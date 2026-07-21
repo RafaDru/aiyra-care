@@ -1,0 +1,20 @@
+{
+  "name": "open-health",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open Health - Gerenciamento centralizado de hist\u00F3rico m\u00E9dico infantil",
+  "scripts": {
+    "api:dev": "cd packages/api && npm run dev",
+    "web:dev": "cd packages/web && npm run dev",
+    "mobile:start": "cd packages/mobile && npx expo start",
+    "agent:pediatria": "cd packages/agents/pediatria && python -m uvicorn main:app --reload",
+    "agent:integracao": "cd packages/agents/integracao && python -m uvicorn main:app --reload",
+    "agent:farmaceutico": "cd packages/agents/farmaceutico && python -m uvicorn main:app --reload",
+    "lint": "echo 'linting'",
+    "test": "echo 'tests'"
+  },
+  "workspaces": [
+    "packages/*",
+    "packages/agents/*"
+  ]
+}
