@@ -335,6 +335,52 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 
 ---
 
+---
+
+## Open Design Integration
+
+O **Open Design** (Powerformer v0.16.0) gerencia o design system do Open Health.
+
+### Localização
+```
+%APPDATA%\Open Design\namespaces\release-stable-win\data\design-systems\
+└── open-health-platform-for-users-and-patients/
+    ├── DESIGN.md              ← Descrição para AI agents
+    ├── brand.json             ← Paletas, tipografia, layout
+    ├── metadata.json          ← Metadados do projeto
+    └── system/
+        ├── tokens.default.json
+        ├── tokens.dark.json
+        ├── tokens.palettes.json  ← Nossas 3 paletas (indigo/teal/rose)
+        ├── variables.css
+        ├── variables.dark.css
+        ├── kit.html / kit.dark.html
+        └── theme.json
+```
+
+### Integração com o Frontend
+
+```
+Open Design (tokens.palettes.json)
+    ↓  sync-opendesign.ps1
+Frontend (theme/colors.ts + ThemeProvider.tsx)
+    ↓
+Ant Design (ConfigProvider)
+```
+
+### Sincronização
+
+```powershell
+.\scripts\sync-opendesign.ps1           # Sincronizar uma vez
+.\scripts\sync-opendesign.ps1 -Watch    # Ficar observando mudanças
+```
+
+O `ThemeProvider` lê os tokens do Open Design via `open-design-bridge.ts`
+e aplica no `ConfigProvider` do Ant Design. As 3 paletas (indigo, teal, rose)
+estão disponíveis no seletor de tema no header da aplicação.
+
+---
+
 ## Scripts Úteis
 
 ```powershell

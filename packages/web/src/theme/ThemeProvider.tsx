@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo } from 'react'
 import { ConfigProvider, theme } from 'antd'
 import { palettes, type PaletteKey } from './colors.js'
+import { loadOpenDesignTokens, tokensToAntDesignTheme } from './open-design-bridge.js'
 
 interface ThemeContextValue {
   palette: PaletteKey
@@ -28,18 +29,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setPalette = useCallback((key: PaletteKey) => setPaletteKey(key), [])
 
   const themeConfig = useMemo(() => {
+    const odTokens = loadOpenDesignTokens()
+    const odTheme = tokensToAntDesignTheme(odTokens, paletteKey)
     const p = palettes[paletteKey]
+
     return {
       algorithm: darkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
       token: {
-        colorPrimary: p.primary,
-        colorBgLayout: darkMode ? '#0f0f0f' : p.bg,
-        colorBgContainer: darkMode ? '#1a1a1a' : p.cardBg,
-        colorTextBase: darkMode ? '#f1f5f9' : p.text,
-        colorTextSecondary: darkMode ? '#94a3b8' : p.textSecondary,
-        colorBorder: darkMode ? '#334155' : p.border,
-        borderRadius: 12,
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        colorPrimary: odTheme.colorPrimary,
+        colorBgLayout: darkMode ? odTokens.darkColors['--brand-bg'] : odTheme.colorBgLayout,
+        colorBgContainer: darkMode ? odTokens.darkColors['--brand-surface'] : odTheme.colorBgContainer,
+        colorTextBase: darkMode ? odTokens.darkColors['--brand-text'] : odTheme.colorTextBase,
+        colorTextSecondary: darkMode ? odTokens.darkColors['--brand-text-secondary'] : odTheme.colorTextSecondary,
+        colorBorder: darkMode ? odTokens.darkColors['--brand-border'] : odTheme.colorBorder,
+        borderRadius: odTheme.borderRadius,
+        fontFamily: odTheme.fontFamily,
       },
     }
   }, [paletteKey, darkMode])

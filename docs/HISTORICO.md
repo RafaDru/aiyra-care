@@ -65,7 +65,6 @@ packages/api/src/
 ```
 
 ### Próximos Passos
-- [ ] Upload de documentos (integração GCS)
 - [ ] Gráficos de crescimento (Recharts)
 - [ ] Página de configurações
 - [ ] Agentes IA integrados no frontend
@@ -116,6 +115,30 @@ packages/web/src/
 │       ├── detail.tsx
 │       └── tabs/  8 entidades (Growth, Vaccines, Medications, etc.)
 └── styles/        globals.css
+```
+
+---
+
+## [2026-07-22] - Quinta Sessão: Open Design Integration
+
+### Contexto
+Integração do design system gerenciado pelo Open Design com o frontend
+Ant Design. O Open Design mantém as paletas de cores, tokens e descrições
+visuais, enquanto o frontend consome esses tokens via bridge.
+
+### Realizado
+- [x] Design system "open-health" atualizado no Open Design com 3 paletas
+- [x] DESIGN.md com descrição completa de componentes e estilos
+- [x] brand.json com paletas, tipografia, layout e voice & tone
+- [x] tokens.palettes.json (indigo #4F46E5, teal #0D9488, rose #E11D48)
+- [x] Frontend bridge (open-design-bridge.ts) que lê tokens do Open Design
+- [x] ThemeProvider atualizado para usar tokens do Open Design + Ant Design
+- [x] Script sync-opendesign.ps1 para sincronização automática
+- [x] Documentação no PROJETO.md
+
+### Fluxo
+```
+Open Design (tokens) → sync-opendesign.ps1 → ThemeProvider → Ant Design ConfigProvider → UI
 ```
 
 ---
