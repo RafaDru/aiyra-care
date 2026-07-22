@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "Open Health",
+    "subtitle": "Children's Medical History"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "patient": {
+    "title": "My Children",
+    "new": "New Child",
+    "edit": "Edit",
+    "delete": "Remove",
+    "deleteConfirm": "Remove child?",
+    "notFound": "Patient not found",
+    "age": "years old",
+    "months": "months",
+    "male": "Male",
+    "female": "Female",
+    "weight": "kg",
+    "height": "cm",
+    "bloodType": "Type"
+  },
+  "tabs": {
+    "growth": "Growth",
+    "vaccines": "Vaccines",
+    "medications": "Medications",
+    "allergies": "Allergies",
+    "exams": "Exams",
+    "records": "Appointments",
+    "diagnoses": "Diagnoses",
+    "documents": "Documents"
+  },
+  "growth": {
+    "new": "New Record",
+    "success": "Record added",
+    "date": "Date",
+    "weight": "Weight (kg)",
+    "height": "Height (cm)",
+    "headCircumference": "HC (cm)",
+    "bmi": "BMI",
+    "percentileWeight": "Weight %",
+    "percentileHeight": "Height %",
+    "notes": "Notes"
+  },
+  "vaccine": {
+    "new": "Register Vaccine",
+    "success": "Vaccine registered",
+    "name": "Vaccine Name",
+    "dose": "Dose",
+    "applicationDate": "Application Date",
+    "nextDose": "Next Dose",
+    "batch": "Batch",
+    "appliedBy": "Applied by",
+    "clinic": "Clinic"
+  },
+  "medication": {
+    "new": "New Medication",
+    "success": "Medication registered",
+    "genericName": "Generic Name",
+    "brandName": "Brand Name",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "route": "Route",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "doctor": "Doctor",
+    "active": "Active",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "allergy": {
+    "new": "New Allergy",
+    "success": "Allergy registered",
+    "allergen": "Allergen",
+    "reaction": "Reaction",
+    "severity": "Severity",
+    "mild": "Mild",
+    "moderate": "Moderate",
+    "severe": "Severe",
+    "diagnosedDate": "Diagnosed Date"
+  },
+  "exam": {
+    "new": "New Exam",
+    "success": "Exam registered",
+    "type": "Exam Type",
+    "date": "Exam Date",
+    "laboratory": "Laboratory",
+    "result": "Result Summary"
+  },
+  "medicalRecord": {
+    "new": "New Appointment",
+    "success": "Appointment registered",
+    "date": "Date",
+    "type": "Type",
+    "doctor": "Doctor",
+    "specialty": "Specialty",
+    "clinic": "Clinic",
+    "description": "Description"
+  },
+  "diagnosis": {
+    "new": "New Diagnosis",
+    "success": "Diagnosis registered",
+    "name": "Diagnosis",
+    "code": "ICD Code",
+    "chronic": "Chronic",
+    "date": "Diagnosed Date",
+    "status": "Status",
+    "active": "Active",
+    "resolved": "Resolved",
+    "monitoring": "Monitoring"
+  },
+  "document": {
+    "new": "Add Document",
+    "success": "Document registered",
+    "type": "Type",
+    "fileName": "File Name",
+    "path": "Path (GCS)",
+    "size": "Size (bytes)",
+    "mime": "MIME Type",
+    "ocr": "OCR",
+    "processed": "Processed",
+    "pending": "Pending",
+    "upload": "Upload"
+  },
+  "common": {
+    "loading": "Loading...",
+    "empty": "No records found",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "confirm": "Confirm",
+    "theme": "Theme",
+    "language": "Language",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "palette": "Color Palette"
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "Open Health",
+    "subtitle": "Histórico Médico Infantil"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Configurações"
+  },
+  "patient": {
+    "title": "Minhas Crianças",
+    "new": "Nova Criança",
+    "edit": "Editar",
+    "delete": "Remover",
+    "deleteConfirm": "Remover criança?",
+    "notFound": "Paciente não encontrado",
+    "age": "anos",
+    "months": "meses",
+    "male": "Masculino",
+    "female": "Feminino",
+    "weight": "kg",
+    "height": "cm",
+    "bloodType": "Tipo"
+  },
+  "tabs": {
+    "growth": "Crescimento",
+    "vaccines": "Vacinas",
+    "medications": "Medicações",
+    "allergies": "Alergias",
+    "exams": "Exames",
+    "records": "Consultas",
+    "diagnoses": "Diagnósticos",
+    "documents": "Documentos"
+  },
+  "growth": {
+    "new": "Novo Registro",
+    "success": "Registro adicionado",
+    "date": "Data",
+    "weight": "Peso (kg)",
+    "height": "Altura (cm)",
+    "headCircumference": "PC (cm)",
+    "bmi": "IMC",
+    "percentileWeight": "Perc. Peso",
+    "percentileHeight": "Perc. Altura",
+    "notes": "Observações"
+  },
+  "vaccine": {
+    "new": "Registrar Vacina",
+    "success": "Vacina registrada",
+    "name": "Nome da Vacina",
+    "dose": "Dose",
+    "applicationDate": "Data de Aplicação",
+    "nextDose": "Próxima Dose",
+    "batch": "Lote",
+    "appliedBy": "Aplicado por",
+    "clinic": "Clínica/Posto"
+  },
+  "medication": {
+    "new": "Nova Medicação",
+    "success": "Medicação registrada",
+    "genericName": "Nome Genérico",
+    "brandName": "Nome Comercial",
+    "dosage": "Dosagem",
+    "frequency": "Frequência",
+    "route": "Via",
+    "startDate": "Data Início",
+    "endDate": "Data Término",
+    "doctor": "Médico",
+    "active": "Ativo",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "allergy": {
+    "new": "Nova Alergia",
+    "success": "Alergia registrada",
+    "allergen": "Alérgeno",
+    "reaction": "Reação",
+    "severity": "Gravidade",
+    "mild": "Leve",
+    "moderate": "Moderada",
+    "severe": "Grave",
+    "diagnosedDate": "Data Diagnóstico"
+  },
+  "exam": {
+    "new": "Novo Exame",
+    "success": "Exame registrado",
+    "type": "Tipo de Exame",
+    "date": "Data do Exame",
+    "laboratory": "Laboratório",
+    "result": "Resumo do Resultado"
+  },
+  "medicalRecord": {
+    "new": "Nova Consulta",
+    "success": "Consulta registrada",
+    "date": "Data",
+    "type": "Tipo",
+    "doctor": "Médico",
+    "specialty": "Especialidade",
+    "clinic": "Clínica",
+    "description": "Descrição"
+  },
+  "diagnosis": {
+    "new": "Novo Diagnóstico",
+    "success": "Diagnóstico registrado",
+    "name": "Diagnóstico",
+    "code": "Código CID",
+    "chronic": "Crônico",
+    "date": "Data Diagnóstico",
+    "status": "Status",
+    "active": "Ativo",
+    "resolved": "Resolvido",
+    "monitoring": "Em Monitoramento"
+  },
+  "document": {
+    "new": "Adicionar Documento",
+    "success": "Documento registrado",
+    "type": "Tipo",
+    "fileName": "Nome do Arquivo",
+    "path": "Caminho (GCS)",
+    "size": "Tamanho (bytes)",
+    "mime": "Tipo MIME",
+    "ocr": "OCR",
+    "processed": "Processado",
+    "pending": "Pendente",
+    "upload": "Upload"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "empty": "Nenhum registro encontrado",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "confirm": "Confirmar",
+    "theme": "Tema",
+    "language": "Idioma",
+    "darkMode": "Modo Escuro",
+    "lightMode": "Modo Claro",
+    "palette": "Paleta de Cores"
+  }
+}
