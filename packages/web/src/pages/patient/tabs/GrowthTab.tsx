@@ -37,7 +37,7 @@ export function GrowthTab({ patientId }: Props) {
         onClose={() => setOpen(false)}
         onSubmit={(values) => api.growthRecords.create({ patientId, ...values, recordDate: (values.recordDate as Date).toISOString() }).then(reload)}
       >
-        <Form.Item name="recordDate" label={t('growth.date')} rules={[{ required: true, type: 'date' as const }]}>
+        <Form.Item name="recordDate" label={t('growth.date')} rules={[{ required: true }]}>
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="weightKg" label={t('growth.weight')}><InputNumber min={0} step={0.1} style={{ width: '100%' }} /></Form.Item>

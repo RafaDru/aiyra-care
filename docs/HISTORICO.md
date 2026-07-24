@@ -212,3 +212,73 @@ open-health/
 - [x] Agent stubs (FastAPI)
 - [x] CI/CD básico (GitHub Actions)
 - [x] Docs: HISTORICO.md + PROJETO.md
+
+---
+
+## [2026-07-23] - Sexta Sessão: Melhorias + OCR
+
+### Corrigido
+- [x] CORS: `@fastify/cors` adicionado à API
+- [x] EntityFormModal: catch vazio agora mostra erro real
+- [x] `type: 'date'` removido de todos Form.Items (Ant Design v5 retorna dayjs, não Date)
+- [x] `App.useApp()` sem provider — adicionado `<AntAppProvider>` no main.tsx
+- [x] IMC calculado automaticamente no backend ao criar GrowthRecord
+- [x] Estado vazio na Dashboard melhorado (link "Nova Criança")
+- [x] Abas do paciente: `destroyInactiveTabPane` + `styles.body`
+- [x] CORS methods: adicionado DELETE, PUT, PATCH, OPTIONS
+- [x] api.ts: não envia `Content-Type: application/json` em DELETE (sem body)
+- [x] Delete no Popconfirm: adicionado try/catch com mensagem de erro
+
+### Implementado - OCR (Fase 1)
+- [x] Domain interfaces: `FileStorage` e `OcrProvider` (portas)
+- [x] `GcsFileStorage`: upload/download para GCS bucket
+- [x] `GoogleVisionOcrProvider`: OCR via Google Cloud Vision API
+- [x] `DocumentService.uploadAndCreate()`: upload + OCR + persistência
+- [x] Rota `POST /documents/upload` (multipart, @fastify/multipart)
+- [x] Frontend: input file real (Upload.Dragger) no DocumentsTab
+- [x] i18n: chaves documentType.* e dropHint
+
+### OCR Pipeline
+```
+DocumentService (application)
+    │
+    ▼
+CompositeOcrProvider (infrastructure)
+    │
+    ├── PythonOcrAdapter (pytesseract local) ← primário
+    │       └── python-ocr.py + Tesseract 5 + tessdata/por
+    │
+    └── GoogleVisionOcrProvider (cloud) ← fallback
+            └── @google-cloud/vision + Vision API
+```
+- [x] PythonOcrAdapter: pytesseract + Pillow, fallback PATH automático
+- [x] CompositeOcrProvider: tenta Python, fallback Google Vision
+- [x] Tesseract 5 + tessdata por (português) instalados
+- [x] Up.ps1 silencioso (*>$null) registrado no AGENTS.md
+
+### Implementado - Scraper Agentic (Portais de Saúde)
+```
+domain/scraper/
+├── portal-credentials.ts   ← tipos de credenciais
+├── scraper-types.ts         ← ScrapedVaccine/Exam/Prescription
+└── health-portal-scraper.ts ← HealthPortalScraper (porta)
+
+application/scraper/
+└── agentic-scraper.service.ts ← orquestrador
+
+infrastructure/
+├── llm/
+│   └── groq-llm.adapter.ts       ← Llama 3.3 70B via Groq
+├── scraper/
+│   ├── browser-manager.ts         ← Playwright chromium headless
+│   ├── agents/
+│   │   ├── auth.agent.ts          ← login + diagnóstico de falhas
+│   │   ├── nav.agent.ts           ← navegação por seções
+│   │   └── extract.agent.ts       ← extração via LLM
+│   └── conectesus.portal.ts       ← adapter ConecteSUS
+```
+- [x] Playwright + Groq SDK instalados
+- [x] AuthAgent: login com LLM, diagnóstico de CAPTCHA/2FA/layout
+- [x] NavAgent: navega inteligente por seções do portal
+- [x] ExtractAgent: extrai vacinas, exames, receitas via LLM
+- [x] ConecteSUSPortalAdapter completo

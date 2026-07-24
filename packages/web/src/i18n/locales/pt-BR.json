@@ -5,7 +5,14 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "integrations": "Integrações",
+    "session": "Sessões",
     "settings": "Configurações"
+  },
+  "session": {
+    "title": "Histórico de Sessões",
+    "subtitle": "Registro de desenvolvimento do projeto",
+    "noItems": "Nenhum item registrado"
   },
   "patient": {
     "title": "Minhas Crianças",
@@ -122,7 +129,15 @@
     "ocr": "OCR",
     "processed": "Processado",
     "pending": "Pendente",
-    "upload": "Upload"
+    "upload": "Upload",
+    "dropHint": "Clique ou arraste um arquivo para esta área"
+  },
+  "documentType": {
+    "prescription": "Receita",
+    "exam": "Exame",
+    "report": "Relatório",
+    "vaccine_card": "Cartão de Vacina",
+    "other": "Outro"
   },
   "common": {
     "loading": "Carregando...",

@@ -43,7 +43,7 @@ export function VaccinesTab({ patientId }: Props) {
       >
         <Form.Item name="vaccineName" label={t('vaccine.name')} rules={[{ required: true }]}><Input /></Form.Item>
         <Form.Item name="doseNumber" label={t('vaccine.dose')}><InputNumber min={1} style={{ width: '100%' }} /></Form.Item>
-        <Form.Item name="applicationDate" label={t('vaccine.applicationDate')} rules={[{ required: true, type: 'date' as const }]}>
+        <Form.Item name="applicationDate" label={t('vaccine.applicationDate')} rules={[{ required: true }]}>
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="nextDoseDate" label={t('vaccine.nextDose')}><DatePicker style={{ width: '100%' }} /></Form.Item>

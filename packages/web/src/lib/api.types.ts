@@ -7,6 +7,10 @@ export interface Patient {
   weightKg: number | null
   heightCm: number | null
   photoUrl: string | null
+  parentIds: string[]
+  cpf: string | null
+  cns: string | null
+  ageCategory: 'children' | 'adolescents' | 'adults'
   createdAt: string
   updatedAt: string
 }
@@ -118,4 +122,58 @@ export interface Diagnosis {
   diagnosedDate: string | null
   status: string | null
   createdAt: string
+}
+
+export interface ScrapedVaccine {
+  vaccineName: string
+  dose: string
+  applicationDate: string
+  nextDoseDate?: string
+  batch?: string
+  appliedBy?: string
+  clinic?: string
+}
+
+export interface ScrapedExam {
+  examType: string
+  examDate: string
+  description?: string
+  attachedFiles?: number
+  results?: string
+}
+
+export interface ScrapedPrescription {
+  medicationName: string
+  dosage?: string
+  duration?: string
+  doctorName?: string
+  prescriptionDate: string
+}
+
+export interface SessionItem {
+  text: string
+  done: boolean
+}
+
+export interface SessionSection {
+  heading: string
+  items: SessionItem[]
+}
+
+export interface Session {
+  date: string
+  title: string
+  description?: string
+  sections: SessionSection[]
+}
+
+export interface ScraperResult {
+  patientName?: string
+  patientBirthDate?: string
+  patientCpf?: string
+  patientCns?: string
+  vaccines: ScrapedVaccine[]
+  exams: ScrapedExam[]
+  prescriptions: ScrapedPrescription[]
+  rawPages: string[]
 }

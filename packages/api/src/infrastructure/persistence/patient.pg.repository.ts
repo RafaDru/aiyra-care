@@ -5,7 +5,8 @@ import type { PatientData } from '../../domain/patient/patient.entity.js'
 
 const COLUMNS = `
   id, name, birth_date, gender, blood_type,
-  weight_kg, height_cm, photo_url,
+  weight_kg, height_cm, photo_url, parent_ids,
+  cpf, cns,
   created_at, updated_at
 `
 
@@ -19,6 +20,9 @@ function rowToPatient(row: Record<string, unknown>): Patient {
     weightKg: row.weight_kg != null ? Number(row.weight_kg) : null,
     heightCm: row.height_cm != null ? Number(row.height_cm) : null,
     photoUrl: row.photo_url as string | null,
+    parentIds: (row.parent_ids as string[]) ?? [],
+    cpf: row.cpf as string | null,
+    cns: row.cns as string | null,
     createdAt: row.created_at as Date,
     updatedAt: row.updated_at as Date,
   })
@@ -44,14 +48,15 @@ export class PatientPgRepository implements PatientRepository {
 
   async save(patient: Patient): Promise<Patient> {
     const { rows } = await this.pool.query(
-      `INSERT INTO patients (id, name, birth_date, gender, blood_type, weight_kg, height_cm, photo_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO patients (id, name, birth_date, gender, blood_type, weight_kg, height_cm, photo_url, parent_ids, cpf, cns)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING ${COLUMNS}`,
       [
         patient.id, patient.name, patient.birthDate,
         patient.gender, patient.bloodType,
         patient.weightKg, patient.heightCm,
-        patient.photoUrl,
+        patient.photoUrl, patient.parentIds,
+        patient.cpf, patient.cns,
       ]
     )
     return rowToPatient(rows[0])
@@ -62,14 +67,17 @@ export class PatientPgRepository implements PatientRepository {
       `UPDATE patients SET
         name = $1, birth_date = $2, gender = $3, blood_type = $4,
         weight_kg = $5, height_cm = $6, photo_url = $7,
+        parent_ids = $8, cpf = $9, cns = $10,
         updated_at = NOW()
-       WHERE id = $8
+       WHERE id = $11
        RETURNING ${COLUMNS}`,
       [
         patient.name, patient.birthDate,
         patient.gender, patient.bloodType,
         patient.weightKg, patient.heightCm,
-        patient.photoUrl, patient.id,
+        patient.photoUrl, patient.parentIds,
+        patient.cpf, patient.cns,
+        patient.id,
       ]
     )
     if (!rows.length) throw new Error(`Patient ${patient.id} not found on update`)

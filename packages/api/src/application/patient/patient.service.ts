@@ -22,9 +22,12 @@ export class PatientService {
 
   async update(id: string, data: Partial<PatientProps>): Promise<Patient> {
     const existing = await this.findById(id)
+    const cleanData = Object.fromEntries(
+      Object.entries(data).filter(([_, v]) => v !== undefined)
+    ) as Partial<PatientProps>
     const updated = Patient.restore({
       ...existing.toJSON(),
-      ...data,
+      ...cleanData,
       updatedAt: new Date(),
     })
     return this.repo.update(updated)

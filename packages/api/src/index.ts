@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import { config } from 'dotenv'
 
 config()
@@ -47,6 +48,8 @@ async function registerRoutes() {
   const { documentRoutes } = await import('./infrastructure/http/document/document.routes.js')
   const { medicalRecordRoutes } = await import('./infrastructure/http/medical-record/medical-record.routes.js')
   const { diagnosisRoutes } = await import('./infrastructure/http/diagnosis/diagnosis.routes.js')
+  const { scraperRoutes } = await import('./infrastructure/http/scraper/scraper.routes.js')
+  const { sessionsRoutes } = await import('./infrastructure/http/session/session.routes.js')
 
   await app.register(patientRoutes)
   await app.register(growthRecordRoutes)
@@ -57,10 +60,13 @@ async function registerRoutes() {
   await app.register(documentRoutes)
   await app.register(medicalRecordRoutes)
   await app.register(diagnosisRoutes)
+  await app.register(scraperRoutes)
+  await app.register(sessionsRoutes)
 }
 
 const start = async () => {
   try {
+    await app.register(cors, { origin: true, methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] })
     await registerRoutes()
     await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' })
   } catch (err) {

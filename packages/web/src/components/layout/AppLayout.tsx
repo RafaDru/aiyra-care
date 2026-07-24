@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Typography } from 'antd'
-import { HeartOutlined, SettingOutlined } from '@ant-design/icons'
+import { HeartOutlined, SettingOutlined, HistoryOutlined, ApiOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '../ui/LanguageSwitcher.js'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
@@ -34,6 +34,8 @@ export function AppLayout() {
           selectedKeys={[location.pathname === '/' ? '/' : location.pathname.startsWith('/patients') ? '/' : location.pathname]}
           items={[
             { key: '/', icon: <HeartOutlined />, label: t('nav.dashboard') },
+            { key: '/integrations', icon: <ApiOutlined />, label: t('nav.integrations') },
+            { key: '/session', icon: <HistoryOutlined />, label: t('nav.session') },
             { key: '/settings', icon: <SettingOutlined />, label: t('nav.settings') },
           ]}
           onClick={({ key }) => navigate(key)}

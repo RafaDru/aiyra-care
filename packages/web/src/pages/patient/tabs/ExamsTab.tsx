@@ -39,7 +39,7 @@ export function ExamsTab({ patientId }: Props) {
         }).then(reload)}
       >
         <Form.Item name="examType" label={t('exam.type')} rules={[{ required: true }]}><Input /></Form.Item>
-        <Form.Item name="examDate" label={t('exam.date')} rules={[{ required: true, type: 'date' as const }]}>
+        <Form.Item name="examDate" label={t('exam.date')} rules={[{ required: true }]}>
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="laboratory" label={t('exam.laboratory')}><Input /></Form.Item>

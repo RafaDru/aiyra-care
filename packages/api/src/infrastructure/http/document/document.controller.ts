@@ -13,6 +13,35 @@ export class DocumentController {
     return reply.status(201).send(doc.toJSON())
   }
 
+  async upload(req: FastifyRequest, reply: FastifyReply) {
+    const file = await req.file()
+    if (!file) return reply.status(400).send({ message: 'Nenhum arquivo enviado' })
+
+    const fields = file.fields as Record<string, { value: string }>
+    const patientId = fields.patientId?.value
+    const documentType = fields.documentType?.value
+
+    if (!patientId || !documentType) {
+      return reply.status(400).send({ message: 'Campos patientId e documentType são obrigatórios' })
+    }
+
+    const validTypes = ['prescription', 'exam', 'report', 'vaccine_card', 'other']
+    if (!validTypes.includes(documentType)) {
+      return reply.status(400).send({ message: `documentType inválido: ${documentType}` })
+    }
+
+    const chunks: Buffer[] = []
+    for await (const chunk of file.file) { chunks.push(chunk) }
+    const buffer = Buffer.concat(chunks)
+
+    try {
+      const doc = await this.service.uploadAndCreate(patientId, documentType as any, file.filename, buffer, file.mimetype)
+      return reply.status(201).send(doc.toJSON())
+    } catch (err) {
+      return reply.status(500).send({ message: err instanceof Error ? err.message : 'Erro no upload' })
+    }
+  }
+
   async findById(req: FastifyRequest, reply: FastifyReply) {
     const parsed = documentParamsSchema.safeParse(req.params)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })

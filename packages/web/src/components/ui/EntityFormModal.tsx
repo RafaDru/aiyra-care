@@ -19,15 +19,16 @@ export function EntityFormModal({ open, title, successMsg, onClose, onSubmit, ch
   const [submitting, setSubmitting] = useState(false)
 
   const handleOk = async () => {
-    const values = await form.validateFields()
-    setSubmitting(true)
     try {
+      const values = await form.validateFields()
+      setSubmitting(true)
       await onSubmit(values)
       message.success(successMsg)
       form.resetFields()
       onClose()
-    } catch {
-      // validation or API error
+    } catch (err) {
+      if (err && typeof err === 'object' && 'errorFields' in err) return
+      message.error(err instanceof Error ? err.message : 'Erro desconhecido')
     } finally {
       setSubmitting(false)
     }

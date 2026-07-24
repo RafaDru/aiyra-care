@@ -1,8 +1,10 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData
+  const headers: Record<string, string> = options?.body && !isFormData ? { 'Content-Type': 'application/json' } : {}
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: { ...headers, ...options?.headers },
     ...options,
   })
   if (!res.ok) {
@@ -44,6 +46,13 @@ export const api = {
   documents: {
     list: (patientId?: string) => request<import('./api.types.js').Document_[]>(`/documents${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').Document_>('/documents', { method: 'POST', body: JSON.stringify(data) }),
+    upload: (patientId: string, documentType: string, file: File) => {
+      const form = new FormData()
+      form.append('patientId', patientId)
+      form.append('documentType', documentType)
+      form.append('file', file, file.name)
+      return request<import('./api.types.js').Document_>('/documents/upload', { method: 'POST', body: form })
+    },
   },
   medicalRecords: {
     list: (patientId?: string) => request<import('./api.types.js').MedicalRecord[]>(`/medical-records${patientId ? `?patientId=${patientId}` : ''}`),
@@ -52,5 +61,12 @@ export const api = {
   diagnoses: {
     list: (patientId?: string) => request<import('./api.types.js').Diagnosis[]>(`/diagnoses${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').Diagnosis>('/diagnoses', { method: 'POST', body: JSON.stringify(data) }),
+  },
+  sessions: {
+    list: () => request<import('./api.types.js').Session[]>('/sessions'),
+  },
+  scraper: {
+    conectesus: (data: { cpf: string }) =>
+      request<import('./api.types.js').ScraperResult>('/scraper/conectesus', { method: 'POST', body: JSON.stringify(data) }),
   },
 }

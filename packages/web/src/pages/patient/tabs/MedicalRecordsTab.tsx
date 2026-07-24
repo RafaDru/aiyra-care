@@ -40,7 +40,7 @@ export function MedicalRecordsTab({ patientId }: Props) {
           recordDate: (values.recordDate as Date).toISOString(),
         }).then(reload)}
       >
-        <Form.Item name="recordDate" label={t('medicalRecord.date')} rules={[{ required: true, type: 'date' as const }]}>
+        <Form.Item name="recordDate" label={t('medicalRecord.date')} rules={[{ required: true }]}>
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="recordType" label={t('medicalRecord.type')} rules={[{ required: true }]}>

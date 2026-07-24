@@ -11,6 +11,9 @@ export const createPatientSchema = z.object({
   weightKg: z.number().positive().max(999.99).optional(),
   heightCm: z.number().positive().max(999.99).optional(),
   photoUrl: z.string().url().optional(),
+  parentIds: z.array(z.string().uuid()).optional(),
+  cpf: z.string().regex(/^\d{11}$/, 'CPF deve ter 11 dígitos').optional(),
+  cns: z.string().optional(),
 })
 
 export const updatePatientSchema = z.object({
@@ -21,6 +24,9 @@ export const updatePatientSchema = z.object({
   weightKg: z.number().positive().max(999.99).optional(),
   heightCm: z.number().positive().max(999.99).optional(),
   photoUrl: z.string().url().optional(),
+  parentIds: z.array(z.string().uuid()).optional(),
+  cpf: z.string().regex(/^\d{11}$/, 'CPF deve ter 11 dígitos').optional(),
+  cns: z.string().optional(),
 })
 
 export const patientParamsSchema = z.object({
