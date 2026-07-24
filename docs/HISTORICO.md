@@ -282,3 +282,135 @@ infrastructure/
 - [x] NavAgent: navega inteligente por seções do portal
 - [x] ExtractAgent: extrai vacinas, exames, receitas via LLM
 - [x] ConecteSUSPortalAdapter completo
+
+---
+
+## [2026-07-24] - Sétima Sessão: Scraper ConecteSUS + Refinamentos
+
+### Contexto
+Finalização do scraper ConecteSUS via FHIR, correções no fluxo de login,
+refatoração do modal de importação e adição de campos de documento pessoal
+e relacionamentos familiares.
+
+### Corrigido
+- [x] Formulário de importação: removidos campos password/birthDate (login é feito manualmente no gov.br via navegador)
+- [x] Erro FHIR Composition 404: parsing de referência corrigido (regex `Composition/id` em vez de `split('/composition/')`)
+- [x] Botão "Editar" no perfil do paciente: estava sem `onClick`
+- [x] `calcAge`: adicionada guarda para birthDate nulo/undefined
+- [x] PATCH patient: undefined fields não sobrescrevem dados existentes (filtro `Object.entries` no service)
+- [x] Dashboard atualiza lista após importação do ConecteSUS
+
+### Implementado - Documentos Pessoais
+- [x] Coluna `cpf` (VARCHAR(11) UNIQUE) na tabela patients
+- [x] Coluna `cns` (VARCHAR(15)) na tabela patients
+- [x] Extração automática de CPF e CNS do FHIR Patient (identifier array)
+- [x] Match por CPF na importação (prioritário ao nome)
+- [x] População automática de CPF/CNS ao criar ou vincular paciente
+
+### Implementado - Relação Parental
+- [x] Coluna `parent_ids UUID[]` na tabela patients (relação pai/filho)
+- [x] Select múltiplo de pais/responsáveis no modal de edição
+- [x] Exibição de pais e filhos na aba "Dados Básicos"
+- [x] Tags clicáveis que navegam ao perfil do familiar
+
+### Implementado - Categorias por Idade
+- [x] Categoria computada no backend (`ageCategory`: children/adolescents/adults)
+- [x] Dashboard agrupa pacientes em 3 seções com cabeçalho e contador
+- [x] Cada card exibe a categoria como tag colorida
+- [x] Ordem de exibição: Adultos → Adolescentes → Crianças
+
+### Implementado - Integrações
+- [x] Página `/integrations` com cards para cada integração
+- [x] Card ConecteSUS disponível, demais marcados "Em breve"
+- [x] Menu "Integrações" na sidebar (`ApiOutlined`)
+- [x] Botão de importação removido do Dashboard
+
+### Implementado - Sessões
+- [x] Página `/session` com timeline do histórico de desenvolvimento
+- [x] API `GET /sessions` que lê e parseia o `HISTORICO.md`
+- [x] Menu "Sessões" na sidebar
+
+### Estrutura Final da API
+```
+packages/api/src/
+├── index.ts                         ← entrypoint + 11 rotas registradas
+├── db/
+│   ├── postgres.ts                  ← Pool PG
+│   └── neo4j.ts                     ← Driver Neo4J
+├── domain/                          ← CORE (0 dependências externas)
+│   ├── errors.ts
+│   ├── document/
+│   │   ├── file-storage.ts          ← porta FileStorage
+│   │   └── ocr-provider.ts          ← porta OcrProvider
+│   ├── scraper/
+│   │   ├── portal-credentials.ts    ← tipos de credenciais
+│   │   ├── scraper-types.ts         ← ScrapedVaccine/Exam/Prescription
+│   │   └── health-portal-scraper.ts ← interface HealthPortalScraper
+│   └── {patient, growth-record, ...}/
+│       ├── {entity}.entity.ts       ← entidade (create/restore)
+│       └── {entity}.repository.ts   ← porta (interface)
+├── application/                     ← CASOS DE USO
+│   ├── scraper/
+│   │   └── agentic-scraper.service.ts
+│   ├── document/
+│   │   └── document.service.ts      ← upload + OCR
+│   └── {entity}/
+│       └── {entity}.service.ts      ← orquestra regras
+└── infrastructure/                  ← ADAPTADORES
+    ├── persistence/
+    │   └── {entity}.pg.repository.ts
+    ├── conectesus/
+    │   ├── fhir-types.ts            ← tipos FHIR
+    │   └── conectesus-gateway.ts    ← gateway REST FHIR
+    ├── llm/
+    │   └── groq-llm.adapter.ts      ← Groq + Llama 3.3 70B
+    ├── ocr/
+    │   ├── composite-ocr.provider.ts
+    │   ├── google-vision.ocr.ts
+    │   └── python-ocr.adapter.ts
+    ├── scraper/
+    │   ├── browser-manager.ts
+    │   ├── agents/
+    │   │   ├── auth.agent.ts
+    │   │   ├── nav.agent.ts
+    │   │   └── extract.agent.ts
+    │   └── conectesus.portal.ts
+    ├── storage/
+    │   └── gcs.storage.ts
+    └── http/{entity}/
+        ├── {entity}.schema.ts
+        ├── {entity}.controller.ts
+        └── {entity}.routes.ts
+```
+
+### Estrutura Final do Frontend
+```
+packages/web/src/
+├── main.tsx, App.tsx
+├── lib/           api.ts + api.types.ts
+├── hooks/         use-patient-entity.ts
+├── theme/         colors.ts + ThemeProvider.tsx
+├── i18n/          locales/pt-BR.json + en.json
+├── components/
+│   ├── ui/        PageHeader, EntityFormModal, LanguageSwitcher, ThemeSwitcher
+│   ├── layout/    AppLayout (Sider + Header + Content)
+│   └── scraper/   ImportConecteSUSModal.tsx
+├── pages/
+│   ├── dashboard.tsx              ← cards agrupados por idade
+│   ├── integrations.tsx           ← cards de integrações
+│   ├── session.tsx                ← timeline do histórico
+│   └── patient/
+│       ├── detail.tsx             ← perfil + 9 abas (Dados Básicos + 8 médicas)
+│       └── tabs/  Growth, Vaccines, Medications, etc.
+└── styles/        globals.css
+```
+
+### Roteamento Final
+```
+/                        → Dashboard (cards agrupados por idade)
+/patients/:id            → Detalhe do paciente (9 abas)
+/integrations            → Página de integrações
+/session                 → Histórico de sessões de desenvolvimento
+```
+
+---

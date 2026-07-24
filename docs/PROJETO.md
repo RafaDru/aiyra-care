@@ -1,7 +1,7 @@
 # Open Health - Documento Vivo do Projeto
 
-> **Última atualização:** 2026-07-22
-> **Status:** API Completa — Iniciando Frontend
+> **Última atualização:** 2026-07-24
+> **Status:** API Completa — Scraper ConecteSUS Integrado
 > **Repositório:** https://github.com/RafaDru/open-health
 
 ---
@@ -32,6 +32,8 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 - **Validação:** Zod
 - **Banco:** pg (raw driver) + neo4j-driver
 - **Arquitetura:** Hexagonal (Ports & Adapters)
+- **Scraper:** Playwright + Groq (Llama 3.3 70B) + Google Cloud Vision
+- **OCR:** Python Tesseract 5 + Google Cloud Vision (fallback)
 
 ### Agentes IA
 - **Runtime:** Python 3.12 + FastAPI + LangChain
@@ -65,9 +67,19 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 │  │ routes      │  │  (implementa interfaces)      │  │
 │  │ schemas(Zod)│  └──────────────────────────────┘  │
 │  └──────┬──────┘                                    │
+│         │                                           │
+│  ┌──────┴──────────────────────────────────────┐    │
+│  │  External Adapters                           │    │
+│  │  - ConecteSUS Gateway (FHIR REST)            │    │
+│  │  - Groq LLM Adapter                          │    │
+│  │  - Google Cloud Vision OCR                   │    │
+│  │  - Python Tesseract OCR                      │    │
+│  │  - GCS File Storage                          │    │
+│  └──────┬──────────────────────────────────────┘    │
 ├─────────┴───────────────────────────────────────────┤
 │              APPLICATION (use cases)                 │
 │         {entity}.service.ts                         │
+│         agentic-scraper.service.ts                  │
 │         (orquestra regras, depende de interfaces)   │
 ├─────────────────────────────────────────────────────┤
 │               DOMAIN (core)                         │
@@ -83,17 +95,20 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 **Domain (core)** — Zero dependências externas.
 - `Patient`, `GrowthRecord`, `Vaccine`, etc. — classes imutáveis com factories
 - `PatientRepository`, `GrowthRecordRepository`, etc. — interfaces (portas)
+- `HealthPortalScraper`, `FileStorage`, `OcrProvider` — portas de serviços externos
 - `NotFoundError` — erro de domínio
 
 **Application** — Depende apenas do domínio.
-- `PatientService`, `GrowthRecordService`, etc. — casos de uso
-- Valida regras de negócio antes de persistir
-- Lança `NotFoundError` quando entidade não encontrada
+- `PatientService`, `GrowthRecordService`, etc. — casos de uso CRUD
+- `AgenticScraperService` — orquestra scraping de portais de saúde
+- `DocumentService` — upload + OCR + persistência
 
 **Infrastructure** — Implementa as portas.
 - `PatientPgRepository` — adaptador PostgreSQL
 - `PatientController` — adaptador HTTP (Fastify)
-- `patient.routes.ts` — plugin Fastify com injeção de dependência manual
+- `ConecteSUSGateway` — gateway REST FHIR do ConecteSUS
+- `CompositeOcrProvider` — OCR com fallback Python → Google Vision
+- `GcsFileStorage` — storage Google Cloud Storage
 
 ### Entidades Implementadas
 
@@ -156,6 +171,7 @@ DOC      POST   /documents
          GET    /documents/:id
          PATCH  /documents/:id
          DELETE /documents/:id
+         POST   /documents/upload            ← multipart + OCR
 
 MEDREC   POST   /medical-records
          GET    /medical-records?patientId=
@@ -168,6 +184,9 @@ DIAG     POST   /diagnoses
          GET    /diagnoses/:id
          PATCH  /diagnoses/:id
          DELETE /diagnoses/:id
+
+SCRAPER  POST   /scraper/conectesus          ← importa dados do SUS
+SESSIONS GET    /sessions                    ← histórico de desenvolvimento
 ```
 
 ---
@@ -177,7 +196,7 @@ DIAG     POST   /diagnoses
 ### PostgreSQL - Schema Relacional
 
 ```sql
-patients          -- dados cadastrais
+patients          -- dados cadastrais (cpf, cns, parent_ids, age_category)
   medical_records -- consultas, atendimentos
     diagnoses     -- diagnósticos (opcional: vinculado à consulta)
   medications     -- medicações
@@ -203,6 +222,44 @@ Symptom ──LED_TO───────> Diagnosis ──RESULTED_IN──> Tr
 
 ---
 
+## Scraper ConecteSUS
+
+### Fluxo de Importação
+
+```
+Usuário informa CPF
+    ↓
+Abre navegador Chrome (non-headless)
+    ↓
+Usuário faz login manual no gov.br
+    ↓
+Captura token OAuth2 via Playwright
+    ↓
+Busca Patient no FHIR (ehr-search-gateway.saude.gov.br)
+    ├── Extrai nome, CPF, CNS, birthDate
+    ↓
+Busca List de imunizações → para cada, busca Composition
+    ↓
+Busca List de exames
+    ↓
+Retorna dados para o frontend
+    ↓
+Match automático:
+    ├── Por CPF (prioritário) → vincula paciente existente
+    └── Por nome (fallback)  → sugere pacientes próximos
+```
+
+### Pipeline de Extração de Vacinas
+
+```
+FHIR List (immunizations) → entry[].item.reference
+    │
+    ├── Composition/<id>  → busca Composition → extrai dose/lote/profissional do text.div
+    └── (outro formato)   → ignora (dados básicos mantidos)
+```
+
+---
+
 ## Design System: Ant Design (antd)
 
 **Ant Design 5** (https://ant.design) — biblioteca de componentes enterprise.
@@ -215,10 +272,13 @@ Symptom ──LED_TO───────> Diagnosis ──RESULTED_IN──> Tr
 | Tabs | Navegação entre categorias no perfil |
 | Form + DatePicker + Input + Select + Switch | Formulários CRUD |
 | Modal | Criação/edição de registros |
-| Tag | Status, gravidade, tipo sanguíneo |
+| Tag | Status, gravidade, tipo sanguíneo, categoria idade |
 | Spin, Empty | Loading, empty state |
 | Menu | Sidebar navigation |
 | ConfigProvider | Tema global (cores + dark mode) |
+| Timeline | Histórico de sessões |
+| Collapse | Agrupamento de itens por seção |
+| Descriptions | Exibição de dados básicos do paciente |
 
 ---
 
@@ -247,12 +307,16 @@ packages/web/src/
 │   │   ├── EntityFormModal.tsx     ← Modal genérico para formulários
 │   │   ├── LanguageSwitcher.tsx    ← Seletor PT/EN
 │   │   └── ThemeSwitcher.tsx       ← Paleta de cores + dark mode
-│   └── layout/
-│       └── AppLayout.tsx           ← Sider + Header + Content
+│   ├── layout/
+│   │   └── AppLayout.tsx           ← Sider + Header + Content
+│   └── scraper/
+│       └── ImportConecteSUSModal.tsx ← Modal de importação SUS
 ├── pages/
-│   ├── dashboard.tsx               ← Cards das crianças
+│   ├── dashboard.tsx               ← Cards agrupados por idade
+│   ├── integrations.tsx            ← Página de integrações
+│   ├── session.tsx                 ← Timeline do histórico
 │   └── patient/
-│       ├── detail.tsx              ← Perfil + 8 abas
+│       ├── detail.tsx              ← Perfil + 9 abas
 │       └── tabs/
 │           ├── GrowthTab.tsx
 │           ├── VaccinesTab.tsx
@@ -269,8 +333,10 @@ packages/web/src/
 ### Roteamento
 
 ```
-/                        → Dashboard (cards das crianças)
-/patients/:id            → Detalhe da criança (8 abas)
+/                        → Dashboard (cards agrupados por idade)
+/patients/:id            → Detalhe do paciente (9 abas)
+/integrations            → Página de integrações
+/session                 → Histórico de sessões
 ```
 
 ### Tema Customizável
@@ -305,20 +371,24 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [x] GitHub Secrets
 - [x] .env + setup script
 
-### Fase 2 - Núcleo ✅ (API) / 🔄 (Frontend)
-- [x] CRUD Patients (API)
-- [x] CRUD GrowthRecords (API)
-- [x] CRUD Vaccines (API)
-- [x] CRUD Medications (API)
-- [x] CRUD Allergies (API)
-- [x] CRUD Exams (API)
-- [x] CRUD Documents (API)
-- [x] CRUD MedicalRecords (API)
-- [x] CRUD Diagnoses (API)
-- [x] Setup frontend (Ant Design + i18n + tema + router)
-- [x] Dashboard com cards das crianças
-- [x] Perfil paciente com 8 abas + formulários CRUD
-- [ ] Upload de documentos (integração GCS)
+### Fase 2 - Núcleo ✅
+- [x] CRUD Patients (API + Frontend)
+- [x] CRUD GrowthRecords (API + Frontend)
+- [x] CRUD Vaccines (API + Frontend)
+- [x] CRUD Medications (API + Frontend)
+- [x] CRUD Allergies (API + Frontend)
+- [x] CRUD Exams (API + Frontend)
+- [x] CRUD Documents (API + Frontend) + Upload c/ OCR
+- [x] CRUD MedicalRecords (API + Frontend)
+- [x] CRUD Diagnoses (API + Frontend)
+- [x] Dashboard com cards agrupados por idade
+- [x] Perfil paciente com 9 abas (Dados Básicos + 8 médicas)
+- [x] CPF e CNS do paciente
+- [x] Relação parental (pais/filhos)
+- [x] Categorias de idade (criança/adolescente/adulto)
+- [x] Scraper ConecteSUS (login gov.br + FHIR)
+- [x] Página de integrações
+- [x] Histórico de sessões (/session)
 - [ ] Gráficos de crescimento (Recharts)
 - [ ] Página de configurações
 
@@ -332,8 +402,6 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [ ] App mobile funcional
 - [ ] Compartilhamento com médicos
 - [ ] Backup e exportação
-
----
 
 ---
 
@@ -414,3 +482,28 @@ git add -A
 git commit -m "feat: descrição"
 git push
 ```
+
+---
+
+## Migrations
+
+```sql
+-- 001_initial_schema.sql - Criação inicial das tabelas
+-- 002_parent_relationship.sql - Adiciona parent_ids, cpf, cns
+```
+
+Para aplicar migrations manualmente:
+```powershell
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d openhealth -f database\relational\002_parent_relationship.sql
+```
+
+---
+
+## Próximos Passos Imediatos
+
+- [ ] Gráficos de crescimento (Recharts) no perfil do paciente
+- [ ] Página de configurações (tema, idioma, backup)
+- [ ] Integração com planos de saúde (Unimed, Amil, Bradesco Saúde)
+- [ ] App mobile (React Native + Expo)
+- [ ] Agentes IA (pediatria, farmacêutico)
+- [ ] Compartilhamento de relatórios com médicos
