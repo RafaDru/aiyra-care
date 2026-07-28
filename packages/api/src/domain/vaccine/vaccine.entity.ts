@@ -8,6 +8,7 @@ export interface VaccineProps {
   appliedBy?: string
   clinic?: string
   notes?: string
+  source?: string
 }
 
 export interface VaccineData {
@@ -21,6 +22,7 @@ export interface VaccineData {
   appliedBy: string | null
   clinic: string | null
   notes: string | null
+  source: string
   createdAt: Date
 }
 
@@ -39,6 +41,7 @@ export class Vaccine {
       appliedBy: props.appliedBy ?? null,
       clinic: props.clinic ?? null,
       notes: props.notes ?? null,
+      source: props.source ?? 'manual',
       createdAt: new Date(),
     })
   }
@@ -55,6 +58,7 @@ export class Vaccine {
   get appliedBy(): string | null { return this.data.appliedBy }
   get clinic(): string | null { return this.data.clinic }
   get notes(): string | null { return this.data.notes }
+  get source(): string { return this.data.source }
   get createdAt(): Date { return this.data.createdAt }
 
   toJSON(): VaccineData { return { ...this.data } }

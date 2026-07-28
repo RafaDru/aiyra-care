@@ -3,7 +3,7 @@ import type { ExamRepository, ExamFilter } from '../../domain/exam/exam.reposito
 import { Exam } from '../../domain/exam/exam.entity.js'
 import type { ExamData } from '../../domain/exam/exam.entity.js'
 
-const COLUMNS = 'id, patient_id, medical_record_id, exam_type, exam_date, result_summary, result_file_url, laboratory, notes, created_at'
+const COLUMNS = 'id, patient_id, medical_record_id, exam_type, exam_date, result_summary, result_file_url, laboratory, notes, source, created_at'
 
 function rowToEntity(row: Record<string, unknown>): Exam {
   return Exam.restore({
@@ -11,7 +11,7 @@ function rowToEntity(row: Record<string, unknown>): Exam {
     examType: row.exam_type as string, examDate: row.exam_date as Date,
     resultSummary: row.result_summary as string | null, resultFileUrl: row.result_file_url as string | null,
     laboratory: row.laboratory as string | null, notes: row.notes as string | null,
-    createdAt: row.created_at as Date,
+    source: row.source as string, createdAt: row.created_at as Date,
   })
 }
 
@@ -33,9 +33,9 @@ export class ExamPgRepository implements ExamRepository {
 
   async save(exam: Exam) {
     const { rows } = await this.pool.query(
-      `INSERT INTO exams (id, patient_id, medical_record_id, exam_type, exam_date, result_summary, result_file_url, laboratory, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING ${COLUMNS}`,
-      [exam.id, exam.patientId, exam.medicalRecordId, exam.examType, exam.examDate, exam.resultSummary, exam.resultFileUrl, exam.laboratory, exam.notes]
+      `INSERT INTO exams (id, patient_id, medical_record_id, exam_type, exam_date, result_summary, result_file_url, laboratory, notes, source)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING ${COLUMNS}`,
+      [exam.id, exam.patientId, exam.medicalRecordId, exam.examType, exam.examDate, exam.resultSummary, exam.resultFileUrl, exam.laboratory, exam.notes, exam.source]
     )
     return rowToEntity(rows[0])
   }

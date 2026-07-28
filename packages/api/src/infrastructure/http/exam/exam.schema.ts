@@ -9,6 +9,7 @@ export const createExamSchema = z.object({
   resultFileUrl: z.string().url().optional(),
   laboratory: z.string().max(255).optional(),
   notes: z.string().optional(),
+  source: z.string().max(50).optional(),
 })
 
 export const updateExamSchema = createExamSchema.partial().omit({ patientId: true })

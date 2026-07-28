@@ -1,7 +1,7 @@
 # Open Health - Documento Vivo do Projeto
 
-> **Última atualização:** 2026-07-24
-> **Status:** API Completa — Scraper ConecteSUS Integrado
+> **Última atualização:** 2026-07-27
+> **Status:** Sync Unimed BH enriquecido (APIs OutSystems + AuthorizationItem + resumo)
 > **Repositório:** https://github.com/RafaDru/open-health
 
 ---
@@ -33,7 +33,7 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 - **Banco:** pg (raw driver) + neo4j-driver
 - **Arquitetura:** Hexagonal (Ports & Adapters)
 - **Scraper:** Playwright + Groq (Llama 3.3 70B) + Google Cloud Vision
-- **OCR:** Python Tesseract 5 + Google Cloud Vision (fallback)
+- **OCR:** Python Tesseract 5 (impresso) + TrOCR (manuscrito clínico) + Google Cloud Vision (fallback pago)
 
 ### Agentes IA
 - **Runtime:** Python 3.12 + FastAPI + LangChain
@@ -109,6 +109,10 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 - `ConecteSUSGateway` — gateway REST FHIR do ConecteSUS
 - `CompositeOcrProvider` — OCR com fallback Python → Google Vision
 - `GcsFileStorage` — storage Google Cloud Storage
+- `CryptoHelper` — AES-256-GCM encrypt/decrypt via crypto-helper.ts
+- `SyncProgressStore` — in-memory job store with progress + result (auto-cleanup 5min)
+- `UnimedBhSyncScraper` — combined scraper: login → extrato → autorizações em sessão única
+- `UnimedBhLoginHelper` — shared login flow (email+password, Playwright)
 
 ### Entidades Implementadas
 
@@ -117,12 +121,15 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 | Patient | patients | — |
 | GrowthRecord | growth_records | patientId |
 | Vaccine | vaccines | patientId |
-| Medication | medications | patientId, isActive |
+| Medication | medications | patientId |
 | Allergy | allergies | patientId |
 | Exam | exams | patientId |
 | Document | documents | patientId, documentType |
 | MedicalRecord | medical_records | patientId |
 | Diagnosis | diagnoses | patientId, medicalRecordId |
+| Authorization | authorizations | patientId |
+| AuthorizationItem | authorization_items | authorizationId |
+| IntegrationLink | integration_links | patientId, portal (portal enum: unimed, amil, bradesco_saude) |
 
 ### Endpoints
 
@@ -185,7 +192,25 @@ DIAG     POST   /diagnoses
          PATCH  /diagnoses/:id
          DELETE /diagnoses/:id
 
-SCRAPER  POST   /scraper/conectesus          ← importa dados do SUS
+INT LINK POST   /integration-links           ← criar vínculo (portal + encrypted password)
+          GET    /integration-links?patientId= ← listar vínculos
+          GET    /integration-links/:id
+          PATCH  /integration-links/:id
+          DELETE /integration-links/:id
+          POST   /integration-links/:id/sync ← disparar sync assíncrono (retorna jobId)
+          GET    /integration-links/sync-progress/:jobId ← polling de progresso
+          POST   /integration-links/sync-all ← sync todos os vínculos de um paciente
+
+AUTH     POST   /authorizations
+          GET    /authorizations?patientId=
+          GET    /authorizations/:id
+          PATCH  /authorizations/:id
+          DELETE /authorizations/:id
+
+SCRAPER  POST   /scraper/conectesus          ← importa dados do SUS (FHIR)
+          POST   /scraper/unimed              ← importa dados Unimed (agente, legado)
+          POST   /scraper/amil                ← importa dados Amil (agente)
+          POST   /scraper/bradesco_saude      ← importa dados Bradesco Saúde (agente)
 SESSIONS GET    /sessions                    ← histórico de desenvolvimento
 ```
 
@@ -196,15 +221,18 @@ SESSIONS GET    /sessions                    ← histórico de desenvolvimento
 ### PostgreSQL - Schema Relacional
 
 ```sql
-patients          -- dados cadastrais (cpf, cns, parent_ids, age_category)
-  medical_records -- consultas, atendimentos
-    diagnoses     -- diagnósticos (opcional: vinculado à consulta)
-  medications     -- medicações
-  vaccines        -- vacinas
-  allergies       -- alergias
-  exams           -- exames
-  growth_records  -- peso/altura/IMC
-  documents       -- metadados de arquivos
+patients            -- dados cadastrais (cpf, cns, parent_ids, age_category)
+  medical_records   -- consultas, atendimentos
+    diagnoses       -- diagnósticos (opcional: vinculado à consulta)
+  medications       -- medicações
+  vaccines          -- vacinas (source: manual | conectesus | unimed | ...)
+  allergies         -- alergias
+  exams             -- exames (source column, dedup por examType+examDate)
+  growth_records    -- peso/altura/IMC
+  documents         -- metadados de arquivos
+  integration_links -- vínculos persistentes com portais (credential_id, encrypted_password, portal)
+  authorizations    -- autorizações de exames Unimed (procedure, doctor, clinic, dates, guide, status)
+  medical_records   -- consultas/atendimentos (source column, dedup por recordDate+doctorName)
 ```
 
 ### Neo4J - Modelo de Grafos
@@ -249,6 +277,23 @@ Match automático:
     └── Por nome (fallback)  → sugere pacientes próximos
 ```
 
+### Agentes Inteligentes (Planos de Saúde)
+
+Unimed, Amil e Bradesco Saúde usam um GenericAgentPortalAdapter que combina:
+
+```
+Browser (Playwright non-headless)
+    ↓
+auth.agent.ts  → LLM detecta campos de login, preenche CPF/senha
+    ↓
+nav.agent.ts   → LLM analisa HTML, navega até seção alvo
+    ↓
+extract.agent.ts → LLM extrai vacinas, exames e receitas do HTML
+```
+
+Cada plano tem seu próprio portal adapter (`unimed.portal.ts`, `amil.portal.ts`, `bradesco-saude.portal.ts`)
+que apenas configura URL e label — a lógica de scraping é compartilhada.
+
 ### Pipeline de Extração de Vacinas
 
 ```
@@ -279,6 +324,8 @@ FHIR List (immunizations) → entry[].item.reference
 | Timeline | Histórico de sessões |
 | Collapse | Agrupamento de itens por seção |
 | Descriptions | Exibição de dados básicos do paciente |
+| Steps | Progresso do sync no SyncProgressModal |
+| Badge | Status tags de autorizações (authorized/used/expired) |
 
 ---
 
@@ -306,26 +353,30 @@ packages/web/src/
 │   │   ├── PageHeader.tsx          ← Header de página padrão
 │   │   ├── EntityFormModal.tsx     ← Modal genérico para formulários
 │   │   ├── LanguageSwitcher.tsx    ← Seletor PT/EN
-│   │   └── ThemeSwitcher.tsx       ← Paleta de cores + dark mode
+│   │   ├── ThemeSwitcher.tsx       ← Paleta de cores + dark mode
+│   │   ├── SourceTag.tsx           ← Badge colorida por source (manual, conectesus, unimed)
+│   │   └── EntityTable.tsx         ← Tabela genérica com action column
 │   ├── layout/
 │   │   └── AppLayout.tsx           ← Sider + Header + Content
 │   └── scraper/
-│       └── ImportConecteSUSModal.tsx ← Modal de importação SUS
+│       ├── ImportConecteSUSModal.tsx ← Modal de importação SUS
+│       └── SyncProgressModal.tsx   ← Modal com Steps do sync Unimed BH
 ├── pages/
 │   ├── dashboard.tsx               ← Cards agrupados por idade
-│   ├── integrations.tsx            ← Página de integrações
+│   ├── integrations.tsx            ← Página de integrações (Unimed BH vincular)
 │   ├── session.tsx                 ← Timeline do histórico
 │   └── patient/
-│       ├── detail.tsx              ← Perfil + 9 abas
+│       ├── detail.tsx              ← Perfil + 10 abas (inclui Autorizações)
 │       └── tabs/
 │           ├── GrowthTab.tsx
-│           ├── VaccinesTab.tsx
+│           ├── VaccinesTab.tsx      ← source column
 │           ├── MedicationsTab.tsx
 │           ├── AllergiesTab.tsx
-│           ├── ExamsTab.tsx
-│           ├── MedicalRecordsTab.tsx
+│           ├── ExamsTab.tsx         ← source column
+│           ├── MedicalRecordsTab.tsx ← source column
 │           ├── DiagnosesTab.tsx
-│           └── DocumentsTab.tsx
+│           ├── DocumentsTab.tsx
+│           └── AuthorizationsTab.tsx ← tabela com status tags + validade + source
 └── styles/
     └── globals.css                 ← Variáveis CSS tema
 ```
@@ -373,12 +424,12 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 
 ### Fase 2 - Núcleo ✅
 - [x] CRUD Patients (API + Frontend)
-- [x] CRUD GrowthRecords (API + Frontend)
+- [x] CRUD Medidas / GrowthRecords (API + Frontend) — UI: aba "Medidas"
 - [x] CRUD Vaccines (API + Frontend)
 - [x] CRUD Medications (API + Frontend)
 - [x] CRUD Allergies (API + Frontend)
 - [x] CRUD Exams (API + Frontend)
-- [x] CRUD Documents (API + Frontend) + Upload c/ OCR
+- [x] CRUD Arquivos (API + Frontend, entidade Document) + Upload c/ OCR
 - [x] CRUD MedicalRecords (API + Frontend)
 - [x] CRUD Diagnoses (API + Frontend)
 - [x] Dashboard com cards agrupados por idade
@@ -392,7 +443,23 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [ ] Gráficos de crescimento (Recharts)
 - [ ] Página de configurações
 
-### Fase 3 - Agentes IA 🔜
+### Fase 3 - Integrações com Planos de Saúde ✅ (Unimed BH)
+- [x] Entidade IntegrationLink (vínculo persistente com portal + credenciais criptografadas)
+- [x] Criptografia AES-256-GCM via crypto-helper.ts
+- [x] Source tagging (source column em exams, vaccines, medical_records, authorizations)
+- [x] Deduplicação na importação (exams: examType+examDate, authorizations: procedureCode+guideNumber, records: recordDate+doctorName)
+- [x] Sync lock (impede execução concorrente por paciente+portal)
+- [x] Sync progress com polling (SyncProgressModal com Steps)
+- [x] Crawler Unimed BH combinado (extrato + autorizações, mesma sessão)
+- [x] Entidade Authorization (create/restore, repository, PG, HTTP CRUD)
+- [x] AuthorizationsTab com status tags (authorized/used/expired) e validade
+- [x] Testes unitários: crypto-helper (4) + sync-progress-store (5) = 9 testes
+- [x] Sync rico via APIs OutSystems (listagem + detalhe + procedimentos + prestador + histórico)
+- [x] Entidade AuthorizationItem (itens/procedimentos do pedido)
+- [x] Campos enriquecidos: solicitation_number, guide_password, specialty, locations, history
+- [x] Resumo pós-sync com pedidos criados/atualizados e contagem de itens
+
+### Fase 4 - Agentes IA 🔜
 - [ ] Agente pediatria operacional
 - [ ] Agente integração (OCR/PDF)
 - [ ] Agente farmacêutico
@@ -402,6 +469,7 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [ ] App mobile funcional
 - [ ] Compartilhamento com médicos
 - [ ] Backup e exportação
+- [ ] **Export do prontuário (2 níveis)** — completo + resumido para o médico
 
 ---
 
@@ -488,8 +556,13 @@ git push
 ## Migrations
 
 ```sql
--- 001_initial_schema.sql - Criação inicial das tabelas
--- 002_parent_relationship.sql - Adiciona parent_ids, cpf, cns
+-- 001_initial_schema.sql        - Criação inicial das tabelas
+-- 002_parent_relationship.sql   - Adiciona parent_ids, cpf, cns
+-- 003_source_column.sql         - Adiciona source column + integration_links + encrypted_password
+-- 004_authorizations.sql        - Cria tabela authorizations com procedimentos, médico, clínica, guia, status
+-- 005_authorization_enrichment.sql - Campos ricos do detalhe Unimed + tabela authorization_items
+-- 006_consulta_authorization_link.sql - Extrato/copart em medical_records + medical_record_id em authorizations
+-- 007_identity_document_types.sql - Tipos certidao_nascimento, rg, cpf_card, cnh no enum document_type
 ```
 
 Para aplicar migrations manualmente:
@@ -501,9 +574,31 @@ Para aplicar migrations manualmente:
 
 ## Próximos Passos Imediatos
 
+### Atual — Validar sync rico Unimed BH
+- [x] Expandir authorizations + tabela authorization_items (migration 005)
+- [x] Scraper via APIs OutSystems (DataActionListarSolicCliente + detalhe)
+- [x] Extrato via API (`DataActionListarExtratoUtilizacao`) → consultas com valor/copart
+- [x] Vincular Authorization → MedicalRecord (consulta origem, por PrestadorId + data)
+- [ ] Conferir UI (Consultas + Autorizações expansível com vínculo)
+
+### Roadmap (não bloquear sync)
+- [ ] Extrair nós Neo4J a partir de Authorization / AuthorizationItem / Doctor (cruzamento para agentes)
+- [ ] Organizar monólito hexagonal em multi-microserviços (API gateway + bounded contexts: patients, integrations, files, agents)
+- [ ] Persistir foto do médico em GCS (hoje ignoramos base64 da API)
+- [ ] Baixar PDF da guia ("Baixar guia") como Arquivo
+- [x] **Documentos de identificação** (certidão, RG, CPF, CNH) — tipos próprios em Arquivos; prioridade para crianças
+- [x] OCR em docs de identificação → sugerir/aplicar CPF, nome, nascimento no paciente
+- [x] Fluxo pronto para upload da certidão dos meninos → CPF → Unimed
+- [x] Renomear nomenclatura UI "Documentos" → "Arquivos" (evitar confusão com documentos pessoais)
+- [x] Renomear aba "Crescimento" → "Medidas" (peso, altura, perímetro cefálico e futuras medições no mesmo lugar)
+- [ ] Evoluir entidade/tabela de Medidas para aceitar novos tipos de medição além de antropometria clássica
+- [ ] **Export do prontuário em dois níveis** (objetivo: apresentar ao médico)
+  - [ ] **Completo** — histórico integral (consultas, autorizações, exames, vacinas, alergias, medicamentos, medidas, arquivos/OCR relevante)
+  - [ ] **Resumido médico** — só o essencial para a consulta: identificação, alergias/medicações ativas, diagnósticos, últimas consultas, exames recentes/pendentes, vacinas em atraso, autorizações vigentes; formato apresentável (PDF/impressão)
+
+### Em espera
 - [ ] Gráficos de crescimento (Recharts) no perfil do paciente
 - [ ] Página de configurações (tema, idioma, backup)
-- [ ] Integração com planos de saúde (Unimed, Amil, Bradesco Saúde)
 - [ ] App mobile (React Native + Expo)
 - [ ] Agentes IA (pediatria, farmacêutico)
-- [ ] Compartilhamento de relatórios com médicos
+- [ ] Compartilhamento de relatórios com médicos (complementa o export resumido)

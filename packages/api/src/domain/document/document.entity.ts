@@ -1,4 +1,13 @@
-export type DocumentType = 'prescription' | 'exam' | 'report' | 'vaccine_card' | 'other'
+export type DocumentType =
+  | 'prescription'
+  | 'exam'
+  | 'report'
+  | 'vaccine_card'
+  | 'other'
+  | 'certidao_nascimento'
+  | 'rg'
+  | 'cpf_card'
+  | 'cnh'
 
 export interface DocumentProps {
   patientId: string
@@ -9,6 +18,12 @@ export interface DocumentProps {
   mimeType?: string
   extractedText?: string
   ocrProcessed?: boolean
+  ocrProvider?: string | null
+  ocrQualityScore?: number | null
+  ocrUsedPaid?: boolean
+  ocrParseOk?: boolean | null
+  ocrFieldsFound?: number | null
+  ocrFieldsExpected?: number | null
 }
 
 export interface DocumentData {
@@ -21,6 +36,12 @@ export interface DocumentData {
   mimeType: string | null
   extractedText: string | null
   ocrProcessed: boolean
+  ocrProvider: string | null
+  ocrQualityScore: number | null
+  ocrUsedPaid: boolean
+  ocrParseOk: boolean | null
+  ocrFieldsFound: number | null
+  ocrFieldsExpected: number | null
   uploadedAt: Date
 }
 
@@ -38,6 +59,12 @@ export class Document {
       mimeType: props.mimeType ?? null,
       extractedText: props.extractedText ?? null,
       ocrProcessed: props.ocrProcessed ?? false,
+      ocrProvider: props.ocrProvider ?? null,
+      ocrQualityScore: props.ocrQualityScore ?? null,
+      ocrUsedPaid: props.ocrUsedPaid ?? false,
+      ocrParseOk: props.ocrParseOk ?? null,
+      ocrFieldsFound: props.ocrFieldsFound ?? null,
+      ocrFieldsExpected: props.ocrFieldsExpected ?? null,
       uploadedAt: new Date(),
     })
   }
@@ -53,6 +80,12 @@ export class Document {
   get mimeType(): string | null { return this.data.mimeType }
   get extractedText(): string | null { return this.data.extractedText }
   get ocrProcessed(): boolean { return this.data.ocrProcessed }
+  get ocrProvider(): string | null { return this.data.ocrProvider }
+  get ocrQualityScore(): number | null { return this.data.ocrQualityScore }
+  get ocrUsedPaid(): boolean { return this.data.ocrUsedPaid }
+  get ocrParseOk(): boolean | null { return this.data.ocrParseOk }
+  get ocrFieldsFound(): number | null { return this.data.ocrFieldsFound }
+  get ocrFieldsExpected(): number | null { return this.data.ocrFieldsExpected }
   get uploadedAt(): Date { return this.data.uploadedAt }
 
   toJSON(): DocumentData { return { ...this.data } }

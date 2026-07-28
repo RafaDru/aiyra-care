@@ -10,6 +10,13 @@ export const createMedicalRecordSchema = z.object({
   specialty: z.string().max(100).optional(),
   clinicName: z.string().max(255).optional(),
   notes: z.string().optional(),
+  source: z.string().max(50).optional(),
+  invoiceNumber: z.string().max(100).optional(),
+  chargedAmount: z.number().optional(),
+  copartCompanyAmount: z.number().optional(),
+  copartBaseAmount: z.number().optional(),
+  providerExternalId: z.string().max(50).optional(),
+  procedureExternalId: z.string().max(50).optional(),
 })
 
 export const updateMedicalRecordSchema = createMedicalRecordSchema.partial().omit({ patientId: true })

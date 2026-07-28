@@ -48,17 +48,25 @@ export class AuthAgent {
   }
 
   private async fillFields(page: Page, creds: PortalCredentials, html: string): Promise<boolean> {
+    const emailInput = await page.$('input[type="email"], input[name="email"], input#email, input#username')
     const cpfInput = await page.$('input[name="login"], input#login, input[name="cpf"], input#cpf')
     const passInput = await page.$('input[type="password"]')
 
-    if (cpfInput && passInput) {
-      await cpfInput.fill(creds.cpf)
-      await passInput.fill(creds.password)
-      return true
+    if (passInput) {
+      if (emailInput && creds.email) {
+        await emailInput.fill(creds.email)
+        await passInput.fill(creds.password)
+        return true
+      }
+      if (cpfInput) {
+        await cpfInput.fill(creds.cpf)
+        await passInput.fill(creds.password)
+        return true
+      }
     }
 
     const r = await this.llm.extractJson<{ fields: Array<{ selector: string; type: string }> }>(
-      'Encontre os seletores CSS dos campos de CPF/usuário e senha. Retorne fields: [{selector, type: "cpf"|"password"|"birthdate"}].',
+      'Encontre os seletores CSS dos campos de login. Retorne fields: [{selector, type: "email"|"cpf"|"password"|"birthdate"}].',
       html.slice(0, TRUNCATED),
     )
 
@@ -67,7 +75,8 @@ export class AuthAgent {
     for (const f of r.fields) {
       const el = await page.$(f.selector)
       if (!el) continue
-      if (f.type === 'cpf') await el.fill(creds.cpf)
+      if (f.type === 'email' && creds.email) await el.fill(creds.email)
+      else if (f.type === 'cpf') await el.fill(creds.cpf)
       else if (f.type === 'password') await el.fill(creds.password)
       else if (f.type === 'birthdate' && creds.birthDate) await el.fill(creds.birthDate)
     }

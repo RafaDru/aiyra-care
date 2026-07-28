@@ -1,7 +1,6 @@
 import sys
 import os
-import subprocess
-from PIL import Image
+from PIL import Image, ImageOps
 
 try:
     import pytesseract
@@ -9,7 +8,6 @@ except ImportError:
     print("pytesseract not installed", flush=True)
     sys.exit(1)
 
-# Find tesseract binary
 tesseract_paths = [
     r"C:\Program Files\Tesseract-OCR\tesseract.exe",
     r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
@@ -22,7 +20,6 @@ else:
     print("tesseract binary not found", flush=True)
     sys.exit(1)
 
-# Find tessdata containing por.traineddata
 tessdata_paths = [
     os.path.join(os.path.dirname(os.path.dirname(pytesseract.pytesseract.tesseract_cmd)), "tessdata"),
     os.path.join(os.environ.get("LOCALAPPDATA", ""), "Tesseract-OCR", "tessdata"),
@@ -46,7 +43,18 @@ if not os.path.isfile(image_path):
 
 try:
     img = Image.open(image_path)
-    text = pytesseract.image_to_string(img, lang=lang)
+    img = ImageOps.exif_transpose(img)
+    # Local preprocessing — cheap gains before paid OCR fallback
+    if img.mode not in ('L', 'RGB'):
+        img = img.convert('RGB')
+    gray = ImageOps.grayscale(img)
+    gray = ImageOps.autocontrast(gray)
+    w, h = gray.size
+    if max(w, h) < 1600:
+        scale = 1600 / max(w, h)
+        gray = gray.resize((int(w * scale), int(h * scale)), Image.Resampling.LANCZOS)
+
+    text = pytesseract.image_to_string(gray, lang=lang, config='--psm 6')
     print(text, flush=True)
 except Exception as e:
     print(f"OCR error: {e}", flush=True)

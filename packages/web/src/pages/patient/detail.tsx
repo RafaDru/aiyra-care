@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, DatePicker, Select, Descriptions, Divider, Space } from 'antd'
-import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, MedicineBoxOutlined, SyncOutlined, CloudDownloadOutlined } from '@ant-design/icons'
+import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
+import { ImportConecteSUSModal } from '../../components/scraper/ImportConecteSUSModal.js'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
-import type { Patient } from '../../lib/api.types.js'
+import type { Patient, IntegrationLink } from '../../lib/api.types.js'
 import { GrowthTab } from './tabs/GrowthTab.js'
 import { VaccinesTab } from './tabs/VaccinesTab.js'
 import { MedicationsTab } from './tabs/MedicationsTab.js'
@@ -14,6 +16,7 @@ import { ExamsTab } from './tabs/ExamsTab.js'
 import { DocumentsTab } from './tabs/DocumentsTab.js'
 import { MedicalRecordsTab } from './tabs/MedicalRecordsTab.js'
 import { DiagnosesTab } from './tabs/DiagnosesTab.js'
+import { AuthorizationsTab } from './tabs/AuthorizationsTab.js'
 
 const { Title, Text } = Typography
 
@@ -35,17 +38,26 @@ export function PatientDetail() {
   const [editOpen, setEditOpen] = useState(false)
   const [editForm] = Form.useForm()
   const [allPatients, setAllPatients] = useState<Patient[]>([])
+  const [integrationLinks, setIntegrationLinks] = useState<IntegrationLink[]>([])
+  const [linkModalOpen, setLinkModalOpen] = useState(false)
+  const [linkPortal, setLinkPortal] = useState<'unimed' | 'amil' | 'bradesco_saude'>('unimed')
+  const [linkForm] = Form.useForm()
+  const [conectesusOpen, setConectesusOpen] = useState(false)
+  const [syncingId, setSyncingId] = useState<string | null>(null)
+  const [syncJobId, setSyncJobId] = useState<string | null>(null)
 
   const load = () => {
     if (!id) return
     Promise.all([
       api.patients.get(id),
       api.patients.list(),
-    ]).then(([p, list]) => {
+      api.integrationLinks.list(id),
+    ]).then(([p, list, links]) => {
       setPatient(p)
       setAllPatients(list)
       setParents(list.filter(x => p.parentIds.includes(x.id)))
       setChildren(list.filter(x => x.parentIds.includes(p.id)))
+      setIntegrationLinks(links)
     }).catch(() => message.error(t('patient.notFound'))).finally(() => setLoading(false))
   }
 
@@ -182,6 +194,38 @@ export function PatientDetail() {
                     </>
                   )}
 
+                  <Divider>Integrações</Divider>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    {integrationLinks.map(link => (
+                      <div key={link.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <Tag color={link.active ? 'green' : 'default'}>
+                          {link.portalType === 'unimed' ? 'Unimed BH'
+                            : link.portalType === 'bradesco_saude' ? 'Bradesco Saúde'
+                              : link.portalType === 'conectesus' ? 'ConecteSUS'
+                                : link.portalType}
+                        </Tag>
+                        <Text type="secondary">{link.email}</Text>
+                        {link.lastSyncAt && <Text type="secondary">Última sincronia: {new Date(link.lastSyncAt).toLocaleDateString('pt-BR')}</Text>}
+                        <Button size="small" icon={<SyncOutlined />} loading={syncingId === link.id} onClick={async () => { setSyncingId(link.id); try { const r = await api.integrationLinks.sync(link.id); setSyncJobId(r.jobId) } catch (e) { message.error(e instanceof Error ? e.message : 'Erro na sincronização') } finally { setSyncingId(null) } }}>Sincronizar</Button>
+                        <Button size="small" danger onClick={async () => { try { await api.integrationLinks.delete(link.id); load(); message.success('Vínculo removido') } catch { message.error('Erro ao remover') } }}>Remover</Button>
+                      </div>
+                    ))}
+                    <Space wrap>
+                      <Button icon={<CloudDownloadOutlined />} onClick={() => setConectesusOpen(true)}>
+                        Importar ConecteSUS
+                      </Button>
+                      <Button icon={<MedicineBoxOutlined />} onClick={() => { setLinkPortal('unimed'); linkForm.resetFields(); setLinkModalOpen(true) }}>
+                        Vincular Unimed BH
+                      </Button>
+                      <Button icon={<LinkOutlined />} onClick={() => { setLinkPortal('amil'); linkForm.resetFields(); setLinkModalOpen(true) }}>
+                        Vincular Amil
+                      </Button>
+                      <Button icon={<LinkOutlined />} onClick={() => { setLinkPortal('bradesco_saude'); linkForm.resetFields(); setLinkModalOpen(true) }}>
+                        Vincular Bradesco Saúde
+                      </Button>
+                    </Space>
+                  </Space>
+
                   <Divider />
                   <Space>
                     <Button type="primary" icon={<EditOutlined />} onClick={handleEditOpen}>Editar Dados</Button>
@@ -195,11 +239,60 @@ export function PatientDetail() {
             { key: 'allergies', label: t('tabs.allergies'), children: <div style={{ padding: 24 }}><AllergiesTab patientId={patient.id} /></div> },
             { key: 'exams', label: t('tabs.exams'), children: <div style={{ padding: 24 }}><ExamsTab patientId={patient.id} /></div> },
             { key: 'records', label: t('tabs.records'), children: <div style={{ padding: 24 }}><MedicalRecordsTab patientId={patient.id} /></div> },
+            { key: 'authorizations', label: 'Autorizações', children: <div style={{ padding: 24 }}><AuthorizationsTab patientId={patient.id} /></div> },
             { key: 'diagnoses', label: t('tabs.diagnoses'), children: <div style={{ padding: 24 }}><DiagnosesTab patientId={patient.id} /></div> },
-            { key: 'documents', label: t('tabs.documents'), children: <div style={{ padding: 24 }}><DocumentsTab patientId={patient.id} /></div> },
+            { key: 'documents', label: t('tabs.documents'), children: <div style={{ padding: 24 }}><DocumentsTab patientId={patient.id} onPatientUpdated={load} /></div> },
           ]}
         />
       </Card>
+
+      <Modal title={`Vincular ${linkPortal === 'unimed' ? 'Unimed BH' : linkPortal === 'amil' ? 'Amil' : 'Bradesco Saúde'}`} open={linkModalOpen} onOk={async () => {
+        try {
+          const values = await linkForm.validateFields()
+          await api.integrationLinks.create({
+            patientId: id!,
+            portalType: linkPortal,
+            email: values.email,
+            password: values.password,
+            cardNumber: values.cardNumber,
+          })
+          message.success('Portal vinculado!')
+          setLinkModalOpen(false)
+          load()
+        } catch (err) {
+          if (err && typeof err === 'object' && 'errorFields' in err) return
+          message.error(err instanceof Error ? err.message : 'Erro ao vincular')
+        }
+      }} onCancel={() => setLinkModalOpen(false)} okText="Vincular" cancelText={t('common.cancel')} width={400}>
+        <Form form={linkForm} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item
+            name="email"
+            label={linkPortal === 'unimed' ? 'E-mail de acesso' : 'E-mail / usuário'}
+            rules={linkPortal === 'unimed' ? [{ required: true, type: 'email' }] : [{ required: true }]}
+          >
+            <Input placeholder={linkPortal === 'unimed' ? 'seu@email.com' : 'Usuário do portal'} />
+          </Form.Item>
+          <Form.Item name="password" label="Senha" rules={[{ required: true }]}>
+            <Input.Password placeholder="Senha do portal" />
+          </Form.Item>
+          <Form.Item name="cardNumber" label="Nº da Carteirinha (opcional)">
+            <Input placeholder="Número da carteirinha" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <ImportConecteSUSModal
+        open={conectesusOpen}
+        onClose={() => setConectesusOpen(false)}
+        patientId={patient.id}
+        onImported={load}
+      />
+
+      <SyncProgressModal
+        jobId={syncJobId}
+        onDone={() => { setSyncJobId(null); load() }}
+        onError={(msg) => { message.error(msg); setSyncJobId(null) }}
+      />
 
       <Modal title="Editar Dados do Paciente" open={editOpen} onOk={handleEditSave} onCancel={() => setEditOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')} width={560}>
         <Form form={editForm} layout="vertical" style={{ marginTop: 16 }}>

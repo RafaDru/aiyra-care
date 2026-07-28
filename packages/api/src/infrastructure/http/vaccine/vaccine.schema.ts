@@ -10,6 +10,7 @@ export const createVaccineSchema = z.object({
   appliedBy: z.string().max(255).optional(),
   clinic: z.string().max(255).optional(),
   notes: z.string().optional(),
+  source: z.string().max(50).optional(),
 })
 
 export const updateVaccineSchema = createVaccineSchema.partial().omit({ patientId: true })

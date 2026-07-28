@@ -7,6 +7,7 @@ export interface ExamProps {
   resultFileUrl?: string
   laboratory?: string
   notes?: string
+  source?: string
 }
 
 export interface ExamData {
@@ -19,6 +20,7 @@ export interface ExamData {
   resultFileUrl: string | null
   laboratory: string | null
   notes: string | null
+  source: string
   createdAt: Date
 }
 
@@ -36,6 +38,7 @@ export class Exam {
       resultFileUrl: props.resultFileUrl ?? null,
       laboratory: props.laboratory ?? null,
       notes: props.notes ?? null,
+      source: props.source ?? 'manual',
       createdAt: new Date(),
     })
   }
@@ -51,6 +54,7 @@ export class Exam {
   get resultFileUrl(): string | null { return this.data.resultFileUrl }
   get laboratory(): string | null { return this.data.laboratory }
   get notes(): string | null { return this.data.notes }
+  get source(): string { return this.data.source }
   get createdAt(): Date { return this.data.createdAt }
 
   toJSON(): ExamData { return { ...this.data } }

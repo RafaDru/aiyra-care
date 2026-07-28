@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
+import { SourceTag } from '../../../components/ui/SourceTag.js'
 import type { Exam } from '../../../lib/api.types.js'
 
 interface Props { patientId: string }
@@ -19,6 +20,7 @@ export function ExamsTab({ patientId }: Props) {
     { title: t('exam.date'), dataIndex: 'examDate', render: (v: string) => new Date(v).toLocaleDateString() },
     { title: t('exam.laboratory'), dataIndex: 'laboratory', render: (v: string | null) => v ?? '-' },
     { title: t('exam.result'), dataIndex: 'resultSummary', render: (v: string | null) => v ? `${v.substring(0, 50)}...` : '-' },
+    { title: 'Origem', dataIndex: 'source', render: (v: string) => <SourceTag source={v} /> },
   ]
 
   return (

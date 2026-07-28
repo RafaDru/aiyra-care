@@ -11,3 +11,4 @@ coverage/
 .next/
 expo-env.d.ts
 *.tsbuildinfo
+packages/api/tmp_screenshots/

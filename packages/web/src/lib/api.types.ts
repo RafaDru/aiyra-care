@@ -40,6 +40,7 @@ export interface Vaccine {
   appliedBy: string | null
   clinic: string | null
   notes: string | null
+  source: string
   createdAt: string
 }
 
@@ -81,20 +82,46 @@ export interface Exam {
   resultFileUrl: string | null
   laboratory: string | null
   notes: string | null
+  source: string
   createdAt: string
+}
+
+export interface SuggestedPatientFields {
+  cpf?: string
+  name?: string
+  birthDate?: string
+  motherName?: string
+  fatherName?: string
 }
 
 export interface Document_ {
   id: string
   patientId: string
-  documentType: 'prescription' | 'exam' | 'report' | 'vaccine_card' | 'other'
+  documentType:
+    | 'prescription'
+    | 'exam'
+    | 'report'
+    | 'vaccine_card'
+    | 'other'
+    | 'certidao_nascimento'
+    | 'rg'
+    | 'cpf_card'
+    | 'cnh'
   originalFilename: string
   storagePath: string
   fileSizeBytes: number | null
   mimeType: string | null
   extractedText: string | null
   ocrProcessed: boolean
+  ocrProvider?: string | null
+  ocrQualityScore?: number | null
+  ocrUsedPaid?: boolean
+  ocrParseOk?: boolean | null
+  ocrFieldsFound?: number | null
+  ocrFieldsExpected?: number | null
   uploadedAt: string
+  suggestedPatient?: SuggestedPatientFields
+  isIdentityDocument?: boolean
 }
 
 export interface MedicalRecord {
@@ -108,6 +135,13 @@ export interface MedicalRecord {
   specialty: string | null
   clinicName: string | null
   notes: string | null
+  source: string
+  invoiceNumber: string | null
+  chargedAmount: number | null
+  copartCompanyAmount: number | null
+  copartBaseAmount: number | null
+  providerExternalId: string | null
+  procedureExternalId: string | null
   createdAt: string
 }
 
@@ -165,6 +199,77 @@ export interface Session {
   title: string
   description?: string
   sections: SessionSection[]
+}
+
+export interface AuthorizationItem {
+  id: string
+  authorizationId: string
+  procedureCode: string | null
+  procedureDescription: string
+  quantityRequested: number | null
+  quantityAuthorized: number | null
+  status: string | null
+  externalProcedureId: string | null
+  sortOrder: number
+  createdAt: string
+}
+
+export interface Authorization {
+  id: string
+  patientId: string
+  procedureCode: string | null
+  procedureDescription: string | null
+  doctorName: string | null
+  doctorCouncil: string | null
+  clinicName: string | null
+  authorizationDate: string | null
+  validityDate: string | null
+  status: string
+  guideNumber: string | null
+  quantity: number | null
+  notes: string | null
+  source: string
+  solicitationNumber: string | null
+  guidePassword: string | null
+  specialty: string | null
+  solicitationUrl: string | null
+  solicId: string | null
+  solicIdEncrypted: string | null
+  authorizationType: string | null
+  classification: string | null
+  localAddress: string | null
+  localPhone: string | null
+  locations: Array<{
+    formattedAddress?: string
+    phone?: string
+    city?: string
+    state?: string
+    latitude?: string
+    longitude?: string
+  }> | null
+  history: Array<{
+    code?: string
+    description?: string
+    occurredAt?: string
+    auditorName?: string
+  }> | null
+  items: AuthorizationItem[]
+  medicalRecordId: string | null
+  providerExternalId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface IntegrationLink {
+  id: string
+  patientId: string
+  portalType: string
+  email: string | null
+  cardNumber: string | null
+  active: boolean
+  lastSyncAt: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ScraperResult {

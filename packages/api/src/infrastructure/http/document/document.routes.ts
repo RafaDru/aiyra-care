@@ -2,21 +2,36 @@ import type { FastifyInstance } from 'fastify'
 import multipart from '@fastify/multipart'
 import { DocumentController } from './document.controller.js'
 import { DocumentService } from '../../../application/document/document.service.js'
+import { isLocalOcrSufficient } from '../../../application/document/ocr-quality.js'
 import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
+import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
 import { GcsFileStorage } from '../../storage/gcs.storage.js'
-import { GoogleVisionOcrProvider } from '../../ocr/google-vision.ocr.js'
-import { PythonOcrAdapter } from '../../ocr/python-ocr.adapter.js'
-import { CompositeOcrProvider } from '../../ocr/composite-ocr.provider.js'
+import { CascadeOcrProvider } from '../../ocr/cascade-ocr.provider.js'
+import { buildDocumentOcrProviders } from '../../ocr/document-ocr.factory.js'
 import { pgPool } from '../../../db/postgres.js'
+import type { DocumentType } from '../../../domain/document/document.entity.js'
 
 export async function documentRoutes(app: FastifyInstance) {
   await app.register(multipart, { limits: { fileSize: 20 * 1024 * 1024 } })
 
-  const ocr = new CompositeOcrProvider(new PythonOcrAdapter(), new GoogleVisionOcrProvider())
-  const service = new DocumentService(new DocumentPgRepository(pgPool), new GcsFileStorage(), ocr)
+  // Product path: local algorithms first (Tesseract / TrOCR); Google Vision only if insufficient. No LLM.
+  const ocrFactory = (documentType: DocumentType) =>
+    new CascadeOcrProvider(
+      buildDocumentOcrProviders(documentType),
+      (text) => isLocalOcrSufficient(documentType, text),
+    )
+
+  const service = new DocumentService(
+    new DocumentPgRepository(pgPool),
+    new GcsFileStorage(),
+    new PatientPgRepository(pgPool),
+    ocrFactory,
+  )
   const controller = new DocumentController(service)
   app.post('/documents', controller.create.bind(controller))
   app.post('/documents/upload', controller.upload.bind(controller))
+  app.post('/documents/:id/apply-identity', controller.applyIdentity.bind(controller))
+  app.get('/documents/ocr-stats', controller.ocrStats.bind(controller))
   app.get('/documents', controller.findAll.bind(controller))
   app.get('/documents/:id', controller.findById.bind(controller))
   app.patch('/documents/:id', controller.update.bind(controller))

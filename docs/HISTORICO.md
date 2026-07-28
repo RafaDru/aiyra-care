@@ -414,3 +414,188 @@ packages/web/src/
 ```
 
 ---
+
+## [2026-07-27] - Oitava Sessão: Unimed BH Sync + Source Tagging + Authorizations
+
+### Contexto
+Substituímos a abordagem de scraping agent-based (LLM genérico) por scrapers específicos para Unimed BH, com vínculo persistente por paciente, sync assíncrono com progresso, source tagging e entidade de autorizações.
+
+### Decisões Arquiteturais
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Vínculo | IntegrationLink (tabela própria) | Persiste credenciais + portal, reutilizável para Amil/Bradesco |
+| Criptografia | AES-256-GCM (crypto-helper.ts) | Senhas armazenadas com segurança, chave via CRYPTO_KEY |
+| Sync | Assíncrono com polling (jobId) | Scraper leva >30s, não pode travar HTTP |
+| Progresso | In-memory Map com auto-cleanup (5min) | Simples, sem dependência externa |
+| Source tag | Coluna `source` em records + componente SourceTag | Rastreabilidade da origem dos dados |
+| Dedup | Composite key antes do INSERT | Evita duplicatas em resyncs |
+| Lock | Set<string> no controller | Impede execução concorrente por paciente+portal |
+
+### Realizado
+
+**Migrações SQL**
+- [x] `003_source_column.sql`: source VARCHAR(50) NOT NULL DEFAULT 'manual' em exams, vaccines, medical_records; tabela integration_links (id, patient_id, portal, credential_id, encrypted_password, created_at, updated_at)
+- [x] `004_authorizations.sql`: tabela authorizations com id, patient_id, procedure_code, procedure_description, doctor_name, doctor_council, clinic_name, authorization_date, validity_date, status ENUM, guide_number, quantity, notes, source, created_at
+
+**Infrastructure**
+- [x] `crypto-helper.ts`: encrypt/decrypt com AES-256-GCM, generateKey, algoritmo com IV aleatório + auth tag
+- [x] `sync-progress-store.ts`: ProgressStore class — createJob, updateProgress, getProgress, removeJob com auto-cleanup via setTimeout
+- [x] `unimedbh-login.helper.ts`: shared login flow — navega para `acesso.unimedbh.com.br`, preenche #username/#password, clica "Entrar"
+- [x] `unimedbh-extrato.scraper.ts`: navega para Extrato de Utilização, extrai linhas da tabela (data, procedimento, prestador, valor), faz fallback para label "Data de Atendimento: <data>"
+- [x] `unimedbh-autorizacoes.scraper.ts`: navega para Autorizações de Exames, extrai cards (procedimento, médico, clínica, datas, status, guia, quantidade)
+- [x] `unimedbh-sync.scraper.ts`: scraper combinado — login uma vez, navega extrato → autorizações na mesma sessão, retorna ScrapedUnimedData
+
+**Domain**
+- [x] `authorization.entity.ts`: Authorization class com create/restore, toJSON com snake_case
+- [x] `authorization.repository.ts`: interface (findById, findAll, save, update, delete)
+
+**Persistence**
+- [x] `authorization.pg.repository.ts`: implementação PG com mapeamento camelCase ↔ snake_case
+
+**HTTP**
+- [x] `integration-link.controller.ts`: CRUD + sync endpoint (com lock, decrypt, dedup, progress) + sync-all + sync-progress polling
+- [x] `integration-link.schema.ts`: Zod schemas (createIntegrationLinkSchema, syncProgressParamsSchema)
+- [x] `integration-link.routes.ts`: plugin Fastify com 7 rotas
+- [x] `authorization/`: schemas, controller, routes com CRUD completo
+
+**Frontend**
+- [x] `SourceTag.tsx`: componente com cores por source (manual=blue, conectesus=green, unimed=volcano, amil=purple, bradesco_saude=orange)
+- [x] `SyncProgressModal.tsx`: modal com Steps (navigate → login → fetch-extrato → fetch-autorizacoes → importing → done), polling automático a cada 1s, botão de fechar manual, tela de resultado
+- [x] VaccinesTab, ExamsTab, MedicalRecordsTab: coluna "Origem" com SourceTag
+- [x] AuthorizationsTab: tabela com procedimento, médico, clínica, datas, status (Tag colorida: authorized=blue, used=green, expired=red), validade, guia, origem; form-modal CRUD
+- [x] Patient detail: adicionada aba "Autorizações" (10ª aba)
+- [x] Integrations page: card Unimed BH com botão "Vincular" (modal com campos: email, password, dependente) e "Sincronizar" + "Remover"
+- [x] `api.ts`: métodos authorizations.list/create, sync, syncProgress
+
+**Tests**
+- [x] Vitest configurado (vitest.config.ts + tsconfig.json paths)
+- [x] `crypto-helper.test.ts`: 4 testes (encrypt/decrypt, reproduzibilidade, formato inválido, CRYPTO_KEY ausente)
+- [x] `sync-progress-store.test.ts`: 5 testes (create/get, update progress, update com resultado, job inexistente, remove)
+
+### Testes
+```powershell
+npx vitest run --config vitest.config.ts
+# Results: 9 passed, 0 failed
+```
+
+### Status
+```powershell
+# Sync endpoint funcional (com lock + dedup + progress):
+POST http://localhost:3000/integration-links/:id/sync
+GET  http://localhost:3000/integration-links/sync-progress/:jobId
+
+# Testado: login Unimed BH, navegação extrato e autorizações
+# SyncProgressModal: steps atualizam em tempo real
+```
+
+### Non-functional
+- Sync lock: retorna 409 se sync já estiver em execução para o mesmo paciente+portal
+- Passwords armazenados criptografados (AES-256-GCM), descriptografados apenas no momento do sync
+- Auto-cleanup de jobs de progresso após 5 minutos
+- Dedup na importação: exams por examType+examDate, authorizations por procedureCode+guideNumber, records por recordDate+doctorName
+
+---
+
+## [2026-07-27] - Nona Sessão: Scraper Improvements + Rich Authorization Detail
+
+### Contexto
+Melhoramos a extração de datas do scraper de autorizações (fallback para linhas de data sem label), consolidamos testes, exploramos a página de detalhe via Chrome DevTools para extrair dados muito mais ricos (17 procedimentos, médico com foto, endereço, etc.), e organizamos a documentação.
+
+### Realizado
+
+**Scraper Date Fix**
+- [x] `unimedbh-autorizacoes.scraper.ts`: quando label "Data de Autorização"/"Data de Validade" não é encontrada, agora percorre parágrafos em busca de linhas contendo data no formato DD/MM/YYYY; primeira data → authorizationDate, segunda → validityDate
+
+**Chrome DevTools Exploration**
+- [x] Navegação para `AutorizacoesDetalhe` no portal Unimed BH
+- [x] Descoberta: página contém 17 itens de procedimento (não apenas 1), nome do médico com foto (blob URL), especialidade, endereço e telefone do local, número de solicitação, senha/password, timeline de histórico, botão "Baixar guia" (PDF)
+- [x] Dados atuais do scraper simples são insuficientes — toda a riqueza da página de detalhe é desperdiçada
+
+**Documentation**
+- [x] PROJETO.md atualizado com todas as novas entidades, endpoints, arquitetura, estrutura frontend e próximos passos
+- [x] HISTORICO.md atualizado com oitava e nona sessões
+
+### Próximos Passos (Documentados no PROJETO.md)
+1. Expandir migration authorizations com novas colunas (solicitation_number, password, specialty, doctor_photo_url, local_address, items JSONB, history JSONB)
+2. Atualizar Authorization entity com novos campos
+3. Fazer scraper navegar para página de detalhe de cada autorização e extrair dados completos
+4. Testar sync end-to-end com credenciais reais (rafaeldruzak@yahoo.com.br)
+
+---
+
+## [2026-07-27] - Décima Sessão: Sync Rico Unimed BH via APIs OutSystems
+
+### Contexto
+Assumimos o refinamento do sincronismo Unimed BH. Em vez de parsear HTML da listagem, mapeamos as APIs OutSystems do portal (login Playwright → intercept screen services) e catalogamos pedido + itens + médico/local como entidades para cruzamento futuro (Neo4J/agentes).
+
+### Decisões
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Fonte de dados | APIs OutSystems (screenservices) | JSON estruturado; HTML da listagem é pobre |
+| Itens do pedido | Tabela `authorization_items` | Entidade própria para cruzamento futuro (não só JSONB) |
+| Histórico/locais | JSONB em authorizations | Timeline e endereços variáveis; suficiente até grafo |
+| Auth | IntegrationLink (email + senha AES-256-GCM) | Sync automático; login Playwright por job |
+| Resumo | SyncResult com authorizationDetails | UX: o que foi criado/atualizado após cada sync |
+| Neo4J / microserviços | Roadmap | Foco atual = sync; grafos e split depois |
+
+### APIs mapeadas
+- `DataActionListarSolicCliente` — lista pedidos (NumeroPedido, Senha, SolicIdEncriptado, médico, datas, status)
+- `DataActionObterInformacoesSolicitacao` — ListaProcedimento (N itens)
+- `DataActionObterPrestador` — especialidade + nome
+- `DataActionObterInfoPrestador` — endereços/telefones
+- `DataActionListarHistoricoSolic` — histórico do pedido
+
+### Realizado
+- [x] Migration `005_authorization_enrichment.sql`
+- [x] Entity `Authorization` enriquecida + `AuthorizationItem`
+- [x] Repos PG + schemas Zod + AuthorizationsTab expansível
+- [x] `UnimedBhSyncScraper` reescrito para interceptar APIs e detalhar cada pedido
+- [x] Sync com upsert por `solicitation_number` + resumo rico no modal
+- [x] Docs: status + roadmap microserviços/Neo4J
+
+### Próximos
+1. Validar sync na UI
+2. (Roadmap) Projetar Authorization/Doctor/Procedure no Neo4J
+3. (Roadmap) Split em microserviços mantendo ports hexagonais
+4. (Roadmap) Documentos de identificação + OCR → CPF → Unimed; UI "Arquivos"
+
+---
+
+## [2026-07-27] - Nomenclatura Arquivos + Roadmap Identificação
+
+### Realizado
+- [x] UI: aba/labels "Documentos" → "Arquivos" (pt-BR/EN) para não confundir com docs pessoais
+- [x] Roadmap: docs de identificação (certidão etc.), OCR obrigatório populando paciente, CPF dos meninos para Unimed
+- [x] UI: aba "Crescimento" → "Medidas"; PC → "Perímetro cefálico" (local para medições atuais e futuras)
+
+---
+
+## [2026-07-27] - Documentos de Identificação + OCR → Paciente
+
+### Contexto
+Backlog para importar dados dos meninos via certidão: tipos de identificação em Arquivos, OCR e aplicação de CPF/nome/nascimento no paciente (base para Unimed).
+
+### Realizado
+- [x] Migration `007_identity_document_types.sql` (certidao_nascimento, rg, cpf_card, cnh)
+- [x] Parser `identity-document.parser.ts` (CPF com dígitos verificadores, data, nome, filiação)
+- [x] Upload retorna `suggestedPatient`; endpoint `POST /documents/:id/apply-identity`
+- [x] UI Arquivos: grupos Identificação/Clínicos; revisão OCR com checkboxes para aplicar no paciente
+- [x] Testes parser (3) — total 12 testes API
+
+### Como usar
+1. Paciente → Arquivos → Adicionar Arquivo → Certidão de Nascimento (foto/scan)
+2. Revisar OCR → marcar CPF (e nome/nascimento se quiser) → Confirmar e aplicar no paciente
+3. CPF fica no cadastro para vincular/sincronizar Unimed
+
+---
+
+## [2026-07-27] - Roadmap: Export para o médico (2 níveis)
+
+### Contexto
+Precisamos levar o histórico ao consultório de forma útil — não só dump completo.
+
+### Roadmap
+- [ ] **Export completo** — prontuário integral do paciente
+- [ ] **Export resumido** — informações relevantes para apresentar ao médico (alergias, medicações, diagnósticos, últimas consultas/exames, vacinas em atraso, autorizações vigentes), em formato apresentável (PDF/impressão)
+
+---

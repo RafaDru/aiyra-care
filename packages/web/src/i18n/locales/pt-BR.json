@@ -15,11 +15,11 @@
     "noItems": "Nenhum item registrado"
   },
   "patient": {
-    "title": "Minhas Crianças",
-    "new": "Nova Criança",
+    "title": "Meus Pacientes",
+    "new": "Novo Paciente",
     "edit": "Editar",
     "delete": "Remover",
-    "deleteConfirm": "Remover criança?",
+    "deleteConfirm": "Remover paciente?",
     "notFound": "Paciente não encontrado",
     "age": "anos",
     "months": "meses",
@@ -30,25 +30,25 @@
     "bloodType": "Tipo"
   },
   "tabs": {
-    "growth": "Crescimento",
+    "growth": "Medidas",
     "vaccines": "Vacinas",
     "medications": "Medicações",
     "allergies": "Alergias",
     "exams": "Exames",
     "records": "Consultas",
     "diagnoses": "Diagnósticos",
-    "documents": "Documentos"
+    "documents": "Arquivos"
   },
   "growth": {
-    "new": "Novo Registro",
-    "success": "Registro adicionado",
+    "new": "Nova medida",
+    "success": "Medida registrada",
     "date": "Data",
     "weight": "Peso (kg)",
     "height": "Altura (cm)",
-    "headCircumference": "PC (cm)",
+    "headCircumference": "Perímetro cefálico (cm)",
     "bmi": "IMC",
-    "percentileWeight": "Perc. Peso",
-    "percentileHeight": "Perc. Altura",
+    "percentileWeight": "Perc. peso",
+    "percentileHeight": "Perc. altura",
     "notes": "Observações"
   },
   "vaccine": {
@@ -119,8 +119,8 @@
     "monitoring": "Em Monitoramento"
   },
   "document": {
-    "new": "Adicionar Documento",
-    "success": "Documento registrado",
+    "new": "Adicionar Arquivo",
+    "success": "Arquivo registrado",
     "type": "Tipo",
     "fileName": "Nome do Arquivo",
     "path": "Caminho (GCS)",
@@ -137,7 +137,11 @@
     "exam": "Exame",
     "report": "Relatório",
     "vaccine_card": "Cartão de Vacina",
-    "other": "Outro"
+    "other": "Outro",
+    "certidao_nascimento": "Certidão de Nascimento",
+    "rg": "RG",
+    "cpf_card": "Cartão / Comprovante CPF",
+    "cnh": "CNH"
   },
   "common": {
     "loading": "Carregando...",

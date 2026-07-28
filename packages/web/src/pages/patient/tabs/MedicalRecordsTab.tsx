@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
+import { SourceTag } from '../../../components/ui/SourceTag.js'
 import type { MedicalRecord } from '../../../lib/api.types.js'
 
 interface Props { patientId: string }
@@ -20,7 +21,10 @@ export function MedicalRecordsTab({ patientId }: Props) {
     { title: t('medicalRecord.doctor'), dataIndex: 'doctorName', render: (v: string | null) => v ?? '-' },
     { title: t('medicalRecord.specialty'), dataIndex: 'specialty', render: (v: string | null) => v ?? '-' },
     { title: t('medicalRecord.clinic'), dataIndex: 'clinicName', render: (v: string | null) => v ?? '-' },
-    { title: t('medicalRecord.description'), dataIndex: 'description', render: (v: string | null) => v ? `${v.substring(0, 60)}...` : '-' },
+    { title: 'Valor', dataIndex: 'chargedAmount', render: (v: number | null) => v != null ? `R$ ${Number(v).toFixed(2)}` : '-' },
+    { title: 'Nota', dataIndex: 'invoiceNumber', render: (v: string | null) => v ?? '-' },
+    { title: t('medicalRecord.description'), dataIndex: 'description', render: (v: string | null) => v ? `${v.substring(0, 60)}${v.length > 60 ? '...' : ''}` : '-' },
+    { title: 'Origem', dataIndex: 'source', render: (v: string) => <SourceTag source={v} /> },
   ]
 
   return (

@@ -46,6 +46,9 @@ export const api = {
   documents: {
     list: (patientId?: string) => request<import('./api.types.js').Document_[]>(`/documents${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').Document_>('/documents', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: object) => request<import('./api.types.js').Document_>(`/documents/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/documents/${id}`, { method: 'DELETE' }),
+    ocrStats: () => request<{ summary: Record<string, unknown>; byType: unknown[] }>('/documents/ocr-stats'),
     upload: (patientId: string, documentType: string, file: File) => {
       const form = new FormData()
       form.append('patientId', patientId)
@@ -53,6 +56,12 @@ export const api = {
       form.append('file', file, file.name)
       return request<import('./api.types.js').Document_>('/documents/upload', { method: 'POST', body: form })
     },
+    applyIdentity: (id: string, data: object) =>
+      request<{
+        patient: import('./api.types.js').Patient
+        suggestedPatient: import('./api.types.js').SuggestedPatientFields
+        applied: { cpf: boolean; name: boolean; birthDate: boolean }
+      }>(`/documents/${id}/apply-identity`, { method: 'POST', body: JSON.stringify(data) }),
   },
   medicalRecords: {
     list: (patientId?: string) => request<import('./api.types.js').MedicalRecord[]>(`/medical-records${patientId ? `?patientId=${patientId}` : ''}`),
@@ -62,11 +71,50 @@ export const api = {
     list: (patientId?: string) => request<import('./api.types.js').Diagnosis[]>(`/diagnoses${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').Diagnosis>('/diagnoses', { method: 'POST', body: JSON.stringify(data) }),
   },
+  authorizations: {
+    list: (patientId?: string) => request<import('./api.types.js').Authorization[]>(`/authorizations${patientId ? `?patientId=${patientId}` : ''}`),
+    create: (data: object) => request<import('./api.types.js').Authorization>('/authorizations', { method: 'POST', body: JSON.stringify(data) }),
+  },
   sessions: {
     list: () => request<import('./api.types.js').Session[]>('/sessions'),
+  },
+  integrationLinks: {
+    list: (patientId: string) => request<import('./api.types.js').IntegrationLink[]>(`/integration-links?patientId=${patientId}`),
+    create: (data: object) => request<import('./api.types.js').IntegrationLink>('/integration-links', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: object) => request<import('./api.types.js').IntegrationLink>(`/integration-links/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/integration-links/${id}`, { method: 'DELETE' }),
+    sync: (id: string) => request<{ jobId: string }>(`/integration-links/${id}/sync`, { method: 'POST' }),
+    syncProgress: (jobId: string) => request<{
+      step: string
+      message: string
+      status: string
+      result?: {
+        exams: number
+        medicalRecords: number
+        authorizations: number
+        authorizationItems: number
+        updatedAuthorizations: number
+        total: number
+        authorizationDetails: Array<{
+          solicitationNumber?: string
+          classification?: string
+          doctorName?: string
+          itemCount: number
+          action: 'created' | 'updated'
+          linkedConsultaId?: string
+          linkedConsultaDate?: string
+        }>
+      }
+    }>(`/integration-links/sync-progress/${jobId}`),
   },
   scraper: {
     conectesus: (data: { cpf: string }) =>
       request<import('./api.types.js').ScraperResult>('/scraper/conectesus', { method: 'POST', body: JSON.stringify(data) }),
+    unimed: (data: { email: string; password: string; insuranceMembershipNumber?: string }) =>
+      request<import('./api.types.js').ScraperResult>('/scraper/unimed', { method: 'POST', body: JSON.stringify(data) }),
+    amil: (data: { cpf: string; password: string; insuranceMembershipNumber?: string }) =>
+      request<import('./api.types.js').ScraperResult>('/scraper/amil', { method: 'POST', body: JSON.stringify(data) }),
+    bradesco: (data: { cpf: string; password: string; insuranceMembershipNumber?: string }) =>
+      request<import('./api.types.js').ScraperResult>('/scraper/bradesco_saude', { method: 'POST', body: JSON.stringify(data) }),
   },
 }

@@ -39,7 +39,7 @@ export function Dashboard() {
         cpf: values.cpf?.replace(/\D/g, '') || undefined,
         cns: values.cns?.replace(/\D/g, '') || undefined,
       })
-      message.success('Criança cadastrada com sucesso')
+      message.success('Paciente cadastrado com sucesso')
       setModalOpen(false)
       form.resetFields()
       load()
@@ -110,7 +110,9 @@ export function Dashboard() {
           </Form.Item>
           <Form.Item name="weightKg" label={`Peso (${t('patient.weight')})`}><Input type="number" step="0.1" /></Form.Item>
           <Form.Item name="heightCm" label={`Altura (${t('patient.height')})`}><Input type="number" step="0.1" /></Form.Item>
-          <Form.Item name="cpf" label="CPF"><Input placeholder="000.000.000-00" maxLength={14} /></Form.Item>
+          <Form.Item name="cpf" label="CPF" rules={[{ validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject('CPF deve ter 11 dígitos') }]}>
+            <Input placeholder="000.000.000-00" maxLength={14} />
+          </Form.Item>
           <Form.Item name="cns" label="CNS"><Input placeholder="Nº do Cartão SUS" maxLength={15} /></Form.Item>
         </Form>
       </Modal>

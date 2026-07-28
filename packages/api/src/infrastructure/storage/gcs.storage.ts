@@ -7,10 +7,11 @@ import type { FileStorage, UploadResult } from '../../domain/document/file-stora
 function resolveKeyPath(): string | undefined {
   const env = process.env.GOOGLE_APPLICATION_CREDENTIALS
   if (!env) return undefined
-  if (isAbsolute(env) || existsSync(env)) return env
+  if (isAbsolute(env) && existsSync(env)) return env
+  if (existsSync(env)) return resolve(env)
   const fromRoot = resolve(process.cwd(), '..', '..', env)
   if (existsSync(fromRoot)) return fromRoot
-  return env
+  return undefined
 }
 
 const bucketName = process.env.GCS_BUCKET || 'openhealth-documents-503119'

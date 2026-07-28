@@ -1,5 +1,6 @@
 export interface PortalCredentials {
   cpf: string
+  email?: string
   password: string
   birthDate?: string
   susCardNumber?: string

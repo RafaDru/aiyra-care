@@ -1,7 +1,15 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import type { DocumentService } from '../../../application/document/document.service.js'
-import { createDocumentSchema, updateDocumentSchema, documentParamsSchema, documentQuerySchema } from './document.schema.js'
+import {
+  createDocumentSchema,
+  updateDocumentSchema,
+  documentParamsSchema,
+  documentQuerySchema,
+  documentTypeEnum,
+  applyIdentitySchema,
+} from './document.schema.js'
 import { NotFoundError } from '../../../domain/errors.js'
+import { isIdentityDocumentType } from '../../../domain/document/identity-document.parser.js'
 
 export class DocumentController {
   constructor(private readonly service: DocumentService) {}
@@ -25,8 +33,8 @@ export class DocumentController {
       return reply.status(400).send({ message: 'Campos patientId e documentType são obrigatórios' })
     }
 
-    const validTypes = ['prescription', 'exam', 'report', 'vaccine_card', 'other']
-    if (!validTypes.includes(documentType)) {
+    const typeParsed = documentTypeEnum.safeParse(documentType)
+    if (!typeParsed.success) {
       return reply.status(400).send({ message: `documentType inválido: ${documentType}` })
     }
 
@@ -35,10 +43,38 @@ export class DocumentController {
     const buffer = Buffer.concat(chunks)
 
     try {
-      const doc = await this.service.uploadAndCreate(patientId, documentType as any, file.filename, buffer, file.mimetype)
-      return reply.status(201).send(doc.toJSON())
+      const { document, suggestedPatient } = await this.service.uploadAndCreate(
+        patientId,
+        typeParsed.data,
+        file.filename,
+        buffer,
+        file.mimetype,
+      )
+      return reply.status(201).send({
+        ...document.toJSON(),
+        suggestedPatient: suggestedPatient && Object.keys(suggestedPatient).length ? suggestedPatient : undefined,
+        isIdentityDocument: isIdentityDocumentType(typeParsed.data),
+      })
     } catch (err) {
       return reply.status(500).send({ message: err instanceof Error ? err.message : 'Erro no upload' })
+    }
+  }
+
+  async applyIdentity(req: FastifyRequest, reply: FastifyReply) {
+    const params = documentParamsSchema.safeParse(req.params)
+    if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    const body = applyIdentitySchema.safeParse(req.body ?? {})
+    if (!body.success) return reply.status(400).send({ error: body.error.flatten() })
+    try {
+      const result = await this.service.applyIdentityToPatient(params.data.id, body.data)
+      return reply.send({
+        patient: result.patient.toJSON(),
+        suggestedPatient: result.suggestedPatient,
+        applied: result.applied,
+      })
+    } catch (err) {
+      if (err instanceof NotFoundError) return reply.status(404).send({ message: err.message })
+      return reply.status(400).send({ message: err instanceof Error ? err.message : 'Erro ao aplicar dados' })
     }
   }
 
@@ -53,6 +89,10 @@ export class DocumentController {
     const query = documentQuerySchema.safeParse(req.query)
     const items = await this.service.findAll(query.success ? query.data : undefined)
     return reply.send(items.map(i => i.toJSON()))
+  }
+
+  async ocrStats(_req: FastifyRequest, reply: FastifyReply) {
+    return reply.send(await this.service.ocrStats())
   }
 
   async update(req: FastifyRequest, reply: FastifyReply) {

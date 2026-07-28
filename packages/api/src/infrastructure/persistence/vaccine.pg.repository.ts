@@ -3,7 +3,7 @@ import type { VaccineRepository, VaccineFilter } from '../../domain/vaccine/vacc
 import { Vaccine } from '../../domain/vaccine/vaccine.entity.js'
 import type { VaccineData } from '../../domain/vaccine/vaccine.entity.js'
 
-const COLUMNS = 'id, patient_id, vaccine_name, dose_number, batch_number, application_date, next_dose_date, applied_by, clinic, notes, created_at'
+const COLUMNS = 'id, patient_id, vaccine_name, dose_number, batch_number, application_date, next_dose_date, applied_by, clinic, notes, source, created_at'
 
 function rowToEntity(row: Record<string, unknown>): Vaccine {
   return Vaccine.restore({
@@ -11,7 +11,7 @@ function rowToEntity(row: Record<string, unknown>): Vaccine {
     doseNumber: row.dose_number != null ? Number(row.dose_number) : null, batchNumber: row.batch_number as string | null,
     applicationDate: row.application_date as Date, nextDoseDate: row.next_dose_date as Date | null,
     appliedBy: row.applied_by as string | null, clinic: row.clinic as string | null, notes: row.notes as string | null,
-    createdAt: row.created_at as Date,
+    source: row.source as string, createdAt: row.created_at as Date,
   })
 }
 
@@ -33,9 +33,9 @@ export class VaccinePgRepository implements VaccineRepository {
 
   async save(vaccine: Vaccine) {
     const { rows } = await this.pool.query(
-      `INSERT INTO vaccines (id, patient_id, vaccine_name, dose_number, batch_number, application_date, next_dose_date, applied_by, clinic, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING ${COLUMNS}`,
-      [vaccine.id, vaccine.patientId, vaccine.vaccineName, vaccine.doseNumber, vaccine.batchNumber, vaccine.applicationDate, vaccine.nextDoseDate, vaccine.appliedBy, vaccine.clinic, vaccine.notes]
+      `INSERT INTO vaccines (id, patient_id, vaccine_name, dose_number, batch_number, application_date, next_dose_date, applied_by, clinic, notes, source)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING ${COLUMNS}`,
+      [vaccine.id, vaccine.patientId, vaccine.vaccineName, vaccine.doseNumber, vaccine.batchNumber, vaccine.applicationDate, vaccine.nextDoseDate, vaccine.appliedBy, vaccine.clinic, vaccine.notes, vaccine.source]
     )
     return rowToEntity(rows[0])
   }

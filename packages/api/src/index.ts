@@ -1,9 +1,21 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { config } from 'dotenv'
+import { resolve, dirname, isAbsolute } from 'path'
+import { existsSync } from 'fs'
+import { fileURLToPath } from 'url'
 
-config()
+const __dirname = dirname(fileURLToPath(import.meta.url))
+config({ path: resolve(__dirname, '../../../.env') })
 
+// Relative GCP key in .env is resolved from monorepo root (API cwd is packages/api)
+{
+  const key = process.env.GOOGLE_APPLICATION_CREDENTIALS
+  if (key && !isAbsolute(key)) {
+    const fromRoot = resolve(__dirname, '../../../', key)
+    if (existsSync(fromRoot)) process.env.GOOGLE_APPLICATION_CREDENTIALS = fromRoot
+  }
+}
 const app = Fastify({ logger: true })
 
 app.get('/health', async () => {
@@ -50,6 +62,8 @@ async function registerRoutes() {
   const { diagnosisRoutes } = await import('./infrastructure/http/diagnosis/diagnosis.routes.js')
   const { scraperRoutes } = await import('./infrastructure/http/scraper/scraper.routes.js')
   const { sessionsRoutes } = await import('./infrastructure/http/session/session.routes.js')
+  const { integrationLinkRoutes } = await import('./infrastructure/http/integration-link/integration-link.routes.js')
+  const { authorizationRoutes } = await import('./infrastructure/http/authorization/authorization.routes.js')
 
   await app.register(patientRoutes)
   await app.register(growthRecordRoutes)
@@ -62,6 +76,8 @@ async function registerRoutes() {
   await app.register(diagnosisRoutes)
   await app.register(scraperRoutes)
   await app.register(sessionsRoutes)
+  await app.register(integrationLinkRoutes)
+  await app.register(authorizationRoutes)
 }
 
 const start = async () => {

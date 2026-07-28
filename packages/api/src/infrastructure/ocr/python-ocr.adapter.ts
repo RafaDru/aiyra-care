@@ -15,6 +15,8 @@ function mimeToExt(mime: string): string {
 }
 
 export class PythonOcrAdapter implements OcrProvider {
+  readonly name = 'python' as const
+
   async extractText(buffer: Buffer, mimeType: string): Promise<OcrResult> {
     if (!supportedMimeTypes.includes(mimeType)) {
       throw new Error(`Formato não suportado para OCR local: ${mimeType}`)

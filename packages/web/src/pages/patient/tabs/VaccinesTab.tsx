@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
+import { SourceTag } from '../../../components/ui/SourceTag.js'
 import type { Vaccine } from '../../../lib/api.types.js'
 
 interface Props { patientId: string }
@@ -21,6 +22,7 @@ export function VaccinesTab({ patientId }: Props) {
     { title: t('vaccine.nextDose'), dataIndex: 'nextDoseDate', render: (v: string | null) => v ? <Tag color="orange">{new Date(v).toLocaleDateString()}</Tag> : '-' },
     { title: t('vaccine.appliedBy'), dataIndex: 'appliedBy', render: (v: string | null) => v ?? '-' },
     { title: t('vaccine.batch'), dataIndex: 'batchNumber', render: (v: string | null) => v ?? '-' },
+    { title: 'Origem', dataIndex: 'source', render: (v: string) => <SourceTag source={v} /> },
   ]
 
   return (

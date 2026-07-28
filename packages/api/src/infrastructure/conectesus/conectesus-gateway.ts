@@ -7,9 +7,15 @@ const TOKEN_URL = '**/govbr-proxy.saude.gov.br/api/token/gerar*'
 const FHIR_GATEWAY = 'https://ehr-search-gateway.saude.gov.br/api/fhir/r4'
 const COMPOSITION_BASE = 'https://mg-ehr-services.saude.gov.br/1.15/api/fhir/r4'
 const LOGIN_TIMEOUT = 5 * 60 * 1000
+const EXPIRY_MARGIN_MS = 60_000
 
 export class ConecteSUSGateway {
   private accessToken = ''
+  private tokenExpiresAt = 0
+
+  private isExpired(): boolean {
+    return Date.now() + EXPIRY_MARGIN_MS >= this.tokenExpiresAt
+  }
 
   async loginViaBrowser(onProgress?: (p: ScraperProgress) => void): Promise<string> {
     const emit = (step: string, message: string, status: ScraperProgress['status']) => onProgress?.({ step, message, status })
@@ -49,6 +55,7 @@ export class ConecteSUSGateway {
       const response = await tokenPromise
       const body = await response.json()
       this.accessToken = body.access_token
+      this.tokenExpiresAt = Date.now() + (body.expires_in || 3600) * 1000
 
       emit('login', 'Login detectado! Coletando dados...', 'success')
       return this.accessToken
@@ -57,7 +64,14 @@ export class ConecteSUSGateway {
     }
   }
 
-  private async fhirGet<T>(path: string): Promise<T> {
+  private async ensureToken(onProgress?: (p: ScraperProgress) => void): Promise<void> {
+    if (!this.accessToken || this.isExpired()) {
+      await this.loginViaBrowser(onProgress)
+    }
+  }
+
+  private async fhirGet<T>(path: string, onProgress?: (p: ScraperProgress) => void): Promise<T> {
+    await this.ensureToken(onProgress)
     const url = `${FHIR_GATEWAY}${path}`
     const res = await fetch(url, {
       headers: {
@@ -65,11 +79,22 @@ export class ConecteSUSGateway {
         Accept: 'application/json',
       },
     })
+    if (res.status === 401) {
+      this.accessToken = ''
+      this.tokenExpiresAt = 0
+      await this.ensureToken(onProgress)
+      const retry = await fetch(url, {
+        headers: { Authorization: `Bearer ${this.accessToken}`, Accept: 'application/json' },
+      })
+      if (!retry.ok) throw new Error(`FHIR ${retry.status} (após reautenticação): ${await retry.text().catch(() => '')}`)
+      return retry.json()
+    }
     if (!res.ok) throw new Error(`FHIR ${res.status}: ${await res.text().catch(() => '')}`)
     return res.json()
   }
 
-  private async fhirCompositionGet(path: string): Promise<FhirBundle> {
+  private async fhirCompositionGet(path: string, onProgress?: (p: ScraperProgress) => void): Promise<FhirBundle> {
+    await this.ensureToken(onProgress)
     const url = `${COMPOSITION_BASE}${path}`
     const res = await fetch(url, {
       headers: {
@@ -77,12 +102,22 @@ export class ConecteSUSGateway {
         Accept: 'application/json',
       },
     })
+    if (res.status === 401) {
+      this.accessToken = ''
+      this.tokenExpiresAt = 0
+      await this.ensureToken(onProgress)
+      const retry = await fetch(url, {
+        headers: { Authorization: `Bearer ${this.accessToken}`, Accept: 'application/json' },
+      })
+      if (!retry.ok) throw new Error(`FHIR Composition ${retry.status} (após reautenticação): ${await retry.text().catch(() => '')}`)
+      return retry.json()
+    }
     if (!res.ok) throw new Error(`FHIR Composition ${res.status}: ${await res.text().catch(() => '')}`)
     return res.json()
   }
 
-  async getPatient(cpf: string): Promise<{ id: string; name?: string; birthDate?: string; cpf?: string; cns?: string }> {
-    const bundle = await this.fhirGet<FhirBundle>(`/Patient?identifier=http://rnds.saude.gov.br/fhir/r4/NamingSystem/cpf%7C${cpf}`)
+  async getPatient(cpf: string, onProgress?: (p: ScraperProgress) => void): Promise<{ id: string; name?: string; birthDate?: string; cpf?: string; cns?: string }> {
+    const bundle = await this.fhirGet<FhirBundle>(`/Patient?identifier=http://rnds.saude.gov.br/fhir/r4/NamingSystem/cpf%7C${cpf}`, onProgress)
     const patient = bundle.entry?.[0]?.resource as FhirPatient | undefined
     if (!patient) throw new Error('Paciente não encontrado no ConecteSUS')
 
@@ -98,8 +133,8 @@ export class ConecteSUSGateway {
     }
   }
 
-  async getVaccines(patientId: string): Promise<ScrapedVaccine[]> {
-    const bundle = await this.fhirGet<FhirBundle>(`/List?subject=Patient/${patientId}&code=http://www.saude.gov.br/fhir/r4/CodeSystem/BRClassificacaoLista%7Cimmunizations`)
+  async getVaccines(patientId: string, onProgress?: (p: ScraperProgress) => void): Promise<ScrapedVaccine[]> {
+    const bundle = await this.fhirGet<FhirBundle>(`/List?subject=Patient/${patientId}&code=http://www.saude.gov.br/fhir/r4/CodeSystem/BRClassificacaoLista%7Cimmunizations`, onProgress)
     const list = bundle.entry?.[0]?.resource as FhirList | undefined
     if (!list?.entry) return []
 
@@ -119,7 +154,7 @@ export class ConecteSUSGateway {
       if (compMatch) {
         const compositionId = compMatch[1]
         try {
-          const docBundle = await this.fhirCompositionGet(`/Composition/${compositionId}`)
+          const docBundle = await this.fhirCompositionGet(`/Composition/${compositionId}`, onProgress)
           if (docBundle.entry) {
             for (const docEntry of docBundle.entry) {
               const composition = docEntry.resource as FhirComposition
@@ -150,8 +185,8 @@ export class ConecteSUSGateway {
     return vaccines
   }
 
-  async getExams(patientId: string): Promise<ScrapedExam[]> {
-    const bundle = await this.fhirGet<FhirBundle>(`/List?subject=Patient/${patientId}&code=http://www.saude.gov.br/fhir/r4/CodeSystem/BRClassificacaoLista%7Ctests`)
+  async getExams(patientId: string, onProgress?: (p: ScraperProgress) => void): Promise<ScrapedExam[]> {
+    const bundle = await this.fhirGet<FhirBundle>(`/List?subject=Patient/${patientId}&code=http://www.saude.gov.br/fhir/r4/CodeSystem/BRClassificacaoLista%7Ctests`, onProgress)
     const list = bundle.entry?.[0]?.resource as FhirList | undefined
     if (!list?.entry) return []
 
@@ -167,15 +202,15 @@ export class ConecteSUSGateway {
     const emit = (step: string, message: string, status: ScraperProgress['status']) => onProgress?.({ step, message, status })
 
     emit('fetch-patient', 'Buscando dados do paciente...', 'running')
-    const patient = await this.getPatient(cpf)
+    const patient = await this.getPatient(cpf, onProgress)
     emit('fetch-patient', `Paciente: ${patient.name}`, 'success')
 
     emit('fetch-vaccines', 'Buscando vacinas...', 'running')
-    const vaccines = await this.getVaccines(patient.id)
+    const vaccines = await this.getVaccines(patient.id, onProgress)
     emit('fetch-vaccines', `${vaccines.length} vacinas encontradas`, 'success')
 
     emit('fetch-exams', 'Buscando exames...', 'running')
-    const exams = await this.getExams(patient.id)
+    const exams = await this.getExams(patient.id, onProgress)
     emit('fetch-exams', `${exams.length} exames encontrados`, 'success')
 
     return { patientName: patient.name, patientBirthDate: patient.birthDate, patientCpf: patient.cpf, patientCns: patient.cns, vaccines, exams, prescriptions: [], rawPages: [] }

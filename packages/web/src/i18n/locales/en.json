@@ -15,11 +15,11 @@
     "noItems": "No items recorded"
   },
   "patient": {
-    "title": "My Children",
-    "new": "New Child",
+    "title": "My Patients",
+    "new": "New Patient",
     "edit": "Edit",
     "delete": "Remove",
-    "deleteConfirm": "Remove child?",
+    "deleteConfirm": "Remove patient?",
     "notFound": "Patient not found",
     "age": "years old",
     "months": "months",
@@ -30,22 +30,22 @@
     "bloodType": "Type"
   },
   "tabs": {
-    "growth": "Growth",
+    "growth": "Measurements",
     "vaccines": "Vaccines",
     "medications": "Medications",
     "allergies": "Allergies",
     "exams": "Exams",
     "records": "Appointments",
     "diagnoses": "Diagnoses",
-    "documents": "Documents"
+    "documents": "Files"
   },
   "growth": {
-    "new": "New Record",
-    "success": "Record added",
+    "new": "New measurement",
+    "success": "Measurement saved",
     "date": "Date",
     "weight": "Weight (kg)",
     "height": "Height (cm)",
-    "headCircumference": "HC (cm)",
+    "headCircumference": "Head circumference (cm)",
     "bmi": "BMI",
     "percentileWeight": "Weight %",
     "percentileHeight": "Height %",
@@ -119,8 +119,8 @@
     "monitoring": "Monitoring"
   },
   "document": {
-    "new": "Add Document",
-    "success": "Document registered",
+    "new": "Add File",
+    "success": "File registered",
     "type": "Type",
     "fileName": "File Name",
     "path": "Path (GCS)",
@@ -137,7 +137,11 @@
     "exam": "Exam",
     "report": "Report",
     "vaccine_card": "Vaccine Card",
-    "other": "Other"
+    "other": "Other",
+    "certidao_nascimento": "Birth Certificate",
+    "rg": "ID Card (RG)",
+    "cpf_card": "CPF Card",
+    "cnh": "Driver License"
   },
   "common": {
     "loading": "Loading...",
