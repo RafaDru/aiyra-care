@@ -20,6 +20,10 @@ export class PatientService {
     return this.repo.findAll()
   }
 
+  async findByIds(ids: readonly string[]): Promise<Patient[]> {
+    return this.repo.findByIds(ids)
+  }
+
   async update(id: string, data: Partial<PatientProps>): Promise<Patient> {
     const existing = await this.findById(id)
     const cleanData = Object.fromEntries(
@@ -36,5 +40,10 @@ export class PatientService {
   async delete(id: string): Promise<void> {
     await this.findById(id)
     await this.repo.delete(id)
+  }
+
+  async setOwnerAccountId(patientId: string, accountId: string): Promise<void> {
+    await this.findById(patientId)
+    await this.repo.setOwnerAccountId(patientId, accountId)
   }
 }

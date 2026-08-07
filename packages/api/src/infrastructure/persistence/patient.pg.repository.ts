@@ -46,6 +46,15 @@ export class PatientPgRepository implements PatientRepository {
     return rows.map(rowToPatient)
   }
 
+  async findByIds(ids: readonly string[]): Promise<Patient[]> {
+    if (ids.length === 0) return []
+    const { rows } = await this.pool.query(
+      `SELECT ${COLUMNS} FROM patients WHERE id = ANY($1::uuid[]) ORDER BY name`,
+      [ids],
+    )
+    return rows.map(rowToPatient)
+  }
+
   async save(patient: Patient): Promise<Patient> {
     const { rows } = await this.pool.query(
       `INSERT INTO patients (id, name, birth_date, gender, blood_type, weight_kg, height_cm, photo_url, parent_ids, cpf, cns)
@@ -82,6 +91,13 @@ export class PatientPgRepository implements PatientRepository {
     )
     if (!rows.length) throw new Error(`Patient ${patient.id} not found on update`)
     return rowToPatient(rows[0])
+  }
+
+  async setOwnerAccountId(patientId: string, accountId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE patients SET owner_account_id = $2, updated_at = NOW() WHERE id = $1`,
+      [patientId, accountId],
+    )
   }
 
   async delete(id: string): Promise<void> {

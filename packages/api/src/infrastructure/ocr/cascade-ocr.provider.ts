@@ -1,7 +1,23 @@
-import type { OcrProvider, CascadeOcrResult } from '../../domain/document/ocr-provider.js'
+import type { OcrProvider, CascadeOcrResult, OcrLayout } from '../../domain/document/ocr-provider.js'
 import { scoreOcrText, type OcrProviderName } from '../../domain/document/ocr-quality.js'
+import { normalizeOcrLayout, textFromOcrRegions } from '../../domain/document/text-encoding.js'
 
 export type NamedOcrProvider = OcrProvider & { readonly name: OcrProviderName }
+
+function finalizeResult(result: CascadeOcrResult): CascadeOcrResult {
+  if (!result.layout?.regions?.length) return result
+  const regions = normalizeOcrLayout(result.layout.regions)
+  const layout: OcrLayout = {
+    imageWidth: result.layout.imageWidth,
+    imageHeight: result.layout.imageHeight,
+    regions,
+  }
+  return {
+    ...result,
+    layout,
+    text: textFromOcrRegions(regions) || result.text,
+  }
+}
 
 /**
  * Tries providers in order (local first). Stops early when `isSufficient` returns true
@@ -28,16 +44,28 @@ export class CascadeOcrProvider {
 
         const candidate: CascadeOcrResult = {
           text: result.text,
+          layout: result.layout,
           provider: provider.name,
           qualityScore,
           usedPaid: paid,
           attempts: [...attempts],
         }
 
-        if (!best || qualityScore > best.qualityScore) best = candidate
+        if (!best || qualityScore > best.qualityScore) {
+          best = {
+            ...candidate,
+            layout: candidate.layout ?? best?.layout,
+          }
+        } else if (result.layout && !best.layout) {
+          best = { ...best, layout: result.layout }
+        }
 
         if (this.isSufficient(result.text)) {
-          return { ...candidate, attempts }
+          return finalizeResult({ ...candidate, attempts })
+        }
+
+        if (result.layout?.regions?.length >= 2 && qualityScore >= 25) {
+          return finalizeResult({ ...candidate, attempts })
         }
       } catch (err) {
         attempts.push({
@@ -54,6 +82,6 @@ export class CascadeOcrProvider {
       throw new Error(`Nenhum provedor OCR conseguiu extrair texto (${detail})`)
     }
 
-    return { ...best, attempts }
+    return finalizeResult({ ...best, attempts })
   }
 }

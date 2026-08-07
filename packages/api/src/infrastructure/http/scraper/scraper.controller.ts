@@ -15,11 +15,13 @@ export class ScraperController {
     const portal = params.data.portal
     const data = body.data
 
+    const govBrInteractive = portal === 'conectesus' || portal === 'caderneta'
+
     if (portal === 'conectesus') {
       if (!data.cpf || data.cpf.replace(/\D/g, '').length !== 11) {
         return reply.status(400).send({ message: 'CPF com 11 dígitos é obrigatório para ConecteSUS' })
       }
-    } else {
+    } else if (!govBrInteractive) {
       if (!data.password) {
         return reply.status(400).send({ message: 'Senha é obrigatória para este portal' })
       }

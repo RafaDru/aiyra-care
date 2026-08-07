@@ -1,0 +1,37 @@
+.patient-basic-summary-row {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.patient-basic-summary-row__clinical {
+  flex: 1 1 65%;
+  min-width: 0;
+}
+
+.patient-basic-summary-row__threads {
+  flex: 1 1 35%;
+  min-width: 0;
+  max-width: 38%;
+}
+
+.patient-basic-summary-row .ant-card {
+  margin-bottom: 0;
+}
+
+.patient-basic-summary-row__threads .health-threads-panel--sidebar .ant-card-head-title {
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .patient-basic-summary-row {
+    flex-direction: column;
+  }
+
+  .patient-basic-summary-row__clinical,
+  .patient-basic-summary-row__threads {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+}

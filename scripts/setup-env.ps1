@@ -14,6 +14,8 @@ if ($Cloud) {
     SUPABASE_SERVICE_ROLE = $env:SUPABASE_OPENHEALTH_SERVICE_ROLE_KEY
     SUPABASE_DATABASE_URL = "postgresql://postgres:${env:SUPABASE_OPENHEALTH_DB_PASSWORD}@db.lyljosprzmtapkocmxxa.supabase.co:5432/postgres"
     SUPABASE_POOL_URL = "postgresql://postgres:${env:SUPABASE_OPENHEALTH_DB_PASSWORD}@db.lyljosprzmtapkocmxxa.supabase.co:6543/postgres?pgbouncer=true"
+    VITE_SUPABASE_URL = "https://lyljosprzmtapkocmxxa.supabase.co"
+    VITE_SUPABASE_ANON_KEY = $env:SUPABASE_OPENHEALTH_FRONTEND_KEY
     NEO4J_URI = "neo4j+s://7cbe171c.databases.neo4j.io"
     NEO4J_USER = $env:NEO4J_USERNAME_INSTANCE
     NEO4J_PASSWORD = $env:NEO4J_INSTANCE_PASSWORD
@@ -38,6 +40,8 @@ if ($Cloud) {
     SUPABASE_URL = "https://lyljosprzmtapkocmxxa.supabase.co"
     SUPABASE_ANON_KEY = $env:SUPABASE_OPENHEALTH_FRONTEND_KEY
     SUPABASE_SERVICE_ROLE = $env:SUPABASE_OPENHEALTH_SERVICE_ROLE_KEY
+    VITE_SUPABASE_URL = "https://lyljosprzmtapkocmxxa.supabase.co"
+    VITE_SUPABASE_ANON_KEY = $env:SUPABASE_OPENHEALTH_FRONTEND_KEY
   }
 }
 

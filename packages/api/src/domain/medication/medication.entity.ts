@@ -6,8 +6,11 @@ export interface MedicationProps {
   dosage?: string
   frequency?: string
   route?: string
+  duration?: string
   startDate?: Date
+  startedAt?: Date
   endDate?: Date
+  endDateIsProjected?: boolean
   prescribingDoctor?: string
   notes?: string
   isActive?: boolean
@@ -22,8 +25,11 @@ export interface MedicationData {
   dosage: string | null
   frequency: string | null
   route: string | null
+  duration: string | null
   startDate: Date | null
+  startedAt: Date | null
   endDate: Date | null
+  endDateIsProjected: boolean
   prescribingDoctor: string | null
   notes: string | null
   isActive: boolean
@@ -43,8 +49,11 @@ export class Medication {
       dosage: props.dosage ?? null,
       frequency: props.frequency ?? null,
       route: props.route ?? null,
+      duration: props.duration ?? null,
       startDate: props.startDate ?? null,
+      startedAt: props.startedAt ?? null,
       endDate: props.endDate ?? null,
+      endDateIsProjected: props.endDateIsProjected ?? false,
       prescribingDoctor: props.prescribingDoctor ?? null,
       notes: props.notes ?? null,
       isActive: props.isActive ?? true,
@@ -62,8 +71,11 @@ export class Medication {
   get dosage(): string | null { return this.data.dosage }
   get frequency(): string | null { return this.data.frequency }
   get route(): string | null { return this.data.route }
+  get duration(): string | null { return this.data.duration }
   get startDate(): Date | null { return this.data.startDate }
+  get startedAt(): Date | null { return this.data.startedAt }
   get endDate(): Date | null { return this.data.endDate }
+  get endDateIsProjected(): boolean { return this.data.endDateIsProjected }
   get prescribingDoctor(): string | null { return this.data.prescribingDoctor }
   get notes(): string | null { return this.data.notes }
   get isActive(): boolean { return this.data.isActive }

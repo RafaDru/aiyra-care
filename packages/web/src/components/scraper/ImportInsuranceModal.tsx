@@ -33,14 +33,20 @@ export function ImportInsuranceModal({
 
   useEffect(() => {
     if (!open || !patientId) return
-    api.patients.get(patientId).then((p) => {
+    Promise.all([
+      api.patients.get(patientId),
+      api.planMemberships.list(patientId).catch(() => []),
+    ]).then(([p, memberships]) => {
       setPatient(p)
-      if (usesEmail) return
-      if (p.cpf) {
-        form.setFieldsValue({ cpf: p.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') })
+      const defaults: { cpf?: string; membership?: string } = {}
+      if (!usesEmail && p.cpf) {
+        defaults.cpf = p.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
       }
+      const match = memberships.find((m) => m.plan?.operator === portal || m.source === portal)
+      if (match?.memberNumber) defaults.membership = match.memberNumber
+      if (defaults.cpf || defaults.membership) form.setFieldsValue(defaults)
     }).catch(() => setPatient(null))
-  }, [open, patientId, usesEmail, form])
+  }, [open, patientId, usesEmail, portal, form])
 
   const handleOk = async () => {
     try {

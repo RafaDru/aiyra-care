@@ -1,19 +1,23 @@
 @layer base {
   :root {
-    --primary: #4F46E5;
-    --primary-light: #818CF8;
-    --primary-dark: #3730A3;
-    --secondary: #0EA5E9;
+    --primary: #9333EA;
+    --primary-light: #A855F7;
+    --primary-dark: #7E22CE;
+    --secondary: #FF3DA8;
     --success: #10B981;
-    --warning: #F59E0B;
+    --warning: #FFE566;
     --danger: #EF4444;
     --background: #F8FAFC;
+    --card-bg: #FFFFFF;
+    --border: #E2E8F0;
+    --text-secondary: #64748B;
   }
 }
 
 body {
   margin: 0;
   padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   background: var(--background);
 }
 

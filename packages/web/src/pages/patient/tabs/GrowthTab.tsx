@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Table, Button, Form, DatePicker, InputNumber, Input } from 'antd'
+import { Table, Button, Form, InputNumber, Input } from 'antd'
+import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { PlusOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import type { GrowthRecord } from '../../../lib/api.types.js'
+import type { Dayjs } from 'dayjs'
 
 interface Props { patientId: string }
 
@@ -35,10 +37,10 @@ export function GrowthTab({ patientId }: Props) {
         title={t('growth.new')}
         successMsg={t('growth.success')}
         onClose={() => setOpen(false)}
-        onSubmit={(values) => api.growthRecords.create({ patientId, ...values, recordDate: (values.recordDate as Date).toISOString() }).then(reload)}
+        onSubmit={(values) => api.growthRecords.create({ patientId, ...values, recordDate: (values.recordDate as Dayjs).toISOString() }).then(reload)}
       >
         <Form.Item name="recordDate" label={t('growth.date')} rules={[{ required: true }]}>
-          <DatePicker style={{ width: '100%' }} />
+          <MaskedDatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="weightKg" label={t('growth.weight')}><InputNumber min={0} step={0.1} style={{ width: '100%' }} /></Form.Item>
         <Form.Item name="heightCm" label={t('growth.height')}><InputNumber min={0} step={0.1} style={{ width: '100%' }} /></Form.Item>

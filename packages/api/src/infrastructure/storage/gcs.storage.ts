@@ -33,6 +33,19 @@ export class GcsFileStorage implements FileStorage {
     return { path: key, sizeBytes: buffer.length }
   }
 
+  async read(path: string): Promise<import('../../domain/document/file-storage.js').StoredFile> {
+    const file = bucket.file(path)
+    const [buffer] = await file.download()
+    let contentType: string | undefined
+    try {
+      const [meta] = await file.getMetadata()
+      contentType = meta.contentType
+    } catch {
+      contentType = undefined
+    }
+    return { buffer, contentType }
+  }
+
   async delete(path: string): Promise<void> {
     await bucket.file(path).delete({ ignoreNotFound: true })
   }

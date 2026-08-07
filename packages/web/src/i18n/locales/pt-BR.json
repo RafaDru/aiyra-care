@@ -1,13 +1,67 @@
 {
   "app": {
-    "title": "Open Health",
-    "subtitle": "Histórico Médico Infantil"
+    "title": "AiyraCare",
+    "subtitle": "Cuidado infantil com inteligência"
   },
   "nav": {
     "dashboard": "Dashboard",
     "integrations": "Integrações",
     "session": "Sessões",
     "settings": "Configurações"
+  },
+  "auth": {
+    "title": "Entrar",
+    "subtitle": "Acesse com Google, Microsoft ou e-mail e senha",
+    "google": "Continuar com Google",
+    "microsoft": "Continuar com Microsoft",
+    "emailDivider": "ou e-mail",
+    "email": "E-mail",
+    "password": "Senha",
+    "signIn": "Entrar",
+    "signUp": "Criar conta",
+    "signOut": "Sair",
+    "account": "Minha conta",
+    "rememberMe": "Manter conectado",
+    "rememberMeHint": "Desmarcado: sessão só até fechar o navegador",
+    "switchToSignUp": "Criar uma conta",
+    "switchToSignIn": "Já tenho conta",
+    "notConfigured": "Login não configurado",
+    "notConfiguredHint": "Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY (scripts/setup-env.ps1 -Cloud)."
+  },
+  "onboarding": {
+    "title": "Complete seu cadastro",
+    "subtitle": "Precisamos de alguns dados para criar seu perfil. O cadastro é permitido apenas para maiores de 18 anos.",
+    "name": "Nome completo",
+    "nameRequired": "Informe seu nome",
+    "birthDate": "Data de nascimento",
+    "birthDateRequired": "Informe sua data de nascimento",
+    "adultOnly": "O cadastro é permitido apenas para maiores de 18 anos.",
+    "gender": "Sexo",
+    "genderRequired": "Selecione o sexo",
+    "cpfRequired": "Informe o CPF",
+    "cpfInvalid": "CPF deve ter 11 dígitos",
+    "cnsPlaceholder": "Nº do Cartão SUS",
+    "weight": "Peso",
+    "height": "Altura",
+    "submit": "Concluir cadastro",
+    "error": "Não foi possível concluir o cadastro"
+  },
+  "settings": {
+    "subtitle": "Preferências do aplicativo",
+    "appearance": "Aparência",
+    "darkMode": "Modo escuro",
+    "brandColors": "Identidade AiyraCare",
+    "language": "Idioma",
+    "languageLabel": "Idioma da interface",
+    "palette": {
+      "indigo": "Indigo",
+      "teal": "Teal",
+      "rose": "Rose"
+    },
+    "lang": {
+      "pt": "Português (BR)",
+      "en": "English"
+    }
   },
   "session": {
     "title": "Histórico de Sessões",
@@ -37,7 +91,10 @@
     "exams": "Exames",
     "records": "Consultas",
     "diagnoses": "Diagnósticos",
-    "documents": "Arquivos"
+    "documents": "Arquivos clínicos",
+    "personalDocuments": "Documentos pessoais",
+    "wallet": "Convênios",
+    "timeline": "Linha do tempo"
   },
   "growth": {
     "new": "Nova medida",
@@ -53,29 +110,47 @@
   },
   "vaccine": {
     "new": "Registrar Vacina",
+    "edit": "Editar vacina",
     "success": "Vacina registrada",
+    "updated": "Vacina atualizada",
     "name": "Nome da Vacina",
     "dose": "Dose",
     "applicationDate": "Data de Aplicação",
     "nextDose": "Próxima Dose",
     "batch": "Lote",
     "appliedBy": "Aplicado por",
-    "clinic": "Clínica/Posto"
+    "clinic": "Clínica/Posto",
+    "notes": "Observações",
+    "uploadCard": "Importar cartão"
   },
   "medication": {
     "new": "Nova Medicação",
+    "edit": "Editar",
     "success": "Medicação registrada",
+    "updated": "Medicação atualizada",
     "genericName": "Nome Genérico",
     "brandName": "Nome Comercial",
-    "dosage": "Dosagem",
+    "dosage": "Dosagem / valor",
     "frequency": "Frequência",
     "route": "Via",
-    "startDate": "Data Início",
-    "endDate": "Data Término",
+    "duration": "Duração",
+    "startDate": "Início",
+    "prescribedDate": "Data da receita",
+    "endDate": "Término",
+    "projectedDate": "Data projetada com base na duração",
+    "projectedEndHint": "Término projetado: {{date}} (data projetada)",
+    "prescribedOnly": "prescrito — ainda não iniciado",
+    "started": "tratamento iniciado",
+    "startTreatment": "Iniciar medicação",
+    "confirmStart": "Confirmar início",
+    "startAt": "Início do tratamento",
+    "startReminderHint": "Este horário será usado no futuro para lembretes push.",
+    "notes": "Observações",
     "doctor": "Médico",
     "active": "Ativo",
     "yes": "Sim",
-    "no": "Não"
+    "no": "Não",
+    "uploadPrescription": "Importar receita"
   },
   "allergy": {
     "new": "Nova Alergia",
@@ -94,7 +169,27 @@
     "type": "Tipo de Exame",
     "date": "Data do Exame",
     "laboratory": "Laboratório",
-    "result": "Resumo do Resultado"
+    "result": "Resumo do Resultado",
+    "file": "Arquivo",
+    "viewFile": "Ver laudo",
+    "fileStored": "Arquivo salvo",
+    "slices": "imagens",
+    "viewSeries": "Ver série",
+    "upload": "Importar exame"
+  },
+  "examSliceViewer": {
+    "phaseDownload": "Baixando cortes…",
+    "phaseDecode": "Preparando imagens…",
+    "phaseReady": "Abrindo visualizador…",
+    "close": "Fechar",
+    "prev": "Corte anterior",
+    "next": "Próximo corte",
+    "play": "Reprodução automática",
+    "pause": "Pausar",
+    "speedSlow": "Lenta",
+    "speedNormal": "Normal",
+    "speedFast": "Rápida",
+    "speedFaster": "Muito rápida"
   },
   "medicalRecord": {
     "new": "Nova Consulta",
@@ -130,7 +225,41 @@
     "processed": "Processado",
     "pending": "Pendente",
     "upload": "Upload",
-    "dropHint": "Clique ou arraste um arquivo para esta área"
+    "dropHint": "Clique ou arraste um arquivo para esta área",
+    "origin": "Origem",
+    "originAll": "Todas as origens",
+    "originManual": "Enviados por você",
+    "originPortal": "Importados do portal",
+    "showSlices": "Mostrar cortes de TC/RM (séries)",
+    "portalImportsHint": "Laudos PDF importados podem aparecer aqui; cortes de imagem (TC, RM) ficam na aba Exames — use o visualizador de série.",
+    "portalGroupLaudo": "Laudo PDF",
+    "portalGroupSlices": "{{count}} cortes de imagem",
+    "linkedExam": "Exame vinculado",
+    "sliceRow": "Corte {{index}}/{{total}}"
+  },
+  "personalDocument": {
+    "introTitle": "Documentos para apresentar em hospitais e consultórios",
+    "introDescription": "Anexe certidão de nascimento, RG, CPF e outros documentos de identificação. Use \"Apresentar todos\" para abrir os arquivos anexados em abas separadas na hora do atendimento.",
+    "attached": "Anexado",
+    "missing": "Pendente",
+    "attach": "Anexar",
+    "replace": "Substituir",
+    "view": "Ver",
+    "attachedCount": "{{count}} documento(s) anexado(s)",
+    "noneAttached": "Nenhum documento pessoal anexado",
+    "presentAll": "Apresentar todos",
+    "noneToPresent": "Anexe pelo menos um documento antes de apresentar.",
+    "notYetAttached": "Nenhum arquivo anexado ainda.",
+    "olderVersions": "versão(ões) anterior(es)",
+    "allFiles": "Todos os documentos pessoais",
+    "deleteConfirm": "Excluir este documento?",
+    "uploadSuccess": "Documento anexado com sucesso",
+    "deleteSuccess": "Documento excluído",
+    "uploadHint": "Foto ou PDF nítido (JPEG, PNG ou PDF, até 20 MB)",
+    "identityReviewTitle": "Dados detectados no documento",
+    "identityReviewHint": "Marque os campos que deseja aplicar ao cadastro do paciente.",
+    "applyToPatient": "Aplicar no paciente",
+    "identityApplied": "Dados aplicados ao cadastro do paciente"
   },
   "documentType": {
     "prescription": "Receita",
@@ -148,6 +277,7 @@
     "empty": "Nenhum registro encontrado",
     "save": "Salvar",
     "cancel": "Cancelar",
+    "delete": "Excluir",
     "back": "Voltar",
     "confirm": "Confirmar",
     "theme": "Tema",

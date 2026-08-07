@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Table, Button, Form, DatePicker, Input, Select } from 'antd'
+import { Table, Button, Form, Input, Select } from 'antd'
+import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
+import { CarePlaceAutocomplete } from '../../../components/ui/CarePlaceAutocomplete.js'
 import { PlusOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
@@ -7,6 +9,7 @@ import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import { SourceTag } from '../../../components/ui/SourceTag.js'
 import type { MedicalRecord } from '../../../lib/api.types.js'
+import type { Dayjs } from 'dayjs'
 
 interface Props { patientId: string }
 
@@ -41,11 +44,11 @@ export function MedicalRecordsTab({ patientId }: Props) {
         onSubmit={(values) => api.medicalRecords.create({
           patientId,
           ...values,
-          recordDate: (values.recordDate as Date).toISOString(),
+          recordDate: (values.recordDate as Dayjs).toISOString(),
         }).then(reload)}
       >
         <Form.Item name="recordDate" label={t('medicalRecord.date')} rules={[{ required: true }]}>
-          <DatePicker style={{ width: '100%' }} />
+          <MaskedDatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="recordType" label={t('medicalRecord.type')} rules={[{ required: true }]}>
           <Select options={[
@@ -59,7 +62,9 @@ export function MedicalRecordsTab({ patientId }: Props) {
         <Form.Item name="description" label={t('medicalRecord.description')}><Input.TextArea rows={2} /></Form.Item>
         <Form.Item name="doctorName" label={t('medicalRecord.doctor')}><Input /></Form.Item>
         <Form.Item name="specialty" label={t('medicalRecord.specialty')}><Input /></Form.Item>
-        <Form.Item name="clinicName" label={t('medicalRecord.clinic')}><Input /></Form.Item>
+        <Form.Item name="clinicName" label={t('medicalRecord.clinic')}>
+          <CarePlaceAutocomplete />
+        </Form.Item>
       </EntityFormModal>
     </>
   )

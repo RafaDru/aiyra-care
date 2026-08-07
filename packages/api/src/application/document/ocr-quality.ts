@@ -53,7 +53,13 @@ export function isClinicalTextSufficient(text: string): boolean {
   if (t.length < 40) return false
   const letters = (t.match(/[A-Za-zÁ-ú0-9]/g) || []).length
   const ratio = letters / Math.max(t.length, 1)
-  return letters >= 30 && ratio >= 0.5
+  if (letters < 30 || ratio < 0.5) return false
+
+  const score = scoreOcrText(t)
+  const medicalHints = /receitu|uso\s+oral|inalat|mg|ml|crm|dr\.|nebul|medic|dias|manh[aã]|tomar|x\s+dia/i.test(t)
+  // Manuscrito clínico: exige score alto OU vocabulário médico reconhecível
+  if (score < 55 && !medicalHints) return false
+  return true
 }
 
 /** Local OCR is good enough — skip paid providers. */

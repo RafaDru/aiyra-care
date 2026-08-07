@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-06",
+  "application": {
+    "name": "AiyraCare (Filhos)",
+    "repository": "https://github.com/RafaDru/open-health",
+    "stack": ["Fastify API", "React/Vite", "PostgreSQL", "Neo4j (projeção)", "Supabase Auth"],
+    "localUrls": {
+      "api": "http://127.0.0.1:3010",
+      "web": "http://localhost:5173"
+    },
+    "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
+  },
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Contexto de paciente é determinístico (sem LLM). Trilhas de saúde (HealthThread) organizam tarefas, investigações, hipóteses e episódios com vínculos a exames, consultas, autorizações, medicamentos, vacinas e documentos. Integrações Unimed BH e Amil com sync assíncrono. Próximo eixo: catálogo de tipos de relação em Postgres (thread↔entidade e entidade↔entidade) para UX e LLM.",
+  "architecture": {
+    "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
+    "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, import_lineage",
+    "neo4jRole": "Projeção read-model para relações e futuros agentes; não define vocabulário de relações",
+    "principle": "Atalhos em trilhas não duplicam dados — chamam use cases existentes e criam health_thread_links"
+  },
+  "layers": [
+    { "id": "A", "name": "Dados estruturados", "description": "Postgres: consultas, exames, vacinas, meds, alergias, autorizações, plano, import_lineage", "usesLlm": false, "status": "operational" },
+    { "id": "B", "name": "Contexto determinístico", "description": "GET /patients/:id/context e /timeline — alertas, textSummary, timeline clínica", "usesLlm": false, "status": "operational" },
+    { "id": "C", "name": "Trilhas de saúde", "description": "HealthThread + entries + links; drawer workflow; adicionar/vincular artefatos", "usesLlm": false, "status": "operational" },
+    { "id": "D", "name": "Documentos + OCR/LLM", "description": "Upload, cascade OCR, interpretação prescrição/vacina/manuscrito", "usesLlm": true, "status": "in_progress" },
+    { "id": "E", "name": "Grafo Neo4j", "description": "Projeção HealthThread, Hypothesis, SUPPORTS; worker lineage pendente", "usesLlm": false, "status": "mvp" },
+    { "id": "F", "name": "Agentes de apoio", "description": "RAG com PatientContext + trilhas + fontes citadas", "usesLlm": true, "status": "planned" }
+  ],
+  "domains": [
+    { "name": "Patient", "table": "patients", "description": "Pacientes e vínculos familiares (parent_ids)" },
+    { "name": "MedicalRecord", "table": "medical_records", "description": "Consultas, extrato Unimed, retornos" },
+    { "name": "Exam", "table": "exams", "description": "Exames laboratoriais e de imagem" },
+    { "name": "Vaccine", "table": "vaccines", "description": "Vacinas aplicadas" },
+    { "name": "Medication", "table": "medications", "description": "Medicamentos e receitas" },
+    { "name": "Allergy", "table": "allergies", "description": "Alergias confirmadas" },
+    { "name": "Diagnosis", "table": "diagnoses", "description": "Diagnósticos formais (conclusão)" },
+    { "name": "Authorization", "table": "authorizations", "description": "Guias, tokens, autorizações de plano" },
+    { "name": "Document", "table": "documents", "description": "Arquivos, OCR, identidade" },
+    { "name": "HealthThread", "table": "health_threads", "description": "Trilhas: task, investigation, hypothesis, episode" },
+    { "name": "HealthThreadEntry", "table": "health_thread_entries", "description": "Notas e entradas de workflow" },
+    { "name": "HealthThreadLink", "table": "health_thread_links", "description": "Vínculo trilha→entidade com role (workflow)" },
+    { "name": "IntegrationLink", "table": "integration_links", "description": "Credenciais portal por paciente" },
+    { "name": "InsurancePlan", "table": "insurance_plans", "description": "Plano + membership multi-operadora" },
+    { "name": "ImportLineage", "table": "import_lineage", "description": "Proveniência de imports externos" },
+    { "name": "ProjectContext", "description": "GET /project/context — foto da app e decisões para LLM/agentes" }
+  ],
+  "apiRoutes": [
+    { "method": "GET", "path": "/project/context", "description": "Contexto estruturado do projeto para LLMs e agentes" },
+    { "method": "GET", "path": "/patients/:id/context", "description": "Contexto clínico determinístico do paciente" },
+    { "method": "GET", "path": "/patients/:id/timeline", "description": "Timeline filtrada por tipo e período" },
+    { "method": "GET", "path": "/health-threads/:id/detail", "description": "Drawer: timeline da trilha, links, entries" },
+    { "method": "POST", "path": "/health-threads/:id/links", "description": "Vincular entidade existente à trilha" },
+    { "method": "POST", "path": "/health-threads/:id/artifacts/*", "description": "Criar exame/consulta/autorização/med/vacina e vincular" },
+    { "method": "GET", "path": "/sessions", "description": "Histórico de sessões parseado de HISTORICO.md" },
+    { "method": "POST", "path": "/integration-links/:id/sync", "description": "Sync assíncrono portal (jobId + polling)" }
+  ],
+  "integrations": [
+    { "portal": "unimed", "syncAutomatic": true, "authMethod": "Playwright SSO acesso.unimedbh.com.br", "imports": ["extrato/consultas", "autorizações", "cartão virtual/plano"] },
+    { "portal": "amil", "syncAutomatic": true, "authMethod": "JWT salvo → CDP Chrome → Playwright fallback", "imports": ["plano", "carências", "guias/tokens → Authorization"] },
+    { "portal": "bradesco_saude", "syncAutomatic": false, "authMethod": "vínculo manual", "imports": [] },
+    { "portal": "conectesus", "syncAutomatic": false, "authMethod": "import manual gov.br", "imports": ["vacinas", "exames"] },
+    { "portal": "mater_dei", "syncAutomatic": true, "authMethod": "scraper dedicado", "imports": ["exames"] }
+  ],
+  "healthThreads": {
+    "kinds": ["task", "investigation", "hypothesis", "episode"],
+    "linkRoles": ["ordered", "scheduled", "result", "related", "blocked_by"],
+    "linkEntityTypes": ["exam", "medical_record", "authorization", "medication", "vaccine", "document", "diagnosis", "allergy", "appointment"],
+    "workflowNotes": [
+      "role descreve passo na trilha (não relação clínica entre entidades)",
+      "Timeline da trilha ordenada por data da entidade, não data do vínculo",
+      "Adicionar… cria registro canônico; Vincular… usa health_thread_links",
+      "Exemplo Rafael check-up 40: consulta=related; exame pedido=ordered; autorização=ordered"
+    ]
+  },
+  "relationCatalog": {
+    "status": "planned",
+    "summary": "Catálogo relation_types em Postgres para vocabulário controlado, UX assistida e validação LLM; separar thread↔entidade vs entidade↔entidade (consulta ORDERED exame)",
+    "plannedTables": ["relation_types", "clinical_entity_links", "relation_type_rules"],
+    "separation": {
+      "threadEntity": "Papel do artefato na história da trilha (check-up, investigação)",
+      "entityEntity": "Relação clínica causal entre registros (consulta gerou exame)"
+    }
+  },
+  "decisions": [
+    { "id": "postgres-source-of-truth", "date": "2026-08-06", "title": "Postgres como fonte da verdade", "decision": "Neo4j apenas projeta; CRUD e links em PG", "rationale": "Proveniência, auditoria, sync com portais", "status": "active" },
+    { "id": "patient-context-no-llm", "date": "2026-08-06", "title": "Resumo clínico sem LLM", "decision": "PatientContextService com template determinístico", "rationale": "Evitar alucinação no resumo base", "status": "active" },
+    { "id": "health-thread-kinds", "date": "2026-08-06", "title": "Trilhas unificadas na UI", "decision": "HealthThread com kinds task/investigation/hypothesis/episode", "rationale": "Um card Em andamento; inputs diferentes", "status": "active" },
+    { "id": "diagnosis-separate", "date": "2026-08-06", "title": "Diagnóstico formal separado", "decision": "diagnoses para conclusão; trilhas para pré-diagnóstico", "rationale": "Hipóteses não são diagnóstico até conversão", "status": "active" },
+    { "id": "relation-catalog-pg", "date": "2026-08-06", "title": "Catálogo de relações em PG", "decision": "Não hardcodar tipos nem só Neo4j", "rationale": "Governança, UX, LLM com schema estável", "status": "planned" },
+    { "id": "auth-sync-no-block-ui", "date": "2026-08-06", "title": "Sync auth não desmonta UI", "decision": "loading do AuthContext sem incluir syncing em gate de rotas", "rationale": "Token refresh ao refocar browser resetava aba do paciente", "status": "active" },
+    { "id": "timeline-no-documents", "date": "2026-08-06", "title": "Timeline clínica sem uploads", "decision": "Documentos só em Arquivos; timeline com eventos estruturados + thread_note", "rationale": "Uploads não poluem linha do tempo clínica", "status": "active" }
+  ],
+  "plannedWork": [
+    { "id": "relation-catalog-4.1", "title": "Migration relation_types + GET /relation-types", "status": "planned" },
+    { "id": "entity-links-4.2", "title": "clinical_entity_links (consulta → exame)", "status": "planned" },
+    { "id": "neo4j-lineage-worker", "title": "Worker import_lineage → Neo4j", "status": "planned" },
+    { "id": "agent-rag", "title": "Agente com PatientContext + citações", "status": "planned" },
+    { "id": "export-pdf", "title": "Export resumido médico PDF", "status": "planned" }
+  ],
+  "documentationSources": [
+    { "path": "docs/project-context.json", "role": "Foto estruturada curada (este arquivo)", "format": "json" },
+    { "path": "GET /project/context", "role": "API agrega JSON + HISTORICO + migrations", "format": "json" },
+    { "path": "docs/PROJETO.md", "role": "Documento vivo — arquitetura, endpoints, roadmap", "format": "markdown" },
+    { "path": "docs/HISTORICO.md", "role": "Decisões cronológicas por sessão", "format": "markdown" },
+    { "path": "AGENTS.md", "role": "Instruções operacionais para agentes Cursor", "format": "markdown" },
+    { "path": "docs/CONNECT.md", "role": "Boundary Connect vs Core", "format": "markdown" },
+    { "path": "docs/SUPABASE.md", "role": "Auth e memberships", "format": "markdown" }
+  ]
+}

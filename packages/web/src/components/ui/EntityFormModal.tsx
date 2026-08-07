@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Modal, Form, App } from 'antd'
 import { useTranslation } from 'react-i18next'
 
@@ -17,6 +17,12 @@ export function EntityFormModal({ open, title, successMsg, onClose, onSubmit, ch
   const { message } = App.useApp()
   const [form] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      form.setFieldsValue(initialValues ?? {})
+    }
+  }, [open, initialValues, form])
 
   const handleOk = async () => {
     try {

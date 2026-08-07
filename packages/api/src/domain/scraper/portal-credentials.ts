@@ -7,7 +7,7 @@ export interface PortalCredentials {
   insuranceMembershipNumber?: string
 }
 
-export type PortalType = 'conectesus' | 'unimed' | 'amil' | 'bradesco_saude' | 'sulamerica' | 'other'
+export type PortalType = 'conectesus' | 'caderneta' | 'unimed' | 'amil' | 'bradesco_saude' | 'sulamerica' | 'other'
 
 export interface PortalSession {
   portalType: PortalType

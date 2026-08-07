@@ -1,7 +1,7 @@
 # Open Health - Documento Vivo do Projeto
 
-> **Última atualização:** 2026-07-27
-> **Status:** Sync Unimed BH enriquecido (APIs OutSystems + AuthorizationItem + resumo)
+> **Última atualização:** 2026-08-06  
+> **Status:** Sync Unimed BH + **Amil validado em produção local**; plano/membership multi-operadora; auth Amil silenciosa (token/CDP)  
 > **Repositório:** https://github.com/RafaDru/open-health
 
 ---
@@ -16,6 +16,106 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 |------|-----------|------|----------|----------------|
 | Luís Drummond Freitas Reis | 23/01/2020 | 20kg | TBD | TBD |
 | Bruno Drummond Freitas Reis | 26/10/2022 | 14kg | TBD | TBD |
+
+---
+
+## Como a plataforma opera agora (guia para continuidade)
+
+### Fluxo do usuário
+
+1. **Dashboard** (`/`) — cards por faixa etária; clique abre perfil do paciente.
+2. **Perfil** (`/patients/:id`) — abas clínicas + **Carteira** (`WalletTab`):
+   - Vincular operadora (Unimed / Amil / Bradesco) com CPF ou e-mail + senha do portal.
+   - **Sincronizar** — dispara job assíncrono; `SyncProgressModal` faz polling (Steps: login → buscar dados → salvar → concluído).
+   - **Meu plano** — dados de `plan_memberships` + `insurance_plans` (nome, ANS, rede, carências).
+   - **QR / token Unimed** — botão na carteira chama `POST .../virtual-card` (sessão Playwright dedicada).
+3. **Integrações** (`/integrations`) — cards por portal; import legado via `ImportInsuranceModal` (agente LLM, não é o sync principal).
+
+### Vínculo (`IntegrationLink`)
+
+- Uma linha por `(patient_id, portal_type)` — UNIQUE no banco.
+- `email` — login do portal: e-mail Unimed; **CPF** (só dígitos) Amil/Bradesco.
+- `encrypted_password` — AES-256-GCM (`CRYPTO_KEY` no `.env`).
+- `encrypted_session_token` + `session_expires_at` — JWT `userToken` Amil após login bem-sucedido (migration 010).
+- `card_number` — carteirinha quando conhecida (preenchida no sync).
+- Controller: `integration-link.controller.ts` — lock por `patientId:portal`, decrypt no sync, dedup na importação.
+
+### Sync Unimed BH (detalhe)
+
+```
+POST /integration-links/:id/sync  →  jobId
+setImmediate → UnimedBhSyncScraper.scrape(email, password, onProgress, { patientName, cardNumber })
+```
+
+1. **Login** — `loginUnimedBh()` → redirect Portal do Cliente.
+2. **Cartão Virtual** (antes das APIs longas) — scrape in-page → `planCard` + upsert plano.
+3. **Extrato** — intercept API `DataActionListarExtratoUtilizacao` → `MedicalRecord` (consultas, copart, nota fiscal).
+4. **Autorizações** — `DataActionListarSolicCliente` + para cada pedido: detalhe, procedimentos, prestador, histórico → `Authorization` + `AuthorizationItem`.
+5. **Upsert** — por `solicitation_number`; vínculo consulta↔autorização quando possível.
+6. **Progresso** — steps: `login`, `fetch-extrato`, `fetch-autorizacoes`, `importing`, `done`.
+7. **Resultado** — contagens + `authorizationDetails[]` no modal.
+
+Arquivos: `unimedbh-sync.scraper.ts`, `unimedbh-login.helper.ts`, `unimedbh-cartao-virtual.scraper.ts`.
+
+### Sync Amil (detalhe)
+
+> **✅ Validado (2026-07-28):** sync end-to-end funcional — login via CDP Chrome real, importação de plano/carências/carteirinha e guias/tokens → `Authorization`. Syncs seguintes silenciosos com token salvo.
+
+```
+POST /integration-links/:id/sync  →  jobId
+runAmilSync → AmilSyncScraper.scrape(cpf, password, onProgress, { sessionToken, patientName, cardNumber })
+→ planService.upsertFromPortal + Authorization por guia/token
+→ link.setSessionToken(encrypt(jwt), expiresAt)
+```
+
+**Autenticação (ordem de prioridade — evita Playwright/WAF):**
+
+| # | Método | Quando | Browser visível? |
+|---|--------|--------|------------------|
+| 1 | Token salvo em `integration_links` | JWT ainda válido (~30 min) | Não — só HTTP |
+| 2 | CDP Chrome real | Token expirado; Chrome em `:9222` ou auto-launch perfil `.cache/amil-chrome-cdp` | Chrome real (não Playwright); usuário clica **Entrar** |
+| 3 | Playwright | Só se `AMIL_ALLOW_BROWSER=1` | Sim — WAF costuma retornar 403 |
+
+**APIs Amil** (Bearer `userToken`):
+
+- `GET .../Beneficiario/Logado`
+- `GET .../Beneficiario/{marca}/ListaBeneficiarios`
+- `GET .../Beneficiario/{marca}/Plano`, `GET .../Carencia/{marca}`
+- `POST .../GuiasTokens/{marca}/PostTokens` → autorizações
+
+**Gotchas Amil:**
+
+- Login: `POST /beneficiario/api/AuthOGS/Login` — body `{ userData: { login: cpfDigits, senha, idSistema: 400 } }`.
+- Formulário React/redux-form: `fill()` não preenche senha — usar native value setter (`setReactInputValue`).
+- JWT: carteirinha em `objeto.login`, não `marcaOtica`.
+- WAF bloqueia POST automatizado de Playwright (403) — preferir token/CDP.
+
+Arquivo principal: `packages/api/src/infrastructure/scraper/amil-sync.scraper.ts`.
+
+### Domínio plano (`InsurancePlan` + `PlanMembership`)
+
+- `InsurancePlanService.upsertFromPortal(patientId, PortalPlanSnapshot, integrationLinkId)`.
+- `PortalPlanSnapshot.waitingPeriods` → JSONB `waiting_periods` no plano.
+- Unimed: dados do Cartão Virtual; Amil: endpoint Plano + Carencia.
+- UI: seção **Meu plano** em `WalletTab.tsx`.
+
+### Criptografia e env
+
+```env
+CRYPTO_KEY=          # hex 32 bytes — obrigatório para vínculos
+DATABASE_URL=          # PostgreSQL
+AMIL_CDP_URL=          # default http://127.0.0.1:9222; 0 desabilita
+AMIL_ALLOW_BROWSER=    # default false
+AMIL_CHROME_PATH=      # opcional
+UNIMED_HEADLESS=       # default true para Unimed
+```
+
+### Subir ambiente (Windows)
+
+```powershell
+.\scripts\up.ps1          # mata node, sobe API + Web (ver AGENTS.md)
+# Logs: api.log, web.log na raiz
+```
 
 ---
 
@@ -90,6 +190,48 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 └─────────────────────────────────────────────────────┘
 ```
 
+### Aiyra Connect (integrações — evolução)
+
+Motor de integração em separação gradual do Core. **Doc completa:** `docs/CONNECT.md`.
+
+| Camada | Pacote | Responsabilidade |
+|--------|--------|------------------|
+| Contrato | `packages/connect` | Registry, payload canônico, `ConnectPort` |
+| Core | `packages/api` | Pacientes, import no domínio clínico, UI |
+| Legado (migração) | `packages/api/.../scraper` | Playwright/sync até Fase 2 |
+
+Fluxo alvo: Connect extrai → `CanonicalSyncBatch` → Core `CanonicalBatchImporter` → `import-lineage`.
+
+### Linha de importação externa (complemento à hexagonal)
+
+Qualquer dado que entra de fora do sistema segue o mesmo fluxo — paralelo aos adapters de infraestrutura:
+
+```
+┌──────────────┐    raw JSON     ┌──────────────────┐    adapter     ┌─────────────────┐
+│ Portal/API   │ ──────────────► │ import_raw_records│ ─────────────► │ modelo interno  │
+│ OCR/document │                 │ + import_batches  │   normalize    │ vaccines, exams…│
+└──────────────┘                 └──────────────────┘                └─────────────────┘
+                                        │                                    │
+                                        └──────── import_raw_id ─────────────┘
+```
+
+| Camada | Responsabilidade |
+|--------|------------------|
+| **Infrastructure** | Gateway/scraper coleta payload; `ExternalDataAdapter` por fonte+tipo |
+| **Application** | `ImportLineageService` + `ingestExternalRecord` (raw → normalizar → persistir → link) |
+| **Domain** | `import_batches`, `import_raw_records`, porta `ImportLineageRepository`, `ExternalDataAdapter` |
+
+Regras:
+
+1. **Sempre** gravar `raw_json` fiel à origem em `import_raw_records` (nunca só o modelo interno).
+2. **Sempre** ligar o registro interno via `import_raw_id` + `processed_table` / `processed_id`.
+3. Normalização (catálogo PNI, TUSS, fuzzy) fica em `normalization` / `match_method` — separada do raw.
+4. Um **adapter** por combinação fonte + tipo de registro (ex.: `cadernetaVaccineScheduleAdapter`).
+
+Tabelas: `database/relational/016_vaccine_import_lineage.sql`, `017_import_lineage_general.sql`.
+
+Código: `packages/api/src/domain/import-lineage/`, `application/import-lineage/`.
+
 ### Camadas
 
 **Domain (core)** — Zero dependências externas.
@@ -110,9 +252,12 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 - `CompositeOcrProvider` — OCR com fallback Python → Google Vision
 - `GcsFileStorage` — storage Google Cloud Storage
 - `CryptoHelper` — AES-256-GCM encrypt/decrypt via crypto-helper.ts
-- `SyncProgressStore` — in-memory job store with progress + result (auto-cleanup 5min)
-- `UnimedBhSyncScraper` — combined scraper: login → extrato → autorizações em sessão única
-- `UnimedBhLoginHelper` — shared login flow (email+password, Playwright)
+- `SyncProgressStore` — in-memory job store with progress + result (auto-cleanup ~2min após sync)
+- `UnimedBhSyncScraper` — login → APIs OutSystems (extrato + autorizações) + Cartão Virtual na mesma sessão
+- `UnimedBhCartaoVirtualScraper` — QR/token + campos do plano (`DadoCartaoCliente`)
+- `UnimedBhLoginHelper` — login SSO Unimed BH (email+senha, Playwright)
+- `AmilSyncScraper` — sync Amil: token salvo → CDP Chrome → Playwright (fallback); APIs REST Bearer
+- `InsurancePlanService` — `upsertFromPortal` compartilhado Unimed/Amil
 
 ### Entidades Implementadas
 
@@ -129,7 +274,9 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 | Diagnosis | diagnoses | patientId, medicalRecordId |
 | Authorization | authorizations | patientId |
 | AuthorizationItem | authorization_items | authorizationId |
-| IntegrationLink | integration_links | patientId, portal (portal enum: unimed, amil, bradesco_saude) |
+| IntegrationLink | integration_links | patientId, portal; campos: email (CPF Amil/Bradesco), encrypted_password, encrypted_session_token, session_expires_at, card_number |
+| InsurancePlan | insurance_plans | operator + external_key |
+| PlanMembership | plan_memberships | patientId, plan, member_number |
 
 ### Endpoints
 
@@ -197,9 +344,12 @@ INT LINK POST   /integration-links           ← criar vínculo (portal + encryp
           GET    /integration-links/:id
           PATCH  /integration-links/:id
           DELETE /integration-links/:id
-          POST   /integration-links/:id/sync ← disparar sync assíncrono (retorna jobId)
+          POST   /integration-links/:id/sync ← disparar sync assíncrono (retorna jobId); portais: unimed | amil
           GET    /integration-links/sync-progress/:jobId ← polling de progresso
           POST   /integration-links/sync-all ← sync todos os vínculos de um paciente
+          POST   /integration-links/:id/virtual-card ← QR/token Unimed (Cartão Virtual)
+
+PLAN     GET    /plan-memberships?patientId= ← memberships + plano (Meu plano na Carteira)
 
 AUTH     POST   /authorizations
           GET    /authorizations?patientId=
@@ -230,9 +380,12 @@ patients            -- dados cadastrais (cpf, cns, parent_ids, age_category)
   exams             -- exames (source column, dedup por examType+examDate)
   growth_records    -- peso/altura/IMC
   documents         -- metadados de arquivos
-  integration_links -- vínculos persistentes com portais (credential_id, encrypted_password, portal)
-  authorizations    -- autorizações de exames Unimed (procedure, doctor, clinic, dates, guide, status)
-  medical_records   -- consultas/atendimentos (source column, dedup por recordDate+doctorName)
+  integration_links -- vínculos persistentes (portal, email/CPF, encrypted_password, encrypted_session_token, card_number)
+  insurance_plans   -- catálogo de planos por operadora (ANS, rede, segmentação, carências JSONB)
+  plan_memberships  -- vínculo paciente↔plano (member_number, role, status, integration_link_id)
+  authorizations    -- autorizações/guias (Unimed + Amil; solicitation_number, guide_password, items filhos)
+  authorization_items -- procedimentos do pedido Unimed
+  medical_records   -- consultas/atendimentos (source, copart, invoice; link opcional com authorization)
 ```
 
 ### Neo4J - Modelo de Grafos
@@ -277,22 +430,17 @@ Match automático:
     └── Por nome (fallback)  → sugere pacientes próximos
 ```
 
-### Agentes Inteligentes (Planos de Saúde)
+### Agentes Inteligentes (Planos de Saúde) — legado
 
-Unimed, Amil e Bradesco Saúde usam um GenericAgentPortalAdapter que combina:
+Rotas `POST /scraper/{portal}` ainda existem com GenericAgentPortalAdapter (LLM + Playwright). **O fluxo principal de produção** para Unimed/Amil é `IntegrationLink` + scrapers dedicados (`UnimedBhSyncScraper`, `AmilSyncScraper`), não o agente genérico.
 
 ```
-Browser (Playwright non-headless)
+Browser (Playwright) — legado agentic
     ↓
-auth.agent.ts  → LLM detecta campos de login, preenche CPF/senha
-    ↓
-nav.agent.ts   → LLM analisa HTML, navega até seção alvo
-    ↓
-extract.agent.ts → LLM extrai vacinas, exames e receitas do HTML
+auth.agent.ts  → LLM detecta campos de login
+nav.agent.ts   → LLM navega HTML
+extract.agent.ts → LLM extrai dados
 ```
-
-Cada plano tem seu próprio portal adapter (`unimed.portal.ts`, `amil.portal.ts`, `bradesco-saude.portal.ts`)
-que apenas configura URL e label — a lógica de scraping é compartilhada.
 
 ### Pipeline de Extração de Vacinas
 
@@ -359,24 +507,20 @@ packages/web/src/
 │   ├── layout/
 │   │   └── AppLayout.tsx           ← Sider + Header + Content
 │   └── scraper/
-│       ├── ImportConecteSUSModal.tsx ← Modal de importação SUS
-│       └── SyncProgressModal.tsx   ← Modal com Steps do sync Unimed BH
+│       ├── ImportConecteSUSModal.tsx
+│       ├── ImportInsuranceModal.tsx  ← import agentic (legado)
+│       └── SyncProgressModal.tsx     ← polling sync Unimed + Amil (timeout 5 min)
 ├── pages/
-│   ├── dashboard.tsx               ← Cards agrupados por idade
-│   ├── integrations.tsx            ← Página de integrações (Unimed BH vincular)
-│   ├── session.tsx                 ← Timeline do histórico
+│   ├── dashboard.tsx
+│   ├── integrations.tsx
+│   ├── session.tsx
 │   └── patient/
-│       ├── detail.tsx              ← Perfil + 10 abas (inclui Autorizações)
+│       ├── detail.tsx              ← perfil + abas (Carteira, Autorizações, Arquivos…)
 │       └── tabs/
-│           ├── GrowthTab.tsx
-│           ├── VaccinesTab.tsx      ← source column
-│           ├── MedicationsTab.tsx
-│           ├── AllergiesTab.tsx
-│           ├── ExamsTab.tsx         ← source column
-│           ├── MedicalRecordsTab.tsx ← source column
-│           ├── DiagnosesTab.tsx
-│           ├── DocumentsTab.tsx
-│           └── AuthorizationsTab.tsx ← tabela com status tags + validade + source
+│           ├── WalletTab.tsx       ← vínculos, sync, Meu plano, QR Unimed
+│           ├── AuthorizationsTab.tsx
+│           ├── DocumentsTab.tsx    ← UI "Arquivos"
+│           └── … (Growth/Medidas, Vaccines, Exams, etc.)
 └── styles/
     └── globals.css                 ← Variáveis CSS tema
 ```
@@ -384,10 +528,10 @@ packages/web/src/
 ### Roteamento
 
 ```
-/                        → Dashboard (cards agrupados por idade)
-/patients/:id            → Detalhe do paciente (9 abas)
-/integrations            → Página de integrações
-/session                 → Histórico de sessões
+/                        → Dashboard
+/patients/:id            → Perfil (Dados Básicos, Medidas, clínico, Carteira, Autorizações, Arquivos…)
+/integrations            → Integrações
+/session                 → Histórico de sessões (lê HISTORICO.md)
 ```
 
 ### Tema Customizável
@@ -443,7 +587,7 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [ ] Gráficos de crescimento (Recharts)
 - [ ] Página de configurações
 
-### Fase 3 - Integrações com Planos de Saúde ✅ (Unimed BH)
+### Fase 3 - Integrações com Planos de Saúde ✅ (Unimed BH + Amil core)
 - [x] Entidade IntegrationLink (vínculo persistente com portal + credenciais criptografadas)
 - [x] Criptografia AES-256-GCM via crypto-helper.ts
 - [x] Source tagging (source column em exams, vaccines, medical_records, authorizations)
@@ -458,6 +602,21 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [x] Entidade AuthorizationItem (itens/procedimentos do pedido)
 - [x] Campos enriquecidos: solicitation_number, guide_password, specialty, locations, history
 - [x] Resumo pós-sync com pedidos criados/atualizados e contagem de itens
+- [x] Extrato via API OutSystems → MedicalRecord com copart/nota
+- [x] Vínculo Authorization ↔ MedicalRecord (consulta origem)
+- [x] Carteira (WalletTab): vínculo, sync, Meu plano, QR Unimed
+- [x] InsurancePlan + PlanMembership + carências (`waiting_periods`)
+- [x] Sync Amil: plano, carências, guias/tokens → Authorization
+- [x] Auth Amil silenciosa: sessão JWT persistida + CDP Chrome real
+- [x] **Sync Amil validado end-to-end** (plano, carências, guias, sessão persistida)
+- [x] Prefill CPF Amil/Bradesco no modal de vínculo
+- [x] Schema vínculo: email aceita CPF (não exige formato e-mail)
+
+### Fase 3 — Pendências integrações
+- [ ] Carências Unimed (`DeclaracaoCarencia` PDF Jasper)
+- [ ] Utilização/exames Amil → MedicalRecord/Exam
+- [ ] Sync Bradesco Saúde
+- [ ] Dependentes Amil como pacientes vinculados
 
 ### Fase 4 - Agentes IA 🔜
 - [ ] Agente pediatria operacional
@@ -470,6 +629,7 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [ ] Compartilhamento com médicos
 - [ ] Backup e exportação
 - [ ] **Export do prontuário (2 níveis)** — completo + resumido para o médico
+- [ ] **Rede credenciada agregada** — busca unificada (SUS + planos) via adapters, estilo “Decolar”
 
 ---
 
@@ -524,9 +684,12 @@ estão disponíveis no seletor de tema no header da aplicação.
 .\scripts\setup-env.ps1          # Local
 .\scripts\setup-env.ps1 -Cloud   # Cloud
 
-# Iniciar ambiente dev (API + Web)
-.\scripts\start-dev.ps1          # Local (PostgreSQL + Neo4J locais)
-.\scripts\start-dev.ps1 -Cloud   # Cloud (Supabase + AuraDB)
+# Iniciar ambiente dev (API + Web) — preferido no dia a dia
+.\scripts\up.ps1
+
+# Alternativa com PG/Neo local ou cloud explícito
+.\scripts\start-dev.ps1          # Local
+.\scripts\start-dev.ps1 -Cloud   # Cloud
 
 # Iniciar apenas API
 npm run api:dev         # packages/api
@@ -563,26 +726,156 @@ git push
 -- 005_authorization_enrichment.sql - Campos ricos do detalhe Unimed + tabela authorization_items
 -- 006_consulta_authorization_link.sql - Extrato/copart em medical_records + medical_record_id em authorizations
 -- 007_identity_document_types.sql - Tipos certidao_nascimento, rg, cpf_card, cnh no enum document_type
+-- 008_ocr_metrics.sql             - Métricas OCR em documents
+-- 009_insurance_plans.sql         - insurance_plans + plan_memberships (área do plano multi-operadora)
+-- 010_integration_link_session.sql - encrypted_session_token + session_expires_at (sessão Amil)
+-- 020_health_threads.sql         - Trilhas de saúde (Em andamento)
 ```
 
-Para aplicar migrations manualmente:
-```powershell
-& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d openhealth -f database\relational\002_parent_relationship.sql
+Para aplicar migrations manualmente (sem psql no PATH), executar o SQL via cliente PG apontando para `DATABASE_URL`. Arquivos em `database/relational/`.
+
+### Contexto do projeto (LLM / agentes)
+
+| Recurso | Uso |
+|---------|-----|
+| `docs/project-context.json` | Foto **curada** — camadas, decisões, roadmap, integrações (atualizar ao evoluir arquitetura) |
+| `GET /project/context` | Agrega JSON + `HISTORICO.md` parseado + lista de migrations em runtime |
+| `GET /sessions` | Só sessões do histórico (subset do context) |
+| `docs/PROJETO.md` / `AGENTS.md` | Narrativa longa e instruções operacionais |
+
+Agentes devem preferir `/project/context` para estado atual; markdown para detalhe profundo.
+
+---
+
+## Roadmap — Contexto, trilhas e inteligência clínica
+
+> Alinhado à discussão de 2026-08-06: histórico completo, cruzamento inteligente (Neo4j), documentos/LLM, agentes de apoio e **resumo sem alucinação**.
+
+### Visão em camadas
+
+| Camada | O que é | LLM? | Status |
+|--------|---------|------|--------|
+| **A. Dados estruturados** | Postgres: consultas, exames, vacinas, meds, alergias, autorizações, plano, `import_lineage` | Não | ✅ Operacional |
+| **B. Contexto determinístico** | `GET /patients/:id/context` — identidade, alertas, pendências, `textSummary`, timeline unificada | Não | ✅ Entregue |
+| **C. Trilhas de saúde** (`HealthThread`) | “Em andamento”: tarefas, investigações, hipóteses, episódios com sintomas | Não (entrada manual rápida) | 📋 Próximo |
+| **D. Documentos + OCR/LLM** | Arquivos, manuscrito, prescrição, laudos → estrutura | Sim (cascade) | 🔄 Paralelo |
+| **E. Grafo Neo4j** | Relações: sintoma → hipótese → diagnóstico → exame; proveniência | Não no CRUD | 📋 Médio prazo |
+| **F. Agentes de apoio** | “Médico agêntico” — volume + momento, sempre com fonte citada | Sim (RAG) | 📋 Depois de B+C |
+
+**Ordem sensata:** A → B → **C** → D (paralelo) → E → F.
+
+Neo4j **não substitui** Postgres; indexa relações e raciocínio. O grafo **projeta** eventos de PG + trilhas + lineage.
+
+### Eixo 1 — Documentos + LLM/OCR
+
+- [x] Tipos de identificação, OCR → CPF/nome/nascimento
+- [x] UI “Arquivos”; cascade OCR (Tesseract / TrOCR / Vision)
+- [ ] Melhorar entendimento de manuscrito (prescrição, laudo) — LLM na cascata
+- [ ] Métricas e validação contínua de qualidade OCR
+
+### Eixo 2 — Contexto do paciente (sem LLM)
+
+- [x] `PatientContextService` + `GET /patients/:id/context`
+- [x] Card **Resumo clínico** na aba Dados Básicos
+- [x] Timeline horizontal recente no resumo (`PatientContextTimeline`)
+- [x] Aba **Linha do tempo** com filtros (`TimelineTab` + `GET /patients/:id/timeline`)
+- [ ] Incluir `activeThreads[]` e pendências derivadas de trilhas no context
+- [ ] Export resumido médico (PDF) alimentado pelo context + trilhas abertas
+
+### Eixo 3 — Trilhas de saúde (“Em andamento”)
+
+Conceito único na UI com **kinds** distintos (input rápido + detalhe sob demanda):
+
+| Kind | Exemplo | Entrada mínima |
+|------|---------|----------------|
+| `task` | Checkup inicial com médica da família | uma linha + data opcional |
+| `investigation` | Luís — adenoides / trato respiratório | título + exames vinculados |
+| `hypothesis` | Bruno — suspeita de alergia | linha + confiança (baixa/média) |
+| `episode` | Febre → sintomas → hipótese → diagnóstico | sintoma + valor + “agora” |
+
+**Fases de implementação:**
+
+| Fase | Entrega | Neo4j |
+|------|---------|-------|
+| **3.1** | Migration `health_threads` + CRUD + card “Em andamento” no perfil + input 1 linha | Não | ✅ |
+| **3.2a** | Wizard formal para abrir `investigation` / `task` + questionário inicial em `metadata` | Não | ✅ |
+| **3.2b** | `health_thread_entries` + `health_thread_links` + drawer da trilha (mini-workflow) | Não | ✅ |
+| **3.2c** | Atalhos: criar/vincular exame, consulta, autorização, nota — persiste na aba canônica + link na trilha | Não | ✅ |
+| **3.3** | Conversão hipótese → diagnóstico/alergia; trilhas no context + notas na timeline global | Não | ✅ |
+| **3.4** | Projeção Neo4j: `Symptom`—`SUGGESTS`—`Hypothesis`—`CONFIRMED_AS`—`Diagnosis` | Sim | ✅ MVP |
+
+**Modelo PG (resumo):** `health_threads`, `health_thread_entries`, `health_thread_links` (exam, authorization, diagnosis, document, medical_record).
+
+`diagnoses` permanece para **conclusão**; trilhas cobrem o que ainda não é diagnóstico formal.
+
+#### Investigação / tarefa como workflow (Eixo 3.2)
+
+**Investigação** e **tarefa** são contêineres de workflow; **hipótese** e **episódio** mantêm entrada rápida (1 linha).
+
+| Abertura | UX | Depois |
+|----------|-----|--------|
+| Investigação | Modal wizard + micro-questionário (motivo, sintomas, hipótese de trabalho, próximos passos) | Drawer da trilha: iterar com notas + artefatos |
+| Tarefa | Wizard curto (o quê, com quem, data objetivo) | Idem |
+| Hipótese / episódio | Input 1 linha (como hoje) | Drawer com log de sintomas (episódio) |
+
+**Princípio arquitetural:** atalhos na trilha **não duplicam dados**. Cada ação chama o use case existente (`ExamService`, `MedicalRecordService`, …) e cria um `health_thread_link` (+ opcional `entry` narrativa).
+
+```text
+UI (wizard / drawer)  →  HealthThreadWorkflowService  →  ExamService.create(...)
+                              ↓                              ↓
+                         health_thread_links          exams (aba Exames)
+                         health_thread_entries      timeline clínica global
 ```
+
+Roles de link (`health_thread_links.role`): `ordered` | `scheduled` | `result` | `related` | `blocked_by` | `note_only`.
+
+Agendamento futuro: mesma mecanismo (`entity_type: appointment` quando existir módulo).
+
+- [x] Aba **Linha do tempo** com filtros por tipo e período (`GET /patients/:id/timeline`)
+- [ ] Worker: sync/import → nós/arestas Neo4j (`import_lineage`, Authorization, Doctor, Procedure)
+- [x] Estender grafo: `Hypothesis`, `HealthThread`, `RULED_OUT`, `SUPPORTS` (após 3.4)
+- [ ] Queries de caminho: medicação → consulta → exame → resultado
+
+Schema base: `database/graph/001_initial_model.cypher`.
+
+### Eixo 5 — Agentes médico de apoio
+
+- [ ] Runtime com contexto = `PatientContext` + trilhas abertas + trechos citados (RAG sobre PG)
+- [ ] Disclaimer fixo; nunca substituir médico
+- [ ] LLM opcional para narrativa e correlação em documentos/OCR
+- [ ] Esqueleto `packages/agents` (pediatria, farmacêutico)
+
+### Como os eixos se alimentam (exemplos da família)
+
+| Situação | Camada que resolve primeiro | Depois |
+|----------|----------------------------|--------|
+| Rafael — checkup pendente | Trilha `task` | Link consulta do extrato Unimed |
+| Luís — exames adenoides | Trilha `investigation` + links exame/autorização | Grafo: exame `SUPPORTS` hipótese |
+| Bruno — suspeita alergia | Trilha `hypothesis` | Confirmar → `allergy`; descartar → `ruled_out` |
+| Menino com febre | Trilha `episode` + log de sintomas | Timeline + eventual `diagnosis` |
 
 ---
 
 ## Próximos Passos Imediatos
 
+### Amil — estabilizar auth e enriquecer dados
+- [x] Auth silenciosa (token + CDP); Playwright opt-in (`AMIL_ALLOW_BROWSER`)
+- [x] Sync end-to-end validado (carteirinha, plano, carências, guias/tokens)
+- [ ] Utilização Amil → consultas/exames
+- [ ] Sessão: estender validade ou refresh automático via CDP em background
+
+### Unimed — validar UI e plano
+- [x] Expandir authorizations + authorization_items
+- [x] Extrato + vínculo consulta
+- [ ] Conferir Carteira (card_number populado após sync)
+- [ ] Carências Unimed (PDF)
+
 ### Atual — Validar sync rico Unimed BH
-- [x] Expandir authorizations + tabela authorization_items (migration 005)
-- [x] Scraper via APIs OutSystems (DataActionListarSolicCliente + detalhe)
-- [x] Extrato via API (`DataActionListarExtratoUtilizacao`) → consultas com valor/copart
-- [x] Vincular Authorization → MedicalRecord (consulta origem, por PrestadorId + data)
 - [ ] Conferir UI (Consultas + Autorizações expansível com vínculo)
 
 ### Roadmap (não bloquear sync)
-- [ ] Extrair nós Neo4J a partir de Authorization / AuthorizationItem / Doctor (cruzamento para agentes)
+- [ ] **Trilhas de saúde (Eixo 3)** — ver seção *Roadmap — Contexto, trilhas e inteligência clínica*
+- [ ] Extrair nós Neo4J a partir de Authorization / AuthorizationItem / Doctor (Eixo 4)
 - [ ] Organizar monólito hexagonal em multi-microserviços (API gateway + bounded contexts: patients, integrations, files, agents)
 - [ ] Persistir foto do médico em GCS (hoje ignoramos base64 da API)
 - [ ] Baixar PDF da guia ("Baixar guia") como Arquivo
@@ -592,13 +885,16 @@ Para aplicar migrations manualmente:
 - [x] Renomear nomenclatura UI "Documentos" → "Arquivos" (evitar confusão com documentos pessoais)
 - [x] Renomear aba "Crescimento" → "Medidas" (peso, altura, perímetro cefálico e futuras medições no mesmo lugar)
 - [ ] Evoluir entidade/tabela de Medidas para aceitar novos tipos de medição além de antropometria clássica
-- [ ] **Export do prontuário em dois níveis** (objetivo: apresentar ao médico)
+- [ ] **Export do prontuário em dois níveis** (objetivo: apresentar ao médico) — alimentar resumido com `PatientContext` + trilhas abertas
   - [ ] **Completo** — histórico integral (consultas, autorizações, exames, vacinas, alergias, medicamentos, medidas, arquivos/OCR relevante)
   - [ ] **Resumido médico** — só o essencial para a consulta: identificação, alergias/medicações ativas, diagnósticos, últimas consultas, exames recentes/pendentes, vacinas em atraso, autorizações vigentes; formato apresentável (PDF/impressão)
+- [ ] **Rede credenciada agregada (“Decolar” da saúde)** — módulo de busca unificada via adapters por provedor (SUS + planos do paciente: Unimed, Amil, Bradesco…); composição/ranking do resultado evolutivo; não é sync clínico, é descoberta de rede
+- [x] **Área do plano (InsurancePlan + PlanMembership)** — domínio compartilhado Unimed/Amil; UI Meu plano na Carteira; upsert via sync Unimed (Cartão Virtual) e sync Amil (Plano + Carência); guias/tokens Amil → Authorization
+- [ ] **Utilização Amil / carências Unimed (PDF)** — extrato/exames Amil; DeclaracaoCarencia Unimed ainda é Jasper
 
 ### Em espera
 - [ ] Gráficos de crescimento (Recharts) no perfil do paciente
 - [ ] Página de configurações (tema, idioma, backup)
 - [ ] App mobile (React Native + Expo)
-- [ ] Agentes IA (pediatria, farmacêutico)
+- [ ] Agentes IA (Eixo 5 — após context + trilhas)
 - [ ] Compartilhamento de relatórios com médicos (complementa o export resumido)

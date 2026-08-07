@@ -4,6 +4,8 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 import { randomUUID } from 'crypto'
 import type { OcrProvider, OcrResult } from '../../domain/document/ocr-provider.js'
+import { normalizeOcrText } from '../../domain/document/text-encoding.js'
+import { decodePythonStdout } from './python-exec.js'
 
 const scriptPath = join(process.cwd(), 'src', 'infrastructure', 'ocr', 'trocr-ocr.py')
 
@@ -43,15 +45,15 @@ export class TrocrOcrAdapter implements OcrProvider {
           {
             timeout: Number(process.env.TROCR_TIMEOUT_MS) || 180_000,
             maxBuffer: 10 * 1024 * 1024,
-            env: { ...process.env },
+            env: { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8' },
           },
           (err, stdout, stderr) => {
-            const out = (stdout || '').trim()
+            const out = normalizeOcrText(decodePythonStdout(stdout).trim())
             if (err) {
-              const detail = out || stderr?.trim() || err.message
+              const detail = out || decodePythonStdout(stderr).trim() || err.message
               return reject(new Error(detail))
             }
-            if (!out) return reject(new Error(stderr?.trim() || 'TrOCR retornou vazio'))
+            if (!out) return reject(new Error(decodePythonStdout(stderr).trim() || 'TrOCR retornou vazio'))
             resolve(out)
           },
         )

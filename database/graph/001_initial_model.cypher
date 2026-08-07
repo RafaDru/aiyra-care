@@ -2,19 +2,29 @@
 
 CREATE CONSTRAINT patient_id IF NOT EXISTS FOR (p:Patient) REQUIRE p.id IS UNIQUE;
 CREATE CONSTRAINT doctor_crm IF NOT EXISTS FOR (d:Doctor) REQUIRE d.crm IS UNIQUE;
+CREATE CONSTRAINT health_thread_id IF NOT EXISTS FOR (t:HealthThread) REQUIRE t.id IS UNIQUE;
+CREATE CONSTRAINT hypothesis_id IF NOT EXISTS FOR (h:Hypothesis) REQUIRE h.id IS UNIQUE;
 CREATE INDEX condition_name IF NOT EXISTS FOR (c:Condition) ON (c.name);
 CREATE INDEX medication_name IF NOT EXISTS FOR (m:Medication) ON (m.generic_name);
+CREATE INDEX health_thread_kind IF NOT EXISTS FOR (t:HealthThread) ON (t.kind);
 
 // === NODE LABELS ===
 // Patient, Doctor, Condition, Medication, Allergen, Symptom,
 // Diagnosis, Treatment, Appointment, Document, ExamType, Vaccine,
-// Clinic, Specialty
+// Clinic, Specialty, HealthThread, Hypothesis, Exam, MedicalRecord,
+// Authorization, LinkedEntity
 
 // === RELATIONSHIP PATTERNS ===
 // (:Patient)-[:HAS_CONDITION {diagnosed_date, status}]->(:Condition)
 // (:Patient)-[:ALLERGIC_TO {severity, reaction}]->(:Allergen)
 // (:Patient)-[:TOOK_VACCINE {date, dose}]->(:Vaccine)
 // (:Patient)-[:HAS_GROWTH {date, weight, height}]->(:GrowthRecord)
+// (:Patient)-[:HAS_THREAD]->(:HealthThread)
+// (:HealthThread)-[:HAS_HYPOTHESIS]->(:Hypothesis)
+// (:HealthThread)-[:SUPPORTS]->(:Exam|:MedicalRecord)
+// (:HealthThread)-[:RULED_OUT]->(:Hypothesis)
+// (:Hypothesis)-[:CONFIRMED_AS]->(:Diagnosis|:Allergen)
+// (:HealthThread)-[:LINKS {role, label}]->(:Exam|:Diagnosis|...)
 // (:Doctor)-[:SPECIALIZES_IN]->(:Specialty)
 // (:Doctor)-[:ATTENDED]->(:Appointment {date, reason, notes})
 // (:Appointment)-[:FOR]->(:Patient)

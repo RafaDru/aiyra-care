@@ -3,8 +3,8 @@ import { Card, Row, Col, Typography, Tag, Select, Alert, Button } from 'antd'
 import { CloudDownloadOutlined, MedicineBoxOutlined, SafetyCertificateOutlined, GlobalOutlined, UserOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/ui/PageHeader.js'
-import { ImportConecteSUSModal } from '../components/scraper/ImportConecteSUSModal.js'
 import { ImportInsuranceModal } from '../components/scraper/ImportInsuranceModal.js'
+import { PublicHealthIntegrationModal } from '../components/integrations/PublicHealthIntegrationModal.js'
 import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 
@@ -52,7 +52,7 @@ export function IntegrationsPage() {
   const navigate = useNavigate()
   const [patients, setPatients] = useState<Patient[]>([])
   const [patientId, setPatientId] = useState<string>()
-  const [conectesusOpen, setConectesusOpen] = useState(false)
+  const [publicHealthPortal, setPublicHealthPortal] = useState<'conectesus' | null>(null)
   const [insuranceOpen, setInsuranceOpen] = useState<{ portal: 'unimed' | 'amil' | 'bradesco_saude'; label: string } | null>(null)
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export function IntegrationsPage() {
   const handleCardClick = (int: typeof integrations[number]) => {
     if (!int.available) return
     if (!patientId) return
-    if (int.modalType === 'conectesus') setConectesusOpen(true)
+    if (int.modalType === 'conectesus') setPublicHealthPortal('conectesus')
     else if (int.modalType === 'insurance') {
       setInsuranceOpen({ portal: int.portalName, label: int.name })
     }
@@ -129,10 +129,11 @@ export function IntegrationsPage() {
       </Row>
 
       {patientId && (
-        <ImportConecteSUSModal
-          open={conectesusOpen}
-          onClose={() => setConectesusOpen(false)}
+        <PublicHealthIntegrationModal
+          open={publicHealthPortal != null}
+          portal={publicHealthPortal}
           patientId={patientId}
+          onClose={() => setPublicHealthPortal(null)}
         />
       )}
       {patientId && insuranceOpen && (

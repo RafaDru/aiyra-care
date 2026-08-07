@@ -1,31 +1,57 @@
-# Open Health
+# AiyraCare
 
-Sistema centralizado de hist\u00F3rico m\u00E9dico infantil.
+Plataforma de cuidado infantil com histórico médico centralizado (prontuário familiar).
+
+## Repositório
+
+https://github.com/RafaDru/open-health
 
 ## Estrutura
 
 ```
 packages/
-  web/          - React + Vite (frontend web)
-  mobile/       - React Native + Expo (app mobile)
-  api/          - Node.js + TypeScript + Fastify (API principal)
-  agents/       - Agentes de IA em Python
-    pediatria/   - Assistente pedi\u00E1trico contextual
-    integracao/  - Processamento PDF/OCR
-    farmaceutico/- Base de medica\u00E7\u00F5es e intera\u00E7\u00F5es
+  web/          React 19 + Vite + Ant Design (frontend)
+  mobile/       React Native + Expo (esqueleto)
+  api/          Node 22 + Fastify 5 + TypeScript (hexagonal)
+  agents/       Python FastAPI (esqueleto)
 database/
-  relational/   - Schemas PostgreSQL
-  graph/        - Modelo Neo4J
+  relational/   Migrations PostgreSQL
+  graph/        Modelo Neo4J (roadmap)
+docs/
+  PROJETO.md    Documento vivo — arquitetura e operação atual
+  HISTORICO.md  Decisões e sessões de desenvolvimento
+scripts/
+  up.ps1        Sobe API (:3000) + Web (:5173)
+  setup-env.ps1 Gera .env local ou cloud
 ```
 
-## Setup
+## Quick start (local)
 
-```bash
+```powershell
 npm install
-npx lerna bootstrap  # ou workspaces nativos
+.\scripts\setup-env.ps1
+.\scripts\up.ps1
 ```
 
-## Documenta\u00E7\u00E3o
+- Web: http://localhost:5173  
+- API: http://localhost:3000/health  
 
-- `docs/PROJETO.md` - Documento vivo com estado atual
-- `docs/HISTORICO.md` - Registro incremental de decis\u00F5es
+Requer PostgreSQL local (`openhealth`) e variáveis em `.env` (ver `.env.example`).
+
+## Documentação para continuidade (IA / dev)
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| [docs/PROJETO.md](docs/PROJETO.md) | Stack, entidades, endpoints, fluxos de sync, UI, roadmap |
+| [docs/HISTORICO.md](docs/HISTORICO.md) | Histórico cronológico de sessões e decisões |
+| [docs/project-context.json](docs/project-context.json) | Foto estruturada da app (curada) para LLM/agentes |
+| `GET /project/context` | API: JSON + HISTORICO parseado + migrations |
+| [AGENTS.md](AGENTS.md) | Instruções operacionais (subir serviços, Amil CDP, arquivos-chave) |
+
+## Funcionalidades principais hoje
+
+- CRUD completo de pacientes e registros clínicos (vacinas, exames, consultas, medidas, alergias, medicações, arquivos/OCR)
+- Import ConecteSUS (gov.br + FHIR)
+- **Vínculo e sync Unimed BH** — extrato, autorizações ricas, carteirinha digital (QR/token), plano e carências (parcial)
+- **Vínculo e sync Amil** ✅ — plano, carências, guias/tokens; auth silenciosa via sessão salva ou Chrome CDP (validado 2026-07-28)
+- **Carteira (WalletTab)** — planos vinculados, sync, QR Unimed, seção Meu plano com carências

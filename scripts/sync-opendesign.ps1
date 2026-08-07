@@ -29,6 +29,7 @@ function Sync-Tokens {
   # Update colors.ts timestamp
   $now = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
   Write-Host "  Last synced: $now" -ForegroundColor Gray
+  node (Join-Path $root "packages\web\scripts\sync-brand-to-opendesign.mjs")
 }
 
 function Watch-Loop {

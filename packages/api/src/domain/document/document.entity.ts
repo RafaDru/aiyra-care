@@ -1,3 +1,5 @@
+import type { OcrLayout } from './ocr-provider.js'
+
 export type DocumentType =
   | 'prescription'
   | 'exam'
@@ -24,6 +26,7 @@ export interface DocumentProps {
   ocrParseOk?: boolean | null
   ocrFieldsFound?: number | null
   ocrFieldsExpected?: number | null
+  ocrLayout?: OcrLayout | null
 }
 
 export interface DocumentData {
@@ -42,6 +45,7 @@ export interface DocumentData {
   ocrParseOk: boolean | null
   ocrFieldsFound: number | null
   ocrFieldsExpected: number | null
+  ocrLayout: OcrLayout | null
   uploadedAt: Date
 }
 
@@ -65,6 +69,7 @@ export class Document {
       ocrParseOk: props.ocrParseOk ?? null,
       ocrFieldsFound: props.ocrFieldsFound ?? null,
       ocrFieldsExpected: props.ocrFieldsExpected ?? null,
+      ocrLayout: props.ocrLayout ?? null,
       uploadedAt: new Date(),
     })
   }
@@ -86,6 +91,7 @@ export class Document {
   get ocrParseOk(): boolean | null { return this.data.ocrParseOk }
   get ocrFieldsFound(): number | null { return this.data.ocrFieldsFound }
   get ocrFieldsExpected(): number | null { return this.data.ocrFieldsExpected }
+  get ocrLayout(): OcrLayout | null { return this.data.ocrLayout }
   get uploadedAt(): Date { return this.data.uploadedAt }
 
   toJSON(): DocumentData { return { ...this.data } }

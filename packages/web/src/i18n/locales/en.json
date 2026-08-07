@@ -1,13 +1,67 @@
 {
   "app": {
-    "title": "Open Health",
-    "subtitle": "Children's Medical History"
+    "title": "AiyraCare",
+    "subtitle": "Pediatric care with intelligence"
   },
   "nav": {
     "dashboard": "Dashboard",
     "integrations": "Integrations",
     "session": "Sessions",
     "settings": "Settings"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Use Google, Microsoft or email and password",
+    "google": "Continue with Google",
+    "microsoft": "Continue with Microsoft",
+    "emailDivider": "or email",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "signOut": "Sign out",
+    "account": "My account",
+    "rememberMe": "Keep me signed in",
+    "rememberMeHint": "Unchecked: session ends when you close the browser",
+    "switchToSignUp": "Create an account",
+    "switchToSignIn": "I already have an account",
+    "notConfigured": "Login not configured",
+    "notConfiguredHint": "Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (scripts/setup-env.ps1 -Cloud)."
+  },
+  "onboarding": {
+    "title": "Complete your profile",
+    "subtitle": "We need a few details to create your profile. Registration is only available for adults 18 or older.",
+    "name": "Full name",
+    "nameRequired": "Enter your name",
+    "birthDate": "Date of birth",
+    "birthDateRequired": "Enter your date of birth",
+    "adultOnly": "Registration is only available for adults 18 or older.",
+    "gender": "Sex",
+    "genderRequired": "Select sex",
+    "cpfRequired": "Enter your CPF",
+    "cpfInvalid": "CPF must have 11 digits",
+    "cnsPlaceholder": "SUS card number",
+    "weight": "Weight",
+    "height": "Height",
+    "submit": "Complete registration",
+    "error": "Could not complete registration"
+  },
+  "settings": {
+    "subtitle": "Application preferences",
+    "appearance": "Appearance",
+    "darkMode": "Dark mode",
+    "brandColors": "AiyraCare identity",
+    "language": "Language",
+    "languageLabel": "Interface language",
+    "palette": {
+      "indigo": "Indigo",
+      "teal": "Teal",
+      "rose": "Rose"
+    },
+    "lang": {
+      "pt": "Portuguese (BR)",
+      "en": "English"
+    }
   },
   "session": {
     "title": "Session History",
@@ -37,7 +91,10 @@
     "exams": "Exams",
     "records": "Appointments",
     "diagnoses": "Diagnoses",
-    "documents": "Files"
+    "documents": "Clinical files",
+    "personalDocuments": "Personal documents",
+    "wallet": "Coverage",
+    "timeline": "Timeline"
   },
   "growth": {
     "new": "New measurement",
@@ -53,29 +110,47 @@
   },
   "vaccine": {
     "new": "Register Vaccine",
+    "edit": "Edit vaccine",
     "success": "Vaccine registered",
+    "updated": "Vaccine updated",
     "name": "Vaccine Name",
     "dose": "Dose",
     "applicationDate": "Application Date",
     "nextDose": "Next Dose",
     "batch": "Batch",
     "appliedBy": "Applied by",
-    "clinic": "Clinic"
+    "clinic": "Clinic",
+    "notes": "Notes",
+    "uploadCard": "Import vaccine card"
   },
   "medication": {
     "new": "New Medication",
+    "edit": "Edit",
     "success": "Medication registered",
+    "updated": "Medication updated",
     "genericName": "Generic Name",
     "brandName": "Brand Name",
-    "dosage": "Dosage",
+    "dosage": "Dosage / amount",
     "frequency": "Frequency",
     "route": "Route",
-    "startDate": "Start Date",
-    "endDate": "End Date",
+    "duration": "Duration",
+    "startDate": "Start",
+    "prescribedDate": "Prescription date",
+    "endDate": "End",
+    "projectedDate": "Projected date based on duration",
+    "projectedEndHint": "Projected end: {{date}} (projected)",
+    "prescribedOnly": "prescribed — not started yet",
+    "started": "treatment started",
+    "startTreatment": "Start medication",
+    "confirmStart": "Confirm start",
+    "startAt": "Treatment start",
+    "startReminderHint": "This time will be used for future push reminders.",
+    "notes": "Notes",
     "doctor": "Doctor",
     "active": "Active",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "uploadPrescription": "Import prescription"
   },
   "allergy": {
     "new": "New Allergy",
@@ -94,7 +169,27 @@
     "type": "Exam Type",
     "date": "Exam Date",
     "laboratory": "Laboratory",
-    "result": "Result Summary"
+    "result": "Result Summary",
+    "file": "File",
+    "viewFile": "View report",
+    "fileStored": "File saved",
+    "slices": "images",
+    "viewSeries": "View series",
+    "upload": "Import exam"
+  },
+  "examSliceViewer": {
+    "phaseDownload": "Downloading slices…",
+    "phaseDecode": "Preparing images…",
+    "phaseReady": "Opening viewer…",
+    "close": "Close",
+    "prev": "Previous slice",
+    "next": "Next slice",
+    "play": "Auto-play",
+    "pause": "Pause",
+    "speedSlow": "Slow",
+    "speedNormal": "Normal",
+    "speedFast": "Fast",
+    "speedFaster": "Very fast"
   },
   "medicalRecord": {
     "new": "New Appointment",
@@ -130,7 +225,41 @@
     "processed": "Processed",
     "pending": "Pending",
     "upload": "Upload",
-    "dropHint": "Click or drag a file to this area"
+    "dropHint": "Click or drag a file to this area",
+    "origin": "Origin",
+    "originAll": "All origins",
+    "originManual": "Uploaded by you",
+    "originPortal": "Imported from portal",
+    "showSlices": "Show CT/MR slice series",
+    "portalImportsHint": "Imported PDF reports may appear here; image slices (CT, MR) live under Exams — use the series viewer.",
+    "portalGroupLaudo": "PDF report",
+    "portalGroupSlices": "{{count}} image slices",
+    "linkedExam": "Linked exam",
+    "sliceRow": "Slice {{index}}/{{total}}"
+  },
+  "personalDocument": {
+    "introTitle": "Documents to show at hospitals and clinics",
+    "introDescription": "Attach birth certificate, ID, CPF and other identity documents. Use \"Present all\" to open attached files in separate tabs during an appointment.",
+    "attached": "Attached",
+    "missing": "Missing",
+    "attach": "Attach",
+    "replace": "Replace",
+    "view": "View",
+    "attachedCount": "{{count}} document(s) attached",
+    "noneAttached": "No personal documents attached",
+    "presentAll": "Present all",
+    "noneToPresent": "Attach at least one document before presenting.",
+    "notYetAttached": "No file attached yet.",
+    "olderVersions": "older version(s)",
+    "allFiles": "All personal documents",
+    "deleteConfirm": "Delete this document?",
+    "uploadSuccess": "Document attached successfully",
+    "deleteSuccess": "Document deleted",
+    "uploadHint": "Clear photo or PDF (JPEG, PNG or PDF, up to 20 MB)",
+    "identityReviewTitle": "Data detected on document",
+    "identityReviewHint": "Check the fields you want to apply to the patient record.",
+    "applyToPatient": "Apply to patient",
+    "identityApplied": "Data applied to patient record"
   },
   "documentType": {
     "prescription": "Prescription",
@@ -148,6 +277,7 @@
     "empty": "No records found",
     "save": "Save",
     "cancel": "Cancel",
+    "delete": "Delete",
     "back": "Back",
     "confirm": "Confirm",
     "theme": "Theme",

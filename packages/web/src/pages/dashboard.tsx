@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, DatePicker, Select, App } from 'antd'
+import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, Select, App, Alert } from 'antd'
+import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { PlusOutlined, ManOutlined, WomanOutlined, UserSwitchOutlined, FireOutlined, SmileOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -20,11 +21,20 @@ export function Dashboard() {
   const { message } = App.useApp()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [form] = Form.useForm()
   const navigate = useNavigate()
 
-  const load = () => api.patients.list().then(setPatients)
+  const load = () => {
+    setLoadError(null)
+    return api.patients.list()
+      .then(setPatients)
+      .catch((err) => {
+        setPatients([])
+        setLoadError(err instanceof Error ? err.message : 'Falha ao carregar pacientes')
+      })
+  }
   useEffect(() => { load().finally(() => setLoading(false)) }, [])
 
   const handleCreate = async () => {
@@ -64,7 +74,18 @@ export function Dashboard() {
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
 
-      {patients.length === 0 ? (
+      {loadError && (
+        <Alert
+          type="error"
+          showIcon
+          message="Não foi possível carregar os pacientes"
+          description={loadError}
+          action={<Button size="small" onClick={() => { setLoading(true); load().finally(() => setLoading(false)) }}>Tentar novamente</Button>}
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
+      {patients.length === 0 && !loadError ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={
@@ -103,7 +124,7 @@ export function Dashboard() {
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="name" label="Nome" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="birthDate" label="Data de Nascimento" rules={[{ required: true }]}>
-            <DatePicker style={{ width: '100%' }} />
+            <MaskedDatePicker style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="gender" label="Sexo">
             <Select options={[{ value: 'male', label: t('patient.male') }, { value: 'female', label: t('patient.female') }]} allowClear />

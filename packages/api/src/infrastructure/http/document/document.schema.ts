@@ -12,6 +12,23 @@ export const documentTypeEnum = z.enum([
   'cnh',
 ])
 
+export const ocrRegionSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  left: z.number(),
+  top: z.number(),
+  width: z.number(),
+  height: z.number(),
+  confidence: z.number().optional(),
+  lineIndex: z.number().optional(),
+})
+
+export const ocrLayoutSchema = z.object({
+  imageWidth: z.number().positive(),
+  imageHeight: z.number().positive(),
+  regions: z.array(ocrRegionSchema),
+})
+
 export const createDocumentSchema = z.object({
   patientId: z.string().uuid(),
   documentType: documentTypeEnum,
@@ -21,6 +38,7 @@ export const createDocumentSchema = z.object({
   mimeType: z.string().max(100).optional(),
   extractedText: z.string().optional(),
   ocrProcessed: z.boolean().optional(),
+  ocrLayout: ocrLayoutSchema.optional().nullable(),
 })
 
 export const updateDocumentSchema = createDocumentSchema.partial().omit({ patientId: true })

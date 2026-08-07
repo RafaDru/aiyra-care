@@ -1,5 +1,23 @@
+export interface OcrRegion {
+  id: string
+  text: string
+  left: number
+  top: number
+  width: number
+  height: number
+  confidence?: number
+  lineIndex?: number
+}
+
+export interface OcrLayout {
+  imageWidth: number
+  imageHeight: number
+  regions: OcrRegion[]
+}
+
 export interface OcrResult {
   text: string
+  layout?: OcrLayout
 }
 
 export type OcrAttempt = {
@@ -9,7 +27,7 @@ export type OcrAttempt = {
   error?: string
 }
 
-/** Result of cascade OCR (local first, paid fallback). */
+/** CascadeOcrResult extends OcrResult */
 export interface CascadeOcrResult extends OcrResult {
   provider: string
   qualityScore: number

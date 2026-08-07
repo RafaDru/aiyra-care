@@ -7,8 +7,13 @@ gcp-key.json
 *.log
 .DS_Store
 coverage/
+packages/web/src/**/*.js
 .turbo/
 .next/
 expo-env.d.ts
 *.tsbuildinfo
 packages/api/tmp_screenshots/
+.cache/
+tmp-*.js
+tmp-chunk-*.js
+packages/api/tmp-*

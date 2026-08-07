@@ -1,4 +1,6 @@
 import { Document, type DocumentProps, type DocumentType } from '../../domain/document/document.entity.js'
+import type { OcrLayout } from '../../domain/document/ocr-provider.js'
+import { normalizeOcrText, textFromOcrRegions, normalizeOcrLayout } from '../../domain/document/text-encoding.js'
 import type { DocumentRepository, DocumentFilter } from '../../domain/document/document.repository.js'
 import type { FileStorage } from '../../domain/document/file-storage.js'
 import type { DocumentOcrRunner } from '../../domain/document/ocr-provider.js'
@@ -59,18 +61,30 @@ export class DocumentService {
     let ocrParseOk: boolean | null = null
     let ocrFieldsFound: number | null = null
     let ocrFieldsExpected: number | null = null
+    let ocrLayout: OcrLayout | null = null
     let suggestedPatient: SuggestedPatientFields | undefined
 
     try {
       const ocr = this.ocrFactory(documentType)
       const result = await ocr.extractText(buffer, mimeType)
-      extractedText = result.text
+      extractedText = normalizeOcrText(result.text)
+      if (result.layout?.regions?.length) {
+        const regions = normalizeOcrLayout(result.layout.regions)
+        ocrLayout = {
+          imageWidth: result.layout.imageWidth,
+          imageHeight: result.layout.imageHeight,
+          regions,
+        }
+        extractedText = textFromOcrRegions(regions) || extractedText
+      } else {
+        ocrLayout = result.layout ?? null
+      }
       ocrProcessed = true
       ocrProvider = result.provider
       ocrQualityScore = result.qualityScore
       ocrUsedPaid = result.usedPaid
 
-      const evaluated = evaluateIdentityParse(documentType, result.text)
+      const evaluated = evaluateIdentityParse(documentType, extractedText ?? result.text)
       ocrParseOk = evaluated.metrics.parseOk
       ocrFieldsFound = evaluated.metrics.fieldsFound
       ocrFieldsExpected = evaluated.metrics.fieldsExpected
@@ -110,6 +124,7 @@ export class DocumentService {
       ocrParseOk,
       ocrFieldsFound,
       ocrFieldsExpected,
+      ocrLayout,
     })
     const saved = await this.repo.save(document)
 
@@ -136,8 +151,22 @@ export class DocumentService {
   }
 
   async delete(id: string) {
-    await this.findById(id)
+    const existing = await this.findById(id)
+    if (this.storage) {
+      await this.storage.delete(existing.storagePath).catch(() => {})
+    }
     await this.repo.delete(id)
+  }
+
+  async readFile(id: string) {
+    if (!this.storage) throw new Error('FileStorage não configurado')
+    const doc = await this.findById(id)
+    const stored = await this.storage.read(doc.storagePath)
+    return {
+      buffer: stored.buffer,
+      contentType: stored.contentType ?? doc.mimeType ?? 'application/octet-stream',
+      filename: doc.originalFilename,
+    }
   }
 
   suggestFromText(documentType: string, text: string): SuggestedPatientFields {

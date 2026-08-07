@@ -1,5 +1,11 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-06] - Linha do tempo + projeção Neo4j (Eixos 3.4 e 4)
+
+- `GET /patients/:id/timeline` com filtros (`kinds`, `sources`, `from`/`to`, `timelineMonths`, `limit`/`offset`); `PatientContextService.buildTimeline` sem quebrar `/context`.
+- Aba **Linha do tempo** no perfil (`TimelineTab`): filtros por tipo/período, toggle linha horizontal vs lista.
+- `HealthThreadGraphProjector` + `NEO4J_SYNC_ENABLED` (default off): upsert `Patient`/`HealthThread`/`Hypothesis`, `SUPPORTS`, `RULED_OUT`, `CONFIRMED_AS` após persist de trilhas.
+
 ## [2026-07-22] - Terceira Sessão: CRUDs Completos + Setup Frontend
 
 ### Contexto
@@ -597,5 +603,230 @@ Precisamos levar o histórico ao consultório de forma útil — não só dump c
 ### Roadmap
 - [ ] **Export completo** — prontuário integral do paciente
 - [ ] **Export resumido** — informações relevantes para apresentar ao médico (alergias, medicações, diagnósticos, últimas consultas/exames, vacinas em atraso, autorizações vigentes), em formato apresentável (PDF/impressão)
+
+---
+
+## [2026-07-28] - Backlog: Rede credenciada agregada (“Decolar” da saúde)
+
+### Contexto
+Hoje cada operadora/SUS tem sua própria busca de rede. A ideia é um módulo de descoberta unificada no Open Health: o usuário/paciente busca uma vez e o sistema compõe resultados de vários provedores vinculados (e do SUS), melhorando o ranking com o tempo — análogo à Decolar para voos/hotéis, mas para rede credenciada.
+
+### Backlog (não implementar agora)
+- [ ] **Módulo Rede Credenciada** — busca (especialidade, local, nome, urgência etc.)
+- [ ] **Arquitetura por adapters** — um adapter por fonte (SUS/ConecteSUS, Unimed BH, Amil, Bradesco Saúde, …), plugável conforme vínculos do paciente
+- [ ] **Composição / ranking** — unificar resultados, deduplicar, ranquear e evoluir qualidade ao longo do tempo
+- [ ] **UI de descoberta** — experiência tipo agregador (filtros, mapa/lista, origem do resultado por provedor)
+
+### Fora de escopo imediato
+- Não confundir com sync clínico (autorizações/extrato/carteira); este módulo é **descoberta de rede**, não importação de prontuário.
+
+---
+
+## [2026-07-28] - Discovery: Portal Beneficiário Amil (área logada)
+
+### Contexto
+Mapeamento inicial da Amil no browser do Cursor (SPA React em `https://www.amil.com.br/beneficiario/#/`) para futuro adapter de sync, no mesmo espírito do Unimed BH.
+
+### Achados técnicos
+- Auth: cookie `userToken` (JWT Bearer) + login por CPF/carteirinha
+- APIs REST sob `/beneficiario/api/Beneficiario/...` (ex.: `ListaBeneficiarios`, `Plano`, `GuiasTokens/.../PostTokens`, `ListaBeneficiariosCarteirinha`)
+- Home mostra carteirinha digital; rota `#/carteirinha` pode retornar “serviço não disponível” conforme perfil
+- **Guias e tokens** (`#/guias-tokens`): lista pedidos com data, senha, token, situação, tipo, executante — filtrável por beneficiário (titular + dependentes)
+- Menus relevantes: Rede credenciada, Meu plano, Minha saúde, Minha utilização, Reembolso, Telemedicina
+
+### Backlog Amil (próximo)
+- [x] Scraper/sync Amil via Playwright + APIs REST (Bearer): plano/carências + guias/tokens → autorizações
+- [ ] Utilização Amil → consultas/exames; dependentes → pacientes adicionais
+- [ ] Carteira digital Amil (QR/token se disponível no perfil)
+- [ ] Adapter de rede credenciada Amil (quando o módulo agregado sair do backlog)
+- [x] Domínio compartilhado `InsurancePlan` + `PlanMembership` (base multi-operadora)
+
+---
+
+## [2026-07-28] - Área do plano (Unimed ∩ Amil) + discovery Unimed Meu Plano
+
+### Contexto
+Amil e Unimed expõem o mesmo núcleo de “produto + vínculo do beneficiário”. Na Unimed isso já vem no Cartão Virtual (`DadoCartaoCliente`); há páginas Meu Plano adicionais (carência, 2ª via contrato, inclusão de serviços, info ANS).
+
+### Unimed — páginas / campos em comum
+- `CartaoVirtual` / `CarteiraVirtual` — token/QR + verso com ANS, acomodação, abrangência, CNS, contratante, validade, aditivos
+- `InformacoesPlanosAns`, `DeclaracaoCarencia`, `SegundaViaContrato`, `InclusaoDeServicos` (200) — candidatos a carências/documentos do plano
+- Campos alinhados à Amil: productCode/ANS, segmentation, accommodation, coverage, contractType, contractor, CNS, inclusionDate
+
+### Realizado
+- [x] Migration `009_insurance_plans.sql` (`insurance_plans` + `plan_memberships`)
+- [x] Domínio + repos + `InsurancePlanService.upsertFromPortal`
+- [x] `GET /plan-memberships?patientId=`
+- [x] Cartão Virtual Unimed agora faz upsert de plano/membership e enriquece o payload
+- [x] UI Carteira: seção **Meu plano** (inclui carências quando houver)
+- [x] Sync clínica Unimed também atualiza plano/membership (Cartão Virtual na mesma sessão)
+- [x] Sync Amil: login AuthOGS → `ListaBeneficiarios` / `Plano` / `Carencia` → `upsertFromPortal`; `PostTokens` → `Authorization`
+- [x] UI syncável: Unimed + Amil (vincular e sincronizar / botão sync na carteira)
+
+### Pendente
+- [ ] Carências Unimed via `DeclaracaoCarencia` (PDF Jasper — sem lista estruturada ainda)
+- [ ] Utilização / exames / vacinas Amil
+
+---
+
+## [2026-07-28] - Sync Amil + plano na sync Unimed + carências
+
+### Realizado
+- `AmilSyncScraper` (Bearer após `api/AuthOGS/Login`)
+- `waiting_periods` no `PortalPlanSnapshot` / upsert
+- Unimed sync enriquece `InsurancePlan`/`PlanMembership`
+- Carteira mostra carências sincronizadas
+
+---
+
+## [2026-07-28] - Décima-primeira Sessão: Login Amil, WAF e preenchimento de formulário
+
+### Contexto
+Primeiros syncs Amil falhavam com "usuário ou senha inválidos" e depois 403. Debug colaborativo no browser confirmou: CPF estava correto; a senha não entrava no redux-form do portal. WAF da Amil bloqueia POST de login quando disparado por Playwright automatizado.
+
+### Achados
+- Login Amil: `POST /beneficiario/api/AuthOGS/Login` com `{ userData: { login, senha, idSistema: 400 } }` — CPF sem máscara no payload.
+- Cookie/sessão: `userToken` (JWT Bearer); expiração ~30 min.
+- JWT: carteirinha/marca ótica em `objeto.login` (ex.: `094995656`), não em `marcaOtica`.
+- `page.fill()` no campo senha deixa valor vazio no React — necessário native value setter + eventos `input`/`change`.
+- Playwright (mesmo headed) recebe **403 WAF** no POST de login; login manual pelo usuário no mesmo browser funciona.
+
+### Realizado
+- [x] `setReactInputValue` + validação de CPF/senha antes do submit
+- [x] Detecção de POST sem senha no body
+- [x] Mapeamento JWT `objeto.login` para marca ótica / carteirinha
+- [x] Chrome visível por padrão (`AMIL_HEADLESS=false`)
+- [x] Fluxo colaborativo: preencher + aguardar clique manual em Entrar
+- [x] `SyncProgressModal`: steps unificados Unimed/Amil, timeout cliente 5 min, mensagem única no footer
+
+### Arquivos
+- `packages/api/src/infrastructure/scraper/amil-sync.scraper.ts`
+- `packages/web/src/components/scraper/SyncProgressModal.tsx`
+
+---
+
+## [2026-07-28] - Décima-segunda Sessão: Auth Amil silenciosa (token + CDP)
+
+### Contexto
+Usuário pediu sync sem abrir browser detectável pelo WAF. Playwright continua flagado; solução: reutilizar sessão JWT e conectar ao **Chrome real** via CDP.
+
+### Decisões
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Sessão Amil | `encrypted_session_token` em `integration_links` | Sync subsequente 100% HTTP |
+| CDP | `chromium.connectOverCDP` + perfil `.cache/amil-chrome-cdp` | Chrome real não é Playwright launch |
+| Playwright Amil | Opt-in `AMIL_ALLOW_BROWSER=1` | WAF bloqueia automação |
+| Primeiro login | Auto-launch Chrome com `--remote-debugging-port=9222` | UX sem comando manual |
+
+### Realizado
+- [x] Migration `010_integration_link_session.sql`
+- [x] `IntegrationLink`: `encryptedSessionToken`, `sessionExpiresAt`, `setSessionToken`, `clearSessionToken`
+- [x] `AmilSyncScraper`: ordem token → CDP → browser; `syncWithToken` via `playwright.request` (sem browser)
+- [x] `tryReadTokenFromCdp` + `loginViaCdpChrome` + `ensureCdpChromeRunning`
+- [x] `runAmilSync` persiste token após sync; limpa sessão em 401/403
+- [x] `.gitignore`: `.cache/`
+- [x] Documentação: `PROJETO.md`, `HISTORICO.md`, `AGENTS.md`, `README.md`
+
+### Variáveis de ambiente (Amil)
+- `AMIL_CDP_URL` — default `http://127.0.0.1:9222`
+- `AMIL_ALLOW_BROWSER` — default false
+- `AMIL_CHROME_PATH` — opcional
+- `AMIL_MANUAL_LOGIN_TIMEOUT_MS` — default 300000
+
+### Fluxo operacional atual
+1. Sync tenta token salvo → APIs Amil direto.
+2. Se expirado: abre/conecta Chrome CDP, preenche CPF/senha, usuário clica Entrar.
+3. Token salvo no vínculo; próximos syncs silenciosos até expirar.
+
+### Pendente
+- [x] Validar primeiro sync CDP end-to-end em produção local ✅ **2026-07-28**
+- [ ] Renovação proativa de sessão (CDP em background antes de expirar)
+- [ ] Utilização Amil → MedicalRecord/Exam
+
+---
+
+## [2026-07-28] - Documentação para continuidade de sessões IA
+
+### Realizado
+- [x] `docs/PROJETO.md` — seção **Como a plataforma opera agora** (fluxo usuário, sync Unimed/Amil, env, arquivos-chave)
+- [x] `docs/HISTORICO.md` — sessões 11–12 Amil + este registro
+- [x] `AGENTS.md` — instruções operacionais expandidas
+- [x] `README.md` — quick start + links para docs
+
+---
+
+---
+
+## [2026-08-06] - ProjectContext para LLM e agentes
+
+### Contexto
+Necessidade de refletir decisões e foto atual da aplicação em entidade estruturada consumível por LLMs/agentes, alinhada ao catálogo de relações planejado.
+
+### Realizado
+- [x] `docs/project-context.json` — snapshot curado (camadas, domínios, decisões, roadmap, trilhas, catálogo de relações planejado)
+- [x] `GET /project/context` — agrega JSON + `HISTORICO.md` parseado + migrations
+- [x] Parser compartilhado `historico.parser.ts` (usado por `/sessions` e `/project/context`)
+- [x] `api.project.context()` no web client; `AGENTS.md` e `README.md` atualizados
+- [x] Testes `project-context.test.ts`
+
+### Decisão
+| Decisão | Motivo |
+|---------|--------|
+| JSON curado + API dinâmica | LLM lê um payload; humanos mantêm `project-context.json` ao mudar arquitetura |
+| HISTORICO parseado na API | Histórico cronológico completo sem duplicar manualmente cada sessão no JSON |
+
+---
+
+## [2026-08-06] - Roadmap: contexto determinístico + trilhas de saúde
+
+### Contexto
+Discussão sobre evolução clínica da plataforma: histórico completo, Neo4j para hipóteses, documentos/LLM, agentes de apoio, e resumo do paciente **sem LLM**. Proposta de “assuntos em andamento” (tarefas, investigações, hipóteses, episódios com sintomas).
+
+### Decisões
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Resumo base | Postgres + template (`PatientContext`) | Fatos com proveniência; sem alucinação |
+| Trilhas | `HealthThread` com kinds `task`, `investigation`, `hypothesis`, `episode` | Um conceito na UI; inputs diferentes |
+| Diagnóstico formal | Tabela `diagnoses` existente | Trilhas cobrem pré-diagnóstico e suspeitas |
+| Neo4j | Projeção após PG + trilhas | CRUD no PG; grafo para relações e agente |
+| Ordem | Context → Trilhas → Neo4j → Agentes | Agentes precisam de contexto factual |
+
+### Realizado (sessão)
+- [x] `GET /patients/:id/context` — agregação determinística
+- [x] `PatientContextPanel` + timeline horizontal no perfil
+- [x] Seção **Roadmap — Contexto, trilhas e inteligência clínica** em `docs/PROJETO.md`
+- [x] **Eixo 3.1** — `health_threads`, API CRUD, card **Em andamento** (`HealthThreadsPanel`)
+
+### Roadmap integrado (próximos)
+1. **Eixo 3.2** — entradas, sintomas, links a exame/autorização
+2. **Eixo 3.3** — conversão hipótese → diagnóstico/alergia; context enriquecido
+3. **Eixo 4** — lineage → Neo4j + aba timeline com filtros
+4. **Eixo 5** — agente com `PatientContext` + trilhas + citações
+
+### Exemplos mapeados
+- Rafael: trilha `task` (checkup médica família)
+- Luís: trilha `investigation` (adenoides / respiratório + exames)
+- Bruno: trilha `hypothesis` (suspeita alergia)
+- Episódio febre: trilha `episode` → log sintomas → timeline → diagnóstico
+
+---
+
+## [2026-07-28] - Amil: sync validado ✅
+
+### Status
+**Integração Amil operacional.** Sync completo testado com sucesso após auth via Chrome CDP (login manual em Entrar) + persistência de sessão.
+
+### O que funciona
+- Vincular paciente com CPF + senha do portal beneficiário Amil
+- Sync assíncrono na aba **Carteira** (`WalletTab`)
+- Login: token salvo → sync silencioso; ou Chrome CDP (`.cache/amil-chrome-cdp`) na primeira vez / sessão expirada
+- Importação: **plano** + **carências** → `InsurancePlan` / `PlanMembership` (Meu plano)
+- Importação: **guias/tokens** → `Authorization`
+- Carteirinha/marca ótica via JWT `objeto.login` (ex.: plano LINCX)
+
+### Ainda fora de escopo
+- Utilização Amil (consultas/exames) → `MedicalRecord` / `Exam`
+- Carteira digital Amil (QR) se disponível no perfil
+- Dependentes como pacientes separados
 
 ---

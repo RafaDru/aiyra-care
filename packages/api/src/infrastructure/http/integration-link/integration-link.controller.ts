@@ -1,30 +1,76 @@
-import type { FastifyRequest, FastifyReply } from 'fastify'
+import type { FastifyReply } from 'fastify'
 import type { Pool } from 'pg'
 import type { IntegrationLinkRepository } from '../../../domain/integration-link/integration-link.repository.js'
 import { IntegrationLink } from '../../../domain/integration-link/integration-link.entity.js'
 import { createIntegrationLinkSchema, updateIntegrationLinkSchema, integrationLinkParamsSchema, integrationLinkQuerySchema } from './integration-link.schema.js'
-import { UnimedBhSyncScraper } from '../../scraper/unimedbh-sync.scraper.js'
-import { Authorization } from '../../../domain/authorization/authorization.entity.js'
-import { AuthorizationItem } from '../../../domain/authorization/authorization-item.entity.js'
-import { AuthorizationPgRepository } from '../../persistence/authorization.pg.repository.js'
+import { UnimedBhCartaoVirtualScraper } from '../../scraper/unimedbh-cartao-virtual.scraper.js'
+import { MaterDeiSyncScraper, MATER_DEI_ORIGIN, resolveMaterDeiGatewayPatientId } from '../../scraper/materdei-sync.scraper.js'
+import { materDeiExamDedupKey } from '../../scraper/materdei-exam.mapper.js'
+import { resolveMaterDeiPatientId } from '../../scraper/materdei-patient-resolver.js'
+import {
+  buildMaterDeiExamMeta,
+  materDeiExamNotes,
+  persistMaterDeiExamFiles,
+} from '../../scraper/materdei-exam-persist.js'
+import type { MaterDeiExamItem } from '../../scraper/materdei-exam.mapper.js'
+import { request as playwrightRequest } from 'playwright'
 import { Exam } from '../../../domain/exam/exam.entity.js'
 import { MedicalRecord } from '../../../domain/medical-record/medical-record.entity.js'
 import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
 import { MedicalRecordPgRepository } from '../../persistence/medical-record.pg.repository.js'
-import { createJob, updateJob, getJob, removeJob, type SyncAuthorizationDetail } from '../../scraper/sync-progress-store.js'
+import { createJob, updateJob, getJob, removeJob, bindSyncJobPersistence } from '../../scraper/sync-progress-store.js'
+import { SyncJobPgRepository } from '../../persistence/sync-job.pg.repository.js'
+import type { SyncNoveltySummary } from '../../../domain/sync-job/sync-job.entity.js'
+import { dispatchBackgroundTask } from '../../sync/background-dispatch.js'
 import { encrypt, decrypt } from '../../crypto-helper.js'
+import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
+import { InsurancePlanService } from '../../../application/insurance-plan/insurance-plan.service.js'
+import { InsurancePlanPgRepository } from '../../persistence/insurance-plan.pg.repository.js'
+import { PlanMembershipPgRepository } from '../../persistence/plan-membership.pg.repository.js'
+import type { MatchablePatient } from '../../../application/insurance-plan/amil-beneficiary-matcher.js'
+import type { SyncablePortalType } from '../../../domain/scraper/sync-portal-profile.js'
+import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
+import { assertPatientAccess, isAuthEnforcementEnabled } from '../auth/patient-access.guard.js'
+import { guardPatientEntity } from '../auth/patient-entity.guard.js'
+import { PortalSyncOrchestrator } from '../../../application/connect/portal-sync.orchestrator.js'
+import { enrichIntegrationLinksWithSyncAuthority } from '../../../application/integration-link/integration-link-sync-authority.js'
 
 const syncLocks = new Set<string>()
 
+function syncJobToStatusPayload(job: ReturnType<SyncJobPgRepository['findById']> extends Promise<infer T> ? NonNullable<T> : never) {
+  const d = job.toJSON()
+  return {
+    id: d.id,
+    status: d.status,
+    step: d.step,
+    message: d.message,
+    stepDetails: d.stepDetails,
+    result: d.result,
+    novelty: d.novelty,
+    error: d.error,
+    startedAt: d.startedAt.toISOString(),
+    finishedAt: d.finishedAt?.toISOString() ?? null,
+    portalType: d.portalType,
+  }
+}
+
 export class IntegrationLinkController {
+  private readonly syncJobRepo: SyncJobPgRepository
+  private readonly portalSync: PortalSyncOrchestrator
+
   constructor(
     private readonly repo: IntegrationLinkRepository,
     private readonly pool: Pool,
-  ) {}
+  ) {
+    this.syncJobRepo = new SyncJobPgRepository(pool)
+    bindSyncJobPersistence(this.syncJobRepo)
+    this.portalSync = new PortalSyncOrchestrator(pool, repo)
+  }
 
-  async create(req: FastifyRequest, reply: FastifyReply) {
+  async create(req: AuthenticatedRequest, reply: FastifyReply) {
     const parsed = createIntegrationLinkSchema.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+    if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
     const { password, ...rest } = parsed.data
     const encryptedPassword = password ? encrypt(password) : undefined
     const link = IntegrationLink.create({ ...rest, encryptedPassword })
@@ -32,20 +78,27 @@ export class IntegrationLinkController {
     return reply.status(201).send({ ...saved.toJSON(), encryptedPassword: undefined })
   }
 
-  async findByPatient(req: FastifyRequest, reply: FastifyReply) {
+  async findByPatient(req: AuthenticatedRequest, reply: FastifyReply) {
     const query = integrationLinkQuerySchema.safeParse(req.query)
     if (!query.success) return reply.status(400).send({ error: query.error.flatten() })
+    if (!assertPatientAccess(req, reply, query.data.patientId)) return
     const links = await this.repo.findAllByPatient(query.data.patientId)
-    return reply.send(links.map(l => ({ ...l.toJSON(), encryptedPassword: undefined })))
+    const enriched = await enrichIntegrationLinksWithSyncAuthority(this.pool, query.data.patientId, links)
+    return reply.send(enriched.map((l) => ({ ...l, encryptedPassword: undefined })))
   }
 
-  async update(req: FastifyRequest, reply: FastifyReply) {
+  async update(req: AuthenticatedRequest, reply: FastifyReply) {
     const params = integrationLinkParamsSchema.safeParse(req.params)
     if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
     const body = updateIntegrationLinkSchema.safeParse(req.body)
     if (!body.success) return reply.status(400).send({ error: body.error.flatten() })
-    const existing = await this.repo.findById(params.data.id)
-    if (!existing) return reply.status(404).send({ message: 'Integration link not found' })
+    const existing = await guardPatientEntity(
+      req,
+      reply,
+      await this.repo.findById(params.data.id),
+      'Integration link not found',
+    )
+    if (!existing) return
     const data = existing.toJSON()
     const updated = IntegrationLink.restore({
       ...data,
@@ -59,244 +112,125 @@ export class IntegrationLinkController {
     return reply.send({ ...saved.toJSON(), encryptedPassword: undefined })
   }
 
-  async delete(req: FastifyRequest, reply: FastifyReply) {
+  async delete(req: AuthenticatedRequest, reply: FastifyReply) {
     const parsed = integrationLinkParamsSchema.safeParse(req.params)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
-    const existing = await this.repo.findById(parsed.data.id)
-    if (!existing) return reply.status(404).send({ message: 'Integration link not found' })
+    const existing = await guardPatientEntity(
+      req,
+      reply,
+      await this.repo.findById(parsed.data.id),
+      'Integration link not found',
+    )
+    if (!existing) return
     await this.repo.delete(parsed.data.id)
     return reply.status(204).send()
   }
 
-  async sync(req: FastifyRequest, reply: FastifyReply) {
+  async sync(req: AuthenticatedRequest, reply: FastifyReply) {
     const params = integrationLinkParamsSchema.safeParse(req.params)
     if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
-    const link = await this.repo.findById(params.data.id)
-    if (!link) return reply.status(404).send({ message: 'Integration link not found' })
+    const link = await guardPatientEntity(
+      req,
+      reply,
+      await this.repo.findById(params.data.id),
+      'Integration link not found',
+    )
+    if (!link) return
+    if (link.portalType !== 'unimed' && link.portalType !== 'amil' && link.portalType !== 'mater_dei') {
+      return reply.status(400).send({ message: `Sincronização automática ainda não disponível para ${link.portalType}` })
+    }
     if (!link.email || !link.encryptedPassword) return reply.status(400).send({ message: 'Credenciais incompletas' })
     const decryptedPassword = decrypt(link.encryptedPassword)
 
     const lockKey = `${link.patientId}:${link.portalType}`
+    const activeDb = await this.syncJobRepo.findActiveByLinkId(link.id)
+    if (activeDb) return reply.status(429).send({ message: 'Sincronização já em andamento' })
     if (syncLocks.has(lockKey)) return reply.status(429).send({ message: 'Sincronização já em andamento' })
     syncLocks.add(lockKey)
 
-    const jobId = createJob()
+    const jobId = createJob(link.portalType as SyncablePortalType, link.id)
     const emit = (step: string, message: string, status: 'running' | 'success' | 'failed') => {
       updateJob(jobId, { step, message, status })
     }
 
-    setImmediate(async () => {
+    dispatchBackgroundTask(async () => {
       try {
-        const scraper = new UnimedBhSyncScraper()
-        const result = await scraper.scrape(link.email!, decryptedPassword, (p) => updateJob(jobId, p))
+        const patientRepo = new PatientPgRepository(this.pool)
+        const patient = await patientRepo.findById(link.patientId)
 
-        emit('importing', 'Salvando dados...', 'running')
-
-        const examRepo = new ExamPgRepository(this.pool)
-        const recordRepo = new MedicalRecordPgRepository(this.pool)
-        const authRepo = new AuthorizationPgRepository(this.pool)
-        let importedExams = 0
-        let importedRecords = 0
-        let importedAuths = 0
-        let updatedAuths = 0
-        let importedItems = 0
-        const authorizationDetails: SyncAuthorizationDetail[] = []
-
-        const allItems = [...result.extrato.paciente]
-        for (const depItems of Object.values(result.extrato.dependentes)) {
-          allItems.push(...depItems)
-        }
-
-        const existingExams = await examRepo.findAll({ patientId: link.patientId })
-        const existingAuths = await authRepo.findAll({ patientId: link.patientId })
-        const existingRecords = await recordRepo.findAll({ patientId: link.patientId })
-
-        const examKey = (e: typeof existingExams[0]) => `${e.examType}|${e.examDate.toISOString().slice(0, 10)}`
-        const existingExamKeys = new Set(existingExams.map(examKey))
-        const recordKey = (r: typeof existingRecords[0]) => {
-          const date = r.recordDate.toISOString().slice(0, 10)
-          if (r.invoiceNumber) return `inv:${r.invoiceNumber}`
-          if (r.providerExternalId) return `prov:${r.providerExternalId}|${date}|${r.description || ''}`
-          return `${date}|${normalizeName(r.doctorName)}|${r.description || ''}`
-        }
-        const existingRecordKeys = new Set(existingRecords.map(recordKey))
-        const savedConsultas: typeof existingRecords = [...existingRecords]
-
-        const authBySolicitation = new Map(
-          existingAuths
-            .filter(a => a.solicitationNumber)
-            .map(a => [a.solicitationNumber!, a]),
-        )
-        const authByLegacy = new Map(
-          existingAuths.map(a => [`${a.procedureCode || ''}|${a.guideNumber || ''}`, a]),
-        )
-
-        for (const item of allItems) {
-          const parsedDate = parseDate(item.procedureDate)
-          if (!parsedDate) continue
-
-          if (item.kind === 'consulta' || (item.kind === 'outro' && item.doctorName)) {
-            const draft = MedicalRecord.create({
-              patientId: link.patientId,
-              recordDate: parsedDate,
-              recordType: item.kind === 'consulta' ? 'consulta' : 'outro',
-              doctorName: item.doctorName || undefined,
-              clinicName: 'Unimed BH',
-              description: item.procedureDescription || undefined,
-              notes: [
-                item.value ? `Valor: ${item.value}` : null,
-                item.invoiceNumber ? `Nota: ${item.invoiceNumber}` : null,
-                item.copartCompanyAmount != null ? `Copart empresa: ${item.copartCompanyAmount}` : null,
-                item.copartBaseAmount != null ? `Base copart: ${item.copartBaseAmount}` : null,
-              ].filter(Boolean).join(' | ') || undefined,
-              source: 'unimed',
-              invoiceNumber: item.invoiceNumber || undefined,
-              chargedAmount: item.chargedAmount,
-              copartCompanyAmount: item.copartCompanyAmount,
-              copartBaseAmount: item.copartBaseAmount,
-              providerExternalId: item.providerExternalId,
-              procedureExternalId: item.procedureExternalId,
+        if (link.portalType === 'amil') {
+          try {
+            const { importOutcome, beneficiaryDetails, unmatchedBeneficiaries } =
+              await this.portalSync.runAmilSync({
+                link,
+                decryptedPassword,
+                jobId,
+                onProgress: emit,
+                patientName: patient?.name,
+                log: req.log,
+              })
+            updateJob(jobId, { step: 'done', message: 'Sincronização Amil concluída', status: 'success' }, {
+              exams: 0,
+              medicalRecords: 0,
+              authorizations: importOutcome.authorizations,
+              authorizationItems: 0,
+              updatedAuthorizations: importOutcome.updatedAuthorizations,
+              total: importOutcome.imported + importOutcome.updated,
+              authorizationDetails: importOutcome.authorizationDetails,
+              beneficiaryDetails,
+              unmatchedBeneficiaries,
             })
-            const key = recordKey(draft)
-            if (!existingRecordKeys.has(key)) {
-              const saved = await recordRepo.save(draft)
-              importedRecords++
-              existingRecordKeys.add(key)
-              savedConsultas.push(saved)
-            }
+          } catch (err) {
+            const message = await this.portalSync.handleAmilSyncFailure(link, err, req.log)
+            updateJob(jobId, { step: 'error', message, status: 'failed' })
           }
-
-          if (item.kind === 'exame' && item.procedureDescription) {
-            const key = `${item.procedureDescription}|${parsedDate.toISOString().slice(0, 10)}`
-            if (!existingExamKeys.has(key)) {
-              await examRepo.save(Exam.create({
-                patientId: link.patientId,
-                examType: item.procedureDescription,
-                examDate: parsedDate,
-                laboratory: item.doctorName || undefined,
-                notes: [
-                  item.value ? `Valor: ${item.value}` : null,
-                  item.invoiceNumber ? `Nota: ${item.invoiceNumber}` : null,
-                ].filter(Boolean).join(' | ') || undefined,
-                source: 'unimed',
-              }))
-              importedExams++
-              existingExamKeys.add(key)
-            }
-          }
+          setTimeout(() => removeJob(jobId), 120000)
+          return
         }
 
-        const allAuths = [...result.autorizacoes.paciente]
-        for (const depItems of Object.values(result.autorizacoes.dependentes)) {
-          allAuths.push(...depItems)
-        }
-
-        for (const item of allAuths) {
-          const solicitationNumber = item.solicitationNumber || item.guideNumber || ''
-          const legacyKey = `${item.procedureCode || ''}|${item.guideNumber || ''}`
-          const existing = (solicitationNumber && authBySolicitation.get(solicitationNumber))
-            || (legacyKey !== '|' ? authByLegacy.get(legacyKey) : undefined)
-
-          const authDate = parseDate(item.authorizationDate)
-          const linkedConsulta = findOriginatingConsulta(savedConsultas, {
-            providerExternalId: item.providerExternalId,
-            doctorName: item.doctorName,
-            authorizationDate: authDate,
+        if (link.portalType === 'mater_dei') {
+          await this.runMaterDeiSync({
+            link,
+            decryptedPassword,
+            jobId,
+            emit,
+            req,
           })
-
-          const props = {
-            patientId: link.patientId,
-            procedureCode: item.procedureCode || undefined,
-            procedureDescription: item.procedureDescription || item.classification || undefined,
-            doctorName: item.doctorName || undefined,
-            doctorCouncil: item.doctorCouncil || undefined,
-            clinicName: item.clinicName || item.localAddress || undefined,
-            authorizationDate: authDate ?? undefined,
-            validityDate: parseDate(item.validityDate) ?? undefined,
-            status: item.status || 'authorized',
-            guideNumber: item.guideNumber || solicitationNumber || undefined,
-            quantity: item.items?.length || (item.quantity ? Number(item.quantity) : undefined),
-            source: 'unimed',
-            solicitationNumber: solicitationNumber || undefined,
-            guidePassword: item.guidePassword || undefined,
-            specialty: item.specialty || undefined,
-            solicitationUrl: item.solicitationUrl || undefined,
-            solicId: item.solicId || undefined,
-            solicIdEncrypted: item.solicIdEncrypted || undefined,
-            authorizationType: item.authorizationType || undefined,
-            classification: item.classification || undefined,
-            localAddress: item.localAddress || undefined,
-            localPhone: item.localPhone || undefined,
-            locations: item.locations,
-            history: item.history,
-            medicalRecordId: linkedConsulta?.id,
-            providerExternalId: item.providerExternalId,
-          }
-
-          let saved: Authorization
-          let action: 'created' | 'updated'
-          if (existing) {
-            saved = await authRepo.update(Authorization.restore({
-              ...existing.toJSON(),
-              ...Authorization.create(props, existing.id).toJSON(),
-              id: existing.id,
-              createdAt: existing.createdAt,
-              items: existing.items,
-              medicalRecordId: linkedConsulta?.id ?? existing.medicalRecordId,
-            }))
-            updatedAuths++
-            action = 'updated'
-          } else {
-            saved = await authRepo.save(Authorization.create(props))
-            importedAuths++
-            action = 'created'
-            if (solicitationNumber) authBySolicitation.set(solicitationNumber, saved)
-          }
-
-          const childItems = (item.items ?? []).map((proc, idx) =>
-            AuthorizationItem.create({
-              authorizationId: saved.id,
-              procedureCode: proc.procedureCode,
-              procedureDescription: proc.procedureDescription,
-              quantityRequested: proc.quantityRequested,
-              quantityAuthorized: proc.quantityAuthorized,
-              status: proc.status,
-              externalProcedureId: proc.externalProcedureId,
-              sortOrder: idx,
-            }),
-          )
-          if (childItems.length) {
-            await authRepo.replaceItems(saved.id, childItems)
-            importedItems += childItems.length
-          }
-
-          authorizationDetails.push({
-            solicitationNumber: solicitationNumber || undefined,
-            classification: item.classification || item.procedureDescription || undefined,
-            doctorName: item.doctorName || undefined,
-            itemCount: childItems.length,
-            action,
-            linkedConsultaId: linkedConsulta?.id,
-            linkedConsultaDate: linkedConsulta?.recordDate?.toISOString().slice(0, 10),
-          })
+          return
         }
 
-        link.markSynced()
-        await this.repo.update(link)
-
-        updateJob(jobId, { step: 'done', message: 'Sincronização concluída', status: 'success' }, {
-          exams: importedExams,
-          medicalRecords: importedRecords,
-          authorizations: importedAuths,
-          authorizationItems: importedItems,
-          updatedAuthorizations: updatedAuths,
-          total: importedExams + importedRecords + importedAuths + updatedAuths,
-          authorizationDetails,
-        })
-        setTimeout(() => removeJob(jobId), 120000)
+        if (link.portalType === 'unimed') {
+          try {
+            const { importOutcome, authorizationDetails } = await this.portalSync.runUnimedSync({
+              link,
+              decryptedPassword,
+              jobId,
+              onProgress: emit,
+              log: req.log,
+            })
+            updateJob(jobId, { step: 'done', message: 'Sincronização concluída', status: 'success' }, {
+              exams: importOutcome.exams,
+              medicalRecords: importOutcome.medicalRecords,
+              authorizations: importOutcome.authorizations,
+              authorizationItems: importOutcome.authorizationItems,
+              updatedAuthorizations: importOutcome.updatedAuthorizations,
+              total: importOutcome.imported + importOutcome.updated,
+              authorizationDetails,
+            })
+          } catch (err) {
+            const message = await this.portalSync.handleUnimedSyncFailure(link, err, req.log)
+            updateJob(jobId, { step: 'error', message, status: 'failed' })
+          }
+          setTimeout(() => removeJob(jobId), 120000)
+          return
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Erro na sincronização'
         req.log.error(err, 'Sync failed')
+        if (/login|autentic|acesso\.unimed|sess[aã]o|portal do cliente/i.test(message)) {
+          link.clearSessionToken()
+          await this.repo.update(link).catch(() => {})
+        }
         updateJob(jobId, { step: 'error', message, status: 'failed' })
         setTimeout(() => removeJob(jobId), 120000)
       } finally {
@@ -307,11 +241,338 @@ export class IntegrationLinkController {
     return reply.send({ jobId })
   }
 
-  async syncProgress(req: FastifyRequest, reply: FastifyReply) {
+  private async runMaterDeiSync(args: {
+    link: IntegrationLink
+    decryptedPassword: string
+    jobId: string
+    emit: (step: string, message: string, status: 'running' | 'success' | 'failed') => void
+    req: AuthenticatedRequest
+  }) {
+    const { link, decryptedPassword, jobId, emit, req } = args
+    try {
+      const storedSession = link.encryptedSessionToken
+        ? decrypt(link.encryptedSessionToken)
+        : undefined
+
+      const scraper = new MaterDeiSyncScraper()
+      const result = await scraper.scrape(
+        link.email!,
+        decryptedPassword,
+        (p) => updateJob(jobId, p),
+        storedSession ? { sessionJson: storedSession } : undefined,
+      )
+
+      emit('importing', 'Salvando dados Mater Dei...', 'running')
+
+      const recordRepo = new MedicalRecordPgRepository(this.pool)
+      const examRepo = new ExamPgRepository(this.pool)
+      const patientRepo = new PatientPgRepository(this.pool)
+      const allPatientsRaw = await patientRepo.findAll()
+      const matchable: MatchablePatient[] = allPatientsRaw.map((p) => ({
+        id: p.id,
+        name: p.name,
+        cpf: p.cpf,
+        cns: p.cns,
+        birthDate: p.birthDate,
+        parentIds: p.parentIds,
+      }))
+      const resolveExamPatientId = (exam: MaterDeiExamItem) =>
+        resolveMaterDeiPatientId(exam.patientName, link.patientId, matchable)
+
+      const existingRecords = await recordRepo.findAll({ patientId: link.patientId })
+      const recordKey = (date: string, desc: string, doctor: string) =>
+        `${date}|${normalizeName(doctor)}|${desc}`
+      const existingKeys = new Set(
+        existingRecords.map((r) =>
+          recordKey(
+            r.recordDate.toISOString().slice(0, 10),
+            r.description || '',
+            r.doctorName || '',
+          )),
+      )
+
+      const existingExamKeysByPatient = new Map<string, Set<string>>()
+      for (const p of allPatientsRaw) {
+        const exs = await examRepo.findAll({ patientId: p.id })
+        existingExamKeysByPatient.set(p.id, new Set(
+          exs.map((e) => {
+            if (e.notes?.startsWith('mater_dei:')) return e.notes.split('\n')[0]
+            return `${e.examType}|${e.examDate.toISOString().slice(0, 10)}`
+          }),
+        ))
+      }
+
+      let importedRecords = 0
+      let importedExams = 0
+      let skippedExams = 0
+      const portalExamCount = result.exams.length
+      const portalAttendanceCount = result.attendances.length
+
+      emit(
+        'fetch-catalog',
+        `Catálogo: ${portalExamCount} exame(s), ${portalAttendanceCount} atendimento(s) no portal — conferindo novidades...`,
+        'running',
+      )
+
+      for (const att of result.attendances) {
+        const parsedDate = att.date ? (parseDate(att.date) ?? parseFlexibleDate(att.date)) : null
+        if (!parsedDate) continue
+        const desc = att.description || att.type || 'Atendimento Mater Dei'
+        const key = recordKey(parsedDate.toISOString().slice(0, 10), desc, att.doctorName || '')
+        if (existingKeys.has(key)) continue
+        await recordRepo.save(MedicalRecord.create({
+          patientId: link.patientId,
+          recordDate: parsedDate,
+          recordType: /consult/i.test(att.type || desc) ? 'consulta' : 'outro',
+          doctorName: att.doctorName || undefined,
+          clinicName: att.unitName || 'Mater Dei',
+          description: desc,
+          source: 'mater_dei',
+          notes: att.id != null ? `ID: ${att.id}` : undefined,
+        }))
+        importedRecords++
+        existingKeys.add(key)
+      }
+
+      for (const exam of result.exams) {
+        const parsedDate = exam.examDate
+          ? (parseDate(exam.examDate) ?? parseFlexibleDate(exam.examDate))
+          : null
+        if (!parsedDate) continue
+        const dedup = materDeiExamDedupKey(exam)
+        const targetPatientId = resolveExamPatientId(exam)
+        const patientExamKeys = existingExamKeysByPatient.get(targetPatientId) ?? new Set<string>()
+        if (patientExamKeys.has(dedup)) {
+          skippedExams++
+          continue
+        }
+
+        await examRepo.save(Exam.create({
+          patientId: targetPatientId,
+          examType: exam.examType,
+          examDate: parsedDate,
+          laboratory: exam.provider || 'Mater Dei',
+          resultSummary: exam.status || undefined,
+          source: 'mater_dei',
+          notes: materDeiExamNotes(dedup, buildMaterDeiExamMeta(exam)),
+        }))
+        importedExams++
+        patientExamKeys.add(dedup)
+        existingExamKeysByPatient.set(targetPatientId, patientExamKeys)
+      }
+
+      emit(
+        'fetch-catalog',
+        `Novidades: ${importedExams} exame(s) novo(s), ${skippedExams} já conhecido(s)`,
+        'success',
+      )
+
+      emit('fetch-files', 'Baixando laudos e imagens de exames...', 'running')
+      const gatewayPatientId = resolveMaterDeiGatewayPatientId(result.session) ?? 0
+      const dlRequest = await playwrightRequest.newContext({ baseURL: MATER_DEI_ORIGIN })
+      let downloadedFiles = 0
+      let skippedFiles = 0
+      try {
+        const fileResult = await persistMaterDeiExamFiles({
+          pool: this.pool,
+          request: dlRequest,
+          accessToken: result.session.accessToken,
+          gatewayPatientId,
+          exams: result.exams,
+          resolvePatientId: resolveExamPatientId,
+          onProgress: (msg) => emit('fetch-files', msg, 'running'),
+        })
+        downloadedFiles = fileResult.downloaded
+        skippedFiles = fileResult.skipped
+      } finally {
+        await dlRequest.dispose()
+      }
+      emit(
+        'fetch-files',
+        downloadedFiles > 0
+          ? `${downloadedFiles} arquivo(s) de exame baixado(s)`
+          : 'Laudos/imagens: nada novo para baixar',
+        'success',
+      )
+
+      link.setSessionToken(
+        encrypt(JSON.stringify(result.session)),
+        result.session.sessionExpiresAt,
+      )
+      link.markSynced()
+      await this.repo.update(link)
+
+      const novelty: SyncNoveltySummary = {
+        portalExams: portalExamCount,
+        portalAttendances: portalAttendanceCount,
+        newExamRecords: importedExams,
+        skippedExamRecords: skippedExams,
+        filesDownloaded: downloadedFiles,
+        filesSkipped: skippedFiles,
+      }
+
+      const warnings = result.warnings ?? []
+      updateJob(jobId, {
+        step: 'done',
+        message: warnings.length > 0
+          ? `Sincronização concluída: ${importedExams} exame(s), ${downloadedFiles} arquivo(s) (${warnings.length} aviso(s))`
+          : `Sincronização Mater Dei concluída (${importedExams} exame(s), ${downloadedFiles} arquivo(s))`,
+        status: 'success',
+      }, {
+        exams: importedExams,
+        medicalRecords: importedRecords,
+        authorizations: 0,
+        authorizationItems: 0,
+        updatedAuthorizations: 0,
+        total: importedRecords + importedExams,
+        authorizationDetails: [],
+        warnings: warnings.length > 0 ? warnings : undefined,
+        novelty,
+      }, novelty)
+      setTimeout(() => removeJob(jobId), 120000)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro na sincronização Mater Dei'
+      req.log.error(err, 'Mater Dei sync failed')
+      if (/401|403|sess[aã]o|token|expirad|login/i.test(message)) {
+        link.clearSessionToken()
+        await this.repo.update(link).catch(() => {})
+      }
+      updateJob(jobId, { step: 'error', message, status: 'failed' })
+      setTimeout(() => removeJob(jobId), 120000)
+    }
+  }
+
+  async virtualCard(req: AuthenticatedRequest, reply: FastifyReply) {
+    const params = integrationLinkParamsSchema.safeParse(req.params)
+    if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    const link = await guardPatientEntity(
+      req,
+      reply,
+      await this.repo.findById(params.data.id),
+      'Integration link not found',
+    )
+    if (!link) return
+    if (link.portalType !== 'unimed') {
+      return reply.status(400).send({ message: 'QR Code / token disponível apenas para Unimed BH' })
+    }
+    if (!link.email || !link.encryptedPassword) {
+      return reply.status(400).send({ message: 'Credenciais incompletas' })
+    }
+
+    const lockKey = `virtual-card:${link.patientId}:${link.portalType}`
+    if (syncLocks.has(lockKey)) return reply.status(429).send({ message: 'Geração de token já em andamento' })
+    syncLocks.add(lockKey)
+
+    try {
+      const patientRepo = new PatientPgRepository(this.pool)
+      const patient = await patientRepo.findById(link.patientId)
+      const scraper = new UnimedBhCartaoVirtualScraper()
+      const card = await scraper.scrape(link.email, decrypt(link.encryptedPassword), {
+        patientName: patient?.name,
+        cardNumber: link.cardNumber || undefined,
+      })
+
+      if (card.cardNumber && card.cardNumber !== link.cardNumber) {
+        link.setCardNumber(card.cardNumber)
+        await this.repo.update(link)
+      }
+
+      const planService = new InsurancePlanService(
+        new InsurancePlanPgRepository(this.pool),
+        new PlanMembershipPgRepository(this.pool),
+      )
+      const planResult = await planService.upsertFromPortal(link.patientId, {
+        operator: 'unimed',
+        operatorName: card.operatorName || 'Unimed BH',
+        planName: card.planName || 'Plano Unimed BH',
+        productCode: card.productCode || undefined,
+        networkName: card.networkName || undefined,
+        segmentation: card.segmentation || undefined,
+        accommodation: card.accommodation || undefined,
+        geographicCoverage: card.geographicCoverage || undefined,
+        regulationType: card.regulationType || undefined,
+        contractType: card.contractType || undefined,
+        contractorName: card.contractorName || undefined,
+        addOns: card.addOns,
+        externalKey: card.externalKey,
+        source: 'unimed',
+        raw: card.raw,
+        memberNumber: card.cardNumber || undefined,
+        role: 'holder',
+        status: 'active',
+        cns: card.cns || undefined,
+        inclusionDate: card.inclusionDate ? new Date(card.inclusionDate) : null,
+        cardValidFrom: card.cardValidFrom ? new Date(card.cardValidFrom) : null,
+        cardValidTo: card.cardValidTo ? new Date(card.cardValidTo) : null,
+      }, link.id)
+
+      return reply.send({ ...card, plan: planResult.plan, membership: planResult.membership })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao gerar QR Code / token Unimed'
+      req.log.error(err, 'Virtual card failed')
+      return reply.status(502).send({ message })
+    } finally {
+      syncLocks.delete(lockKey)
+    }
+  }
+
+  async syncProgress(req: AuthenticatedRequest, reply: FastifyReply) {
     const { jobId } = req.params as { jobId: string }
     const job = getJob(jobId)
-    if (!job) return reply.status(404).send({ message: 'Job not found' })
-    return reply.send({ ...job.progress, result: job.result })
+    const dbJob = await this.syncJobRepo.findById(jobId)
+    if (!job && !dbJob) return reply.status(404).send({ message: 'Job not found' })
+
+    const linkId = dbJob?.integrationLinkId ?? job?.integrationLinkId
+    if (linkId) {
+      const guarded = await guardPatientEntity(
+        req,
+        reply,
+        await this.repo.findById(linkId),
+        'Integration link not found',
+      )
+      if (!guarded) return
+    } else if (isAuthEnforcementEnabled()) {
+      return reply.status(403).send({ message: 'Acesso negado' })
+    }
+    if (job) {
+      return reply.send({
+        ...job.progress,
+        portalType: job.portalType,
+        result: job.result,
+        stepDetails: job.stepDetails,
+        novelty: job.result?.novelty ?? dbJob?.toJSON().novelty,
+      })
+    }
+    const d = dbJob!.toJSON()
+    return reply.send({
+      step: d.step ?? 'pending',
+      message: d.message ?? '',
+      status: d.status === 'failed' ? 'failed' : d.status === 'success' ? 'success' : 'running',
+      portalType: d.portalType,
+      result: d.result,
+      stepDetails: d.stepDetails,
+      novelty: d.novelty,
+    })
+  }
+
+  async syncStatus(req: AuthenticatedRequest, reply: FastifyReply) {
+    const params = integrationLinkParamsSchema.safeParse(req.params)
+    if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    const link = await guardPatientEntity(
+      req,
+      reply,
+      await this.repo.findById(params.data.id),
+      'Integration link not found',
+    )
+    if (!link) return
+
+    const active = await this.syncJobRepo.findActiveByLinkId(link.id)
+    const last = await this.syncJobRepo.findLastCompletedByLinkId(link.id)
+
+    return reply.send({
+      activeJob: active ? syncJobToStatusPayload(active) : null,
+      lastJob: last ? syncJobToStatusPayload(last) : null,
+    })
   }
 }
 
@@ -326,35 +587,18 @@ function parseDate(dateStr: string): Date | null {
   return isNaN(d.getTime()) ? null : d
 }
 
-function normalizeName(name: string | null | undefined): string {
-  return (name || '').normalize('NFD').replace(/\p{M}/gu, '').toUpperCase().replace(/\s+/g, ' ').trim()
+function parseFlexibleDate(dateStr: string): Date | null {
+  if (!dateStr) return null
+  const iso = parseDate(dateStr)
+  if (iso) return iso
+  const m = /^(\d{4}-\d{2}-\d{2})/.exec(dateStr)
+  if (m) {
+    const d = new Date(`${m[1]}T12:00:00`)
+    if (!isNaN(d.getTime())) return d
+  }
+  return null
 }
 
-function findOriginatingConsulta(
-  records: Array<{
-    id: string
-    recordDate: Date
-    recordType: string
-    doctorName: string | null
-    providerExternalId: string | null
-    description: string | null
-  }>,
-  auth: { providerExternalId?: string; doctorName?: string; authorizationDate: Date | null },
-) {
-  const consultas = records.filter((r) => r.recordType === 'consulta')
-  if (!consultas.length || !auth.authorizationDate) return undefined
-
-  const authDay = auth.authorizationDate.toISOString().slice(0, 10)
-  const byProvider = auth.providerExternalId
-    ? consultas.find((r) =>
-      r.providerExternalId === auth.providerExternalId
-      && r.recordDate.toISOString().slice(0, 10) === authDay)
-    : undefined
-  if (byProvider) return byProvider
-
-  const doctor = normalizeName(auth.doctorName)
-  if (!doctor) return undefined
-  return consultas.find((r) =>
-    r.recordDate.toISOString().slice(0, 10) === authDay
-    && normalizeName(r.doctorName) === doctor)
+function normalizeName(name: string | null | undefined): string {
+  return (name || '').normalize('NFD').replace(/\p{M}/gu, '').toUpperCase().replace(/\s+/g, ' ').trim()
 }

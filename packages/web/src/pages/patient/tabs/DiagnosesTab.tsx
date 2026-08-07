@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Table, Button, Form, Input, Switch, DatePicker, Select, Tag } from 'antd'
+import { Table, Button, Form, Input, Switch, Select, Tag } from 'antd'
+import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { PlusOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import type { Diagnosis } from '../../../lib/api.types.js'
+import type { Dayjs } from 'dayjs'
 
 interface Props { patientId: string }
 
@@ -40,14 +42,16 @@ export function DiagnosesTab({ patientId }: Props) {
         onSubmit={(values) => api.diagnoses.create({
           patientId,
           ...values,
-          diagnosedDate: (values.diagnosedDate as Date | undefined)?.toISOString(),
+          diagnosedDate: (values.diagnosedDate as Dayjs | undefined)?.toISOString(),
         }).then(reload)}
       >
         <Form.Item name="diagnosisName" label={t('diagnosis.name')} rules={[{ required: true }]}><Input /></Form.Item>
         <Form.Item name="diagnosisCode" label={t('diagnosis.code')}><Input placeholder="H66.9" /></Form.Item>
         <Form.Item name="description" label={t('medicalRecord.description')}><Input.TextArea rows={2} /></Form.Item>
         <Form.Item name="isChronic" label={t('diagnosis.chronic')} valuePropName="checked"><Switch /></Form.Item>
-        <Form.Item name="diagnosedDate" label={t('diagnosis.date')}><DatePicker style={{ width: '100%' }} /></Form.Item>
+        <Form.Item name="diagnosedDate" label={t('diagnosis.date')}>
+          <MaskedDatePicker style={{ width: '100%' }} />
+        </Form.Item>
         <Form.Item name="status" label={t('diagnosis.status')}>
           <Select options={[
             { value: 'active', label: t('diagnosis.active') },

@@ -2,11 +2,23 @@ import type { Page, Response } from 'playwright'
 import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
 import type { UnimedBhUsageItem } from './unimedbh-extrato.scraper.js'
 import type { UnimedBhAuthorizationItem } from './unimedbh-autorizacoes.scraper.js'
-import { loginUnimedBh } from './unimedbh-login.helper.js'
+import {
+  acquireUnimedBhSession,
+  captureUnimedStorageState,
+  unimedSessionExpiresAt,
+} from './unimedbh-login.helper.js'
+import {
+  scrapeUnimedBhVirtualCardFromPage,
+  type UnimedBhVirtualCard,
+} from './unimedbh-cartao-virtual.scraper.js'
+import { waitForUnimedScreenService } from './unimedbh-wait-response.helper.js'
 
 export interface UnimedBhSyncResult {
   extrato: { paciente: UnimedBhUsageItem[]; dependentes: Record<string, UnimedBhUsageItem[]> }
   autorizacoes: { paciente: UnimedBhAuthorizationItem[]; dependentes: Record<string, UnimedBhAuthorizationItem[]> }
+  planCard: UnimedBhVirtualCard | null
+  sessionStorageState?: string
+  sessionExpiresAt?: Date
 }
 
 type OutSystemsListItem = {
@@ -41,6 +53,9 @@ type ExtratoUtilRow = {
 type ExtratoBeneficiario = {
   Nome?: string
   Carteira?: string
+  CodigoCliente?: string
+  codigoCliente?: string
+  NumeroCarteira?: string
   UtilizacaoSt?: { List?: ExtratoUtilRow[] }
 }
 
@@ -49,11 +64,8 @@ const LIST_URL = 'https://app.unimedbh.com.br/PortalDoCliente/AutorizacoesExames
 const EXTRATO_URL = 'https://app.unimedbh.com.br/PortalDoCliente/ExtratoUtilizacao'
 const EXTRATO_MONTHS = 6
 
-function waitForScreenService(page: Page, pathPart: string, timeout = 30000): Promise<Response> {
-  return page.waitForResponse(
-    (r) => r.url().includes(pathPart) && r.request().method() === 'POST' && r.ok(),
-    { timeout },
-  )
+function waitForScreenService(page: Page, pathPart: string, timeout = 45000): Promise<Response> {
+  return waitForUnimedScreenService(page, pathPart, timeout)
 }
 
 function formatIsoDate(iso?: string): string {
@@ -102,7 +114,7 @@ function flattenExtratoPayload(data: {
       const dateIso = u.DataAtendimento.includes('T') ? u.DataAtendimento : `${u.DataAtendimento}T12:00:00Z`
       items.push({
         patientName: benef.Nome || '',
-        cardNumber: benef.Carteira || '',
+        cardNumber: benef.Carteira || benef.CodigoCliente || benef.codigoCliente || benef.NumeroCarteira || '',
         procedureDate: formatIsoDate(dateIso),
         procedureDescription: description,
         doctorName: u.NomePrestador || '',
@@ -127,18 +139,48 @@ export class UnimedBhSyncScraper {
     email: string,
     password: string,
     onProgress?: (p: ScraperProgress) => void,
+    opts?: { patientName?: string; cardNumber?: string; storageStateJson?: string },
   ): Promise<UnimedBhSyncResult> {
     const emit = (step: string, message: string, status: ScraperProgress['status']) => onProgress?.({ step, message, status })
 
-    const { browser, page } = await loginUnimedBh(email, password)
+    const { browser, context, page, usedStoredSession } = await acquireUnimedBhSession(
+      email,
+      password,
+      { storageStateJson: opts?.storageStateJson },
+    )
 
     try {
-      emit('login', 'Login realizado!', 'success')
+      if (usedStoredSession) {
+        emit('login', 'Sessão Unimed salva (sem login)...', 'success')
+      } else {
+        emit('login', 'Login realizado!', 'success')
+      }
+
+      emit('fetch-plano', 'Buscando dados do plano (Cartão Virtual)...', 'running')
+      let planCard: UnimedBhVirtualCard | null = null
+      try {
+        planCard = await scrapeUnimedBhVirtualCardFromPage(page, {
+          patientName: opts?.patientName,
+          cardNumber: opts?.cardNumber,
+          requireToken: false,
+        })
+        emit('fetch-plano', planCard ? 'Plano obtido do Cartão Virtual' : 'Plano não disponível nesta sessão', 'running')
+      } catch {
+        emit('fetch-plano', 'Não foi possível obter o plano agora (seguindo com dados clínicos)', 'running')
+      }
 
       const extrato = await this.scrapeExtrato(page, emit)
       const autorizacoes = await this.scrapeAutorizacoes(page, emit)
 
-      return { extrato, autorizacoes }
+      const sessionStorageState = await captureUnimedStorageState(context)
+
+      return {
+        extrato,
+        autorizacoes,
+        planCard,
+        sessionStorageState,
+        sessionExpiresAt: unimedSessionExpiresAt(),
+      }
     } finally {
       await browser.close()
     }
@@ -192,7 +234,7 @@ export class UnimedBhSyncScraper {
     }
 
     const consultas = collected.filter((i) => i.kind === 'consulta').length
-    emit('fetch-extrato', `${collected.length} utilizações (${consultas} consultas)`, 'success')
+    emit('fetch-extrato', `${collected.length} utilizações (${consultas} consultas)`, 'running')
     return { paciente: collected, dependentes: {} as Record<string, UnimedBhUsageItem[]> }
   }
 
@@ -227,7 +269,7 @@ export class UnimedBhSyncScraper {
       paciente.push(enriched)
     }
 
-    emit('fetch-autorizacoes', `${paciente.length} autorizações com detalhe`, 'success')
+    emit('fetch-autorizacoes', `${paciente.length} autorizações com detalhe`, 'running')
     return { paciente, dependentes: {} as Record<string, UnimedBhAuthorizationItem[]> }
   }
 

@@ -25,7 +25,7 @@ except ImportError as e:
 
 try:
     import torch
-    from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+    from transformers import RobertaTokenizer, ViTImageProcessor, VisionEncoderDecoderModel
 except ImportError as e:
     fail(
         "TrOCR deps missing. Install with: "
@@ -39,21 +39,24 @@ MAX_SIDE = int(os.environ.get("TROCR_MAX_SIDE", "2000"))
 MIN_LINE_HEIGHT = 14
 MAX_LINES = int(os.environ.get("TROCR_MAX_LINES", "60"))
 
-_processor = None
+_image_processor = None
+_tokenizer = None
 _model = None
 _device = None
 
 
 def get_model():
-    global _processor, _model, _device
+    global _image_processor, _tokenizer, _model, _device
     if _model is not None:
-        return _processor, _model, _device
+        return _image_processor, _tokenizer, _model, _device
     _device = "cuda" if torch.cuda.is_available() else "cpu"
-    _processor = TrOCRProcessor.from_pretrained(MODEL_ID)
+    # TrOCRProcessor breaks on transformers 5.x; load components separately.
+    _image_processor = ViTImageProcessor.from_pretrained(MODEL_ID)
+    _tokenizer = RobertaTokenizer.from_pretrained(MODEL_ID)
     _model = VisionEncoderDecoderModel.from_pretrained(MODEL_ID)
     _model.to(_device)
     _model.eval()
-    return _processor, _model, _device
+    return _image_processor, _tokenizer, _model, _device
 
 
 def prepare_image(path: str) -> Image.Image:
@@ -119,15 +122,15 @@ def split_lines(img: Image.Image) -> list[Image.Image]:
 
 
 @torch.inference_mode()
-def ocr_line(processor, model, device, line_img: Image.Image) -> str:
+def ocr_line(image_processor, tokenizer, model, device, line_img: Image.Image) -> str:
     # TrOCR expects reasonably tall crops
     w, h = line_img.size
     if h < 32:
         scale = 32 / max(h, 1)
         line_img = line_img.resize((max(1, int(w * scale)), 32), Image.Resampling.LANCZOS)
-    pixel_values = processor(images=line_img, return_tensors="pt").pixel_values.to(device)
+    pixel_values = image_processor(images=line_img, return_tensors="pt").pixel_values.to(device)
     generated = model.generate(pixel_values, max_new_tokens=128)
-    return processor.batch_decode(generated, skip_special_tokens=True)[0].strip()
+    return tokenizer.batch_decode(generated, skip_special_tokens=True)[0].strip()
 
 
 def main() -> None:
@@ -138,12 +141,12 @@ def main() -> None:
         fail(f"File not found: {path}")
 
     img = prepare_image(path)
-    processor, model, device = get_model()
+    image_processor, tokenizer, model, device = get_model()
     lines = split_lines(img)
     texts: list[str] = []
     for line in lines:
         try:
-            t = ocr_line(processor, model, device, line)
+            t = ocr_line(image_processor, tokenizer, model, device, line)
             if t:
                 texts.append(t)
         except Exception:

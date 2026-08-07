@@ -1,0 +1,28 @@
+/* Menu lateral — gradiente Aiyra / Open Design (tokens --sidebar-*) */
+
+.app-sider.ant-layout-sider {
+  background: var(--sidebar-bg) !important;
+  box-shadow: var(--sidebar-shadow);
+}
+
+.app-sider .ant-layout-sider-children {
+  background: transparent;
+}
+
+.app-sider .ant-menu {
+  background: transparent !important;
+}
+
+.app-sider .ant-menu-item-selected {
+  background: var(--sidebar-menu-selected) !important;
+}
+
+.app-sider .ant-layout-sider-trigger {
+  background: transparent !important;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.app-sider .app-sider-brand {
+  border-bottom: 1px solid var(--sidebar-border);
+}

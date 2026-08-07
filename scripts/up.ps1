@@ -5,13 +5,18 @@ $apiDir = Join-Path $root "packages\api"
 $webDir = Join-Path $root "packages\web"
 
 Write-Host "Starting API..." -NoNewline
+$apiPort = 3010
 $logApi = Join-Path $root "api.log"
-$cmdApi = "set PORT=3000&&set DATABASE_URL=postgresql://postgres:postgres123@127.0.0.1:5432/openhealth&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
+$cmdApi = "set PORT=$apiPort&&set DATABASE_URL=postgresql://postgres:postgres123@127.0.0.1:5432/openhealth&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
 cmd /c "start /B cmd /c `"$cmdApi`""
 
 for ($i = 0; $i -lt 12; $i++) {
   Start-Sleep 1
-  try { $h = Invoke-RestMethod -Uri "http://localhost:3000/health" -ErrorAction Stop; Write-Host " OK ($($h.status))" -ForegroundColor Green; break }
+  try {
+    $h = Invoke-RestMethod -Uri "http://127.0.0.1:$apiPort/health" -ErrorAction Stop
+    if ($h.service -eq 'aiyracare-api' -or $h.service -eq 'open-health-api') { Write-Host " OK ($($h.status))" -ForegroundColor Green; break }
+    Write-Host "." -NoNewline
+  }
   catch { Write-Host "." -NoNewline; if ($i -eq 11) { Write-Host " FAIL" -ForegroundColor Red } }
 }
 
@@ -27,8 +32,10 @@ for ($i = 0; $i -lt 12; $i++) {
 }
 
 Write-Host @"
-`nOpen Health running:
-  API  http://localhost:3000/health
+`nAiyraCare running:
+  API  http://127.0.0.1:$apiPort/health
   Web  http://localhost:5173
   Logs api.log / web.log
 "@
+
+Start-Process "http://localhost:5173/login"

@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Table, Button, Form, DatePicker, Input, Select, Tag } from 'antd'
+import { Table, Button, Form, Input, Select, Tag } from 'antd'
+import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { PlusOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import type { Allergy } from '../../../lib/api.types.js'
+import type { Dayjs } from 'dayjs'
 
 interface Props { patientId: string }
 
@@ -38,7 +40,7 @@ export function AllergiesTab({ patientId }: Props) {
         onSubmit={(values) => api.allergies.create({
           patientId,
           ...values,
-          diagnosedDate: (values.diagnosedDate as Date | undefined)?.toISOString(),
+          diagnosedDate: (values.diagnosedDate as Dayjs | undefined)?.toISOString(),
         }).then(reload)}
       >
         <Form.Item name="allergen" label={t('allergy.allergen')} rules={[{ required: true }]}><Input /></Form.Item>
@@ -50,7 +52,9 @@ export function AllergiesTab({ patientId }: Props) {
             { value: 'severe', label: t('allergy.severe') },
           ]} />
         </Form.Item>
-        <Form.Item name="diagnosedDate" label={t('allergy.diagnosedDate')}><DatePicker style={{ width: '100%' }} /></Form.Item>
+        <Form.Item name="diagnosedDate" label={t('allergy.diagnosedDate')}>
+          <MaskedDatePicker style={{ width: '100%' }} />
+        </Form.Item>
       </EntityFormModal>
     </>
   )

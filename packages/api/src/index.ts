@@ -19,7 +19,7 @@ config({ path: resolve(__dirname, '../../../.env') })
 const app = Fastify({ logger: true })
 
 app.get('/health', async () => {
-  return { status: 'ok', version: '0.1.0', service: 'open-health-api' }
+  return { status: 'ok', version: '0.1.0', service: 'aiyracare-api' }
 })
 
 app.get('/health/db', async () => {
@@ -51,6 +51,11 @@ app.get('/health/db', async () => {
 })
 
 async function registerRoutes() {
+  const { getAuthService } = await import('./infrastructure/http/auth/auth.routes.js')
+  const { registerSecurityPlugin } = await import('./infrastructure/http/auth/security.plugin.js')
+  const authService = getAuthService()
+  await registerSecurityPlugin(app, authService)
+
   const { patientRoutes } = await import('./infrastructure/http/patient/patient.routes.js')
   const { growthRecordRoutes } = await import('./infrastructure/http/growth-record/growth-record.routes.js')
   const { vaccineRoutes } = await import('./infrastructure/http/vaccine/vaccine.routes.js')
@@ -58,12 +63,20 @@ async function registerRoutes() {
   const { allergyRoutes } = await import('./infrastructure/http/allergy/allergy.routes.js')
   const { examRoutes } = await import('./infrastructure/http/exam/exam.routes.js')
   const { documentRoutes } = await import('./infrastructure/http/document/document.routes.js')
+  const { handwritingCreditsRoutes } = await import('./infrastructure/http/handwriting/handwriting-credits.routes.js')
   const { medicalRecordRoutes } = await import('./infrastructure/http/medical-record/medical-record.routes.js')
   const { diagnosisRoutes } = await import('./infrastructure/http/diagnosis/diagnosis.routes.js')
   const { scraperRoutes } = await import('./infrastructure/http/scraper/scraper.routes.js')
   const { sessionsRoutes } = await import('./infrastructure/http/session/session.routes.js')
   const { integrationLinkRoutes } = await import('./infrastructure/http/integration-link/integration-link.routes.js')
   const { authorizationRoutes } = await import('./infrastructure/http/authorization/authorization.routes.js')
+  const { insurancePlanRoutes } = await import('./infrastructure/http/insurance-plan/insurance-plan.routes.js')
+  const { cadernetaImportRoutes } = await import('./infrastructure/http/caderneta/caderneta-import.routes.js')
+  const { authRoutes } = await import('./infrastructure/http/auth/auth.routes.js')
+  const { carePlaceRoutes } = await import('./infrastructure/http/care-place/care-place.routes.js')
+  const { healthThreadRoutes } = await import('./infrastructure/http/health-thread/health-thread.routes.js')
+  const { clinicalLinkRoutes } = await import('./infrastructure/http/clinical-link/clinical-link.routes.js')
+  const { projectContextRoutes } = await import('./infrastructure/http/project/project-context.routes.js')
 
   await app.register(patientRoutes)
   await app.register(growthRecordRoutes)
@@ -72,12 +85,20 @@ async function registerRoutes() {
   await app.register(allergyRoutes)
   await app.register(examRoutes)
   await app.register(documentRoutes)
+  await app.register(handwritingCreditsRoutes)
   await app.register(medicalRecordRoutes)
   await app.register(diagnosisRoutes)
   await app.register(scraperRoutes)
   await app.register(sessionsRoutes)
   await app.register(integrationLinkRoutes)
   await app.register(authorizationRoutes)
+  await app.register(insurancePlanRoutes)
+  await app.register(cadernetaImportRoutes)
+  await app.register(authRoutes)
+  await app.register(carePlaceRoutes)
+  await app.register(healthThreadRoutes)
+  await app.register(clinicalLinkRoutes)
+  await app.register(projectContextRoutes)
 }
 
 const start = async () => {

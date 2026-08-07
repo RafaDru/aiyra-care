@@ -5,10 +5,12 @@ import type { HealthPortalScraper } from '../../domain/scraper/health-portal-scr
 import { ConecteSUSPortalAdapter } from '../../infrastructure/scraper/conectesus.portal.js'
 import { UnimedPortalAdapter } from '../../infrastructure/scraper/unimed.portal.js'
 import { AmilPortalAdapter } from '../../infrastructure/scraper/amil.portal.js'
+import { CadernetaPortalAdapter } from '../../infrastructure/scraper/caderneta.portal.js'
 import { BradescoSaudePortalAdapter } from '../../infrastructure/scraper/bradesco-saude.portal.js'
 
 const portalAdapters: Record<string, () => HealthPortalScraper> = {
   conectesus: () => new ConecteSUSPortalAdapter(),
+  caderneta: () => new CadernetaPortalAdapter(),
   unimed: () => new UnimedPortalAdapter(),
   amil: () => new AmilPortalAdapter(),
   bradesco_saude: () => new BradescoSaudePortalAdapter(),
