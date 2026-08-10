@@ -11,7 +11,20 @@ const API_TARGET = `http://127.0.0.1:${API_PORT}`
 
 /** Rotas da API — proxy direto em 127.0.0.1 (porta 3010; evita conflito com Next.js na 3000). */
 const API_ROUTE_PATTERN =
-  '^/(patients|documents|exams|vaccines|medications|allergies|growth-records|medical-records|diagnoses|authorizations|sessions|integration-links|scraper|plan-memberships|handwriting-credits|health|auth)'
+  '^/(patients|documents|exams|vaccines|medications|allergies|growth-records|medical-records|diagnoses|authorizations|sessions|roadmap|integration-links|scraper|plan-memberships|handwriting-credits|health|auth)'
+
+/** React Router paths que colidem com prefixos da API — refresh não deve ir ao backend. */
+function isSpaDocumentRequest(req: { url?: string; headers: Record<string, string | string[] | undefined> }): boolean {
+  const accept = String(req.headers.accept ?? '')
+  const mode = String(req.headers['sec-fetch-mode'] ?? '')
+  const isDocumentNavigation = mode === 'navigate' || accept.includes('text/html')
+  if (!isDocumentNavigation) return false
+
+  const path = (req.url ?? '').split('?')[0]
+  if (path.startsWith('/patients/')) return true
+  if (path === '/roadmap') return true
+  return false
+}
 
 export default defineConfig({
   /** .env na raiz do monorepo (scripts/setup-env.ps1). */
@@ -23,6 +36,9 @@ export default defineConfig({
       [API_ROUTE_PATTERN]: {
         target: API_TARGET,
         changeOrigin: true,
+        bypass(req) {
+          if (isSpaDocumentRequest(req)) return '/index.html'
+        },
       },
     },
   },

@@ -4,7 +4,7 @@
 
 **AiyraCare (Filhos)** — monorepo para cuidado infantil com histórico médico centralizado (Luís e Bruno). Stack: Fastify API + React/Vite web + PostgreSQL. Documentação viva em `docs/PROJETO.md`; histórico de decisões em `docs/HISTORICO.md`.
 
-**Contexto para LLM/agentes:** `GET http://127.0.0.1:3010/project/context` — foto estruturada da app + decisões + `HISTORICO.md` parseado + lista de migrations. Fonte curada: `docs/project-context.json` (atualizar ao mudar arquitetura/roadmap).
+**Contexto para LLM/agentes:** `GET http://127.0.0.1:3010/project/context` — foto estruturada da app + decisões + `HISTORICO.md` parseado + lista de migrations. Fonte curada: `docs/project-context.json` (atualizar ao mudar arquitetura/roadmap). **Roadmap priorizado:** `docs/roadmap.json` + UI menu Roadmap (`GET /roadmap`).
 
 ## Starting Services
 
@@ -29,7 +29,7 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 
 - **Hexagonal** em `packages/api`: `domain/` → `application/` → `infrastructure/`
 - **Integrações de plano**: `IntegrationLink` (credenciais + sessão) → scrapers → `InsurancePlanService.upsertFromPortal` + import de `Authorization` / `MedicalRecord` / `Exam`
-- **Sync assíncrono**: `POST /integration-links/:id/sync` retorna `jobId`; UI faz polling em `GET /integration-links/sync-progress/:jobId` (`SyncProgressModal`, timeout cliente 5 min)
+- **Sync assíncrono**: `POST /integration-links/:id/sync` retorna `jobId`; query `silent=1` (sem modal) ou `force=1` (ignora intervalo). UI: auto silent na Carteira (`shouldOfferSilentSync`); modal só no botão manual. Polling: `GET /integration-links/:id/sync-status` + `sync-progress/:jobId`.
 - **Credenciais**: AES-256-GCM via `CRYPTO_KEY` em `.env` (`crypto-helper.ts`)
 - **Auth API**: com `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE`, hook global em `security.plugin.ts`; escopo por paciente via `patient_memberships` + `owner_account_id` (`patient-access.guard.ts`). Ver `docs/SUPABASE.md`.
 - **Integrações**: boundary Connect vs Core em `docs/CONNECT.md`; pacote `packages/connect` (contrato canônico). Scrapers ainda em `packages/api` até Fase 2.
@@ -53,11 +53,25 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 | `AMIL_CHROME_PATH` | auto | Caminho do `chrome.exe` |
 | `AMIL_MANUAL_LOGIN_TIMEOUT_MS` | `300000` | Tempo para clicar Entrar no Chrome CDP |
 
+### Connect — sync silencioso
+
+| Variável | Default | Efeito |
+|----------|---------|--------|
+| `SYNC_MIN_INTERVAL_MS` | `1800000` (30 min) | API: skip sync se último job OK recente (unless `force=1`) |
+| `AMIL_SESSION_RENEW_MS` | `86400000` (24h) | Renovar JWT Amil via CDP antes de expirar |
+| `VITE_SILENT_SYNC_STALE_MS` | `21600000` (6h) | Web: auto silent sync ao abrir Carteira **só com `sessionReady`** |
+
+**Sync silencioso na Carteira:** auto-sync só dispara com sessão persistida válida (`sessionReady`); primeiro login sempre via botão **Sincronizar** (pode abrir portal/Chrome). API ignora `silent=1` sem sessão (`skipped: session_required`).
+
+**Progresso de sync (UI):** push-first via SSE `GET /integration-links/sync-progress/:jobId/stream` (heartbeat ~25s); GET `/sync-progress/:jobId` só reconciliação se stream mudo >45s. Ver `docs/SYNC_DELTA.md` para delta sync por portal.
+
 **Fluxo Amil (prioridade):**
 
 1. `integration_links.encrypted_session_token` — sync 100% HTTP, sem browser
-2. CDP — conecta ao Chrome real (`connectOverCDP`), lê cookie `userToken` ou abre perfil `.cache/amil-chrome-cdp` e aguarda login manual
-3. Playwright — só com `AMIL_ALLOW_BROWSER=1`
+2. **API `AuthOGS/Login`** — login HTTP com CPF/senha (sem browser); salva JWT
+3. CDP — lê cookie `userToken` do Chrome já aberto (não abre janela nova)
+4. CDP + preenchimento — só em sync **manual** (`interactiveLogin`); tenta API in-page antes do clique em Entrar
+5. Playwright — só com `AMIL_ALLOW_BROWSER=1` e se CDP falhar
 
 JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login API: `POST /beneficiario/api/AuthOGS/Login` com `{ userData: { login, senha, idSistema: 400 } }`.
 
@@ -69,7 +83,7 @@ JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login 
 
 ## Frontend — onde mexer
 
-- Perfil paciente: `packages/web/src/pages/patient/detail.tsx` (abas incl. **Carteira** `WalletTab`)
+- Perfil paciente: `packages/web/src/pages/patient/detail.tsx` (abas **Carteira**, **Convênios**, **Integrações**)
 - Sync modal: `packages/web/src/components/scraper/SyncProgressModal.tsx`
 - Vincular plano: modal em `detail.tsx` + `ImportInsuranceModal.tsx`
 - API client: `packages/web/src/lib/api.ts`

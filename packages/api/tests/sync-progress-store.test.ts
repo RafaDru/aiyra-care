@@ -58,6 +58,15 @@ describe('sync-progress-store', () => {
     expect(getJob(id)?.result?.warnings).toEqual(['Exames: erro 500'])
   })
 
+  it('marks login success when fetch substeps start', () => {
+    const id = createJob()
+    updateJob(id, { step: 'login', message: 'Autenticando...', status: 'running' })
+    updateJob(id, { step: 'fetch-exams', message: 'Buscando exames...', status: 'running' })
+    const job = getJob(id)
+    expect(job?.stepDetails.login?.status).toBe('success')
+    expect(job?.stepDetails['fetch-exams']?.status).toBe('running')
+  })
+
   it('returns undefined for unknown job', () => {
     expect(getJob('nonexistent')).toBeUndefined()
   })

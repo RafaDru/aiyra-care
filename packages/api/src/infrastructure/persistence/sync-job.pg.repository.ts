@@ -54,19 +54,22 @@ export class SyncJobPgRepository {
     error?: string
     finishedAt?: Date
   }): Promise<void> {
+    const terminal = args.status === 'success' || args.status === 'failed'
     await this.pool.query(
       `UPDATE sync_jobs SET
         step = $2, message = $3, status = $4, step_details = $5,
         result = COALESCE($6, result), novelty = COALESCE($7, novelty),
-        error = COALESCE($8, error), finished_at = COALESCE($9, finished_at), updated_at = NOW()
+        error = COALESCE($8, error),
+        finished_at = CASE WHEN $4 IN ('success', 'failed') THEN COALESCE($9, NOW()) ELSE NULL END,
+        updated_at = NOW()
        WHERE id = $1`,
       [
         args.id, args.step, args.message, args.status,
         JSON.stringify(args.stepDetails),
         args.result ? JSON.stringify(args.result) : null,
         args.novelty ? JSON.stringify(args.novelty) : null,
-        args.error ?? null,
-        args.finishedAt ?? null,
+        terminal ? (args.error ?? args.message) : null,
+        terminal ? (args.finishedAt ?? new Date()) : null,
       ],
     )
   }
@@ -77,6 +80,26 @@ export class SyncJobPgRepository {
   }
 
   async findActiveByLinkId(linkId: string): Promise<SyncJob | null> {
+    await this.pool.query(
+      `UPDATE sync_jobs SET
+        status = 'failed', step = 'error',
+        message = 'Sincronização expirou (timeout)',
+        error = 'Sincronização expirou (timeout)',
+        finished_at = COALESCE(finished_at, NOW()), updated_at = NOW()
+       WHERE integration_link_id = $1 AND status IN ('pending', 'running')
+         AND started_at < NOW() - INTERVAL '30 minutes'`,
+      [linkId],
+    )
+    await this.pool.query(
+      `UPDATE sync_jobs SET
+        status = 'failed', step = 'error',
+        message = 'Sincronização interrompida',
+        error = 'Job inconsistente (running com finished_at)',
+        finished_at = COALESCE(finished_at, NOW()), updated_at = NOW()
+       WHERE integration_link_id = $1 AND status IN ('pending', 'running')
+         AND finished_at IS NOT NULL`,
+      [linkId],
+    )
     const { rows } = await this.pool.query(
       `SELECT * FROM sync_jobs
        WHERE integration_link_id = $1 AND status IN ('pending', 'running')

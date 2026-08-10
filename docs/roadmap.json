@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-10",
+  "title": "Roadmap AiyraCare",
+  "intro": "Prioridades ajustadas em 2026-08-07: primeiro sync silencioso (Connect), depois sequência clínica + grafo; agentes só com contexto e fontes sólidas. Os portais não entregam associações — o sync alimenta nós e proveniência; a sequência é nossa camada (Postgres + UX).",
+  "categories": [
+    {
+      "id": "negocio",
+      "label": "Negócio",
+      "color": "purple",
+      "description": "Produto, UX e modelo de informação — como o usuário organiza tempo, histórico e ações futuras."
+    },
+    {
+      "id": "tecnico",
+      "label": "Técnico",
+      "color": "geekblue",
+      "description": "Arquitetura, integrações, dados e infraestrutura."
+    }
+  ],
+  "priorities": [
+    {
+      "id": "P0",
+      "label": "P0 — Agora",
+      "color": "red",
+      "description": "Sync sem intervenção humana no dia a dia; sessão estável e novidades discretas."
+    },
+    {
+      "id": "P1",
+      "label": "P1 — Estrutural clínico",
+      "color": "volcano",
+      "description": "Sequência do cuidado, links entre entidades e projeção Neo4j — base para correlação e agentes."
+    },
+    {
+      "id": "P2",
+      "label": "P2 — Automação e entrega",
+      "color": "orange",
+      "description": "Scheduler/worker, export médico, enriquecimento contínuo dos portais."
+    },
+    {
+      "id": "P3",
+      "label": "P3 — Inteligência",
+      "color": "blue",
+      "description": "OCR/LLM em evolução e agentes com citações (após contexto + grafo)."
+    },
+    {
+      "id": "P4",
+      "label": "P4 — Horizonte",
+      "color": "default",
+      "description": "Rede credenciada agregada, mobile, microserviços — produto ampliado."
+    }
+  ],
+  "principles": [
+    "Postgres é fonte da verdade; Neo4j projeta relações para caminhos e IA.",
+    "Connect extrai e normaliza; Core importa no domínio clínico (boundary em docs/CONNECT.md).",
+    "Portais não trazem o grafo clínico — associações são inferidas/confirmadas no app.",
+    "Resumo base (PatientContext) permanece determinístico, sem LLM."
+  ],
+  "epics": [
+    {
+      "id": "connect-silencioso",
+      "category": "tecnico",
+      "priority": "P0",
+      "title": "Connect — sincronismo silencioso",
+      "summary": "Manter carteira e histórico atualizados sem modal obrigatório, CDP só quando inevitável.",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
+      "items": [
+        {
+          "id": "connect-contract",
+          "title": "Pacote @open-health/connect (registry + payload canônico)",
+          "status": "done",
+          "detail": "Fase 1: tipos, CONNECTOR_REGISTRY, CanonicalSyncBatch; scrapers ainda em packages/api."
+        },
+        {
+          "id": "connect-orchestrator",
+          "title": "PortalSyncOrchestrator + CanonicalBatchImporter",
+          "status": "done",
+          "detail": "Unimed/Amil → batch canônico → Exam, Authorization, MedicalRecord, import_lineage."
+        },
+        {
+          "id": "connect-session-amil",
+          "title": "Sessão Amil persistida (JWT + CDP fallback)",
+          "status": "done",
+          "detail": "Sync silencioso quando token válido; Chrome CDP na primeira vez ou expiração."
+        },
+        {
+          "id": "connect-session-unimed",
+          "title": "Sessão Unimed reutilizável",
+          "status": "done",
+          "detail": "encrypted_session_token + isUnimedSessionUsable no orchestrator."
+        },
+        {
+          "id": "connect-sync-jobs-pg",
+          "title": "sync_jobs persistidos (trigger manual | scheduled)",
+          "status": "in_progress",
+          "detail": "Tabela 013 + repositório; dual-write com sync-progress-store — polling Carteira via syncStatus (PG)."
+        },
+        {
+          "id": "connect-novelty",
+          "title": "Novidades no sync (novelty JSONB)",
+          "status": "done",
+          "detail": "Badge na Carteira com novelty (guias/consultas/exames); formatSyncNovelty no WalletTab."
+        },
+        {
+          "id": "connect-refresh-cdp",
+          "title": "Refresh de sessão Amil em background",
+          "status": "done",
+          "detail": "PortalSyncOrchestrator renova userToken via CDP quando sessionExpiresAt < AMIL_SESSION_RENEW_MS."
+        },
+        {
+          "id": "connect-incremental",
+          "title": "Sync incremental por connector",
+          "status": "in_progress",
+          "detail": "Mater Dei: janela de exames desde max(exam_date)−14d (v1). Unimed/Amil: import skip por chave mas fetch portal ainda full. Ver docs/SYNC_DELTA.md."
+        },
+        {
+          "id": "connect-sync-stream",
+          "title": "Progresso de sync via SSE (push-first)",
+          "status": "in_progress",
+          "detail": "GET /integration-links/sync-progress/:jobId/stream + heartbeat; poll só reconciliação se stream mudo >45s. Web: fetch stream com Bearer."
+        },
+        {
+          "id": "connect-delta-audit",
+          "title": "Auditoria delta sync (portal vs DB)",
+          "status": "in_progress",
+          "detail": "Matriz por portal: fetch incremental, import dedup, arquivos skip; gaps Unimed extrato full, Amil guias, ConecteSUS manual."
+        },
+        {
+          "id": "connect-intervention-only",
+          "title": "Intervenção humana só em falha recuperável",
+          "status": "in_progress",
+          "detail": "Auto silent na Carteira; modal só no Sincronizar manual; toast se silent falha (login/CDP)."
+        }
+      ]
+    },
+    {
+      "id": "sequencia-cuidado",
+      "priority": "P1",
+      "title": "Sequência do cuidado (entidade ↔ entidade)",
+      "summary": "Catálogo relation_types + clinical_entity_links — consulta → autorização → exame auditável no Postgres.",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
+      "items": [
+        {
+          "id": "seq-migration-024",
+          "title": "Migration relation_types + clinical_entity_links",
+          "status": "done",
+          "detail": "024_clinical_entity_links.sql — ORDERED_AUTH, ORDERED_EXAM, RELATED, etc."
+        },
+        {
+          "id": "seq-api",
+          "title": "ClinicalLinkService + rotas HTTP",
+          "status": "done",
+          "detail": "CRUD links, counts, clinical-flow por health-thread."
+        },
+        {
+          "id": "seq-ui-acompanhamento",
+          "title": "UI Acompanhamento — Associar na sequência",
+          "status": "in_progress",
+          "detail": "ClinicalLinkModal, abas Consultas/Autorizações/Exames; pré-seleção e fallback local."
+        },
+        {
+          "id": "seq-fk-shortcuts",
+          "title": "Atalhos de modelo (ORDERED_AUTH → medical_record_id)",
+          "status": "done",
+          "detail": "FK em authorization/exam quando relação canônica é criada."
+        },
+        {
+          "id": "seq-health-thread-vs-clinical",
+          "title": "Separar workflow (thread link) vs relação clínica",
+          "status": "done",
+          "detail": "health_thread_links = papel na trilha; clinical_entity_links = causal entre registros."
+        },
+        {
+          "id": "seq-context-threads",
+          "title": "Trilhas abertas no PatientContext",
+          "status": "planned",
+          "detail": "activeThreads[] e pendências derivadas de acompanhamento no resumo."
+        },
+        {
+          "id": "seq-ui-polish",
+          "title": "Polish UX sequência (tabs, timeline, linguagem)",
+          "status": "planned",
+          "detail": "Badges, Sequência do cuidado no drawer, menos jargão técnico."
+        },
+        {
+          "id": "seq-task-rename",
+          "title": "Renomear kind task → acompanhamento no modelo",
+          "status": "planned",
+          "detail": "UI já usa 'Acompanhamento'; migration de kind opcional."
+        }
+      ]
+    },
+    {
+      "id": "grafo-neo4j",
+      "priority": "P1",
+      "title": "Grafo Neo4j — camada estrutural",
+      "summary": "Projeção read-model para caminhos (medicação → consulta → exame) e correlação futura.",
+      "status": "in_progress",
+      "statusLabel": "MVP",
+      "items": [
+        {
+          "id": "neo4j-projector-links",
+          "title": "ClinicalEntityGraphProjector (links + entidades)",
+          "status": "done",
+          "detail": "MERGE Patient + entidade ao criar; NEO4J_SYNC_ENABLED opcional local."
+        },
+        {
+          "id": "neo4j-hypothesis",
+          "title": "Hypothesis, HealthThread, SUPPORTS / RULED_OUT",
+          "status": "done",
+          "detail": "MVP após trilhas 3.4."
+        },
+        {
+          "id": "neo4j-lineage-worker",
+          "title": "Worker import_lineage → Neo4j",
+          "status": "planned",
+          "detail": "Authorization, Doctor, Procedure a partir de sync e imports."
+        },
+        {
+          "id": "neo4j-path-queries",
+          "title": "Queries de caminho clínico",
+          "status": "planned",
+          "detail": "medicação → consulta → exame → resultado; API para UI e agentes."
+        },
+        {
+          "id": "neo4j-timeline-graph",
+          "title": "Timeline alimentada pelo grafo (opcional)",
+          "status": "planned",
+          "detail": "Visualização de encadeamento além da lista por data."
+        }
+      ]
+    },
+    {
+      "id": "connect-scheduler",
+      "priority": "P2",
+      "title": "Connect — scheduler e worker apartado",
+      "summary": "Execução fora do request do usuário: jobs scheduled, fila, runner dedicado.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "items": [
+        {
+          "id": "sched-trigger",
+          "title": "trigger=scheduled em sync_jobs",
+          "status": "planned",
+          "detail": "Schema já prevê manual | scheduled."
+        },
+        {
+          "id": "sched-pg-only",
+          "title": "Eliminar sync-progress-store em memória",
+          "status": "planned",
+          "detail": "Worker e UI leem só Postgres (step_details JSONB)."
+        },
+        {
+          "id": "sched-cron-local",
+          "title": "Agendamento local (pg_cron ou script)",
+          "status": "planned",
+          "detail": "Enfileirar pending para links com sessão válida; política por portal."
+        },
+        {
+          "id": "sched-worker-package",
+          "title": "packages/connect-worker (runner)",
+          "status": "planned",
+          "detail": "Consome sync_jobs pending; scrapers migram gradualmente do api."
+        },
+        {
+          "id": "sched-events",
+          "title": "Eventos sync.completed",
+          "status": "planned",
+          "detail": "Atualizar context, notificações; não montar sequência automática."
+        },
+        {
+          "id": "sched-microservice",
+          "title": "Connect como serviço HTTP + fila (Fase 3 CONNECT.md)",
+          "status": "planned",
+          "detail": "Longo prazo: /v1/connections/:id/sync, web sempre via Core."
+        }
+      ]
+    },
+    {
+      "id": "contexto-export",
+      "priority": "P2",
+      "title": "Contexto determinístico + export médico",
+      "summary": "Resumo sem alucinação; PDF para consulta alimentado por context + trilhas.",
+      "status": "in_progress",
+      "statusLabel": "Parcial",
+      "items": [
+        {
+          "id": "ctx-api",
+          "title": "GET /patients/:id/context + timeline",
+          "status": "done",
+          "detail": "PatientContextService, alertas, textSummary, timeline filtrada."
+        },
+        {
+          "id": "ctx-ui-resumo",
+          "title": "Card Resumo clínico + timeline horizontal",
+          "status": "done",
+          "detail": "PatientContextPanel, PatientContextTimeline, aba Linha do tempo."
+        },
+        {
+          "id": "export-resumido",
+          "title": "Export resumido médico (PDF/impressão)",
+          "status": "planned",
+          "detail": "Essencial para consulta: alergias, meds, diagnósticos, últimos eventos, vacinas atraso."
+        },
+        {
+          "id": "export-completo",
+          "title": "Export completo do prontuário",
+          "status": "planned",
+          "detail": "Histórico integral + arquivos/OCR relevantes."
+        },
+        {
+          "id": "export-share",
+          "title": "Compartilhamento com médicos",
+          "status": "planned",
+          "detail": "Complementa export; link temporário ou envio."
+        }
+      ]
+    },
+    {
+      "id": "integracoes-dados",
+      "priority": "P2",
+      "title": "Integrações — enriquecimento de dados",
+      "summary": "Mais minério dos portais; não esperar associações — alimentar nós canônicos.",
+      "status": "in_progress",
+      "statusLabel": "Contínuo",
+      "items": [
+        {
+          "id": "int-unimed-sync",
+          "title": "Unimed BH — extrato, autorizações, cartão virtual",
+          "status": "done",
+          "detail": "Sync rico OutSystems; vínculo consulta ↔ autorização no extrato."
+        },
+        {
+          "id": "int-amil-sync",
+          "title": "Amil — plano, carências, guias/tokens",
+          "status": "done",
+          "detail": "Sync validado; JWT + CDP."
+        },
+        {
+          "id": "int-amil-utilizacao",
+          "title": "Amil — utilização → consultas/exames",
+          "status": "planned",
+          "detail": "Minha utilização no portal beneficiário."
+        },
+        {
+          "id": "int-amil-dependentes",
+          "title": "Amil — dependentes como pacientes",
+          "status": "planned",
+          "detail": "Titular + dependentes no mesmo sync."
+        },
+        {
+          "id": "int-unimed-carencias",
+          "title": "Unimed — carências (PDF DeclaracaoCarencia)",
+          "status": "planned",
+          "detail": "Jasper PDF no portal."
+        },
+        {
+          "id": "int-bradesco",
+          "title": "Bradesco Saúde — sync automático",
+          "status": "planned",
+          "detail": "Hoje só vínculo manual."
+        },
+        {
+          "id": "int-mater-dei",
+          "title": "Mater Dei — expansão Connect",
+          "status": "in_progress",
+          "detail": "Scraper dedicado; piloto no boundary Connect."
+        },
+        {
+          "id": "int-guia-pdf",
+          "title": "Baixar PDF da guia como Arquivo",
+          "status": "planned",
+          "detail": "Persistir documento no GCS."
+        },
+        {
+          "id": "int-doctor-photo",
+          "title": "Foto do médico no GCS",
+          "status": "planned",
+          "detail": "Hoje ignoramos base64 da API."
+        }
+      ]
+    },
+    {
+      "id": "documentos-ocr",
+      "priority": "P3",
+      "title": "Documentos + OCR / LLM",
+      "summary": "Cascade OCR, manuscrito, prescrição; métricas de qualidade.",
+      "status": "in_progress",
+      "statusLabel": "Paralelo",
+      "items": [
+        {
+          "id": "ocr-identidade",
+          "title": "Docs identificação → CPF/nome/nascimento",
+          "status": "done",
+          "detail": "Certidão, RG, etc.; base Unimed."
+        },
+        {
+          "id": "ocr-cascade",
+          "title": "Cascade OCR (Tesseract / TrOCR / Vision)",
+          "status": "done",
+          "detail": "python-ocr, trocr adapters."
+        },
+        {
+          "id": "ocr-manuscrito",
+          "title": "Entendimento manuscrito (prescrição, laudo)",
+          "status": "planned",
+          "detail": "LLM na cascata; handwriting credits."
+        },
+        {
+          "id": "ocr-metrics",
+          "title": "Métricas e validação contínua OCR",
+          "status": "planned",
+          "detail": "ocr-quality, feedback loop."
+        }
+      ]
+    },
+    {
+      "id": "agentes",
+      "priority": "P3",
+      "title": "Agentes de apoio (RAG)",
+      "summary": "Médico agêntico com PatientContext + trilhas + fontes citadas; nunca substituir médico.",
+      "status": "planned",
+      "statusLabel": "Depois de P1",
+      "items": [
+        {
+          "id": "agent-runtime",
+          "title": "Runtime com contexto determinístico + citações",
+          "status": "planned",
+          "detail": "RAG sobre PG; disclaimer fixo."
+        },
+        {
+          "id": "agent-packages",
+          "title": "Esqueleto packages/agents",
+          "status": "planned",
+          "detail": "Pediatria, farmacêutico, integração OCR."
+        },
+        {
+          "id": "agent-graph",
+          "title": "Correlação via grafo Neo4j",
+          "status": "planned",
+          "detail": "Hipóteses, caminhos clínicos — após path queries."
+        }
+      ]
+    },
+    {
+      "id": "rede-credenciada",
+      "priority": "P4",
+      "title": "Rede credenciada agregada (“Decolar”)",
+      "summary": "Busca unificada SUS + planos; adapters; ranking — descoberta, não sync clínico.",
+      "status": "planned",
+      "statusLabel": "Horizonte",
+      "items": [
+        {
+          "id": "rede-modulo",
+          "title": "Módulo busca unificada",
+          "status": "planned",
+          "detail": "Especialidade, local, urgência."
+        },
+        {
+          "id": "rede-adapters",
+          "title": "Adapters por provedor",
+          "status": "planned",
+          "detail": "SUS, Unimed, Amil, Bradesco plugável."
+        },
+        {
+          "id": "rede-ranking",
+          "title": "Composição e ranking evolutivo",
+          "status": "planned",
+          "detail": "Deduplicar, ranquear resultados."
+        },
+        {
+          "id": "rede-ui",
+          "title": "UI agregador (filtros, mapa/lista)",
+          "status": "planned",
+          "detail": "Origem do resultado por provedor."
+        }
+      ]
+    },
+    {
+      "id": "plataforma",
+      "priority": "P4",
+      "title": "Plataforma e entrega",
+      "summary": "Mobile, settings, gráficos, arquitetura distribuída.",
+      "status": "planned",
+      "statusLabel": "Horizonte",
+      "items": [
+        {
+          "id": "plat-charts",
+          "title": "Gráficos de crescimento (Recharts)",
+          "status": "planned",
+          "detail": "Aba Medidas no perfil."
+        },
+        {
+          "id": "plat-settings",
+          "title": "Configurações (tema, idioma, backup)",
+          "status": "planned",
+          "detail": "Página settings parcial hoje."
+        },
+        {
+          "id": "plat-mobile",
+          "title": "App mobile (React Native + Expo)",
+          "status": "planned",
+          "detail": "Fora do web atual."
+        },
+        {
+          "id": "plat-microservices",
+          "title": "Split microserviços + API gateway",
+          "status": "planned",
+          "detail": "Bounded contexts: patients, integrations, files, agents."
+        },
+        {
+          "id": "plat-medidas",
+          "title": "Medidas — novos tipos além antropometria",
+          "status": "planned",
+          "detail": "Evoluir entidade growth_records."
+        }
+      ]
+    },
+    {
+      "id": "agenda-calendario",
+      "category": "negocio",
+      "priority": "P3",
+      "title": "Agenda / Calendário (pegada Google)",
+      "summary": "Unificar visão temporal: eventos clínicos já existentes + entradas programadas pelo usuário (consultas a agendar, lembretes). Avaliar Linha do Tempo como sub-visão da Agenda; depois integrar com Google, Microsoft e outros.",
+      "status": "planned",
+      "statusLabel": "Discovery",
+      "items": [
+        {
+          "id": "agenda-timeline-reorg",
+          "title": "Avaliar Linha do Tempo como sub-item de Calendário/Agenda",
+          "status": "planned",
+          "detail": "Hoje: aba Linha do tempo (filtros, eventos passados). Proposta: Agenda como hub temporal; timeline como visão lista/histórico dentro dela."
+        },
+        {
+          "id": "agenda-discovery-ux",
+          "title": "Discovery UX — calendário estilo Google Agenda",
+          "status": "planned",
+          "detail": "Visões mês/semana/dia; eventos clicáveis; criar entrada rápida; diferenciar evento clínico vs lembrete programado."
+        },
+        {
+          "id": "agenda-modelo",
+          "title": "Modelo: eventos canônicos + agenda programada",
+          "status": "planned",
+          "detail": "Agregar consultas, exames, vacinas, autorizações com validade; mais entidade scheduled_event (título, data objetivo, paciente, trilha opcional)."
+        },
+        {
+          "id": "agenda-scheduled-crud",
+          "title": "Criar entradas programadas pelo usuário",
+          "status": "planned",
+          "detail": "Ex.: «Agendar consulta com neurologista», «Lembrar pedir autorização do exame» — sem duplicar consulta real até confirmar."
+        },
+        {
+          "id": "agenda-thread-link",
+          "title": "Lembretes vinculados a Acompanhamento",
+          "status": "planned",
+          "detail": "scheduled_event ↔ health_thread; aparecer na agenda e no drawer da trilha."
+        },
+        {
+          "id": "agenda-google",
+          "title": "Integração Google Calendar",
+          "status": "planned",
+          "detail": "OAuth Google (já usado no login); export ou sync de lembretes/consultas programadas."
+        },
+        {
+          "id": "agenda-microsoft",
+          "title": "Integração Microsoft Outlook / Calendar",
+          "status": "planned",
+          "detail": "OAuth Microsoft (já usado no login); mesma linha que Google."
+        },
+        {
+          "id": "agenda-sync-bidirectional",
+          "title": "Sync bidirecional com calendários externos (fase 2)",
+          "status": "planned",
+          "detail": "Importar compromissos externos; evitar duplicata; política de merge com eventos clínicos."
+        }
+      ]
+    }
+  ]
+}

@@ -38,9 +38,12 @@ const hybridAuthStorage = {
   },
 }
 
+/** Token em memória — evita race entre React state e getSession após hard refresh. */
+let memoryAccessToken: string | null = null
+
 function buildClient(): SupabaseClient | null {
   if (!url || !anonKey) return null
-  return createClient(url, anonKey, {
+  const client = createClient(url, anonKey, {
     auth: {
       storage: hybridAuthStorage,
       autoRefreshToken: true,
@@ -48,16 +51,68 @@ function buildClient(): SupabaseClient | null {
       detectSessionInUrl: true,
     },
   })
+  client.auth.onAuthStateChange((_event, session) => {
+    memoryAccessToken = session?.access_token ?? null
+  })
+  return client
 }
 
 export let supabase: SupabaseClient | null = buildClient()
+
+export function setMemoryAccessToken(token: string | null): void {
+  memoryAccessToken = token
+}
 
 export function getSupabase(): SupabaseClient | null {
   return supabase
 }
 
 export async function getAccessToken(): Promise<string | null> {
+  if (memoryAccessToken) return memoryAccessToken
   if (!supabase) return null
   const { data } = await supabase.auth.getSession()
-  return data.session?.access_token ?? null
+  const token = data.session?.access_token ?? null
+  if (token) memoryAccessToken = token
+  return token
+}
+
+/** Aguarda hidratação da sessão após hard refresh (evita 401 Token ausente). */
+export async function waitForAccessToken(maxWaitMs = 8000): Promise<string | null> {
+  const immediate = await getAccessToken()
+  if (immediate) return immediate
+  if (!supabase) return null
+
+  return new Promise((resolve) => {
+    const deadline = Date.now() + maxWaitMs
+    const { data: sub } = supabase!.auth.onAuthStateChange((_event, session) => {
+      const token = session?.access_token ?? null
+      if (token) {
+        memoryAccessToken = token
+        sub.subscription.unsubscribe()
+        resolve(token)
+      }
+    })
+
+    const poll = async () => {
+      const token = await getAccessToken()
+      if (token) {
+        sub.subscription.unsubscribe()
+        resolve(token)
+        return
+      }
+      if (Date.now() >= deadline) {
+        sub.subscription.unsubscribe()
+        resolve(null)
+        return
+      }
+      setTimeout(poll, 50)
+    }
+    poll()
+  })
+}
+
+/** Garante token antes de chamar a API quando Supabase está configurado. */
+export async function ensureAccessToken(): Promise<string | null> {
+  if (!supabaseConfigured) return null
+  return waitForAccessToken()
 }

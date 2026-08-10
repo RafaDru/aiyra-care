@@ -1,0 +1,117 @@
+.patient-section-nav {
+  padding: 16px 24px 12px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  background: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
+}
+
+.patient-section-nav .ant-segmented {
+  width: 100%;
+  padding: 4px;
+  background: color-mix(in srgb, var(--border) 55%, var(--card-bg));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.patient-section-nav .ant-segmented-item {
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.patient-section-nav .ant-segmented-item-label {
+  padding: 8px 10px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.patient-section-nav .ant-segmented-item:hover:not(.ant-segmented-item-selected) .ant-segmented-item-label {
+  color: var(--primary);
+}
+
+.patient-section-nav .ant-segmented-item-selected {
+  background: var(--primary) !important;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.patient-section-nav .ant-segmented-item-selected .ant-segmented-item-label {
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.patient-section-nav .ant-segmented-thumb {
+  background: var(--primary) !important;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.patient-sub-tabs {
+  background: var(--card-bg);
+}
+
+.patient-sub-tabs .ant-tabs-nav {
+  margin: 0;
+  padding: 8px 24px 0;
+}
+
+.patient-sub-tabs .ant-tabs-nav-wrap {
+  overflow: visible;
+}
+
+.patient-sub-tabs .ant-tabs-tab {
+  margin: 0 4px 8px 0 !important;
+  padding: 8px 14px !important;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.patient-sub-tabs .ant-tabs-tab .ant-tabs-tab-btn {
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.patient-sub-tabs .ant-tabs-tab:hover .ant-tabs-tab-btn {
+  color: var(--primary);
+}
+
+.patient-sub-tabs .ant-tabs-tab-active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.patient-sub-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.patient-sub-tabs .ant-tabs-ink-bar {
+  display: none;
+}
+
+.patient-sub-tabs .ant-tabs-nav::before {
+  border-bottom-color: var(--border);
+}
+
+@media (max-width: 768px) {
+  .patient-section-nav {
+    padding: 12px 16px 8px;
+  }
+
+  .patient-section-nav .ant-segmented-item-label {
+    font-size: 12px;
+    padding: 6px 6px;
+  }
+
+  .patient-sub-tabs .ant-tabs-nav {
+    padding: 6px 16px 0;
+  }
+
+  .patient-sub-tabs .ant-tabs-tab {
+    padding: 6px 10px !important;
+  }
+
+  .patient-sub-tabs .ant-tabs-tab .ant-tabs-tab-btn {
+    font-size: 13px;
+  }
+}

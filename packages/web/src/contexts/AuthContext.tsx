@@ -4,6 +4,7 @@ import type { AppAccount } from '../lib/api.types.js'
 import {
   getSupabase,
   isRememberMeEnabled,
+  setMemoryAccessToken,
   setRememberMePreference,
   supabaseConfigured,
 } from '../lib/supabase.js'
@@ -76,17 +77,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    client.auth.getSession().then(async ({ data }) => {
-      setSession(data.session)
-      await runSync(data.session?.access_token)
-      setLoading(false)
-    })
+    let initialResolved = false
 
-    const { data: sub } = client.auth.onAuthStateChange(async (_event, next) => {
+    const resolveInitial = async (next: Session | null, source: 'initial' | 'getSession' | 'timeout') => {
+      if (initialResolved) return
+      if (source === 'getSession' && !next) return
+      initialResolved = true
       setSession(next)
+      setMemoryAccessToken(next?.access_token ?? null)
+      await runSync(next?.access_token)
+      setLoading(false)
+    }
+
+    const { data: sub } = client.auth.onAuthStateChange(async (event, next) => {
+      if (event === 'INITIAL_SESSION') {
+        if (!next) return
+        await resolveInitial(next, 'initial')
+        return
+      }
+      if (event === 'SIGNED_OUT') {
+        setSession(null)
+        setMemoryAccessToken(null)
+        setAccount(null)
+        setNeedsProfile(false)
+        return
+      }
+      setSession(next)
+      setMemoryAccessToken(next?.access_token ?? null)
       await runSync(next?.access_token)
     })
-    return () => sub.subscription.unsubscribe()
+
+    client.auth.getSession().then(async ({ data }) => {
+      await resolveInitial(data.session, 'getSession')
+    })
+
+    const timeoutId = window.setTimeout(() => {
+      void client.auth.getSession().then(async ({ data }) => {
+        await resolveInitial(data.session ?? null, 'timeout')
+      })
+    }, 3000)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      sub.subscription.unsubscribe()
+    }
   }, [runSync])
 
   const value = useMemo<AuthContextValue>(() => ({
@@ -148,6 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!client) return
       await client.auth.signOut({ scope: 'local' })
       setSession(null)
+      setMemoryAccessToken(null)
       setAccount(null)
       setNeedsProfile(false)
       window.location.assign('/login')

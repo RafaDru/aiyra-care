@@ -42,6 +42,7 @@ export interface AmilSyncParams {
   onProgress: (step: string, message: string, status: 'running' | 'success' | 'failed') => void
   patientName?: string
   log?: FastifyBaseLogger
+  interactiveLogin?: boolean
 }
 
 export interface AmilSyncResult {
@@ -133,11 +134,25 @@ export class PortalSyncOrchestrator {
   }
 
   async runAmilSync(params: AmilSyncParams): Promise<AmilSyncResult> {
-    const { link, decryptedPassword, jobId, onProgress, patientName, log } = params
+    const { link, decryptedPassword, jobId, onProgress, patientName, log, interactiveLogin } = params
+
+    const renewWindowMs = Number(process.env.AMIL_SESSION_RENEW_MS ?? String(24 * 60 * 60 * 1000))
+    if (link.encryptedSessionToken && link.sessionExpiresAt) {
+      const msUntilExpiry = link.sessionExpiresAt.getTime() - Date.now()
+      if (msUntilExpiry > 0 && msUntilExpiry < renewWindowMs) {
+        const scraper = new AmilSyncScraper()
+        const refreshed = await scraper.tryRefreshTokenFromCdp()
+        if (refreshed) {
+          link.setSessionToken(encrypt(refreshed.token), refreshed.expiresAt)
+          await this.linkRepo.update(link)
+          log?.info({ linkId: link.id }, 'Amil session refreshed via CDP')
+        }
+      }
+    }
 
     const storedToken = link.encryptedSessionToken ? decrypt(link.encryptedSessionToken) : undefined
-    const scraper = new AmilSyncScraper()
-    const result = await scraper.scrape(
+    const amilScraper = new AmilSyncScraper()
+    const result = await amilScraper.scrape(
       link.email!,
       decryptedPassword,
       (p) => updateJob(jobId, p),
@@ -145,6 +160,7 @@ export class PortalSyncOrchestrator {
         patientName,
         cardNumber: link.cardNumber || undefined,
         sessionToken: storedToken,
+        interactiveLogin,
       },
     )
 

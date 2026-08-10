@@ -28,6 +28,7 @@ import { healthThreadKindLabel } from './health-thread-kinds.js'
 import { ClinicalEntityFlow } from './ClinicalEntityFlow.js'
 import { ClinicalLinkModal } from './ClinicalLinkModal.js'
 import type { ClinicalFlow } from '../../lib/api.types.js'
+import { CLINICAL_SEQUENCE_COPY } from './clinical-sequence-copy.js'
 
 const { Text, Paragraph } = Typography
 
@@ -229,7 +230,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
                     onRemoveLink={async (linkId) => {
                       try {
                         await api.clinicalLinks.delete(linkId)
-                        message.success('Vínculo removido')
+                        message.success(CLINICAL_SEQUENCE_COPY.removed)
                         load()
                       } catch (e) {
                         message.error(e instanceof Error ? e.message : 'Erro ao remover')
@@ -243,8 +244,9 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
                   style={{ marginTop: 12 }}
                   onClick={() => setLinkModalOpen(true)}
                   disabled={!clinicalFlow || clinicalFlow.nodes.length < 2}
+                  title={CLINICAL_SEQUENCE_COPY.connectButtonHint}
                 >
-                  Vincular entidades no fluxo
+                  {CLINICAL_SEQUENCE_COPY.connectButton}
                 </Button>
               </div>
             )}
@@ -364,7 +366,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
         flow={clinicalFlow}
         onClose={() => setLinkModalOpen(false)}
         onCreated={() => {
-          message.success('Vínculo clínico criado')
+          message.success(CLINICAL_SEQUENCE_COPY.created)
           load()
           onUpdated?.()
         }}

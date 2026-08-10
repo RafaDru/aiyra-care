@@ -12,6 +12,14 @@ import {
   type SyncablePortalType,
   type SyncPortalProfile,
 } from '../../lib/sync-portal-profile.js'
+import {
+  isFatalSyncJobFailure,
+  isSyncJobFinished,
+  SYNC_FALLBACK_CHECK_MS,
+  SYNC_LONG_RUNNING_HINT_MS,
+  SYNC_STREAM_STALE_MS,
+} from '../../lib/sync-job-progress.js'
+import { openSyncJobStream, type SyncProgressStreamPayload } from '../../lib/sync-job-stream.js'
 import { RegisterAmilDependentModal, type UnmatchedBeneficiary } from './RegisterAmilDependentModal.js'
 
 const { Text, Title } = Typography
@@ -69,17 +77,15 @@ interface Props {
   onResync?: () => void
 }
 
-const POLL_MS = 800
-const LONG_RUNNING_HINT_MS = 3 * 60 * 1000
+const LONG_RUNNING_HINT_MS = SYNC_LONG_RUNNING_HINT_MS
 const DEFAULT_PORTAL: SyncablePortalType = 'unimed'
 
-/** Job concluído apenas quando o controller gravou o result (evita falso "Concluído" do scraper). */
 function isJobFinished(p: { step: string; status: string; result?: SyncResult }) {
-  return p.result !== undefined
+  return isSyncJobFinished(p)
 }
 
 function isFatalJobFailure(step: string, status: string): boolean {
-  return status === 'failed' && step === 'error'
+  return isFatalSyncJobFailure(step, status)
 }
 
 function formatBeneficiaryName(name: string): string {
@@ -274,6 +280,9 @@ export function SyncProgressModal({
   const [registerTarget, setRegisterTarget] = useState<UnmatchedBeneficiary | null>(null)
   const finishedRef = useRef(false)
   const startedAtRef = useRef(0)
+  const lastEventAtRef = useRef(0)
+  const onErrorRef = useRef(onError)
+  onErrorRef.current = onError
   const [longRunning, setLongRunning] = useState(false)
 
   const profile = useMemo(() => getSyncPortalProfile(resolvedPortal), [resolvedPortal])
@@ -286,6 +295,7 @@ export function SyncProgressModal({
     if (!jobId) return
     finishedRef.current = false
     startedAtRef.current = Date.now()
+    lastEventAtRef.current = Date.now()
     setCurrentStep(0)
     setMessage('Iniciando...')
     setStatus('running')
@@ -295,51 +305,84 @@ export function SyncProgressModal({
     setLongRunning(false)
     if (portalTypeProp) setResolvedPortal(portalTypeProp)
 
-    const interval = setInterval(async () => {
-      if (Date.now() - startedAtRef.current > LONG_RUNNING_HINT_MS) {
-        setLongRunning(true)
-      }
+    let cancelled = false
 
-      try {
-        const p = await api.integrationLinks.syncProgress(jobId)
+    const applyPayload = (p: SyncProgressStreamPayload) => {
+      if (cancelled || finishedRef.current) return
+      if (p.event !== 'heartbeat') {
         if (p.portalType) setResolvedPortal(p.portalType as SyncablePortalType)
         if (p.message) setMessage(p.message)
         if (p.stepDetails) setStepDetails(p.stepDetails)
-
-        const portal = (p.portalType as SyncablePortalType | undefined) ?? portalTypeProp ?? DEFAULT_PORTAL
-        const idx = resolveSyncStepIndex(p.step, portal)
-        if (idx >= 0) setCurrentStep(idx)
-
-        if (isFatalJobFailure(p.step, p.status)) {
-          if (finishedRef.current) return
-          finishedRef.current = true
-          setStatus('failed')
-          setMessage(p.message || 'Erro na sincronização')
-          clearInterval(interval)
-          onError(p.message || 'Erro na sincronização')
-          return
-        }
-
-        if (isJobFinished(p)) {
-          if (finishedRef.current) return
-          finishedRef.current = true
-          const activeProfile = getSyncPortalProfile(portal)
-          const details = p.stepDetails ?? {}
-          const partial = (p.result?.warnings?.length ?? 0) > 0
-            || fetchGroupHasFailure(details, activeProfile)
-          setStatus(partial ? 'partial' : 'success')
-          setCurrentStep(activeProfile.mainSteps.length - 1)
-          if (p.result !== undefined) setResult(p.result as SyncResult)
-          if (p.stepDetails) setStepDetails(p.stepDetails)
-          clearInterval(interval)
-        }
-      } catch {
-        // job ainda não disponível
       }
-    }, POLL_MS)
 
-    return () => clearInterval(interval)
-  }, [jobId, onError, portalTypeProp])
+      const portal = (p.portalType as SyncablePortalType | undefined) ?? portalTypeProp ?? DEFAULT_PORTAL
+      const details = p.stepDetails ?? {}
+      if (p.event !== 'heartbeat') {
+        setCurrentStep(resolveSyncStepIndex(p.step, portal, details))
+      }
+
+      if (isFatalJobFailure(p.step, p.status)) {
+        if (finishedRef.current) return
+        finishedRef.current = true
+        setStatus('failed')
+        setMessage(p.message || 'Erro na sincronização')
+        onErrorRef.current(p.message || 'Erro na sincronização')
+        return
+      }
+
+      if (isJobFinished(p as { step: string; status: string; result?: SyncResult })) {
+        if (finishedRef.current) return
+        finishedRef.current = true
+        const activeProfile = getSyncPortalProfile(portal)
+        const partial = ((p.result?.warnings?.length ?? 0) > 0)
+          || fetchGroupHasFailure(details, activeProfile)
+        setStatus(partial ? 'partial' : 'success')
+        setCurrentStep(activeProfile.mainSteps.length - 1)
+        if (p.result !== undefined) setResult(p.result as unknown as SyncResult)
+        if (p.stepDetails) setStepDetails(p.stepDetails)
+      }
+    }
+
+    const onStreamPayload = (p: SyncProgressStreamPayload) => {
+      lastEventAtRef.current = Date.now()
+      applyPayload(p)
+    }
+
+    const closeStream = openSyncJobStream(jobId, onStreamPayload, () => {
+      if (!cancelled && !finishedRef.current) lastEventAtRef.current = 0
+    })
+
+    const reconcile = async () => {
+      if (cancelled || finishedRef.current) return
+      try {
+        const p = await api.integrationLinks.syncProgress(jobId)
+        if (cancelled || finishedRef.current) return
+        lastEventAtRef.current = Date.now()
+        applyPayload({ ...p, event: 'snapshot' })
+      } catch {
+        // reconciliação falhou
+      }
+    }
+
+    void reconcile()
+
+    const staleCheck = setInterval(() => {
+      if (cancelled || finishedRef.current) return
+      if (Date.now() - startedAtRef.current > LONG_RUNNING_HINT_MS) {
+        setLongRunning(true)
+      }
+      const staleFor = Date.now() - lastEventAtRef.current
+      if (lastEventAtRef.current > 0 && staleFor > SYNC_STREAM_STALE_MS) {
+        void reconcile()
+      }
+    }, SYNC_FALLBACK_CHECK_MS)
+
+    return () => {
+      cancelled = true
+      closeStream()
+      clearInterval(staleCheck)
+    }
+  }, [jobId, portalTypeProp])
 
   const isOpen = !!jobId
   const canClose = true

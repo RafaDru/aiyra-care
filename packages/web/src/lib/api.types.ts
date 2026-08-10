@@ -202,6 +202,16 @@ export interface ClinicalEntityLink {
   createdAt: string
   relationLabel?: string
   neo4jRelType?: string
+  /** Quando a lista é filtrada por entidade: sentido da relação para o peer. */
+  direction?: 'outgoing' | 'incoming'
+  /** Resumo da outra entidade no vínculo (para UI e navegação). */
+  peerEntity?: {
+    entityType: ClinicalEntityType
+    entityId: string
+    title: string
+    subtitle?: string
+    date?: string
+  }
 }
 
 export interface ClinicalFlowNode {
@@ -681,6 +691,7 @@ export interface IntegrationLink {
   cardNumber: string | null
   active: boolean
   lastSyncAt: string | null
+  sessionExpiresAt?: string | null
   createdAt: string
   updatedAt: string
   /** self = sync neste vínculo; titular = plano atualizado pelo vínculo de outro paciente (ex. Amil). */
@@ -689,6 +700,9 @@ export interface IntegrationLink {
   managedByPatientId?: string
   managedByPatientName?: string
   effectiveLastSyncAt?: string | null
+  effectiveSessionExpiresAt?: string | null
+  /** Sessão persistida válida — sync silencioso permitido sem abrir browser de login. */
+  sessionReady?: boolean
 }
 
 export interface SyncNoveltySummary {
@@ -698,6 +712,9 @@ export interface SyncNoveltySummary {
   skippedExamRecords?: number
   filesDownloaded?: number
   filesSkipped?: number
+  newAuthorizations?: number
+  updatedAuthorizations?: number
+  newMedicalRecords?: number
 }
 
 export interface SyncJobStatusPayload {

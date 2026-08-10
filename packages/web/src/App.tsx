@@ -8,6 +8,7 @@ import { IntegrationsPage } from './pages/integrations.js'
 import { LoginPage } from './pages/login.js'
 import { OnboardingPage } from './pages/onboarding.js'
 import { SettingsPage } from './pages/settings.js'
+import { RoadmapPage } from './pages/roadmap.js'
 
 export function App() {
   return (
@@ -21,6 +22,7 @@ export function App() {
             <Route path="/patients/:id" element={<PatientDetail />} />
             <Route path="/session" element={<SessionPage />} />
             <Route path="/integrations" element={<IntegrationsPage />} />
+            <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Route>

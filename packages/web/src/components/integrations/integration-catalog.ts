@@ -1,6 +1,6 @@
 import type { BrandKey } from '../brands/brand-config.js'
 
-export type LinkablePortal = 'unimed' | 'amil' | 'bradesco_saude' | 'mater_dei'
+export type LinkablePortal = 'unimed' | 'amil' | 'bradesco_saude' | 'mater_dei' | 'hermes_pardini'
 
 export type IntegrationAction = 'link' | 'conectesus' | 'caderneta'
 
@@ -17,7 +17,7 @@ export interface IntegrationOption {
   disabledReason?: string
 }
 
-export type IntegrationGroupId = 'public' | 'health' | 'dental' | 'hospital'
+export type IntegrationGroupId = 'public' | 'health' | 'dental' | 'hospital' | 'laboratory'
 
 export interface IntegrationGroup {
   id: IntegrationGroupId
@@ -40,6 +40,11 @@ export const INTEGRATION_GROUPS: IntegrationGroup[] = [
     id: 'hospital',
     title: 'Hospitais e clínicas',
     description: 'Portais de exames, laudos e atendimentos',
+  },
+  {
+    id: 'laboratory',
+    title: 'Laboratórios',
+    description: 'Resultados de exames laboratoriais',
   },
   {
     id: 'public',
@@ -97,6 +102,16 @@ export const INTEGRATION_OPTIONS: IntegrationOption[] = [
     description: 'Exames, laudos, atendimentos e documentos clínicos',
     action: 'link',
     portalType: 'mater_dei',
+    enabled: true,
+  },
+  {
+    id: 'hermes_pardini',
+    groupId: 'laboratory',
+    brand: 'hermes_pardini',
+    title: 'Hermes Pardini',
+    description: 'Resultados de exames — CPF ou código do cliente + senha do protocolo',
+    action: 'link',
+    portalType: 'hermes_pardini',
     enabled: true,
   },
   {

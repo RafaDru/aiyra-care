@@ -3,7 +3,7 @@
  * Manter sincronizado ao adicionar novos portais ou etapas.
  */
 
-export type SyncablePortalType = 'unimed' | 'amil' | 'mater_dei'
+export type SyncablePortalType = 'unimed' | 'amil' | 'mater_dei' | 'hermes_pardini'
 
 export interface SyncFetchSubstepDef {
   key: string
@@ -119,6 +119,26 @@ export const SYNC_PORTAL_PROFILES: Record<SyncablePortalType, SyncPortalProfile>
       showWarnings: true,
     },
   },
+  hermes_pardini: {
+    portalType: 'hermes_pardini',
+    label: 'Hermes Pardini',
+    mainSteps: [
+      { key: 'login', title: 'Autenticando', aliases: ['navigate', 'pending'] },
+      { key: 'fetch', title: 'Buscando exames', aliases: ['fetch-exams'] },
+      ...COMMON_TAIL,
+    ],
+    fetchSubsteps: [
+      { key: 'fetch-exams', label: 'Resultados laboratoriais' },
+    ],
+    summary: {
+      showExams: true,
+      showMedicalRecords: false,
+      showAuthorizations: false,
+      showBeneficiaries: false,
+      showUnmatchedDependents: false,
+      showWarnings: true,
+    },
+  },
 }
 
 export function getSyncPortalProfile(portalType: SyncablePortalType): SyncPortalProfile {
@@ -127,22 +147,54 @@ export function getSyncPortalProfile(portalType: SyncablePortalType): SyncPortal
 
 /** Mensagens que indicam login manual no browser — exibir destaque no modal. */
 export function isInteractiveLoginMessage(message: string): boolean {
-  return /chrome|browser|gov\.br|conclua o login|clique em entrar|login manual/i.test(message)
+  const m = message.toLowerCase()
+  if (
+    m.includes('sem browser')
+    || m.includes('sem navegador')
+    || m.includes('via api')
+    || m.includes('via http')
+    || m.includes('reutilizada')
+    || m.includes('autenticado via api')
+    || m.includes('sessão amil salva')
+  ) {
+    return false
+  }
+  return /chrome|gov\.br|conclua o login|clique em entrar|login manual|abra o chrome|navegador automatizado/i.test(m)
 }
 
-function stepIndexForProfile(step: string, profile: SyncPortalProfile): number {
+function stepIndexForProfile(
+  step: string,
+  profile: SyncPortalProfile,
+  stepDetails?: Record<string, { status: string }>,
+): number {
   const direct = profile.mainSteps.findIndex((s) => s.key === step)
   if (direct >= 0) return direct
-  const aliased = profile.mainSteps.findIndex((s) => s.aliases?.includes(step))
-  if (aliased >= 0) return aliased
   if (step.startsWith('fetch-')) {
     return profile.mainSteps.findIndex((s) => s.key === 'fetch')
   }
-  return -1
+  if (stepDetails) {
+    if (profile.fetchSubsteps.some((s) => {
+      const st = stepDetails[s.key]?.status
+      return st === 'running' || st === 'success' || st === 'failed'
+    })) {
+      return profile.mainSteps.findIndex((s) => s.key === 'fetch')
+    }
+    if (stepDetails.importing?.status) {
+      return profile.mainSteps.findIndex((s) => s.key === 'importing')
+    }
+  }
+  const aliased = profile.mainSteps.findIndex((s) => s.aliases?.includes(step))
+  if (aliased >= 0) return aliased
+  if (step === 'done' || step === 'error') return profile.mainSteps.length - 1
+  return 0
 }
 
-export function resolveSyncStepIndex(step: string, portalType: SyncablePortalType): number {
-  return stepIndexForProfile(step, getSyncPortalProfile(portalType))
+export function resolveSyncStepIndex(
+  step: string,
+  portalType: SyncablePortalType,
+  stepDetails?: Record<string, { status: string }>,
+): number {
+  return stepIndexForProfile(step, getSyncPortalProfile(portalType), stepDetails)
 }
 
 export function fetchGroupHasFailure(

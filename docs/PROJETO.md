@@ -747,7 +747,13 @@ Agentes devem preferir `/project/context` para estado atual; markdown para detal
 
 ---
 
-## Roadmap — Contexto, trilhas e inteligência clínica
+## Roadmap
+
+Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: `roadmap.json`). A UI do app lê via `GET /roadmap`.
+
+---
+
+## Roadmap — Contexto, trilhas e inteligência clínica (detalhe histórico)
 
 > Alinhado à discussão de 2026-08-06: histórico completo, cruzamento inteligente (Neo4j), documentos/LLM, agentes de apoio e **resumo sem alucinação**.
 

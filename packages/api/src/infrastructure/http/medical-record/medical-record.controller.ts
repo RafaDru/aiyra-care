@@ -1,6 +1,7 @@
 import type { FastifyReply } from 'fastify'
 import type { MedicalRecordService } from '../../../application/medical-record/medical-record.service.js'
 import type { CarePlaceService } from '../../../application/care-place/care-place.service.js'
+import { scheduleCanonicalEntityProjection } from '../../graph/canonical-entity-graph.js'
 import { createMedicalRecordSchema, updateMedicalRecordSchema, medicalRecordParamsSchema, medicalRecordQuerySchema } from './medical-record.schema.js'
 import { NotFoundError } from '../../../domain/errors.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
@@ -19,7 +20,16 @@ export class MedicalRecordController {
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
     const record = await this.service.create(parsed.data)
     await this.carePlaces?.recordUsage(parsed.data.clinicName)
-    return reply.status(201).send(record.toJSON())
+    const json = record.toJSON()
+    scheduleCanonicalEntityProjection({
+      patientId: json.patientId,
+      entityType: 'medical_record',
+      entityId: json.id,
+      title: json.doctorName ?? json.specialty ?? json.clinicName ?? 'Consulta',
+      date: json.recordDate.toISOString(),
+      source: json.source,
+    })
+    return reply.status(201).send(json)
   }
 
   async findById(req: AuthenticatedRequest, reply: FastifyReply) {

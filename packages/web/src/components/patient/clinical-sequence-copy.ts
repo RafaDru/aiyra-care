@@ -1,0 +1,33 @@
+/** Textos de UI — linguagem prática, sem jargão de “entidade/vínculo”. */
+
+export const CLINICAL_SEQUENCE_COPY = {
+  flowSectionTitle: 'Sequência do cuidado',
+  flowEmpty:
+    'Adicione consulta, pedidos e exames a este acompanhamento; depois associe o que veio de quê.',
+  connectButton: 'Associar na sequência',
+  connectButtonHint: 'Ex.: consulta que gerou pedido de exame ou autorização',
+  modalTitle: 'Como isso se conecta?',
+  modalHint:
+    'Indique o que veio primeiro e o que foi pedido ou resultado depois — como na consulta que gera um pedido de exame.',
+  fromLabel: 'Primeiro (o que aconteceu antes)',
+  toLabel: 'Depois (pedido, autorização ou resultado)',
+  relationLabel: 'O que aconteceu entre eles?',
+  relationPlaceholder: 'Escolha origem e destino',
+  relationLoading: 'Carregando opções…',
+  submit: 'Confirmar associação',
+  created: 'Associação registrada',
+  removed: 'Associação removida',
+  columnTitle: 'Sequência',
+  associate: 'Associar',
+  popoverTitle: 'Conexões neste registro',
+  expandTitle: 'Na sequência do cuidado',
+  expandEmpty: 'Nenhuma associação neste registro.',
+  expandHint: 'Clique em um item para abrir na aba correspondente.',
+  sequenceCount: '{{count}} na sequência',
+  goToEntity: 'Abrir',
+  peerOutgoing: 'Depois',
+  peerIncoming: 'Antes',
+  entityModalTitle: 'Associar com outro registro',
+  entityModalHint:
+    'Liga este item a outro do histórico (ex.: consulta → pedido de autorização).',
+}

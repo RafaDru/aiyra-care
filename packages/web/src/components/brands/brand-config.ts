@@ -6,6 +6,7 @@ export type BrandKey =
   | 'conectesus'
   | 'caderneta'
   | 'mater_dei'
+  | 'hermes_pardini'
 
 export interface BrandMeta {
   key: BrandKey
@@ -80,6 +81,16 @@ export const BRANDS: Record<BrandKey, BrandMeta> = {
     accent: '#e1bee7',
     color: '#7b1fa2',
     logoSrc: '/brands/materdei.png',
+  },
+  hermes_pardini: {
+    key: 'hermes_pardini',
+    label: 'Hermes Pardini',
+    shortLabel: 'Pardini',
+    subtitle: 'Laboratório',
+    gradient: 'linear-gradient(135deg, #b91c1c 0%, #dc2626 55%, #ef4444 100%)',
+    accent: '#fecaca',
+    color: '#dc2626',
+    logoSrc: '/brands/hermes-pardini.png',
   },
 }
 

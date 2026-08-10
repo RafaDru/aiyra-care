@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space } from 'antd'
+import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
-import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -18,11 +18,25 @@ import { PersonalDocumentsTab } from './tabs/PersonalDocumentsTab.js'
 import { MedicalRecordsTab } from './tabs/MedicalRecordsTab.js'
 import { DiagnosesTab } from './tabs/DiagnosesTab.js'
 import { AuthorizationsTab } from './tabs/AuthorizationsTab.js'
-import { WalletTab } from './tabs/WalletTab.js'
+import { WalletCardsTab } from './tabs/WalletCardsTab.js'
+import { CoverageTab } from './tabs/CoverageTab.js'
+import { IntegrationsTab, type IntegrationsTabHandle } from './tabs/IntegrationsTab.js'
 import { TimelineTab } from './tabs/TimelineTab.js'
 import { PatientContextPanel } from '../../components/patient/PatientContextPanel.js'
 import { HealthThreadsPanel } from '../../components/patient/HealthThreadsPanel.js'
+import { useAuth } from '../../contexts/AuthContext.js'
+import {
+  SECTION_TABS,
+  resolvePatientNav,
+  tabToSection,
+  defaultTabForSection,
+  isPatientTabKey,
+  PATIENT_SECTIONS,
+  type PatientSection,
+  type PatientTabKey,
+} from '../../lib/patient-navigation.js'
 import '../../components/patient/patient-basic-summary.css'
+import '../../components/patient/patient-detail-nav.css'
 
 const { Title, Text } = Typography
 
@@ -32,10 +46,12 @@ const CATEGORY_LABEL: Record<string, string> = {
   adults: 'Adulto',
 }
 
-const PATIENT_TAB_KEYS = new Set([
-  'basic', 'timeline', 'personal-documents', 'wallet', 'growth', 'vaccines',
-  'medications', 'allergies', 'exams', 'records', 'authorizations', 'diagnoses', 'documents',
-])
+const SECTION_ICONS: Record<PatientSection, ReactNode> = {
+  overview: <UserOutlined />,
+  clinical: <MedicineBoxOutlined />,
+  plan: <IdcardOutlined />,
+  files: <FolderOutlined />,
+}
 
 export function PatientDetail() {
   const { id } = useParams<{ id: string }>()
@@ -43,6 +59,7 @@ export function PatientDetail() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { message } = App.useApp()
   const { t } = useTranslation()
+  const { loading: authLoading, session, configured: authConfigured } = useAuth()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [parents, setParents] = useState<Patient[]>([])
   const [children, setChildren] = useState<Patient[]>([])
@@ -52,20 +69,64 @@ export function PatientDetail() {
   const [allPatients, setAllPatients] = useState<Patient[]>([])
   const [integrationLinks, setIntegrationLinks] = useState<IntegrationLink[]>([])
   const [linkModalOpen, setLinkModalOpen] = useState(false)
-  const [linkPortal, setLinkPortal] = useState<'unimed' | 'amil' | 'bradesco_saude' | 'mater_dei'>('unimed')
+  const [linkPortal, setLinkPortal] = useState<'unimed' | 'amil' | 'bradesco_saude' | 'mater_dei' | 'hermes_pardini'>('unimed')
   const [linkForm] = Form.useForm()
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const [syncJobId, setSyncJobId] = useState<string | null>(null)
-  const [syncPortalType, setSyncPortalType] = useState<'unimed' | 'amil' | 'mater_dei' | null>(null)
+  const [syncPortalType, setSyncPortalType] = useState<'unimed' | 'amil' | 'mater_dei' | 'hermes_pardini' | null>(null)
+  const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
 
-  const tabFromUrl = searchParams.get('tab')
-  const activeTab = tabFromUrl && PATIENT_TAB_KEYS.has(tabFromUrl) ? tabFromUrl : 'basic'
+  const { section: activeSection, tab: activeTab } = resolvePatientNav(
+    searchParams.get('section'),
+    searchParams.get('tab'),
+  )
+  const sectionTabKeys = SECTION_TABS[activeSection]
+  const highlightEntityId = searchParams.get('highlight')
+  const highlightCard = searchParams.get('card')
 
   const setActiveTab = useCallback((key: string) => {
+    if (!isPatientTabKey(key)) return
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
-      if (key === 'basic') next.delete('tab')
-      else next.set('tab', key)
+      const section = tabToSection(key)
+      if (section === 'overview' && key === 'basic') {
+        next.delete('section')
+        next.delete('tab')
+      } else {
+        next.set('section', section)
+        if (key === 'basic') next.delete('tab')
+        else next.set('tab', key)
+      }
+      if (key !== 'wallet') next.delete('card')
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+
+  const setActiveSection = useCallback((section: PatientSection) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      const prevTab = prev.get('tab')
+      const candidate = isPatientTabKey(prevTab) ? prevTab : 'basic'
+      const tab: PatientTabKey = SECTION_TABS[section].includes(candidate) ? candidate : defaultTabForSection(section)
+      if (section === 'overview' && tab === 'basic') {
+        next.delete('section')
+        next.delete('tab')
+      } else {
+        next.set('section', section)
+        if (tab === 'basic') next.delete('tab')
+        else next.set('tab', tab)
+      }
+      if (tab !== 'wallet') next.delete('card')
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+
+  const openWalletCard = useCallback((portalKey: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('section', 'plan')
+      next.set('tab', 'wallet')
+      next.set('card', portalKey)
       return next
     }, { replace: true })
   }, [setSearchParams])
@@ -82,13 +143,20 @@ export function PatientDetail() {
       setParents(list.filter(x => p.parentIds.includes(x.id)))
       setChildren(list.filter(x => x.parentIds.includes(p.id)))
       setIntegrationLinks(links)
-    }).catch(() => message.error(t('patient.notFound'))).finally(() => setLoading(false))
+    }).catch((err) => {
+      const msg = err instanceof Error ? err.message : t('patient.notFound')
+      message.error(msg)
+    }).finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [id])
+  useEffect(() => {
+    if (!id) return
+    if (authConfigured && (authLoading || !session)) return
+    load()
+  }, [id, authLoading, session, authConfigured])
 
-  const SYNCABLE_PORTALS = new Set(['unimed', 'amil', 'mater_dei'])
-  const CPF_LOGIN_PORTALS = new Set(['amil', 'bradesco_saude', 'mater_dei'])
+  const SYNCABLE_PORTALS = new Set(['unimed', 'amil', 'mater_dei', 'hermes_pardini'])
+  const CPF_LOGIN_PORTALS = new Set(['amil', 'bradesco_saude', 'mater_dei', 'hermes_pardini'])
 
   const formatCpf = (cpf: string) => {
     const digits = cpf.replace(/\D/g, '')
@@ -96,7 +164,7 @@ export function PatientDetail() {
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
   }
 
-  const openLinkModal = async (portal: 'unimed' | 'amil' | 'bradesco_saude' | 'mater_dei') => {
+  const openLinkModal = async (portal: 'unimed' | 'amil' | 'bradesco_saude' | 'mater_dei' | 'hermes_pardini') => {
     setLinkPortal(portal)
     linkForm.resetFields()
     setLinkModalOpen(true)
@@ -123,21 +191,43 @@ export function PatientDetail() {
     }
   }
 
-  const startSync = async (linkId: string, portalTypeHint?: string) => {
+  const startSync = async (
+    linkId: string,
+    portalTypeHint?: string,
+    opts?: { silent?: boolean; force?: boolean },
+  ) => {
     const link = integrationLinks.find((l) => l.id === linkId)
     const portalType = portalTypeHint ?? link?.portalType
-    setSyncingId(linkId)
-    if (portalType && SYNCABLE_PORTALS.has(portalType)) {
-      setSyncPortalType(portalType as 'unimed' | 'amil' | 'mater_dei')
+    if (!opts?.silent) {
+      setSyncingId(linkId)
+      if (portalType && SYNCABLE_PORTALS.has(portalType)) {
+        setSyncPortalType(portalType as 'unimed' | 'amil' | 'mater_dei' | 'hermes_pardini')
+      }
     }
     try {
-      const r = await api.integrationLinks.sync(linkId)
-      setSyncJobId(r.jobId)
+      const r = await api.integrationLinks.sync(linkId, { silent: opts?.silent, force: opts?.force })
+      if (r.skipped) {
+        if (!opts?.silent && r.reason === 'session_required') {
+          message.info('Conecte ao portal com Sincronizar (primeira vez ou sessão expirada)')
+        }
+        return
+      }
+      if (!opts?.silent) {
+        setSyncJobId(r.jobId!)
+      }
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro na sincronização')
-      setSyncPortalType(null)
+      if (opts?.silent) {
+        const msg = e instanceof Error ? e.message : String(e)
+        if (/login|autentic|chrome|cdp|sess[aã]o|credenciais|portal do cliente|abra o/i.test(msg)) {
+          message.warning('Sincronização silenciosa falhou — pode ser necessário abrir o portal ou o Chrome (CDP)')
+        }
+        console.warn('Silent sync failed', e)
+      } else {
+        message.error(e instanceof Error ? e.message : 'Erro na sincronização')
+        setSyncPortalType(null)
+      }
     } finally {
-      setSyncingId(null)
+      if (!opts?.silent) setSyncingId(null)
     }
   }
 
@@ -185,6 +275,160 @@ export function PatientDetail() {
 
   const age = calcAge(patient.birthDate, t)
 
+  const tabLabel = (key: PatientTabKey): ReactNode => {
+    switch (key) {
+      case 'basic': return <><UserOutlined /> {t('tabs.basic')}</>
+      case 'timeline': return <><HistoryOutlined /> {t('tabs.timeline')}</>
+      case 'personal-documents': return <><FileProtectOutlined /> {t('tabs.personalDocuments')}</>
+      case 'wallet': return <><IdcardOutlined /> {t('tabs.wallet')}</>
+      case 'coverage': return <><SafetyCertificateOutlined /> {t('tabs.coverage')}</>
+      case 'integrations': return <><ApiOutlined /> {t('tabs.integrations')}</>
+      case 'growth': return t('tabs.growth')
+      case 'vaccines': return t('tabs.vaccines')
+      case 'medications': return t('tabs.medications')
+      case 'allergies': return t('tabs.allergies')
+      case 'exams': return t('tabs.exams')
+      case 'records': return t('tabs.records')
+      case 'authorizations': return t('tabs.authorizations')
+      case 'diagnoses': return t('tabs.diagnoses')
+      case 'documents': return t('tabs.documents')
+    }
+  }
+
+  const renderTabContent = (key: PatientTabKey) => {
+    switch (key) {
+      case 'basic':
+        return (
+          <>
+            <div className="patient-basic-summary-row">
+              <div className="patient-basic-summary-row__clinical">
+                <PatientContextPanel patientId={patient.id} />
+              </div>
+              <div className="patient-basic-summary-row__threads">
+                <HealthThreadsPanel patientId={patient.id} layout="sidebar" />
+              </div>
+            </div>
+            <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
+              <Descriptions.Item label="Nome">{patient.name}</Descriptions.Item>
+              <Descriptions.Item label="Data de Nascimento">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : '-'}</Descriptions.Item>
+              <Descriptions.Item label="Sexo">{patient.gender === 'male' ? t('patient.male') : patient.gender === 'female' ? t('patient.female') : '-'}</Descriptions.Item>
+              <Descriptions.Item label="Tipo Sanguíneo">{patient.bloodType || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Peso">{patient.weightKg ? `${patient.weightKg} ${t('patient.weight')}` : '-'}</Descriptions.Item>
+              <Descriptions.Item label="Altura">{patient.heightCm ? `${patient.heightCm} ${t('patient.height')}` : '-'}</Descriptions.Item>
+              <Descriptions.Item label="CPF">{patient.cpf ? `${patient.cpf.slice(0, 3)}.${patient.cpf.slice(3, 6)}.${patient.cpf.slice(6, 9)}-${patient.cpf.slice(9)}` : '-'}</Descriptions.Item>
+              <Descriptions.Item label="CNS">{patient.cns || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Idade">{age}</Descriptions.Item>
+              <Descriptions.Item label="Categoria">
+                <Tag color="geekblue">{CATEGORY_LABEL[patient.ageCategory] || patient.ageCategory}</Tag>
+              </Descriptions.Item>
+            </Descriptions>
+            {(parents.length > 0 || children.length > 0) && (
+              <>
+                <Divider><LinkOutlined /> Relações Familiares</Divider>
+                {parents.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text strong>Pais/Responsáveis:</Text>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                      {parents.map((p) => (
+                        <Tag key={p.id} color="purple" style={{ cursor: 'pointer' }} onClick={() => navigate(`/patients/${p.id}`)}>
+                          {p.name}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {children.length > 0 && (
+                  <div>
+                    <Text strong>Filhos:</Text>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                      {children.map((p) => (
+                        <Tag key={p.id} color="cyan" style={{ cursor: 'pointer' }} onClick={() => navigate(`/patients/${p.id}`)}>
+                          {p.name}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+            <Divider />
+            <Space>
+              <Button type="primary" icon={<EditOutlined />} onClick={handleEditOpen}>Editar Dados</Button>
+            </Space>
+          </>
+        )
+      case 'timeline':
+        return <TimelineTab patientId={patient.id} />
+      case 'personal-documents':
+        return <PersonalDocumentsTab patientId={patient.id} />
+      case 'wallet':
+        return (
+          <WalletCardsTab
+            patient={patient}
+            links={integrationLinks}
+            linkedChildrenCount={children.length}
+            highlightCard={highlightCard}
+            onCardUpdated={load}
+            onOpenIntegrations={() => setActiveTab('integrations')}
+          />
+        )
+      case 'coverage':
+        return (
+          <CoverageTab
+            patient={patient}
+            links={integrationLinks}
+            onViewCard={openWalletCard}
+          />
+        )
+      case 'integrations':
+        return (
+          <IntegrationsTab
+            ref={integrationsTabRef}
+            patient={patient}
+            links={integrationLinks}
+            onRemoved={load}
+            onLinkPortal={(portal) => { void openLinkModal(portal) }}
+            onCardUpdated={load}
+            linkedChildrenCount={children.length}
+          />
+        )
+      case 'growth':
+        return <GrowthTab patientId={patient.id} />
+      case 'vaccines':
+        return <VaccinesTab patientId={patient.id} />
+      case 'medications':
+        return <MedicationsTab patientId={patient.id} />
+      case 'allergies':
+        return <AllergiesTab patientId={patient.id} />
+      case 'exams':
+        return <ExamsTab patientId={patient.id} highlightEntityId={highlightEntityId} />
+      case 'records':
+        return <MedicalRecordsTab patientId={patient.id} highlightEntityId={highlightEntityId} />
+      case 'authorizations':
+        return <AuthorizationsTab patientId={patient.id} highlightEntityId={highlightEntityId} />
+      case 'diagnoses':
+        return <DiagnosesTab patientId={patient.id} />
+      case 'documents':
+        return <DocumentsTab patientId={patient.id} onPatientUpdated={load} onOpenExamsTab={() => setActiveTab('exams')} />
+    }
+  }
+
+  const subTabItems = sectionTabKeys.map((key) => ({
+    key,
+    label: tabLabel(key),
+    children: <div style={{ padding: 24 }}>{renderTabContent(key)}</div>,
+  }))
+
+  const sectionOptions = PATIENT_SECTIONS.map((section) => ({
+    value: section,
+    label: (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        {SECTION_ICONS[section]}
+        {t(`sections.${section}`)}
+      </span>
+    ),
+  }))
+
   return (
     <div>
       <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} style={{ marginBottom: 16 }}>
@@ -218,129 +462,34 @@ export function PatientDetail() {
       </Card>
 
       <Card style={{ borderRadius: 16 }} styles={{ body: { padding: 0 } }}>
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          tabBarStyle={{ padding: '0 24px', margin: 0 }}
-          destroyInactiveTabPane
-          items={[
-            {
-              key: 'basic', label: <><UserOutlined /> Dados Básicos</>,
-              children: (
-                <div style={{ padding: 24 }}>
-                  <div className="patient-basic-summary-row">
-                    <div className="patient-basic-summary-row__clinical">
-                      <PatientContextPanel patientId={patient.id} />
-                    </div>
-                    <div className="patient-basic-summary-row__threads">
-                      <HealthThreadsPanel patientId={patient.id} layout="sidebar" />
-                    </div>
-                  </div>
-                  <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
-                    <Descriptions.Item label="Nome">{patient.name}</Descriptions.Item>
-                    <Descriptions.Item label="Data de Nascimento">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : '-'}</Descriptions.Item>
-                    <Descriptions.Item label="Sexo">{patient.gender === 'male' ? t('patient.male') : patient.gender === 'female' ? t('patient.female') : '-'}</Descriptions.Item>
-                    <Descriptions.Item label="Tipo Sanguíneo">{patient.bloodType || '-'}</Descriptions.Item>
-                    <Descriptions.Item label="Peso">{patient.weightKg ? `${patient.weightKg} ${t('patient.weight')}` : '-'}</Descriptions.Item>
-                    <Descriptions.Item label="Altura">{patient.heightCm ? `${patient.heightCm} ${t('patient.height')}` : '-'}</Descriptions.Item>
-                    <Descriptions.Item label="CPF">{patient.cpf ? `${patient.cpf.slice(0,3)}.${patient.cpf.slice(3,6)}.${patient.cpf.slice(6,9)}-${patient.cpf.slice(9)}` : '-'}</Descriptions.Item>
-                    <Descriptions.Item label="CNS">{patient.cns || '-'}</Descriptions.Item>
-                    <Descriptions.Item label="Idade">{age}</Descriptions.Item>
-                    <Descriptions.Item label="Categoria">
-                      <Tag color="geekblue">{CATEGORY_LABEL[patient.ageCategory] || patient.ageCategory}</Tag>
-                    </Descriptions.Item>
-                  </Descriptions>
-
-                  {(parents.length > 0 || children.length > 0) && (
-                    <>
-                      <Divider><LinkOutlined /> Relações Familiares</Divider>
-                      {parents.length > 0 && (
-                        <div style={{ marginBottom: 12 }}>
-                          <Text strong>Pais/Responsáveis:</Text>
-                          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                            {parents.map(p => (
-                              <Tag key={p.id} color="purple" style={{ cursor: 'pointer' }} onClick={() => navigate(`/patients/${p.id}`)}>
-                                {p.name}
-                              </Tag>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {children.length > 0 && (
-                        <div>
-                          <Text strong>Filhos:</Text>
-                          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                            {children.map(p => (
-                              <Tag key={p.id} color="cyan" style={{ cursor: 'pointer' }} onClick={() => navigate(`/patients/${p.id}`)}>
-                                {p.name}
-                              </Tag>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  <Divider />
-                  <Space>
-                    <Button type="primary" icon={<EditOutlined />} onClick={handleEditOpen}>Editar Dados</Button>
-                  </Space>
-                </div>
-              ),
-            },
-            {
-              key: 'timeline',
-              label: <><HistoryOutlined /> {t('tabs.timeline')}</>,
-              children: (
-                <div style={{ padding: 24 }}>
-                  <TimelineTab patientId={patient.id} />
-                </div>
-              ),
-            },
-            {
-              key: 'personal-documents',
-              label: <><FileProtectOutlined /> {t('tabs.personalDocuments')}</>,
-              children: (
-                <div style={{ padding: 24 }}>
-                  <PersonalDocumentsTab patientId={patient.id} />
-                </div>
-              ),
-            },
-            {
-              key: 'wallet',
-              label: <><IdcardOutlined /> {t('tabs.wallet')}</>,
-              children: (
-                <div style={{ padding: 24 }}>
-                  <WalletTab
-                    patient={patient}
-                    links={integrationLinks}
-                    syncingId={syncingId}
-                    onSync={startSync}
-                    onRemoved={load}
-                    onLinkPortal={(portal) => { void openLinkModal(portal) }}
-                    onCardUpdated={load}
-                    linkedChildrenCount={children.length}
-                  />
-                </div>
-              ),
-            },
-            { key: 'growth', label: t('tabs.growth'), children: <div style={{ padding: 24 }}><GrowthTab patientId={patient.id} /></div> },
-            { key: 'vaccines', label: t('tabs.vaccines'), children: <div style={{ padding: 24 }}><VaccinesTab patientId={patient.id} /></div> },
-            { key: 'medications', label: t('tabs.medications'), children: <div style={{ padding: 24 }}><MedicationsTab patientId={patient.id} /></div> },
-            { key: 'allergies', label: t('tabs.allergies'), children: <div style={{ padding: 24 }}><AllergiesTab patientId={patient.id} /></div> },
-            { key: 'exams', label: t('tabs.exams'), children: <div style={{ padding: 24 }}><ExamsTab patientId={patient.id} /></div> },
-            { key: 'records', label: t('tabs.records'), children: <div style={{ padding: 24 }}><MedicalRecordsTab patientId={patient.id} /></div> },
-            { key: 'authorizations', label: 'Autorizações', children: <div style={{ padding: 24 }}><AuthorizationsTab patientId={patient.id} /></div> },
-            { key: 'diagnoses', label: t('tabs.diagnoses'), children: <div style={{ padding: 24 }}><DiagnosesTab patientId={patient.id} /></div> },
-            { key: 'documents', label: t('tabs.documents'), children: <div style={{ padding: 24 }}><DocumentsTab patientId={patient.id} onPatientUpdated={load} onOpenExamsTab={() => setActiveTab('exams')} /></div> },
-          ]}
-        />
+        <div className="patient-section-nav">
+          <Segmented
+            block
+            size="large"
+            value={activeSection}
+            onChange={(value) => setActiveSection(value as PatientSection)}
+            options={sectionOptions}
+          />
+        </div>
+        {sectionTabKeys.length > 1 ? (
+          <Tabs
+            className="patient-sub-tabs"
+            size="large"
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            destroyInactiveTabPane
+            items={subTabItems}
+          />
+        ) : (
+          <div style={{ padding: 24 }}>{renderTabContent(activeTab)}</div>
+        )}
       </Card>
 
       <Modal title={`Vincular ${
         linkPortal === 'unimed' ? 'Unimed BH'
           : linkPortal === 'amil' ? 'Amil'
             : linkPortal === 'mater_dei' ? 'Meu Mater Dei'
+              : linkPortal === 'hermes_pardini' ? 'Hermes Pardini'
               : 'Bradesco Saúde'
       }`} open={linkModalOpen} confirmLoading={syncingId !== null} onOk={async () => {
         try {
@@ -374,6 +523,7 @@ export function PatientDetail() {
             label={
               linkPortal === 'unimed' ? 'E-mail de acesso'
                 : linkPortal === 'mater_dei' ? 'CPF (Meu Mater Dei)'
+                  : linkPortal === 'hermes_pardini' ? 'CPF ou código do cliente'
                   : linkPortal === 'amil' ? 'CPF'
                     : 'CPF / usuário'
             }
@@ -382,10 +532,11 @@ export function PatientDetail() {
                 ? [{ required: true, type: 'email', message: 'Informe o e-mail' }]
                 : CPF_LOGIN_PORTALS.has(linkPortal)
                   ? [
-                      { required: true, message: 'Informe o CPF' },
+                      { required: true, message: linkPortal === 'hermes_pardini' ? 'Informe CPF ou código' : 'Informe o CPF' },
                       {
                         validator: (_, value) => {
                           const digits = String(value || '').replace(/\D/g, '')
+                          if (linkPortal === 'hermes_pardini' && digits.length >= 1) return Promise.resolve()
                           if (digits.length === 11) return Promise.resolve()
                           return Promise.reject(new Error('CPF deve ter 11 dígitos'))
                         },
@@ -394,9 +545,11 @@ export function PatientDetail() {
                   : [{ required: true }]
             }
             extra={
-              CPF_LOGIN_PORTALS.has(linkPortal) && patient?.cpf
-                ? 'Pré-preenchido com o CPF do paciente'
-                : undefined
+              linkPortal === 'hermes_pardini'
+                ? 'CPF ou código do cliente e senha do protocolo de entrega'
+                : CPF_LOGIN_PORTALS.has(linkPortal) && patient?.cpf
+                  ? 'Pré-preenchido com o CPF do paciente'
+                  : undefined
             }
           >
             <Input

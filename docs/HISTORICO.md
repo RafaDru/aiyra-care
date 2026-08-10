@@ -830,3 +830,50 @@ Discussão sobre evolução clínica da plataforma: histórico completo, Neo4j p
 - Dependentes como pacientes separados
 
 ---
+
+## [2026-08-10] - Carteira em 3 abas, sync push-first, UI integrações e refresh
+
+### Contexto
+Consolidação da aba Carteira (Carteirinhas / Convênios / Integrações), progresso de sync sem polling agressivo, sidebar com histórico de sincronizações, Hermes Pardini (Precision Care), e correção do **Token ausente** no hard refresh com paciente selecionado.
+
+### Decisões
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Progresso de sync | SSE push-first + GET reconciliação | Evitar poll 800 ms; heartbeat no stream |
+| Histórico sync UI | Snapshot do `lastJob` no mesmo card do dock | Comparar estado final; alinhamento visual |
+| Refresh SPA | Vite proxy `bypass` para `/patients/*` e `/roadmap` | Navegação HTML não deve ir à API (401 Token ausente) |
+| Mater Dei incremental | `examStartDate` desde max(exam)−14d | Reduzir fetch full 2015→hoje no portal |
+| Convênios | Collapse sem `accordion` | Comparar dois planos expandidos |
+
+### Realizado
+- [x] Navegação paciente Opção A (`section` + `tab`); abas Carteira: Carteirinhas, Convênios, Integrações
+- [x] `WalletSyncDock` / `IntegrationsSyncSidebar` — progresso ao vivo + últimas sincronizações por data/hora
+- [x] SSE `GET /integration-links/sync-progress/:jobId/stream` + `sync-job-stream.ts`
+- [x] Fix polling React (`onTerminal` em ref); cards histórico = `SyncJobCardView`
+- [x] Hermes Pardini: ROPC, scraper, link no catálogo; BFF exames pendente
+- [x] `docs/roadmap.json`, `docs/SYNC_DELTA.md`, sync incremental Mater Dei
+- [x] **Refresh corrigido** — `vite.config.ts` bypass document navigation; `AuthContext` ignora `INITIAL_SESSION` vazio
+
+### To-Dos (sequência)
+- [x] Refresh corrigido (proxy Vite vs rotas SPA)
+- [x] Registrar histórico e momento atual da aplicação (`HISTORICO.md` + `project-context.json`)
+- [x] Commit e push `main` (esta sessão)
+- [ ] Mapear BFF Hermes Pardini (lista/PDF exames)
+- [ ] Sync incremental Unimed/Amil (fetch portal com janela/cursor)
+- [ ] Renovação proativa sessão Amil em background
+- [ ] Export PDF resumido para consulta médica
+
+### Momento atual da aplicação (snapshot)
+- **Web:** perfil paciente com macro-seções; Carteira em 3 sub-abas; dock lateral de sync sempre visível em Integrações; auth Supabase com token em memória + stream de progresso.
+- **API:** sync jobs em PG + memória; push SSE em `updateJob`; portais syncáveis Unimed, Amil, Mater Dei, Hermes (exames Hermes stub).
+- **Auth refresh:** hard refresh em `/patients/:id?...` serve SPA via Vite, não JSON 401 da API.
+- **Roadmap vivo:** `docs/roadmap.json` + página Roadmap; P0 Connect silencioso em progresso.
+
+### Arquivos-chave
+- `packages/web/vite.config.ts` — bypass SPA no proxy
+- `packages/web/src/components/scraper/SyncJobCardView.tsx`
+- `packages/api/src/infrastructure/scraper/sync-job-stream.ts`
+- `packages/api/src/application/connect/sync-delta.helper.ts`
+- `docs/SYNC_DELTA.md`, `docs/roadmap.json`
+
+---

@@ -1,5 +1,5 @@
 import type { Page, Response } from 'playwright'
-import { loginUnimedBh } from './unimedbh-login.helper.js'
+import { acquireUnimedBhSession } from './unimedbh-login.helper.js'
 import type { PlanAddOn } from '../../domain/insurance-plan/insurance-plan.entity.js'
 import { waitForUnimedScreenService } from './unimedbh-wait-response.helper.js'
 
@@ -219,14 +219,25 @@ export class UnimedBhCartaoVirtualScraper {
   async scrape(
     email: string,
     password: string,
-    opts?: { patientName?: string; cardNumber?: string },
+    opts?: { patientName?: string; cardNumber?: string; storageStateJson?: string },
   ): Promise<UnimedBhVirtualCard> {
-    const { browser, page } = await loginUnimedBh(email, password)
+    const { browser, page, usedStoredSession } = await acquireUnimedBhSession(
+      email,
+      password,
+      { storageStateJson: opts?.storageStateJson },
+    )
 
     try {
-      const card = await scrapeUnimedBhVirtualCardFromPage(page, { ...opts, requireToken: true })
+      const card = await scrapeUnimedBhVirtualCardFromPage(page, {
+        patientName: opts?.patientName,
+        cardNumber: opts?.cardNumber,
+        requireToken: true,
+      })
       if (!card?.token && !card?.qrCode && !card?.cardNumber) {
-        throw new Error('Não foi possível obter token/QR Code do Cartão Virtual Unimed')
+        const hint = usedStoredSession
+          ? 'Sessão Unimed expirada — use Sincronizar para reconectar'
+          : 'Não foi possível obter token/QR Code do Cartão Virtual Unimed'
+        throw new Error(hint)
       }
       return card!
     } finally {

@@ -1,0 +1,43 @@
+.clinical-entity-row--highlight td {
+  background: color-mix(in srgb, var(--primary) 12%, var(--card-bg)) !important;
+  animation: clinical-row-pulse 1.2s ease-in-out 2;
+}
+
+@keyframes clinical-row-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+}
+
+.clinical-links-expanded {
+  padding: 8px 12px 12px;
+  background: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.clinical-link-peer-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.clinical-link-peer-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  background: color-mix(in srgb, var(--primary) 6%, var(--card-bg));
+}
+
+.clinical-link-peer-card:last-child {
+  margin-bottom: 0;
+}

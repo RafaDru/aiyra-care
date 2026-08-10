@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-06",
+  "generatedAt": "2026-08-10",
   "application": {
     "name": "AiyraCare (Filhos)",
     "repository": "https://github.com/RafaDru/open-health",
@@ -11,7 +11,7 @@
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Contexto de paciente é determinístico (sem LLM). Trilhas de saúde (HealthThread) organizam tarefas, investigações, hipóteses e episódios com vínculos a exames, consultas, autorizações, medicamentos, vacinas e documentos. Integrações Unimed BH e Amil com sync assíncrono. Próximo eixo: catálogo de tipos de relação em Postgres (thread↔entidade e entidade↔entidade) para UX e LLM.",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Carteira do paciente em 3 abas (Carteirinhas, Convênios, Integrações). Sync de portais com progresso push-first (SSE) e histórico lateral por data/hora. Auth Supabase: refresh em /patients/* corrigido via bypass do proxy Vite (não enviar navegação HTML à API). Hermes Pardini integrado (login HTTP); BFF de exames pendente. Mater Dei: fetch de exames incremental desde última data conhecida.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
     "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, import_lineage",
@@ -52,14 +52,17 @@
     { "method": "POST", "path": "/health-threads/:id/links", "description": "Vincular entidade existente à trilha" },
     { "method": "POST", "path": "/health-threads/:id/artifacts/*", "description": "Criar exame/consulta/autorização/med/vacina e vincular" },
     { "method": "GET", "path": "/sessions", "description": "Histórico de sessões parseado de HISTORICO.md" },
-    { "method": "POST", "path": "/integration-links/:id/sync", "description": "Sync assíncrono portal (jobId + polling)" }
+    { "method": "POST", "path": "/integration-links/:id/sync", "description": "Sync assíncrono portal (jobId + SSE/polling fallback)" },
+    { "method": "GET", "path": "/integration-links/sync-progress/:jobId/stream", "description": "SSE progresso de sync (push-first)" },
+    { "method": "GET", "path": "/roadmap", "description": "Roadmap priorizado (docs/roadmap.json)" }
   ],
   "integrations": [
     { "portal": "unimed", "syncAutomatic": true, "authMethod": "Playwright SSO acesso.unimedbh.com.br", "imports": ["extrato/consultas", "autorizações", "cartão virtual/plano"] },
     { "portal": "amil", "syncAutomatic": true, "authMethod": "JWT salvo → CDP Chrome → Playwright fallback", "imports": ["plano", "carências", "guias/tokens → Authorization"] },
     { "portal": "bradesco_saude", "syncAutomatic": false, "authMethod": "vínculo manual", "imports": [] },
     { "portal": "conectesus", "syncAutomatic": false, "authMethod": "import manual gov.br", "imports": ["vacinas", "exames"] },
-    { "portal": "mater_dei", "syncAutomatic": true, "authMethod": "scraper dedicado", "imports": ["exames"] }
+    { "portal": "mater_dei", "syncAutomatic": true, "authMethod": "scraper dedicado", "imports": ["exames", "atendimentos"], "notes": "fetch exames incremental desde max(exam_date)−14d" },
+    { "portal": "hermes_pardini", "syncAutomatic": true, "authMethod": "Keycloak ROPC + browser fallback", "imports": ["exames (BFF pendente)"] }
   ],
   "healthThreads": {
     "kinds": ["task", "investigation", "hypothesis", "episode"],
@@ -88,9 +91,12 @@
     { "id": "diagnosis-separate", "date": "2026-08-06", "title": "Diagnóstico formal separado", "decision": "diagnoses para conclusão; trilhas para pré-diagnóstico", "rationale": "Hipóteses não são diagnóstico até conversão", "status": "active" },
     { "id": "relation-catalog-pg", "date": "2026-08-06", "title": "Catálogo de relações em PG", "decision": "Não hardcodar tipos nem só Neo4j", "rationale": "Governança, UX, LLM com schema estável", "status": "planned" },
     { "id": "auth-sync-no-block-ui", "date": "2026-08-06", "title": "Sync auth não desmonta UI", "decision": "loading do AuthContext sem incluir syncing em gate de rotas", "rationale": "Token refresh ao refocar browser resetava aba do paciente", "status": "active" },
-    { "id": "timeline-no-documents", "date": "2026-08-06", "title": "Timeline clínica sem uploads", "decision": "Documentos só em Arquivos; timeline com eventos estruturados + thread_note", "rationale": "Uploads não poluem linha do tempo clínica", "status": "active" }
+    { "id": "vite-spa-proxy-bypass", "date": "2026-08-10", "title": "Refresh SPA vs API no dev", "decision": "Vite proxy bypass para navegação HTML em /patients/* e /roadmap", "rationale": "Hard refresh não deve chamar API sem Bearer (401 Token ausente)", "status": "active" },
+    { "id": "sync-progress-sse", "date": "2026-08-10", "title": "Progresso sync push-first", "decision": "SSE em updateJob + reconciliação GET se stream mudo", "rationale": "Substituir polling contínuo; heartbeat de conectividade", "status": "active" }
   ],
   "plannedWork": [
+    { "id": "hermes-bff-exams", "title": "Mapear BFF Hermes Pardini (lista/PDF exames)", "status": "planned" },
+    { "id": "sync-incremental-unimed-amil", "title": "Sync incremental Unimed/Amil no fetch portal", "status": "planned" },
     { "id": "relation-catalog-4.1", "title": "Migration relation_types + GET /relation-types", "status": "planned" },
     { "id": "entity-links-4.2", "title": "clinical_entity_links (consulta → exame)", "status": "planned" },
     { "id": "neo4j-lineage-worker", "title": "Worker import_lineage → Neo4j", "status": "planned" },
@@ -103,6 +109,8 @@
     { "path": "docs/PROJETO.md", "role": "Documento vivo — arquitetura, endpoints, roadmap", "format": "markdown" },
     { "path": "docs/HISTORICO.md", "role": "Decisões cronológicas por sessão", "format": "markdown" },
     { "path": "AGENTS.md", "role": "Instruções operacionais para agentes Cursor", "format": "markdown" },
+    { "path": "docs/roadmap.json", "role": "Roadmap priorizado P0–P4", "format": "json" },
+    { "path": "docs/SYNC_DELTA.md", "role": "Auditoria delta sync por portal", "format": "markdown" },
     { "path": "docs/CONNECT.md", "role": "Boundary Connect vs Core", "format": "markdown" },
     { "path": "docs/SUPABASE.md", "role": "Auth e memberships", "format": "markdown" }
   ]

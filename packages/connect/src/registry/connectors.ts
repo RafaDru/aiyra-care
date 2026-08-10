@@ -40,6 +40,14 @@ export const CONNECTOR_REGISTRY: Record<string, ConnectorDefinition> = {
     capabilities: ['sync_medical_records', 'sync_exams'],
     legacyPortalType: 'mater_dei',
   },
+  hermes_pardini: {
+    id: 'hermes_pardini',
+    label: 'Hermes Pardini',
+    category: 'provider',
+    authProfile: 'session_basic',
+    capabilities: ['sync_exams'],
+    legacyPortalType: 'hermes_pardini',
+  },
   bradesco_saude: {
     id: 'bradesco_saude',
     label: 'Bradesco Saúde',

@@ -7,6 +7,7 @@ import { ImportInsuranceModal } from '../components/scraper/ImportInsuranceModal
 import { PublicHealthIntegrationModal } from '../components/integrations/PublicHealthIntegrationModal.js'
 import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
+import { useAuth } from '../contexts/AuthContext.js'
 
 const { Text } = Typography
 
@@ -50,14 +51,16 @@ const integrations = [
 
 export function IntegrationsPage() {
   const navigate = useNavigate()
+  const { loading: authLoading, session, configured: authConfigured } = useAuth()
   const [patients, setPatients] = useState<Patient[]>([])
   const [patientId, setPatientId] = useState<string>()
   const [publicHealthPortal, setPublicHealthPortal] = useState<'conectesus' | null>(null)
   const [insuranceOpen, setInsuranceOpen] = useState<{ portal: 'unimed' | 'amil' | 'bradesco_saude'; label: string } | null>(null)
 
   useEffect(() => {
+    if (authConfigured && (authLoading || !session)) return
     api.patients.list().then(setPatients).catch(() => {})
-  }, [])
+  }, [authConfigured, authLoading, session])
 
   const handleCardClick = (int: typeof integrations[number]) => {
     if (!int.available) return

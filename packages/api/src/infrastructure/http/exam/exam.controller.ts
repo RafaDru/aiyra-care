@@ -1,6 +1,7 @@
 import type { FastifyReply } from 'fastify'
 import type { ExamService } from '../../../application/exam/exam.service.js'
 import type { CarePlaceService } from '../../../application/care-place/care-place.service.js'
+import { scheduleCanonicalEntityProjection } from '../../graph/canonical-entity-graph.js'
 import { createExamSchema, updateExamSchema, examParamsSchema, examQuerySchema } from './exam.schema.js'
 import { NotFoundError } from '../../../domain/errors.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
@@ -19,7 +20,16 @@ export class ExamController {
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
     const exam = await this.service.create(parsed.data)
     await this.carePlaces?.recordUsage(parsed.data.laboratory)
-    return reply.status(201).send(exam.toJSON())
+    const json = exam.toJSON()
+    scheduleCanonicalEntityProjection({
+      patientId: json.patientId,
+      entityType: 'exam',
+      entityId: json.id,
+      title: json.examType,
+      date: json.examDate.toISOString(),
+      source: json.source,
+    })
+    return reply.status(201).send(json)
   }
 
   async findById(req: AuthenticatedRequest, reply: FastifyReply) {

@@ -6,6 +6,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "integrations": "Integrations",
+    "roadmap": "Roadmap",
     "session": "Sessions",
     "settings": "Settings"
   },
@@ -68,6 +69,19 @@
     "subtitle": "Project development records",
     "noItems": "No items recorded"
   },
+  "roadmap": {
+    "title": "Roadmap",
+    "subtitle": "Priorities, epics and pending work — track and discuss product evolution",
+    "introTitle": "Current direction",
+    "principlesTitle": "Principles",
+    "categoriesTitle": "Categories",
+    "prioritiesTitle": "Priorities",
+    "noEpics": "No epics at this priority level.",
+    "updatedAt": "Updated {{date}}",
+    "empty": "Roadmap not available",
+    "loadError": "Failed to load roadmap",
+    "footer": "Source: docs/roadmap.json in the repo. Edit the JSON to change priorities or status."
+  },
   "patient": {
     "title": "My Patients",
     "new": "New Patient",
@@ -83,7 +97,15 @@
     "height": "cm",
     "bloodType": "Type"
   },
+  "sections": {
+    "overview": "Overview",
+    "clinical": "Clinical history",
+    "plan": "Plan & portals",
+    "files": "Files"
+  },
   "tabs": {
+    "basic": "Basic info",
+    "authorizations": "Authorizations",
     "growth": "Measurements",
     "vaccines": "Vaccines",
     "medications": "Medications",
@@ -93,7 +115,9 @@
     "diagnoses": "Diagnoses",
     "documents": "Clinical files",
     "personalDocuments": "Personal documents",
-    "wallet": "Coverage",
+    "wallet": "Wallet",
+    "coverage": "Coverage",
+    "integrations": "Integrations",
     "timeline": "Timeline"
   },
   "growth": {

@@ -3,6 +3,7 @@ import { allKnownSyncStepKeys, type SyncablePortalType } from '../../domain/scra
 import type { SyncNoveltySummary } from '../../domain/sync-job/sync-job.entity.js'
 import { SyncJob as SyncJobEntity } from '../../domain/sync-job/sync-job.entity.js'
 import type { SyncJobPgRepository } from '../persistence/sync-job.pg.repository.js'
+import { publishSyncJobEvent } from './sync-job-stream.js'
 
 export interface SyncAuthorizationDetail {
   solicitationNumber?: string
@@ -64,6 +65,19 @@ export interface SyncJob {
   stepDetails: Record<string, SyncStepDetail>
 }
 
+export type SyncProgressEventKind = 'progress' | 'heartbeat' | 'snapshot'
+
+export interface SyncProgressPayload {
+  step: string
+  message: string
+  status: 'running' | 'success' | 'failed'
+  portalType?: SyncablePortalType
+  result?: SyncResult
+  stepDetails?: Record<string, SyncStepDetail>
+  novelty?: SyncNoveltySummary
+  event?: SyncProgressEventKind
+}
+
 const TRACKED_STEPS = new Set(allKnownSyncStepKeys())
 
 function trackStep(
@@ -73,13 +87,21 @@ function trackStep(
   if (!TRACKED_STEPS.has(progress.step) && !progress.step.startsWith('fetch-')) {
     return stepDetails
   }
-  return {
+  const next: Record<string, SyncStepDetail> = {
     ...stepDetails,
     [progress.step]: {
       status: progress.status === 'failed' ? 'failed' : progress.status === 'success' ? 'success' : 'running',
       message: progress.message,
     },
   }
+  const login = next.login
+  if (
+    login?.status === 'running'
+    && (progress.step.startsWith('fetch-') || progress.step === 'importing' || progress.step === 'done')
+  ) {
+    next.login = { status: 'success', message: login.message }
+  }
+  return next
 }
 
 const jobs = new Map<string, SyncJob>()
@@ -106,7 +128,7 @@ function persistJobUpdate(
   if (!syncJobRepo) return
   const status = mapPersistedStatus(progress)
   const finishedAt = status === 'success' || status === 'failed' ? new Date() : undefined
-  syncJobRepo.updateProgress({
+  const persist = syncJobRepo.updateProgress({
     id,
     step: progress.step,
     message: progress.message,
@@ -116,7 +138,29 @@ function persistJobUpdate(
     novelty,
     error: status === 'failed' ? progress.message : undefined,
     finishedAt,
-  }).catch(() => {})
+  })
+  if (status === 'success' || status === 'failed') {
+    persist.catch((err) => console.error('sync_jobs terminal persist failed', id, err))
+  } else {
+    persist.catch(() => {})
+  }
+}
+
+function jobToPayload(job: SyncJob, event?: SyncProgressEventKind): SyncProgressPayload {
+  return {
+    ...job.progress,
+    portalType: job.portalType,
+    result: job.result,
+    stepDetails: job.stepDetails,
+    novelty: job.result?.novelty,
+    event,
+  }
+}
+
+export function getJobProgressPayload(id: string, event?: SyncProgressEventKind): SyncProgressPayload | undefined {
+  const job = jobs.get(id)
+  if (!job) return undefined
+  return jobToPayload(job, event)
 }
 
 export function createJob(portalType?: SyncablePortalType, integrationLinkId?: string): string {
@@ -136,6 +180,7 @@ export function createJob(portalType?: SyncablePortalType, integrationLinkId?: s
     })
     syncJobRepo.save(entity).catch(() => {})
   }
+  publishSyncJobEvent(id, jobToPayload(jobs.get(id)!, 'snapshot'))
   return id
 }
 
@@ -147,14 +192,20 @@ export function updateJob(
 ) {
   const prev = jobs.get(id)
   const stepDetails = trackStep(prev?.stepDetails ?? {}, progress)
-  const mergedResult = result !== undefined ? result : prev?.result
+  const mergedResult =
+    result !== undefined
+      ? { ...result, novelty: novelty ?? result.novelty }
+      : prev?.result
   jobs.set(id, {
     portalType: prev?.portalType,
+    integrationLinkId: prev?.integrationLinkId,
     progress,
     result: mergedResult,
     stepDetails,
   })
-  persistJobUpdate(id, progress, stepDetails, mergedResult, novelty)
+  const noveltyToPersist = novelty ?? mergedResult?.novelty
+  persistJobUpdate(id, progress, stepDetails, mergedResult, noveltyToPersist)
+  publishSyncJobEvent(id, jobToPayload(jobs.get(id)!, 'progress'))
 }
 
 export function getJob(id: string): SyncJob | undefined {

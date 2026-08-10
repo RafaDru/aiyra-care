@@ -27,6 +27,7 @@ import type { MedicationProps } from '../../domain/medication/medication.entity.
 import { Vaccine } from '../../domain/vaccine/vaccine.entity.js'
 import type { VaccineProps } from '../../domain/vaccine/vaccine.entity.js'
 import { NotFoundError } from '../../domain/errors.js'
+import { scheduleCanonicalEntityProjection } from '../../infrastructure/graph/canonical-entity-graph.js'
 
 export interface InvestigationWizardInput {
   patientId: string
@@ -248,6 +249,16 @@ export class HealthThreadWorkflowService {
 
       this.graphSync?.scheduleLink(thread, link)
 
+      const examJson = exam.toJSON()
+      scheduleCanonicalEntityProjection({
+        patientId: examJson.patientId,
+        entityType: 'exam',
+        entityId: examJson.id,
+        title: examJson.examType,
+        date: examJson.examDate.toISOString(),
+        source: examJson.source,
+      })
+
       await this.entries.save(
         HealthThreadEntry.create({
           threadId,
@@ -286,6 +297,15 @@ export class HealthThreadWorkflowService {
       }),
     )
     this.graphSync?.scheduleLink(thread, link)
+    const recordJson = record.toJSON()
+    scheduleCanonicalEntityProjection({
+      patientId: recordJson.patientId,
+      entityType: 'medical_record',
+      entityId: recordJson.id,
+      title: recordJson.doctorName ?? recordJson.specialty ?? recordJson.clinicName ?? 'Consulta',
+      date: recordJson.recordDate.toISOString(),
+      source: recordJson.source,
+    })
     await this.entries.save(
       HealthThreadEntry.create({
         threadId,
@@ -319,6 +339,15 @@ export class HealthThreadWorkflowService {
       }),
     )
     this.graphSync?.scheduleLink(thread, link)
+    const authJson = auth.toJSON()
+    scheduleCanonicalEntityProjection({
+      patientId: authJson.patientId,
+      entityType: 'authorization',
+      entityId: authJson.id,
+      title: authJson.classification ?? authJson.procedureDescription ?? 'Autorização',
+      date: authJson.authorizationDate?.toISOString() ?? authJson.createdAt.toISOString(),
+      source: authJson.source,
+    })
     await this.entries.save(
       HealthThreadEntry.create({
         threadId,

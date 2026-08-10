@@ -8,16 +8,22 @@ export function documentDownloadUrl(documentId: string): string {
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const isFormData = options?.body instanceof FormData
   const headers: Record<string, string> = options?.body && !isFormData ? { 'Content-Type': 'application/json' } : {}
-  const { getAccessToken } = await import('./supabase.js')
-  const token = await getAccessToken()
+  const { ensureAccessToken, supabaseConfigured } = await import('./supabase.js')
+  const token = await ensureAccessToken()
+  if (supabaseConfigured && !token) {
+    throw new Error('Sessão não disponível — aguarde ou faça login novamente')
+  }
   if (token) headers.Authorization = `Bearer ${token}`
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { ...headers, ...options?.headers },
     ...options,
   })
   if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { message?: string; code?: string }
-    throw new Error(body.message || `HTTP ${res.status}`)
+    const body = await res.json().catch(() => ({})) as { message?: string; code?: string; error?: unknown }
+    const zodMsg = body.error && typeof body.error === 'object' && 'fieldErrors' in (body.error as object)
+      ? JSON.stringify(body.error)
+      : undefined
+    throw new Error(body.message || zodMsg || `HTTP ${res.status}`)
   }
   if (res.status === 204) return undefined as T
   return res.json()
@@ -144,19 +150,31 @@ export const api = {
   sessions: {
     list: () => request<import('./api.types.js').Session[]>('/sessions'),
   },
+  roadmap: {
+    get: () => request<import('./roadmap.types.js').RoadmapData>('/roadmap'),
+  },
   integrationLinks: {
     list: (patientId: string) => request<import('./api.types.js').IntegrationLink[]>(`/integration-links?patientId=${patientId}`),
     create: (data: object) => request<import('./api.types.js').IntegrationLink>('/integration-links', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: object) => request<import('./api.types.js').IntegrationLink>(`/integration-links/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: string) => request<void>(`/integration-links/${id}`, { method: 'DELETE' }),
-    sync: (id: string) => request<{ jobId: string }>(`/integration-links/${id}/sync`, { method: 'POST' }),
+    sync: (id: string, opts?: { silent?: boolean; force?: boolean }) => {
+      const params = new URLSearchParams()
+      if (opts?.silent) params.set('silent', '1')
+      if (opts?.force) params.set('force', '1')
+      const q = params.toString()
+      return request<{ jobId: string | null; silent?: boolean; skipped?: boolean; reason?: string }>(
+        `/integration-links/${id}/sync${q ? `?${q}` : ''}`,
+        { method: 'POST' },
+      )
+    },
     virtualCard: (id: string) => request<import('./api.types.js').UnimedVirtualCard>(`/integration-links/${id}/virtual-card`, { method: 'POST' }),
     syncStatus: (id: string) => request<import('./api.types.js').IntegrationLinkSyncStatus>(`/integration-links/${id}/sync-status`),
     syncProgress: (jobId: string) => request<{
       step: string
       message: string
       status: string
-      portalType?: 'unimed' | 'amil' | 'mater_dei'
+      portalType?: 'unimed' | 'amil' | 'mater_dei' | 'hermes_pardini'
       stepDetails?: Record<string, { status: 'running' | 'success' | 'failed'; message: string }>
       novelty?: import('./api.types.js').SyncNoveltySummary
       result?: {

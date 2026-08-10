@@ -148,16 +148,47 @@ export class ClinicalLinkService {
     const types = await this.relationTypes.findAll()
     const typeMap = new Map(types.map((t) => [t.code, t]))
 
-    return rows.map((row) => {
-      const json = row.toJSON()
-      const rel = typeMap.get(json.relationCode)
-      return {
-        ...json,
-        createdAt: json.createdAt.toISOString(),
-        relationLabel: rel?.label ?? json.relationCode,
-        neo4jRelType: rel?.neo4jRelType ?? 'RELATED',
-      }
-    })
+    const filterEntityType = filter.entityType
+    const filterEntityId = filter.entityId
+
+    return Promise.all(
+      rows.map(async (row) => {
+        const json = row.toJSON()
+        const rel = typeMap.get(json.relationCode)
+        const base = {
+          ...json,
+          createdAt: json.createdAt.toISOString(),
+          relationLabel: rel?.label ?? json.relationCode,
+          neo4jRelType: rel?.neo4jRelType ?? 'RELATED',
+        }
+
+        if (!filterEntityType || !filterEntityId) return base
+
+        const isFrom =
+          json.fromEntityType === filterEntityType && json.fromEntityId === filterEntityId
+        const peerType = isFrom ? json.toEntityType : json.fromEntityType
+        const peerId = isFrom ? json.toEntityId : json.fromEntityId
+        const summary = await this.entitySummary(patientId, peerType, peerId)
+
+        return {
+          ...base,
+          direction: isFrom ? 'outgoing' : 'incoming',
+          peerEntity: summary
+            ? {
+                entityType: summary.entityType,
+                entityId: summary.entityId,
+                title: summary.title,
+                subtitle: summary.subtitle,
+                date: summary.date,
+              }
+            : {
+                entityType: peerType,
+                entityId: peerId,
+                title: peerType,
+              },
+        }
+      }),
+    )
   }
 
   async linkCounts(patientId: string) {

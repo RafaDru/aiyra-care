@@ -4,6 +4,7 @@ import { IntegrationLinkPgRepository } from '../../infrastructure/persistence/in
 import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg.repository.js'
 import { PlanMembershipPgRepository } from '../../infrastructure/persistence/plan-membership.pg.repository.js'
 import { InsurancePlanPgRepository } from '../../infrastructure/persistence/insurance-plan.pg.repository.js'
+import { isIntegrationLinkSessionReady } from './integration-link-session.js'
 
 /** Portais em que um sync no titular atualiza dependentes do mesmo plano. */
 const TITULAR_HOUSEHOLD_PORTALS = new Set(['amil'])
@@ -14,6 +15,8 @@ export interface IntegrationLinkSyncAuthority {
   managedByPatientId?: string
   managedByPatientName?: string
   effectiveLastSyncAt: Date | null
+  effectiveSessionExpiresAt: Date | null
+  sessionReady: boolean
 }
 
 export type IntegrationLinkWithSyncAuthority = ReturnType<IntegrationLink['toJSON']> &
@@ -43,6 +46,8 @@ export async function enrichIntegrationLinksWithSyncAuthority(
       syncAuthority: 'self',
       effectiveSyncLinkId: link.id,
       effectiveLastSyncAt: link.lastSyncAt,
+      effectiveSessionExpiresAt: link.sessionExpiresAt,
+      sessionReady: isIntegrationLinkSessionReady(link),
     }
 
     if (TITULAR_HOUSEHOLD_PORTALS.has(link.portalType)) {
@@ -64,6 +69,8 @@ export async function enrichIntegrationLinksWithSyncAuthority(
             managedByPatientId: holderLink.patientId,
             managedByPatientName: holderPatient?.name ?? undefined,
             effectiveLastSyncAt: holderLink.lastSyncAt,
+            effectiveSessionExpiresAt: holderLink.sessionExpiresAt,
+            sessionReady: isIntegrationLinkSessionReady(holderLink),
           }
         }
       }

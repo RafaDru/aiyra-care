@@ -33,9 +33,9 @@ function isHeadless(): boolean {
   return v !== '0' && v !== 'false' && v !== 'no'
 }
 
-async function launchBrowser(): Promise<Browser> {
+async function launchBrowser(headless?: boolean): Promise<Browser> {
   return chromium.launch({
-    headless: isHeadless(),
+    headless: headless ?? isHeadless(),
     channel: 'chrome',
     args: ['--disable-blink-features=AutomationControlled'],
   })
@@ -121,7 +121,7 @@ export async function acquireUnimedBhSession(
   opts?: { storageStateJson?: string },
 ): Promise<UnimedBhSession> {
   if (opts?.storageStateJson) {
-    const browser = await launchBrowser()
+    const browser = await launchBrowser(true)
     try {
       const context = await newStealthContext(browser, opts.storageStateJson)
       const page = await context.newPage()

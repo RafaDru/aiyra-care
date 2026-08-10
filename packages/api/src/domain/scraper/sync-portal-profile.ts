@@ -1,6 +1,6 @@
 /** Perfis de etapas de sincronização por portal — contrato de domínio (UI espelha em web). */
 
-export type SyncablePortalType = 'unimed' | 'amil' | 'mater_dei'
+export type SyncablePortalType = 'unimed' | 'amil' | 'mater_dei' | 'hermes_pardini'
 
 export interface SyncFetchSubstepDef {
   key: string
@@ -110,6 +110,26 @@ export const SYNC_PORTAL_PROFILES: Record<SyncablePortalType, SyncPortalProfile>
     summary: {
       showExams: true,
       showMedicalRecords: true,
+      showAuthorizations: false,
+      showBeneficiaries: false,
+      showUnmatchedDependents: false,
+      showWarnings: true,
+    },
+  },
+  hermes_pardini: {
+    portalType: 'hermes_pardini',
+    label: 'Hermes Pardini',
+    mainSteps: [
+      { key: 'login', title: 'Autenticando', aliases: ['navigate', 'pending'] },
+      { key: 'fetch', title: 'Buscando exames', aliases: ['fetch-exams'] },
+      ...COMMON_TAIL,
+    ],
+    fetchSubsteps: [
+      { key: 'fetch-exams', label: 'Resultados laboratoriais' },
+    ],
+    summary: {
+      showExams: true,
+      showMedicalRecords: false,
       showAuthorizations: false,
       showBeneficiaries: false,
       showUnmatchedDependents: false,

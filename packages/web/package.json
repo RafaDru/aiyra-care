@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc --noEmit && vite build",
+    "clean:stale-js": "node -e \"const fs=require('fs');const p=require('path');function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.js'))fs.unlinkSync(f);}}walk('src');\""
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.2",

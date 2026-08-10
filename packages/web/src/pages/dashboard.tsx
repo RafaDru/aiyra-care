@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
+import { useAuth } from '../contexts/AuthContext.js'
 
 const { Title, Text } = Typography
 
@@ -19,6 +20,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ReactNode; co
 export function Dashboard() {
   const { t } = useTranslation()
   const { message } = App.useApp()
+  const { loading: authLoading, session, configured: authConfigured } = useAuth()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -35,7 +37,10 @@ export function Dashboard() {
         setLoadError(err instanceof Error ? err.message : 'Falha ao carregar pacientes')
       })
   }
-  useEffect(() => { load().finally(() => setLoading(false)) }, [])
+  useEffect(() => {
+    if (authConfigured && (authLoading || !session)) return
+    load().finally(() => setLoading(false))
+  }, [authConfigured, authLoading, session])
 
   const handleCreate = async () => {
     try {

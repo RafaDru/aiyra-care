@@ -56,9 +56,64 @@ export interface AmilScrapeOpts {
   cardNumber?: string
   /** JWT userToken de sync anterior — evita abrir browser. */
   sessionToken?: string
+  /** Primeira sync / botão Sincronizar — permite CDP/browser se API falhar. */
+  interactiveLogin?: boolean
 }
 
 type Json = Record<string, unknown>
+
+const AMIL_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+
+function extractTokenFromLoginJson(json: unknown): string {
+  const rec = asRecord(json)
+  if (!rec) return ''
+  return str(rec.token, pickNested(rec, ['data', 'token']), pickNested(rec, ['Data', 'token']))
+}
+
+/** Login HTTP AuthOGS — sem browser (prioridade após JWT salvo). */
+async function loginAmilViaApi(login: string, password: string): Promise<string | null> {
+  const digits = normalizeLogin(login)
+  if (!digits || !password) return null
+
+  const request = await playwrightRequest.newContext({
+    baseURL: BASE,
+    userAgent: AMIL_USER_AGENT,
+    extraHTTPHeaders: {
+      Accept: 'application/json',
+      'Accept-Language': 'pt-BR,pt;q=0.9',
+    },
+  })
+
+  try {
+    await request.get(`${BASE}/#/`, { timeout: 45_000 }).catch(() => {})
+
+    const loginVariants = [digits]
+    const masked = formatAmilLoginMask(digits)
+    if (masked !== digits) loginVariants.push(masked)
+
+    for (const loginValue of loginVariants) {
+      const res = await request.post(`${BASE}/api/AuthOGS/Login`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Origin: 'https://www.amil.com.br',
+          Referer: `${BASE}/`,
+        },
+        data: { userData: { login: loginValue, senha: password, idSistema: 400 } },
+      })
+      if (res.status() === 401) {
+        throw new Error('Usuário ou senha Amil inválidos')
+      }
+      if (!res.ok()) continue
+      const token = extractTokenFromLoginJson(await res.json())
+      if (token && isAmilSessionValid(token)) return token
+    }
+    return null
+  } finally {
+    await request.dispose()
+  }
+}
 
 function allowBrowserLaunch(): boolean {
   const v = (process.env.AMIL_ALLOW_BROWSER ?? 'false').toLowerCase()
@@ -697,29 +752,47 @@ export class AmilSyncScraper {
     opts?: AmilScrapeOpts,
   ): Promise<AmilSyncResult> {
     const emit = (step: string, message: string, status: ScraperProgress['status']) => onProgress?.({ step, message, status })
+    const interactiveLogin = opts?.interactiveLogin ?? false
 
     if (opts?.sessionToken && isAmilSessionValid(opts.sessionToken)) {
-      emit('login', 'Sessão Amil salva (sem browser)...', 'running')
+      emit('login', 'Sessão Amil salva...', 'running')
       try {
-        return await this.syncWithToken(opts.sessionToken, emit, opts)
+        return await this.authenticatedSync(opts.sessionToken, 'Sessão Amil reutilizada', emit, opts)
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        if (!/401|403|401|sess[aã]o|token|unauthorized/i.test(msg)) throw err
+        if (!/401|403|sess[aã]o|token|unauthorized/i.test(msg)) throw err
         emit('login', 'Sessão salva expirada, renovando...', 'running')
       }
     }
 
+    try {
+      emit('login', 'Autenticando na Amil (API)...', 'running')
+      const apiToken = await loginAmilViaApi(login, password)
+      if (apiToken) {
+        return await this.authenticatedSync(apiToken, 'Autenticado via API Amil', emit, opts)
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (/inv[aá]lid|senha|401/i.test(msg)) throw err
+      emit('login', 'API indisponível, tentando outras formas...', 'running')
+    }
+
     const cdpToken = await this.tryReadTokenFromCdp(emit)
     if (cdpToken) {
-      emit('login', 'Sessão obtida do Chrome (CDP)...', 'running')
-      return this.syncWithToken(cdpToken, emit, opts)
+      return await this.authenticatedSync(cdpToken, 'Sessão lida do Chrome (CDP)', emit, opts)
+    }
+
+    if (!interactiveLogin) {
+      throw new Error(
+        'Sessão Amil indisponível. Use Sincronizar para conectar (primeira vez ou após expirar a sessão).',
+      )
     }
 
     const endpoint = cdpEndpoint()
     if (endpoint) {
       try {
         const token = await this.loginViaCdpChrome(login, password, endpoint, emit)
-        return this.syncWithToken(token, emit, opts)
+        return this.authenticatedSync(token, 'Autenticado na Amil', emit, opts)
       } catch (cdpErr) {
         if (!allowBrowserLaunch()) throw cdpErr
         emit('login', 'Tentando navegador automatizado...', 'running')
@@ -729,6 +802,23 @@ export class AmilSyncScraper {
     }
 
     const token = await this.acquireTokenViaBrowser(login, password, emit)
+    return this.authenticatedSync(token, 'Autenticado na Amil', emit, opts)
+  }
+
+  /** Lê userToken válido do Chrome CDP sem sync completo (renovação silenciosa). */
+  async tryRefreshTokenFromCdp(): Promise<{ token: string; expiresAt: Date } | null> {
+    const token = await this.tryReadTokenFromCdp()
+    if (!token) return null
+    return { token, expiresAt: sessionExpiresAt(token) }
+  }
+
+  private async authenticatedSync(
+    token: string,
+    loginSuccessMessage: string,
+    emit: (step: string, message: string, status: ScraperProgress['status']) => void,
+    opts?: AmilScrapeOpts,
+  ): Promise<AmilSyncResult> {
+    emit('login', loginSuccessMessage, 'success')
     return this.syncWithToken(token, emit, opts)
   }
 
@@ -922,7 +1012,19 @@ export class AmilSyncScraper {
         .catch(() => {})
 
       emit('login', 'Preenchendo credenciais no Chrome...', 'running')
-      await fillAmilCredentials(page, login, password)
+      const loginDigits = await fillAmilCredentials(page, login, password)
+
+      emit('login', 'Autenticando...', 'running')
+      const inPage = await tryInPageLogin(page, loginDigits, password)
+      if (inPage.token) {
+        emit('login', 'Autenticado na Amil', 'running')
+        return inPage.token
+      }
+      if (inPage.status === 401) {
+        throw new Error('Usuário ou senha Amil inválidos')
+      }
+
+      await page.getByRole('button', { name: /^Entrar$/i }).first().click({ timeout: 5000 }).catch(() => {})
 
       emit('login', 'Clique em Entrar no Chrome (login manual)...', 'running')
       const token = await this.waitForUserToken(page, context, emit, manualLoginTimeoutMs())

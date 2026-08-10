@@ -11,6 +11,9 @@ export interface SyncNoveltySummary {
   skippedExamRecords?: number
   filesDownloaded?: number
   filesSkipped?: number
+  newAuthorizations?: number
+  updatedAuthorizations?: number
+  newMedicalRecords?: number
 }
 
 export interface SyncJobProps {

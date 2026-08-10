@@ -24,8 +24,58 @@ const ALLOWED_REL_TYPES = new Set([
   'RELATED',
 ])
 
+export interface CanonicalEntityProjection {
+  patientId: string
+  entityType: string
+  entityId: string
+  title?: string | null
+  date?: string | null
+  source?: string | null
+}
+
 export class ClinicalEntityGraphProjector {
   constructor(private readonly driver: Driver) {}
+
+  scheduleCanonicalEntity(input: CanonicalEntityProjection): void {
+    if (!isNeo4jSyncEnabled()) return
+    void this.projectCanonicalEntity(input).catch((err) => {
+      console.warn('[neo4j] Canonical entity projection failed:', (err as Error).message)
+    })
+  }
+
+  async projectCanonicalEntity(input: CanonicalEntityProjection): Promise<void> {
+    const label = ENTITY_LABEL[input.entityType] ?? 'ClinicalEntity'
+    const session = this.driver.session()
+    try {
+      await session.executeWrite(async (tx) => {
+        await tx.run(`MERGE (p:Patient {id: $patientId})`, { patientId: input.patientId })
+        await tx.run(
+          `MERGE (e:${label} {id: $entityId})
+           SET e.type = $entityType,
+               e.patientId = $patientId,
+               e.title = $title,
+               e.eventDate = $date,
+               e.source = $source`,
+          {
+            entityId: input.entityId,
+            entityType: input.entityType,
+            patientId: input.patientId,
+            title: input.title ?? null,
+            date: input.date ?? null,
+            source: input.source ?? null,
+          },
+        )
+        await tx.run(
+          `MATCH (p:Patient {id: $patientId})
+           MATCH (e:${label} {id: $entityId})
+           MERGE (p)-[:HAS_RECORD]->(e)`,
+          { patientId: input.patientId, entityId: input.entityId },
+        )
+      })
+    } finally {
+      await session.close()
+    }
+  }
 
   scheduleLink(link: ClinicalEntityLink, relationType: RelationType): void {
     if (!isNeo4jSyncEnabled()) return

@@ -3,26 +3,13 @@ import { LinkOutlined } from '@ant-design/icons'
 import type { ClinicalFlow, ClinicalFlowEdge, ClinicalFlowNode } from '../../lib/api.types.js'
 import { ENTITY_TYPE_LABEL } from './health-thread-link-roles.js'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
+import { sortClinicalFlowNodes } from './entity-clinical-link-utils.js'
+import { CLINICAL_SEQUENCE_COPY } from './clinical-sequence-copy.js'
 
 const { Text } = Typography
 
-const NODE_ORDER: Record<string, number> = {
-  medical_record: 0,
-  authorization: 1,
-  exam: 2,
-  medication: 3,
-  diagnosis: 4,
-  vaccine: 5,
-  health_thread: 6,
-}
-
 function sortNodes(nodes: ClinicalFlowNode[]): ClinicalFlowNode[] {
-  return [...nodes].sort((a, b) => {
-    const oa = NODE_ORDER[a.entityType] ?? 9
-    const ob = NODE_ORDER[b.entityType] ?? 9
-    if (oa !== ob) return oa - ob
-    return (a.date ?? '').localeCompare(b.date ?? '')
-  })
+  return sortClinicalFlowNodes(nodes)
 }
 
 function buildLanes(nodes: ClinicalFlowNode[], edges: ClinicalFlowEdge[]) {
@@ -57,7 +44,7 @@ export function ClinicalEntityFlow({ flow, onRemoveLink }: ClinicalEntityFlowPro
   if (flow.nodes.length === 0) {
     return (
       <Text type="secondary" style={{ fontSize: 12 }}>
-        Vincule consulta, autorização e exame à trilha e crie relações clínicas entre eles.
+        {CLINICAL_SEQUENCE_COPY.flowEmpty}
       </Text>
     )
   }
@@ -68,7 +55,7 @@ export function ClinicalEntityFlow({ flow, onRemoveLink }: ClinicalEntityFlowPro
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <LinkOutlined style={{ color: AIYRACARE_TOKENS.colorPrimary }} />
-        <Text strong style={{ fontSize: 13 }}>Fluxo clínico</Text>
+        <Text strong style={{ fontSize: 13 }}>{CLINICAL_SEQUENCE_COPY.flowSectionTitle}</Text>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

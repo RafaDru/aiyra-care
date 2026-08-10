@@ -2,9 +2,10 @@ import type { FastifyReply } from 'fastify'
 import type { Pool } from 'pg'
 import type { IntegrationLinkRepository } from '../../../domain/integration-link/integration-link.repository.js'
 import { IntegrationLink } from '../../../domain/integration-link/integration-link.entity.js'
-import { createIntegrationLinkSchema, updateIntegrationLinkSchema, integrationLinkParamsSchema, integrationLinkQuerySchema } from './integration-link.schema.js'
+import { createIntegrationLinkSchema, updateIntegrationLinkSchema, integrationLinkParamsSchema, integrationLinkQuerySchema, syncLinkQuerySchema } from './integration-link.schema.js'
 import { UnimedBhCartaoVirtualScraper } from '../../scraper/unimedbh-cartao-virtual.scraper.js'
 import { MaterDeiSyncScraper, MATER_DEI_ORIGIN, resolveMaterDeiGatewayPatientId } from '../../scraper/materdei-sync.scraper.js'
+import { HermesPardiniSyncScraper } from '../../scraper/hermes-pardini-sync.scraper.js'
 import { materDeiExamDedupKey } from '../../scraper/materdei-exam.mapper.js'
 import { resolveMaterDeiPatientId } from '../../scraper/materdei-patient-resolver.js'
 import {
@@ -18,7 +19,8 @@ import { Exam } from '../../../domain/exam/exam.entity.js'
 import { MedicalRecord } from '../../../domain/medical-record/medical-record.entity.js'
 import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
 import { MedicalRecordPgRepository } from '../../persistence/medical-record.pg.repository.js'
-import { createJob, updateJob, getJob, removeJob, bindSyncJobPersistence } from '../../scraper/sync-progress-store.js'
+import { createJob, updateJob, getJob, removeJob, bindSyncJobPersistence, getJobProgressPayload, type SyncProgressPayload } from '../../scraper/sync-progress-store.js'
+import { subscribeSyncJob } from '../../scraper/sync-job-stream.js'
 import { SyncJobPgRepository } from '../../persistence/sync-job.pg.repository.js'
 import type { SyncNoveltySummary } from '../../../domain/sync-job/sync-job.entity.js'
 import { dispatchBackgroundTask } from '../../sync/background-dispatch.js'
@@ -33,9 +35,18 @@ import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess, isAuthEnforcementEnabled } from '../auth/patient-access.guard.js'
 import { guardPatientEntity } from '../auth/patient-entity.guard.js'
 import { PortalSyncOrchestrator } from '../../../application/connect/portal-sync.orchestrator.js'
+import { attachNoveltyToSyncResult, noveltyFromImportOutcome } from '../../../application/connect/sync-novelty.helper.js'
+import {
+  computeMaterDeiExamStartDate,
+  collectHouseholdPatientIds,
+} from '../../../application/connect/sync-delta.helper.js'
 import { enrichIntegrationLinksWithSyncAuthority } from '../../../application/integration-link/integration-link-sync-authority.js'
+import { isIntegrationLinkSessionReady } from '../../../application/integration-link/integration-link-session.js'
 
 const syncLocks = new Set<string>()
+
+const RECENT_SYNC_MS = Number(process.env.SYNC_MIN_INTERVAL_MS ?? String(30 * 60 * 1000))
+const SYNC_STREAM_HEARTBEAT_MS = Number(process.env.SYNC_STREAM_HEARTBEAT_MS ?? '25000')
 
 function syncJobToStatusPayload(job: ReturnType<SyncJobPgRepository['findById']> extends Promise<infer T> ? NonNullable<T> : never) {
   const d = job.toJSON()
@@ -84,7 +95,16 @@ export class IntegrationLinkController {
     if (!assertPatientAccess(req, reply, query.data.patientId)) return
     const links = await this.repo.findAllByPatient(query.data.patientId)
     const enriched = await enrichIntegrationLinksWithSyncAuthority(this.pool, query.data.patientId, links)
-    return reply.send(enriched.map((l) => ({ ...l, encryptedPassword: undefined })))
+    return reply.send(enriched.map((l) => ({
+      ...l,
+      encryptedPassword: undefined,
+      sessionExpiresAt: l.sessionExpiresAt?.toISOString() ?? null,
+      effectiveSessionExpiresAt: l.effectiveSessionExpiresAt?.toISOString() ?? null,
+      lastSyncAt: l.lastSyncAt?.toISOString() ?? null,
+      effectiveLastSyncAt: l.effectiveLastSyncAt?.toISOString() ?? null,
+      createdAt: l.createdAt.toISOString(),
+      updatedAt: l.updatedAt.toISOString(),
+    })))
   }
 
   async update(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -129,6 +149,11 @@ export class IntegrationLinkController {
   async sync(req: AuthenticatedRequest, reply: FastifyReply) {
     const params = integrationLinkParamsSchema.safeParse(req.params)
     if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    const query = syncLinkQuerySchema.safeParse(req.query)
+    if (!query.success) return reply.status(400).send({ error: query.error.flatten() })
+    const silent = query.data.silent ?? false
+    const force = query.data.force ?? false
+
     const link = await guardPatientEntity(
       req,
       reply,
@@ -136,7 +161,7 @@ export class IntegrationLinkController {
       'Integration link not found',
     )
     if (!link) return
-    if (link.portalType !== 'unimed' && link.portalType !== 'amil' && link.portalType !== 'mater_dei') {
+    if (!['unimed', 'amil', 'mater_dei', 'hermes_pardini'].includes(link.portalType)) {
       return reply.status(400).send({ message: `Sincronização automática ainda não disponível para ${link.portalType}` })
     }
     if (!link.email || !link.encryptedPassword) return reply.status(400).send({ message: 'Credenciais incompletas' })
@@ -146,6 +171,32 @@ export class IntegrationLinkController {
     const activeDb = await this.syncJobRepo.findActiveByLinkId(link.id)
     if (activeDb) return reply.status(429).send({ message: 'Sincronização já em andamento' })
     if (syncLocks.has(lockKey)) return reply.status(429).send({ message: 'Sincronização já em andamento' })
+
+    if (!force) {
+      const lastCompleted = await this.syncJobRepo.findLastCompletedByLinkId(link.id)
+      if (
+        lastCompleted?.toJSON().status === 'success'
+        && lastCompleted.toJSON().finishedAt
+        && Date.now() - lastCompleted.toJSON().finishedAt!.getTime() < RECENT_SYNC_MS
+      ) {
+        return reply.send({
+          jobId: lastCompleted.id,
+          skipped: true,
+          reason: 'recent_sync',
+          silent,
+        })
+      }
+    }
+
+    if (silent && !isIntegrationLinkSessionReady(link)) {
+      return reply.send({
+        jobId: null,
+        skipped: true,
+        reason: 'session_required',
+        silent,
+      })
+    }
+
     syncLocks.add(lockKey)
 
     const jobId = createJob(link.portalType as SyncablePortalType, link.id)
@@ -168,8 +219,10 @@ export class IntegrationLinkController {
                 onProgress: emit,
                 patientName: patient?.name,
                 log: req.log,
+                interactiveLogin: !silent,
               })
-            updateJob(jobId, { step: 'done', message: 'Sincronização Amil concluída', status: 'success' }, {
+            const novelty = noveltyFromImportOutcome(importOutcome)
+            const syncResult = attachNoveltyToSyncResult({
               exams: 0,
               medicalRecords: 0,
               authorizations: importOutcome.authorizations,
@@ -179,7 +232,8 @@ export class IntegrationLinkController {
               authorizationDetails: importOutcome.authorizationDetails,
               beneficiaryDetails,
               unmatchedBeneficiaries,
-            })
+            }, novelty)
+            updateJob(jobId, { step: 'done', message: 'Sincronização Amil concluída', status: 'success' }, syncResult, novelty)
           } catch (err) {
             const message = await this.portalSync.handleAmilSyncFailure(link, err, req.log)
             updateJob(jobId, { step: 'error', message, status: 'failed' })
@@ -195,6 +249,19 @@ export class IntegrationLinkController {
             jobId,
             emit,
             req,
+            interactiveLogin: !silent,
+          })
+          return
+        }
+
+        if (link.portalType === 'hermes_pardini') {
+          await this.runHermesPardiniSync({
+            link,
+            decryptedPassword,
+            jobId,
+            emit,
+            req,
+            interactiveLogin: !silent,
           })
           return
         }
@@ -208,7 +275,8 @@ export class IntegrationLinkController {
               onProgress: emit,
               log: req.log,
             })
-            updateJob(jobId, { step: 'done', message: 'Sincronização concluída', status: 'success' }, {
+            const novelty = noveltyFromImportOutcome(importOutcome)
+            const syncResult = attachNoveltyToSyncResult({
               exams: importOutcome.exams,
               medicalRecords: importOutcome.medicalRecords,
               authorizations: importOutcome.authorizations,
@@ -216,7 +284,8 @@ export class IntegrationLinkController {
               updatedAuthorizations: importOutcome.updatedAuthorizations,
               total: importOutcome.imported + importOutcome.updated,
               authorizationDetails,
-            })
+            }, novelty)
+            updateJob(jobId, { step: 'done', message: 'Sincronização concluída', status: 'success' }, syncResult, novelty)
           } catch (err) {
             const message = await this.portalSync.handleUnimedSyncFailure(link, err, req.log)
             updateJob(jobId, { step: 'error', message, status: 'failed' })
@@ -238,7 +307,7 @@ export class IntegrationLinkController {
       }
     })
 
-    return reply.send({ jobId })
+    return reply.send({ jobId, silent })
   }
 
   private async runMaterDeiSync(args: {
@@ -247,27 +316,38 @@ export class IntegrationLinkController {
     jobId: string
     emit: (step: string, message: string, status: 'running' | 'success' | 'failed') => void
     req: AuthenticatedRequest
+    interactiveLogin?: boolean
   }) {
-    const { link, decryptedPassword, jobId, emit, req } = args
+    const { link, decryptedPassword, jobId, emit, req, interactiveLogin } = args
     try {
       const storedSession = link.encryptedSessionToken
         ? decrypt(link.encryptedSessionToken)
         : undefined
+
+      const patientRepo = new PatientPgRepository(this.pool)
+      const allPatientsRaw = await patientRepo.findAll()
+      const householdIds = collectHouseholdPatientIds(
+        link.patientId,
+        allPatientsRaw.map((p) => ({ id: p.id, parentIds: p.parentIds })),
+      )
+      const examStartDate = await computeMaterDeiExamStartDate(this.pool, link, householdIds)
 
       const scraper = new MaterDeiSyncScraper()
       const result = await scraper.scrape(
         link.email!,
         decryptedPassword,
         (p) => updateJob(jobId, p),
-        storedSession ? { sessionJson: storedSession } : undefined,
+        {
+          sessionJson: storedSession,
+          interactiveLogin: interactiveLogin ?? true,
+          examStartDate,
+        },
       )
 
       emit('importing', 'Salvando dados Mater Dei...', 'running')
 
       const recordRepo = new MedicalRecordPgRepository(this.pool)
       const examRepo = new ExamPgRepository(this.pool)
-      const patientRepo = new PatientPgRepository(this.pool)
-      const allPatientsRaw = await patientRepo.findAll()
       const matchable: MatchablePatient[] = allPatientsRaw.map((p) => ({
         id: p.id,
         name: p.name,
@@ -442,6 +522,112 @@ export class IntegrationLinkController {
     }
   }
 
+  private async runHermesPardiniSync(args: {
+    link: IntegrationLink
+    decryptedPassword: string
+    jobId: string
+    emit: (step: string, message: string, status: 'running' | 'success' | 'failed') => void
+    req: AuthenticatedRequest
+    interactiveLogin?: boolean
+  }) {
+    const { link, decryptedPassword, jobId, emit, req, interactiveLogin } = args
+    try {
+      const storedSession = link.encryptedSessionToken
+        ? decrypt(link.encryptedSessionToken)
+        : undefined
+
+      const scraper = new HermesPardiniSyncScraper()
+      const result = await scraper.scrape(
+        link.email!,
+        decryptedPassword,
+        (p) => updateJob(jobId, p),
+        {
+          sessionJson: storedSession,
+          interactiveLogin: interactiveLogin ?? true,
+        },
+      )
+
+      const examRepo = new ExamPgRepository(this.pool)
+      const existingExams = await examRepo.findAll({ patientId: link.patientId })
+      const existingKeys = new Set(
+        existingExams.map((e) => {
+          if (e.notes?.startsWith('hermes_pardini:')) return e.notes.split('\n')[0]
+          return `${e.examType}|${e.examDate.toISOString().slice(0, 10)}`
+        }),
+      )
+
+      let importedExams = 0
+      let skippedExams = 0
+      for (const exam of result.exams) {
+        const dedup = exam.externalKey
+        if (existingKeys.has(dedup)) {
+          skippedExams++
+          continue
+        }
+        const parsedDate = exam.performedAt
+          ? (parseDate(exam.performedAt) ?? parseFlexibleDate(exam.performedAt))
+          : null
+        if (!parsedDate) continue
+        await examRepo.save(Exam.create({
+          patientId: link.patientId,
+          examType: exam.name,
+          examDate: parsedDate,
+          laboratory: 'Hermes Pardini',
+          source: 'hermes_pardini',
+          notes: dedup,
+        }))
+        importedExams++
+        existingKeys.add(dedup)
+      }
+
+      link.setSessionToken(
+        encrypt(JSON.stringify(result.session)),
+        result.session.sessionExpiresAt,
+      )
+      link.markSynced()
+      await this.repo.update(link)
+
+      const warnings = result.warnings
+      const novelty: SyncNoveltySummary = {
+        portalExams: result.exams.length,
+        newExamRecords: importedExams,
+        skippedExamRecords: skippedExams,
+      }
+
+      updateJob(jobId, {
+        step: 'done',
+        message: importedExams > 0
+          ? `Hermes Pardini: ${importedExams} exame(s) importado(s)`
+          : warnings.length > 0
+            ? `Hermes Pardini: sessão OK (${warnings[0]})`
+            : 'Hermes Pardini: sincronização concluída',
+        status: 'success',
+      }, {
+        exams: importedExams,
+        medicalRecords: 0,
+        authorizations: 0,
+        authorizationItems: 0,
+        updatedAuthorizations: 0,
+        total: importedExams,
+        authorizationDetails: [],
+        warnings: warnings.length > 0 ? warnings : undefined,
+        postLoginUrl: result.postLoginUrl,
+        discoveredPath: result.discoveredPath,
+        novelty,
+      }, novelty)
+      setTimeout(() => removeJob(jobId), 120000)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro na sincronização Hermes Pardini'
+      req.log.error(err, 'Hermes Pardini sync failed')
+      if (/401|403|sess[aã]o|token|expirad|login|invalid_grant/i.test(message)) {
+        link.clearSessionToken()
+        await this.repo.update(link).catch(() => {})
+      }
+      updateJob(jobId, { step: 'error', message, status: 'failed' })
+      setTimeout(() => removeJob(jobId), 120000)
+    }
+  }
+
   async virtualCard(req: AuthenticatedRequest, reply: FastifyReply) {
     const params = integrationLinkParamsSchema.safeParse(req.params)
     if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
@@ -466,10 +652,15 @@ export class IntegrationLinkController {
     try {
       const patientRepo = new PatientPgRepository(this.pool)
       const patient = await patientRepo.findById(link.patientId)
+      const storedUnimedState =
+        link.encryptedSessionToken && isIntegrationLinkSessionReady(link)
+          ? decrypt(link.encryptedSessionToken)
+          : undefined
       const scraper = new UnimedBhCartaoVirtualScraper()
       const card = await scraper.scrape(link.email, decrypt(link.encryptedPassword), {
         patientName: patient?.name,
         cardNumber: link.cardNumber || undefined,
+        storageStateJson: storedUnimedState,
       })
 
       if (card.cardNumber && card.cardNumber !== link.cardNumber) {
@@ -534,15 +725,10 @@ export class IntegrationLinkController {
     } else if (isAuthEnforcementEnabled()) {
       return reply.status(403).send({ message: 'Acesso negado' })
     }
-    if (job) {
-      return reply.send({
-        ...job.progress,
-        portalType: job.portalType,
-        result: job.result,
-        stepDetails: job.stepDetails,
-        novelty: job.result?.novelty ?? dbJob?.toJSON().novelty,
-      })
-    }
+
+    const payload = getJobProgressPayload(jobId, 'snapshot')
+    if (payload) return reply.send(payload)
+
     const d = dbJob!.toJSON()
     return reply.send({
       step: d.step ?? 'pending',
@@ -552,6 +738,78 @@ export class IntegrationLinkController {
       result: d.result,
       stepDetails: d.stepDetails,
       novelty: d.novelty,
+      event: 'snapshot',
+    })
+  }
+
+  async syncProgressStream(req: AuthenticatedRequest, reply: FastifyReply) {
+    const { jobId } = req.params as { jobId: string }
+    const job = getJob(jobId)
+    const dbJob = await this.syncJobRepo.findById(jobId)
+    if (!job && !dbJob) return reply.status(404).send({ message: 'Job not found' })
+
+    const linkId = dbJob?.integrationLinkId ?? job?.integrationLinkId
+    if (linkId) {
+      const guarded = await guardPatientEntity(
+        req,
+        reply,
+        await this.repo.findById(linkId),
+        'Integration link not found',
+      )
+      if (!guarded) return
+    } else if (isAuthEnforcementEnabled()) {
+      return reply.status(403).send({ message: 'Acesso negado' })
+    }
+
+    const res = reply.raw
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    })
+    res.write('\n')
+
+    const writeEvent = (event: string, payload: SyncProgressPayload) => {
+      res.write(`event: ${event}\n`)
+      res.write(`data: ${JSON.stringify(payload)}\n\n`)
+    }
+
+    const memoryPayload = getJobProgressPayload(jobId, 'snapshot')
+    if (memoryPayload) {
+      writeEvent('snapshot', memoryPayload)
+    } else if (dbJob) {
+      const d = dbJob.toJSON()
+      writeEvent('snapshot', {
+        step: d.step ?? 'pending',
+        message: d.message ?? '',
+        status: d.status === 'failed' ? 'failed' : d.status === 'success' ? 'success' : 'running',
+        portalType: d.portalType as SyncablePortalType | undefined,
+        result: d.result,
+        stepDetails: d.stepDetails ?? undefined,
+        novelty: d.novelty ?? undefined,
+        event: 'snapshot',
+      })
+    }
+
+    const unsub = subscribeSyncJob(jobId, (payload) => {
+      writeEvent(payload.event ?? 'progress', payload)
+    })
+
+    const heartbeat = setInterval(() => {
+      const live = getJobProgressPayload(jobId)
+      writeEvent('heartbeat', {
+        step: live?.step ?? 'pending',
+        message: live?.message ?? '',
+        status: live?.status ?? 'running',
+        portalType: live?.portalType,
+        event: 'heartbeat',
+      })
+    }, SYNC_STREAM_HEARTBEAT_MS)
+
+    req.raw.on('close', () => {
+      clearInterval(heartbeat)
+      unsub()
     })
   }
 

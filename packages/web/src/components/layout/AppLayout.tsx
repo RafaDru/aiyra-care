@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, HistoryOutlined, ApiOutlined, LogoutOutlined, UserOutlined, DashboardOutlined } from '@ant-design/icons'
+import { SettingOutlined, HistoryOutlined, ApiOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -69,6 +69,7 @@ export function AppLayout() {
             items={[
               { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
               { key: '/integrations', icon: <ApiOutlined />, label: t('nav.integrations') },
+              { key: '/roadmap', icon: <ProjectOutlined />, label: t('nav.roadmap') },
               { key: '/session', icon: <HistoryOutlined />, label: t('nav.session') },
               { key: '/settings', icon: <SettingOutlined />, label: t('nav.settings') },
             ]}

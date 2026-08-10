@@ -202,6 +202,12 @@ export async function loginMaterDeiApi(
   })
   if (!res.ok()) {
     const body = await res.text().catch(() => '')
+    if (res.status() === 401) {
+      throw new Error('CPF ou senha do Meu Mater Dei incorretos')
+    }
+    if (res.status() === 400) {
+      throw new Error(`Dados de login inválidos (400): ${body.slice(0, 200)}`)
+    }
     throw new Error(`Login Mater Dei falhou (${res.status()}): ${body.slice(0, 200)}`)
   }
   const json = await res.json() as {
@@ -699,6 +705,7 @@ async function fetchClinicalBundle(
   request: APIRequestContext,
   session: MaterDeiSession,
   emit?: (p: ScraperProgress) => void,
+  opts?: { examStartDate?: string },
 ): Promise<Pick<MaterDeiSyncResult, 'attendances' | 'surgeries' | 'exams' | 'documents' | 'ambulatorialOrders' | 'warnings'>> {
   const token = session.accessToken
   const examPatientIds = resolveMaterDeiExamPatientIds(session)
@@ -722,12 +729,12 @@ async function fetchClinicalBundle(
     warnings.push(msg)
     emit?.({ step: 'fetch-exams', message: msg, status: 'failed' })
   } else {
-    emit?.({ step: 'fetch-exams', message: 'Buscando resultados de exames...', status: 'running' })
+    emit?.({ step: 'fetch-exams', message: `Buscando exames desde ${opts?.examStartDate ?? '2015-01-01'}...`, status: 'running' })
     const seen = new Set<string>()
     let examFetchFailed = false
     for (const pid of examPatientIds) {
       try {
-        const batch = await fetchAllMaterDeiExams(request, token, pid)
+        const batch = await fetchAllMaterDeiExams(request, token, pid, { startDate: opts?.examStartDate })
         for (const exam of batch) {
           const key = `${pid}:${exam.examOrderId}:${exam.examOrderItemId ?? exam.examType}:${exam.examDate.slice(0, 10)}`
           if (seen.has(key)) continue
@@ -801,7 +808,7 @@ async function fetchClinicalBundle(
 }
 
 function allowMaterDeiBrowser(): boolean {
-  const v = (process.env.MATER_DEI_ALLOW_BROWSER ?? 'true').toLowerCase()
+  const v = (process.env.MATER_DEI_ALLOW_BROWSER ?? 'false').toLowerCase()
   return v === '1' || v === 'true' || v === 'yes'
 }
 
@@ -828,7 +835,7 @@ async function acquireMaterDeiSession(
   cpf: string,
   password: string,
   emit: (p: ScraperProgress) => void,
-  opts?: { sessionJson?: string },
+  opts?: { sessionJson?: string; interactiveLogin?: boolean },
 ): Promise<MaterDeiSession> {
   if (opts?.sessionJson) {
     const parsed = parseMaterDeiSessionJson(opts.sessionJson)
@@ -861,8 +868,9 @@ async function acquireMaterDeiSession(
     return buildMaterDeiSession(login.accessToken, login.refreshToken, profile)
   } catch (apiErr) {
     const apiMsg = apiErr instanceof Error ? apiErr.message : String(apiErr)
-    if (!allowMaterDeiBrowser()) {
-      throw new Error(`${apiMsg}. Defina MATER_DEI_ALLOW_BROWSER=1 para login interativo.`)
+    const canTryInteractive = opts?.interactiveLogin || allowMaterDeiBrowser()
+    if (!canTryInteractive) {
+      throw new Error(apiMsg)
     }
     emit({ step: 'login', message: apiMsg, status: 'running' })
   }
@@ -914,7 +922,7 @@ export class MaterDeiSyncScraper {
     cpf: string,
     password: string,
     emit: (p: ScraperProgress) => void,
-    opts?: { sessionJson?: string },
+    opts?: { sessionJson?: string; interactiveLogin?: boolean; examStartDate?: string },
   ): Promise<MaterDeiSyncResult> {
     const request = await playwrightRequest.newContext({ baseURL: MATER_DEI_ORIGIN })
 
@@ -928,7 +936,7 @@ export class MaterDeiSyncScraper {
         ...profile,
       })
 
-      const clinical = await fetchClinicalBundle(request, session, emit)
+      const clinical = await fetchClinicalBundle(request, session, emit, { examStartDate: opts?.examStartDate })
 
       return { session, ...clinical }
     } finally {

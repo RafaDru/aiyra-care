@@ -6,6 +6,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "integrations": "Integrações",
+    "roadmap": "Roadmap",
     "session": "Sessões",
     "settings": "Configurações"
   },
@@ -68,6 +69,19 @@
     "subtitle": "Registro de desenvolvimento do projeto",
     "noItems": "Nenhum item registrado"
   },
+  "roadmap": {
+    "title": "Roadmap",
+    "subtitle": "Prioridades, épicos e pendências — para acompanhar e debater evolução do produto",
+    "introTitle": "Direção atual",
+    "principlesTitle": "Princípios",
+    "categoriesTitle": "Categorias",
+    "prioritiesTitle": "Prioridades",
+    "noEpics": "Nenhum épico nesta prioridade.",
+    "updatedAt": "Atualizado em {{date}}",
+    "empty": "Roadmap não disponível",
+    "loadError": "Erro ao carregar roadmap",
+    "footer": "Fonte: docs/roadmap.json no repositório. Para alterar prioridades ou status, edite o JSON e reinicie a API se necessário."
+  },
   "patient": {
     "title": "Meus Pacientes",
     "new": "Novo Paciente",
@@ -83,7 +97,15 @@
     "height": "cm",
     "bloodType": "Tipo"
   },
+  "sections": {
+    "overview": "Visão geral",
+    "clinical": "Histórico clínico",
+    "plan": "Plano & portais",
+    "files": "Arquivos"
+  },
   "tabs": {
+    "basic": "Dados básicos",
+    "authorizations": "Autorizações",
     "growth": "Medidas",
     "vaccines": "Vacinas",
     "medications": "Medicações",
@@ -93,7 +115,9 @@
     "diagnoses": "Diagnósticos",
     "documents": "Arquivos clínicos",
     "personalDocuments": "Documentos pessoais",
-    "wallet": "Convênios",
+    "wallet": "Carteira",
+    "coverage": "Convênios",
+    "integrations": "Integrações",
     "timeline": "Linha do tempo"
   },
   "growth": {

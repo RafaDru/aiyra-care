@@ -5,6 +5,7 @@ import { createAuthorizationSchema, updateAuthorizationSchema, authorizationPara
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess, filterByPatientAccess } from '../auth/patient-access.guard.js'
 import { guardPatientEntity } from '../auth/patient-entity.guard.js'
+import { scheduleCanonicalEntityProjection } from '../../graph/canonical-entity-graph.js'
 
 export class AuthorizationController {
   constructor(private readonly repo: AuthorizationRepository) {}
@@ -15,7 +16,16 @@ export class AuthorizationController {
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
     const auth = Authorization.create(parsed.data)
     const saved = await this.repo.save(auth)
-    return reply.status(201).send(saved.toJSON())
+    const json = saved.toJSON()
+    scheduleCanonicalEntityProjection({
+      patientId: json.patientId,
+      entityType: 'authorization',
+      entityId: json.id,
+      title: json.classification ?? json.procedureDescription ?? 'Autorização',
+      date: json.authorizationDate?.toISOString() ?? json.createdAt.toISOString(),
+      source: json.source,
+    })
+    return reply.status(201).send(json)
   }
 
   async findAll(req: AuthenticatedRequest, reply: FastifyReply) {
