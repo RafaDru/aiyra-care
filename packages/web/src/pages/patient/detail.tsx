@@ -369,7 +369,6 @@ export function PatientDetail() {
             linkedChildrenCount={children.length}
             highlightCard={highlightCard}
             onCardUpdated={load}
-            onOpenIntegrations={() => setActiveTab('integrations')}
           />
         )
       case 'coverage':

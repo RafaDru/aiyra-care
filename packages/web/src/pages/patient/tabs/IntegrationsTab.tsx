@@ -10,19 +10,23 @@ import {
 import { api } from '../../../lib/api.js'
 import type { Patient, IntegrationLink } from '../../../lib/api.types.js'
 import type { IntegrationLinkSyncStatus } from '../../../lib/api.types.js'
-import { BrandLogo } from '../../../components/brands/BrandLogo.js'
+import { BrandCoverageOperator } from '../../../components/brands/BrandCoverageOperator.js'
 import { brandOrFallback } from '../../../components/brands/brand-config.js'
+import { coverageBrandRowVars } from '../../../components/brands/coverage-brand-surface.js'
+import '../../../components/brands/brand-tint-table.css'
 import { NewIntegrationModal } from '../../../components/integrations/NewIntegrationModal.js'
 import { PublicHealthIntegrationModal } from '../../../components/integrations/PublicHealthIntegrationModal.js'
 import type { PublicHealthPortal, LinkablePortal } from '../../../components/integrations/integration-catalog.js'
 import {
   formatSyncNovelty,
-  shouldOfferSilentSync,
-  isLinkSessionReady,
+  collectSyncTargets,
   isSyncablePortal,
+  isLinkSessionReady,
 } from '../../../lib/silent-sync.js'
 import type { WalletDockJob } from '../../../components/scraper/WalletSyncDock.js'
 import { IntegrationsSyncSidebar } from '../../../components/integrations/IntegrationsSyncSidebar.js'
+import { GroupedAlignedTables } from '../../../components/layout/GroupedAlignedTables.js'
+import { ALIGNED_COL } from '../../../components/layout/aligned-table-columns.js'
 import { useIntegrationSyncHistory } from '../../../hooks/useIntegrationSyncHistory.js'
 import type { SyncablePortalType } from '../../../lib/sync-portal-profile.js'
 import type { SyncJobOverallStatus } from '../../../lib/sync-job-progress.js'
@@ -31,8 +35,6 @@ import {
   INSURANCE_PORTALS,
   HOSPITAL_PORTALS,
   LABORATORY_PORTALS,
-  SYNCABLE,
-  collectSyncTargets,
   noveltySummary,
 } from './wallet-shared.js'
 
@@ -65,12 +67,12 @@ type TableRow = {
   group: 'health' | 'hospital' | 'laboratory' | 'public'
 }
 
-function LinkSyncStatusCell({ linkId, hidden }: { linkId: string; hidden?: boolean }) {
+function LinkSyncStatusCell({ linkId, hidden, pausePolling }: { linkId: string; hidden?: boolean; pausePolling?: boolean }) {
   const [status, setStatus] = useState<IntegrationLinkSyncStatus | null>(null)
   const { loading: authLoading, session, configured: authConfigured } = useAuth()
 
   useEffect(() => {
-    if (hidden) return
+    if (hidden || pausePolling) return
     if (authConfigured && (authLoading || !session)) return
     let cancelled = false
     const poll = () => {
@@ -79,9 +81,9 @@ function LinkSyncStatusCell({ linkId, hidden }: { linkId: string; hidden?: boole
         .catch(() => {})
     }
     poll()
-    const id = window.setInterval(poll, 4000)
+    const id = window.setInterval(poll, 15000)
     return () => { cancelled = true; window.clearInterval(id) }
-  }, [linkId, hidden, authLoading, session, authConfigured])
+  }, [linkId, hidden, pausePolling, authLoading, session, authConfigured])
 
   if (hidden) return <Text type="secondary">—</Text>
 
@@ -147,7 +149,6 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const [startingLinkIds, setStartingLinkIds] = useState<Set<string>>(new Set())
   const [syncAllBusy, setSyncAllBusy] = useState(false)
   const terminalHandledRef = useRef<Set<string>>(new Set())
-  const silentSyncStartedRef = useRef<Set<string>>(new Set())
   const [editLink, setEditLink] = useState<IntegrationLink | null>(null)
   const [savingCard, setSavingCard] = useState(false)
   const [form] = Form.useForm()
@@ -158,7 +159,11 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const dockLinkIds = new Set(dockJobs.map((j) => j.linkId))
   const syncTargets = collectSyncTargets(links)
   const linkedPortals = new Set(links.map((l) => l.portalType))
-  const { groupedByDate, activeEntries } = useIntegrationSyncHistory(syncTargets, historyRefreshKey)
+  const { groupedByDate, activeEntries } = useIntegrationSyncHistory(
+    syncTargets,
+    historyRefreshKey,
+    dockJobs.length > 0,
+  )
 
   const dockJobsRef = useRef(dockJobs)
   dockJobsRef.current = dockJobs
@@ -173,7 +178,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     portalType: string,
     opts?: { force?: boolean },
   ) => {
-    if (!SYNCABLE.has(portalType)) return
+    if (!isSyncablePortal(portalType)) return
     if (
       dockJobsRef.current.some((j) => j.linkId === linkId)
       || startingLinkIdsRef.current.has(linkId)
@@ -214,12 +219,10 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     if (syncAllBusy || dockJobsRef.current.length > 0) return
     setSyncAllBusy(true)
     try {
-      await Promise.all(
-        syncTargets.map((link) => {
-          const syncLinkId = link.effectiveSyncLinkId ?? link.id
-          return startManualSync(syncLinkId, link.portalType, { force: true })
-        }),
-      )
+      for (const link of syncTargets) {
+        const syncLinkId = link.effectiveSyncLinkId ?? link.id
+        await startManualSync(syncLinkId, link.portalType, { force: true })
+      }
     } finally {
       setSyncAllBusy(false)
     }
@@ -246,32 +249,6 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       terminalHandledRef.current.delete(jobId)
     }, delay)
   }, [onCardUpdated])
-
-  useEffect(() => {
-    if (authConfigured && (authLoading || !session)) return
-    let cancelled = false
-    const queue = links.filter((link) => {
-      const syncLinkId = link.effectiveSyncLinkId ?? link.id
-      if (silentSyncStartedRef.current.has(syncLinkId)) return false
-      return shouldOfferSilentSync(link)
-    })
-    if (!queue.length) return
-
-    const run = async () => {
-      for (const link of queue) {
-        if (cancelled) return
-        const syncLinkId = link.effectiveSyncLinkId ?? link.id
-        silentSyncStartedRef.current.add(syncLinkId)
-        try {
-          await api.integrationLinks.sync(syncLinkId, { silent: true })
-        } catch (e) {
-          console.warn('Silent sync failed', e)
-        }
-      }
-    }
-    void run()
-    return () => { cancelled = true }
-  }, [links, authLoading, session, authConfigured])
 
   const openPublicHealth = (portal: PublicHealthPortal) => {
     setPickerOpen(false)
@@ -358,27 +335,24 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     {
       title: 'Portal',
       key: 'portal',
-      width: 220,
+      width: ALIGNED_COL.portal,
       render: (_, row) => (
-        <Space size={8}>
-          <BrandLogo brand={row.portalType} size={28} />
-          <div>
-            <Text strong>{row.label}</Text>
-            {row.link?.syncAuthority === 'titular' && row.link.managedByPatientName && (
-              <div>
-                <Text type="secondary" style={{ fontSize: 11 }}>
-                  Via titular · {row.link.managedByPatientName.split(' ')[0]}
-                </Text>
-              </div>
-            )}
-          </div>
-        </Space>
+        <div>
+          <BrandCoverageOperator brand={row.portalType} logoSize="default">
+            {row.label}
+          </BrandCoverageOperator>
+          {row.link?.syncAuthority === 'titular' && row.link.managedByPatientName && (
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
+              Via titular · {row.link.managedByPatientName.split(' ')[0]}
+            </Text>
+          )}
+        </div>
       ),
     },
     {
       title: 'Sessão',
       key: 'session',
-      width: 132,
+      width: ALIGNED_COL.session,
       render: (_, row) => {
         if (row.kind === 'public') {
           return row.publicPortal === 'conectesus'
@@ -397,7 +371,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     {
       title: 'Última sincronização',
       key: 'lastSync',
-      width: 200,
+      width: ALIGNED_COL.lastSync,
       render: (_, row) => {
         if (row.kind === 'public') return <Text type="secondary">Importação manual</Text>
         const syncId = row.syncLinkId!
@@ -405,6 +379,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           <LinkSyncStatusCell
             linkId={syncId}
             hidden={dockLinkIds.has(syncId)}
+            pausePolling={dockJobs.length > 0}
           />
         )
       },
@@ -412,7 +387,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     {
       title: 'Ações',
       key: 'actions',
-      width: 208,
+      width: ALIGNED_COL.actions,
       render: (_, row) => {
         if (row.kind === 'public') {
           return (
@@ -463,7 +438,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
               size="small"
               icon={<SyncOutlined />}
               loading={isLinkSyncing(syncLinkId)}
-              disabled={!SYNCABLE.has(link.portalType)}
+              disabled={!isSyncablePortal(link.portalType)}
               onClick={() => startManualSync(syncLinkId, link.portalType, { force: true })}
             >
               {managedByTitular ? `Via ${titularName}` : 'Sincronizar'}
@@ -477,29 +452,21 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     },
   ]
 
-  const renderGroupTable = (group: TableRow['group']) => {
-    const data = rows.filter((r) => r.group === group)
-    if (!data.length) return null
+  const integrationOnRow = (row: TableRow) => ({
+    className: 'brand-tint-row',
+    style: coverageBrandRowVars(row.portalType),
+  })
 
-    return (
-      <div key={group} style={{ marginBottom: 24 }}>
-        <Text strong style={{ display: 'block', marginBottom: 8 }}>{groupTitle[group]}</Text>
-        <Table<TableRow>
-          size="small"
-          pagination={false}
-          tableLayout="fixed"
-          dataSource={data}
-          rowKey="key"
-          style={{
-            border: '1px solid var(--border, #e2e8f0)',
-            borderRadius: 12,
-            overflow: 'hidden',
-          }}
-          columns={integrationColumns}
-        />
-      </div>
-    )
-  }
+  const integrationGroups: Array<{
+    key: TableRow['group']
+    title: string
+    data: TableRow[]
+  }> = [
+    { key: 'health', title: groupTitle.health, data: rows.filter((r) => r.group === 'health') },
+    { key: 'hospital', title: groupTitle.hospital, data: rows.filter((r) => r.group === 'hospital') },
+    { key: 'laboratory', title: groupTitle.laboratory, data: rows.filter((r) => r.group === 'laboratory') },
+    { key: 'public', title: groupTitle.public, data: rows.filter((r) => r.group === 'public') },
+  ]
 
   const firstName = patient.name.split(' ')[0]
 
@@ -554,12 +521,13 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
             description="Use Nova integração para vincular Unimed, Amil, Mater Dei ou importar do gov.br."
           />
         ) : (
-          <>
-            {renderGroupTable('health')}
-            {renderGroupTable('hospital')}
-            {renderGroupTable('laboratory')}
-            {renderGroupTable('public')}
-          </>
+          <GroupedAlignedTables<TableRow>
+            groups={integrationGroups}
+            columns={integrationColumns}
+            rowKey="key"
+            hideEmptyGroups
+            onRow={integrationOnRow}
+          />
         )}
 
         <NewIntegrationModal

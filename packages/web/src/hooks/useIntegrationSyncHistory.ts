@@ -73,11 +73,12 @@ function mapJobToEntry(
   }
 }
 
-export function useIntegrationSyncHistory(syncTargets: IntegrationLink[], refreshKey = 0) {
+export function useIntegrationSyncHistory(syncTargets: IntegrationLink[], refreshKey = 0, pausePolling = false) {
   const [entries, setEntries] = useState<IntegrationSyncHistoryEntry[]>([])
   const { loading: authLoading, session, configured: authConfigured } = useAuth()
 
   useEffect(() => {
+    if (pausePolling) return
     if (authConfigured && (authLoading || !session)) return
     if (!syncTargets.length) {
       setEntries([])
@@ -114,7 +115,7 @@ export function useIntegrationSyncHistory(syncTargets: IntegrationLink[], refres
       cancelled = true
       window.clearInterval(id)
     }
-  }, [syncTargets, refreshKey, authLoading, session, authConfigured])
+  }, [syncTargets, refreshKey, pausePolling, authLoading, session, authConfigured])
 
   const groupedByDate = useMemo(() => {
     const withTime = entries.filter((e) => e.finishedAt || e.isActive)

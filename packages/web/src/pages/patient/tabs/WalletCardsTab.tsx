@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  Typography, Button, Space, Tag, Empty, Modal, App, QRCode, Spin, Alert, Descriptions,
+  Typography, Button, Space, Tag, Empty, Modal, App, QRCode, Spin, Alert, Descriptions, Tooltip,
 } from 'antd'
 import { SyncOutlined, QrcodeOutlined } from '@ant-design/icons'
 import { api } from '../../../lib/api.js'
 import type { Patient, IntegrationLink, UnimedVirtualCard, PlanMembershipWithPlan } from '../../../lib/api.types.js'
 import { BrandTag } from '../../../components/brands/BrandLogo.js'
+import { useSilentWalletSync } from '../../../hooks/useSilentWalletSync.js'
+import { useWalletLinkSyncStatus } from '../../../hooks/useWalletLinkSyncStatus.js'
 import {
   INSURANCE_PORTALS,
   WalletCardFace,
@@ -25,7 +27,6 @@ interface Props {
   linkedChildrenCount?: number
   highlightCard?: string | null
   onCardUpdated: () => void
-  onOpenIntegrations?: () => void
 }
 
 export function WalletCardsTab({
@@ -34,7 +35,6 @@ export function WalletCardsTab({
   linkedChildrenCount = 0,
   highlightCard,
   onCardUpdated,
-  onOpenIntegrations,
 }: Props) {
   const { message } = App.useApp()
   const [memberships, setMemberships] = useState<PlanMembershipWithPlan[]>([])
@@ -43,10 +43,17 @@ export function WalletCardsTab({
   const [loadingToken, setLoadingToken] = useState(false)
   const [tokenError, setTokenError] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(0)
+  const [syncRefreshKey, setSyncRefreshKey] = useState(0)
   const highlightRef = useRef<HTMLDivElement | null>(null)
 
   const insuranceLinks = links.filter((l) => INSURANCE_PORTALS.has(l.portalType))
-  const hasMaterDei = links.some((l) => l.portalType === 'mater_dei')
+
+  useSilentWalletSync(links, () => {
+    onCardUpdated()
+    setSyncRefreshKey((k) => k + 1)
+  })
+
+  const syncMeta = useWalletLinkSyncStatus(insuranceLinks, syncRefreshKey, false)
 
   useEffect(() => {
     api.planMemberships.list(patient.id).then(setMemberships).catch(() => setMemberships([]))
@@ -151,7 +158,7 @@ export function WalletCardsTab({
       <div>
         <Text strong style={{ display: 'block', marginBottom: 4 }}>Plano de saúde</Text>
         <Text type="secondary" style={{ display: 'block', marginBottom: 10, fontSize: 12 }}>
-          Carteirinhas das operadoras vinculadas
+          Carteirinhas das operadoras vinculadas. Atualização automática em segundo plano quando há sessão válida.
         </Text>
         {insuranceLinks.length === 0 ? (
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma carteirinha — vincule em Integrações" />
@@ -162,6 +169,7 @@ export function WalletCardsTab({
                 || memberships.find((m) => m.source === link.portalType || m.plan?.operator === link.portalType)
               const cardNum = formatCardNumber(link.cardNumber || membership?.memberNumber) ?? '—'
               const isHighlight = highlightCard === link.portalType
+              const meta = syncMeta[link.id]
               return (
                 <div
                   key={link.id}
@@ -187,9 +195,27 @@ export function WalletCardsTab({
                         QR / Token
                       </Button>
                     )}
-                    <Text type="secondary" style={{ fontSize: 11, flex: 1 }}>
-                      Dados atualizados via Integrações
-                    </Text>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {meta?.active ? (
+                        <Space size={4}>
+                          <SyncOutlined spin style={{ color: '#1677ff', fontSize: 11 }} />
+                          <Text type="secondary" style={{ fontSize: 11 }}>{meta.message}</Text>
+                        </Space>
+                      ) : meta?.noveltyText ? (
+                        <Tooltip title={meta.lastSyncLabel ? `Atualizado ${meta.lastSyncLabel}` : undefined}>
+                          <Tag color="success" style={{ margin: 0, fontSize: 11 }}>{meta.noveltyText}</Tag>
+                        </Tooltip>
+                      ) : meta?.lastSyncLabel ? (
+                        <Text type="secondary" style={{ fontSize: 11 }}>Atualizado {meta.lastSyncLabel}</Text>
+                      ) : (
+                        <Text type="secondary" style={{ fontSize: 11 }}>Sincronize em Integrações na primeira vez</Text>
+                      )}
+                      {meta?.message && !meta.active && (
+                        <Tooltip title={meta.message}>
+                          <Tag color="error" style={{ margin: '4px 0 0', fontSize: 10 }}>Falhou</Tag>
+                        </Tooltip>
+                      )}
+                    </div>
                   </CardToolbar>
                 </div>
               )
@@ -202,22 +228,6 @@ export function WalletCardsTab({
         <Text strong style={{ display: 'block', marginBottom: 4 }}>Plano odontológico</Text>
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum plano odontológico vinculado" />
       </div>
-
-      {hasMaterDei && (
-        <Alert
-          type="info"
-          showIcon
-          message="Meu Mater Dei configurado"
-          description="Portal de exames e laudos — gerencie conexão e sync na aba Integrações."
-          action={
-            onOpenIntegrations ? (
-              <Button size="small" type="link" onClick={onOpenIntegrations}>
-                Abrir Integrações
-              </Button>
-            ) : undefined
-          }
-        />
-      )}
 
       <Modal
         title={<Space><BrandTag brand="unimed">Unimed BH</BrandTag> QR / Token</Space>}

@@ -48,7 +48,7 @@ function OptionRow({
       ]}
     >
       <List.Item.Meta
-        avatar={<BrandLogo brand={option.brand} size={40} />}
+        avatar={<BrandLogo brand={option.brand} variant="avatar" context="integrations" />}
         title={<Text strong={!disabled}>{option.title}</Text>}
         description={
           <Text type="secondary" style={{ fontSize: 12 }}>{option.description}</Text>

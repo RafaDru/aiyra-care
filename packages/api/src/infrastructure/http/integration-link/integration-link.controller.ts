@@ -24,6 +24,7 @@ import { subscribeSyncJob } from '../../scraper/sync-job-stream.js'
 import { SyncJobPgRepository } from '../../persistence/sync-job.pg.repository.js'
 import type { SyncNoveltySummary } from '../../../domain/sync-job/sync-job.entity.js'
 import { dispatchBackgroundTask } from '../../sync/background-dispatch.js'
+import { withBrowserSyncMutex } from '../../sync/browser-sync-mutex.js'
 import { encrypt, decrypt } from '../../crypto-helper.js'
 import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
 import { InsurancePlanService } from '../../../application/insurance-plan/insurance-plan.service.js'
@@ -206,6 +207,7 @@ export class IntegrationLinkController {
 
     dispatchBackgroundTask(async () => {
       try {
+        await withBrowserSyncMutex(async () => {
         const patientRepo = new PatientPgRepository(this.pool)
         const patient = await patientRepo.findById(link.patientId)
 
@@ -274,6 +276,7 @@ export class IntegrationLinkController {
               jobId,
               onProgress: emit,
               log: req.log,
+              incremental: silent && !force,
             })
             const novelty = noveltyFromImportOutcome(importOutcome)
             const syncResult = attachNoveltyToSyncResult({
@@ -293,6 +296,7 @@ export class IntegrationLinkController {
           setTimeout(() => removeJob(jobId), 120000)
           return
         }
+        })
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Erro na sincronização'
         req.log.error(err, 'Sync failed')

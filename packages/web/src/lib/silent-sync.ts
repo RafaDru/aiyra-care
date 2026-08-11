@@ -16,6 +16,19 @@ export function isLinkSessionReady(link: IntegrationLink): boolean {
   return link.sessionReady === true
 }
 
+export function collectSyncTargets(links: IntegrationLink[]): IntegrationLink[] {
+  const seen = new Set<string>()
+  const out: IntegrationLink[] = []
+  for (const link of links) {
+    if (!SYNCABLE.has(link.portalType)) continue
+    const syncLinkId = link.effectiveSyncLinkId ?? link.id
+    if (seen.has(syncLinkId)) continue
+    seen.add(syncLinkId)
+    out.push(link)
+  }
+  return out
+}
+
 /**
  * Oferece sync automático na Carteira apenas com sessão válida e dados desatualizados.
  * Primeiro login continua manual (botão Sincronizar).

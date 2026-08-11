@@ -3,8 +3,22 @@ import { chromium, type Browser, type BrowserContext, type Page } from 'playwrig
 const SUCCESS_ALERT = /parab[eé]ns|validados?\s+com\s+sucesso|login\s+realizado|autenticado/i
 const FAILURE_ALERT = /inv[aá]lid|incorret|erro|falha|bloquead|expirad|obrigat[oó]ri/i
 const PORTAL_HOME = 'https://app.unimedbh.com.br/PortalDoCliente/'
+const EXTRATO_PROBE_URL = 'https://app.unimedbh.com.br/PortalDoCliente/ExtratoUtilizacao'
 const LOGIN_URL =
   'https://acesso.unimedbh.com.br/?force=true&redirect=https:%2F%2Fapp.unimedbh.com.br%2FPortalDoCliente%2F'
+
+/** Página de login SSO (sessão expirada ou redirect pendente). */
+export function isUnimedLoginPage(url: string): boolean {
+  try {
+    return new URL(url).hostname === 'acesso.unimedbh.com.br'
+  } catch {
+    return false
+  }
+}
+
+export function unimedSessionExpiredMessage(pageUrl: string): string {
+  return `Sessão Unimed expirada — faça login em Sincronizar (página=${pageUrl})`
+}
 
 /** Host real do portal — não confundir com `PortalDoCliente` no query `redirect` do SSO. */
 export function isOnUnimedPortalApp(url: string): boolean {
@@ -62,6 +76,14 @@ export async function isUnimedPortalLoggedIn(page: Page): Promise<boolean> {
 
 export async function captureUnimedStorageState(context: BrowserContext): Promise<string> {
   return JSON.stringify(await context.storageState())
+}
+
+/** Valida sessão salva com navegação ao extrato (não só home). */
+async function probeStoredSession(page: Page): Promise<boolean> {
+  await page.goto(EXTRATO_PROBE_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
+  await page.waitForTimeout(800)
+  if (isUnimedLoginPage(page.url())) return false
+  return isOnUnimedPortalApp(page.url())
 }
 
 async function performCredentialLogin(
@@ -127,11 +149,15 @@ export async function acquireUnimedBhSession(
       const page = await context.newPage()
       await page.goto(PORTAL_HOME, { waitUntil: 'domcontentloaded', timeout: 45000 })
       await page.waitForTimeout(1200)
-      if (await isUnimedPortalLoggedIn(page)) {
+      if (!(await isUnimedPortalLoggedIn(page))) {
+        await context.close().catch(() => {})
+        await browser.close().catch(() => {})
+      } else if (await probeStoredSession(page)) {
         return { browser, context, page, usedStoredSession: true }
+      } else {
+        await context.close().catch(() => {})
+        await browser.close().catch(() => {})
       }
-      await context.close().catch(() => {})
-      await browser.close().catch(() => {})
     } catch {
       await browser.close().catch(() => {})
     }

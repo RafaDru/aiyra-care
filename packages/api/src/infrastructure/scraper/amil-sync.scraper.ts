@@ -777,12 +777,11 @@ export class AmilSyncScraper {
       emit('login', 'API indisponível, tentando outras formas...', 'running')
     }
 
-    const cdpToken = await this.tryReadTokenFromCdp(emit)
-    if (cdpToken) {
-      return await this.authenticatedSync(cdpToken, 'Sessão lida do Chrome (CDP)', emit, opts)
-    }
-
     if (!interactiveLogin) {
+      const cdpToken = await this.tryReadTokenFromCdp(emit)
+      if (cdpToken) {
+        return await this.authenticatedSync(cdpToken, 'Sessão lida do Chrome (CDP)', emit, opts)
+      }
       throw new Error(
         'Sessão Amil indisponível. Use Sincronizar para conectar (primeira vez ou após expirar a sessão).',
       )

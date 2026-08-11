@@ -6,7 +6,7 @@ import {
   WarningFilled,
 } from '@ant-design/icons'
 import { Alert, Card, Steps, Typography } from 'antd'
-import { BrandTag } from '../brands/BrandLogo.js'
+import { BrandIntegrationChip, SYNC_CHIP_LOGO_MAX } from '../brands/BrandIntegrationChip.js'
 import { useSyncJobProgress } from '../../hooks/useSyncJobProgress.js'
 import {
   fetchGroupHasFailure,
@@ -89,8 +89,13 @@ export function SyncJobCardView({
           marginBottom: 8,
         }}
       >
-        <div style={{ minWidth: 0 }}>
-          <BrandTag brand={portalType}>{profile.label}</BrandTag>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <BrandIntegrationChip
+            brand={portalType}
+            label={profile.label}
+            fullWidth
+            logoMaxSize={SYNC_CHIP_LOGO_MAX}
+          />
           {timeLabel && (
             <Text type="secondary" style={{ fontSize: 10, display: 'block', marginTop: 2 }}>
               {timeLabel}

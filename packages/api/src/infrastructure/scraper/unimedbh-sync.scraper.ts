@@ -5,8 +5,11 @@ import type { UnimedBhAuthorizationItem } from './unimedbh-autorizacoes.scraper.
 import {
   acquireUnimedBhSession,
   captureUnimedStorageState,
+  isUnimedLoginPage,
+  unimedSessionExpiredMessage,
   unimedSessionExpiresAt,
 } from './unimedbh-login.helper.js'
+import { registerSyncBrowser, unregisterSyncBrowser } from '../sync/sync-browser-registry.js'
 import {
   scrapeUnimedBhVirtualCardFromPage,
   type UnimedBhVirtualCard,
@@ -62,7 +65,22 @@ type ExtratoBeneficiario = {
 const DETAIL_BASE = 'https://app.unimedbh.com.br/PortalDoCliente/AutorizacoesDetalhe?InSolicIdEncriptado='
 const LIST_URL = 'https://app.unimedbh.com.br/PortalDoCliente/AutorizacoesExames'
 const EXTRATO_URL = 'https://app.unimedbh.com.br/PortalDoCliente/ExtratoUtilizacao'
-const EXTRATO_MONTHS = 6
+const EXTRATO_MONTHS_DEFAULT = 6
+
+function parseUnimedPortalDate(iso?: string): Date | null {
+  if (!iso || iso.startsWith('1900')) return null
+  const normalized = iso.includes('T') ? iso : `${iso}T12:00:00Z`
+  const d = new Date(normalized)
+  return isNaN(d.getTime()) ? null : d
+}
+
+function authorizationWithinWindow(item: OutSystemsListItem, since: Date): boolean {
+  const emissao = parseUnimedPortalDate(item.DataEmissao)
+  const validade = parseUnimedPortalDate(item.DataValidadeAutorizacao)
+  const ref = emissao ?? validade
+  if (!ref) return true
+  return ref >= since
+}
 
 function waitForScreenService(page: Page, pathPart: string, timeout = 45000): Promise<Response> {
   return waitForUnimedScreenService(page, pathPart, timeout)
@@ -134,12 +152,23 @@ function flattenExtratoPayload(data: {
 }
 
 
+export type UnimedBhScrapeOpts = {
+  patientName?: string
+  cardNumber?: string
+  storageStateJson?: string
+  jobId?: string
+  /** Competências do extrato (default 6). Sync silencioso usa 2. */
+  extratoMonths?: number
+  /** Só detalha autorizações com emissão/validade >= esta data. */
+  authorizationSince?: Date | null
+}
+
 export class UnimedBhSyncScraper {
   async scrape(
     email: string,
     password: string,
     onProgress?: (p: ScraperProgress) => void,
-    opts?: { patientName?: string; cardNumber?: string; storageStateJson?: string },
+    opts?: UnimedBhScrapeOpts,
   ): Promise<UnimedBhSyncResult> {
     const emit = (step: string, message: string, status: ScraperProgress['status']) => onProgress?.({ step, message, status })
 
@@ -148,6 +177,8 @@ export class UnimedBhSyncScraper {
       password,
       { storageStateJson: opts?.storageStateJson },
     )
+
+    if (opts?.jobId) registerSyncBrowser(opts.jobId, browser)
 
     try {
       if (usedStoredSession) {
@@ -169,8 +200,9 @@ export class UnimedBhSyncScraper {
         emit('fetch-plano', 'Não foi possível obter o plano agora (seguindo com dados clínicos)', 'running')
       }
 
-      const extrato = await this.scrapeExtrato(page, emit)
-      const autorizacoes = await this.scrapeAutorizacoes(page, emit)
+      const extratoMonths = opts?.extratoMonths ?? EXTRATO_MONTHS_DEFAULT
+      const extrato = await this.scrapeExtrato(page, emit, extratoMonths)
+      const autorizacoes = await this.scrapeAutorizacoes(page, emit, opts?.authorizationSince ?? null)
 
       const sessionStorageState = await captureUnimedStorageState(context)
 
@@ -182,12 +214,30 @@ export class UnimedBhSyncScraper {
         sessionExpiresAt: unimedSessionExpiresAt(),
       }
     } finally {
-      await browser.close()
+      if (opts?.jobId) await unregisterSyncBrowser(opts.jobId)
+      else await browser.close()
     }
   }
 
-  private async scrapeExtrato(page: Page, emit: (step: string, msg: string, status: ScraperProgress['status']) => void) {
-    emit('fetch-extrato', 'Buscando extrato de utilização (API)...', 'running')
+  private assertUnimedPortalSession(page: Page): void {
+    if (isUnimedLoginPage(page.url())) {
+      throw new Error(unimedSessionExpiredMessage(page.url()))
+    }
+  }
+
+  private async scrapeExtrato(
+    page: Page,
+    emit: (step: string, msg: string, status: ScraperProgress['status']) => void,
+    extratoMonths: number,
+  ) {
+    const incremental = extratoMonths < EXTRATO_MONTHS_DEFAULT
+    emit(
+      'fetch-extrato',
+      incremental
+        ? `Buscando extrato (últimos ${extratoMonths} meses)...`
+        : 'Buscando extrato de utilização (API)...',
+      'running',
+    )
 
     const collected: UnimedBhUsageItem[] = []
     const seenKeys = new Set<string>()
@@ -204,6 +254,7 @@ export class UnimedBhSyncScraper {
     const firstWait = waitForScreenService(page, 'DataActionListarExtratoUtilizacao')
     const compWait = waitForScreenService(page, 'DataActionListarCompetencias').catch(() => null)
     await page.goto(EXTRATO_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    this.assertUnimedPortalSession(page)
     const [firstRes, compRes] = await Promise.all([firstWait, compWait])
     const firstJson = await firstRes.json() as { data?: { ExtratoUtilizacao?: { List?: ExtratoBeneficiario[] } } }
     if (firstJson.data) ingest(firstJson.data)
@@ -219,7 +270,7 @@ export class UnimedBhSyncScraper {
     const toVisit = competencias
       .map((c) => c.DataFormatada)
       .filter((label): label is string => !!label)
-      .slice(1, EXTRATO_MONTHS)
+      .slice(1, extratoMonths)
 
     for (const label of toVisit) {
       emit('fetch-extrato', `Extrato: ${label}...`, 'running')
@@ -238,11 +289,22 @@ export class UnimedBhSyncScraper {
     return { paciente: collected, dependentes: {} as Record<string, UnimedBhUsageItem[]> }
   }
 
-  private async scrapeAutorizacoes(page: Page, emit: (step: string, msg: string, status: ScraperProgress['status']) => void) {
-    emit('fetch-autorizacoes', 'Buscando autorizações (API OutSystems)...', 'running')
+  private async scrapeAutorizacoes(
+    page: Page,
+    emit: (step: string, msg: string, status: ScraperProgress['status']) => void,
+    authorizationSince: Date | null,
+  ) {
+    emit(
+      'fetch-autorizacoes',
+      authorizationSince
+        ? 'Buscando autorizações recentes (API OutSystems)...'
+        : 'Buscando autorizações (API OutSystems)...',
+      'running',
+    )
 
     const listWait = waitForScreenService(page, 'DataActionListarSolicCliente')
     await page.goto(LIST_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    this.assertUnimedPortalSession(page)
     const listRes = await listWait
     const listJson = await listRes.json() as { data?: {
       LocalDadosAutorizacaoAUTORIZACOES?: { List?: OutSystemsListItem[] }
@@ -262,14 +324,23 @@ export class UnimedBhSyncScraper {
 
     const paciente: UnimedBhAuthorizationItem[] = []
     let index = 0
+    let skippedDetails = 0
     for (const item of bySolic.values()) {
+      if (authorizationSince && !authorizationWithinWindow(item, authorizationSince)) {
+        paciente.push(this.mapListItemOnly(item))
+        skippedDetails++
+        continue
+      }
       index++
-      emit('fetch-autorizacoes', `Detalhando autorização ${index}/${bySolic.size}...`, 'running')
+      emit('fetch-autorizacoes', `Detalhando autorização ${index}/${bySolic.size - skippedDetails}...`, 'running')
       const enriched = await this.scrapeAuthorizationDetail(page, item)
       paciente.push(enriched)
     }
 
-    emit('fetch-autorizacoes', `${paciente.length} autorizações com detalhe`, 'running')
+    const detailMsg = skippedDetails > 0
+      ? `${paciente.length} autorizações (${index} com detalhe, ${skippedDetails} só lista)`
+      : `${paciente.length} autorizações com detalhe`
+    emit('fetch-autorizacoes', detailMsg, 'running')
     return { paciente, dependentes: {} as Record<string, UnimedBhAuthorizationItem[]> }
   }
 

@@ -5,6 +5,12 @@ const MATER_DEI_DEFAULT_START = '2015-01-01'
 const MATER_DEI_LOOKBACK_DAYS = 14
 const MATER_DEI_FIRST_SYNC_DAYS = 365
 
+/** Meses de extrato no sync manual (full). */
+export const UNIMED_EXTRATO_MONTHS_FULL = 6
+/** Meses de extrato no sync silencioso/incremental. */
+export const UNIMED_EXTRATO_MONTHS_INCREMENTAL = 2
+const UNIMED_LOOKBACK_DAYS = 14
+
 function formatDateYmd(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
@@ -47,6 +53,27 @@ export async function computeMaterDeiExamStartDate(
 
   const firstSyncFrom = subtractDays(new Date(), MATER_DEI_FIRST_SYNC_DAYS)
   return formatDateYmd(firstSyncFrom)
+}
+
+/** Janela de competências do extrato Unimed (sync silencioso = menos meses). */
+export function computeUnimedExtratoMonths(incremental: boolean): number {
+  return incremental ? UNIMED_EXTRATO_MONTHS_INCREMENTAL : UNIMED_EXTRATO_MONTHS_FULL
+}
+
+/**
+ * Autorizações com emissão/validade antes desta data usam só dados da lista (sem detalhe).
+ * null = detalhar todas (sync manual).
+ */
+export function computeUnimedAuthorizationSince(
+  link: IntegrationLink,
+  incremental: boolean,
+): Date | null {
+  if (!incremental) return null
+  const lastSync = link.lastSyncAt
+  if (lastSync) return subtractDays(lastSync, UNIMED_LOOKBACK_DAYS)
+  const fallback = new Date()
+  fallback.setMonth(fallback.getMonth() - UNIMED_EXTRATO_MONTHS_INCREMENTAL)
+  return fallback
 }
 
 export function collectHouseholdPatientIds(

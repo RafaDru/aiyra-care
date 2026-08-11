@@ -1,33 +1,17 @@
 import type { ReactNode } from 'react'
 import { Typography } from 'antd'
 import type { IntegrationLink } from '../../../lib/api.types.js'
-import { BrandLogo } from '../../../components/brands/BrandLogo.js'
-import { brandOrFallback, type BrandKey } from '../../../components/brands/brand-config.js'
+import { brandOrFallback, brandLogoForVariant, type BrandKey } from '../../../components/brands/brand-config.js'
 import { formatSyncNovelty } from '../../../lib/silent-sync.js'
-import type { SyncNoveltySummary } from '../../../lib/api.types.js'
 
 const { Text } = Typography
 
 export const INSURANCE_PORTALS = new Set(['unimed', 'amil', 'bradesco_saude'])
 export const HOSPITAL_PORTALS = new Set(['mater_dei'])
 export const LABORATORY_PORTALS = new Set(['hermes_pardini'])
-export const SYNCABLE = new Set(['unimed', 'amil', 'mater_dei', 'hermes_pardini'])
 
-export function noveltySummary(n: SyncNoveltySummary | null | undefined): string | null {
+export function noveltySummary(n: import('../../../lib/api.types.js').SyncNoveltySummary | null | undefined): string | null {
   return formatSyncNovelty(n)
-}
-
-export function collectSyncTargets(links: IntegrationLink[]): IntegrationLink[] {
-  const seen = new Set<string>()
-  const out: IntegrationLink[] = []
-  for (const link of links) {
-    if (!SYNCABLE.has(link.portalType)) continue
-    const syncLinkId = link.effectiveSyncLinkId ?? link.id
-    if (seen.has(syncLinkId)) continue
-    seen.add(syncLinkId)
-    out.push(link)
-  }
-  return out
 }
 
 export function formatCpf(cpf: string | null | undefined) {
@@ -78,6 +62,12 @@ export function WalletCardFace({
   id?: string
 }) {
   const meta = brandOrFallback(brandKey)
+  const textColor = meta.cardTextColor ?? '#fff'
+  const mutedColor = meta.cardMutedColor ?? meta.accent
+  const headerBg = meta.cardHeaderBg ?? meta.logoBg ?? meta.color
+  const headerLogoSrc = brandLogoForVariant(meta, 'cardHeader')
+  const headerLogoMaxH = meta.cardHeaderLogoMaxHeight ?? 40
+
   return (
     <div
       id={id}
@@ -85,8 +75,7 @@ export function WalletCardFace({
         borderRadius: 16,
         overflow: 'hidden',
         background: meta.gradient,
-        color: '#fff',
-        minHeight: 168,
+        color: textColor,
         position: 'relative',
         boxShadow: highlighted
           ? '0 0 0 3px var(--primary, #9333EA), 0 8px 24px rgba(15,23,42,0.12)'
@@ -94,25 +83,48 @@ export function WalletCardFace({
         transition: 'box-shadow 0.2s ease',
       }}
     >
+      {headerLogoSrc && (
+        <div
+          style={{
+            background: headerBg,
+            padding: '14px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            minHeight: headerLogoMaxH + 28,
+          }}
+        >
+          <img
+            src={headerLogoSrc}
+            alt={meta.label}
+            style={{
+              display: 'block',
+              width: 'auto',
+              height: 'auto',
+              maxHeight: headerLogoMaxH,
+              maxWidth: '85%',
+              objectFit: 'contain',
+            }}
+          />
+        </div>
+      )}
+
       <div style={{ padding: '16px 18px', position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <BrandLogo brand={brandKey} size={36} />
-            <div>
-              <Text style={{ color: meta.accent, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' }}>
-                {meta.subtitle}
-              </Text>
-              <div style={{ fontWeight: 700, fontSize: 17, lineHeight: 1.2 }}>{meta.label}</div>
-              {planLabel && planLabel !== meta.subtitle && (
-                <Text style={{ color: meta.accent, fontSize: 12 }}>{planLabel}</Text>
-              )}
-            </div>
+          <div>
+            <Text style={{ color: mutedColor, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' }}>
+              {meta.subtitle}
+            </Text>
+            <div style={{ fontWeight: 700, fontSize: 17, lineHeight: 1.2, marginTop: 2 }}>{meta.label}</div>
+            {planLabel && planLabel !== meta.subtitle && (
+              <Text style={{ color: mutedColor, fontSize: 12 }}>{planLabel}</Text>
+            )}
           </div>
           {extra}
         </div>
 
         <div style={{ marginTop: 22 }}>
-          <Text style={{ color: meta.accent, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase' }}>
+          <Text style={{ color: mutedColor, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase' }}>
             {numberLabel}
           </Text>
           <div
@@ -130,7 +142,7 @@ export function WalletCardFace({
         </div>
 
         <div style={{ marginTop: 16 }}>
-          <Text style={{ color: meta.accent, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase' }}>
+          <Text style={{ color: mutedColor, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase' }}>
             Beneficiário
           </Text>
           <div style={{ fontWeight: 600, fontSize: 14 }}>{holderName}</div>

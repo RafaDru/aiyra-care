@@ -88,6 +88,16 @@ JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login 
 - Vincular plano: modal em `detail.tsx` + `ImportInsuranceModal.tsx`
 - API client: `packages/web/src/lib/api.ts`
 
+### UI — listas agrupadas com colunas alinhadas
+
+Regra: novas telas com **grupos de cards/linhas** devem manter alinhamento horizontal entre grupos.
+
+- `GroupedAlignedTables` — vários grupos (título + tabela) com as **mesmas colunas** e `tableLayout="fixed"`
+- `aligned-table-columns.ts` (`ALIGNED_COL`) — larguras fixas compartilhadas (portal 220, ações 208, etc.)
+- `AlignedFieldGrid` — detalhes expandidos (labels alinhados em grid)
+- Logos: `packages/web/public/brands/` — `logoSrc` (inline), `logoSquare` (avatar), `logoBanner` (faixa)
+- Exemplos: `IntegrationsTab`, `CoverageTab`
+
 ## Migrations
 
 SQL em `database/relational/`. Aplicar novas colunas manualmente se necessário (ex.: via `npx tsx` + `pg` no dir `packages/api`). Última relevante: `010_integration_link_session.sql` (`encrypted_session_token`, `session_expires_at`).

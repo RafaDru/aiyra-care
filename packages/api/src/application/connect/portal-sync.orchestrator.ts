@@ -15,6 +15,10 @@ import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg
 import { unimedResultToCanonicalBatch } from './mappers/unimed-canonical.mapper.js'
 import { amilResultToCanonicalBatch } from './mappers/amil-canonical.mapper.js'
 import { CanonicalBatchImporterService, type CanonicalImportOutcome } from './canonical-batch-importer.service.js'
+import {
+  computeUnimedAuthorizationSince,
+  computeUnimedExtratoMonths,
+} from './sync-delta.helper.js'
 import { normalizeName } from './connect-sync.helpers.js'
 import type { UnimedBhUsageItem } from '../../infrastructure/scraper/unimedbh-extrato.scraper.js'
 import type {
@@ -28,6 +32,8 @@ export interface UnimedSyncParams {
   jobId: string
   onProgress: (step: string, message: string, status: 'running' | 'success' | 'failed') => void
   log?: FastifyBaseLogger
+  /** Sync silencioso — janela menor no extrato e menos detalhes de autorização. */
+  incremental?: boolean
 }
 
 export interface UnimedSyncResult {
@@ -64,7 +70,16 @@ export class PortalSyncOrchestrator {
   }
 
   async runUnimedSync(params: UnimedSyncParams): Promise<UnimedSyncResult> {
-    const { link, decryptedPassword, jobId, onProgress, log } = params
+    const { link, decryptedPassword, jobId, onProgress, log, incremental = false } = params
+
+    const extratoMonths = computeUnimedExtratoMonths(incremental)
+    const authorizationSince = computeUnimedAuthorizationSince(link, incremental)
+    if (incremental) {
+      log?.info(
+        { linkId: link.id, extratoMonths, authorizationSince: authorizationSince?.toISOString() },
+        'Unimed incremental sync window',
+      )
+    }
 
     const storedUnimedState =
       link.encryptedSessionToken && isUnimedSessionUsable(link.sessionExpiresAt)
@@ -81,6 +96,9 @@ export class PortalSyncOrchestrator {
         patientName: patient?.name,
         cardNumber: link.cardNumber || undefined,
         storageStateJson: storedUnimedState,
+        jobId,
+        extratoMonths,
+        authorizationSince,
       },
     )
 
@@ -126,7 +144,7 @@ export class PortalSyncOrchestrator {
   async handleUnimedSyncFailure(link: IntegrationLink, err: unknown, log?: FastifyBaseLogger): Promise<string> {
     const message = err instanceof Error ? err.message : 'Erro na sincronização'
     log?.error(err, 'Unimed sync failed')
-    if (/login|autentic|acesso\.unimed|sess[aã]o|portal do cliente/i.test(message)) {
+    if (/login|autentic|acesso\.unimed|sess[aã]o|portal do cliente|expirad/i.test(message)) {
       link.clearSessionToken()
       await this.linkRepo.update(link).catch(() => {})
     }
@@ -195,7 +213,8 @@ export class PortalSyncOrchestrator {
   async handleAmilSyncFailure(link: IntegrationLink, err: unknown, log?: FastifyBaseLogger): Promise<string> {
     const message = err instanceof Error ? err.message : 'Erro na sincronização Amil'
     log?.error(err, 'Amil sync failed')
-    if (/401|403|sess[aã]o|token|expirad/i.test(message)) {
+    const badCredentials = /inv[aá]lid|senha/i.test(message)
+    if (!badCredentials && /401|403|sess[aã]o|token|expirad/i.test(message)) {
       link.clearSessionToken()
       await this.linkRepo.update(link).catch(() => {})
     }

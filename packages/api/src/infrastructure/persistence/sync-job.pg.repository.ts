@@ -2,6 +2,7 @@ import type { Pool } from 'pg'
 import { SyncJob, type SyncJobProps } from '../../domain/sync-job/sync-job.entity.js'
 import type { SyncResult } from '../scraper/sync-progress-store.js'
 import type { SyncNoveltySummary } from '../../domain/sync-job/sync-job.entity.js'
+import { unregisterSyncBrowser } from '../sync/sync-browser-registry.js'
 
 function rowToProps(row: Record<string, unknown>): SyncJobProps {
   return {
@@ -80,6 +81,16 @@ export class SyncJobPgRepository {
   }
 
   async findActiveByLinkId(linkId: string): Promise<SyncJob | null> {
+    const stale = await this.pool.query<{ id: string }>(
+      `SELECT id FROM sync_jobs
+       WHERE integration_link_id = $1 AND status IN ('pending', 'running')
+         AND started_at < NOW() - INTERVAL '30 minutes'`,
+      [linkId],
+    )
+    for (const row of stale.rows) {
+      await unregisterSyncBrowser(row.id)
+    }
+
     await this.pool.query(
       `UPDATE sync_jobs SET
         status = 'failed', step = 'error',

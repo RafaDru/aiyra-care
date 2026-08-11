@@ -1,0 +1,22 @@
+/* Tint por marca — linhas de tabelas Convênios / Integrações */
+.brand-tint-row > td {
+  background: var(--coverage-row-bg) !important;
+  transition: background 0.15s ease;
+}
+
+.brand-tint-row > td:first-child {
+  border-left: 4px solid var(--coverage-brand-color);
+}
+
+.brand-tint-row:hover > td {
+  background: var(--coverage-row-bg-hover) !important;
+}
+
+.brand-tint-expanded > td {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.brand-tint-expanded-inner {
+  padding: 12px 16px 16px;
+}
