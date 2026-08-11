@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-10",
+  "generatedAt": "2026-08-11",
   "application": {
     "name": "AiyraCare (Filhos)",
     "repository": "https://github.com/RafaDru/open-health",
@@ -11,7 +11,7 @@
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Carteira do paciente em 3 abas (Carteirinhas, Convênios, Integrações). Sync de portais com progresso push-first (SSE) e histórico lateral por data/hora. Auth Supabase: refresh em /patients/* corrigido via bypass do proxy Vite (não enviar navegação HTML à API). Hermes Pardini integrado (login HTTP); BFF de exames pendente. Mater Dei: fetch de exames incremental desde última data conhecida.",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Carteira do paciente em 3 abas (Carteirinhas, Convênios, Integrações). Sync silencioso na aba Carteira (sessionReady + stale 6h); progresso push-first (SSE). Incremental em silent: Unimed 2 meses extrato + auth detalhe desde lastSync−14d; Amil PostTokens janela curta; Mater Dei exames desde max(exam_date)−14d. Hardening: probe sessão Unimed, mutex browser, timeout fecha Playwright.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
     "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, import_lineage",
@@ -57,8 +57,8 @@
     { "method": "GET", "path": "/roadmap", "description": "Roadmap priorizado (docs/roadmap.json)" }
   ],
   "integrations": [
-    { "portal": "unimed", "syncAutomatic": true, "authMethod": "Playwright SSO acesso.unimedbh.com.br", "imports": ["extrato/consultas", "autorizações", "cartão virtual/plano"] },
-    { "portal": "amil", "syncAutomatic": true, "authMethod": "JWT salvo → CDP Chrome → Playwright fallback", "imports": ["plano", "carências", "guias/tokens → Authorization"] },
+    { "portal": "unimed", "syncAutomatic": true, "authMethod": "Playwright SSO + storageState; probe extrato", "imports": ["extrato/consultas", "autorizações", "cartão virtual/plano"], "notes": "silent: 2 meses extrato; auth detalhe desde lastSync−14d" },
+    { "portal": "amil", "syncAutomatic": true, "authMethod": "JWT → API AuthOGS → CDP (manual only) → Playwright fallback", "imports": ["plano", "carências", "guias/tokens → Authorization"], "notes": "silent: PostTokens desde lastSync−14d" },
     { "portal": "bradesco_saude", "syncAutomatic": false, "authMethod": "vínculo manual", "imports": [] },
     { "portal": "conectesus", "syncAutomatic": false, "authMethod": "import manual gov.br", "imports": ["vacinas", "exames"] },
     { "portal": "mater_dei", "syncAutomatic": true, "authMethod": "scraper dedicado", "imports": ["exames", "atendimentos"], "notes": "fetch exames incremental desde max(exam_date)−14d" },

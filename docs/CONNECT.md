@@ -130,11 +130,22 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 - `ConnectPort` / `CanonicalBatchImporterPort` definidos.
 - Scrapers ainda no API.
 
-### Fase 2 — Orquestrador + Unimed canônico ✅ (parcial)
+### Fase 2 — Orquestrador + Unimed/Amil canônico ✅ (parcial)
 
 - `PortalSyncOrchestrator` + `CanonicalBatchImporterService` em `packages/api/src/application/connect/`
 - Sync **Unimed BH** e **Amil**: scrape → `CanonicalSyncBatch` → import + import-lineage
-- Mater Dei: ainda no controller (próximo piloto)
+- **Incremental (2026-08-11):** `sync-delta.helper.ts` — janelas curtas em `silent=1` (extrato Unimed, PostTokens Amil, exames Mater Dei)
+- **Hardening:** `browser-sync-mutex`, probe sessão Unimed, JWT-first Amil
+- Mater Dei: ainda no controller (próximo piloto canônico full)
+
+## Sync silencioso (estado atual)
+
+| Camada | Comportamento |
+|--------|----------------|
+| Web Carteira | `useSilentWalletSync` — `sessionReady` + stale 6h; toast se falha recuperável |
+| Web Integrações | Sincronizar manual + dock SSE; sync-all serial |
+| API | `incremental = silent && !force`; mutex browser; `sync_jobs` dual-write |
+| Fetch | Ver [SYNC_DELTA.md](./SYNC_DELTA.md) |
 
 ### Fase 3 — Deploy separado
 
@@ -147,7 +158,7 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 | Hoje | Futuro |
 |------|--------|
 | `integration_links.portal_type` | `connectorId` + `legacyPortalType` no registry |
-| `sync-progress-store` in-memory | `sync_jobs` + worker |
+| `sync-progress-store` in-memory | `sync_jobs` PG dual-write (worker 🔜) |
 | Controller persiste exames | Extractor → batch → importer |
 | `packages/agents/integracao` (Python) | Avaliar merge ou agente dentro de Connect |
 

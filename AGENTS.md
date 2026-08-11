@@ -29,7 +29,9 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 
 - **Hexagonal** em `packages/api`: `domain/` → `application/` → `infrastructure/`
 - **Integrações de plano**: `IntegrationLink` (credenciais + sessão) → scrapers → `InsurancePlanService.upsertFromPortal` + import de `Authorization` / `MedicalRecord` / `Exam`
-- **Sync assíncrono**: `POST /integration-links/:id/sync` retorna `jobId`; query `silent=1` (sem modal) ou `force=1` (ignora intervalo). UI: auto silent na Carteira (`shouldOfferSilentSync`); modal só no botão manual. Polling: `GET /integration-links/:id/sync-status` + `sync-progress/:jobId`.
+- **Sync assíncrono**: `POST /integration-links/:id/sync` retorna `jobId`; query `silent=1` (sem modal) ou `force=1` (ignora intervalo). UI: auto silent na aba **Carteira** (`useSilentWalletSync` + `shouldOfferSilentSync`); modal só no botão **Sincronizar** em Integrações. Polling: `GET /integration-links/:id/sync-status` (15s; pausa com dock/SSE) + `sync-progress/:jobId/stream`.
+- **Sync incremental (silent)**: `sync-delta.helper.ts` — Unimed: 2 meses extrato + detalhe auth desde `lastSync−14d`; Amil: `PostTokens` desde `lastSync−14d` (ou 2 meses); Mater Dei: exames desde `max(exam_date)−14d`. Manual/`force` = janela full.
+- **Hardening sync**: probe Unimed no extrato + fail-fast SSO; Amil JWT/API antes de CDP em manual; `browser-sync-mutex` (1 browser pesado por vez); `sync-browser-registry` fecha Playwright em timeout PG; sync-all serial na UI.
 - **Credenciais**: AES-256-GCM via `CRYPTO_KEY` em `.env` (`crypto-helper.ts`)
 - **Auth API**: com `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE`, hook global em `security.plugin.ts`; escopo por paciente via `patient_memberships` + `owner_account_id` (`patient-access.guard.ts`). Ver `docs/SUPABASE.md`.
 - **Integrações**: boundary Connect vs Core em `docs/CONNECT.md`; pacote `packages/connect` (contrato canônico). Scrapers ainda em `packages/api` até Fase 2.
@@ -77,13 +79,16 @@ JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login 
 
 ### Unimed BH — arquivos-chave
 
-- `unimedbh-login.helper.ts` — login SSO
-- `unimedbh-sync.scraper.ts` — extrato + autorizações + cartão virtual na mesma sessão
+- `unimedbh-login.helper.ts` — login SSO; probe sessão no extrato (`isUnimedLoginPage`)
+- `unimedbh-sync.scraper.ts` — extrato + autorizações + cartão virtual; `extratoMonths` / `authorizationSince` em silent
+- `unimedbh-wait-response.helper.ts` — fail-fast se redirect ao SSO durante wait API
 - `unimedbh-cartao-virtual.scraper.ts` — QR/token + campos do plano
+- `sync-delta.helper.ts` — `computeUnimedExtratoMonths`, `computeUnimedAuthorizationSince`
 
 ## Frontend — onde mexer
 
 - Perfil paciente: `packages/web/src/pages/patient/detail.tsx` (abas **Carteira**, **Convênios**, **Integrações**)
+- Carteira silenciosa: `useSilentWalletSync.ts`, `useWalletLinkSyncStatus.ts`, `silent-sync.ts`
 - Sync modal: `packages/web/src/components/scraper/SyncProgressModal.tsx`
 - Vincular plano: modal em `detail.tsx` + `ImportInsuranceModal.tsx`
 - API client: `packages/web/src/lib/api.ts`

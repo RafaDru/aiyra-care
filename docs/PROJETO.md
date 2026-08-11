@@ -1,7 +1,7 @@
 # Open Health - Documento Vivo do Projeto
 
 > **Última atualização:** 2026-08-06  
-> **Status:** Sync Unimed BH + **Amil validado em produção local**; plano/membership multi-operadora; auth Amil silenciosa (token/CDP)  
+> **Status:** Sync Unimed BH + **Amil validado**; P0 Connect — silent sync na Carteira, incremental Unimed/Amil, hardening sessão/browser (2026-08-11)  
 > **Repositório:** https://github.com/RafaDru/open-health
 
 ---
@@ -24,8 +24,11 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 ### Fluxo do usuário
 
 1. **Dashboard** (`/`) — cards por faixa etária; clique abre perfil do paciente.
-2. **Perfil** (`/patients/:id`) — abas clínicas + **Carteira** (`WalletTab`):
-   - Vincular operadora (Unimed / Amil / Bradesco) com CPF ou e-mail + senha do portal.
+2. **Perfil** (`/patients/:id`) — abas clínicas + **Carteira** (3 sub-abas):
+   - **Carteirinhas** (`WalletCardsTab`) — cards por operadora; sync silencioso automático; novelty no toolbar.
+   - **Convênios** (`CoverageTab`) — planos, carências, cobertura; linhas com tint por operadora.
+   - **Integrações** (`IntegrationsTab`) — vínculos, Sincronizar manual, dock SSE + histórico.
+   - Vincular operadora (Unimed / Amil / Bradesco / Mater Dei / Hermes) com CPF ou e-mail + senha do portal.
    - **Sincronizar** — dispara job assíncrono; `SyncProgressModal` faz polling (Steps: login → buscar dados → salvar → concluído).
    - **Meu plano** — dados de `plan_memberships` + `insurance_plans` (nome, ANS, rede, carências).
    - **QR / token Unimed** — botão na carteira chama `POST .../virtual-card` (sessão Playwright dedicada).
@@ -43,11 +46,13 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 ### Sync Unimed BH (detalhe)
 
 ```
-POST /integration-links/:id/sync  →  jobId
-setImmediate → UnimedBhSyncScraper.scrape(email, password, onProgress, { patientName, cardNumber })
+POST /integration-links/:id/sync?silent=1|force=1  →  jobId
+PortalSyncOrchestrator.runUnimedSync → UnimedBhSyncScraper.scrape(..., { extratoMonths, authorizationSince })
 ```
 
-1. **Login** — `loginUnimedBh()` → redirect Portal do Cliente.
+**Incremental (silent, sem force):** `sync-delta.helper.ts` — 2 meses de extrato; detalhe de autorização só desde `lastSyncAt − 14d`. Manual: 6 meses + detalhe full.
+
+1. **Login** — `acquireUnimedBhSession()`; probe no extrato se sessão salva; fail-fast SSO.
 2. **Cartão Virtual** (antes das APIs longas) — scrape in-page → `planCard` + upsert plano.
 3. **Extrato** — intercept API `DataActionListarExtratoUtilizacao` → `MedicalRecord` (consultas, copart, nota fiscal).
 4. **Autorizações** — `DataActionListarSolicCliente` + para cada pedido: detalhe, procedimentos, prestador, histórico → `Authorization` + `AuthorizationItem`.
@@ -62,19 +67,20 @@ Arquivos: `unimedbh-sync.scraper.ts`, `unimedbh-login.helper.ts`, `unimedbh-cart
 > **✅ Validado (2026-07-28):** sync end-to-end funcional — login via CDP Chrome real, importação de plano/carências/carteirinha e guias/tokens → `Authorization`. Syncs seguintes silenciosos com token salvo.
 
 ```
-POST /integration-links/:id/sync  →  jobId
-runAmilSync → AmilSyncScraper.scrape(cpf, password, onProgress, { sessionToken, patientName, cardNumber })
-→ planService.upsertFromPortal + Authorization por guia/token
-→ link.setSessionToken(encrypt(jwt), expiresAt)
+POST /integration-links/:id/sync?silent=1  →  jobId (incremental guias)
+runAmilSync → AmilSyncScraper.scrape(..., { sessionToken, guidesPeriodStart, interactiveLogin })
 ```
+
+**Incremental (silent):** `PostTokens` com `PeriodoIni` desde `lastSync−14d` (ou 2 meses). Manual: 12 meses.
 
 **Autenticação (ordem de prioridade — evita Playwright/WAF):**
 
 | # | Método | Quando | Browser visível? |
 |---|--------|--------|------------------|
-| 1 | Token salvo em `integration_links` | JWT ainda válido (~30 min) | Não — só HTTP |
-| 2 | CDP Chrome real | Token expirado; Chrome em `:9222` ou auto-launch perfil `.cache/amil-chrome-cdp` | Chrome real (não Playwright); usuário clica **Entrar** |
-| 3 | Playwright | Só se `AMIL_ALLOW_BROWSER=1` | Sim — WAF costuma retornar 403 |
+| 1 | Token salvo em `integration_links` | JWT ainda válido | Não — só HTTP |
+| 2 | API `AuthOGS/Login` | Sem JWT válido | Não |
+| 3 | CDP Chrome real | Sync **manual** após API falhar; silent **não** lê CDP antes | Chrome real |
+| 4 | Playwright | Só se `AMIL_ALLOW_BROWSER=1` | Sim — WAF costuma 403 |
 
 **APIs Amil** (Bearer `userToken`):
 

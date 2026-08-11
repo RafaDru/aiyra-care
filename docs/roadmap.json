@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-10",
+  "updatedAt": "2026-08-11",
   "title": "Roadmap AiyraCare",
   "intro": "Prioridades ajustadas em 2026-08-07: primeiro sync silencioso (Connect), depois sequência clínica + grafo; agentes só com contexto e fontes sólidas. Os portais não entregam associações — o sync alimenta nós e proveniência; a sequência é nossa camada (Postgres + UX).",
   "categories": [
@@ -99,7 +99,7 @@
           "id": "connect-novelty",
           "title": "Novidades no sync (novelty JSONB)",
           "status": "done",
-          "detail": "Badge na Carteira com novelty (guias/consultas/exames); formatSyncNovelty no WalletTab."
+          "detail": "Badge na Carteira (WalletCardsTab) com novelty; formatSyncNovelty em silent-sync.ts."
         },
         {
           "id": "connect-refresh-cdp",
@@ -111,25 +111,25 @@
           "id": "connect-incremental",
           "title": "Sync incremental por connector",
           "status": "in_progress",
-          "detail": "Mater Dei: janela de exames desde max(exam_date)−14d (v1). Unimed/Amil: import skip por chave mas fetch portal ainda full. Ver docs/SYNC_DELTA.md."
+          "detail": "Mater Dei: examStartDate. Unimed silent: 2 meses extrato + auth detalhe desde lastSync−14d. Amil silent: PostTokens desde lastSync−14d. Manual = janela full. Ver docs/SYNC_DELTA.md."
         },
         {
           "id": "connect-sync-stream",
           "title": "Progresso de sync via SSE (push-first)",
-          "status": "in_progress",
-          "detail": "GET /integration-links/sync-progress/:jobId/stream + heartbeat; poll só reconciliação se stream mudo >45s. Web: fetch stream com Bearer."
+          "status": "done",
+          "detail": "GET /integration-links/sync-progress/:jobId/stream + heartbeat; poll reconciliação se stream mudo >45s; LinkSyncStatusCell 15s."
         },
         {
           "id": "connect-delta-audit",
           "title": "Auditoria delta sync (portal vs DB)",
           "status": "in_progress",
-          "detail": "Matriz por portal: fetch incremental, import dedup, arquivos skip; gaps Unimed extrato full, Amil guias, ConecteSUS manual."
+          "detail": "Matriz em SYNC_DELTA.md; gaps: Amil plano full em silent, Hermes BFF, skipped* novelty."
         },
         {
           "id": "connect-intervention-only",
           "title": "Intervenção humana só em falha recuperável",
-          "status": "in_progress",
-          "detail": "Auto silent na Carteira; modal só no Sincronizar manual; toast se silent falha (login/CDP)."
+          "status": "done",
+          "detail": "useSilentWalletSync na Carteira; modal só em Integrações; toast se silent falha (login/CDP)."
         }
       ]
     },

@@ -1,7 +1,7 @@
 # Roadmap AiyraCare
 
 > **Fonte estruturada (UI + API):** [`roadmap.json`](./roadmap.json)  
-> **Última revisão de prioridades:** 2026-08-07
+> **Última revisão de prioridades:** 2026-08-11
 
 Documento vivo para acompanhar épicos, pendências e debates. A página **Roadmap** no app lê o JSON via API.
 
@@ -32,7 +32,11 @@ Detalhe completo (status, itens, notas): ver `roadmap.json` ou menu **Roadmap** 
 
 ### P0 — Connect: sincronismo silencioso
 - Pacote `@open-health/connect`, orchestrator, sessões Amil/Unimed ✅
-- `sync_jobs` PG, novelty na UI, refresh CDP, sync incremental 🔜
+- `sync_jobs` PG (dual-write), novelty na UI, refresh CDP ✅
+- Sync incremental Unimed/Amil em silent ✅ (extrato/guias); Mater Dei exames ✅
+- Hardening sync (sessão, mutex, timeout browser) ✅
+- SSE push-first 🔄; intervenção só manual na Carteira ✅
+- `skipped*` novelty todos portais 🔜
 
 ### P1 — Sequência do cuidado
 - `relation_types`, `clinical_entity_links`, UI Acompanhamento 🔄

@@ -859,8 +859,8 @@ Consolidação da aba Carteira (Carteirinhas / Convênios / Integrações), prog
 - [x] Registrar histórico e momento atual da aplicação (`HISTORICO.md` + `project-context.json`)
 - [x] Commit e push `main` (esta sessão)
 - [ ] Mapear BFF Hermes Pardini (lista/PDF exames)
-- [ ] Sync incremental Unimed/Amil (fetch portal com janela/cursor)
-- [ ] Renovação proativa sessão Amil em background
+- [x] Sync incremental Unimed/Amil (fetch portal com janela/cursor) — 2026-08-11
+- [x] Renovação proativa sessão Amil em background (`AMIL_SESSION_RENEW_MS`)
 - [ ] Export PDF resumido para consulta médica
 
 ### Momento atual da aplicação (snapshot)
@@ -875,5 +875,49 @@ Consolidação da aba Carteira (Carteirinhas / Convênios / Integrações), prog
 - `packages/api/src/infrastructure/scraper/sync-job-stream.ts`
 - `packages/api/src/application/connect/sync-delta.helper.ts`
 - `docs/SYNC_DELTA.md`, `docs/roadmap.json`
+
+---
+
+## [2026-08-11] - P0 Connect: hardening sync, Carteira silenciosa, incremental Unimed/Amil
+
+### Contexto
+Consolidação do épico P0 (sync silencioso): UI de marcas/alinhamento, sync automático na aba Carteira, robustez de sessão Unimed/Amil, e fetch incremental em sync `silent=1`.
+
+### Decisões
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Silent sync | Só na aba **Carteira** (`useSilentWalletSync`) | Integrações fica para ação manual + histórico |
+| Incremental | `silent && !force` na API | Manual/`force` mantém janela full |
+| Unimed extrato silent | 2 meses vs 6 manual | Menos timeout em `DataActionListarExtratoUtilizacao` |
+| Unimed auth silent | Detalhe só desde `lastSync−14d` | Lista ainda full; evita N× goto detalhe |
+| Amil guias silent | `PostTokens` desde `lastSync−14d` | API já aceita `PeriodoIni`/`PeriodoFim` |
+| Browser | `browser-sync-mutex` + registry em timeout | Evita corrida no sync-all; mata Playwright órfão |
+| Amil CDP | Não ler token CDP em sync manual antes de API | Evita usuário errado no Chrome paralelo |
+
+### Realizado
+- [x] UI brands: logos por operadora, tint em Convênios/Integrações, `GroupedAlignedTables`, Amil `#4F14FF` na Carteira
+- [x] `useSilentWalletSync` + `useWalletLinkSyncStatus` — novelty discreta nos cards
+- [x] Hardening Unimed: probe extrato, fail-fast SSO, `sync-browser-registry`
+- [x] Hardening Amil: JWT-first; não limpar sessão em senha inválida
+- [x] Sync-all serial (UI) + mutex API; polling `sync-status` 15s com pausa no dock
+- [x] `sync-delta.helper`: incremental Unimed + Amil; testes vitest
+- [x] Commits `4c70e72`, `b471fb5`
+
+### To-Dos (sequência)
+- [ ] `skipped*` no novelty (todos os portais)
+- [ ] Mapear BFF Hermes Pardini (lista/PDF exames)
+- [ ] Amil: skip plano/carências em silent quando recente
+- [ ] Export PDF resumido para consulta médica
+
+### Momento atual da aplicação (snapshot)
+- **Web:** Carteira dispara silent sync (6h stale, `sessionReady`); Integrações = Sincronizar manual + dock SSE.
+- **API:** incremental Unimed/Amil/Mater Dei; dual-write `sync_jobs`; mutex browser.
+- **Roadmap:** P0 Connect em progresso — incremental fetch ✅; scheduler 🔜.
+
+### Arquivos-chave
+- `packages/web/src/hooks/useSilentWalletSync.ts`
+- `packages/api/src/application/connect/sync-delta.helper.ts`
+- `packages/api/src/infrastructure/sync/browser-sync-mutex.ts`
+- `docs/SYNC_DELTA.md`
 
 ---
