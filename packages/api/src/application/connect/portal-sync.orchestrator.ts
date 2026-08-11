@@ -18,6 +18,7 @@ import { CanonicalBatchImporterService, type CanonicalImportOutcome } from './ca
 import {
   computeUnimedAuthorizationSince,
   computeUnimedExtratoMonths,
+  computeAmilGuidesPeriodStart,
 } from './sync-delta.helper.js'
 import { normalizeName } from './connect-sync.helpers.js'
 import type { UnimedBhUsageItem } from '../../infrastructure/scraper/unimedbh-extrato.scraper.js'
@@ -49,6 +50,8 @@ export interface AmilSyncParams {
   patientName?: string
   log?: FastifyBaseLogger
   interactiveLogin?: boolean
+  /** Sync silencioso — janela menor em guias/tokens. */
+  incremental?: boolean
 }
 
 export interface AmilSyncResult {
@@ -152,7 +155,15 @@ export class PortalSyncOrchestrator {
   }
 
   async runAmilSync(params: AmilSyncParams): Promise<AmilSyncResult> {
-    const { link, decryptedPassword, jobId, onProgress, patientName, log, interactiveLogin } = params
+    const { link, decryptedPassword, jobId, onProgress, patientName, log, interactiveLogin, incremental = false } = params
+
+    const guidesPeriodStart = computeAmilGuidesPeriodStart(link, incremental)
+    if (incremental) {
+      log?.info(
+        { linkId: link.id, guidesPeriodStart: guidesPeriodStart.toISOString() },
+        'Amil incremental sync window',
+      )
+    }
 
     const renewWindowMs = Number(process.env.AMIL_SESSION_RENEW_MS ?? String(24 * 60 * 60 * 1000))
     if (link.encryptedSessionToken && link.sessionExpiresAt) {
@@ -179,6 +190,7 @@ export class PortalSyncOrchestrator {
         cardNumber: link.cardNumber || undefined,
         sessionToken: storedToken,
         interactiveLogin,
+        guidesPeriodStart,
       },
     )
 

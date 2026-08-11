@@ -58,6 +58,8 @@ export interface AmilScrapeOpts {
   sessionToken?: string
   /** Primeira sync / botão Sincronizar — permite CDP/browser se API falhar. */
   interactiveLogin?: boolean
+  /** Início do período para PostTokens (guias). Default: 12 meses. */
+  guidesPeriodStart?: Date
 }
 
 type Json = Record<string, unknown>
@@ -898,7 +900,10 @@ export class AmilSyncScraper {
       }
 
       emit('fetch-autorizacoes', `Guias — ${label}...`, 'running')
-      const authorizations = await this.fetchAuthorizations(request, token, marcaOtica, emit, { silent: true })
+      const authorizations = await this.fetchAuthorizations(request, token, marcaOtica, emit, {
+        silent: true,
+        periodStart: opts?.guidesPeriodStart,
+      })
 
       beneficiaryData.push({
         beneficiary: snapshot,
@@ -1237,11 +1242,14 @@ export class AmilSyncScraper {
     token: string,
     marcaOtica: string,
     emit: (step: string, message: string, status: ScraperProgress['status']) => void,
-    opts?: { silent?: boolean },
+    opts?: { silent?: boolean; periodStart?: Date },
   ): Promise<AmilAuthorizationItem[]> {
     const end = new Date()
-    const start = new Date()
-    start.setMonth(start.getMonth() - 12)
+    const start = opts?.periodStart ?? (() => {
+      const s = new Date()
+      s.setMonth(s.getMonth() - 12)
+      return s
+    })()
 
     const pageSize = 50
     let page = 1

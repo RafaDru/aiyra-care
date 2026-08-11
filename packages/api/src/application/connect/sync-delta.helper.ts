@@ -11,6 +11,12 @@ export const UNIMED_EXTRATO_MONTHS_FULL = 6
 export const UNIMED_EXTRATO_MONTHS_INCREMENTAL = 2
 const UNIMED_LOOKBACK_DAYS = 14
 
+/** Meses de guias/tokens Amil no sync manual (full). */
+export const AMIL_GUIAS_MONTHS_FULL = 12
+/** Meses de guias no sync silencioso/incremental. */
+export const AMIL_GUIAS_MONTHS_INCREMENTAL = 2
+const AMIL_LOOKBACK_DAYS = 14
+
 function formatDateYmd(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
@@ -74,6 +80,19 @@ export function computeUnimedAuthorizationSince(
   const fallback = new Date()
   fallback.setMonth(fallback.getMonth() - UNIMED_EXTRATO_MONTHS_INCREMENTAL)
   return fallback
+}
+
+/** Início do período PostTokens (guias Amil). Sync silencioso = janela curta. */
+export function computeAmilGuidesPeriodStart(link: IntegrationLink, incremental: boolean): Date {
+  if (!incremental) {
+    const start = new Date()
+    start.setMonth(start.getMonth() - AMIL_GUIAS_MONTHS_FULL)
+    return start
+  }
+  if (link.lastSyncAt) return subtractDays(link.lastSyncAt, AMIL_LOOKBACK_DAYS)
+  const start = new Date()
+  start.setMonth(start.getMonth() - AMIL_GUIAS_MONTHS_INCREMENTAL)
+  return start
 }
 
 export function collectHouseholdPatientIds(

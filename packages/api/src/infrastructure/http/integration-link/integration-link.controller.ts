@@ -222,6 +222,7 @@ export class IntegrationLinkController {
                 patientName: patient?.name,
                 log: req.log,
                 interactiveLogin: !silent,
+                incremental: silent && !force,
               })
             const novelty = noveltyFromImportOutcome(importOutcome)
             const syncResult = attachNoveltyToSyncResult({
