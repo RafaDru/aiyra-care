@@ -8,6 +8,8 @@ export function amilResultToCanonicalBatch(
     connectionId: string
     jobId: string
     tenantRef?: string | null
+    /** Sync silencioso — não emite coverage (evita upsert com plano stub). */
+    skipCoverage?: boolean
   },
 ): CanonicalSyncBatch {
   const records: CanonicalRecord[] = []
@@ -29,29 +31,31 @@ export function amilResultToCanonicalBatch(
       raw: entry.beneficiary as unknown as Record<string, unknown>,
     })
 
-    records.push({
-      type: 'coverage',
-      externalKey: entry.plan.externalKey,
-      beneficiaryKey: key,
-      beneficiaryName,
-      planName: entry.plan.planName,
-      operatorName: entry.plan.operatorName,
-      productCode: entry.plan.productCode,
-      networkName: entry.plan.networkName,
-      raw: entry.plan as unknown as Record<string, unknown>,
-    })
-
-    if (entry.cardNumber) {
+    if (!ctx.skipCoverage) {
       records.push({
-        type: 'coverage_membership',
-        externalKey: `${key}|${entry.cardNumber}`,
+        type: 'coverage',
+        externalKey: entry.plan.externalKey,
         beneficiaryKey: key,
         beneficiaryName,
-        memberNumber: entry.cardNumber,
-        role: entry.beneficiary.role,
-        status: 'active',
-        raw: { cardNumber: entry.cardNumber, marcaOtica: entry.marcaOtica } as Record<string, unknown>,
+        planName: entry.plan.planName,
+        operatorName: entry.plan.operatorName,
+        productCode: entry.plan.productCode,
+        networkName: entry.plan.networkName,
+        raw: entry.plan as unknown as Record<string, unknown>,
       })
+
+      if (entry.cardNumber) {
+        records.push({
+          type: 'coverage_membership',
+          externalKey: `${key}|${entry.cardNumber}`,
+          beneficiaryKey: key,
+          beneficiaryName,
+          memberNumber: entry.cardNumber,
+          role: entry.beneficiary.role,
+          status: 'active',
+          raw: { cardNumber: entry.cardNumber, marcaOtica: entry.marcaOtica } as Record<string, unknown>,
+        })
+      }
     }
 
     for (const item of entry.authorizations) {

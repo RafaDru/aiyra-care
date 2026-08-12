@@ -708,8 +708,12 @@ export interface IntegrationLink {
 export interface SyncNoveltySummary {
   portalExams?: number
   portalAttendances?: number
+  portalMedicalRecords?: number
+  portalAuthorizations?: number
   newExamRecords?: number
   skippedExamRecords?: number
+  skippedMedicalRecords?: number
+  skippedAuthorizations?: number
   filesDownloaded?: number
   filesSkipped?: number
   newAuthorizations?: number

@@ -36,6 +36,9 @@ export interface CanonicalImportOutcome {
   imported: number
   updated: number
   skipped: number
+  skippedMedicalRecords: number
+  skippedExams: number
+  skippedAuthorizations: number
   exams: number
   medicalRecords: number
   authorizations: number
@@ -45,6 +48,23 @@ export interface CanonicalImportOutcome {
   beneficiaryDetails?: SyncBeneficiaryDetail[]
   unmatchedBeneficiaries?: SyncUnmatchedBeneficiary[]
   cardNumberHint?: string | null
+}
+
+function emptyImportOutcome(): CanonicalImportOutcome {
+  return {
+    imported: 0,
+    updated: 0,
+    skipped: 0,
+    skippedMedicalRecords: 0,
+    skippedExams: 0,
+    skippedAuthorizations: 0,
+    exams: 0,
+    medicalRecords: 0,
+    authorizations: 0,
+    authorizationItems: 0,
+    updatedAuthorizations: 0,
+    authorizationDetails: [],
+  }
 }
 
 export class CanonicalBatchImporterService {
@@ -84,17 +104,7 @@ export class CanonicalBatchImporterService {
     }
 
     const skipped = parsed.data.records.length
-    return {
-      imported: 0,
-      updated: 0,
-      skipped,
-      exams: 0,
-      medicalRecords: 0,
-      authorizations: 0,
-      authorizationItems: 0,
-      updatedAuthorizations: 0,
-      authorizationDetails: [],
-    }
+    return { ...emptyImportOutcome(), skipped }
   }
 
   private async ingestUnimedBatch(
@@ -109,17 +119,7 @@ export class CanonicalBatchImporterService {
       status: 'running',
     })
 
-    const outcome: CanonicalImportOutcome = {
-      imported: 0,
-      updated: 0,
-      skipped: 0,
-      exams: 0,
-      medicalRecords: 0,
-      authorizations: 0,
-      authorizationItems: 0,
-      updatedAuthorizations: 0,
-      authorizationDetails: [],
-    }
+    const outcome = emptyImportOutcome()
 
     const existingExams = await this.examRepo.findAll({ patientId })
     const existingAuths = await this.authRepo.findAll({ patientId })
@@ -159,13 +159,19 @@ export class CanonicalBatchImporterService {
           if (n) {
             outcome.medicalRecords++
             outcome.imported++
-          } else outcome.skipped++
+          } else {
+            outcome.skipped++
+            outcome.skippedMedicalRecords++
+          }
         } else if (record.type === 'exam') {
           const n = await this.importUnimedExam(record, patientId, batchId, existingExamKeys, examKey)
           if (n) {
             outcome.exams++
             outcome.imported++
-          } else outcome.skipped++
+          } else {
+            outcome.skipped++
+            outcome.skippedExams++
+          }
         } else if (record.type === 'authorization') {
           const r = await this.importUnimedAuthorization(
             record,
@@ -181,7 +187,10 @@ export class CanonicalBatchImporterService {
           outcome.imported += r.imported
           outcome.updated += r.updated
           outcome.authorizationDetails.push(...r.details)
-          if (!r.imported && !r.updated) outcome.skipped++
+          if (!r.imported && !r.updated) {
+            outcome.skipped++
+            outcome.skippedAuthorizations++
+          }
         } else if (record.type === 'coverage') {
           const card = record.raw as UnimedBhVirtualCard | undefined
           if (card) {
@@ -463,15 +472,7 @@ export class CanonicalBatchImporterService {
     })
 
     const outcome: CanonicalImportOutcome = {
-      imported: 0,
-      updated: 0,
-      skipped: 0,
-      exams: 0,
-      medicalRecords: 0,
-      authorizations: 0,
-      authorizationItems: 0,
-      updatedAuthorizations: 0,
-      authorizationDetails: [],
+      ...emptyImportOutcome(),
       beneficiaryDetails: [],
       unmatchedBeneficiaries: [],
     }
@@ -585,6 +586,10 @@ export class CanonicalBatchImporterService {
         )
         importedForPatient += stats.imported
         updatedForPatient += stats.updated
+        if (!stats.imported && !stats.updated) {
+          outcome.skipped++
+          outcome.skippedAuthorizations++
+        }
         outcome.authorizationDetails.push(...stats.details)
         outcome.imported += stats.imported
         outcome.updated += stats.updated
@@ -654,6 +659,15 @@ export class CanonicalBatchImporterService {
     let saved: Authorization
 
     if (existing) {
+      const unchanged =
+        (existing.procedureDescription || '') === (props.procedureDescription || '')
+        && (existing.doctorName || '') === (props.doctorName || '')
+        && (existing.status || '') === (props.status || '')
+        && (existing.guidePassword || '') === (props.guidePassword || '')
+        && (existing.notes || '') === (props.notes || '')
+      if (unchanged) {
+        return { imported: 0, updated: 0, details: [] }
+      }
       saved = await this.authRepo.update(
         Authorization.restore({
           ...existing.toJSON(),

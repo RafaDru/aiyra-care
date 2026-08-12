@@ -30,7 +30,8 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 - **Hexagonal** em `packages/api`: `domain/` → `application/` → `infrastructure/`
 - **Integrações de plano**: `IntegrationLink` (credenciais + sessão) → scrapers → `InsurancePlanService.upsertFromPortal` + import de `Authorization` / `MedicalRecord` / `Exam`
 - **Sync assíncrono**: `POST /integration-links/:id/sync` retorna `jobId`; query `silent=1` (sem modal) ou `force=1` (ignora intervalo). UI: auto silent na aba **Carteira** (`useSilentWalletSync` + `shouldOfferSilentSync`); modal só no botão **Sincronizar** em Integrações. Polling: `GET /integration-links/:id/sync-status` (15s; pausa com dock/SSE) + `sync-progress/:jobId/stream`.
-- **Sync incremental (silent)**: `sync-delta.helper.ts` — Unimed: 2 meses extrato + detalhe auth desde `lastSync−14d`; Amil: `PostTokens` desde `lastSync−14d` (ou 2 meses); Mater Dei: exames desde `max(exam_date)−14d`. Manual/`force` = janela full.
+- **Sync incremental (silent)**: `sync-delta.helper.ts` — Unimed: 2 meses extrato + detalhe auth desde `lastSync−14d`; Amil: `PostTokens` desde `lastSync−14d` (ou 2 meses), **sem** fetch plano/carências; Mater Dei: exames desde `max(exam_date)−14d`. Manual/`force` = janela full.
+- **Novelty skipped***: import conta dedup (`skippedMedicalRecords`, `skippedAuthorizations`, …); UI `formatSyncNovelty` na Carteira.
 - **Hardening sync**: probe Unimed no extrato + fail-fast SSO; Amil JWT/API antes de CDP em manual; `browser-sync-mutex` (1 browser pesado por vez); `sync-browser-registry` fecha Playwright em timeout PG; sync-all serial na UI.
 - **Credenciais**: AES-256-GCM via `CRYPTO_KEY` em `.env` (`crypto-helper.ts`)
 - **Auth API**: com `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE`, hook global em `security.plugin.ts`; escopo por paciente via `patient_memberships` + `owner_account_id` (`patient-access.guard.ts`). Ver `docs/SUPABASE.md`.

@@ -123,7 +123,7 @@
           "id": "connect-delta-audit",
           "title": "Auditoria delta sync (portal vs DB)",
           "status": "in_progress",
-          "detail": "Matriz em SYNC_DELTA.md; gaps: Amil plano full em silent, Hermes BFF, skipped* novelty."
+          "detail": "Matriz em SYNC_DELTA.md; gaps restantes: Hermes BFF, lineage unificado."
         },
         {
           "id": "connect-intervention-only",

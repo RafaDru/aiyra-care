@@ -60,6 +60,8 @@ export interface AmilScrapeOpts {
   interactiveLogin?: boolean
   /** Início do período para PostTokens (guias). Default: 12 meses. */
   guidesPeriodStart?: Date
+  /** Sync silencioso — pula fetch de plano/carências. */
+  incremental?: boolean
 }
 
 type Json = Record<string, unknown>
@@ -868,13 +870,19 @@ export class AmilSyncScraper {
       return score(a) - score(b)
     })
 
-    emit('fetch-plano', 'Buscando carteirinhas do plano...', 'running')
-    const carteirinhaRaw = await this.getJson(
-      request,
-      token,
-      `${API}/Beneficiario/${holderMarca}/ListaBeneficiariosCarteirinha`,
-    ).catch(() => null)
-    const carteirinhaList = mapBeneficiaryList(carteirinhaRaw)
+    const skipPlanFetch = opts?.incremental ?? false
+    let carteirinhaList: Json[] = []
+    if (!skipPlanFetch) {
+      emit('fetch-plano', 'Buscando carteirinhas do plano...', 'running')
+      const carteirinhaRaw = await this.getJson(
+        request,
+        token,
+        `${API}/Beneficiario/${holderMarca}/ListaBeneficiariosCarteirinha`,
+      ).catch(() => null)
+      carteirinhaList = mapBeneficiaryList(carteirinhaRaw)
+    } else {
+      emit('fetch-plano', 'Sync incremental — guias apenas...', 'running')
+    }
 
     const beneficiaryData: AmilBeneficiarySyncData[] = []
     let sharedExternalKey: string | undefined
@@ -884,19 +892,35 @@ export class AmilSyncScraper {
       const snapshot = mapBeneficiarySnapshot(b)
       const label = snapshot.name.split(' ')[0] || 'beneficiário'
 
-      emit('fetch-plano', `Plano — ${label}...`, 'running')
-      const [planoRaw, carenciaRaw] = await Promise.all([
-        this.getJson(request, token, `${API}/Beneficiario/${marcaOtica}/Plano`).catch(() => null),
-        this.getJson(request, token, `${API}/Carencia/${marcaOtica}`).catch(() => null),
-      ])
+      let plan: PortalPlanSnapshot
+      let cardNumber: string
 
-      const carteirinhaMatch = carteirinhaList.find((c) => beneficiaryMarca(c) === marcaOtica) ?? b
-      const carteirinhaRec = asRecord(carteirinhaMatch)
-      const { plan, cardNumber } = buildPlanSnapshot(b, carteirinhaRec, planoRaw, carenciaRaw, sharedExternalKey)
-      if (!sharedExternalKey && plan.productCode) {
-        sharedExternalKey = plan.productCode
-      } else if (sharedExternalKey) {
-        plan.externalKey = sharedExternalKey
+      if (skipPlanFetch) {
+        plan = {
+          operator: 'amil',
+          operatorName: 'Amil',
+          planName: 'Plano Amil',
+          source: 'amil',
+          externalKey: sharedExternalKey ?? marcaOtica,
+        }
+        cardNumber = marcaOtica
+      } else {
+        emit('fetch-plano', `Plano — ${label}...`, 'running')
+        const [planoRaw, carenciaRaw] = await Promise.all([
+          this.getJson(request, token, `${API}/Beneficiario/${marcaOtica}/Plano`).catch(() => null),
+          this.getJson(request, token, `${API}/Carencia/${marcaOtica}`).catch(() => null),
+        ])
+
+        const carteirinhaMatch = carteirinhaList.find((c) => beneficiaryMarca(c) === marcaOtica) ?? b
+        const carteirinhaRec = asRecord(carteirinhaMatch)
+        const built = buildPlanSnapshot(b, carteirinhaRec, planoRaw, carenciaRaw, sharedExternalKey)
+        plan = built.plan
+        cardNumber = built.cardNumber
+        if (!sharedExternalKey && plan.productCode) {
+          sharedExternalKey = plan.productCode
+        } else if (sharedExternalKey) {
+          plan.externalKey = sharedExternalKey
+        }
       }
 
       emit('fetch-autorizacoes', `Guias — ${label}...`, 'running')

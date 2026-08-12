@@ -9,7 +9,7 @@ Auditoria de consumo de dados em integrações. Objetivo: **buscar no terceiro s
 | Portal | Fetch no portal | Import no DB | Arquivos/PDF | Gap principal |
 |--------|-----------------|--------------|--------------|---------------|
 | **Unimed BH** | **Incremental em silent:** 2 meses extrato; auth detalhe só desde `lastSync−14d`. Manual: 6 meses + detalhe full | Dedup por chave; auth atualiza se mudou | N/A | Lista de autorizações ainda vem completa do portal (detalhe é o que cortamos) |
-| **Amil** | **Incremental em silent:** `PostTokens` desde `lastSync−14d` (ou 2 meses). Manual: 12 meses | Dedup + update autorizações; matcher dependentes | N/A | Plano/carências ainda full por beneficiário |
+| **Amil** | **Incremental em silent:** `PostTokens` desde `lastSync−14d` (ou 2 meses); **plano/carências omitidos** (só guias). Manual: 12 meses + plano full | Dedup + update autorizações; matcher dependentes; `skipped*` no novelty | N/A | — |
 | **Mater Dei** | Atendimentos/cirurgias: APIs “últimos”; **exames**: search paginado desde `examStartDate` | Dedup atendimento/exame; laudos skip se `documentId` ou séries já salvas | Skip PDF/imagem se já persistido | Atendimentos sem cursor por data |
 | **Hermes Pardini** | Login HTTP OK; BFF exames não mapeado | — | — | Endpoints de lista/PDF pendentes |
 | **ConecteSUS** | Import manual gov.br | Dedup no import | — | Sem sync automático |
@@ -39,7 +39,7 @@ Helpers em `packages/api/src/application/connect/sync-delta.helper.ts`:
 - **Unimed** (`CanonicalBatchImporter`): skip se chave de consulta/exame/pedido já existe; autorização atualiza.
 - **Amil**: idem + matching de beneficiários.
 - **Mater Dei**: dedup `mater_dei:` em notes; atendimentos por data+desc+médico.
-- **Novelty** (`sync_jobs.novelty`): contagens de novos vs atualizados para UI (Carteira + Integrações).
+- **Novelty** (`sync_jobs.novelty`): contagens de novos, atualizados e **skipped** (já conhecidos) para UI (Carteira + Integrações).
 
 ### 4. Hardening (2026-08-11)
 
@@ -55,11 +55,9 @@ Helpers em `packages/api/src/application/connect/sync-delta.helper.ts`:
 
 ## Próximos passos (roadmap)
 
-1. Expor `skipped*` no novelty de todos os portais (import já dedup).
-2. Hermes: mapear BFF e dedup por `codigoCliente` + id exame.
-3. Amil: skip fetch plano/carências em silent quando `lastSync` recente.
-4. `import_lineage` / `external_id` unificado para todos os connectors.
-5. Scheduler `trigger=scheduled` (worker apartado).
+1. Hermes: mapear BFF e dedup por `codigoCliente` + id exame.
+2. `import_lineage` / `external_id` unificado para todos os connectors.
+3. Scheduler `trigger=scheduled` (worker apartado).
 
 ## Variáveis
 

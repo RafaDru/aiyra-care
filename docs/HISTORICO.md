@@ -902,17 +902,17 @@ Consolidação do épico P0 (sync silencioso): UI de marcas/alinhamento, sync au
 - [x] Sync-all serial (UI) + mutex API; polling `sync-status` 15s com pausa no dock
 - [x] `sync-delta.helper`: incremental Unimed + Amil; testes vitest
 - [x] Commits `4c70e72`, `b471fb5`
+- [x] `skipped*` no novelty (Unimed consultas/exames/auth; Amil auth) + UI `formatSyncNovelty`
+- [x] Amil silent: skip fetch plano/carências + `skipCoverage` no mapper (só guias)
 
 ### To-Dos (sequência)
-- [ ] `skipped*` no novelty (todos os portais)
 - [ ] Mapear BFF Hermes Pardini (lista/PDF exames)
-- [ ] Amil: skip plano/carências em silent quando recente
 - [ ] Export PDF resumido para consulta médica
 
 ### Momento atual da aplicação (snapshot)
 - **Web:** Carteira dispara silent sync (6h stale, `sessionReady`); Integrações = Sincronizar manual + dock SSE.
 - **API:** incremental Unimed/Amil/Mater Dei; dual-write `sync_jobs`; mutex browser.
-- **Roadmap:** P0 Connect em progresso — incremental fetch ✅; scheduler 🔜.
+- **Roadmap:** P0 Connect em progresso — incremental fetch ✅; novelty skipped* ✅; Hermes BFF 🔜.
 
 ### Arquivos-chave
 - `packages/web/src/hooks/useSilentWalletSync.ts`

@@ -26,3 +26,7 @@
 .app-sider .app-sider-brand {
   border-bottom: 1px solid var(--sidebar-border);
 }
+
+.app-header.ant-layout-header {
+  box-shadow: 0 1px 0 var(--border);
+}

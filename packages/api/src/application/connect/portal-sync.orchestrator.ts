@@ -191,6 +191,7 @@ export class PortalSyncOrchestrator {
         sessionToken: storedToken,
         interactiveLogin,
         guidesPeriodStart,
+        incremental,
       },
     )
 
@@ -201,6 +202,7 @@ export class PortalSyncOrchestrator {
     const batch = amilResultToCanonicalBatch(result, {
       connectionId: link.id,
       jobId,
+      skipCoverage: incremental,
     })
 
     const importOutcome = await this.importer.ingestBatch(batch, link.patientId, link.id)

@@ -6,23 +6,35 @@ import {
 } from '../src/application/connect/sync-novelty.helper.js'
 
 describe('sync-novelty.helper', () => {
-  it('noveltyFromImportOutcome maps import counts', () => {
-    const novelty = noveltyFromImportOutcome({
-      imported: 3,
-      updated: 2,
-      authorizations: 1,
-      updatedAuthorizations: 1,
-      medicalRecords: 2,
-      exams: 1,
-      authorizationDetails: [],
-    }, { portalExams: 10, portalAttendances: 5 })
+  const baseOutcome = {
+    imported: 3,
+    updated: 2,
+    skipped: 5,
+    skippedMedicalRecords: 2,
+    skippedExams: 1,
+    skippedAuthorizations: 2,
+    authorizations: 1,
+    updatedAuthorizations: 1,
+    medicalRecords: 2,
+    exams: 1,
+    authorizationItems: 0,
+    authorizationDetails: [],
+  }
+
+  it('noveltyFromImportOutcome maps import and skipped counts', () => {
+    const novelty = noveltyFromImportOutcome(baseOutcome, { portalAttendances: 5 })
 
     expect(novelty).toEqual({
       newAuthorizations: 1,
       updatedAuthorizations: 1,
       newMedicalRecords: 2,
       newExamRecords: 1,
-      portalExams: 10,
+      skippedMedicalRecords: 2,
+      skippedExamRecords: 1,
+      skippedAuthorizations: 2,
+      portalMedicalRecords: 4,
+      portalExams: 2,
+      portalAuthorizations: 4,
       portalAttendances: 5,
     })
   })
