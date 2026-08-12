@@ -23,7 +23,7 @@
     { "id": "B", "name": "Contexto determinístico", "description": "GET /patients/:id/context e /timeline — alertas, textSummary, timeline clínica", "usesLlm": false, "status": "operational" },
     { "id": "C", "name": "Trilhas de saúde", "description": "HealthThread + entries + links; drawer workflow; adicionar/vincular artefatos", "usesLlm": false, "status": "operational" },
     { "id": "D", "name": "Documentos + OCR/LLM", "description": "Upload, cascade OCR, interpretação prescrição/vacina/manuscrito", "usesLlm": true, "status": "in_progress" },
-    { "id": "E", "name": "Grafo Neo4j", "description": "Projeção HealthThread, Hypothesis, SUPPORTS; worker lineage pendente", "usesLlm": false, "status": "mvp" },
+    { "id": "E", "name": "Grafo Neo4j", "description": "Lineage worker, path queries API, timeline Encadeamento; Doctor/Procedure nodes", "usesLlm": false, "status": "done" },
     { "id": "F", "name": "Agentes de apoio", "description": "RAG com PatientContext + trilhas + fontes citadas", "usesLlm": true, "status": "planned" }
   ],
   "domains": [
@@ -102,7 +102,7 @@
     { "id": "connect-worker-package", "title": "packages/connect-worker runner apartado", "status": "planned" },
     { "id": "relation-catalog-4.1", "title": "Migration relation_types + GET /relation-types", "status": "planned" },
     { "id": "entity-links-4.2", "title": "clinical_entity_links (consulta → exame)", "status": "planned" },
-    { "id": "neo4j-lineage-worker", "title": "Worker import_lineage → Neo4j", "status": "planned" },
+    { "id": "neo4j-lineage-worker", "title": "Worker import_lineage → Neo4j", "status": "done" },
     { "id": "agent-rag", "title": "Agente com PatientContext + citações", "status": "planned" },
     { "id": "export-pdf", "title": "Export resumido médico PDF", "status": "planned" }
   ],

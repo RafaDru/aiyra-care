@@ -30,7 +30,7 @@ Detalhe completo (status, itens, notas): ver `roadmap.json` ou menu **Roadmap** 
 
 **Categorias transversais:** `negocio` (produto/UX) e `tecnico` (arquitetura/dados) — tag nos épicos no JSON.
 
-### P0 — Connect: sincronismo silencioso
+### P0 — Connect: sincronismo silencioso ✅
 - Pacote `@open-health/connect`, orchestrator, sessões Amil/Unimed ✅
 - `sync_jobs` PG (só Postgres), novelty na UI, refresh CDP ✅
 - Sync incremental Unimed/Amil/Mater Dei/Hermes em silent ✅
@@ -46,7 +46,8 @@ Detalhe completo (status, itens, notas): ver `roadmap.json` ou menu **Roadmap** 
 
 ### P1 — Grafo Neo4j
 - Projector links + Hypothesis MVP ✅
-- Worker lineage, path queries 🔜
+- Worker lineage (`packages/neo4j-lineage-worker`), path queries API ✅
+- Timeline modo Encadeamento (grafo) na UI ✅
 
 ### P2 — Scheduler e worker
 - `trigger=scheduled` + `run-scheduled-syncs.mjs` + loop API ✅

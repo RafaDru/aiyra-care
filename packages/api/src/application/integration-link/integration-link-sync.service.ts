@@ -38,6 +38,7 @@ import {
   MATER_DEI_ORIGIN,
   resolveMaterDeiGatewayPatientId,
 } from '../../infrastructure/scraper/materdei-sync.scraper.js'
+import { scheduleImportLineageProjection } from '../../infrastructure/graph/import-lineage-graph.js'
 import { createJob, updateJob, bindSyncJobPersistence } from '../../infrastructure/scraper/sync-progress-store.js'
 import { dispatchBackgroundTask } from '../../infrastructure/sync/background-dispatch.js'
 import { withBrowserSyncMutex } from '../../infrastructure/sync/browser-sync-mutex.js'
@@ -394,7 +395,7 @@ export class IntegrationLinkSyncService {
         const desc = att.description || att.type || 'Atendimento Mater Dei'
         const key = recordKey(parsedDate.toISOString().slice(0, 10), desc, att.doctorName || '')
         if (existingKeys.has(key)) continue
-        await recordRepo.save(MedicalRecord.create({
+        const savedRecord = await recordRepo.save(MedicalRecord.create({
           patientId: link.patientId,
           recordDate: parsedDate,
           recordType: /consult/i.test(att.type || desc) ? 'consulta' : 'outro',
@@ -404,6 +405,12 @@ export class IntegrationLinkSyncService {
           source: 'mater_dei',
           notes: att.id != null ? `ID: ${att.id}` : undefined,
         }))
+        scheduleImportLineageProjection({
+          patientId: link.patientId,
+          processedTable: 'medical_records',
+          processedId: savedRecord.id,
+          source: 'mater_dei',
+        })
         importedRecords++
         existingKeys.add(key)
       }
@@ -421,7 +428,7 @@ export class IntegrationLinkSyncService {
           continue
         }
 
-        await examRepo.save(Exam.create({
+        const savedExam = await examRepo.save(Exam.create({
           patientId: targetPatientId,
           examType: exam.examType,
           examDate: parsedDate,
@@ -430,6 +437,12 @@ export class IntegrationLinkSyncService {
           source: 'mater_dei',
           notes: materDeiExamNotes(dedup, buildMaterDeiExamMeta(exam)),
         }))
+        scheduleImportLineageProjection({
+          patientId: targetPatientId,
+          processedTable: 'exams',
+          processedId: savedExam.id,
+          source: 'mater_dei',
+        })
         importedExams++
         patientExamKeys.add(dedup)
         existingExamKeysByPatient.set(targetPatientId, patientExamKeys)
@@ -568,7 +581,7 @@ export class IntegrationLinkSyncService {
           ? (parsePortalDate(exam.performedAt) ?? parseFlexiblePortalDate(exam.performedAt))
           : null
         if (!parsedDate) continue
-        await examRepo.save(Exam.create({
+        const savedExam = await examRepo.save(Exam.create({
           patientId: link.patientId,
           examType: exam.name,
           examDate: parsedDate,
@@ -576,6 +589,12 @@ export class IntegrationLinkSyncService {
           source: 'hermes_pardini',
           notes: hermesPardiniExamNotes(dedup, { pedidoId: exam.pedidoId }),
         }))
+        scheduleImportLineageProjection({
+          patientId: link.patientId,
+          processedTable: 'exams',
+          processedId: savedExam.id,
+          source: 'hermes_pardini',
+        })
         importedExams++
         existingKeys.add(dedup)
       }

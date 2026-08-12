@@ -51,6 +51,14 @@ export const api = {
         `/patients/${id}/timeline${query ? `?${query}` : ''}`,
       )
     },
+    timelineGraph: (id: string, limit = 200) =>
+      request<import('./api.types.js').PatientTimeline>(
+        `/patients/${id}/timeline/graph?limit=${limit}`,
+      ),
+    graphClinicalFlow: (id: string) =>
+      request<import('./api.types.js').ClinicalFlow>(`/patients/${id}/graph/clinical-flow`),
+    graphClinicalPaths: (id: string) =>
+      request<import('./api.types.js').ClinicalFlow>(`/patients/${id}/graph/clinical-paths`),
     create: (data: object) => request<import('./api.types.js').Patient>('/patients', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: object) => request<import('./api.types.js').Patient>(`/patients/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: string) => request<void>(`/patients/${id}`, { method: 'DELETE' }),

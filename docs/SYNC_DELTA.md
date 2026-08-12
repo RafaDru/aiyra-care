@@ -56,7 +56,8 @@ Helpers em `packages/api/src/application/connect/sync-delta.helper.ts`:
 
 ## Próximos passos (roadmap)
 
-1. `import_lineage` / `external_id` unificado para todos os connectors.
+1. Lineage → Neo4j via `neo4j-lineage-worker` + hooks de sync (ver `NEO4J_SYNC_ENABLED`).
+2. `import_lineage` / `external_id` unificado para todos os connectors (evolução futura).
 
 ## Variáveis
 

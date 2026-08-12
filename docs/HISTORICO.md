@@ -858,14 +858,14 @@ Consolidação da aba Carteira (Carteirinhas / Convênios / Integrações), prog
 - [x] Refresh corrigido (proxy Vite vs rotas SPA)
 - [x] Registrar histórico e momento atual da aplicação (`HISTORICO.md` + `project-context.json`)
 - [x] Commit e push `main` (esta sessão)
-- [x] Mapear BFF Hermes Pardini (lista/PDF exames) — lista ✅ 2026-08-12; PDF 🔜
+- [x] Mapear BFF Hermes Pardini (lista + PDF exames) — ✅ 2026-08-12 (`780162e`)
 - [x] Sync incremental Unimed/Amil (fetch portal com janela/cursor) — 2026-08-11
 - [x] Renovação proativa sessão Amil em background (`AMIL_SESSION_RENEW_MS`)
 - [ ] Export PDF resumido para consulta médica
 
 ### Momento atual da aplicação (snapshot)
 - **Web:** perfil paciente com macro-seções; Carteira em 3 sub-abas; dock lateral de sync sempre visível em Integrações; auth Supabase com token em memória + stream de progresso.
-- **API:** sync jobs em PG + memória; push SSE em `updateJob`; portais syncáveis Unimed, Amil, Mater Dei, Hermes (exames Hermes stub).
+- **API:** sync jobs só PG; portais Unimed, Amil, Mater Dei, Hermes (lista + PDF laudo).
 - **Auth refresh:** hard refresh em `/patients/:id?...` serve SPA via Vite, não JSON 401 da API.
 - **Roadmap vivo:** `docs/roadmap.json` + página Roadmap; P0 Connect silencioso em progresso.
 
@@ -906,7 +906,7 @@ Consolidação do épico P0 (sync silencioso): UI de marcas/alinhamento, sync au
 - [x] Amil silent: skip fetch plano/carências + `skipCoverage` no mapper (só guias)
 
 ### To-Dos (sequência)
-- [x] Mapear BFF Hermes Pardini (lista/PDF exames) — lista ✅ 2026-08-12; PDF 🔜
+- [x] Mapear BFF Hermes Pardini (lista + PDF exames) — ✅ 2026-08-12 (`780162e`)
 - [ ] Export PDF resumido para consulta médica
 
 ### Momento atual da aplicação (snapshot)
@@ -991,5 +991,25 @@ Fechar backlog P2 Connect: notificar UI quando sync termina (sem depender só de
 - `packages/api/src/infrastructure/scraper/hermes-pardini-exam-persist.ts`
 - `packages/web/src/lib/patient-sync-stream.ts`
 - `docs/SYNC_DELTA.md`, `docs/roadmap.json`, `AGENTS.md`
+
+---
+
+## [2026-08-12] - Neo4j épico fechado (lineage worker + path queries + timeline grafo)
+
+### Contexto
+Completar P1 grafo: projetar sync/import no Neo4j, expor leituras de caminho clínico e visualização de encadeamento na Linha do tempo.
+
+### Realizado
+- [x] `ImportLineageGraphProjector` — exames/consultas/autorizações + Doctor/Procedure + proveniência `IMPORTED_AS`
+- [x] Hooks em `CanonicalBatchImporterService` e sync Mater Dei/Hermes
+- [x] `neo4j-lineage.runner` + `packages/neo4j-lineage-worker` (loop, once, backfill)
+- [x] `ClinicalGraphQueryService` — graph clinical-flow/paths + timeline/graph
+- [x] Web: Linha do tempo → modo **Encadeamento**
+- [x] Migration `025_neo4j_projection_state.sql`
+
+### Arquivos-chave
+- `packages/api/src/infrastructure/graph/import-lineage-graph.projector.ts`
+- `packages/api/src/infrastructure/graph/clinical-graph-query.service.ts`
+- `packages/neo4j-lineage-worker/`
 
 ---

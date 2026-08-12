@@ -1,11 +1,9 @@
 import type { Driver } from 'neo4j-driver'
 import type { HealthThread } from '../../domain/health-thread/health-thread.entity.js'
 import type { HealthThreadLink } from '../../domain/health-thread/health-thread-link.entity.js'
+import { isNeo4jSyncEnabled } from './neo4j-env.js'
 
-export function isNeo4jSyncEnabled(): boolean {
-  const flag = process.env.NEO4J_SYNC_ENABLED
-  return flag === '1' || flag === 'true'
-}
+export { isNeo4jSyncEnabled } from './neo4j-env.js'
 
 const ENTITY_LABEL: Record<string, string> = {
   exam: 'Exam',

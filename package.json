@@ -13,7 +13,10 @@
     "lint": "echo 'linting'",
     "test": "echo 'tests'",
     "connect-worker": "cd packages/connect-worker && npm run start",
-    "connect-worker:once": "cd packages/connect-worker && npm run once"
+    "connect-worker:once": "cd packages/connect-worker && npm run once",
+    "neo4j-lineage-worker": "cd packages/neo4j-lineage-worker && npm run start",
+    "neo4j-lineage-worker:once": "cd packages/neo4j-lineage-worker && npm run once",
+    "neo4j-lineage-worker:backfill": "cd packages/neo4j-lineage-worker && npm run backfill"
   },
   "workspaces": [
     "packages/*",

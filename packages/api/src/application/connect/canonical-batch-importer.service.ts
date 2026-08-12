@@ -13,6 +13,7 @@ import { MedicalRecordPgRepository } from '../../infrastructure/persistence/medi
 import { InsurancePlanPgRepository } from '../../infrastructure/persistence/insurance-plan.pg.repository.js'
 import { PlanMembershipPgRepository } from '../../infrastructure/persistence/plan-membership.pg.repository.js'
 import { ImportLineagePgRepository } from '../../infrastructure/persistence/import-lineage.pg.repository.js'
+import { scheduleImportLineageProjection } from '../../infrastructure/graph/import-lineage-graph.js'
 import type { SyncAuthorizationDetail, SyncBeneficiaryDetail, SyncUnmatchedBeneficiary } from '../../infrastructure/scraper/sync-progress-store.js'
 import type { UnimedBhAuthorizationItem } from '../../infrastructure/scraper/unimedbh-autorizacoes.scraper.js'
 import type { UnimedBhUsageItem } from '../../infrastructure/scraper/unimedbh-extrato.scraper.js'
@@ -279,7 +280,7 @@ export class CanonicalBatchImporterService {
     const saved = await this.recordRepo.save(draft)
     existingRecordKeys.add(key)
     savedConsultas.push(saved)
-    await this.lineage.recordRaw({
+    const rawId = await this.lineage.recordRaw({
       batchId,
       patientId,
       source: 'unimed',
@@ -287,6 +288,14 @@ export class CanonicalBatchImporterService {
       externalKey: record.externalKey,
       rawJson: (record.raw as Record<string, unknown>) ?? {},
       processed: { table: 'medical_records', id: saved.id },
+    })
+    scheduleImportLineageProjection({
+      patientId,
+      processedTable: 'medical_records',
+      processedId: saved.id,
+      batchId,
+      rawRecordId: rawId,
+      source: 'unimed',
     })
     return true
   }
@@ -320,7 +329,7 @@ export class CanonicalBatchImporterService {
 
     const saved = await this.examRepo.save(draft)
     existingExamKeys.add(key)
-    await this.lineage.recordRaw({
+    const rawId = await this.lineage.recordRaw({
       batchId,
       patientId,
       source: 'unimed',
@@ -328,6 +337,14 @@ export class CanonicalBatchImporterService {
       externalKey: record.externalKey,
       rawJson: (record.raw as Record<string, unknown>) ?? {},
       processed: { table: 'exams', id: saved.id },
+    })
+    scheduleImportLineageProjection({
+      patientId,
+      processedTable: 'exams',
+      processedId: saved.id,
+      batchId,
+      rawRecordId: rawId,
+      source: 'unimed',
     })
     return true
   }
@@ -433,7 +450,7 @@ export class CanonicalBatchImporterService {
       itemCount = childItems.length
     }
 
-    await this.lineage.recordRaw({
+    const rawId = await this.lineage.recordRaw({
       batchId,
       patientId,
       source: 'unimed',
@@ -441,6 +458,14 @@ export class CanonicalBatchImporterService {
       externalKey: record.externalKey,
       rawJson: item as unknown as Record<string, unknown>,
       processed: { table: 'authorizations', id: saved.id },
+    })
+    scheduleImportLineageProjection({
+      patientId,
+      processedTable: 'authorizations',
+      processedId: saved.id,
+      batchId,
+      rawRecordId: rawId,
+      source: 'unimed',
     })
 
     return {
@@ -687,7 +712,7 @@ export class CanonicalBatchImporterService {
       existingAuths.push(saved)
     }
 
-    await this.lineage.recordRaw({
+    const rawId = await this.lineage.recordRaw({
       batchId,
       patientId,
       source: 'amil',
@@ -695,6 +720,14 @@ export class CanonicalBatchImporterService {
       externalKey: solicitationNumber,
       rawJson: item as unknown as Record<string, unknown>,
       processed: { table: 'authorizations', id: saved.id },
+    })
+    scheduleImportLineageProjection({
+      patientId,
+      processedTable: 'authorizations',
+      processedId: saved.id,
+      batchId,
+      rawRecordId: rawId,
+      source: 'amil',
     })
 
     return {

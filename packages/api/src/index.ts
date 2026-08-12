@@ -79,6 +79,8 @@ async function registerRoutes() {
   const { roadmapRoutes } = await import('./infrastructure/http/roadmap/roadmap.routes.js')
   const { projectContextRoutes } = await import('./infrastructure/http/project/project-context.routes.js')
 
+  const { graphRoutes } = await import('./infrastructure/http/graph/graph.routes.js')
+
   await app.register(patientRoutes)
   await app.register(growthRecordRoutes)
   await app.register(vaccineRoutes)
@@ -99,6 +101,7 @@ async function registerRoutes() {
   await app.register(carePlaceRoutes)
   await app.register(healthThreadRoutes)
   await app.register(clinicalLinkRoutes)
+  await app.register(graphRoutes)
   await app.register(roadmapRoutes)
   await app.register(projectContextRoutes)
 }

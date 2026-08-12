@@ -3,8 +3,9 @@ import { Card, Checkbox, DatePicker, Select, Space, Spin, Typography, Segmented,
 import { AppstoreOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
 import { api } from '../../../lib/api.js'
-import type { PatientTimeline, PatientTimelineEvent } from '../../../lib/api.types.js'
+import type { PatientTimeline, PatientTimelineEvent, ClinicalFlow } from '../../../lib/api.types.js'
 import { PatientContextTimeline } from '../../../components/patient/PatientContextTimeline.js'
+import { ClinicalEntityFlow } from '../../../components/patient/ClinicalEntityFlow.js'
 import { TIMELINE_KIND_OPTIONS, timelineKindMeta } from '../../../components/patient/timeline-kind-meta.js'
 
 const { Text } = Typography
@@ -14,10 +15,12 @@ interface TimelineTabProps {
   patientId: string
 }
 
-type ViewMode = 'timeline' | 'list'
+type ViewMode = 'timeline' | 'list' | 'chain'
 
 export function TimelineTab({ patientId }: TimelineTabProps) {
   const [data, setData] = useState<PatientTimeline | null>(null)
+  const [chainFlow, setChainFlow] = useState<ClinicalFlow | null>(null)
+  const [chainError, setChainError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [kinds, setKinds] = useState<string[]>([])
@@ -52,6 +55,18 @@ export function TimelineTab({ patientId }: TimelineTabProps) {
   useEffect(() => {
     load()
   }, [load])
+
+  useEffect(() => {
+    if (viewMode !== 'chain') return
+    setChainError(null)
+    api.patients
+      .graphClinicalPaths(patientId)
+      .then(setChainFlow)
+      .catch((e: unknown) => {
+        setChainFlow(null)
+        setChainError(e instanceof Error ? e.message : 'Encadeamento via grafo indisponível')
+      })
+  }, [patientId, viewMode])
 
   const events = data?.events ?? []
 
@@ -101,6 +116,7 @@ export function TimelineTab({ patientId }: TimelineTabProps) {
               options={[
                 { value: 'timeline', icon: <AppstoreOutlined />, label: 'Linha' },
                 { value: 'list', icon: <UnorderedListOutlined />, label: 'Lista' },
+                { value: 'chain', icon: <AppstoreOutlined />, label: 'Encadeamento' },
               ]}
             />
           </Space>
@@ -150,6 +166,18 @@ export function TimelineTab({ patientId }: TimelineTabProps) {
             )
           }}
         />
+      )}
+
+      {viewMode === 'chain' && chainError && (
+        <Text type="secondary">{chainError}</Text>
+      )}
+
+      {viewMode === 'chain' && !chainError && chainFlow && chainFlow.nodes.length > 0 && (
+        <ClinicalEntityFlow flow={chainFlow} />
+      )}
+
+      {viewMode === 'chain' && !chainError && chainFlow && chainFlow.nodes.length === 0 && (
+        <Empty description="Sem encadeamentos no grafo — sincronize portais ou associe na sequência" />
       )}
     </div>
   )

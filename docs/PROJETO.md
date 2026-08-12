@@ -1,7 +1,7 @@
 # Open Health - Documento Vivo do Projeto
 
 > **Última atualização:** 2026-08-06  
-> **Status:** Sync Unimed BH + **Amil validado**; P0 Connect — silent sync, incremental, hardening; P2 — SSE sync.completed + laudo PDF Hermes (2026-08-12)  
+> **Status:** Sync Unimed BH + **Amil validado**; P0 Connect fechado; P1 Neo4j + sequência clínica; P2 export resumido + Hermes PDF + sync.completed (2026-08-12)  
 > **Repositório:** https://github.com/RafaDru/open-health
 
 ---
@@ -773,7 +773,7 @@ Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: 
 | **B. Contexto determinístico** | `GET /patients/:id/context` — identidade, alertas, pendências, `textSummary`, timeline unificada | Não | ✅ Entregue |
 | **C. Trilhas de saúde** (`HealthThread`) | “Em andamento”: tarefas, investigações, hipóteses, episódios com sintomas | Não (entrada manual rápida) | 📋 Próximo |
 | **D. Documentos + OCR/LLM** | Arquivos, manuscrito, prescrição, laudos → estrutura | Sim (cascade) | 🔄 Paralelo |
-| **E. Grafo Neo4j** | Relações: sintoma → hipótese → diagnóstico → exame; proveniência | Não no CRUD | 📋 Médio prazo |
+| **E. Grafo Neo4j** | Projeção lineage + path API + timeline Encadeamento | Não no CRUD | ✅ Operacional (NEO4J_SYNC_ENABLED) |
 | **F. Agentes de apoio** | “Médico agêntico” — volume + momento, sempre com fonte citada | Sim (RAG) | 📋 Depois de B+C |
 
 **Ordem sensata:** A → B → **C** → D (paralelo) → E → F.
@@ -846,7 +846,7 @@ Roles de link (`health_thread_links.role`): `ordered` | `scheduled` | `result` |
 Agendamento futuro: mesma mecanismo (`entity_type: appointment` quando existir módulo).
 
 - [x] Aba **Linha do tempo** com filtros por tipo e período (`GET /patients/:id/timeline`)
-- [ ] Worker: sync/import → nós/arestas Neo4j (`import_lineage`, Authorization, Doctor, Procedure)
+- [x] Worker: sync/import → nós/arestas Neo4j (`import_raw_records`, Doctor, Procedure, path API)
 - [x] Estender grafo: `Hypothesis`, `HealthThread`, `RULED_OUT`, `SUPPORTS` (após 3.4)
 - [ ] Queries de caminho: medicação → consulta → exame → resultado
 

@@ -62,8 +62,8 @@
       "priority": "P0",
       "title": "Connect — sincronismo silencioso",
       "summary": "Manter carteira e histórico atualizados sem modal obrigatório, CDP só quando inevitável.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Completo",
       "items": [
         {
           "id": "connect-contract",
@@ -122,8 +122,8 @@
         {
           "id": "connect-delta-audit",
           "title": "Auditoria delta sync (portal vs DB)",
-          "status": "in_progress",
-          "detail": "Matriz em SYNC_DELTA.md; gaps restantes: lineage unificado, PDF Hermes."
+          "status": "done",
+          "detail": "Matriz SYNC_DELTA.md; Hermes lista+PDF; lineage Neo4j via worker."
         },
         {
           "id": "connect-intervention-only",
@@ -196,8 +196,8 @@
       "priority": "P1",
       "title": "Grafo Neo4j — camada estrutural",
       "summary": "Projeção read-model para caminhos (medicação → consulta → exame) e correlação futura.",
-      "status": "in_progress",
-      "statusLabel": "MVP",
+      "status": "done",
+      "statusLabel": "Completo",
       "items": [
         {
           "id": "neo4j-projector-links",
@@ -214,20 +214,20 @@
         {
           "id": "neo4j-lineage-worker",
           "title": "Worker import_lineage → Neo4j",
-          "status": "planned",
-          "detail": "Authorization, Doctor, Procedure a partir de sync e imports."
+          "status": "done",
+          "detail": "ImportLineageGraphProjector; hooks sync/import; packages/neo4j-lineage-worker backfill; Doctor/Procedure nodes."
         },
         {
           "id": "neo4j-path-queries",
           "title": "Queries de caminho clínico",
-          "status": "planned",
-          "detail": "medicação → consulta → exame → resultado; API para UI e agentes."
+          "status": "done",
+          "detail": "GET /patients/:id/graph/clinical-flow, /graph/clinical-paths; ClinicalGraphQueryService."
         },
         {
           "id": "neo4j-timeline-graph",
           "title": "Timeline alimentada pelo grafo (opcional)",
-          "status": "planned",
-          "detail": "Visualização de encadeamento além da lista por data."
+          "status": "done",
+          "detail": "GET /patients/:id/timeline/graph; aba Linha do tempo modo Encadeamento (ClinicalEntityFlow)."
         }
       ]
     },

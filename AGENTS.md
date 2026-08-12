@@ -101,6 +101,13 @@ JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login 
 - `hermes-pardini-sync.scraper.ts` — sessão Keycloak + fetch BFF
 - `integration-link-sync.service.ts` — execução centralizada de sync (manual + scheduled)
 
+### Neo4j — projeção (opcional)
+
+- `NEO4J_SYNC_ENABLED=1` — projeta entidades, links, lineage (Doctor/Procedure) após sync/import
+- `neo4j-lineage-worker` — backfill de `import_raw_records`; scripts `npm run neo4j-lineage-worker:once|backfill`
+- Leitura: `GET /patients/:id/graph/clinical-paths`, `/timeline/graph`; UI Linha do tempo → **Encacheamento**
+- Migration `025_neo4j_projection_state.sql`
+
 ## Frontend — onde mexer
 
 - Perfil paciente: `packages/web/src/pages/patient/detail.tsx` (abas **Carteira**, **Convênios**, **Integrações**)
