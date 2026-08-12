@@ -31,7 +31,7 @@ export function AppLayout() {
   ]
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
       <Sider
         className="app-sider"
         collapsible
@@ -92,8 +92,9 @@ export function AppLayout() {
           )}
         </div>
       </Sider>
-      <Layout>
+      <Layout style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Header
+          className="app-header"
           style={{
             background: 'var(--card-bg)',
             padding: '0 24px',
@@ -103,6 +104,10 @@ export function AppLayout() {
             justifyContent: collapsed ? 'space-between' : 'flex-end',
             height: 64,
             gap: 16,
+            flexShrink: 0,
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
           }}
         >
           {collapsed && <AppLogo variant="wordmark" height={38} />}
@@ -118,7 +123,7 @@ export function AppLayout() {
             <LanguageSwitcher />
           </div>
         </Header>
-        <Content style={{ margin: 24 }}>
+        <Content style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto' }}>
           <Outlet />
         </Content>
       </Layout>

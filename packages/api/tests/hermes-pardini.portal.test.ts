@@ -12,7 +12,7 @@ describe('hermes-pardini.portal', () => {
       'https://resultados.grupofleury.com.br/?origin=pardini',
     )
     expect(HERMES_PARDINI_PRECISION_CARE.keycloak.clientId).toBe('precision_care_pardini')
-    expect(HERMES_PARDINI_PRECISION_CARE.bffBase).toContain('api-plataforma.grupofleury.com.br')
+    expect(HERMES_PARDINI_PRECISION_CARE.pacienteApiBase).toContain('/paciente/api/v1')
   })
 
   it('keeps Magento regional URLs for legacy store', () => {

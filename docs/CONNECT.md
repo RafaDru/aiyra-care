@@ -7,7 +7,7 @@
 A integração concentra Playwright, tokens, WAF, jobs longos e credenciais — diferente do CRUD clínico. Hoje isso está no `integration-link.controller` e em ~15 scrapers dentro de `packages/api`, o que:
 
 - mistura HTTP, worker e persistência clínica;
-- dificulta escalar syncs (estado em memória em `sync-progress-store`);
+- dificulta escalar syncs sem worker dedicado (`packages/connect-worker` 🔜);
 - faz cada portal conhecer `Exam`, `Authorization`, etc.
 
 Connect extrai, normaliza e entrega **payload canônico**. O Core importa no domínio clínico e mantém **patient**, memberships e UI.
@@ -144,7 +144,7 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 |--------|----------------|
 | Web Carteira | `useSilentWalletSync` — `sessionReady` + stale 6h; toast se falha recuperável |
 | Web Integrações | Sincronizar manual + dock SSE; sync-all serial |
-| API | `incremental = silent && !force`; mutex browser; `sync_jobs` dual-write |
+| API | `incremental = silent && !force`; mutex browser; `sync_jobs` em Postgres (SSE + polling) |
 | Fetch | Ver [SYNC_DELTA.md](./SYNC_DELTA.md) |
 
 ### Fase 3 — Deploy separado
@@ -158,7 +158,7 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 | Hoje | Futuro |
 |------|--------|
 | `integration_links.portal_type` | `connectorId` + `legacyPortalType` no registry |
-| `sync-progress-store` in-memory | `sync_jobs` PG dual-write (worker 🔜) |
+| `sync-progress-store` | `sync_jobs` PG — leitura/escrita só Postgres; SSE via `publishSyncJobEvent` |
 | Controller persiste exames | Extractor → batch → importer |
 | `packages/agents/integracao` (Python) | Avaliar merge ou agente dentro de Connect |
 

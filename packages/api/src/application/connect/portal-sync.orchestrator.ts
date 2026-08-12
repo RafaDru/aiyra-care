@@ -94,7 +94,7 @@ export class PortalSyncOrchestrator {
     const result = await scraper.scrape(
       link.email!,
       decryptedPassword,
-      (p) => updateJob(jobId, p),
+      (p) => void updateJob(jobId, p),
       {
         patientName: patient?.name,
         cardNumber: link.cardNumber || undefined,
@@ -184,13 +184,14 @@ export class PortalSyncOrchestrator {
     const result = await amilScraper.scrape(
       link.email!,
       decryptedPassword,
-      (p) => updateJob(jobId, p),
+      (p) => void updateJob(jobId, p),
       {
         patientName,
         cardNumber: link.cardNumber || undefined,
         sessionToken: storedToken,
         interactiveLogin,
         guidesPeriodStart,
+        incremental,
       },
     )
 
@@ -201,6 +202,7 @@ export class PortalSyncOrchestrator {
     const batch = amilResultToCanonicalBatch(result, {
       connectionId: link.id,
       jobId,
+      skipCoverage: incremental,
     })
 
     const importOutcome = await this.importer.ingestBatch(batch, link.patientId, link.id)

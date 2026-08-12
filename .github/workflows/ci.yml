@@ -31,5 +31,5 @@ jobs:
         run: |
           for dir in packages/agents/*/; do
             echo "Checking $dir"
-            cd "$dir" && pip install -r requirements.txt -q && python -c "from main import app; print('OK')"
+            (cd "$dir" && pip install -r requirements.txt -q && python -c "from main import app; print('OK')")
           done

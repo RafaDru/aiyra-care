@@ -1,4 +1,7 @@
 .patient-section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 22;
   padding: 16px 24px 12px;
   border-bottom: 1px solid var(--border, #e2e8f0);
   background: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
@@ -51,6 +54,10 @@
 .patient-sub-tabs .ant-tabs-nav {
   margin: 0;
   padding: 8px 24px 0;
+  position: sticky;
+  top: 60px;
+  z-index: 21;
+  background: var(--card-bg);
 }
 
 .patient-sub-tabs .ant-tabs-nav-wrap {
@@ -105,6 +112,7 @@
 
   .patient-sub-tabs .ant-tabs-nav {
     padding: 6px 16px 0;
+    top: 48px;
   }
 
   .patient-sub-tabs .ant-tabs-tab {

@@ -1,6 +1,6 @@
 export interface ScrapedVaccine {
   vaccineName: string
-  dose: string
+  dose?: string
   applicationDate: string
   nextDoseDate?: string
   batch?: string

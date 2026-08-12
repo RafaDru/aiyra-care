@@ -858,7 +858,7 @@ Consolidação da aba Carteira (Carteirinhas / Convênios / Integrações), prog
 - [x] Refresh corrigido (proxy Vite vs rotas SPA)
 - [x] Registrar histórico e momento atual da aplicação (`HISTORICO.md` + `project-context.json`)
 - [x] Commit e push `main` (esta sessão)
-- [ ] Mapear BFF Hermes Pardini (lista/PDF exames)
+- [x] Mapear BFF Hermes Pardini (lista/PDF exames) — lista ✅ 2026-08-12; PDF 🔜
 - [x] Sync incremental Unimed/Amil (fetch portal com janela/cursor) — 2026-08-11
 - [x] Renovação proativa sessão Amil em background (`AMIL_SESSION_RENEW_MS`)
 - [ ] Export PDF resumido para consulta médica
@@ -902,22 +902,61 @@ Consolidação do épico P0 (sync silencioso): UI de marcas/alinhamento, sync au
 - [x] Sync-all serial (UI) + mutex API; polling `sync-status` 15s com pausa no dock
 - [x] `sync-delta.helper`: incremental Unimed + Amil; testes vitest
 - [x] Commits `4c70e72`, `b471fb5`
+- [x] `skipped*` no novelty (Unimed consultas/exames/auth; Amil auth) + UI `formatSyncNovelty`
+- [x] Amil silent: skip fetch plano/carências + `skipCoverage` no mapper (só guias)
 
 ### To-Dos (sequência)
-- [ ] `skipped*` no novelty (todos os portais)
-- [ ] Mapear BFF Hermes Pardini (lista/PDF exames)
-- [ ] Amil: skip plano/carências em silent quando recente
+- [x] Mapear BFF Hermes Pardini (lista/PDF exames) — lista ✅ 2026-08-12; PDF 🔜
 - [ ] Export PDF resumido para consulta médica
 
 ### Momento atual da aplicação (snapshot)
 - **Web:** Carteira dispara silent sync (6h stale, `sessionReady`); Integrações = Sincronizar manual + dock SSE.
 - **API:** incremental Unimed/Amil/Mater Dei; dual-write `sync_jobs`; mutex browser.
-- **Roadmap:** P0 Connect em progresso — incremental fetch ✅; scheduler 🔜.
+- **Roadmap:** P0 Connect em progresso — incremental fetch ✅; novelty skipped* ✅; Hermes BFF 🔜.
 
 ### Arquivos-chave
 - `packages/web/src/hooks/useSilentWalletSync.ts`
 - `packages/api/src/application/connect/sync-delta.helper.ts`
 - `packages/api/src/infrastructure/sync/browser-sync-mutex.ts`
 - `docs/SYNC_DELTA.md`
+
+---
+
+## [2026-08-12] - Hermes BFF, sync_jobs PG-only, scheduler scheduled
+
+### Contexto
+Fechar backlog P0 Connect: mapear API real do Hermes Pardini (portalpaciente), eliminar dual-write em `sync-progress-store`, e habilitar sync agendado com `trigger=scheduled`.
+
+### Decisões
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Hermes API | `paciente/api/v1/pedidos` + `/exames` | Shell `precision-care/api` não lista exames; SPA usa microfrontend portalpaciente |
+| Progresso sync | Só `sync_jobs` PG | Histórico estável; SSE via `publishSyncJobEvent`; heartbeat reconcilia PG |
+| Execução sync | `IntegrationLinkSyncService` | Controller HTTP fino; script/loop reutiliza mesmo pipeline |
+| Scheduled | Silent + `sessionReady` + `SYNC_MIN_INTERVAL_MS` | Igual política Carteira; sem login interativo |
+
+### Realizado
+- [x] `hermes-pardini-bff.service.ts` — paginação pedidos + expand exames; delta `computeHermesPardiniExamStartDate`
+- [x] `sync-progress-store` — async PG-only; `createJob(trigger)`; testes com fake repo
+- [x] `IntegrationLinkSyncService` — Unimed/Amil/Mater Dei/Hermes + `runScheduledBatch`
+- [x] `scripts/run-scheduled-syncs.mjs`; loop opcional `SYNC_SCHEDULED_INTERVAL_MS`
+- [x] Header fixo web + novelty `skipped*` (commit anterior na branch)
+
+### To-Dos (sequência)
+- [ ] PDF laudo Hermes (`POST /pedidos/{id}/download`)
+- [ ] `packages/connect-worker` (runner apartado)
+- [ ] Export PDF resumido para consulta médica
+
+### Momento atual da aplicação (snapshot)
+- **Web:** header fixo; Carteira silent + novelty skipped*; Integrações manual + dock SSE.
+- **API:** Hermes importa exames via BFF; `sync_jobs` só PG; batch scheduled via script ou env.
+- **Roadmap P0 Connect:** incremental ✅; novelty skipped* ✅; Hermes BFF ✅; sync PG ✅; scheduler local ✅.
+
+### Arquivos-chave
+- `packages/api/src/infrastructure/scraper/hermes-pardini-bff.service.ts`
+- `packages/api/src/application/integration-link/integration-link-sync.service.ts`
+- `packages/api/src/infrastructure/scraper/sync-progress-store.ts`
+- `packages/api/scripts/run-scheduled-syncs.mjs`
+- `docs/SYNC_DELTA.md`, `docs/roadmap.json`, `AGENTS.md`
 
 ---

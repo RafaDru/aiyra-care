@@ -12,7 +12,10 @@ export const HERMES_PARDINI_PRECISION_CARE = {
   portalOrigin: 'https://resultados.grupofleury.com.br',
   portalEntryUrl: 'https://resultados.grupofleury.com.br/?origin=pardini',
   spaBase: 'https://resultados.grupofleury.com.br/precision-care',
+  /** Shell BFF (produtos, config) — exames estão no microfrontend portalpaciente. */
   bffBase: 'https://api-plataforma.grupofleury.com.br/precision-care/api',
+  /** API do portal paciente (lista de pedidos + exames por pedido). */
+  pacienteApiBase: 'https://api-plataforma.grupofleury.com.br/precision-care/paciente/api/v1',
   keycloak: {
     base: 'https://sso.grupofleury.com.br/auth',
     realm: 'grupopardini',
@@ -43,12 +46,5 @@ export function resolveHermesPardiniRegion(): HermesPardiniRegion {
   return raw === 'sp' ? 'sp' : 'mg'
 }
 
-/** Caminhos candidatos no BFF — validados com 401 (existem) até mapear o payload real. */
-export const HERMES_PARDINI_BFF_EXAM_CANDIDATES = [
-  '/v1/exames',
-  '/v1/exams',
-  '/v1/resultados',
-  '/v1/results',
-  '/v1/paciente/exames',
-  '/v1/patient/exams',
-] as const
+/** Tamanho de página na UI; sync usa lote maior para menos round-trips. */
+export const HERMES_PARDINI_PEDIDOS_PAGE_SIZE = 50

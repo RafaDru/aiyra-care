@@ -182,7 +182,7 @@ export async function persistMaterDeiExamFiles(args: {
         examDate: parsedDate,
         laboratory: item.provider || 'Mater Dei',
         resultSummary: item.status || undefined,
-        resultFileUrl: resultPath,
+        resultFileUrl: resultPath ?? undefined,
         source: 'mater_dei',
         notes: buildExamNotes(dedup, meta),
       }))

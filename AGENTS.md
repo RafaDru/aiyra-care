@@ -30,7 +30,10 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 - **Hexagonal** em `packages/api`: `domain/` → `application/` → `infrastructure/`
 - **Integrações de plano**: `IntegrationLink` (credenciais + sessão) → scrapers → `InsurancePlanService.upsertFromPortal` + import de `Authorization` / `MedicalRecord` / `Exam`
 - **Sync assíncrono**: `POST /integration-links/:id/sync` retorna `jobId`; query `silent=1` (sem modal) ou `force=1` (ignora intervalo). UI: auto silent na aba **Carteira** (`useSilentWalletSync` + `shouldOfferSilentSync`); modal só no botão **Sincronizar** em Integrações. Polling: `GET /integration-links/:id/sync-status` (15s; pausa com dock/SSE) + `sync-progress/:jobId/stream`.
-- **Sync incremental (silent)**: `sync-delta.helper.ts` — Unimed: 2 meses extrato + detalhe auth desde `lastSync−14d`; Amil: `PostTokens` desde `lastSync−14d` (ou 2 meses); Mater Dei: exames desde `max(exam_date)−14d`. Manual/`force` = janela full.
+- **Sync incremental (silent)**: `sync-delta.helper.ts` — Unimed: 2 meses extrato + detalhe auth desde `lastSync−14d`; Amil: `PostTokens` desde `lastSync−14d` (ou 2 meses), **sem** fetch plano/carências; Mater Dei: exames desde `max(exam_date)−14d`; Hermes Pardini: `GET /pedidos` desde `max(exam_date)−14d` + `/pedidos/{id}/exames`. Manual/`force` = janela full.
+- **Novelty skipped***: import conta dedup (`skippedMedicalRecords`, `skippedExams`, `skippedAuthorizations`, …); UI `formatSyncNovelty` na Carteira.
+- **sync_jobs só PG**: `createJob`/`updateJob`/`getJob` persistem em Postgres; SSE via `publishSyncJobEvent`; heartbeat reconcilia com `findById`.
+- **Sync agendado**: `IntegrationLinkSyncService.runScheduledBatch()` — `trigger=scheduled`, silent + `sessionReady`; script `run-scheduled-syncs.mjs` ou `SYNC_SCHEDULED_INTERVAL_MS` na API.
 - **Hardening sync**: probe Unimed no extrato + fail-fast SSO; Amil JWT/API antes de CDP em manual; `browser-sync-mutex` (1 browser pesado por vez); `sync-browser-registry` fecha Playwright em timeout PG; sync-all serial na UI.
 - **Credenciais**: AES-256-GCM via `CRYPTO_KEY` em `.env` (`crypto-helper.ts`)
 - **Auth API**: com `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE`, hook global em `security.plugin.ts`; escopo por paciente via `patient_memberships` + `owner_account_id` (`patient-access.guard.ts`). Ver `docs/SUPABASE.md`.
@@ -44,6 +47,8 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 | **Amil** | Sim ✅ validado | Token JWT salvo → CDP Chrome → Playwright (fallback) | Plano, carências, guias/tokens → `Authorization` |
 | **Bradesco Saúde** | Não (só vínculo/import manual) | — | — |
 | **ConecteSUS** | Import manual gov.br | Login interativo FHIR | Vacinas, exames |
+| **Mater Dei** | Sim | Scraper + sessão JSON | Exames, atendimentos, laudos/imagens |
+| **Hermes Pardini** | Sim | Keycloak ROPC + browser fallback | Exames via API `paciente/api/v1/pedidos` |
 
 ### Amil — variáveis de ambiente
 
@@ -60,6 +65,7 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 | Variável | Default | Efeito |
 |----------|---------|--------|
 | `SYNC_MIN_INTERVAL_MS` | `1800000` (30 min) | API: skip sync se último job OK recente (unless `force=1`) |
+| `SYNC_SCHEDULED_INTERVAL_MS` | `0` (off) | API: loop de sync `trigger=scheduled` (silent, sessão válida) |
 | `AMIL_SESSION_RENEW_MS` | `86400000` (24h) | Renovar JWT Amil via CDP antes de expirar |
 | `VITE_SILENT_SYNC_STALE_MS` | `21600000` (6h) | Web: auto silent sync ao abrir Carteira **só com `sessionReady`** |
 
@@ -83,7 +89,14 @@ JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login 
 - `unimedbh-sync.scraper.ts` — extrato + autorizações + cartão virtual; `extratoMonths` / `authorizationSince` em silent
 - `unimedbh-wait-response.helper.ts` — fail-fast se redirect ao SSO durante wait API
 - `unimedbh-cartao-virtual.scraper.ts` — QR/token + campos do plano
-- `sync-delta.helper.ts` — `computeUnimedExtratoMonths`, `computeUnimedAuthorizationSince`
+- `sync-delta.helper.ts` — `computeUnimedExtratoMonths`, `computeUnimedAuthorizationSince`, `computeHermesPardiniExamStartDate`
+
+### Hermes Pardini — arquivos-chave
+
+- `hermes-pardini.portal.ts` — `pacienteApiBase` (`precision-care/paciente/api/v1`)
+- `hermes-pardini-bff.service.ts` — `GET /pedidos` paginado + `GET /pedidos/{id}/exames`
+- `hermes-pardini-sync.scraper.ts` — sessão Keycloak + fetch BFF
+- `integration-link-sync.service.ts` — execução centralizada de sync (manual + scheduled)
 
 ## Frontend — onde mexer
 

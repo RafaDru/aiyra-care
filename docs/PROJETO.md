@@ -603,7 +603,7 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [x] Crawler Unimed BH combinado (extrato + autorizações, mesma sessão)
 - [x] Entidade Authorization (create/restore, repository, PG, HTTP CRUD)
 - [x] AuthorizationsTab com status tags (authorized/used/expired) e validade
-- [x] Testes unitários: crypto-helper (4) + sync-progress-store (5) = 9 testes
+- [x] Testes unitários: crypto-helper, sync-progress-store, Hermes BFF, scheduled-sync, sync-delta
 - [x] Sync rico via APIs OutSystems (listagem + detalhe + procedimentos + prestador + histórico)
 - [x] Entidade AuthorizationItem (itens/procedimentos do pedido)
 - [x] Campos enriquecidos: solicitation_number, guide_password, specialty, locations, history

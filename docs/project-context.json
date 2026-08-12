@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-11",
+  "generatedAt": "2026-08-12",
   "application": {
     "name": "AiyraCare (Filhos)",
     "repository": "https://github.com/RafaDru/open-health",
@@ -11,10 +11,10 @@
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Carteira do paciente em 3 abas (Carteirinhas, Convênios, Integrações). Sync silencioso na aba Carteira (sessionReady + stale 6h); progresso push-first (SSE). Incremental em silent: Unimed 2 meses extrato + auth detalhe desde lastSync−14d; Amil PostTokens janela curta; Mater Dei exames desde max(exam_date)−14d. Hardening: probe sessão Unimed, mutex browser, timeout fecha Playwright.",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Carteira: sync silencioso (sessionReady + stale 6h); progresso SSE push-first. Incremental em silent: Unimed 2 meses + auth detalhe; Amil PostTokens janela curta sem plano; Mater Dei e Hermes exames desde max(exam_date)−14d. sync_jobs só PG; batch scheduled via script ou SYNC_SCHEDULED_INTERVAL_MS.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
-    "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, import_lineage",
+    "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, import_lineage, sync_jobs",
     "neo4jRole": "Projeção read-model para relações e futuros agentes; não define vocabulário de relações",
     "principle": "Atalhos em trilhas não duplicam dados — chamam use cases existentes e criam health_thread_links"
   },
@@ -42,6 +42,7 @@
     { "name": "IntegrationLink", "table": "integration_links", "description": "Credenciais portal por paciente" },
     { "name": "InsurancePlan", "table": "insurance_plans", "description": "Plano + membership multi-operadora" },
     { "name": "ImportLineage", "table": "import_lineage", "description": "Proveniência de imports externos" },
+    { "name": "SyncJob", "table": "sync_jobs", "description": "Jobs de sync portal (trigger manual|scheduled, novelty JSONB)" },
     { "name": "ProjectContext", "description": "GET /project/context — foto da app e decisões para LLM/agentes" }
   ],
   "apiRoutes": [
@@ -58,11 +59,11 @@
   ],
   "integrations": [
     { "portal": "unimed", "syncAutomatic": true, "authMethod": "Playwright SSO + storageState; probe extrato", "imports": ["extrato/consultas", "autorizações", "cartão virtual/plano"], "notes": "silent: 2 meses extrato; auth detalhe desde lastSync−14d" },
-    { "portal": "amil", "syncAutomatic": true, "authMethod": "JWT → API AuthOGS → CDP (manual only) → Playwright fallback", "imports": ["plano", "carências", "guias/tokens → Authorization"], "notes": "silent: PostTokens desde lastSync−14d" },
+    { "portal": "amil", "syncAutomatic": true, "authMethod": "JWT → API AuthOGS → CDP (manual only) → Playwright fallback", "imports": ["plano", "carências", "guias/tokens → Authorization"], "notes": "silent: PostTokens desde lastSync−14d; skip plano/carências" },
     { "portal": "bradesco_saude", "syncAutomatic": false, "authMethod": "vínculo manual", "imports": [] },
     { "portal": "conectesus", "syncAutomatic": false, "authMethod": "import manual gov.br", "imports": ["vacinas", "exames"] },
-    { "portal": "mater_dei", "syncAutomatic": true, "authMethod": "scraper dedicado", "imports": ["exames", "atendimentos"], "notes": "fetch exames incremental desde max(exam_date)−14d" },
-    { "portal": "hermes_pardini", "syncAutomatic": true, "authMethod": "Keycloak ROPC + browser fallback", "imports": ["exames (BFF pendente)"] }
+    { "portal": "mater_dei", "syncAutomatic": true, "authMethod": "scraper dedicado", "imports": ["exames", "atendimentos", "laudos/imagens"], "notes": "fetch exames incremental desde max(exam_date)−14d" },
+    { "portal": "hermes_pardini", "syncAutomatic": true, "authMethod": "Keycloak ROPC + browser fallback", "imports": ["exames via GET /pedidos + /exames"], "notes": "paciente/api/v1; dedup hermes_pardini:{pedido}:{exame}" }
   ],
   "healthThreads": {
     "kinds": ["task", "investigation", "hypothesis", "episode"],
@@ -92,11 +93,13 @@
     { "id": "relation-catalog-pg", "date": "2026-08-06", "title": "Catálogo de relações em PG", "decision": "Não hardcodar tipos nem só Neo4j", "rationale": "Governança, UX, LLM com schema estável", "status": "planned" },
     { "id": "auth-sync-no-block-ui", "date": "2026-08-06", "title": "Sync auth não desmonta UI", "decision": "loading do AuthContext sem incluir syncing em gate de rotas", "rationale": "Token refresh ao refocar browser resetava aba do paciente", "status": "active" },
     { "id": "vite-spa-proxy-bypass", "date": "2026-08-10", "title": "Refresh SPA vs API no dev", "decision": "Vite proxy bypass para navegação HTML em /patients/* e /roadmap", "rationale": "Hard refresh não deve chamar API sem Bearer (401 Token ausente)", "status": "active" },
-    { "id": "sync-progress-sse", "date": "2026-08-10", "title": "Progresso sync push-first", "decision": "SSE em updateJob + reconciliação GET se stream mudo", "rationale": "Substituir polling contínuo; heartbeat de conectividade", "status": "active" }
+    { "id": "sync-progress-sse", "date": "2026-08-10", "title": "Progresso sync push-first", "decision": "SSE em updateJob + reconciliação GET se stream mudo", "rationale": "Substituir polling contínuo; heartbeat de conectividade", "status": "active" },
+    { "id": "sync-jobs-pg-only", "date": "2026-08-12", "title": "sync_jobs só Postgres", "decision": "Remover Map in-memory; createJob/updateJob persistem PG; SSE via publishSyncJobEvent", "rationale": "Histórico e sync-status estáveis; base para worker scheduled", "status": "active" },
+    { "id": "hermes-bff-pedidos", "date": "2026-08-12", "title": "Hermes BFF portalpaciente", "decision": "GET /pedidos + /pedidos/{id}/exames em paciente/api/v1", "rationale": "Shell precision-care/api não lista exames; SPA Fleury usa microfrontend portalpaciente", "status": "active" }
   ],
   "plannedWork": [
-    { "id": "hermes-bff-exams", "title": "Mapear BFF Hermes Pardini (lista/PDF exames)", "status": "planned" },
-    { "id": "sync-incremental-unimed-amil", "title": "Sync incremental Unimed/Amil no fetch portal", "status": "planned" },
+    { "id": "hermes-pdf-laudo", "title": "Import PDF laudo Hermes (POST /pedidos/{id}/download)", "status": "planned" },
+    { "id": "connect-worker-package", "title": "packages/connect-worker runner apartado", "status": "planned" },
     { "id": "relation-catalog-4.1", "title": "Migration relation_types + GET /relation-types", "status": "planned" },
     { "id": "entity-links-4.2", "title": "clinical_entity_links (consulta → exame)", "status": "planned" },
     { "id": "neo4j-lineage-worker", "title": "Worker import_lineage → Neo4j", "status": "planned" },

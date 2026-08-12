@@ -1,6 +1,9 @@
 import type { Pool } from 'pg'
 import type { IntegrationLink } from '../../domain/integration-link/integration-link.entity.js'
 
+const HERMES_PARDINI_DEFAULT_START = '2015-01-01'
+const HERMES_PARDINI_LOOKBACK_DAYS = 14
+const HERMES_PARDINI_FIRST_SYNC_DAYS = 365
 const MATER_DEI_DEFAULT_START = '2015-01-01'
 const MATER_DEI_LOOKBACK_DAYS = 14
 const MATER_DEI_FIRST_SYNC_DAYS = 365
@@ -58,6 +61,39 @@ export async function computeMaterDeiExamStartDate(
   }
 
   const firstSyncFrom = subtractDays(new Date(), MATER_DEI_FIRST_SYNC_DAYS)
+  return formatDateYmd(firstSyncFrom)
+}
+
+/**
+ * Janela incremental para GET /pedidos no Hermes Pardini (portalpaciente API).
+ */
+export async function computeHermesPardiniExamStartDate(
+  pool: Pool,
+  link: IntegrationLink,
+  householdPatientIds: string[],
+): Promise<string> {
+  if (!householdPatientIds.length) return HERMES_PARDINI_DEFAULT_START
+
+  const { rows } = await pool.query<{ max_date: Date | null }>(
+    `SELECT MAX(exam_date) AS max_date
+     FROM exams
+     WHERE source = 'hermes_pardini' AND patient_id = ANY($1::uuid[])`,
+    [householdPatientIds],
+  )
+  const maxExamDate = rows[0]?.max_date
+
+  if (maxExamDate) {
+    const from = subtractDays(maxExamDate, HERMES_PARDINI_LOOKBACK_DAYS)
+    return formatDateYmd(from)
+  }
+
+  const lastSync = link.lastSyncAt
+  if (lastSync) {
+    const from = subtractDays(lastSync, HERMES_PARDINI_LOOKBACK_DAYS)
+    return formatDateYmd(from)
+  }
+
+  const firstSyncFrom = subtractDays(new Date(), HERMES_PARDINI_FIRST_SYNC_DAYS)
   return formatDateYmd(firstSyncFrom)
 }
 

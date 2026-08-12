@@ -197,6 +197,9 @@ export class ClinicalLinkService {
 
   async getThreadClinicalFlow(threadId: string): Promise<ClinicalFlow> {
     const thread = await this.threads.findById(threadId)
+    if (!thread) {
+      return { nodes: [], edges: [] }
+    }
     const threadLinkList = await this.threadLinks.findByThreadId(threadId)
 
     const entityKeys = new Set<string>()

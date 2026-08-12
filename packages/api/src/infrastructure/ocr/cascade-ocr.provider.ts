@@ -19,6 +19,21 @@ function finalizeResult(result: CascadeOcrResult): CascadeOcrResult {
   }
 }
 
+function mergeBetterOcr(
+  prev: CascadeOcrResult | null,
+  candidate: CascadeOcrResult,
+  qualityScore: number,
+  resultLayout: OcrLayout | undefined,
+): CascadeOcrResult | null {
+  if (!prev || qualityScore > prev.qualityScore) {
+    return { ...candidate, layout: candidate.layout ?? prev?.layout }
+  }
+  if (resultLayout && !prev.layout) {
+    return { ...prev, layout: resultLayout }
+  }
+  return prev
+}
+
 /**
  * Tries providers in order (local first). Stops early when `isSufficient` returns true
  * so paid OCR is only used when local algorithms fail.
@@ -31,7 +46,7 @@ export class CascadeOcrProvider {
 
   async extractText(buffer: Buffer, mimeType: string): Promise<CascadeOcrResult> {
     const attempts: CascadeOcrResult['attempts'] = []
-    let best: CascadeOcrResult | null = null
+    let bestResult: CascadeOcrResult | null = null
 
     for (const provider of this.providers) {
       const paid = provider.name === 'google_vision'
@@ -51,20 +66,13 @@ export class CascadeOcrProvider {
           attempts: [...attempts],
         }
 
-        if (!best || qualityScore > best.qualityScore) {
-          best = {
-            ...candidate,
-            layout: candidate.layout ?? best?.layout,
-          }
-        } else if (result.layout && !best.layout) {
-          best = { ...best, layout: result.layout }
-        }
+        bestResult = mergeBetterOcr(bestResult, candidate, qualityScore, result.layout)
 
         if (this.isSufficient(result.text)) {
           return finalizeResult({ ...candidate, attempts })
         }
 
-        if (result.layout?.regions?.length >= 2 && qualityScore >= 25) {
+        if ((result.layout?.regions?.length ?? 0) >= 2 && qualityScore >= 25) {
           return finalizeResult({ ...candidate, attempts })
         }
       } catch (err) {
@@ -77,11 +85,11 @@ export class CascadeOcrProvider {
       }
     }
 
-    if (!best) {
+    if (!bestResult) {
       const detail = attempts.map((a) => `${a.provider}: ${a.error || 'vazio'}`).join('; ')
       throw new Error(`Nenhum provedor OCR conseguiu extrair texto (${detail})`)
     }
 
-    return finalizeResult({ ...best, attempts })
+    return finalizeResult({ ...bestResult, attempts })
   }
 }

@@ -1,6 +1,6 @@
 import { chromium, request as playwrightRequest } from 'playwright'
 import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
-import { probeHermesPardiniExams, type HermesPardiniExamProbeItem } from './hermes-pardini-bff.probe.js'
+import { fetchHermesPardiniExams, type HermesPardiniExamItem } from './hermes-pardini-bff.service.js'
 import {
   buildHermesPardiniSession,
   fetchHermesPardiniUserInfo,
@@ -16,7 +16,8 @@ import { hermesPardiniPortalEntryUrl } from './hermes-pardini.portal.js'
 
 export interface HermesPardiniSyncResult {
   session: HermesPardiniSession
-  exams: HermesPardiniExamProbeItem[]
+  exams: HermesPardiniExamItem[]
+  pedidosCount?: number
   discoveredPath?: string
   warnings: string[]
   postLoginUrl?: string
@@ -101,8 +102,8 @@ export class HermesPardiniSyncScraper {
   async scrape(
     login: string,
     password: string,
-    onProgress?: ScraperProgress,
-    opts?: { sessionJson?: string; interactiveLogin?: boolean },
+    onProgress?: (p: ScraperProgress) => void,
+    opts?: { sessionJson?: string; interactiveLogin?: boolean; examStartDate?: string },
   ): Promise<HermesPardiniSyncResult> {
     const emit = (step: string, message: string, status: ScraperProgress['status']) =>
       onProgress?.({ step, message, status })
@@ -117,23 +118,29 @@ export class HermesPardiniSyncScraper {
 
     const request = await playwrightRequest.newContext()
     try {
-      emit('fetch-exams', 'Buscando resultados no Precision Care…', 'running')
-      const probe = await probeHermesPardiniExams(request, session.accessToken)
-      const warnings = [...probe.warnings]
-      if (probe.discoveredPath) {
-        emit(
-          'fetch-exams',
-          `${probe.exams.length} exame(s) em ${probe.discoveredPath}`,
-          probe.exams.length > 0 ? 'success' : 'running',
-        )
-      } else if (warnings.length > 0) {
-        emit('fetch-exams', warnings[0], 'running')
-      }
+      const startDate = opts?.examStartDate
+      emit(
+        'fetch-exams',
+        startDate
+          ? `Buscando resultados desde ${startDate}…`
+          : 'Buscando resultados no Precision Care…',
+        'running',
+      )
+      const fetchResult = await fetchHermesPardiniExams(request, session.accessToken, {
+        startDate,
+      })
+      const warnings = [...fetchResult.warnings]
+      emit(
+        'fetch-exams',
+        `${fetchResult.exams.length} exame(s) em ${fetchResult.pedidosCount} pedido(s)`,
+        fetchResult.exams.length > 0 ? 'success' : 'running',
+      )
 
       return {
         session,
-        exams: probe.exams,
-        discoveredPath: probe.discoveredPath,
+        exams: fetchResult.exams,
+        pedidosCount: fetchResult.pedidosCount,
+        discoveredPath: '/pedidos',
         warnings,
         postLoginUrl: hermesPardiniPortalEntryUrl(),
       }
@@ -146,7 +153,7 @@ export class HermesPardiniSyncScraper {
   async probeLogin(
     login: string,
     password: string,
-    onProgress?: ScraperProgress,
+    onProgress?: (p: ScraperProgress) => void,
   ): Promise<{
     region: 'mg' | 'sp'
     loginUrl: string
