@@ -300,8 +300,8 @@
         {
           "id": "export-resumido",
           "title": "Export resumido médico (PDF/impressão)",
-          "status": "planned",
-          "detail": "Essencial para consulta: alergias, meds, diagnósticos, últimos eventos, vacinas atraso."
+          "status": "done",
+          "detail": "Pré-visualização + Imprimir/salvar PDF no Resumo clínico; PatientClinicalExportSheet alimentado por PatientContext."
         },
         {
           "id": "export-completo",

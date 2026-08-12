@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Alert, Card, List, Spin, Tag, Typography } from 'antd'
+import { Alert, Button, Card, List, Spin, Tag, Typography } from 'antd'
+import { PrinterOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
 import type { PatientContext } from '../../lib/api.types.js'
 import { PatientContextTimeline } from './PatientContextTimeline.js'
+import { PatientClinicalExportModal } from './PatientClinicalExportModal.js'
 import {
   HEALTH_THREAD_STATUS_LABEL,
   healthThreadKindLabel,
@@ -27,6 +29,7 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
   const [context, setContext] = useState<PatientContext | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exportOpen, setExportOpen] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -46,7 +49,22 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
   const otherPendencies = context.pendencies.filter((p) => !p.threadId)
 
   return (
-    <Card title="Resumo clínico" size="small" style={{ marginBottom: 16 }}>
+    <>
+      <Card
+        title="Resumo clínico"
+        size="small"
+        style={{ marginBottom: 16 }}
+        extra={
+          <Button
+            size="small"
+            type="link"
+            icon={<PrinterOutlined />}
+            onClick={() => setExportOpen(true)}
+          >
+            Imprimir / PDF
+          </Button>
+        }
+      >
       <Paragraph style={{ marginBottom: 16 }}>{context.textSummary}</Paragraph>
 
       {context.alerts.length > 0 && (
@@ -135,6 +153,13 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
       {context.timeline.length > 0 && (
         <PatientContextTimeline events={context.timeline} maxItems={8} />
       )}
-    </Card>
+      </Card>
+
+      <PatientClinicalExportModal
+        open={exportOpen}
+        context={context}
+        onClose={() => setExportOpen(false)}
+      />
+    </>
   )
 }

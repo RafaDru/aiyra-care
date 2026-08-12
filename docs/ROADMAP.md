@@ -54,7 +54,8 @@ Detalhe completo (status, itens, notas): ver `roadmap.json` ou menu **Roadmap** 
 
 ### P2 — Contexto + export médico
 - Context API + UI ✅
-- PDF resumido/completo, compartilhamento 🔜
+- Export resumido (imprimir/PDF via context) ✅
+- Export completo, compartilhamento 🔜
 
 ### P2 — Integrações (dados)
 - Unimed/Amil core ✅

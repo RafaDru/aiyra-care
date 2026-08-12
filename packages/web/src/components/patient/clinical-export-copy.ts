@@ -1,0 +1,20 @@
+export const CLINICAL_EXPORT_COPY = {
+  title: 'Resumo para consulta médica',
+  subtitle: 'AiyraCare — histórico consolidado do paciente',
+  printButton: 'Imprimir / salvar PDF',
+  closeButton: 'Fechar',
+  previewTitle: 'Pré-visualização do resumo',
+  sectionAlerts: 'Alertas',
+  sectionPendencies: 'Pendências',
+  sectionFollowUp: 'Em acompanhamento',
+  sectionPlans: 'Planos de saúde',
+  sectionTimeline: 'Eventos recentes',
+  sectionSummary: 'Resumo',
+  footerDisclaimer:
+    'Documento gerado automaticamente a partir dos registros do cuidador. Não substitui prontuário oficial do serviço de saúde. Revise com o paciente antes da consulta.',
+  generatedAt: 'Gerado em',
+  noPendencies: 'Sem pendências registradas.',
+  noFollowUp: 'Sem acompanhamentos ativos.',
+  noTimeline: 'Sem eventos recentes no período.',
+  noPlans: 'Sem planos ativos registrados.',
+}

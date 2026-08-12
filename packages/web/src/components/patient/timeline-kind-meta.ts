@@ -19,7 +19,7 @@ export const TIMELINE_KIND_META: Record<
   vaccine: { label: 'Vacina', color: '#059669', bg: '#ECFDF5', Icon: MedicineBoxOutlined },
   authorization: { label: 'Autorização', color: '#FF3DA8', bg: '#FCE7F3', Icon: SafetyCertificateOutlined },
   medication_start: { label: 'Medicamento', color: '#7C3AED', bg: '#EDE9FE', Icon: ThunderboltOutlined },
-  thread_note: { label: 'Trilha', color: '#9333EA', bg: '#F3E8FF', Icon: UnorderedListOutlined },
+  thread_note: { label: 'Acompanhamento', color: '#9333EA', bg: '#F3E8FF', Icon: UnorderedListOutlined },
 }
 
 export const TIMELINE_KIND_OPTIONS = Object.entries(TIMELINE_KIND_META).map(([value, meta]) => ({
