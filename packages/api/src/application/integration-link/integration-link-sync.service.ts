@@ -187,7 +187,7 @@ export class IntegrationLinkSyncService {
           background: false,
           log,
         })
-        item.jobId = result.jobId
+        if (result.jobId) item.jobId = result.jobId
         if (result.skipped) {
           item.skipped = true
           item.reason = result.reason

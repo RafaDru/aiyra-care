@@ -102,7 +102,7 @@ export class HermesPardiniSyncScraper {
   async scrape(
     login: string,
     password: string,
-    onProgress?: ScraperProgress,
+    onProgress?: (p: ScraperProgress) => void,
     opts?: { sessionJson?: string; interactiveLogin?: boolean; examStartDate?: string },
   ): Promise<HermesPardiniSyncResult> {
     const emit = (step: string, message: string, status: ScraperProgress['status']) =>
@@ -153,7 +153,7 @@ export class HermesPardiniSyncScraper {
   async probeLogin(
     login: string,
     password: string,
-    onProgress?: ScraperProgress,
+    onProgress?: (p: ScraperProgress) => void,
   ): Promise<{
     region: 'mg' | 'sp'
     loginUrl: string

@@ -56,12 +56,12 @@ async function launchBrowser(headless?: boolean): Promise<Browser> {
 }
 
 async function newStealthContext(browser: Browser, storageStateJson?: string): Promise<BrowserContext> {
-  const opts: Parameters<Browser['newContext']>[0] = {
+  const opts: NonNullable<Parameters<Browser['newContext']>[0]> = {
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
   }
   if (storageStateJson) {
-    opts.storageState = JSON.parse(storageStateJson) as Parameters<Browser['newContext']>[0]['storageState']
+    opts.storageState = JSON.parse(storageStateJson) as NonNullable<Parameters<Browser['newContext']>[0]>['storageState']
   }
   const context = await browser.newContext(opts)
   await context.addInitScript(() => {
