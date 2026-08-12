@@ -46,6 +46,17 @@ export class IntegrationLinkPgRepository implements IntegrationLinkRepository {
     return rows.map(rowToEntity)
   }
 
+  async findSyncableActive() {
+    const { rows } = await this.pool.query(
+      `SELECT ${COLUMNS} FROM integration_links
+       WHERE active = true
+         AND portal_type IN ('unimed', 'amil', 'mater_dei', 'hermes_pardini')
+         AND email IS NOT NULL AND encrypted_password IS NOT NULL
+       ORDER BY last_sync_at NULLS FIRST, portal_type`,
+    )
+    return rows.map(rowToEntity)
+  }
+
   async save(link: IntegrationLink) {
     const { rows } = await this.pool.query(
       `INSERT INTO integration_links (id, patient_id, portal_type, email, encrypted_password, encrypted_session_token, session_expires_at, card_number, active, last_sync_at)

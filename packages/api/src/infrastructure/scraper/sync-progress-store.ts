@@ -1,7 +1,6 @@
 import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
 import { allKnownSyncStepKeys, type SyncablePortalType } from '../../domain/scraper/sync-portal-profile.js'
-import type { SyncNoveltySummary } from '../../domain/sync-job/sync-job.entity.js'
-import { SyncJob as SyncJobEntity } from '../../domain/sync-job/sync-job.entity.js'
+import { SyncJob as SyncJobEntity, type SyncJobStatus, type SyncJobTrigger, type SyncNoveltySummary } from '../../domain/sync-job/sync-job.entity.js'
 import type { SyncJobPgRepository } from '../persistence/sync-job.pg.repository.js'
 import { publishSyncJobEvent } from './sync-job-stream.js'
 
@@ -104,45 +103,60 @@ function trackStep(
   return next
 }
 
-const jobs = new Map<string, SyncJob>()
 let syncJobRepo: SyncJobPgRepository | null = null
 
 export function bindSyncJobPersistence(repo: SyncJobPgRepository): void {
   syncJobRepo = repo
 }
 
-function mapPersistedStatus(progress: ScraperProgress): 'pending' | 'running' | 'success' | 'failed' {
+function requireRepo(): SyncJobPgRepository {
+  if (!syncJobRepo) throw new Error('sync_jobs persistence not bound — call bindSyncJobPersistence')
+  return syncJobRepo
+}
+
+function mapPersistedStatus(progress: ScraperProgress): SyncJobStatus {
   if (progress.step === 'error' || progress.status === 'failed') return 'failed'
   if (progress.step === 'done' && progress.status === 'success') return 'success'
   if (progress.step === 'pending') return 'pending'
   return 'running'
 }
 
-function persistJobUpdate(
-  id: string,
-  progress: ScraperProgress,
-  stepDetails: Record<string, SyncStepDetail>,
-  result?: SyncResult,
-  novelty?: SyncNoveltySummary,
-): void {
-  if (!syncJobRepo) return
-  const status = mapPersistedStatus(progress)
-  const finishedAt = status === 'success' || status === 'failed' ? new Date() : undefined
-  const persist = syncJobRepo.updateProgress({
-    id,
-    step: progress.step,
-    message: progress.message,
+function progressStatusFromEntity(status: SyncJobStatus, step: string | null): ScraperProgress['status'] {
+  if (status === 'failed' || step === 'error') return 'failed'
+  if (status === 'success' && step === 'done') return 'success'
+  return 'running'
+}
+
+function entityToStoreJob(entity: SyncJobEntity): SyncJob {
+  const d = entity.toJSON()
+  return {
+    portalType: d.portalType as SyncablePortalType,
+    integrationLinkId: d.integrationLinkId,
+    progress: {
+      step: d.step ?? 'pending',
+      message: d.message ?? '',
+      status: progressStatusFromEntity(d.status, d.step),
+    },
+    result: d.result ?? undefined,
+    stepDetails: (d.stepDetails ?? {}) as Record<string, SyncStepDetail>,
+  }
+}
+
+export function entityToSyncProgressPayload(
+  entity: SyncJobEntity,
+  event?: SyncProgressEventKind,
+): SyncProgressPayload {
+  const d = entity.toJSON()
+  const status = progressStatusFromEntity(d.status, d.step)
+  return {
+    step: d.step ?? 'pending',
+    message: d.message ?? '',
     status,
-    stepDetails,
-    result,
-    novelty,
-    error: status === 'failed' ? progress.message : undefined,
-    finishedAt,
-  })
-  if (status === 'success' || status === 'failed') {
-    persist.catch((err) => console.error('sync_jobs terminal persist failed', id, err))
-  } else {
-    persist.catch(() => {})
+    portalType: d.portalType as SyncablePortalType,
+    result: d.result ?? undefined,
+    stepDetails: (d.stepDetails ?? {}) as Record<string, SyncStepDetail>,
+    novelty: d.novelty ?? d.result?.novelty ?? undefined,
+    event,
   }
 }
 
@@ -157,61 +171,91 @@ function jobToPayload(job: SyncJob, event?: SyncProgressEventKind): SyncProgress
   }
 }
 
-export function getJobProgressPayload(id: string, event?: SyncProgressEventKind): SyncProgressPayload | undefined {
-  const job = jobs.get(id)
+export async function getJobProgressPayload(
+  id: string,
+  event?: SyncProgressEventKind,
+): Promise<SyncProgressPayload | undefined> {
+  const job = await getJob(id)
   if (!job) return undefined
   return jobToPayload(job, event)
 }
 
-export function createJob(portalType?: SyncablePortalType, integrationLinkId?: string): string {
+export async function createJob(
+  portalType?: SyncablePortalType,
+  integrationLinkId?: string,
+  opts?: { trigger?: SyncJobTrigger },
+): Promise<string> {
+  const repo = requireRepo()
   const id = crypto.randomUUID()
-  jobs.set(id, {
+  const initial: SyncJob = {
     portalType,
     integrationLinkId,
     progress: { step: 'pending', message: 'Aguardando...', status: 'running' },
     stepDetails: {},
-  })
-  if (syncJobRepo && integrationLinkId) {
+  }
+
+  if (integrationLinkId) {
     const entity = SyncJobEntity.create({
       id,
       integrationLinkId,
       portalType: portalType ?? 'unknown',
-      trigger: 'manual',
+      trigger: opts?.trigger ?? 'manual',
     })
-    syncJobRepo.save(entity).catch(() => {})
+    await repo.save(entity)
   }
-  publishSyncJobEvent(id, jobToPayload(jobs.get(id)!, 'snapshot'))
+
+  publishSyncJobEvent(id, jobToPayload(initial, 'snapshot'))
   return id
 }
 
-export function updateJob(
+export async function updateJob(
   id: string,
   progress: ScraperProgress,
   result?: SyncResult,
   novelty?: SyncNoveltySummary,
-) {
-  const prev = jobs.get(id)
+): Promise<void> {
+  const repo = requireRepo()
+  const prevEntity = await repo.findById(id)
+  const prev = prevEntity ? entityToStoreJob(prevEntity) : undefined
   const stepDetails = trackStep(prev?.stepDetails ?? {}, progress)
   const mergedResult =
     result !== undefined
       ? { ...result, novelty: novelty ?? result.novelty }
       : prev?.result
-  jobs.set(id, {
+  const noveltyToPersist = novelty ?? mergedResult?.novelty
+
+  const status = mapPersistedStatus(progress)
+  const finishedAt = status === 'success' || status === 'failed' ? new Date() : undefined
+
+  await repo.updateProgress({
+    id,
+    step: progress.step,
+    message: progress.message,
+    status,
+    stepDetails,
+    result: mergedResult,
+    novelty: noveltyToPersist,
+    error: status === 'failed' ? progress.message : undefined,
+    finishedAt,
+  })
+
+  const job: SyncJob = {
     portalType: prev?.portalType,
-    integrationLinkId: prev?.integrationLinkId,
+    integrationLinkId: prev?.integrationLinkId ?? prevEntity?.integrationLinkId,
     progress,
     result: mergedResult,
     stepDetails,
-  })
-  const noveltyToPersist = novelty ?? mergedResult?.novelty
-  persistJobUpdate(id, progress, stepDetails, mergedResult, noveltyToPersist)
-  publishSyncJobEvent(id, jobToPayload(jobs.get(id)!, 'progress'))
+  }
+  publishSyncJobEvent(id, jobToPayload(job, 'progress'))
 }
 
-export function getJob(id: string): SyncJob | undefined {
-  return jobs.get(id)
+export async function getJob(id: string): Promise<SyncJob | undefined> {
+  const entity = await requireRepo().findById(id)
+  if (!entity) return undefined
+  return entityToStoreJob(entity)
 }
 
-export function removeJob(id: string) {
-  jobs.delete(id)
+/** @deprecated PG é fonte de verdade — noop para compatibilidade com callers legados. */
+export function removeJob(_id: string): void {
+  // histórico permanece em sync_jobs
 }

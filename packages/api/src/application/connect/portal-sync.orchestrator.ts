@@ -94,7 +94,7 @@ export class PortalSyncOrchestrator {
     const result = await scraper.scrape(
       link.email!,
       decryptedPassword,
-      (p) => updateJob(jobId, p),
+      (p) => void updateJob(jobId, p),
       {
         patientName: patient?.name,
         cardNumber: link.cardNumber || undefined,
@@ -184,7 +184,7 @@ export class PortalSyncOrchestrator {
     const result = await amilScraper.scrape(
       link.email!,
       decryptedPassword,
-      (p) => updateJob(jobId, p),
+      (p) => void updateJob(jobId, p),
       {
         patientName,
         cardNumber: link.cardNumber || undefined,

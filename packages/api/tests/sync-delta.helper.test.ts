@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   computeMaterDeiExamStartDate,
+  computeHermesPardiniExamStartDate,
   collectHouseholdPatientIds,
   computeUnimedExtratoMonths,
   computeUnimedAuthorizationSince,
@@ -31,6 +32,17 @@ describe('sync-delta.helper', () => {
     } as unknown as import('pg').Pool
     const link = IntegrationLink.create({ patientId: 'p1', portalType: 'mater_dei' })
     const start = await computeMaterDeiExamStartDate(pool, link, ['p1'])
+    expect(start).toBe('2026-05-18')
+  })
+
+  it('computeHermesPardiniExamStartDate uses max exam date with lookback', async () => {
+    const pool = {
+      query: async () => ({
+        rows: [{ max_date: new Date('2026-06-01T12:00:00Z') }],
+      }),
+    } as unknown as import('pg').Pool
+    const link = IntegrationLink.create({ patientId: 'p1', portalType: 'hermes_pardini' })
+    const start = await computeHermesPardiniExamStartDate(pool, link, ['p1'])
     expect(start).toBe('2026-05-18')
   })
 

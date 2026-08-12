@@ -107,6 +107,14 @@ const start = async () => {
   try {
     await app.register(cors, { origin: true, methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] })
     await registerRoutes()
+
+    const scheduledIntervalMs = Number(process.env.SYNC_SCHEDULED_INTERVAL_MS ?? '0')
+    if (scheduledIntervalMs > 0) {
+      const { pgPool } = await import('./db/postgres.js')
+      const { startScheduledSyncLoop } = await import('./infrastructure/sync/scheduled-sync.loop.js')
+      startScheduledSyncLoop(pgPool, scheduledIntervalMs, app.log)
+    }
+
     await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' })
   } catch (err) {
     app.log.error(err)
