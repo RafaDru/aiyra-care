@@ -2,7 +2,7 @@
 
 Auditoria de consumo de dados em integrações. Objetivo: **buscar no terceiro só o inevitável**; no import, **gravar só novidades**.
 
-**Última atualização:** 2026-08-11
+**Última atualização:** 2026-08-12
 
 ## Resumo por portal
 
@@ -11,7 +11,7 @@ Auditoria de consumo de dados em integrações. Objetivo: **buscar no terceiro s
 | **Unimed BH** | **Incremental em silent:** 2 meses extrato; auth detalhe só desde `lastSync−14d`. Manual: 6 meses + detalhe full | Dedup por chave; auth atualiza se mudou | N/A | Lista de autorizações ainda vem completa do portal (detalhe é o que cortamos) |
 | **Amil** | **Incremental em silent:** `PostTokens` desde `lastSync−14d` (ou 2 meses); **plano/carências omitidos** (só guias). Manual: 12 meses + plano full | Dedup + update autorizações; matcher dependentes; `skipped*` no novelty | N/A | — |
 | **Mater Dei** | Atendimentos/cirurgias: APIs “últimos”; **exames**: search paginado desde `examStartDate` | Dedup atendimento/exame; laudos skip se `documentId` ou séries já salvas | Skip PDF/imagem se já persistido | Atendimentos sem cursor por data |
-| **Hermes Pardini** | Login HTTP OK; BFF exames não mapeado | — | — | Endpoints de lista/PDF pendentes |
+| **Hermes Pardini** | **Incremental:** `GET /pedidos` desde `max(exam_date)−14d` ou `lastSync−14d`; expande `GET /pedidos/{id}/exames` | Dedup `hermes_pardini:{pedido}:{exame}` em `notes` | PDF laudo (`POST /pedidos/{id}/download`) não importado ainda | — |
 | **ConecteSUS** | Import manual gov.br | Dedup no import | — | Sem sync automático |
 | **Caderneta** | Upload manual | Dedup vacinas/marcos | — | Fora do Connect |
 
@@ -33,6 +33,7 @@ Helpers em `packages/api/src/application/connect/sync-delta.helper.ts`:
 | **Unimed autorizações** | `computeUnimedAuthorizationSince` → detalhe só ≥ data | todas com detalhe |
 | **Amil guias** | `computeAmilGuidesPeriodStart` → `lastSync−14d` ou **2** meses | **12** meses |
 | **Mater Dei exames** | `computeMaterDeiExamStartDate` → `max(exam_date)−14d` ou `lastSync−14d` | 365 dias (1ª sync) |
+| **Hermes Pardini exames** | `computeHermesPardiniExamStartDate` → `max(exam_date)−14d` ou `lastSync−14d` | 365 dias (1ª sync) |
 
 ### 3. Import (Core)
 
@@ -55,14 +56,13 @@ Helpers em `packages/api/src/application/connect/sync-delta.helper.ts`:
 
 ## Próximos passos (roadmap)
 
-1. Hermes: mapear BFF e dedup por `codigoCliente` + id exame.
-2. `import_lineage` / `external_id` unificado para todos os connectors.
-3. Scheduler `trigger=scheduled` (worker apartado).
+1. `import_lineage` / `external_id` unificado para todos os connectors.
 
 ## Variáveis
 
 | Variável | Default | Efeito |
 |----------|---------|--------|
+| `SYNC_SCHEDULED_INTERVAL_MS` | 0 (off) | API: loop de sync `trigger=scheduled` (silent, sessão válida) |
 | `SYNC_MIN_INTERVAL_MS` | 30 min | API skip sync recente |
 | `SYNC_STREAM_HEARTBEAT_MS` | 25 s | SSE heartbeat no progresso |
 | `VITE_SILENT_SYNC_STALE_MS` | 6 h | Web auto silent na Carteira |

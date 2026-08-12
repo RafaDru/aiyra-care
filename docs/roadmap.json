@@ -92,8 +92,8 @@
         {
           "id": "connect-sync-jobs-pg",
           "title": "sync_jobs persistidos (trigger manual | scheduled)",
-          "status": "in_progress",
-          "detail": "Tabela 013 + repositório; dual-write com sync-progress-store — polling Carteira via syncStatus (PG)."
+          "status": "done",
+          "detail": "Progresso só PG; IntegrationLinkSyncService; trigger scheduled via script ou SYNC_SCHEDULED_INTERVAL_MS."
         },
         {
           "id": "connect-novelty",
@@ -110,8 +110,8 @@
         {
           "id": "connect-incremental",
           "title": "Sync incremental por connector",
-          "status": "in_progress",
-          "detail": "Mater Dei: examStartDate. Unimed silent: 2 meses extrato + auth detalhe desde lastSync−14d. Amil silent: PostTokens desde lastSync−14d. Manual = janela full. Ver docs/SYNC_DELTA.md."
+          "status": "done",
+          "detail": "Unimed/Amil/Mater Dei/Hermes — janelas em sync-delta.helper + SYNC_DELTA.md. Manual = full."
         },
         {
           "id": "connect-sync-stream",
@@ -123,7 +123,7 @@
           "id": "connect-delta-audit",
           "title": "Auditoria delta sync (portal vs DB)",
           "status": "in_progress",
-          "detail": "Matriz em SYNC_DELTA.md; gaps restantes: Hermes BFF, lineage unificado."
+          "detail": "Matriz em SYNC_DELTA.md; gaps restantes: lineage unificado, PDF Hermes."
         },
         {
           "id": "connect-intervention-only",
@@ -242,20 +242,20 @@
         {
           "id": "sched-trigger",
           "title": "trigger=scheduled em sync_jobs",
-          "status": "planned",
-          "detail": "Schema já prevê manual | scheduled."
+          "status": "done",
+          "detail": "IntegrationLinkSyncService + createJob(trigger); batch via script ou SYNC_SCHEDULED_INTERVAL_MS."
         },
         {
           "id": "sched-pg-only",
           "title": "Eliminar sync-progress-store em memória",
-          "status": "planned",
-          "detail": "Worker e UI leem só Postgres (step_details JSONB)."
+          "status": "done",
+          "detail": "createJob/updateJob/getJob leem e gravam só sync_jobs PG; SSE heartbeat reconcilia via findById."
         },
         {
           "id": "sched-cron-local",
           "title": "Agendamento local (pg_cron ou script)",
-          "status": "planned",
-          "detail": "Enfileirar pending para links com sessão válida; política por portal."
+          "status": "done",
+          "detail": "scripts/run-scheduled-syncs.mjs; loop opcional SYNC_SCHEDULED_INTERVAL_MS na API."
         },
         {
           "id": "sched-worker-package",
