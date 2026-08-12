@@ -943,9 +943,9 @@ Fechar backlog P0 Connect: mapear API real do Hermes Pardini (portalpaciente), e
 - [x] Header fixo web + novelty `skipped*` (commit anterior na branch)
 
 ### To-Dos (sequência)
-- [ ] PDF laudo Hermes (`POST /pedidos/{id}/download`)
-- [ ] `packages/connect-worker` (runner apartado)
-- [ ] Export PDF resumido para consulta médica
+- [x] PDF laudo Hermes (`POST /pedidos/{id}/download`) — ver entrada 2026-08-12 sync-events + PDF
+- [x] `packages/connect-worker` (runner apartado)
+- [x] Export PDF resumido para consulta médica
 
 ### Momento atual da aplicação (snapshot)
 - **Web:** header fixo; Carteira silent + novelty skipped*; Integrações manual + dock SSE.
@@ -957,6 +957,39 @@ Fechar backlog P0 Connect: mapear API real do Hermes Pardini (portalpaciente), e
 - `packages/api/src/application/integration-link/integration-link-sync.service.ts`
 - `packages/api/src/infrastructure/scraper/sync-progress-store.ts`
 - `packages/api/scripts/run-scheduled-syncs.mjs`
+- `docs/SYNC_DELTA.md`, `docs/roadmap.json`, `AGENTS.md`
+
+---
+
+## [2026-08-12] - sync.completed SSE + laudo PDF Hermes
+
+### Contexto
+Fechar backlog P2 Connect: notificar UI quando sync termina (sem depender só de polling) e importar laudo PDF consolidado do Hermes Pardini após metadados de exames.
+
+### Decisões
+| Decisão | Opção | Motivo |
+|---------|-------|--------|
+| Evento terminal | Bus por `patientId` + SSE | Carteira e contexto do mesmo paciente; job stream já existente para dock |
+| Hermes PDF | Um download por `pedidoId` | API `POST /pedidos/{id}/download` retorna PDF do pedido; `resultFileUrl` em todos exames do pedido |
+| Persistência | GCS + `Document` + meta JSON em `notes` | Mesmo padrão Mater Dei; dedup por `pedidoId` + `documentId` |
+
+### Realizado
+- [x] `sync-completion.bus.ts` — `notifySyncJobTerminal` → `publishSyncCompletion` com `patientId`
+- [x] `sync-progress-store` — eventos `completed`/`failed` no job stream
+- [x] `GET /patients/:id/sync-completions/stream` — SSE heartbeat ~25s
+- [x] Web: `patient-sync-stream.ts`, `usePatientSyncCompletions` — refresh Resumo clínico + Carteira
+- [x] `downloadHermesPardiniPedidoPdf` + `hermes-pardini-exam-persist.ts` — laudo → GCS
+- [x] Sync Hermes: passo `fetch-files`; novelty `filesDownloaded`
+- [x] Roadmap `sched-events` → done; `hermes-pdf-laudo` → done
+
+### Momento atual da aplicação (snapshot)
+- **Web:** sync terminal push na Carteira e contexto; polling 30s como fallback.
+- **API:** Hermes importa exames + PDF laudo; jobs terminam com evento por paciente.
+
+### Arquivos-chave
+- `packages/api/src/infrastructure/sync/sync-completion.bus.ts`
+- `packages/api/src/infrastructure/scraper/hermes-pardini-exam-persist.ts`
+- `packages/web/src/lib/patient-sync-stream.ts`
 - `docs/SYNC_DELTA.md`, `docs/roadmap.json`, `AGENTS.md`
 
 ---

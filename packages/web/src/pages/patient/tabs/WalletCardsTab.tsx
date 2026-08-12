@@ -8,6 +8,7 @@ import type { Patient, IntegrationLink, UnimedVirtualCard, PlanMembershipWithPla
 import { BrandTag } from '../../../components/brands/BrandLogo.js'
 import { useSilentWalletSync } from '../../../hooks/useSilentWalletSync.js'
 import { useWalletLinkSyncStatus } from '../../../hooks/useWalletLinkSyncStatus.js'
+import { usePatientSyncCompletions } from '../../../hooks/usePatientSyncCompletions.js'
 import {
   INSURANCE_PORTALS,
   WalletCardFace,
@@ -49,6 +50,11 @@ export function WalletCardsTab({
   const insuranceLinks = links.filter((l) => INSURANCE_PORTALS.has(l.portalType))
 
   useSilentWalletSync(links, () => {
+    onCardUpdated()
+    setSyncRefreshKey((k) => k + 1)
+  })
+
+  usePatientSyncCompletions(patient.id, () => {
     onCardUpdated()
     setSyncRefreshKey((k) => k + 1)
   })

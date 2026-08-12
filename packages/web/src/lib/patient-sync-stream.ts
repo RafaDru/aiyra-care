@@ -1,39 +1,26 @@
 /** Em dev o Vite faz proxy à API (porta 3010). */
 const BASE_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'http://127.0.0.1:3010')
 
-export type SyncProgressStreamEvent = 'progress' | 'heartbeat' | 'snapshot' | 'completed' | 'failed'
+export type PatientSyncStreamEvent = 'completed' | 'failed' | 'heartbeat'
 
-export interface SyncProgressStreamPayload {
-  step: string
-  message: string
-  status: string
-  portalType?: string
-  stepDetails?: Record<string, { status: 'running' | 'success' | 'failed'; message: string }>
+export interface PatientSyncCompletionPayload {
+  jobId: string
+  integrationLinkId: string
+  patientId: string
+  portalType: string
+  status: 'success' | 'failed'
+  trigger: string
+  message?: string
   novelty?: import('./api.types.js').SyncNoveltySummary
-  result?: SyncJobProgressStreamResult
-  event?: SyncProgressStreamEvent
+  finishedAt: string
 }
 
-export interface SyncJobProgressStreamResult {
-  exams: number
-  medicalRecords: number
-  authorizations: number
-  authorizationItems: number
-  updatedAuthorizations: number
-  total: number
-  warnings?: string[]
-  novelty?: import('./api.types.js').SyncNoveltySummary
-  beneficiaryDetails?: unknown[]
-  unmatchedBeneficiaries?: unknown[]
-  authorizationDetails?: unknown[]
-}
-
-function parseSseBlock(block: string): { event: SyncProgressStreamEvent; data: string } | null {
+function parseSseBlock(block: string): { event: PatientSyncStreamEvent; data: string } | null {
   const lines = block.split('\n')
-  let event: SyncProgressStreamEvent = 'progress'
+  let event: PatientSyncStreamEvent = 'completed'
   let data = ''
   for (const line of lines) {
-    if (line.startsWith('event:')) event = line.slice(6).trim() as SyncProgressStreamEvent
+    if (line.startsWith('event:')) event = line.slice(6).trim() as PatientSyncStreamEvent
     else if (line.startsWith('data:')) data += line.slice(5).trim()
   }
   if (!data) return null
@@ -41,12 +28,12 @@ function parseSseBlock(block: string): { event: SyncProgressStreamEvent; data: s
 }
 
 /**
- * SSE via fetch (suporta Authorization Bearer — EventSource nativo não).
+ * SSE de sync terminal por paciente (completed/failed).
  * Retorna função para fechar o stream.
  */
-export function openSyncJobStream(
-  jobId: string,
-  onPayload: (payload: SyncProgressStreamPayload, event: SyncProgressStreamEvent) => void,
+export function openPatientSyncStream(
+  patientId: string,
+  onPayload: (payload: PatientSyncCompletionPayload, event: PatientSyncStreamEvent) => void,
   onDisconnect?: () => void,
 ): () => void {
   const controller = new AbortController()
@@ -58,7 +45,7 @@ export function openSyncJobStream(
     if (token) headers.Authorization = `Bearer ${token}`
 
     try {
-      const res = await fetch(`${BASE_URL}/integration-links/sync-progress/${jobId}/stream`, {
+      const res = await fetch(`${BASE_URL}/patients/${patientId}/sync-completions/stream`, {
         headers,
         signal: controller.signal,
       })
@@ -77,9 +64,9 @@ export function openSyncJobStream(
           const block = buffer.slice(0, sep)
           buffer = buffer.slice(sep + 2)
           const parsed = parseSseBlock(block)
-          if (parsed) {
-            const payload = JSON.parse(parsed.data) as SyncProgressStreamPayload
-            onPayload({ ...payload, event: parsed.event }, parsed.event)
+          if (parsed && parsed.event !== 'heartbeat') {
+            const payload = JSON.parse(parsed.data) as PatientSyncCompletionPayload
+            onPayload(payload, parsed.event)
           }
           sep = buffer.indexOf('\n\n')
         }
@@ -89,7 +76,7 @@ export function openSyncJobStream(
         onDisconnect?.()
       }
       if (!controller.signal.aborted && err instanceof Error && err.name !== 'AbortError') {
-        console.warn('[sync-stream]', err.message)
+        console.warn('[patient-sync-stream]', err.message)
       }
     }
   }

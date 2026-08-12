@@ -56,6 +56,7 @@ describe('hermes-pardini-bff.service', () => {
     expect(result.exams).toHaveLength(2)
     expect(result.exams[0]).toMatchObject({
       externalKey: 'hermes_pardini:101:1',
+      pedidoId: '101',
       name: 'Hemograma',
       performedAt: '2026-01-12',
       laboratory: 'Lab Centro',
@@ -76,5 +77,29 @@ describe('hermes-pardini-bff.service', () => {
     const result = await fetchHermesPardiniExams(request, 'token')
     expect(result.exams).toHaveLength(1)
     expect(result.exams[0].name).toBe('TSH')
+  })
+
+  it('downloads pedido PDF via POST /download', async () => {
+    const pdfBytes = Buffer.from('%PDF-1.4 test')
+    const request = {
+      get: vi.fn(),
+      post: vi.fn(async (url: string) => ({
+        status: () => 200,
+        ok: () => true,
+        headers: () => ({ 'content-type': 'application/pdf' }),
+        body: async () => pdfBytes,
+      })),
+    } as unknown as APIRequestContext
+
+    const { downloadHermesPardiniPedidoPdf } = await import(
+      '../src/infrastructure/scraper/hermes-pardini-bff.service.js'
+    )
+    const file = await downloadHermesPardiniPedidoPdf(request, 'token', 55)
+    expect(file?.filename).toBe('hermes-pardini-pedido-55.pdf')
+    expect(file?.buffer.equals(pdfBytes)).toBe(true)
+    expect(request.post).toHaveBeenCalledWith(
+      expect.stringContaining('/pedidos/55/download'),
+      expect.objectContaining({ data: {} }),
+    )
   })
 })

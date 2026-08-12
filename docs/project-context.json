@@ -98,7 +98,7 @@
     { "id": "hermes-bff-pedidos", "date": "2026-08-12", "title": "Hermes BFF portalpaciente", "decision": "GET /pedidos + /pedidos/{id}/exames em paciente/api/v1", "rationale": "Shell precision-care/api não lista exames; SPA Fleury usa microfrontend portalpaciente", "status": "active" }
   ],
   "plannedWork": [
-    { "id": "hermes-pdf-laudo", "title": "Import PDF laudo Hermes (POST /pedidos/{id}/download)", "status": "planned" },
+    { "id": "hermes-pdf-laudo", "title": "Import PDF laudo Hermes (POST /pedidos/{id}/download)", "status": "done" },
     { "id": "connect-worker-package", "title": "packages/connect-worker runner apartado", "status": "planned" },
     { "id": "relation-catalog-4.1", "title": "Migration relation_types + GET /relation-types", "status": "planned" },
     { "id": "entity-links-4.2", "title": "clinical_entity_links (consulta → exame)", "status": "planned" },

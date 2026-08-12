@@ -48,7 +48,7 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 | **Bradesco Saúde** | Não (só vínculo/import manual) | — | — |
 | **ConecteSUS** | Import manual gov.br | Login interativo FHIR | Vacinas, exames |
 | **Mater Dei** | Sim | Scraper + sessão JSON | Exames, atendimentos, laudos/imagens |
-| **Hermes Pardini** | Sim | Keycloak ROPC + browser fallback | Exames via API `paciente/api/v1/pedidos` |
+| **Hermes Pardini** | Sim | Keycloak ROPC + browser fallback | Exames via API `paciente/api/v1/pedidos` + laudo PDF `POST /pedidos/{id}/download` |
 
 ### Amil — variáveis de ambiente
 
@@ -73,7 +73,7 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 
 **Sync silencioso na Carteira:** auto-sync só dispara com sessão persistida válida (`sessionReady`); primeiro login sempre via botão **Sincronizar** (pode abrir portal/Chrome). API ignora `silent=1` sem sessão (`skipped: session_required`).
 
-**Progresso de sync (UI):** push-first via SSE `GET /integration-links/sync-progress/:jobId/stream` (heartbeat ~25s); GET `/sync-progress/:jobId` só reconciliação se stream mudo >45s. Ver `docs/SYNC_DELTA.md` para delta sync por portal.
+**Progresso de sync (UI):** push-first via SSE `GET /integration-links/sync-progress/:jobId/stream` (heartbeat ~25s); GET `/sync-progress/:jobId` só reconciliação se stream mudo >45s. **Sync terminal por paciente:** SSE `GET /patients/:id/sync-completions/stream` (`completed`/`failed`) → refresh contexto + carteira. Ver `docs/SYNC_DELTA.md` para delta sync por portal.
 
 **Fluxo Amil (prioridade):**
 
@@ -96,7 +96,8 @@ JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login 
 ### Hermes Pardini — arquivos-chave
 
 - `hermes-pardini.portal.ts` — `pacienteApiBase` (`precision-care/paciente/api/v1`)
-- `hermes-pardini-bff.service.ts` — `GET /pedidos` paginado + `GET /pedidos/{id}/exames`
+- `hermes-pardini-bff.service.ts` — `GET /pedidos` paginado + `GET /pedidos/{id}/exames` + `POST /pedidos/{id}/download`
+- `hermes-pardini-exam-persist.ts` — laudo PDF → GCS + `resultFileUrl`
 - `hermes-pardini-sync.scraper.ts` — sessão Keycloak + fetch BFF
 - `integration-link-sync.service.ts` — execução centralizada de sync (manual + scheduled)
 

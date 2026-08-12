@@ -1,7 +1,7 @@
 # Open Health - Documento Vivo do Projeto
 
 > **Última atualização:** 2026-08-06  
-> **Status:** Sync Unimed BH + **Amil validado**; P0 Connect — silent sync na Carteira, incremental Unimed/Amil, hardening sessão/browser (2026-08-11)  
+> **Status:** Sync Unimed BH + **Amil validado**; P0 Connect — silent sync, incremental, hardening; P2 — SSE sync.completed + laudo PDF Hermes (2026-08-12)  
 > **Repositório:** https://github.com/RafaDru/open-health
 
 ---
@@ -47,6 +47,8 @@ acessível para consultas, relatórios e compartilhamento com profissionais de s
 
 ```
 POST /integration-links/:id/sync?silent=1|force=1  →  jobId
+GET  /integration-links/sync-progress/:jobId/stream  ← SSE progresso do job
+GET  /patients/:id/sync-completions/stream  ← SSE sync terminal (completed/failed) por paciente
 PortalSyncOrchestrator.runUnimedSync → UnimedBhSyncScraper.scrape(..., { extratoMonths, authorizationSince })
 ```
 
@@ -603,7 +605,7 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 - [x] Crawler Unimed BH combinado (extrato + autorizações, mesma sessão)
 - [x] Entidade Authorization (create/restore, repository, PG, HTTP CRUD)
 - [x] AuthorizationsTab com status tags (authorized/used/expired) e validade
-- [x] Testes unitários: crypto-helper, sync-progress-store, Hermes BFF, scheduled-sync, sync-delta
+- [x] Testes unitários: crypto-helper, sync-progress-store, Hermes BFF + PDF, sync-completion, scheduled-sync, sync-delta
 - [x] Sync rico via APIs OutSystems (listagem + detalhe + procedimentos + prestador + histórico)
 - [x] Entidade AuthorizationItem (itens/procedimentos do pedido)
 - [x] Campos enriquecidos: solicitation_number, guide_password, specialty, locations, history

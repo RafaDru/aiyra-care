@@ -6,6 +6,7 @@ import {
 
 export interface HermesPardiniExamItem {
   externalKey: string
+  pedidoId: string
   name: string
   performedAt?: string | null
   laboratory?: string | null
@@ -103,6 +104,7 @@ function mapExamItem(
 
   return {
     externalKey: `hermes_pardini:${String(pedidoId)}:${String(examId)}`,
+    pedidoId: String(pedidoId),
     name,
     performedAt,
     laboratory: pedido.nomeUnidade ?? 'Hermes Pardini',
@@ -251,4 +253,51 @@ export async function fetchHermesPardiniExams(
   }
 
   return { exams, pedidosCount: pedidos.length, warnings }
+}
+
+export interface HermesPardiniPdfFile {
+  buffer: Buffer
+  filename: string
+  mimeType: string
+}
+
+/**
+ * Baixa laudo PDF consolidado do pedido (`POST /pedidos/{id}/download`).
+ */
+export async function downloadHermesPardiniPedidoPdf(
+  request: APIRequestContext,
+  accessToken: string,
+  pedidoId: number | string,
+): Promise<HermesPardiniPdfFile | null> {
+  const base = HERMES_PARDINI_PRECISION_CARE.pacienteApiBase
+  const res = await request.post(`${base}/pedidos/${pedidoId}/download`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/pdf, application/octet-stream',
+      'Content-Type': 'application/json',
+    },
+    data: {},
+  })
+
+  if (res.status() === 404 || res.status() === 400 || res.status() === 204) return null
+  if (res.status() === 401 || res.status() === 403) {
+    throw new Error(`Token Hermes Pardini rejeitado no download (${res.status()})`)
+  }
+  if (!res.ok()) {
+    throw new Error(`Download laudo pedido ${pedidoId} falhou (HTTP ${res.status()})`)
+  }
+
+  const contentType = (res.headers()['content-type'] ?? '').toLowerCase()
+  if (!contentType.includes('pdf') && !contentType.includes('octet-stream')) {
+    return null
+  }
+
+  const body = await res.body()
+  if (!body?.length) return null
+
+  return {
+    buffer: body,
+    filename: `hermes-pardini-pedido-${pedidoId}.pdf`,
+    mimeType: 'application/pdf',
+  }
 }

@@ -45,6 +45,7 @@ export async function patientRoutes(app: FastifyInstance) {
   app.get('/patients', controller.findAll.bind(controller))
   app.get('/patients/:id/context', controller.getContext.bind(controller))
   app.get('/patients/:id/timeline', controller.getTimeline.bind(controller))
+  app.get('/patients/:id/sync-completions/stream', controller.streamSyncCompletions.bind(controller))
   app.get('/patients/:id', controller.findById.bind(controller))
   app.patch('/patients/:id', controller.update.bind(controller))
   app.delete('/patients/:id', controller.delete.bind(controller))

@@ -1,10 +1,16 @@
 import type { FastifyInstance } from 'fastify'
 import { IntegrationLinkPgRepository } from '../../persistence/integration-link.pg.repository.js'
 import { IntegrationLinkController } from './integration-link.controller.js'
+import { bindSyncCompletionNotifier, publishSyncCompletion } from '../../sync/sync-completion.bus.js'
 import { pgPool } from '../../../db/postgres.js'
 
 export async function integrationLinkRoutes(app: FastifyInstance) {
   const repo = new IntegrationLinkPgRepository(pgPool)
+  bindSyncCompletionNotifier(async (event) => {
+    const link = await repo.findById(event.integrationLinkId)
+    if (!link) return
+    publishSyncCompletion({ ...event, patientId: link.patientId })
+  })
   const ctrl = new IntegrationLinkController(repo, pgPool)
   app.post('/integration-links', ctrl.create.bind(ctrl))
   app.get('/integration-links', ctrl.findByPatient.bind(ctrl))

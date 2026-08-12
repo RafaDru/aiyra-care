@@ -16,6 +16,9 @@ import {
   getAllowedPatientIds,
   isAuthEnforcementEnabled,
 } from '../auth/patient-access.guard.js'
+import { subscribePatientSyncCompletions } from '../../sync/sync-completion.bus.js'
+
+const PATIENT_SYNC_STREAM_HEARTBEAT_MS = 25_000
 
 export class PatientController {
   constructor(
@@ -78,6 +81,40 @@ export class PatientController {
       if (err instanceof NotFoundError) return reply.status(404).send({ message: err.message })
       throw err
     }
+  }
+
+  async streamSyncCompletions(req: AuthenticatedRequest, reply: FastifyReply) {
+    const parsed = patientParamsSchema.safeParse(req.params)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+    if (!assertPatientAccess(req, reply, parsed.data.id)) return
+
+    const patientId = parsed.data.id
+    const res = reply.raw
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    })
+    res.write('\n')
+
+    const writeEvent = (event: string, payload: unknown) => {
+      res.write(`event: ${event}\n`)
+      res.write(`data: ${JSON.stringify(payload)}\n\n`)
+    }
+
+    const unsub = subscribePatientSyncCompletions(patientId, (event) => {
+      writeEvent(event.status === 'success' ? 'completed' : 'failed', event)
+    })
+
+    const heartbeat = setInterval(() => {
+      writeEvent('heartbeat', { ts: new Date().toISOString() })
+    }, PATIENT_SYNC_STREAM_HEARTBEAT_MS)
+
+    req.raw.on('close', () => {
+      clearInterval(heartbeat)
+      unsub()
+    })
   }
 
   async findById(req: AuthenticatedRequest, reply: FastifyReply) {

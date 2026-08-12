@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Card, List, Spin, Tag, Typography } from 'antd'
 import { PrinterOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
 import type { PatientContext } from '../../lib/api.types.js'
 import { PatientContextTimeline } from './PatientContextTimeline.js'
 import { PatientClinicalExportModal } from './PatientClinicalExportModal.js'
+import { usePatientSyncCompletions } from '../../hooks/usePatientSyncCompletions.js'
 import {
   HEALTH_THREAD_STATUS_LABEL,
   healthThreadKindLabel,
@@ -31,7 +32,7 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
   const [error, setError] = useState<string | null>(null)
   const [exportOpen, setExportOpen] = useState(false)
 
-  useEffect(() => {
+  const reloadContext = useCallback(() => {
     setLoading(true)
     setError(null)
     api.patients
@@ -40,6 +41,12 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
       .catch((e) => setError(e instanceof Error ? e.message : 'Erro ao carregar contexto'))
       .finally(() => setLoading(false))
   }, [patientId])
+
+  useEffect(() => {
+    reloadContext()
+  }, [reloadContext])
+
+  usePatientSyncCompletions(patientId, reloadContext)
 
   if (loading) return <Spin style={{ display: 'block', margin: '16px auto' }} />
   if (error) return <Alert type="error" message={error} showIcon />

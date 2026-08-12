@@ -142,9 +142,9 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 
 | Camada | Comportamento |
 |--------|----------------|
-| Web Carteira | `useSilentWalletSync` — `sessionReady` + stale 6h; toast se falha recuperável |
+| Web Carteira | `useSilentWalletSync` — `sessionReady` + stale 6h; `usePatientSyncCompletions` refresh após sync OK |
 | Web Integrações | Sincronizar manual + dock SSE; sync-all serial |
-| API | `incremental = silent && !force`; mutex browser; `sync_jobs` em Postgres (SSE + polling) |
+| API | `incremental = silent && !force`; mutex browser; `sync_jobs` em Postgres (SSE job + SSE paciente) |
 | Fetch | Ver [SYNC_DELTA.md](./SYNC_DELTA.md) |
 | Worker | `packages/connect-worker` — loop `CONNECT_WORKER_INTERVAL_MS`; `CONNECT_WORKER_EXTERNAL=1` na API |
 
@@ -152,7 +152,7 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 
 - Serviço Connect com vault dedicado.
 - Core: `RemoteConnectClient` HTTP.
-- Webhooks `sync.completed` opcionais.
+- Webhooks `sync.completed` opcionais (HTTP externo); hoje SSE `GET /patients/:id/sync-completions/stream` na web.
 
 ## Legado durante migração
 

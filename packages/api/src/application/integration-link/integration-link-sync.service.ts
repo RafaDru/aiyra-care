@@ -27,6 +27,10 @@ import {
   materDeiExamNotes,
   persistMaterDeiExamFiles,
 } from '../../infrastructure/scraper/materdei-exam-persist.js'
+import {
+  hermesPardiniExamNotes,
+  persistHermesPardiniLaudos,
+} from '../../infrastructure/scraper/hermes-pardini-exam-persist.js'
 import { materDeiExamDedupKey, type MaterDeiExamItem } from '../../infrastructure/scraper/materdei-exam.mapper.js'
 import { resolveMaterDeiPatientId } from '../../infrastructure/scraper/materdei-patient-resolver.js'
 import {
@@ -570,11 +574,37 @@ export class IntegrationLinkSyncService {
           examDate: parsedDate,
           laboratory: exam.laboratory ?? 'Hermes Pardini',
           source: 'hermes_pardini',
-          notes: dedup,
+          notes: hermesPardiniExamNotes(dedup, { pedidoId: exam.pedidoId }),
         }))
         importedExams++
         existingKeys.add(dedup)
       }
+
+      emit('fetch-files', 'Baixando laudos PDF…', 'running')
+      const dlRequest = await playwrightRequest.newContext()
+      let downloadedFiles = 0
+      let skippedFiles = 0
+      try {
+        const fileResult = await persistHermesPardiniLaudos({
+          pool: this.pool,
+          request: dlRequest,
+          accessToken: result.session.accessToken,
+          patientId: link.patientId,
+          exams: result.exams,
+          onProgress: (msg) => emit('fetch-files', msg, 'running'),
+        })
+        downloadedFiles = fileResult.downloaded
+        skippedFiles = fileResult.skipped
+      } finally {
+        await dlRequest.dispose()
+      }
+      emit(
+        'fetch-files',
+        downloadedFiles > 0
+          ? `${downloadedFiles} laudo(s) PDF baixado(s)`
+          : 'Laudos PDF: nada novo para baixar',
+        'success',
+      )
 
       link.setSessionToken(
         encrypt(JSON.stringify(result.session)),
@@ -588,6 +618,8 @@ export class IntegrationLinkSyncService {
         portalExams: result.exams.length,
         newExamRecords: importedExams,
         skippedExamRecords: skippedExams,
+        filesDownloaded: downloadedFiles > 0 ? downloadedFiles : undefined,
+        filesSkipped: skippedFiles > 0 ? skippedFiles : undefined,
       }
 
       void updateJob(jobId, {

@@ -266,8 +266,8 @@
         {
           "id": "sched-events",
           "title": "Eventos sync.completed",
-          "status": "planned",
-          "detail": "Atualizar context, notificações; não montar sequência automática."
+          "status": "done",
+          "detail": "SSE GET /patients/:id/sync-completions/stream; bus paciente após job terminal; UI refresh contexto + carteira."
         },
         {
           "id": "sched-microservice",

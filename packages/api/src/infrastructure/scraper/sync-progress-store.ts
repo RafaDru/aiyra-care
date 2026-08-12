@@ -3,6 +3,7 @@ import { allKnownSyncStepKeys, type SyncablePortalType } from '../../domain/scra
 import { SyncJob as SyncJobEntity, type SyncJobStatus, type SyncJobTrigger, type SyncNoveltySummary } from '../../domain/sync-job/sync-job.entity.js'
 import type { SyncJobPgRepository } from '../persistence/sync-job.pg.repository.js'
 import { publishSyncJobEvent } from './sync-job-stream.js'
+import { notifySyncJobTerminal } from '../sync/sync-completion.bus.js'
 
 export interface SyncAuthorizationDetail {
   solicitationNumber?: string
@@ -64,7 +65,7 @@ export interface SyncJob {
   stepDetails: Record<string, SyncStepDetail>
 }
 
-export type SyncProgressEventKind = 'progress' | 'heartbeat' | 'snapshot'
+export type SyncProgressEventKind = 'progress' | 'heartbeat' | 'snapshot' | 'completed' | 'failed'
 
 export interface SyncProgressPayload {
   step: string
@@ -246,7 +247,26 @@ export async function updateJob(
     result: mergedResult,
     stepDetails,
   }
-  publishSyncJobEvent(id, jobToPayload(job, 'progress'))
+
+  const terminal = status === 'success' || status === 'failed'
+  const eventKind: SyncProgressEventKind = terminal
+    ? (status === 'success' ? 'completed' : 'failed')
+    : 'progress'
+  publishSyncJobEvent(id, jobToPayload(job, eventKind))
+
+  if (terminal && prevEntity) {
+    const d = prevEntity.toJSON()
+    void notifySyncJobTerminal({
+      jobId: id,
+      integrationLinkId: d.integrationLinkId,
+      portalType: d.portalType,
+      status,
+      trigger: d.trigger,
+      novelty: noveltyToPersist,
+      message: progress.message,
+      finishedAt: (finishedAt ?? new Date()).toISOString(),
+    })
+  }
 }
 
 export async function getJob(id: string): Promise<SyncJob | undefined> {
