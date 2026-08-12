@@ -37,6 +37,9 @@ export interface PatientContextActiveThread {
   status: string
   summary: string | null
   updatedAt: string
+  dueDate: string | null
+  priority: string
+  linkCount: number
 }
 
 export interface PatientContextTimelineEvent {
@@ -52,6 +55,7 @@ export interface PatientContextPendency {
   kind: string
   title: string
   detail?: string
+  threadId?: string
 }
 
 export interface PatientContextIntegration {

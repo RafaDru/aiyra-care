@@ -30,4 +30,16 @@ export const CLINICAL_SEQUENCE_COPY = {
   entityModalTitle: 'Associar com outro registro',
   entityModalHint:
     'Liga este item a outro do histórico (ex.: consulta → pedido de autorização).',
+  drawerFallbackTitle: 'Acompanhamento',
+  drawerNotFound: 'Acompanhamento não encontrado.',
+  drawerLoadError: 'Erro ao carregar acompanhamento',
+  timelineSectionTitle: 'Linha do tempo',
+  timelineSectionHint:
+    'Consulta, pedidos, autorizações e resultados na ordem em que ocorreram.',
+  noteSectionTitle: 'Adicionar nota',
+  notePlaceholder: 'Observação, evolução…',
+  noteSaved: 'Nota adicionada',
+  diagnosisConverted: 'Diagnóstico registrado; acompanhamento atualizado',
+  allergyConverted: 'Alergia registrada; hipótese convertida',
+  targetPickerPlaceholder: 'Selecione o registro destino',
 }

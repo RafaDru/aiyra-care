@@ -1,16 +1,29 @@
 import { useEffect, useState } from 'react'
-import { Alert, Card, Spin, Typography } from 'antd'
+import { Alert, Card, List, Spin, Tag, Typography } from 'antd'
 import { api } from '../../lib/api.js'
 import type { PatientContext } from '../../lib/api.types.js'
 import { PatientContextTimeline } from './PatientContextTimeline.js'
+import {
+  HEALTH_THREAD_STATUS_LABEL,
+  healthThreadKindLabel,
+} from './health-thread-kinds.js'
 
 const { Paragraph, Text } = Typography
 
-interface PatientContextPanelProps {
-  patientId: string
+const PENDENCY_KIND_LABEL: Record<string, string> = {
+  vaccine_schedule: 'Vacina',
+  document_ocr: 'Documento',
+  authorization_expiring: 'Autorização',
+  health_thread_due: 'Prazo vencido',
+  health_thread_unlinked: 'Acompanhamento',
 }
 
-export function PatientContextPanel({ patientId }: PatientContextPanelProps) {
+interface PatientContextPanelProps {
+  patientId: string
+  onOpenThread?: (threadId: string) => void
+}
+
+export function PatientContextPanel({ patientId, onOpenThread }: PatientContextPanelProps) {
   const [context, setContext] = useState<PatientContext | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -28,6 +41,9 @@ export function PatientContextPanel({ patientId }: PatientContextPanelProps) {
   if (loading) return <Spin style={{ display: 'block', margin: '16px auto' }} />
   if (error) return <Alert type="error" message={error} showIcon />
   if (!context) return null
+
+  const threadPendencies = context.pendencies.filter((p) => p.threadId)
+  const otherPendencies = context.pendencies.filter((p) => !p.threadId)
 
   return (
     <Card title="Resumo clínico" size="small" style={{ marginBottom: 16 }}>
@@ -47,6 +63,72 @@ export function PatientContextPanel({ patientId }: PatientContextPanelProps) {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {otherPendencies.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <Text strong>Pendências</Text>
+          <List
+            size="small"
+            style={{ marginTop: 8 }}
+            dataSource={otherPendencies}
+            renderItem={(item) => (
+              <List.Item>
+                <div>
+                  <Tag>{PENDENCY_KIND_LABEL[item.kind] ?? item.kind}</Tag>
+                  <Text>{item.title}</Text>
+                  {item.detail && (
+                    <div>
+                      <Text type="secondary" style={{ fontSize: 12 }}>{item.detail}</Text>
+                    </div>
+                  )}
+                </div>
+              </List.Item>
+            )}
+          />
+        </div>
+      )}
+
+      {context.activeThreads.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <Text strong>Em acompanhamento</Text>
+          <List
+            size="small"
+            style={{ marginTop: 8 }}
+            dataSource={context.activeThreads.slice(0, 5)}
+            renderItem={(thread) => {
+              const overdue = thread.dueDate && new Date(thread.dueDate).getTime() < Date.now()
+              const threadPendency = threadPendencies.find((p) => p.threadId === thread.id)
+              return (
+                <List.Item
+                  style={{ cursor: onOpenThread ? 'pointer' : undefined }}
+                  onClick={() => onOpenThread?.(thread.id)}
+                >
+                  <div style={{ width: '100%' }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <Tag color="blue">{healthThreadKindLabel(thread.kind as 'task', true)}</Tag>
+                      <Text strong>{thread.title}</Text>
+                      {overdue && <Tag color="error">Prazo vencido</Tag>}
+                      {thread.linkCount === 0 && <Tag>Vincular registros</Tag>}
+                    </div>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {HEALTH_THREAD_STATUS_LABEL[thread.status] ?? thread.status}
+                      {thread.dueDate
+                        ? ` · Prazo ${new Date(thread.dueDate).toLocaleDateString('pt-BR')}`
+                        : ''}
+                      {thread.linkCount > 0 ? ` · ${thread.linkCount} vínculo(s)` : ''}
+                    </Text>
+                    {threadPendency?.detail && (
+                      <div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>{threadPendency.detail}</Text>
+                      </div>
+                    )}
+                  </div>
+                </List.Item>
+              )
+            }}
+          />
         </div>
       )}
 

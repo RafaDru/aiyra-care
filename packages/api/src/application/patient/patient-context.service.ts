@@ -23,6 +23,11 @@ import type {
   PatientTimelineFilterOptions,
   PatientTimelineResponse,
 } from './patient-context.types.js'
+import {
+  buildThreadLinkCountMap,
+  deriveThreadPendencies,
+  mapActiveThreadsForContext,
+} from './patient-context-threads.helper.js'
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 const MS_PER_MONTH = 30 * MS_PER_DAY
@@ -249,6 +254,13 @@ export class PatientContextService {
       })
     }
 
+    const threadIds = activeThreadList.map((t) => t.id)
+    const threadLinkCounts = await this.countThreadLinks(threadIds)
+    const linkCountMap = buildThreadLinkCountMap(threadIds, threadLinkCounts)
+    pendencies.push(...deriveThreadPendencies(activeThreadList, linkCountMap, now))
+
+    const activeThreads = mapActiveThreadsForContext(activeThreadList, linkCountMap)
+
     const timeline = await this.collectTimeline(patientId, {
       cutoff: timelineCutoff,
       upperBound: new Date(now),
@@ -317,16 +329,21 @@ export class PatientContextService {
       pendencies,
       integrations,
       planMemberships,
-      activeThreads: activeThreadList.map((t) => ({
-        id: t.id,
-        kind: t.kind,
-        title: t.title,
-        status: t.status,
-        summary: t.summary,
-        updatedAt: t.updatedAt.toISOString(),
-      })),
+      activeThreads,
       textSummary,
     }
+  }
+
+  private async countThreadLinks(threadIds: string[]): Promise<Array<{ thread_id: string; count: number }>> {
+    if (threadIds.length === 0) return []
+    const { rows } = await this.pool.query<{ thread_id: string; count: number }>(
+      `SELECT thread_id, COUNT(*)::int AS count
+       FROM health_thread_links
+       WHERE thread_id = ANY($1::uuid[])
+       GROUP BY thread_id`,
+      [threadIds],
+    )
+    return rows
   }
 
   async buildTimeline(patientId: string, options?: PatientTimelineFilterOptions): Promise<PatientTimelineResponse> {

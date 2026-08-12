@@ -1,10 +1,10 @@
 import { Tag, Typography } from 'antd'
-import { LinkOutlined } from '@ant-design/icons'
 import type { ClinicalFlow, ClinicalFlowEdge, ClinicalFlowNode } from '../../lib/api.types.js'
 import { ENTITY_TYPE_LABEL } from './health-thread-link-roles.js'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
 import { sortClinicalFlowNodes } from './entity-clinical-link-utils.js'
 import { CLINICAL_SEQUENCE_COPY } from './clinical-sequence-copy.js'
+import { ClinicalSequenceSectionHeader } from './ClinicalSequenceSectionHeader.js'
 
 const { Text } = Typography
 
@@ -53,10 +53,7 @@ export function ClinicalEntityFlow({ flow, onRemoveLink }: ClinicalEntityFlowPro
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <LinkOutlined style={{ color: AIYRACARE_TOKENS.colorPrimary }} />
-        <Text strong style={{ fontSize: 13 }}>{CLINICAL_SEQUENCE_COPY.flowSectionTitle}</Text>
-      </div>
+      <ClinicalSequenceSectionHeader title={CLINICAL_SEQUENCE_COPY.flowSectionTitle} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {lanes.map((lane, laneIdx) => (

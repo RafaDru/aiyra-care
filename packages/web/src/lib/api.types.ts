@@ -49,6 +49,7 @@ export interface PatientContext {
     kind: string
     title: string
     detail?: string
+    threadId?: string
   }>
   integrations: Array<{
     portalType: string
@@ -73,6 +74,9 @@ export interface PatientContext {
     status: string
     summary: string | null
     updatedAt: string
+    dueDate: string | null
+    priority: string
+    linkCount: number
   }>
   textSummary: string
 }

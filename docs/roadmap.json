@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-11",
+  "updatedAt": "2026-08-12",
   "title": "Roadmap AiyraCare",
   "intro": "Prioridades ajustadas em 2026-08-07: primeiro sync silencioso (Connect), depois sequência clínica + grafo; agentes só com contexto e fontes sólidas. Os portais não entregam associações — o sync alimenta nós e proveniência; a sequência é nossa camada (Postgres + UX).",
   "categories": [
@@ -156,8 +156,8 @@
         {
           "id": "seq-ui-acompanhamento",
           "title": "UI Acompanhamento — Associar na sequência",
-          "status": "in_progress",
-          "detail": "ClinicalLinkModal, abas Consultas/Autorizações/Exames; pré-seleção e fallback local."
+          "status": "done",
+          "detail": "ClinicalLinkModal + EntityClinicalLinkModal; picker tabulado Consultas/Autorizações/Exames; componentes compartilhados."
         },
         {
           "id": "seq-fk-shortcuts",
@@ -174,14 +174,14 @@
         {
           "id": "seq-context-threads",
           "title": "Trilhas abertas no PatientContext",
-          "status": "planned",
-          "detail": "activeThreads[] e pendências derivadas de acompanhamento no resumo."
+          "status": "done",
+          "detail": "activeThreads com dueDate/priority/linkCount; pendências health_thread_due/unlinked; Resumo clínico lista trilhas e abre drawer."
         },
         {
           "id": "seq-ui-polish",
           "title": "Polish UX sequência (tabs, timeline, linguagem)",
-          "status": "planned",
-          "detail": "Badges, Sequência do cuidado no drawer, menos jargão técnico."
+          "status": "done",
+          "detail": "clinical-sequence-copy centralizado; drawer Acompanhamento; ClinicalSequenceSectionHeader; modais compartilham relation hook/field."
         },
         {
           "id": "seq-task-rename",

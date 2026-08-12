@@ -74,6 +74,7 @@ export function PatientDetail() {
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const [syncJobId, setSyncJobId] = useState<string | null>(null)
   const [syncPortalType, setSyncPortalType] = useState<'unimed' | 'amil' | 'mater_dei' | 'hermes_pardini' | null>(null)
+  const [openThreadId, setOpenThreadId] = useState<string | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
 
   const { section: activeSection, tab: activeTab } = resolvePatientNav(
@@ -302,10 +303,15 @@ export function PatientDetail() {
           <>
             <div className="patient-basic-summary-row">
               <div className="patient-basic-summary-row__clinical">
-                <PatientContextPanel patientId={patient.id} />
+                <PatientContextPanel patientId={patient.id} onOpenThread={setOpenThreadId} />
               </div>
               <div className="patient-basic-summary-row__threads">
-                <HealthThreadsPanel patientId={patient.id} layout="sidebar" />
+                <HealthThreadsPanel
+                  patientId={patient.id}
+                  layout="sidebar"
+                  openThreadId={openThreadId}
+                  onOpenThreadIdChange={setOpenThreadId}
+                />
               </div>
             </div>
             <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">

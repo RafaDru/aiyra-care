@@ -40,8 +40,9 @@ Detalhe completo (status, itens, notas): ver `roadmap.json` ou menu **Roadmap** 
 - `trigger=scheduled` + script/loop local ✅
 
 ### P1 — Sequência do cuidado
-- `relation_types`, `clinical_entity_links`, UI Acompanhamento 🔄
-- Trilhas no context, polish UX 🔜
+- `relation_types`, `clinical_entity_links`, UI Acompanhamento ✅
+- Trilhas no context (`activeThreads`, pendências de acompanhamento) ✅
+- Polish UX sequência + picker tabulado nos modais ✅
 
 ### P1 — Grafo Neo4j
 - Projector links + Hypothesis MVP ✅

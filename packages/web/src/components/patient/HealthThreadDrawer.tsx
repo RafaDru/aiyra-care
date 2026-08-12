@@ -29,6 +29,7 @@ import { ClinicalEntityFlow } from './ClinicalEntityFlow.js'
 import { ClinicalLinkModal } from './ClinicalLinkModal.js'
 import type { ClinicalFlow } from '../../lib/api.types.js'
 import { CLINICAL_SEQUENCE_COPY } from './clinical-sequence-copy.js'
+import { ClinicalSequenceSectionHeader } from './ClinicalSequenceSectionHeader.js'
 
 const { Text, Paragraph } = Typography
 
@@ -130,7 +131,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
     api.healthThreads
       .detail(threadId)
       .then(setDetail)
-      .catch(() => message.error('Erro ao carregar trilha'))
+      .catch(() => message.error(CLINICAL_SEQUENCE_COPY.drawerLoadError))
       .finally(() => setLoading(false))
     loadFlow()
   }, [threadId, loadFlow])
@@ -148,7 +149,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
       setNote('')
       load()
       onUpdated?.()
-      message.success('Nota adicionada')
+      message.success(CLINICAL_SEQUENCE_COPY.noteSaved)
     } catch (e) {
       message.error(e instanceof Error ? e.message : 'Erro')
     } finally {
@@ -164,7 +165,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
       setConvertAllergyOpen(false)
       allergyForm.resetFields()
       onUpdated?.()
-      message.success('Alergia registrada; hipótese convertida')
+      message.success(CLINICAL_SEQUENCE_COPY.allergyConverted)
       onClose()
     } catch (e) {
       message.error(e instanceof Error ? e.message : 'Erro')
@@ -182,7 +183,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
       setConvertDiagnosisOpen(false)
       diagnosisForm.resetFields()
       onUpdated?.()
-      message.success('Diagnóstico registrado; trilha convertida')
+      message.success(CLINICAL_SEQUENCE_COPY.diagnosisConverted)
       onClose()
     } catch (e) {
       message.error(e instanceof Error ? e.message : 'Erro')
@@ -195,7 +196,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
   return (
     <>
       <Drawer
-        title={thread?.title ?? 'Trilha'}
+        title={thread?.title ?? CLINICAL_SEQUENCE_COPY.drawerFallbackTitle}
         open={open}
         onClose={onClose}
         width={480}
@@ -266,11 +267,12 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
 
             {displayTimeline.length > 0 && (
               <>
-                <Text strong style={{ display: 'block', marginBottom: 4 }}>
-                  Sequência (por data do evento)
-                </Text>
+                <ClinicalSequenceSectionHeader
+                  title={CLINICAL_SEQUENCE_COPY.timelineSectionTitle}
+                  icon={false}
+                />
                 <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
-                  Consulta → pedidos → autorizações → resultados, na ordem em que ocorreram.
+                  {CLINICAL_SEQUENCE_COPY.timelineSectionHint}
                 </Text>
                 <Timeline
                   style={{ marginTop: 4 }}
@@ -283,12 +285,12 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
             )}
 
             <div style={{ marginTop: 24 }}>
-              <Text strong>Adicionar nota</Text>
+              <Text strong>{CLINICAL_SEQUENCE_COPY.noteSectionTitle}</Text>
               <Input.TextArea
                 rows={2}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Observação, evolução…"
+                placeholder={CLINICAL_SEQUENCE_COPY.notePlaceholder}
                 style={{ marginTop: 8 }}
               />
               <Button
@@ -303,7 +305,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
             </div>
           </>
         ) : (
-          <Text type="secondary">Trilha não encontrada.</Text>
+          <Text type="secondary">{CLINICAL_SEQUENCE_COPY.drawerNotFound}</Text>
         )}
       </Drawer>
 

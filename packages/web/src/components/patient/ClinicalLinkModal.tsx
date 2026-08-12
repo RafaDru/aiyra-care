@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Alert, Form, Modal, Select, Typography } from 'antd'
 import { api } from '../../lib/api.js'
-import type { ClinicalEntityType, ClinicalFlow, RelationType } from '../../lib/api.types.js'
+import type { ClinicalEntityType, ClinicalFlow } from '../../lib/api.types.js'
 import { ENTITY_TYPE_LABEL } from './health-thread-link-roles.js'
 import {
   entityKey,
-  fallbackRelationTypes,
   pickClinicalRelationCode,
   sortClinicalFlowNodes,
 } from './entity-clinical-link-utils.js'
 import { CLINICAL_SEQUENCE_COPY } from './clinical-sequence-copy.js'
+import { ClinicalRelationTypeField } from './ClinicalRelationTypeField.js'
+import { useClinicalRelationTypes } from './useClinicalRelationTypes.js'
 
 const { Text } = Typography
 
@@ -38,9 +39,6 @@ export function ClinicalLinkModal({
   onCreated,
 }: ClinicalLinkModalProps) {
   const [form] = Form.useForm()
-  const [relationTypes, setRelationTypes] = useState<RelationType[]>([])
-  const [loadingTypes, setLoadingTypes] = useState(false)
-  const [typesError, setTypesError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const entityOptions: EntityOption[] = useMemo(() => {
@@ -56,50 +54,14 @@ export function ClinicalLinkModal({
   const fromKey = Form.useWatch('fromKey', form)
   const toKey = Form.useWatch('toKey', form)
 
-  const resolvePair = useCallback(
-    (fromValue?: string, toValue?: string) => {
-      const from = entityOptions.find((o) => o.value === fromValue)
-      const to = entityOptions.find((o) => o.value === toValue)
-      if (!from || !to || fromValue === toValue) return null
-      return { from, to }
-    },
-    [entityOptions],
-  )
+  const fromEntity = entityOptions.find((o) => o.value === fromKey)
+  const toEntity = entityOptions.find((o) => o.value === toKey)
 
-  const loadRelationTypes = useCallback(
-    async (fromType: ClinicalEntityType, toType: ClinicalEntityType) => {
-      setLoadingTypes(true)
-      setTypesError(null)
-      try {
-        let types = await api.clinicalLinks.relationTypes(fromType, toType)
-        if (types.length === 0) types = fallbackRelationTypes(fromType, toType)
-        setRelationTypes(types)
-        const pick = pickClinicalRelationCode(types, fromType, toType)
-        if (pick) form.setFieldValue('relationCode', pick)
-      } catch {
-        const types = fallbackRelationTypes(fromType, toType)
-        setRelationTypes(types)
-        const pick = pickClinicalRelationCode(types, fromType, toType)
-        if (pick) form.setFieldValue('relationCode', pick)
-        setTypesError('Não foi possível carregar opções do servidor; usando padrões locais.')
-      } finally {
-        setLoadingTypes(false)
-      }
-    },
-    [form],
-  )
-
-  const syncRelationTypes = useCallback(
-    (fromValue?: string, toValue?: string) => {
-      const pair = resolvePair(fromValue, toValue)
-      if (!pair) {
-        setRelationTypes([])
-        form.setFieldValue('relationCode', undefined)
-        return
-      }
-      loadRelationTypes(pair.from.entityType, pair.to.entityType)
-    },
-    [form, loadRelationTypes, resolvePair],
+  const { relationTypes, loadingTypes, typesError, reset } = useClinicalRelationTypes(
+    open,
+    fromEntity?.entityType,
+    toEntity?.entityType,
+    form,
   )
 
   useEffect(() => {
@@ -118,15 +80,9 @@ export function ClinicalLinkModal({
     })
   }, [open, flow, form])
 
-  useEffect(() => {
-    if (!open) return
-    syncRelationTypes(fromKey, toKey)
-  }, [open, fromKey, toKey, syncRelationTypes])
-
   const handleClose = () => {
     form.resetFields()
-    setRelationTypes([])
-    setTypesError(null)
+    reset()
     onClose()
   }
 
@@ -160,11 +116,6 @@ export function ClinicalLinkModal({
     }
   }
 
-  const relationOptions = relationTypes.map((t) => ({
-    value: t.code,
-    label: t.description ? `${t.label} — ${t.description}` : t.label,
-  }))
-
   const pairReady = Boolean(fromKey && toKey && fromKey !== toKey)
   const canSubmit = pairReady && relationTypes.length > 0 && !loadingTypes
 
@@ -185,7 +136,15 @@ export function ClinicalLinkModal({
       {typesError && (
         <Alert type="warning" message={typesError} style={{ marginBottom: 12 }} showIcon />
       )}
-      <Form form={form} layout="vertical">
+      <Form
+        form={form}
+        layout="vertical"
+        onValuesChange={(changed) => {
+          if ('fromKey' in changed || 'toKey' in changed) {
+            form.setFieldValue('relationCode', undefined)
+          }
+        }}
+      >
         <Form.Item
           name="fromKey"
           label={CLINICAL_SEQUENCE_COPY.fromLabel}
@@ -196,7 +155,6 @@ export function ClinicalLinkModal({
             placeholder="Ex.: consulta com a médica"
             showSearch
             optionFilterProp="label"
-            onChange={() => form.setFieldValue('relationCode', undefined)}
           />
         </Form.Item>
         <Form.Item
@@ -209,29 +167,13 @@ export function ClinicalLinkModal({
             placeholder="Ex.: pedido de autorização de exame"
             showSearch
             optionFilterProp="label"
-            onChange={() => form.setFieldValue('relationCode', undefined)}
           />
         </Form.Item>
-        <Form.Item
-          name="relationCode"
-          label={CLINICAL_SEQUENCE_COPY.relationLabel}
-          rules={[{ required: true, message: 'Escolha o que aconteceu entre eles' }]}
-        >
-          <Select
-            placeholder={
-              loadingTypes
-                ? CLINICAL_SEQUENCE_COPY.relationLoading
-                : !pairReady
-                  ? CLINICAL_SEQUENCE_COPY.relationPlaceholder
-                  : relationOptions.length === 0
-                    ? 'Nenhuma opção para esta combinação'
-                    : 'Selecione'
-            }
-            options={relationOptions}
-            loading={loadingTypes}
-            disabled={!pairReady || loadingTypes || relationOptions.length === 0}
-          />
-        </Form.Item>
+        <ClinicalRelationTypeField
+          relationTypes={relationTypes}
+          loading={loadingTypes}
+          ready={pairReady}
+        />
       </Form>
     </Modal>
   )

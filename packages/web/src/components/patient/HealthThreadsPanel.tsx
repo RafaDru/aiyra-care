@@ -33,9 +33,16 @@ const { Text } = Typography
 interface HealthThreadsPanelProps {
   patientId: string
   layout?: 'default' | 'sidebar'
+  openThreadId?: string | null
+  onOpenThreadIdChange?: (threadId: string | null) => void
 }
 
-export function HealthThreadsPanel({ patientId, layout = 'default' }: HealthThreadsPanelProps) {
+export function HealthThreadsPanel({
+  patientId,
+  layout = 'default',
+  openThreadId,
+  onOpenThreadIdChange,
+}: HealthThreadsPanelProps) {
   const isSidebar = layout === 'sidebar'
   const [threads, setThreads] = useState<HealthThread[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,6 +65,15 @@ export function HealthThreadsPanel({ patientId, layout = 'default' }: HealthThre
   useEffect(() => {
     load()
   }, [load])
+
+  useEffect(() => {
+    if (openThreadId != null) setDrawerThreadId(openThreadId)
+  }, [openThreadId])
+
+  const closeDrawer = () => {
+    setDrawerThreadId(null)
+    onOpenThreadIdChange?.(null)
+  }
 
   const handleQuickAdd = async () => {
     if (!quickKind) return
@@ -324,7 +340,7 @@ export function HealthThreadsPanel({ patientId, layout = 'default' }: HealthThre
         threadId={drawerThreadId}
         patientId={patientId}
         open={drawerThreadId != null}
-        onClose={() => setDrawerThreadId(null)}
+        onClose={closeDrawer}
         onUpdated={load}
       />
     </>
