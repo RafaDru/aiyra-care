@@ -260,8 +260,8 @@
         {
           "id": "sched-worker-package",
           "title": "packages/connect-worker (runner)",
-          "status": "planned",
-          "detail": "Consome sync_jobs pending; scrapers migram gradualmente do api."
+          "status": "done",
+          "detail": "Loop CONNECT_WORKER_INTERVAL_MS; run-once; connect-worker.runner na API; CONNECT_WORKER_EXTERNAL desliga loop na API."
         },
         {
           "id": "sched-events",

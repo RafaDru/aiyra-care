@@ -7,7 +7,7 @@
 A integração concentra Playwright, tokens, WAF, jobs longos e credenciais — diferente do CRUD clínico. Hoje isso está no `integration-link.controller` e em ~15 scrapers dentro de `packages/api`, o que:
 
 - mistura HTTP, worker e persistência clínica;
-- dificulta escalar syncs sem worker dedicado (`packages/connect-worker` 🔜);
+- dificulta escalar syncs sem worker dedicado (`packages/connect-worker` ✅ runner apartado);
 - faz cada portal conhecer `Exam`, `Authorization`, etc.
 
 Connect extrai, normaliza e entrega **payload canônico**. O Core importa no domínio clínico e mantém **patient**, memberships e UI.
@@ -146,6 +146,7 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 | Web Integrações | Sincronizar manual + dock SSE; sync-all serial |
 | API | `incremental = silent && !force`; mutex browser; `sync_jobs` em Postgres (SSE + polling) |
 | Fetch | Ver [SYNC_DELTA.md](./SYNC_DELTA.md) |
+| Worker | `packages/connect-worker` — loop `CONNECT_WORKER_INTERVAL_MS`; `CONNECT_WORKER_EXTERNAL=1` na API |
 
 ### Fase 3 — Deploy separado
 

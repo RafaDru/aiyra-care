@@ -109,10 +109,13 @@ const start = async () => {
     await registerRoutes()
 
     const scheduledIntervalMs = Number(process.env.SYNC_SCHEDULED_INTERVAL_MS ?? '0')
-    if (scheduledIntervalMs > 0) {
+    const workerExternal = process.env.CONNECT_WORKER_EXTERNAL === '1'
+    if (scheduledIntervalMs > 0 && !workerExternal) {
       const { pgPool } = await import('./db/postgres.js')
       const { startScheduledSyncLoop } = await import('./infrastructure/sync/scheduled-sync.loop.js')
       startScheduledSyncLoop(pgPool, scheduledIntervalMs, app.log)
+    } else if (scheduledIntervalMs > 0 && workerExternal) {
+      app.log.info('SYNC_SCHEDULED_INTERVAL_MS ignored — CONNECT_WORKER_EXTERNAL=1 (use packages/connect-worker)')
     }
 
     await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' })

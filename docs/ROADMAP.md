@@ -50,7 +50,8 @@ Detalhe completo (status, itens, notas): ver `roadmap.json` ou menu **Roadmap** 
 
 ### P2 — Scheduler e worker
 - `trigger=scheduled` + `run-scheduled-syncs.mjs` + loop API ✅
-- `packages/connect-worker` (runner apartado), eventos `sync.completed` 🔜
+- `packages/connect-worker` (runner apartado) ✅
+- Eventos `sync.completed` 🔜
 
 ### P2 — Contexto + export médico
 - Context API + UI ✅

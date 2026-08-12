@@ -1,43 +1,19 @@
 import type { FastifyBaseLogger } from 'fastify'
-import { IntegrationLinkSyncService } from '../../application/integration-link/integration-link-sync.service.js'
-import { IntegrationLinkPgRepository } from '../persistence/integration-link.pg.repository.js'
+import type { Pool } from 'pg'
+import { startConnectWorkerLoop } from './connect-worker.runner.js'
 
-let intervalHandle: ReturnType<typeof setInterval> | null = null
-let running = false
+let activeWorker: { stop: () => void } | null = null
 
 export function startScheduledSyncLoop(
-  pool: import('pg').Pool,
+  pool: Pool,
   intervalMs: number,
   log?: FastifyBaseLogger,
 ): void {
-  if (intervalHandle) return
-
-  const linkRepo = new IntegrationLinkPgRepository(pool)
-  const syncService = new IntegrationLinkSyncService(pool, linkRepo)
-
-  const tick = async () => {
-    if (running) {
-      log?.warn('Scheduled sync skipped — previous batch still running')
-      return
-    }
-    running = true
-    try {
-      const report = await syncService.runScheduledBatch(log)
-      log?.info({ report }, 'Scheduled sync batch finished')
-    } catch (err) {
-      log?.error(err, 'Scheduled sync batch failed')
-    } finally {
-      running = false
-    }
-  }
-
-  log?.info({ intervalMs }, 'Scheduled sync loop enabled')
-  intervalHandle = setInterval(() => {
-    void tick()
-  }, intervalMs)
+  if (activeWorker) return
+  activeWorker = startConnectWorkerLoop(pool, intervalMs, log)
 }
 
 export function stopScheduledSyncLoop(): void {
-  if (intervalHandle) clearInterval(intervalHandle)
-  intervalHandle = null
+  if (activeWorker) activeWorker.stop()
+  activeWorker = null
 }

@@ -33,7 +33,7 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 - **Sync incremental (silent)**: `sync-delta.helper.ts` — Unimed: 2 meses extrato + detalhe auth desde `lastSync−14d`; Amil: `PostTokens` desde `lastSync−14d` (ou 2 meses), **sem** fetch plano/carências; Mater Dei: exames desde `max(exam_date)−14d`; Hermes Pardini: `GET /pedidos` desde `max(exam_date)−14d` + `/pedidos/{id}/exames`. Manual/`force` = janela full.
 - **Novelty skipped***: import conta dedup (`skippedMedicalRecords`, `skippedExams`, `skippedAuthorizations`, …); UI `formatSyncNovelty` na Carteira.
 - **sync_jobs só PG**: `createJob`/`updateJob`/`getJob` persistem em Postgres; SSE via `publishSyncJobEvent`; heartbeat reconcilia com `findById`.
-- **Sync agendado**: `IntegrationLinkSyncService.runScheduledBatch()` — `trigger=scheduled`, silent + `sessionReady`; script `run-scheduled-syncs.mjs` ou `SYNC_SCHEDULED_INTERVAL_MS` na API.
+- **Sync agendado**: `IntegrationLinkSyncService.runScheduledBatch()` — `trigger=scheduled`, silent + `sessionReady`; `packages/connect-worker` (loop) ou script `run-scheduled-syncs.mjs`; loop embutido na API só se `SYNC_SCHEDULED_INTERVAL_MS` e sem `CONNECT_WORKER_EXTERNAL=1`.
 - **Hardening sync**: probe Unimed no extrato + fail-fast SSO; Amil JWT/API antes de CDP em manual; `browser-sync-mutex` (1 browser pesado por vez); `sync-browser-registry` fecha Playwright em timeout PG; sync-all serial na UI.
 - **Credenciais**: AES-256-GCM via `CRYPTO_KEY` em `.env` (`crypto-helper.ts`)
 - **Auth API**: com `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE`, hook global em `security.plugin.ts`; escopo por paciente via `patient_memberships` + `owner_account_id` (`patient-access.guard.ts`). Ver `docs/SUPABASE.md`.
@@ -65,7 +65,9 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 | Variável | Default | Efeito |
 |----------|---------|--------|
 | `SYNC_MIN_INTERVAL_MS` | `1800000` (30 min) | API: skip sync se último job OK recente (unless `force=1`) |
-| `SYNC_SCHEDULED_INTERVAL_MS` | `0` (off) | API: loop de sync `trigger=scheduled` (silent, sessão válida) |
+| `SYNC_SCHEDULED_INTERVAL_MS` | `0` (off) | API: loop embutido `trigger=scheduled` (use `0` com worker externo) |
+| `CONNECT_WORKER_EXTERNAL` | `0` | `1` desliga loop na API — rode `packages/connect-worker` |
+| `CONNECT_WORKER_INTERVAL_MS` | `SYNC_SCHEDULED_INTERVAL_MS` ou 30 min | Worker: intervalo do loop |
 | `AMIL_SESSION_RENEW_MS` | `86400000` (24h) | Renovar JWT Amil via CDP antes de expirar |
 | `VITE_SILENT_SYNC_STALE_MS` | `21600000` (6h) | Web: auto silent sync ao abrir Carteira **só com `sessionReady`** |
 

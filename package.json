@@ -11,7 +11,9 @@
     "agent:integracao": "cd packages/agents/integracao && python -m uvicorn main:app --reload",
     "agent:farmaceutico": "cd packages/agents/farmaceutico && python -m uvicorn main:app --reload",
     "lint": "echo 'linting'",
-    "test": "echo 'tests'"
+    "test": "echo 'tests'",
+    "connect-worker": "cd packages/connect-worker && npm run start",
+    "connect-worker:once": "cd packages/connect-worker && npm run once"
   },
   "workspaces": [
     "packages/*",
