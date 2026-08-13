@@ -1,7 +1,9 @@
 import type { FastifyReply } from 'fastify'
 import type { PatientService } from '../../../application/patient/patient.service.js'
 import type { PatientContextService } from '../../../application/patient/patient-context.service.js'
+import type { LegalComplianceService } from '../../../application/legal-compliance/legal-compliance.service.js'
 import type { PatientMembershipRepository } from '../../../domain/auth/app-account.repository.js'
+import { isMinorBirthDate } from '../../../domain/patient/patient-age.js'
 import {
   createPatientSchema,
   updatePatientSchema,
@@ -25,11 +27,28 @@ export class PatientController {
     private readonly service: PatientService,
     private readonly memberships?: PatientMembershipRepository,
     private readonly contextService?: PatientContextService,
+    private readonly compliance?: LegalComplianceService,
   ) {}
 
   async create(req: AuthenticatedRequest, reply: FastifyReply) {
     const parsed = createPatientSchema.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+    if (req.accountId && isMinorBirthDate(parsed.data.birthDate) && this.compliance) {
+      try {
+        await this.compliance.assertMinorGuardianConsent(req.accountId)
+      } catch (err) {
+        const code = err && typeof err === 'object' && 'code' in err
+          ? String((err as { code?: string }).code)
+          : undefined
+        if (code === 'MINOR_GUARDIAN_CONSENT_REQUIRED') {
+          return reply.status(403).send({
+            message: err instanceof Error ? err.message : 'Consentimento pendente',
+            code: 'MINOR_GUARDIAN_CONSENT_REQUIRED',
+          })
+        }
+        throw err
+      }
+    }
     const patient = await this.service.create(parsed.data)
     if (req.accountId && this.memberships) {
       await this.memberships.ensureMembership(req.accountId, patient.id, 'guardian')

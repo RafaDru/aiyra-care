@@ -19,6 +19,7 @@ import type { UnimedBhAuthorizationItem } from '../../infrastructure/scraper/uni
 import type { UnimedBhUsageItem } from '../../infrastructure/scraper/unimedbh-extrato.scraper.js'
 import type { UnimedBhVirtualCard } from '../../infrastructure/scraper/unimedbh-cartao-virtual.scraper.js'
 import type { AmilAuthorizationItem } from '../../infrastructure/scraper/amil-sync.scraper.js'
+import type { AmilUsageItem } from '../../infrastructure/scraper/amil-utilizacao.helper.js'
 import type { PortalPlanSnapshot } from '../insurance-plan/insurance-plan.service.js'
 import {
   buildHouseholdCandidates,
@@ -300,6 +301,56 @@ export class CanonicalBatchImporterService {
     return true
   }
 
+  private async importAmilMedicalRecord(
+    record: CanonicalRecord & { type: 'medical_record' },
+    patientId: string,
+    batchId: string,
+    existingRecordKeys: Set<string>,
+    recordKeyFn: (r: MedicalRecord) => string,
+    savedConsultas: MedicalRecord[],
+  ): Promise<boolean> {
+    const item = record.raw as AmilUsageItem | undefined
+    const parsedDate = parseDate(record.date || item?.procedureDate || '')
+    if (!parsedDate) return false
+
+    const draft = MedicalRecord.create({
+      patientId,
+      recordDate: parsedDate,
+      recordType: record.recordType || item?.kind || 'outro',
+      doctorName: item?.doctorName || undefined,
+      clinicName: item?.providerName || record.providerName || 'Amil',
+      description: record.description || item?.procedureDescription || undefined,
+      notes: item?.invoiceNumber ? `Nota: ${item.invoiceNumber}` : undefined,
+      source: 'amil',
+      invoiceNumber: item?.invoiceNumber || undefined,
+    })
+
+    const key = recordKeyFn(draft)
+    if (existingRecordKeys.has(key)) return false
+
+    const saved = await this.recordRepo.save(draft)
+    existingRecordKeys.add(key)
+    savedConsultas.push(saved)
+    const rawId = await this.lineage.recordRaw({
+      batchId,
+      patientId,
+      source: 'amil',
+      recordType: 'clinical_record',
+      externalKey: record.externalKey,
+      rawJson: (record.raw as Record<string, unknown>) ?? {},
+      processed: { table: 'medical_records', id: saved.id },
+    })
+    scheduleImportLineageProjection({
+      patientId,
+      processedTable: 'medical_records',
+      processedId: saved.id,
+      batchId,
+      rawRecordId: rawId,
+      source: 'amil',
+    })
+    return true
+  }
+
   private async importUnimedExam(
     record: CanonicalRecord & { type: 'exam' },
     patientId: string,
@@ -405,6 +456,8 @@ export class CanonicalBatchImporterService {
       history: item.history,
       medicalRecordId: linkedConsulta?.id,
       providerExternalId: item.providerExternalId,
+      doctorPhotoUrl: item.doctorPhotoUrl || existing?.doctorPhotoUrl || undefined,
+      guideDocumentId: item.guideDocumentId || existing?.guideDocumentId || undefined,
     }
 
     let saved: Authorization
@@ -421,6 +474,8 @@ export class CanonicalBatchImporterService {
           createdAt: existing.createdAt,
           items: existing.items,
           medicalRecordId: linkedConsulta?.id ?? existing.medicalRecordId,
+          doctorPhotoUrl: props.doctorPhotoUrl ?? existing.doctorPhotoUrl,
+          guideDocumentId: props.guideDocumentId ?? existing.guideDocumentId,
         }),
       )
       updated = 1
@@ -588,6 +643,37 @@ export class CanonicalBatchImporterService {
         (r) => r.type === 'beneficiary' && (r.beneficiaryKey === marca || r.marcaOtica === marca),
       )
       const existingAuths = await this.authRepo.findAll({ patientId: patient.id })
+      const existingRecords = await this.recordRepo.findAll({ patientId: patient.id })
+      const recordKeyFn = (r: MedicalRecord) => {
+        const date = r.recordDate.toISOString().slice(0, 10)
+        if (r.invoiceNumber) return `inv:${r.invoiceNumber}`
+        return `${date}|${normalizeName(r.doctorName)}|${r.description || ''}`
+      }
+      const existingRecordKeys = new Set(existingRecords.map(recordKeyFn))
+      const savedConsultas: MedicalRecord[] = [...existingRecords]
+
+      const usageRecords = batch.records.filter(
+        (r) => r.type === 'medical_record' && r.beneficiaryKey === marca,
+      )
+      for (const usageRecord of usageRecords) {
+        if (usageRecord.type !== 'medical_record') continue
+        const imported = await this.importAmilMedicalRecord(
+          usageRecord,
+          patient.id,
+          batchId,
+          existingRecordKeys,
+          recordKeyFn,
+          savedConsultas,
+        )
+        if (imported) {
+          outcome.medicalRecords++
+          outcome.imported++
+        } else {
+          outcome.skipped++
+          outcome.skippedMedicalRecords++
+        }
+      }
+
       const authRecords = batch.records.filter(
         (r) => r.type === 'authorization' && r.beneficiaryKey === marca,
       )

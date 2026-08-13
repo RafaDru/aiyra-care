@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Modal, Form, Input, App, Alert, Collapse, Tag, Table, Typography, Spin } from 'antd'
 import { CloudDownloadOutlined, ChromeOutlined, UserOutlined, KeyOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
+import { DismissibleHint } from '../ui/DismissibleHint.js'
 import type { Patient, ScraperResult } from '../../lib/api.types.js'
 
 interface Props {
@@ -150,7 +151,8 @@ export function ImportInsuranceModal({
       okButtonProps={{ disabled: !patientId }}
     >
       {patient && (
-        <Alert
+        <DismissibleHint
+          hintId="import-insurance.patient-target"
           type="info"
           showIcon
           icon={<UserOutlined />}
@@ -180,9 +182,13 @@ export function ImportInsuranceModal({
           <Form.Item name="membership" label="Número de matrícula (opcional)">
             <Input placeholder="Carteirinha / matrícula" />
           </Form.Item>
-          <Alert type="info" showIcon icon={<ChromeOutlined />} message={
-            <>Uma janela do navegador será aberta para login no <strong>{label}</strong>.</>
-          } />
+          <DismissibleHint
+            hintId="import-insurance.browser-login"
+            type="info"
+            showIcon
+            icon={<ChromeOutlined />}
+            message={<>Uma janela do navegador será aberta para login no <strong>{label}</strong>.</>}
+          />
         </Form>
       )}
 

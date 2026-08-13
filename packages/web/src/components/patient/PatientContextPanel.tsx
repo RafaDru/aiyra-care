@@ -10,16 +10,10 @@ import {
   HEALTH_THREAD_STATUS_LABEL,
   healthThreadKindLabel,
 } from './health-thread-kinds.js'
+import { DismissibleHint } from '../ui/DismissibleHint.js'
+import { PatientPendenciesSection } from './PatientPendenciesSection.js'
 
 const { Paragraph, Text } = Typography
-
-const PENDENCY_KIND_LABEL: Record<string, string> = {
-  vaccine_schedule: 'Vacina',
-  document_ocr: 'Documento',
-  authorization_expiring: 'Autorização',
-  health_thread_due: 'Prazo vencido',
-  health_thread_unlinked: 'Acompanhamento',
-}
 
 interface PatientContextPanelProps {
   patientId: string
@@ -79,8 +73,9 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
           <Text strong>Alertas</Text>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
             {context.alerts.map((alert, i) => (
-              <Alert
+              <DismissibleHint
                 key={`${alert.kind}-${i}`}
+                hintId={`context-alert.${patientId}.${alert.kind}.${alert.title}`}
                 type={alert.severity === 'critical' ? 'error' : alert.severity === 'warning' ? 'warning' : 'info'}
                 message={alert.title}
                 description={alert.detail}
@@ -91,29 +86,7 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
         </div>
       )}
 
-      {otherPendencies.length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <Text strong>Pendências</Text>
-          <List
-            size="small"
-            style={{ marginTop: 8 }}
-            dataSource={otherPendencies}
-            renderItem={(item) => (
-              <List.Item>
-                <div>
-                  <Tag>{PENDENCY_KIND_LABEL[item.kind] ?? item.kind}</Tag>
-                  <Text>{item.title}</Text>
-                  {item.detail && (
-                    <div>
-                      <Text type="secondary" style={{ fontSize: 12 }}>{item.detail}</Text>
-                    </div>
-                  )}
-                </div>
-              </List.Item>
-            )}
-          />
-        </div>
-      )}
+      <PatientPendenciesSection pendencies={otherPendencies} />
 
       {context.activeThreads.length > 0 && (
         <div style={{ marginBottom: 16 }}>
@@ -164,6 +137,7 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
 
       <PatientClinicalExportModal
         open={exportOpen}
+        patientId={patientId}
         context={context}
         onClose={() => setExportOpen(false)}
       />

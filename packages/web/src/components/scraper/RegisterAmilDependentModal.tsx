@@ -3,7 +3,8 @@ import { Modal, Form, Input, App, Select } from 'antd'
 import { MaskedDatePicker } from '../ui/MaskedDatePicker.js'
 import dayjs from 'dayjs'
 import { api } from '../../lib/api.js'
-import { isMinorBirthDate } from '../../lib/amil-dependent-utils.js'
+import { isMinorBirthDate } from '../../lib/patient-age.js'
+import { MinorGuardianConsentFormItem } from '../legal/MinorGuardianConsentField.js'
 
 export interface UnmatchedBeneficiary {
   name: string
@@ -54,13 +55,22 @@ export function RegisterAmilDependentModal({
     })
   }, [open, beneficiary, holderPatientId, form])
 
+  const birthDateWatch = Form.useWatch('birthDate', form)
+  const showMinorConsent = birthDateWatch
+    ? isMinorBirthDate(birthDateWatch.toDate?.() ?? birthDateWatch)
+    : isMinorBirthDate(beneficiary?.birthDate)
+
   const handleOk = async () => {
     if (!beneficiary) return
     try {
       const values = await form.validateFields()
+      const birthIso = values.birthDate.toISOString()
+      if (isMinorBirthDate(birthIso) && values.guardianConsent) {
+        await api.compliance.accept({ kinds: ['minor_guardian_consent'] })
+      }
       await api.patients.create({
         name: values.name,
-        birthDate: values.birthDate.toISOString(),
+        birthDate: birthIso,
         cpf: values.cpf?.replace(/\D/g, '') || undefined,
         cns: values.cns?.replace(/\D/g, '') || undefined,
         parentIds: values.parentIds || [],
@@ -107,6 +117,7 @@ export function RegisterAmilDependentModal({
         <Form.Item name="parentIds" label="Pais / responsáveis">
           <Select mode="multiple" disabled options={[{ value: holderPatientId, label: 'Titular do plano' }]} />
         </Form.Item>
+        {showMinorConsent && <MinorGuardianConsentFormItem />}
       </Form>
     </Modal>
   )

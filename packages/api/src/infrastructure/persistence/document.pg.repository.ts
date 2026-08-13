@@ -94,13 +94,17 @@ export class DocumentPgRepository implements DocumentRepository {
       SELECT document_type,
         COUNT(*)::int AS total,
         COUNT(*) FILTER (WHERE ocr_processed)::int AS ocr_ok,
+        COUNT(*) FILTER (WHERE ocr_parse_ok)::int AS parse_ok,
+        COUNT(*) FILTER (WHERE ocr_used_paid)::int AS paid_count,
         AVG(ocr_quality_score) FILTER (WHERE ocr_quality_score IS NOT NULL) AS avg_quality
       FROM documents GROUP BY document_type ORDER BY document_type
     `)
     const summary = await this.pool.query(`
       SELECT COUNT(*)::int AS total,
         COUNT(*) FILTER (WHERE ocr_processed)::int AS ocr_ok,
-        COUNT(*) FILTER (WHERE ocr_used_paid)::int AS paid_count
+        COUNT(*) FILTER (WHERE ocr_parse_ok)::int AS parse_ok,
+        COUNT(*) FILTER (WHERE ocr_used_paid)::int AS paid_count,
+        AVG(ocr_quality_score) FILTER (WHERE ocr_quality_score IS NOT NULL) AS avg_quality
       FROM documents
     `)
     return { summary: summary.rows[0] ?? {}, byType: rows }

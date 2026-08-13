@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Button, Dropdown } from 'antd'
+import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, HistoryOutlined, ApiOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined } from '@ant-design/icons'
+import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -11,6 +11,7 @@ import { LanguageSwitcher } from '../ui/LanguageSwitcher.js'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
 
 const { Sider, Content, Header } = Layout
+const { Text } = Typography
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
@@ -29,6 +30,15 @@ export function AppLayout() {
       onClick: () => signOut(),
     },
   ]
+
+  const mainSelectedKey =
+    location.pathname === '/' || location.pathname.startsWith('/patients')
+      ? '/'
+      : location.pathname.startsWith('/settings')
+        ? '/settings'
+        : ''
+
+  const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
@@ -65,17 +75,34 @@ export function AppLayout() {
         <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)' }}>
           <Menu
             mode="inline"
-            selectedKeys={[location.pathname === '/' ? '/' : location.pathname.startsWith('/patients') ? '/' : location.pathname]}
+            selectedKeys={[mainSelectedKey]}
             items={[
               { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
-              { key: '/integrations', icon: <ApiOutlined />, label: t('nav.integrations') },
-              { key: '/roadmap', icon: <ProjectOutlined />, label: t('nav.roadmap') },
-              { key: '/session', icon: <HistoryOutlined />, label: t('nav.session') },
               { key: '/settings', icon: <SettingOutlined />, label: t('nav.settings') },
             ]}
             onClick={({ key }) => navigate(key)}
-            style={{ borderRight: 0, flex: 1, background: 'transparent' }}
+            style={{ borderRight: 0, background: 'transparent' }}
           />
+
+          <div className="app-sider-dev">
+            {!collapsed && (
+              <Text type="secondary" className="app-sider-dev__label">
+                {t('settings.devTools')}
+              </Text>
+            )}
+            <Menu
+              mode="inline"
+              selectedKeys={devSelectedKeys}
+              items={[
+                { key: '/roadmap', icon: <ProjectOutlined />, label: t('nav.roadmap') },
+              ]}
+              onClick={({ key }) => navigate(key)}
+              style={{ borderRight: 0, background: 'transparent' }}
+            />
+          </div>
+
+          <div style={{ flex: 1 }} />
+
           {configured && user && (
             <div style={{ borderTop: '1px solid var(--sidebar-border)', padding: collapsed ? 8 : 12 }}>
               <Button

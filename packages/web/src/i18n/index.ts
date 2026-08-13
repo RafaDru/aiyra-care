@@ -4,8 +4,11 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 
 import ptBR from './locales/pt-BR.json' with { type: 'json' }
 import en from './locales/en.json' with { type: 'json' }
+import { syncDayjsLocale } from '../lib/dayjs-locale.js'
 
 const saved = localStorage.getItem('openhealth-lang')
+const initialLang = saved || 'pt-BR'
+syncDayjsLocale(initialLang)
 
 void i18n
   .use(LanguageDetector)
@@ -17,8 +20,13 @@ void i18n
     interpolation: { escapeValue: false },
   })
 
+i18n.on('languageChanged', (lang) => {
+  syncDayjsLocale(lang)
+})
+
 export function setLanguage(lang: string) {
   localStorage.setItem('openhealth-lang', lang)
+  syncDayjsLocale(lang)
   void i18n.changeLanguage(lang)
 }
 

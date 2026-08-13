@@ -15,12 +15,14 @@ import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import type { Document_, Exam, HandwritingQuota, SuggestedPatientFields } from '../../../lib/api.types.js'
 import { InterpretHandwritingModal, isHandwritingClinicalType } from '../../../components/scraper/InterpretHandwritingModal.js'
 import { OcrRegionReviewModal } from '../../../components/document/OcrRegionReviewModal.js'
+import { OcrStatsPanel } from '../../../components/document/OcrStatsPanel.js'
 import { DocumentUploadProgressModal } from '../../../components/document/DocumentUploadProgressModal.js'
 import { uploadDocumentWithProgress, type DocumentUploadPhase } from '../../../lib/document-upload.js'
 import { isPoorHandwritingOcr } from '../../../lib/handwriting-ocr.js'
 import { canUseOcrRegionReview, normalizeDisplayText } from '../../../lib/ocr-layout.js'
 import { buildDocumentLinkIndex, groupPortalDocuments } from '../../../lib/document-provenance.js'
 import { SourceTag } from '../../../components/ui/SourceTag.js'
+import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
 
 interface Props {
   patientId: string
@@ -394,7 +396,9 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
 
   return (
     <>
-      <Alert
+      <OcrStatsPanel />
+      <DismissibleHint
+        hintId="documents.portal-imports"
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
@@ -416,7 +420,8 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
           </span>
         }
       />
-      <Alert
+      <DismissibleHint
+        hintId="documents.handwriting-ocr"
         type="warning"
         showIcon
         style={{ marginBottom: 16 }}

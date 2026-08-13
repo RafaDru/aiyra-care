@@ -14,7 +14,7 @@ import {
   Spin,
 } from 'antd'
 import { api } from '../../lib/api.js'
-import type { HealthThreadDetail, HealthThreadTimelineItem } from '../../lib/api.types.js'
+import type { HealthThreadDetail, HealthThreadTimelineItem, ScheduledEvent } from '../../lib/api.types.js'
 import { MaskedDatePicker } from '../ui/MaskedDatePicker.js'
 import type { Dayjs } from 'dayjs'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
@@ -113,6 +113,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
   const [convertAllergyOpen, setConvertAllergyOpen] = useState(false)
   const [convertDiagnosisOpen, setConvertDiagnosisOpen] = useState(false)
   const [clinicalFlow, setClinicalFlow] = useState<ClinicalFlow | null>(null)
+  const [threadEvents, setThreadEvents] = useState<ScheduledEvent[]>([])
   const [linkModalOpen, setLinkModalOpen] = useState(false)
   const [allergyForm] = Form.useForm()
   const [diagnosisForm] = Form.useForm()
@@ -134,7 +135,10 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
       .catch(() => message.error(CLINICAL_SEQUENCE_COPY.drawerLoadError))
       .finally(() => setLoading(false))
     loadFlow()
-  }, [threadId, loadFlow])
+    api.scheduledEvents.list(patientId, { healthThreadId: threadId })
+      .then(setThreadEvents)
+      .catch(() => setThreadEvents([]))
+  }, [threadId, patientId, loadFlow])
 
   useEffect(() => {
     if (open && threadId) load()
@@ -222,6 +226,23 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
               onUpdated={onUpdated}
               onReload={load}
             />
+
+            {threadEvents.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <ClinicalSequenceSectionHeader title="Agenda vinculada" />
+                <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                  {threadEvents.map((ev) => (
+                    <div key={ev.id}>
+                      <Text strong>{ev.title}</Text>
+                      <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                        {new Date(ev.scheduledAt).toLocaleString('pt-BR')}
+                      </Text>
+                      {ev.status !== 'planned' && <Tag style={{ marginLeft: 8 }}>{ev.status}</Tag>}
+                    </div>
+                  ))}
+                </Space>
+              </div>
+            )}
 
             {(thread.kind === 'task' || thread.kind === 'investigation') && (
               <div style={{ marginBottom: 16 }}>

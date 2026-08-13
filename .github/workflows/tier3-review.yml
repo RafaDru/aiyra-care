@@ -1,0 +1,15 @@
+name: Tier 3 review reminder
+
+on:
+  pull_request:
+    types: [opened, labeled, synchronize]
+
+jobs:
+  tier3-reminder:
+    if: contains(github.event.pull_request.labels.*.name, 'tier-3')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remind security review
+        run: |
+          echo "::notice::PR labeled tier-3 — run security review (aiyracare-review-security) before merge."
+          echo "See docs/FEATURE_REVIEW_FRAMEWORK.md and .github/pull_request_template.md"

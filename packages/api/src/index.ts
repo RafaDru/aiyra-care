@@ -16,7 +16,25 @@ config({ path: resolve(__dirname, '../../../.env') })
     if (existsSync(fromRoot)) process.env.GOOGLE_APPLICATION_CREDENTIALS = fromRoot
   }
 }
-const app = Fastify({ logger: true })
+const app = Fastify({
+  logger: true,
+  rewriteUrl: (req) => req.url ?? '/',
+})
+
+app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
+  const url = req.url?.split('?')[0] ?? ''
+  if (url === '/billing/webhook') {
+    (req as { rawBody?: Buffer }).rawBody = body as Buffer
+    done(null, body)
+    return
+  }
+  try {
+    const text = (body as Buffer).toString('utf8')
+    done(null, text ? JSON.parse(text) : {})
+  } catch (err) {
+    done(err as Error, undefined)
+  }
+})
 
 app.get('/health', async () => {
   return { status: 'ok', version: '0.1.0', service: 'aiyracare-api' }
@@ -80,6 +98,12 @@ async function registerRoutes() {
   const { projectContextRoutes } = await import('./infrastructure/http/project/project-context.routes.js')
 
   const { graphRoutes } = await import('./infrastructure/http/graph/graph.routes.js')
+  const { clinicalExportRoutes } = await import('./infrastructure/http/clinical-export/clinical-export.routes.js')
+  const { scheduledEventRoutes } = await import('./infrastructure/http/scheduled-event/scheduled-event.routes.js')
+  const { billingRoutes } = await import('./infrastructure/http/billing/billing.routes.js')
+  const { legalComplianceRoutes } = await import('./infrastructure/http/legal-compliance/legal-compliance.routes.js')
+  const { googleCalendarRoutes } = await import('./infrastructure/http/calendar/google-calendar.routes.js')
+  const { microsoftCalendarRoutes } = await import('./infrastructure/http/calendar/microsoft-calendar.routes.js')
 
   await app.register(patientRoutes)
   await app.register(growthRecordRoutes)
@@ -98,10 +122,18 @@ async function registerRoutes() {
   await app.register(insurancePlanRoutes)
   await app.register(cadernetaImportRoutes)
   await app.register(authRoutes)
+  const { accountProfileRoutes } = await import('./infrastructure/http/account-profile/account-profile.routes.js')
+  await app.register(accountProfileRoutes)
   await app.register(carePlaceRoutes)
   await app.register(healthThreadRoutes)
   await app.register(clinicalLinkRoutes)
   await app.register(graphRoutes)
+  await app.register(clinicalExportRoutes)
+  await app.register(scheduledEventRoutes)
+  await app.register(billingRoutes)
+  await app.register(legalComplianceRoutes)
+  await app.register(googleCalendarRoutes)
+  await app.register(microsoftCalendarRoutes)
   await app.register(roadmapRoutes)
   await app.register(projectContextRoutes)
 }

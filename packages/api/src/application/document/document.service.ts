@@ -11,6 +11,7 @@ import {
   type SuggestedPatientFields,
 } from '../../domain/document/identity-document.parser.js'
 import { evaluateIdentityParse } from './ocr-quality.js'
+import { isOcrApplicable, OCR_EXEMPT_PROVIDER } from '../../domain/document/ocr-policy.js'
 import type { PatientRepository } from '../../domain/patient/patient.repository.js'
 import { Patient } from '../../domain/patient/patient.entity.js'
 
@@ -53,6 +54,12 @@ export class DocumentService {
 
     const { path, sizeBytes } = await this.storage.upload(patientId, filename, buffer, mimeType)
 
+    const ocrCandidate = {
+      documentType,
+      originalFilename: filename,
+      mimeType,
+    }
+
     let extractedText: string | undefined
     let ocrProcessed = false
     let ocrProvider: string | null = null
@@ -64,7 +71,10 @@ export class DocumentService {
     let ocrLayout: OcrLayout | null = null
     let suggestedPatient: SuggestedPatientFields | undefined
 
-    try {
+    if (!isOcrApplicable(ocrCandidate)) {
+      ocrProcessed = true
+      ocrProvider = OCR_EXEMPT_PROVIDER
+    } else try {
       const ocr = this.ocrFactory(documentType)
       const result = await ocr.extractText(buffer, mimeType)
       extractedText = normalizeOcrText(result.text)

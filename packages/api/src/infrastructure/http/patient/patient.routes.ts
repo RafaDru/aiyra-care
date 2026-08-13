@@ -17,11 +17,13 @@ import { InsurancePlanPgRepository } from '../../persistence/insurance-plan.pg.r
 import { PlanMembershipPgRepository } from '../../persistence/plan-membership.pg.repository.js'
 import { HealthThreadPgRepository } from '../../persistence/health-thread.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
+import { getLegalComplianceService } from '../legal-compliance/legal-compliance.routes.js'
 
 export async function patientRoutes(app: FastifyInstance) {
   const repo = new PatientPgRepository(pgPool)
   const service = new PatientService(repo)
   const memberships = new PatientMembershipPgRepository(pgPool)
+  const compliance = getLegalComplianceService()
   const contextService = new PatientContextService(
     pgPool,
     repo,
@@ -39,7 +41,7 @@ export async function patientRoutes(app: FastifyInstance) {
     ),
     new HealthThreadPgRepository(pgPool),
   )
-  const controller = new PatientController(service, memberships, contextService)
+  const controller = new PatientController(service, memberships, contextService, compliance)
 
   app.post('/patients', controller.create.bind(controller))
   app.get('/patients', controller.findAll.bind(controller))

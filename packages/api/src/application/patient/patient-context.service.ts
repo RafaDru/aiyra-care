@@ -13,6 +13,7 @@ import type { HealthThreadRepository } from '../../domain/health-thread/health-t
 import { NotFoundError } from '../../domain/errors.js'
 import { ageInYears } from '../../domain/patient/age-rules.js'
 import { enrichIntegrationLinksWithSyncAuthority } from '../integration-link/integration-link-sync-authority.js'
+import { isOcrPending } from '../../domain/document/ocr-policy.js'
 import type {
   PatientContext,
   PatientContextAlert,
@@ -22,6 +23,9 @@ import type {
   PatientContextTimelineKind,
   PatientTimelineFilterOptions,
   PatientTimelineResponse,
+  PatientClinicalExport,
+  PatientClinicalExportMode,
+  PatientClinicalExportSections,
 } from './patient-context.types.js'
 import {
   buildThreadLinkCountMap,
@@ -167,7 +171,7 @@ export class PatientContextService {
     const patientJson = patient.toJSON()
 
     const overdueSchedule = scheduleRows.filter((r) => isScheduleItemOverdue(r, birthDate, now))
-    const docsPendingOcr = docList.filter((d) => !d.ocrProcessed)
+    const docsPendingOcr = docList.filter((d) => isOcrPending(d.toJSON()))
     const expiringAuths = authList.filter((a) => {
       if (!a.validityDate) return false
       const daysLeft = (a.validityDate.getTime() - now) / MS_PER_DAY
@@ -214,7 +218,7 @@ export class PatientContextService {
     }
 
     const workflowThreads = activeThreadList.filter(
-      (t) => t.kind === 'investigation' || t.kind === 'task',
+      (t) => t.kind === 'investigation' || t.kind === 'acompanhamento' || (t.kind as string) === 'task',
     )
     if (workflowThreads.length > 0) {
       alerts.push({
@@ -332,6 +336,91 @@ export class PatientContextService {
       activeThreads,
       textSummary,
     }
+  }
+
+  async buildClinicalExport(
+    patientId: string,
+    mode: PatientClinicalExportMode = 'summary',
+  ): Promise<PatientClinicalExport> {
+    const timelineMonths = mode === 'full' ? 120 : 12
+    const context = await this.build(patientId, { timelineMonths })
+    if (mode === 'summary') {
+      return { mode, context }
+    }
+
+    const [
+      allergyList,
+      medications,
+      vaccines,
+      documents,
+      authorizations,
+      records,
+      exams,
+      diagnosisRows,
+    ] = await Promise.all([
+      this.allergies.findAll({ patientId }),
+      this.medications.findAll({ patientId }),
+      this.vaccines.findAll({ patientId }),
+      this.documents.findAll({ patientId }),
+      this.authorizations.findAll({ patientId }),
+      this.medicalRecords.findAll({ patientId }),
+      this.exams.findAll({ patientId }),
+      this.pool.query<{
+        code: string | null
+        description: string
+        diagnosed_at: Date | null
+      }>(
+        `SELECT code, description, diagnosed_at FROM diagnoses
+         WHERE patient_id = $1 ORDER BY diagnosed_at DESC NULLS LAST, created_at DESC`,
+        [patientId],
+      ),
+    ])
+
+    const fullSections: PatientClinicalExportSections = {
+      allergies: allergyList.map((a) => ({
+        allergen: a.allergen,
+        severity: a.severity,
+        reaction: a.reaction,
+      })),
+      medications: medications.map((m) => ({
+        name: m.genericName,
+        dose: m.dosage,
+        frequency: m.frequency,
+      })),
+      vaccines: vaccines.map((v) => ({
+        name: v.vaccineName,
+        administeredAt: iso(v.applicationDate),
+        doseLabel: v.doseNumber != null ? `Dose ${v.doseNumber}` : null,
+      })),
+      diagnoses: diagnosisRows.rows.map((d) => ({
+        code: d.code,
+        description: d.description,
+        diagnosedAt: iso(d.diagnosed_at),
+      })),
+      documents: documents.map((d) => ({
+        filename: d.originalFilename,
+        type: d.documentType,
+        uploadedAt: d.uploadedAt.toISOString(),
+        ocrProcessed: d.ocrProcessed,
+      })),
+      authorizations: authorizations.map((a) => ({
+        title: a.procedureDescription ?? a.guideNumber ?? 'Autorização',
+        date: iso(a.authorizationDate),
+        status: a.status,
+      })),
+      medicalRecords: records.map((r) => ({
+        date: r.recordDate.toISOString(),
+        description: r.description,
+        doctor: r.doctorName,
+      })),
+      exams: exams.map((e) => ({
+        name: e.examType,
+        date: e.examDate.toISOString(),
+        laboratory: e.laboratory,
+      })),
+    }
+
+    return { mode, context, fullSections }
   }
 
   private async countThreadLinks(threadIds: string[]): Promise<Array<{ thread_id: string; count: number }>> {

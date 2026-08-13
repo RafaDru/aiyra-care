@@ -65,6 +65,10 @@ Variáveis `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` no `.env` ser
    - Tenant URL: vazio ou `https://login.microsoftonline.com/common` (trabalho + pessoal)
 3. Frontend: `signInWithOAuth({ provider: 'azure', options: { scopes: 'email' } })`
 
+**Agenda Outlook (sync calendário):** no mesmo app Azure, adicione também o redirect da **API** (não é o do Supabase):
+
+`http://localhost:3010/calendar/microsoft/oauth/callback` (local; Azure **não** aceita `http://127.0.0.1` na plataforma Web) — ver `MICROSOFT_CALENDAR_*` no `.env.example`.
+
 ### Erro: provider Azure não habilitado
 
 Igual ao Google — ativar e salvar credenciais no dashboard cloud (não só no `.env` local).

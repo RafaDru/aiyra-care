@@ -161,7 +161,7 @@ export class HealthThreadWorkflowService {
 
     const thread = await this.threads.create({
       patientId: input.patientId,
-      kind: 'task',
+      kind: 'acompanhamento',
       title: input.title.trim(),
       summary: input.summary?.trim() ?? undefined,
       status: 'active',

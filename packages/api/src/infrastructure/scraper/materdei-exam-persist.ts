@@ -2,6 +2,7 @@ import type { Pool } from 'pg'
 import type { APIRequestContext } from 'playwright'
 import { Exam } from '../../domain/exam/exam.entity.js'
 import { Document } from '../../domain/document/document.entity.js'
+import { OCR_EXEMPT_PROVIDER } from '../../domain/document/ocr-policy.js'
 import { ExamPgRepository } from '../persistence/exam.pg.repository.js'
 import { DocumentPgRepository } from '../persistence/document.pg.repository.js'
 import { GcsFileStorage } from '../storage/gcs.storage.js'
@@ -121,19 +122,22 @@ export async function persistMaterDeiExamFiles(args: {
       const slug = item.examType.replace(/[^\w.-]+/g, '_').slice(0, 30)
       for (let i = 0; i < series.images.length; i++) {
         const img = series.images[i]
+        const storedName = `materdei-${slug}-${img.filename}`
         const { path, sizeBytes } = await storage.upload(
           targetPatientId,
-          `materdei-${slug}-${img.filename}`,
+          storedName,
           img.buffer,
           img.mimeType,
         )
         const doc = await docRepo.save(Document.create({
           patientId: targetPatientId,
           documentType: 'exam',
-          originalFilename: img.filename,
+          originalFilename: storedName,
           storagePath: path,
           fileSizeBytes: sizeBytes,
           mimeType: img.mimeType,
+          ocrProcessed: true,
+          ocrProvider: OCR_EXEMPT_PROVIDER,
         }))
         imageDocumentIds.push(doc.id)
       }

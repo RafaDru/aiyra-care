@@ -4,6 +4,7 @@ export type PatientSection = 'overview' | 'clinical' | 'plan' | 'files'
 export type PatientTabKey =
   | 'basic'
   | 'timeline'
+  | 'agenda'
   | 'personal-documents'
   | 'wallet'
   | 'coverage'
@@ -21,7 +22,7 @@ export type PatientTabKey =
 export const PATIENT_SECTIONS: PatientSection[] = ['overview', 'clinical', 'plan', 'files']
 
 export const SECTION_TABS: Record<PatientSection, PatientTabKey[]> = {
-  overview: ['basic', 'timeline', 'personal-documents'],
+  overview: ['basic', 'agenda', 'personal-documents'],
   clinical: ['growth', 'vaccines', 'medications', 'allergies', 'exams', 'records', 'authorizations', 'diagnoses'],
   plan: ['wallet', 'coverage', 'integrations'],
   files: ['documents'],
@@ -58,7 +59,14 @@ export function resolvePatientNav(
   sectionParam: string | null,
   tabParam: string | null,
 ): { section: PatientSection; tab: PatientTabKey } {
-  const tab: PatientTabKey = isPatientTabKey(tabParam) ? tabParam : 'basic'
+  let tab: PatientTabKey
+  if (isPatientTabKey(tabParam)) {
+    tab = tabParam
+  } else if (tabParam === 'timeline') {
+    tab = 'agenda'
+  } else {
+    tab = 'basic'
+  }
   let section: PatientSection
 
   if (isPatientSection(sectionParam)) {

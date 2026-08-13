@@ -37,6 +37,18 @@ export const api = {
       request<import('./api.types.js').PatientContext>(
         `/patients/${id}/context${timelineMonths ? `?timelineMonths=${timelineMonths}` : ''}`,
       ),
+    clinicalExport: (id: string, mode: 'summary' | 'full' = 'summary') =>
+      request<import('./api.types.js').PatientClinicalExport>(
+        `/patients/${id}/clinical-export?mode=${mode}`,
+      ),
+    createClinicalExportShare: (
+      id: string,
+      body: { mode?: 'summary' | 'full'; ttlHours?: number },
+    ) =>
+      request<{ token: string; expiresAt: string; shareUrl: string }>(
+        `/patients/${id}/clinical-export/shares`,
+        { method: 'POST', body: JSON.stringify(body) },
+      ),
     timeline: (id: string, params?: import('./api.types.js').PatientTimelineQuery) => {
       const qs = new URLSearchParams()
       if (params?.timelineMonths) qs.set('timelineMonths', String(params.timelineMonths))
@@ -77,6 +89,104 @@ export const api = {
     list: (patientId?: string) => request<import('./api.types.js').GrowthRecord[]>(`/growth-records${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').GrowthRecord>('/growth-records', { method: 'POST', body: JSON.stringify(data) }),
   },
+  scheduledEvents: {
+    list: (patientId?: string, params?: { status?: string; healthThreadId?: string }) => {
+      const qs = new URLSearchParams()
+      if (patientId) qs.set('patientId', patientId)
+      if (params?.status) qs.set('status', params.status)
+      if (params?.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      const query = qs.toString()
+      return request<import('./api.types.js').ScheduledEvent[]>(`/scheduled-events${query ? `?${query}` : ''}`)
+    },
+    create: (data: object) =>
+      request<import('./api.types.js').ScheduledEvent>('/scheduled-events', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: object) =>
+      request<import('./api.types.js').ScheduledEvent>(`/scheduled-events/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/scheduled-events/${id}`, { method: 'DELETE' }),
+    importIcs: (body: { patientId: string; ics: string; sourceLabel?: string }) =>
+      request<import('./api.types.js').IcsImportResult>('/scheduled-events/import/ics', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    exportIcsUrl: (patientId: string) =>
+      `${import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'http://127.0.0.1:3010')}/scheduled-events/export/ics?patientId=${patientId}`,
+  },
+  calendar: {
+    googleStatus: (patientId: string) =>
+      request<import('./api.types.js').GoogleCalendarStatus>(
+        `/calendar/google/status?patientId=${encodeURIComponent(patientId)}`,
+      ),
+    googleOAuthStart: (patientId: string, returnTo?: string) => {
+      const qs = new URLSearchParams({ patientId })
+      if (returnTo) qs.set('returnTo', returnTo)
+      return request<{ url: string }>(`/calendar/google/oauth/start?${qs.toString()}`)
+    },
+    googleSync: (patientId: string) =>
+      request<import('./api.types.js').GoogleCalendarSyncResult>('/calendar/google/sync', {
+        method: 'POST',
+        body: JSON.stringify({ patientId }),
+      }),
+    googleDisconnect: (patientId: string) =>
+      request<{ ok: boolean }>('/calendar/google/disconnect', {
+        method: 'POST',
+        body: JSON.stringify({ patientId }),
+      }),
+    microsoftStatus: (patientId: string) =>
+      request<import('./api.types.js').GoogleCalendarStatus>(
+        `/calendar/microsoft/status?patientId=${encodeURIComponent(patientId)}`,
+      ),
+    microsoftOAuthStart: (patientId: string, returnTo?: string) => {
+      const qs = new URLSearchParams({ patientId })
+      if (returnTo) qs.set('returnTo', returnTo)
+      return request<{ url: string }>(`/calendar/microsoft/oauth/start?${qs.toString()}`)
+    },
+    microsoftSync: (patientId: string) =>
+      request<import('./api.types.js').GoogleCalendarSyncResult>('/calendar/microsoft/sync', {
+        method: 'POST',
+        body: JSON.stringify({ patientId }),
+      }),
+    microsoftDisconnect: (patientId: string) =>
+      request<{ ok: boolean }>('/calendar/microsoft/disconnect', {
+        method: 'POST',
+        body: JSON.stringify({ patientId }),
+      }),
+  },
+  billing: {
+    offers: () => request<import('./api.types.js').BillingOffers>('/billing/offers'),
+    me: () => request<import('./api.types.js').BillingMe>('/billing/me'),
+    checkout: (packageId: 'pack_10' | 'pack_30') =>
+      request<{ sessionId: string; url: string | null }>('/billing/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ packageId }),
+      }),
+    checkoutSubscription: () =>
+      request<{ sessionId: string; url: string | null }>('/billing/checkout-subscription', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    customerPortal: () =>
+      request<{ url: string }>('/billing/customer-portal', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    downloadContabilizeiExport: async (month?: string) => {
+      const { ensureAccessToken } = await import('./supabase.js')
+      const token = await ensureAccessToken()
+      const q = month ? `?month=${encodeURIComponent(month)}` : ''
+      const res = await fetch(`${BASE_URL}/billing/export/contabilizei${q}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { message?: string }
+        throw new Error(body.message || `HTTP ${res.status}`)
+      }
+      const blob = await res.blob()
+      const disposition = res.headers.get('Content-Disposition') ?? ''
+      const match = disposition.match(/filename="([^"]+)"/)
+      const filename = match?.[1] ?? `billing-export-${month ?? 'current'}.csv`
+      return { blob, filename }
+    },
+  },
   vaccines: {
     list: (patientId?: string) => request<import('./api.types.js').Vaccine[]>(`/vaccines${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').Vaccine>('/vaccines', { method: 'POST', body: JSON.stringify(data) }),
@@ -106,7 +216,7 @@ export const api = {
     create: (data: object) => request<import('./api.types.js').Document_>('/documents', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: object) => request<import('./api.types.js').Document_>(`/documents/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: string) => request<void>(`/documents/${id}`, { method: 'DELETE' }),
-    ocrStats: () => request<{ summary: Record<string, unknown>; byType: unknown[] }>('/documents/ocr-stats'),
+    ocrStats: () => request<import('./api.types.js').OcrStats>('/documents/ocr-stats'),
     upload: (patientId: string, documentType: string, file: File) => {
       const form = new FormData()
       form.append('patientId', patientId)
@@ -325,8 +435,33 @@ export const api = {
         '/auth/complete-profile',
         { method: 'POST', body: JSON.stringify(data) },
       ),
+    deleteAccount: (body: { confirmPhrase: 'EXCLUIR' }) =>
+      request<{ ok: boolean; deletedPatientIds: string[]; removedMemberships: number }>(
+        '/auth/account',
+        { method: 'DELETE', body: JSON.stringify(body) },
+      ),
+    getProfile: () => request<import('./api.types.js').AccountProfileView>('/auth/profile'),
+    updateProfile: (data: import('./api.types.js').UpdateAccountProfileInput) =>
+      request<import('./api.types.js').AccountProfileView>('/auth/profile', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
   },
   project: {
     context: () => request<import('./api.types.js').ProjectContext>('/project/context'),
+  },
+  compliance: {
+    listDocuments: () =>
+      request<{ documents: import('./api.types.js').LegalDocumentView[] }>('/compliance/documents'),
+    getCurrent: (kind: import('./api.types.js').LegalDocumentKind) =>
+      request<import('./api.types.js').LegalDocumentWithContent>(`/compliance/documents/${kind}/current`),
+    status: () => request<import('./api.types.js').ComplianceStatus>('/compliance/status'),
+    contact: () => request<import('./api.types.js').ComplianceContactInfo>('/compliance/contact'),
+    goLiveStatus: () => request<import('./api.types.js').GoLiveStatus>('/compliance/go-live-status'),
+    accept: (body?: { kinds?: import('./api.types.js').LegalDocumentKind[]; documentIds?: string[] }) =>
+      request<import('./api.types.js').ComplianceStatus>('/compliance/accept', {
+        method: 'POST',
+        body: JSON.stringify(body ?? {}),
+      }),
   },
 }

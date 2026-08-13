@@ -9,12 +9,22 @@ export class HandwritingCreditsPgRepository implements HandwritingCreditsReposit
   constructor(private readonly pool: Pool) {}
 
   async getOrCreateAccount(scopeId: string, defaultMonthlyFree: number): Promise<HandwritingCreditAccount> {
+    let allowance = defaultMonthlyFree
+    if (/^[0-9a-f-]{36}$/i.test(scopeId)) {
+      const ent = await this.pool.query(
+        `SELECT monthly_free_allowance FROM account_entitlements WHERE account_id = $1::uuid`,
+        [scopeId],
+      )
+      if (ent.rows.length) {
+        allowance = Number(ent.rows[0].monthly_free_allowance)
+      }
+    }
     const { rows } = await this.pool.query(
       `INSERT INTO handwriting_credit_accounts (scope_id, monthly_free_allowance)
        VALUES ($1, $2)
        ON CONFLICT (scope_id) DO UPDATE SET scope_id = EXCLUDED.scope_id
        RETURNING scope_id, package_credits, monthly_free_allowance, monthly_free_used, monthly_period`,
-      [scopeId, defaultMonthlyFree],
+      [scopeId, allowance],
     )
     const row = rows[0] as Record<string, unknown>
     const account: HandwritingCreditAccount = {

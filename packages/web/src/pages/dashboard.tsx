@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, Select, App, Alert } from 'antd'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
+import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
+import { isMinorBirthDate } from '../lib/patient-age.js'
 import { PlusOutlined, ManOutlined, WomanOutlined, UserSwitchOutlined, FireOutlined, SmileOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +28,10 @@ export function Dashboard() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [form] = Form.useForm()
+  const birthDateWatch = Form.useWatch('birthDate', form)
+  const showMinorConsent = birthDateWatch
+    ? isMinorBirthDate(birthDateWatch.toDate?.() ?? birthDateWatch)
+    : false
   const navigate = useNavigate()
 
   const load = () => {
@@ -45,9 +51,13 @@ export function Dashboard() {
   const handleCreate = async () => {
     try {
       const values = await form.validateFields()
+      const birthDate = values.birthDate.toDate()
+      if (isMinorBirthDate(birthDate)) {
+        await api.compliance.accept({ kinds: ['minor_guardian_consent'] })
+      }
       await api.patients.create({
         name: values.name,
-        birthDate: values.birthDate.toISOString(),
+        birthDate: birthDate.toISOString(),
         gender: values.gender || undefined,
         weightKg: values.weightKg ? Number(values.weightKg) : undefined,
         heightCm: values.heightCm ? Number(values.heightCm) : undefined,
@@ -140,6 +150,7 @@ export function Dashboard() {
             <Input placeholder="000.000.000-00" maxLength={14} />
           </Form.Item>
           <Form.Item name="cns" label="CNS"><Input placeholder="Nº do Cartão SUS" maxLength={15} /></Form.Item>
+          {showMinorConsent && <MinorGuardianConsentFormItem />}
         </Form>
       </Modal>
     </div>

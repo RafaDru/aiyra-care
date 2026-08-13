@@ -8,7 +8,7 @@ const COLUMNS = `id, patient_id, procedure_code, procedure_description, doctor_n
   authorization_date, validity_date, status, guide_number, quantity, notes, source,
   solicitation_number, guide_password, specialty, solicitation_url, solic_id, solic_id_encrypted,
   authorization_type, classification, local_address, local_phone, locations, history,
-  medical_record_id, provider_external_id, created_at, updated_at`
+  medical_record_id, provider_external_id, doctor_photo_url, guide_document_id, created_at, updated_at`
 
 function rowToEntity(row: Record<string, unknown>, items: AuthorizationData['items'] = []): Authorization {
   return Authorization.restore({
@@ -41,6 +41,8 @@ function rowToEntity(row: Record<string, unknown>, items: AuthorizationData['ite
     items,
     medicalRecordId: (row.medical_record_id as string | null) ?? null,
     providerExternalId: (row.provider_external_id as string | null) ?? null,
+    doctorPhotoUrl: (row.doctor_photo_url as string | null) ?? null,
+    guideDocumentId: (row.guide_document_id as string | null) ?? null,
     createdAt: row.created_at as Date,
     updatedAt: (row.updated_at as Date) ?? (row.created_at as Date),
   })
@@ -84,9 +86,9 @@ export class AuthorizationPgRepository implements AuthorizationRepository {
          authorization_date, validity_date, status, guide_number, quantity, notes, source,
          solicitation_number, guide_password, specialty, solicitation_url, solic_id, solic_id_encrypted,
          authorization_type, classification, local_address, local_phone, locations, history,
-         medical_record_id, provider_external_id
+         medical_record_id, provider_external_id, doctor_photo_url, guide_document_id
        ) VALUES (
-         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30
        ) RETURNING ${COLUMNS}`,
       [
         auth.id, auth.patientId, auth.procedureCode, auth.procedureDescription, auth.doctorName, auth.doctorCouncil, auth.clinicName,
@@ -95,7 +97,7 @@ export class AuthorizationPgRepository implements AuthorizationRepository {
         auth.authorizationType, auth.classification, auth.localAddress, auth.localPhone,
         auth.locations ? JSON.stringify(auth.locations) : null,
         auth.history ? JSON.stringify(auth.history) : null,
-        auth.medicalRecordId, auth.providerExternalId,
+        auth.medicalRecordId, auth.providerExternalId, auth.doctorPhotoUrl, auth.guideDocumentId,
       ],
     )
     return rowToEntity(rows[0], auth.items)
@@ -109,8 +111,8 @@ export class AuthorizationPgRepository implements AuthorizationRepository {
          solicitation_number=$12, guide_password=$13, specialty=$14, solicitation_url=$15,
          solic_id=$16, solic_id_encrypted=$17, authorization_type=$18, classification=$19,
          local_address=$20, local_phone=$21, locations=$22, history=$23,
-         medical_record_id=$24, provider_external_id=$25, updated_at=NOW()
-       WHERE id=$26 RETURNING ${COLUMNS}`,
+         medical_record_id=$24, provider_external_id=$25, doctor_photo_url=$26, guide_document_id=$27, updated_at=NOW()
+       WHERE id=$28 RETURNING ${COLUMNS}`,
       [
         auth.procedureCode, auth.procedureDescription, auth.doctorName, auth.doctorCouncil, auth.clinicName,
         auth.authorizationDate, auth.validityDate, auth.status, auth.guideNumber, auth.quantity, auth.notes,
@@ -119,7 +121,7 @@ export class AuthorizationPgRepository implements AuthorizationRepository {
         auth.localAddress, auth.localPhone,
         auth.locations ? JSON.stringify(auth.locations) : null,
         auth.history ? JSON.stringify(auth.history) : null,
-        auth.medicalRecordId, auth.providerExternalId,
+        auth.medicalRecordId, auth.providerExternalId, auth.doctorPhotoUrl, auth.guideDocumentId,
         auth.id,
       ],
     )

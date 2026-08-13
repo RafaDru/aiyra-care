@@ -76,6 +76,25 @@ export interface PatientContextPlanMembership {
   status: string
 }
 
+export type PatientClinicalExportMode = 'summary' | 'full'
+
+export interface PatientClinicalExportSections {
+  allergies: Array<{ allergen: string; severity: string | null; reaction: string | null }>
+  medications: Array<{ name: string; dose: string | null; frequency: string | null }>
+  vaccines: Array<{ name: string; administeredAt: string | null; doseLabel: string | null }>
+  diagnoses: Array<{ code: string | null; description: string; diagnosedAt: string | null }>
+  documents: Array<{ filename: string; type: string; uploadedAt: string; ocrProcessed: boolean }>
+  authorizations: Array<{ title: string; date: string | null; status: string }>
+  medicalRecords: Array<{ date: string; description: string | null; doctor: string | null }>
+  exams: Array<{ name: string; date: string; laboratory: string | null }>
+}
+
+export interface PatientClinicalExport {
+  mode: PatientClinicalExportMode
+  context: PatientContext
+  fullSections?: PatientClinicalExportSections
+}
+
 export interface PatientContext {
   patientId: string
   generatedAt: string

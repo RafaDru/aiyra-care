@@ -70,6 +70,13 @@ export function defaultMonthlyFreeAllowance(): number {
   return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 10
 }
 
+export function estimatedInterpretationCostCents(tier: 'free' | 'premium', provider: string): number {
+  if (tier === 'free') return 0
+  if (provider.includes('openai')) return 8
+  if (provider.includes('gemini') && provider.includes('pro')) return 5
+  return 3
+}
+
 export function handwritingAdminKey(): string | undefined {
   return process.env.HANDWRITING_ADMIN_KEY?.trim() || undefined
 }

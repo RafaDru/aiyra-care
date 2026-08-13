@@ -14,6 +14,7 @@ import { isIdentityDocumentType } from '../../../domain/document/identity-docume
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess, filterByPatientAccess } from '../auth/patient-access.guard.js'
 import { guardPatientEntity } from '../auth/patient-entity.guard.js'
+import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
 
 export class DocumentController {
   constructor(
@@ -174,7 +175,7 @@ export class DocumentController {
     const doc = await this.guardDocument(req, reply, parsed.data.id)
     if (!doc) return
     try {
-      const scopeId = process.env.HANDWRITING_CREDITS_SCOPE?.trim() || 'default'
+    const scopeId = resolveHandwritingScopeId(req)
       const result = await this.interpretation.interpretHandwritingDocument(parsed.data.id, scopeId)
       return reply.send(result)
     } catch (err) {
@@ -199,7 +200,7 @@ export class DocumentController {
     const doc = await this.guardDocument(req, reply, parsed.data.id)
     if (!doc) return
     try {
-      const scopeId = process.env.HANDWRITING_CREDITS_SCOPE?.trim() || 'default'
+      const scopeId = resolveHandwritingScopeId(req)
       const result = await this.interpretation.interpretVaccineCardDocument(parsed.data.id, scopeId)
       return reply.send(result)
     } catch (err) {

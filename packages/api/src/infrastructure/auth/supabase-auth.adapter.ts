@@ -1,7 +1,8 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { AuthProviderPort, AuthUser } from '../../domain/auth/auth-provider.port.js'
+import type { AuthIdentityDeletionPort } from '../../domain/auth/auth-identity-deletion.port.js'
 
-export class SupabaseAuthAdapter implements AuthProviderPort {
+export class SupabaseAuthAdapter implements AuthProviderPort, AuthIdentityDeletionPort {
   private readonly client: SupabaseClient
 
   constructor(url: string, serviceRoleKey: string) {
@@ -26,5 +27,10 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
       displayName,
       avatarUrl,
     }
+  }
+
+  async deleteUser(authSubject: string): Promise<void> {
+    const { error } = await this.client.auth.admin.deleteUser(authSubject)
+    if (error) throw error
   }
 }

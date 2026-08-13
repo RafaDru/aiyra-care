@@ -1,11 +1,15 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import type { AuthService } from '../../../application/auth/auth.service.js'
+import type { AccountDeletionService } from '../../../application/account/account-deletion.service.js'
 import type { AuthenticatedRequest } from './auth.middleware.js'
-import { completeProfileSchema } from './auth.schema.js'
+import { completeProfileSchema, deleteAccountSchema } from './auth.schema.js'
 import { ConflictError } from '../../../domain/errors.js'
 
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly accountDeletion: AccountDeletionService | null = null,
+  ) {}
 
   private syncPayload(synced: NonNullable<Awaited<ReturnType<AuthService['syncAccountFromToken']>>>) {
     return {
@@ -54,5 +58,27 @@ export class AuthController {
       if (err instanceof ConflictError) return reply.status(409).send({ message: err.message })
       throw err
     }
+  }
+
+  async deleteAccount(request: AuthenticatedRequest, reply: FastifyReply) {
+    if (!request.accountId || !request.authSubject) {
+      return reply.status(401).send({ message: 'Não autenticado' })
+    }
+    if (!this.accountDeletion) {
+      return reply.status(503).send({ message: 'Exclusão de conta não configurada' })
+    }
+    const parsed = deleteAccountSchema.safeParse(request.body ?? {})
+    if (!parsed.success) {
+      return reply.status(400).send({
+        message: 'Confirmação inválida — digite EXCLUIR',
+        error: parsed.error.flatten(),
+      })
+    }
+    const result = await this.accountDeletion.deleteAccount(request.accountId, request.authSubject)
+    return reply.send({
+      ok: true,
+      deletedPatientIds: result.deletedPatientIds,
+      removedMemberships: result.removedMemberships,
+    })
   }
 }

@@ -15,6 +15,10 @@ import {
   type UnimedBhVirtualCard,
 } from './unimedbh-cartao-virtual.scraper.js'
 import { waitForUnimedScreenService } from './unimedbh-wait-response.helper.js'
+import {
+  captureUnimedAuthorizationPageAssets,
+  persistUnimedDeclaracaoCarenciaPdf,
+} from './unimedbh-authorization-assets.js'
 
 export interface UnimedBhSyncResult {
   extrato: { paciente: UnimedBhUsageItem[]; dependentes: Record<string, UnimedBhUsageItem[]> }
@@ -161,6 +165,9 @@ export type UnimedBhScrapeOpts = {
   extratoMonths?: number
   /** Só detalha autorizações com emissão/validade >= esta data. */
   authorizationSince?: Date | null
+  patientId?: string
+  /** Em sync full, baixa PDF DeclaracaoCarencia. */
+  fetchCarenciaPdf?: boolean
 }
 
 export class UnimedBhSyncScraper {
@@ -202,7 +209,17 @@ export class UnimedBhSyncScraper {
 
       const extratoMonths = opts?.extratoMonths ?? EXTRATO_MONTHS_DEFAULT
       const extrato = await this.scrapeExtrato(page, emit, extratoMonths)
-      const autorizacoes = await this.scrapeAutorizacoes(page, emit, opts?.authorizationSince ?? null)
+      const autorizacoes = await this.scrapeAutorizacoes(page, emit, opts?.authorizationSince ?? null, opts)
+
+      if (opts?.fetchCarenciaPdf && opts.patientId) {
+        emit('fetch-plano', 'Baixando Declaração de Carência...', 'running')
+        try {
+          await persistUnimedDeclaracaoCarenciaPdf({ page, patientId: opts.patientId })
+          emit('fetch-plano', 'Declaração de Carência salva', 'running')
+        } catch {
+          emit('fetch-plano', 'Declaração de Carência não disponível', 'running')
+        }
+      }
 
       const sessionStorageState = await captureUnimedStorageState(context)
 
@@ -293,6 +310,7 @@ export class UnimedBhSyncScraper {
     page: Page,
     emit: (step: string, msg: string, status: ScraperProgress['status']) => void,
     authorizationSince: Date | null,
+    scrapeOpts?: UnimedBhScrapeOpts,
   ) {
     emit(
       'fetch-autorizacoes',
@@ -333,7 +351,7 @@ export class UnimedBhSyncScraper {
       }
       index++
       emit('fetch-autorizacoes', `Detalhando autorização ${index}/${bySolic.size - skippedDetails}...`, 'running')
-      const enriched = await this.scrapeAuthorizationDetail(page, item)
+      const enriched = await this.scrapeAuthorizationDetail(page, item, scrapeOpts)
       paciente.push(enriched)
     }
 
@@ -344,7 +362,11 @@ export class UnimedBhSyncScraper {
     return { paciente, dependentes: {} as Record<string, UnimedBhAuthorizationItem[]> }
   }
 
-  private async scrapeAuthorizationDetail(page: Page, listItem: OutSystemsListItem): Promise<UnimedBhAuthorizationItem> {
+  private async scrapeAuthorizationDetail(
+    page: Page,
+    listItem: OutSystemsListItem,
+    scrapeOpts?: UnimedBhScrapeOpts,
+  ): Promise<UnimedBhAuthorizationItem> {
     const enc = listItem.SolicIdEncriptado
     if (!enc) {
       return this.mapListItemOnly(listItem)
@@ -430,6 +452,23 @@ export class UnimedBhSyncScraper {
       || procedures[0]?.DescricaoItem
       || ''
 
+    const solicitationNumber = listItem.NumeroPedido || ''
+    let doctorPhotoUrl: string | undefined
+    let guideDocumentId: string | undefined
+    if (scrapeOpts?.patientId && solicitationNumber) {
+      try {
+        const assets = await captureUnimedAuthorizationPageAssets({
+          page,
+          patientId: scrapeOpts.patientId,
+          solicitationNumber,
+        })
+        doctorPhotoUrl = assets.doctorPhotoUrl
+        guideDocumentId = assets.guideDocumentId
+      } catch {
+        // assets opcionais — não bloqueia sync
+      }
+    }
+
     return {
       patientName: '',
       procedureCode: procedures[0]?.CodigoItem || '',
@@ -448,6 +487,8 @@ export class UnimedBhSyncScraper {
       solicitationUrl: `${DETAIL_BASE}${enc}`,
       solicId: listItem.SolicId || '',
       solicIdEncrypted: enc,
+      doctorPhotoUrl,
+      guideDocumentId,
       authorizationType: listItem.TipoAutorizacao || '',
       classification: listItem.ClassificacaoProcCliente || '',
       providerExternalId: listItem.SolicitanteId && listItem.SolicitanteId !== '0' ? listItem.SolicitanteId : undefined,

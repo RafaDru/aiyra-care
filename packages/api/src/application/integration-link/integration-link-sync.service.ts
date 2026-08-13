@@ -15,9 +15,11 @@ import { normalizeName } from '../connect/connect-sync.helpers.js'
 import { isIntegrationLinkSessionReady } from './integration-link-session.js'
 import { parseFlexiblePortalDate, parsePortalDate } from './integration-link-sync-date.helper.js'
 import { Exam } from '../../domain/exam/exam.entity.js'
+import { Vaccine } from '../../domain/vaccine/vaccine.entity.js'
 import { MedicalRecord } from '../../domain/medical-record/medical-record.entity.js'
 import { encrypt, decrypt } from '../../infrastructure/crypto-helper.js'
 import { ExamPgRepository } from '../../infrastructure/persistence/exam.pg.repository.js'
+import { VaccinePgRepository } from '../../infrastructure/persistence/vaccine.pg.repository.js'
 import { MedicalRecordPgRepository } from '../../infrastructure/persistence/medical-record.pg.repository.js'
 import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg.repository.js'
 import { SyncJobPgRepository } from '../../infrastructure/persistence/sync-job.pg.repository.js'
@@ -44,8 +46,10 @@ import { dispatchBackgroundTask } from '../../infrastructure/sync/background-dis
 import { withBrowserSyncMutex } from '../../infrastructure/sync/browser-sync-mutex.js'
 import type { MatchablePatient } from '../insurance-plan/amil-beneficiary-matcher.js'
 import { request as playwrightRequest } from 'playwright'
+import { AgenticScraperService } from '../scraper/agentic-scraper.service.js'
+import type { Patient } from '../../domain/patient/patient.entity.js'
 
-const SYNCABLE_PORTALS = new Set<string>(['unimed', 'amil', 'mater_dei', 'hermes_pardini'])
+const SYNCABLE_PORTALS = new Set<string>(['unimed', 'amil', 'mater_dei', 'hermes_pardini', 'bradesco_saude'])
 const RECENT_SYNC_MS = Number(process.env.SYNC_MIN_INTERVAL_MS ?? String(30 * 60 * 1000))
 
 export type IntegrationLinkSyncSkipReason =
@@ -265,6 +269,11 @@ export class IntegrationLinkSyncService {
 
         if (link.portalType === 'hermes_pardini') {
           await this.runHermesPardiniSync(link, decryptedPassword, jobId, emit, opts.log, !opts.silent)
+          return
+        }
+
+        if (link.portalType === 'bradesco_saude') {
+          await this.runBradescoSync(link, decryptedPassword, jobId, emit, patient)
           return
         }
 
@@ -667,6 +676,92 @@ export class IntegrationLinkSyncService {
         link.clearSessionToken()
         await this.linkRepo.update(link).catch(() => {})
       }
+      void updateJob(jobId, { step: 'error', message, status: 'failed' })
+    }
+  }
+
+  private async runBradescoSync(
+    link: IntegrationLink,
+    decryptedPassword: string,
+    jobId: string,
+    emit: (step: string, message: string, status: 'running' | 'success' | 'failed') => void,
+    patient: Patient | null,
+  ) {
+    try {
+      if (!patient?.cpf) {
+        throw new Error('CPF do paciente é obrigatório para sync Bradesco Saúde')
+      }
+      emit('login', 'Abrindo Bradesco Saúde (agente)...', 'running')
+      const scraper = new AgenticScraperService()
+      const result = await scraper.scrape('bradesco_saude', {
+        cpf: patient.cpf.replace(/\D/g, ''),
+        email: link.email ?? undefined,
+        password: decryptedPassword,
+      }, (p) => emit(p.step, p.message, p.status))
+
+      const examRepo = new ExamPgRepository(this.pool)
+      const vaccineRepo = new VaccinePgRepository(this.pool)
+      const existingExams = await examRepo.findAll({ patientId: link.patientId })
+      const examKeys = new Set(existingExams.map((e) => `${e.examType}|${e.examDate.toISOString().slice(0, 10)}`))
+      let importedExams = 0
+      for (const item of result.exams) {
+        const date = parsePortalDate(item.examDate) ?? parseFlexiblePortalDate(item.examDate)
+        if (!date || !item.examType) continue
+        const key = `${item.examType}|${date.toISOString().slice(0, 10)}`
+        if (examKeys.has(key)) continue
+        await examRepo.save(Exam.create({
+          patientId: link.patientId,
+          examType: item.examType,
+          examDate: date,
+          resultSummary: item.results ?? item.description ?? undefined,
+          source: 'bradesco_saude',
+        }))
+        examKeys.add(key)
+        importedExams++
+      }
+
+      const existingVaccines = await vaccineRepo.findAll({ patientId: link.patientId })
+      const vaccineKeys = new Set(
+        existingVaccines.map((v) => `${v.vaccineName}|${v.applicationDate.toISOString().slice(0, 10)}`),
+      )
+      let importedVaccines = 0
+      for (const item of result.vaccines) {
+        const date = parsePortalDate(item.applicationDate) ?? parseFlexiblePortalDate(item.applicationDate)
+        if (!date || !item.vaccineName) continue
+        const key = `${item.vaccineName}|${date.toISOString().slice(0, 10)}`
+        if (vaccineKeys.has(key)) continue
+        await vaccineRepo.save(Vaccine.create({
+          patientId: link.patientId,
+          vaccineName: item.vaccineName,
+          applicationDate: date,
+          batchNumber: item.batch ?? undefined,
+          appliedBy: item.appliedBy ?? undefined,
+          clinic: item.clinic ?? undefined,
+          source: 'bradesco_saude',
+        }))
+        vaccineKeys.add(key)
+        importedVaccines++
+      }
+
+      link.markSynced()
+      await this.linkRepo.update(link)
+
+      const total = importedExams + importedVaccines
+      void updateJob(jobId, {
+        step: 'done',
+        message: `Bradesco: ${importedExams} exame(s), ${importedVaccines} vacina(s)`,
+        status: 'success',
+      }, {
+        exams: importedExams,
+        medicalRecords: 0,
+        authorizations: 0,
+        authorizationItems: 0,
+        updatedAuthorizations: 0,
+        total,
+        authorizationDetails: [],
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro na sincronização Bradesco'
       void updateJob(jobId, { step: 'error', message, status: 'failed' })
     }
   }

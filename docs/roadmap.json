@@ -1,20 +1,70 @@
 {
-  "schemaVersion": 1,
-  "updatedAt": "2026-08-12",
+  "schemaVersion": 2,
+  "updatedAt": "2026-08-13",
   "title": "Roadmap AiyraCare",
-  "intro": "Prioridades ajustadas em 2026-08-07: primeiro sync silencioso (Connect), depois sequência clínica + grafo; agentes só com contexto e fontes sólidas. Os portais não entregam associações — o sync alimenta nós e proveniência; a sequência é nossa camada (Postgres + UX).",
+  "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
+  "reviewBadges": [
+    {
+      "id": "legal",
+      "label": "Jurídico",
+      "color": "gold",
+      "profession": "Advogado",
+      "description": "Termos, privacidade, LGPD, contratos"
+    },
+    {
+      "id": "fiscal",
+      "label": "Fiscal",
+      "color": "orange",
+      "profession": "Contador / Contabilizei",
+      "description": "NFS-e, conciliação Stripe, CNPJ em produção"
+    },
+    {
+      "id": "regulatory",
+      "label": "Regulatório",
+      "color": "purple",
+      "profession": "Consultor ANVISA / DPO",
+      "description": "SaMD, posicionamento de software de saúde"
+    },
+    {
+      "id": "medical",
+      "label": "Médico",
+      "color": "cyan",
+      "profession": "Pediatria / clínico",
+      "description": "Conteúdo clínico, disclaimers, agentes IA"
+    },
+    {
+      "id": "security",
+      "label": "Segurança",
+      "color": "red",
+      "profession": "Pentest / auditor",
+      "description": "Revisão tier 3, go-live público"
+    },
+    {
+      "id": "content",
+      "label": "Conteúdo",
+      "color": "blue",
+      "profession": "Revisão de textos",
+      "description": "Markdown legal, copy UX, e-mails operacionais"
+    }
+  ],
   "categories": [
     {
       "id": "negocio",
-      "label": "Negócio",
+      "label": "Experiência da família",
       "color": "purple",
-      "description": "Produto, UX e modelo de informação — como o usuário organiza tempo, histórico e ações futuras."
+      "description": "O que você vê e toca no app: resumo clínico, trilhas de acompanhamento, export para consulta, agenda e lembretes."
     },
     {
       "id": "tecnico",
-      "label": "Técnico",
+      "label": "Por dentro do sistema",
       "color": "geekblue",
-      "description": "Arquitetura, integrações, dados e infraestrutura."
+      "description": "Integrações com planos e laboratórios, bases de dados, sync em segundo plano e infra — o que mantém os dados corretos e atualizados."
+    },
+    {
+      "id": "regulacao",
+      "label": "Regulatório e LGPD",
+      "color": "gold",
+      "description": "Termos e políticas versionados, aceite obrigatório, conformidade para oferta pública e integrações com provedores externos de compliance."
     }
   ],
   "priorities": [
@@ -22,40 +72,100 @@
       "id": "P0",
       "label": "P0 — Agora",
       "color": "red",
-      "description": "Sync sem intervenção humana no dia a dia; sessão estável e novidades discretas."
+      "description": "Carteira e histórico atualizados sem abrir modal ou portal todo dia."
     },
     {
       "id": "P1",
       "label": "P1 — Estrutural clínico",
       "color": "volcano",
-      "description": "Sequência do cuidado, links entre entidades e projeção Neo4j — base para correlação e agentes."
+      "description": "Ligar consulta → autorização → exame no Postgres e no grafo, para correlação futura."
     },
     {
       "id": "P2",
       "label": "P2 — Automação e entrega",
       "color": "orange",
-      "description": "Scheduler/worker, export médico, enriquecimento contínuo dos portais."
+      "description": "Sync agendado, export médico, PDFs e enriquecimento contínuo dos portais."
     },
     {
       "id": "P3",
       "label": "P3 — Inteligência",
       "color": "blue",
-      "description": "OCR/LLM em evolução e agentes com citações (após contexto + grafo)."
+      "description": "OCR melhor, leitura de manuscrito e agentes com citações — depois do contexto sólido."
     },
     {
       "id": "P4",
       "label": "P4 — Horizonte",
       "color": "default",
-      "description": "Rede credenciada agregada, mobile, microserviços — produto ampliado."
+      "description": "Rede credenciada unificada, app mobile e arquitetura ampliada."
     }
   ],
   "principles": [
-    "Postgres é fonte da verdade; Neo4j projeta relações para caminhos e IA.",
-    "Connect extrai e normaliza; Core importa no domínio clínico (boundary em docs/CONNECT.md).",
-    "Portais não trazem o grafo clínico — associações são inferidas/confirmadas no app.",
-    "Resumo base (PatientContext) permanece determinístico, sem LLM."
+    "Os dados clínicos ficam no Postgres; o Neo4j ajuda a ver caminhos e correlações, não substitui o prontuário.",
+    "Os portais (Unimed, Amil, etc.) trazem pedaços soltos — o app organiza e liga o que importa para o cuidado.",
+    "O resumo clínico é montado de forma determinística (sem “inventar” com IA) para você confiar no que leva ao pediatra.",
+    "Sync silencioso quando possível; browser ou login manual só quando o portal exige."
   ],
   "epics": [
+    {
+      "id": "human-review-gates",
+      "category": "regulacao",
+      "priority": "P0",
+      "title": "Revisão humana / profissional (paralela)",
+      "summary": "Tecnologia pronta no código; cada item abaixo depende de parecer externo antes de go-live público. Rastreie aqui enquanto busca advogado, contador e consultores.",
+      "status": "in_progress",
+      "statusLabel": "Aguardando profissionais",
+      "items": [
+        {
+          "id": "hr-legal-texts",
+          "title": "Parecer advogado — 4 documentos v1.0",
+          "status": "planned",
+          "detail": "docs/legal/LAWYER_REVIEW_CHECKLIST.md (termos, privacidade, cookies, consentimento menor).",
+          "reviewBadge": ["legal", "content"]
+        },
+        {
+          "id": "hr-fiscal-nfse",
+          "title": "Processo NFS-e + Contabilizei",
+          "status": "in_progress",
+          "detail": "docs/legal/FISCAL_NFSE.md + node packages/api/scripts/export-billing-contabilizei.mjs",
+          "reviewBadge": ["fiscal"]
+        },
+        {
+          "id": "hr-regulatory-anvisa",
+          "title": "Validação consultor — posicionamento SaMD (ANVISA)",
+          "status": "planned",
+          "detail": "docs/legal/ANVISA_SAMD_POSITION.md antes de agentes clínicos.",
+          "reviewBadge": ["regulatory"]
+        },
+        {
+          "id": "hr-dpo-channel",
+          "title": "DPO operacional (e-mail real em produção)",
+          "status": "planned",
+          "detail": "LEGAL_PRIVACY_EMAIL em prod; SLA técnico já em DATA_SUBJECT_REQUEST.md.",
+          "reviewBadge": ["legal", "regulatory"]
+        },
+        {
+          "id": "hr-stripe-live",
+          "title": "Stripe live + dados fiscais publicados",
+          "status": "planned",
+          "detail": "Chaves live, LEGAL_ENTITY_NAME/CNPJ na UI, NFS-e com contador.",
+          "reviewBadge": ["fiscal", "legal"]
+        },
+        {
+          "id": "hr-clinical-copy",
+          "title": "Revisão médica — export e disclaimers IA",
+          "status": "planned",
+          "detail": "clinical-export-copy.ts, manuscrito, resumo de contexto.",
+          "reviewBadge": ["medical", "content"]
+        },
+        {
+          "id": "hr-security-go-live",
+          "title": "Go-live público — gate compliance + tier 3",
+          "status": "planned",
+          "detail": "COMPLIANCE_GATE_ENABLED=1; pentest opcional (FEATURE_REVIEW_FRAMEWORK).",
+          "reviewBadge": ["security"]
+        }
+      ]
+    },
     {
       "id": "connect-silencioso",
       "category": "tecnico",
@@ -138,8 +248,8 @@
       "priority": "P1",
       "title": "Sequência do cuidado (entidade ↔ entidade)",
       "summary": "Catálogo relation_types + clinical_entity_links — consulta → autorização → exame auditável no Postgres.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Completo",
       "items": [
         {
           "id": "seq-migration-024",
@@ -186,8 +296,8 @@
         {
           "id": "seq-task-rename",
           "title": "Renomear kind task → acompanhamento no modelo",
-          "status": "planned",
-          "detail": "UI já usa 'Acompanhamento'; migration de kind opcional."
+          "status": "done",
+          "detail": "Migration 026; kind acompanhamento no PG; API aceita task legado."
         }
       ]
     },
@@ -235,9 +345,9 @@
       "id": "connect-scheduler",
       "priority": "P2",
       "title": "Connect — scheduler e worker apartado",
-      "summary": "Execução fora do request do usuário: jobs scheduled, fila, runner dedicado.",
-      "status": "planned",
-      "statusLabel": "Planejado",
+      "summary": "Sync automático em segundo plano (worker + jobs agendados), sem depender de você abrir o app.",
+      "status": "done",
+      "statusLabel": "Completo",
       "items": [
         {
           "id": "sched-trigger",
@@ -282,8 +392,8 @@
       "priority": "P2",
       "title": "Contexto determinístico + export médico",
       "summary": "Resumo sem alucinação; PDF para consulta alimentado por context + trilhas.",
-      "status": "in_progress",
-      "statusLabel": "Parcial",
+      "status": "done",
+      "statusLabel": "Completo",
       "items": [
         {
           "id": "ctx-api",
@@ -306,14 +416,20 @@
         {
           "id": "export-completo",
           "title": "Export completo do prontuário",
-          "status": "planned",
-          "detail": "Histórico integral + arquivos/OCR relevantes."
+          "status": "done",
+          "detail": "GET /patients/:id/clinical-export?mode=full; UI Resumido/Completo no modal."
         },
         {
           "id": "export-share",
           "title": "Compartilhamento com médicos",
+          "status": "done",
+          "detail": "POST shares + link público GET /clinical-export/share/:token (48h default)."
+        },
+        {
+          "id": "export-copy-medical-review",
+          "title": "Revisão médica — copy do export e share",
           "status": "planned",
-          "detail": "Complementa export; link temporário ou envio."
+          "detail": "clinical-export-copy.ts — rastreio: human-review-gates/hr-clinical-copy."
         }
       ]
     },
@@ -322,8 +438,8 @@
       "priority": "P2",
       "title": "Integrações — enriquecimento de dados",
       "summary": "Mais minério dos portais; não esperar associações — alimentar nós canônicos.",
-      "status": "in_progress",
-      "statusLabel": "Contínuo",
+      "status": "done",
+      "statusLabel": "Completo",
       "items": [
         {
           "id": "int-unimed-sync",
@@ -340,44 +456,44 @@
         {
           "id": "int-amil-utilizacao",
           "title": "Amil — utilização → consultas/exames",
-          "status": "planned",
-          "detail": "Minha utilização no portal beneficiário."
+          "status": "done",
+          "detail": "fetchAmilUtilizacao + medical_records no CanonicalBatchImporter."
         },
         {
           "id": "int-amil-dependentes",
           "title": "Amil — dependentes como pacientes",
-          "status": "planned",
-          "detail": "Titular + dependentes no mesmo sync."
+          "status": "done",
+          "detail": "Titular + dependentes; match household → import por paciente."
         },
         {
           "id": "int-unimed-carencias",
           "title": "Unimed — carências (PDF DeclaracaoCarencia)",
-          "status": "planned",
-          "detail": "Jasper PDF no portal."
+          "status": "done",
+          "detail": "Sync full baixa PDF → GCS + documento other."
         },
         {
           "id": "int-bradesco",
           "title": "Bradesco Saúde — sync automático",
-          "status": "planned",
-          "detail": "Hoje só vínculo manual."
+          "status": "done",
+          "detail": "Agentic scraper; exames + vacinas no sync de integração."
         },
         {
           "id": "int-mater-dei",
           "title": "Mater Dei — expansão Connect",
-          "status": "in_progress",
-          "detail": "Scraper dedicado; piloto no boundary Connect."
+          "status": "done",
+          "detail": "Sync em integration-link-sync; boundary Connect Fase 2 pendente opcional."
         },
         {
           "id": "int-guia-pdf",
           "title": "Baixar PDF da guia como Arquivo",
-          "status": "planned",
-          "detail": "Persistir documento no GCS."
+          "status": "done",
+          "detail": "Detalhe autorização Unimed → GCS + guide_document_id."
         },
         {
           "id": "int-doctor-photo",
           "title": "Foto do médico no GCS",
-          "status": "planned",
-          "detail": "Hoje ignoramos base64 da API."
+          "status": "done",
+          "detail": "Blob da página de detalhe → doctor_photo_url na autorização."
         }
       ]
     },
@@ -385,9 +501,9 @@
       "id": "documentos-ocr",
       "priority": "P3",
       "title": "Documentos + OCR / LLM",
-      "summary": "Cascade OCR, manuscrito, prescrição; métricas de qualidade.",
-      "status": "in_progress",
-      "statusLabel": "Paralelo",
+      "summary": "Ler fotos de receitas, laudos e certidões com mais precisão — inclusive manuscrito quando possível.",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "ocr-identidade",
@@ -404,14 +520,20 @@
         {
           "id": "ocr-manuscrito",
           "title": "Entendimento manuscrito (prescrição, laudo)",
-          "status": "planned",
-          "detail": "LLM na cascata; handwriting credits."
+          "status": "done",
+          "detail": "InterpretHandwritingModal + créditos mensais."
         },
         {
           "id": "ocr-metrics",
           "title": "Métricas e validação contínua OCR",
+          "status": "done",
+          "detail": "GET /documents/ocr-stats + painel na aba Arquivos clínicos."
+        },
+        {
+          "id": "ocr-disclaimer-review",
+          "title": "Revisão médica — disclaimers interpretação manuscrito",
           "status": "planned",
-          "detail": "ocr-quality, feedback loop."
+          "detail": "Textos UI/API — rastreio: human-review-gates/hr-clinical-copy."
         }
       ]
     },
@@ -419,27 +541,31 @@
       "id": "agentes",
       "priority": "P3",
       "title": "Agentes de apoio (RAG)",
-      "summary": "Médico agêntico com PatientContext + trilhas + fontes citadas; nunca substituir médico.",
+      "summary": "Assistentes que respondem com base no histórico real do paciente e citam a fonte — apoio à família, não substituto do pediatra.",
       "status": "planned",
-      "statusLabel": "Depois de P1",
+      "statusLabel": "Próximo épico de produto — gate ANVISA + médico",
+      "reviewBadge": ["medical", "regulatory"],
       "items": [
         {
           "id": "agent-runtime",
           "title": "Runtime com contexto determinístico + citações",
           "status": "planned",
-          "detail": "RAG sobre PG; disclaimer fixo."
+          "detail": "RAG sobre PG; disclaimer fixo.",
+          "reviewBadge": ["medical", "regulatory"]
         },
         {
           "id": "agent-packages",
           "title": "Esqueleto packages/agents",
           "status": "planned",
-          "detail": "Pediatria, farmacêutico, integração OCR."
+          "detail": "Pediatria, farmacêutico, integração OCR.",
+          "reviewBadge": ["medical"]
         },
         {
           "id": "agent-graph",
           "title": "Correlação via grafo Neo4j",
           "status": "planned",
-          "detail": "Hipóteses, caminhos clínicos — após path queries."
+          "detail": "Hipóteses, caminhos clínicos — após path queries.",
+          "reviewBadge": ["medical"]
         }
       ]
     },
@@ -447,7 +573,7 @@
       "id": "rede-credenciada",
       "priority": "P4",
       "title": "Rede credenciada agregada (“Decolar”)",
-      "summary": "Busca unificada SUS + planos; adapters; ranking — descoberta, não sync clínico.",
+      "summary": "Buscar médico, clínica ou urgência em um lugar — cruzando SUS e convênios, com ranking e filtros.",
       "status": "planned",
       "statusLabel": "Horizonte",
       "items": [
@@ -481,21 +607,21 @@
       "id": "plataforma",
       "priority": "P4",
       "title": "Plataforma e entrega",
-      "summary": "Mobile, settings, gráficos, arquitetura distribuída.",
+      "summary": "Gráficos de medidas, configurações, app mobile e evolução da arquitetura para escalar o produto.",
       "status": "planned",
       "statusLabel": "Horizonte",
       "items": [
         {
           "id": "plat-charts",
           "title": "Gráficos de crescimento (Recharts)",
-          "status": "planned",
-          "detail": "Aba Medidas no perfil."
+          "status": "done",
+          "detail": "Linhas de peso, altura e PC na aba Medidas."
         },
         {
           "id": "plat-settings",
-          "title": "Configurações (tema, idioma, backup)",
-          "status": "planned",
-          "detail": "Página settings parcial hoje."
+          "title": "Configurações (tema, idioma) — MVP monolítico",
+          "status": "done",
+          "detail": "Tema + idioma em /settings; perfil, billing e legal empilhados no mesmo fluxo (ver épico settings-area-structure)."
         },
         {
           "id": "plat-mobile",
@@ -518,61 +644,466 @@
       ]
     },
     {
+      "id": "billing-monetizacao",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Billing e monetização (SaaS)",
+      "summary": "Franquia grátis de interpretação no free tier das LLMs; pacotes e assinatura quando a família precisa de mais volume ou qualidade premium — sem escalar custo de API no seu bolso.",
+      "status": "done",
+      "statusLabel": "Entregue",
+      "items": [
+        {
+          "id": "bill-credits-db",
+          "title": "Modelo de créditos (handwriting_credit_accounts)",
+          "status": "done",
+          "detail": "Migration 011; franquia mensal + package_credits; eventos de auditoria."
+        },
+        {
+          "id": "bill-free-premium-tier",
+          "title": "Cascata free tier → premium por tipo de crédito",
+          "status": "done",
+          "detail": "Franquia mensal: Gemini Flash/Groq; pacote: + Gemini Pro/OpenAI vision."
+        },
+        {
+          "id": "bill-interpret-api",
+          "title": "Interpretação sob demanda (1 crédito por clique)",
+          "status": "done",
+          "detail": "POST /documents/:id/interpret-handwriting; upload com OCR local continua grátis."
+        },
+        {
+          "id": "bill-quota-api",
+          "title": "API de saldo (GET /handwriting-credits/quota)",
+          "status": "done",
+          "detail": "monthlyFreeRemaining + packageCredits visíveis na aba Arquivos clínicos."
+        },
+        {
+          "id": "bill-admin-grant",
+          "title": "Creditar pacote manual (admin key)",
+          "status": "done",
+          "detail": "POST /handwriting-credits/packages protegido por HANDWRITING_ADMIN_KEY."
+        },
+        {
+          "id": "bill-ocr-paid-guard",
+          "title": "Controle de OCR pago (Google Vision)",
+          "status": "done",
+          "detail": "OCR_ALLOW_PAID=0 desliga fallback pago no cascade OCR."
+        },
+        {
+          "id": "bill-scope-account",
+          "title": "scope_id por conta (não 'default' global)",
+          "status": "done",
+          "detail": "resolveHandwritingScopeId(req) → accountId; entitlements ajustam franquia."
+        },
+        {
+          "id": "bill-pricing-ui",
+          "title": "UI de planos e compra de pacotes",
+          "status": "done",
+          "detail": "BillingSettingsCard em Configurações + CTA pacotes."
+        },
+        {
+          "id": "bill-stripe-checkout",
+          "title": "Checkout Stripe (PCI — cartão só no Stripe)",
+          "status": "done",
+          "detail": "POST /billing/checkout + checkout-subscription; requer STRIPE_SECRET_KEY."
+        },
+        {
+          "id": "bill-stripe-webhook",
+          "title": "Webhook pagamento → creditar pacote",
+          "status": "done",
+          "detail": "POST /billing/webhook → grantPackage; raw body no Fastify."
+        },
+        {
+          "id": "bill-subscription",
+          "title": "Assinatura recorrente (plano família)",
+          "status": "done",
+          "detail": "Checkout subscription + applyFamilySubscription no webhook."
+        },
+        {
+          "id": "bill-entitlements",
+          "title": "Entitlements por plano (franquia, pacientes, features)",
+          "status": "done",
+          "detail": "account_entitlements + sync monthly_free_allowance."
+        },
+        {
+          "id": "bill-usage-cost",
+          "title": "Telemetria de custo por interpretação",
+          "status": "done",
+          "detail": "metadata provider/tier/estimatedCostCents em handwriting_credit_events."
+        },
+        {
+          "id": "bill-invoice-history",
+          "title": "Histórico de compras para o usuário",
+          "status": "done",
+          "detail": "billing_purchases + GET /billing/me."
+        },
+        {
+          "id": "bill-gcp-infra",
+          "title": "GCP billing e alertas de custo (infra)",
+          "status": "done",
+          "detail": "docs/infra/GCP_BILLING_ALERTS.md — budgets no openhealth-503119 (operacional GCP)."
+        },
+        {
+          "id": "bill-stripe-production",
+          "title": "Stripe produção (live keys + webhook URL)",
+          "status": "planned",
+          "detail": "Dashboard Stripe live; STRIPE_* no .env de prod. Rastreio: human-review-gates/hr-stripe-live."
+        }
+      ]
+    },
+    {
       "id": "agenda-calendario",
       "category": "negocio",
       "priority": "P3",
       "title": "Agenda / Calendário (pegada Google)",
-      "summary": "Unificar visão temporal: eventos clínicos já existentes + entradas programadas pelo usuário (consultas a agendar, lembretes). Avaliar Linha do Tempo como sub-visão da Agenda; depois integrar com Google, Microsoft e outros.",
-      "status": "planned",
-      "statusLabel": "Discovery",
+      "summary": "Uma visão de calendário com consultas, exames, vacinas e lembretes que você programa — e depois sync com Google/Microsoft.",
+      "status": "done",
+      "statusLabel": "Google + Outlook OAuth",
       "items": [
         {
           "id": "agenda-timeline-reorg",
           "title": "Avaliar Linha do Tempo como sub-item de Calendário/Agenda",
-          "status": "planned",
-          "detail": "Hoje: aba Linha do tempo (filtros, eventos passados). Proposta: Agenda como hub temporal; timeline como visão lista/histórico dentro dela."
+          "status": "done",
+          "detail": "Aba Agenda com sub-visão Linha do tempo; tab timeline removida do overview."
         },
         {
           "id": "agenda-discovery-ux",
           "title": "Discovery UX — calendário estilo Google Agenda",
-          "status": "planned",
-          "detail": "Visões mês/semana/dia; eventos clicáveis; criar entrada rápida; diferenciar evento clínico vs lembrete programado."
+          "status": "done",
+          "detail": "Tabs Calendário/Lista/Histórico; antd Calendar com badges."
         },
         {
           "id": "agenda-modelo",
           "title": "Modelo: eventos canônicos + agenda programada",
-          "status": "planned",
-          "detail": "Agregar consultas, exames, vacinas, autorizações com validade; mais entidade scheduled_event (título, data objetivo, paciente, trilha opcional)."
+          "status": "done",
+          "detail": "Tabela scheduled_events + migration 029."
         },
         {
           "id": "agenda-scheduled-crud",
           "title": "Criar entradas programadas pelo usuário",
-          "status": "planned",
-          "detail": "Ex.: «Agendar consulta com neurologista», «Lembrar pedir autorização do exame» — sem duplicar consulta real até confirmar."
+          "status": "done",
+          "detail": "API CRUD + aba Agenda no perfil (lista próximos/anteriores)."
         },
         {
           "id": "agenda-thread-link",
           "title": "Lembretes vinculados a Acompanhamento",
-          "status": "planned",
-          "detail": "scheduled_event ↔ health_thread; aparecer na agenda e no drawer da trilha."
+          "status": "done",
+          "detail": "health_thread_id no form; lista no drawer da trilha."
         },
         {
           "id": "agenda-google",
           "title": "Integração Google Calendar",
-          "status": "planned",
-          "detail": "OAuth Google (já usado no login); export ou sync de lembretes/consultas programadas."
+          "status": "done",
+          "detail": "Export ICS (importar no Google Calendar); OAuth sync fase 2."
         },
         {
           "id": "agenda-microsoft",
           "title": "Integração Microsoft Outlook / Calendar",
-          "status": "planned",
-          "detail": "OAuth Microsoft (já usado no login); mesma linha que Google."
+          "status": "done",
+          "detail": "Export ICS compatível com Outlook."
+        },
+        {
+          "id": "agenda-ics-import",
+          "title": "Import ICS (Google/Outlook → agenda)",
+          "status": "done",
+          "detail": "POST /scheduled-events/import/ics; dedup por UID + título/hora; migration 034."
+        },
+        {
+          "id": "agenda-google-oauth",
+          "title": "Google Calendar OAuth (sync bidirecional)",
+          "status": "done",
+          "detail": "calendar_connections + OAuth + pull/push; UI Agenda e Integrações."
         },
         {
           "id": "agenda-sync-bidirectional",
-          "title": "Sync bidirecional com calendários externos (fase 2)",
+          "title": "Sync OAuth Microsoft Outlook (fase 3)",
+          "status": "done",
+          "detail": "Microsoft Graph calendarView + push; migration 036; UI OutlookCalendarConnectCard."
+        }
+      ]
+    },
+    {
+      "id": "legal-lgpd-compliance",
+      "category": "regulacao",
+      "priority": "P2",
+      "title": "Legal, LGPD e conformidade (go-live público)",
+      "summary": "Documentos legais versionados, aceite vinculado à conta, módulo hexagonal extensível e backlog fiscal/regulatório antes de oferta B2C ampla.",
+      "status": "in_progress",
+      "statusLabel": "Tech pronta — revisão profissional pendente",
+      "reviewBadge": ["legal", "content"],
+      "items": [
+        {
+          "id": "legal-docs-structure",
+          "title": "Repositório docs/legal + LEGAL_COMPLIANCE.md",
+          "status": "done",
+          "detail": "Termos v1.0, Privacidade v1.0, CHANGELOG, índice e arquitetura hexagonal documentada."
+        },
+        {
+          "id": "legal-migration-db",
+          "title": "Migration legal_documents + legal_document_acceptances",
+          "status": "done",
+          "detail": "031_legal_compliance.sql — versão is_current, SHA-256, FK app_accounts."
+        },
+        {
+          "id": "legal-hexagonal-module",
+          "title": "Domínio legal-compliance (ports & adapters)",
+          "status": "done",
+          "detail": "LegalContentPort, ComplianceGatePort, repositories PG, FsLegalContentAdapter."
+        },
+        {
+          "id": "legal-api-routes",
+          "title": "API /compliance (documentos, status, accept)",
+          "status": "done",
+          "detail": "GET público documentos; status/accept autenticados; security.plugin isPublicCompliancePath."
+        },
+        {
+          "id": "legal-seed-v1",
+          "title": "Seed documentos v1.0 no Postgres",
+          "status": "done",
+          "detail": "scripts/seed-legal-documents.mjs calcula hash e publica is_current."
+        },
+        {
+          "id": "legal-public-pages",
+          "title": "Páginas públicas /termos e /privacidade",
+          "status": "done",
+          "detail": "LegalDocumentPage lê API; links no login (pendente)."
+        },
+        {
+          "id": "legal-accept-signup-ui",
+          "title": "Aceite obrigatório no signup/login",
+          "status": "done",
+          "detail": "Checkbox signup + POST /compliance/accept; página /compliance/accept para OAuth."
+        },
+        {
+          "id": "legal-compliance-gate",
+          "title": "Gate de rotas (ComplianceGate middleware)",
+          "status": "done",
+          "detail": "COMPLIANCE_GATE_ENABLED=1 na API; RequireCompliance na web."
+        },
+        {
+          "id": "legal-account-deletion",
+          "title": "Exclusão de conta e dados (LGPD art. 18)",
+          "status": "done",
+          "detail": "DELETE /auth/account — PG cascade, GCS docs, Supabase user, cancel Stripe sub."
+        },
+        {
+          "id": "legal-cookie-policy",
+          "title": "Política de cookies + banner",
+          "status": "done",
+          "detail": "cookie-policy v1.0; CookieConsentBanner; POST accept opcional autenticado."
+        },
+        {
+          "id": "legal-minor-consent",
+          "title": "Consentimento responsável (menores)",
+          "status": "done",
+          "detail": "minor_guardian_consent v1.0; checkbox no cadastro de menor; API 403 MINOR_GUARDIAN_CONSENT_REQUIRED."
+        },
+        {
+          "id": "legal-dpo-channel",
+          "title": "Canal privacidade@ + registro de operações",
+          "status": "done",
+          "detail": "GET /compliance/contact; LEGAL_PRIVACY_EMAIL; DATA_PROCESSING_MAP.md; LegalContactCard."
+        },
+        {
+          "id": "legal-lawyer-review",
+          "title": "Revisão jurídica dos textos v1.0",
           "status": "planned",
-          "detail": "Importar compromissos externos; evitar duplicata; política de merge com eventos clínicos."
+          "detail": "Advogado; pacote docs/legal/LAWYER_REVIEW_CHECKLIST.md + publisher LEGAL_ENTITY_NAME/CNPJ na UI. Rastreio: épico human-review-gates."
+        },
+        {
+          "id": "legal-fiscal-export-api",
+          "title": "API + UI export Contabilizei CSV",
+          "status": "done",
+          "detail": "GET /billing/export/contabilizei + script alinhado; BILLING_EXPORT_ACCOUNT_IDS."
+        },
+        {
+          "id": "legal-fiscal-nfse",
+          "title": "NFS-e + conciliação Stripe/Contabilizei",
+          "status": "in_progress",
+          "detail": "FISCAL_NFSE.md + export-billing-contabilizei.mjs; emissão NFS-e com contador. Rastreio: human-review-gates/hr-fiscal-nfse."
+        },
+        {
+          "id": "legal-regulatory-signoff",
+          "title": "Parecer consultor — posicionamento SaMD (ANVISA)",
+          "status": "planned",
+          "detail": "Validar docs/legal/ANVISA_SAMD_POSITION.md antes de agentes clínicos. Rastreio: human-review-gates."
+        },
+        {
+          "id": "legal-dpo-operational",
+          "title": "Canal DPO operacional (SLA + processo titular)",
+          "status": "done",
+          "detail": "LEGAL_DPO_SLA_DAYS, DATA_SUBJECT_REQUEST.md, LegalContactCard. E-mail real em prod: hr-dpo-channel."
+        },
+        {
+          "id": "legal-incident-response",
+          "title": "Plano de resposta a incidentes (vazamento)",
+          "status": "done",
+          "detail": "INCIDENT_RESPONSE.md operacional com checklist P1–P3."
+        },
+        {
+          "id": "legal-anvisa-review-rag",
+          "title": "Revisão ANVISA antes de agentes RAG clínicos",
+          "status": "done",
+          "detail": "ANVISA_SAMD_POSITION.md — gate antes de packages/agents clínico."
+        },
+        {
+          "id": "legal-external-cms-port",
+          "title": "Adapter LegalContentPort para CMS externo",
+          "status": "done",
+          "detail": "LEGAL_CONTENT_ADAPTER=fs|http|gcs; factory + Http/Gcs adapters."
+        }
+      ]
+    },
+    {
+      "id": "account-plan-management",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Conta, plano e assinaturas",
+      "summary": "Área unificada em Configurações: conta, aceite legal, plano família, pacotes e portal Stripe.",
+      "status": "done",
+      "statusLabel": "Completo",
+      "items": [
+        {
+          "id": "account-plan-section-ui",
+          "title": "AccountPlanSection em Configurações",
+          "status": "done",
+          "detail": "Perfil + compliance + BillingSettingsCard + exclusão conta."
+        },
+        {
+          "id": "account-profile",
+          "title": "Perfil estendido da conta (contato, redes)",
+          "status": "done",
+          "detail": "AccountProfileCard; GET/PATCH /auth/profile; migration 032."
+        },
+        {
+          "id": "account-family-checkout-ui",
+          "title": "Botão assinar plano família",
+          "status": "done",
+          "detail": "POST /billing/checkout-subscription + api.billing.checkoutSubscription."
+        },
+        {
+          "id": "account-stripe-portal",
+          "title": "Stripe Customer Portal (cancelar / cartão)",
+          "status": "done",
+          "detail": "POST /billing/customer-portal; botão Gerenciar assinatura na UI."
+        },
+        {
+          "id": "account-subscription-status",
+          "title": "UI status assinatura (renovação, past_due)",
+          "status": "done",
+          "detail": "subscriptionStatus + current_period_end + cancel_at_period_end na UI."
+        },
+        {
+          "id": "bill-subscription-lifecycle",
+          "title": "Webhook subscription.deleted / cancel",
+          "status": "done",
+          "detail": "downgradeToFree; sync em subscription.updated/created/deleted."
+        },
+        {
+          "id": "account-settings-split",
+          "title": "Separar conta vs plano em rotas distintas",
+          "status": "done",
+          "detail": "Épico settings-area-structure — /settings/account vs /settings/plan."
+        }
+      ]
+    },
+    {
+      "id": "settings-area-structure",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Estruturação da área Configurações",
+      "summary": "Quebrar /settings em sub-áreas com navegação clara: preferências do app, perfil da conta, plano/assinatura e legal — evitar misturar billing com profile e configurações gerais.",
+      "status": "done",
+      "statusLabel": "Completo",
+      "items": [
+        {
+          "id": "settings-shell-nav",
+          "title": "Shell de Configurações (menu ou tabs)",
+          "status": "done",
+          "detail": "SettingsLayout + menu horizontal em /settings/*."
+        },
+        {
+          "id": "settings-route-general",
+          "title": "Sub-rota /settings/general",
+          "status": "done",
+          "detail": "Aparência, idioma, ferramentas de dev."
+        },
+        {
+          "id": "settings-route-account",
+          "title": "Sub-rota /settings/account",
+          "status": "done",
+          "detail": "AccountProfileCard + DeleteAccountCard."
+        },
+        {
+          "id": "settings-route-plan",
+          "title": "Sub-rota /settings/plan",
+          "status": "done",
+          "detail": "BillingSettingsCard isolado."
+        },
+        {
+          "id": "settings-route-legal",
+          "title": "Sub-rota /settings/legal",
+          "status": "done",
+          "detail": "SettingsComplianceCard + LegalGoLiveCard + LegalContactCard."
+        },
+        {
+          "id": "settings-index-redirect",
+          "title": "Índice /settings e deep links",
+          "status": "done",
+          "detail": "/settings → /settings/general; settings-paths.ts."
+        },
+        {
+          "id": "settings-migrate-monolith",
+          "title": "Desmontar AccountPlanSection monolítico",
+          "status": "done",
+          "detail": "AccountPlanSection removido; cards nas sub-rotas."
+        },
+        {
+          "id": "settings-ia-doc",
+          "title": "Documentar mapa de Configurações",
+          "status": "done",
+          "detail": "ACCOUNT_AND_PLAN.md com tabela de rotas."
+        }
+      ]
+    },
+    {
+      "id": "feature-review-framework",
+      "category": "regulacao",
+      "priority": "P2",
+      "title": "Revisões paralelas por feature (skills)",
+      "summary": "Tier 0–3; skills legal, medical, security, business; não substitui advogado/médico/pentest.",
+      "status": "done",
+      "statusLabel": "Completo",
+      "items": [
+        {
+          "id": "review-framework-doc",
+          "title": "FEATURE_REVIEW_FRAMEWORK.md",
+          "status": "done",
+          "detail": "Matriz de risco, tiers, template de saída, DocuSign vs click-wrap ref."
+        },
+        {
+          "id": "review-skills-cursor",
+          "title": "Skills .cursor/skills/aiyracare-review-*",
+          "status": "done",
+          "detail": "legal, medical, security, business-domain + feature-release orchestrator."
+        },
+        {
+          "id": "review-log-folder",
+          "title": "docs/reviews/ para tier 2+",
+          "status": "done",
+          "detail": "README + template opcional por release."
+        },
+        {
+          "id": "review-ci-tier-gate",
+          "title": "Checklist em PR template (tier + reviews)",
+          "status": "done",
+          "detail": ".github/pull_request_template.md + FEATURE_REVIEW_FRAMEWORK.md."
+        },
+        {
+          "id": "review-automation-tier3",
+          "title": "Automação tier 3 (CI reminder + security-review)",
+          "status": "done",
+          "detail": ".github/workflows/tier3-review.yml + PR template; subagent manual.",
+          "reviewBadge": ["security"]
         }
       ]
     }

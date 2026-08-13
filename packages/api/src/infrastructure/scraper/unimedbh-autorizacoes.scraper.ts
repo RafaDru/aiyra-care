@@ -16,6 +16,8 @@ export interface UnimedBhAuthorizationItem {
   solicitationUrl?: string
   solicId?: string
   solicIdEncrypted?: string
+  doctorPhotoUrl?: string
+  guideDocumentId?: string
   authorizationType?: string
   classification?: string
   providerExternalId?: string

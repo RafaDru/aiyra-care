@@ -12,6 +12,7 @@ import {
 import type { Document_, OcrLayout, OcrRegion, SuggestedPatientFields, VaccineCardInterpretation } from '../../lib/api.types.js'
 import { api, documentDownloadUrl } from '../../lib/api.js'
 import { textFromOcrLayout, normalizeOcrLayoutForDisplay } from '../../lib/ocr-layout.js'
+import { DismissibleHint } from '../ui/DismissibleHint.js'
 
 const { Text } = Typography
 const { TextArea } = Input
@@ -238,13 +239,15 @@ export function OcrRegionReviewModal({
       destroyOnClose
     >
       <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <Alert
+        <DismissibleHint
+          hintId="ocr-region-review.regions"
           type="info"
           showIcon
           message="Clique em uma área destacada para corrigir o texto. Use zoom para ler manuscrito em células pequenas."
         />
         {isVaccineCard && (
-          <Alert
+          <DismissibleHint
+            hintId="ocr-region-review.vaccine-card"
             type="success"
             showIcon
             message="Cartão de vacina"

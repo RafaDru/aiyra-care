@@ -1,5 +1,8 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import { ConfigProvider, theme } from 'antd'
+import ptBR from 'antd/locale/pt_BR'
+import enUS from 'antd/locale/en_US'
+import { useTranslation } from 'react-i18next'
 import { AIYRACARE_DARK, AIYRACARE_TOKENS } from './aiyracare-tokens.js'
 import { darkPalette, palettes } from './colors.js'
 
@@ -20,6 +23,7 @@ export function useTheme() {
 const DARK_MODE_KEY = 'aiyracare-dark-mode'
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const { i18n } = useTranslation()
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem(DARK_MODE_KEY) === '1')
 
   useEffect(() => {
@@ -86,9 +90,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [darkMode])
 
+  const antLocale = i18n.language.startsWith('en') ? enUS : ptBR
+
   return (
     <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
-      <ConfigProvider theme={themeConfig}>
+      <ConfigProvider theme={themeConfig} locale={antLocale}>
         {children}
       </ConfigProvider>
     </ThemeContext.Provider>

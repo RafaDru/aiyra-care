@@ -1,5 +1,128 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-13] - Sprint go-live tech: agenda, calendários, settings, billing, legal UX
+
+### Contexto
+
+Consolidação de P2–P3 antes do épico **Agentes RAG**: estrutura de Configurações, agenda com sync Google/Outlook, billing Stripe completo, legal/compliance end-to-end no código, roadmap com badges de revisão humana.
+
+### Agenda e calendários externos
+
+- **Modelo:** `scheduled_events` (029) + import ICS (034) + `calendar_connections` (035, 036).
+- **API:** CRUD agenda, `POST /scheduled-events/import/ics`, OAuth Google (`/calendar/google/*`) e Microsoft (`/calendar/microsoft/*`) — pull `calendarView` −30d/+180d + push de eventos locais.
+- **Web:** aba **Agenda** (`AgendaTab`) — calendário estilo Google (marcas coloridas, + no dia, painel lateral); `GoogleCalendarConnectCard` + `OutlookCalendarConnectCard`.
+- **Azure Outlook local:** redirect Web só aceita `http://localhost:3010/...` (não `127.0.0.1`); ver `MICROSOFT_CALENDAR_REDIRECT_URI` e `docs/SUPABASE.md`.
+- **Google:** `GOOGLE_CALENDAR_*`; redirect API `http://127.0.0.1:3010/calendar/google/oauth/callback`; test users no GCP em modo Testing.
+
+### Configurações (settings-area-structure)
+
+- Rotas: `/settings/general`, `/account`, `/plan`, `/legal` via `SettingsLayout`.
+- Removido monólito `AccountPlanSection` e página `/settings` antiga.
+- Doc: `docs/ACCOUNT_AND_PLAN.md`.
+
+### Billing SaaS (Stripe)
+
+- Migrations 030/033; checkout pacotes + assinatura família; webhook → créditos/entitlements; Customer Portal; `GET /billing/me`; export Contabilizei (`GET /billing/export/contabilizei` + script CLI).
+- UI: `BillingSettingsCard` em `/settings/plan`.
+- Doc: `docs/BILLING.md`, `docs/infra/GCP_BILLING_ALERTS.md`.
+
+### Legal / LGPD (tech completa)
+
+- Migrations 031–032; módulo hexagonal `legal-compliance`; 4 docs v1.0 + cookies + consentimento menor.
+- `COMPLIANCE_GATE_ENABLED`, `RequireCompliance`, `/compliance/accept` (modal + Vite SPA bypass).
+- `LegalContentPort` adapters: `fs` | `http` | `gcs` (`LEGAL_CONTENT_ADAPTER`).
+- Exclusão conta `DELETE /auth/account`; canal DPO; `GO_LIVE_TECHNICAL_READINESS.md`, `HUMAN_REVIEW_QUEUE.md`.
+- **Pendente humano:** parecer advogado, NFS-e live, Stripe live, ANVISA antes de agentes clínicos.
+
+### Export clínico e sequência
+
+- Share link 48h (`027_clinical_export_share`); assets autorização Unimed (`028`); kind `acompanhamento` (`026`).
+- Export resumido/completo + share; polish sequência clínica e trilhas no contexto.
+
+### Sync / Connect (hardening)
+
+- Unimed session probe + fail-fast SSO; Amil JWT-first; mutex browser; sync-all serial; jobs timeout + browser registry.
+- Amil utilização → consultas; dependentes; Unimed carências PDF + guia PDF + foto médico; Bradesco agentic.
+
+### OCR / documentos
+
+- `OcrStatsPanel`, política OCR; métricas `GET /documents/ocr-stats`.
+
+### Roadmap e revisões
+
+- `roadmap.json` schema v2: `reviewBadges`, épico `human-review-gates`, épicos marcados done até agenda-sync-bidirectional.
+- `FEATURE_REVIEW_FRAMEWORK.md`, skills `.cursor/skills/aiyracare-*`, PR template, workflow tier3 CI.
+- **Próximo épico código:** `agentes` (P3 RAG) — gate `legal-anvisa-review-rag` + médico.
+
+### Migrations novas (026–036)
+
+| # | Arquivo | Tema |
+|---|---------|------|
+| 026 | `health_thread_kind_acompanhamento` | kind acompanhamento |
+| 027 | `clinical_export_share` | links públicos export |
+| 028 | `authorization_assets` | PDF guia, foto médico |
+| 029 | `scheduled_events` | agenda programada |
+| 030 | `billing` | Stripe, créditos, purchases |
+| 031 | `legal_compliance` | docs legais + aceite |
+| 032 | `account_profiles` | perfil estendido |
+| 033 | `subscription_period` | período assinatura |
+| 034 | `scheduled_events_external` | UID ICS / external_id |
+| 035 | `calendar_connections` | OAuth Google |
+| 036 | `calendar_microsoft_provider` | provider microsoft |
+
+Scripts: `apply-migration-026.mjs` … `036.mjs`, `seed-legal-documents.mjs`, `export-billing-contabilizei.mjs`.
+
+---
+
+## [2026-08-13] - Legal, LGPD e conformidade (estrutura inicial)
+
+### Contexto
+
+Preparação para oferta do AiyraCare ao **público externo** (B2C): documentos legais versionados, aceite vinculado à conta, módulo hexagonal alinhado ao Connect.
+
+### Documentação
+
+- [`docs/LEGAL_COMPLIANCE.md`](./LEGAL_COMPLIANCE.md) — arquitetura, enquadramento regulatório, API, checklist go-live.
+- [`docs/legal/`](./legal/) — Termos v1.0, Privacidade v1.0, CHANGELOG (modelos — revisão jurídica pendente).
+
+### Implementado
+
+- Migration `031_legal_compliance.sql` — `legal_documents`, `legal_document_acceptances` (SHA-256, `is_current`).
+- Módulo hexagonal `legal-compliance`: `LegalContentPort`, `ComplianceGatePort`, PG repos, `FsLegalContentAdapter`.
+- API: `GET /compliance/documents`, `GET /compliance/documents/:kind/current` (público); `GET /compliance/status`, `POST /compliance/accept` (auth).
+- Scripts: `apply-migration-031.mjs`, `seed-legal-documents.mjs`.
+- Web: rotas públicas `/termos`, `/privacidade`.
+- Roadmap: epic `legal-lgpd-compliance` + categoria `regulacao`.
+
+### Backlog (próximo)
+
+- Aceite obrigatório no signup + gate de rotas (`COMPLIANCE_GATE_ENABLED`).
+- Exclusão de conta, cookie policy, canal DPO, revisão advogado, NFS-e, incident response, revisão ANVISA antes de RAG clínico.
+
+### Produto / negócio (conversa 2026-08-13)
+
+- Stripe: tarifa por transação (+0,7% Billing em assinaturas); não rentabilidade com saldo parado.
+- Gateways BR: subadquirente + conta PJ Contabilizei para payout; credenciamento direto só com volume.
+- Regularidade go-live: LGPD (dados sensíveis + menores), CDC, fiscal; ANVISA SaMD em geral não para organizador familiar sem diagnóstico.
+
+## [2026-08-13] - DocuSign, conta/plano e revisões paralelas
+
+- **DocuSign:** B2C termos/privacidade → click-wrap + PG (`LEGAL_COMPLIANCE.md` §11); DocuSign só B2B.
+- `docs/ACCOUNT_AND_PLAN.md` + `AccountPlanSection` (conta, compliance, plano família).
+- `docs/FEATURE_REVIEW_FRAMEWORK.md` + skills `.cursor/skills/aiyracare-review-*` (tier 0–3).
+- Roadmap: `account-plan-management`, `feature-review-framework`.
+
+### Aceite obrigatório + gate (2026-08-13 tarde)
+
+- Web: checkbox no signup, `/compliance/accept`, `RequireCompliance`, links em Configurações.
+- API: `COMPLIANCE_GATE_ENABLED=1` bloqueia rotas com `403 COMPLIANCE_PENDING` (exceções `/compliance/status|accept`).
+
+### Exclusão de conta (LGPD art. 18)
+
+- `DELETE /auth/account` body `{ "confirmPhrase": "EXCLUIR" }`
+- Remove pacientes `owner_account_id`, arquivos GCS, memberships, créditos, `app_accounts` (cascade billing/legal)
+- Cancela Stripe subscription se configurado; remove usuário Supabase Auth
+
 ## [2026-08-06] - Linha do tempo + projeção Neo4j (Eixos 3.4 e 4)
 
 - `GET /patients/:id/timeline` com filtros (`kinds`, `sources`, `from`/`to`, `timelineMonths`, `limit`/`offset`); `PatientContextService.buildTimeline` sem quebrar `/context`.
@@ -912,7 +1035,7 @@ Consolidação do épico P0 (sync silencioso): UI de marcas/alinhamento, sync au
 ### Momento atual da aplicação (snapshot)
 - **Web:** Carteira dispara silent sync (6h stale, `sessionReady`); Integrações = Sincronizar manual + dock SSE.
 - **API:** incremental Unimed/Amil/Mater Dei; dual-write `sync_jobs`; mutex browser.
-- **Roadmap:** P0 Connect em progresso — incremental fetch ✅; novelty skipped* ✅; Hermes BFF 🔜.
+- **Roadmap:** P0 Connect ✅; Hermes BFF + PDF ✅.
 
 ### Arquivos-chave
 - `packages/web/src/hooks/useSilentWalletSync.ts`

@@ -5,6 +5,7 @@ import { chromium, request as playwrightRequest, type APIRequestContext, type Br
 import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
 import type { PlanAddOn, PlanWaitingPeriod } from '../../domain/insurance-plan/insurance-plan.entity.js'
 import type { PortalPlanSnapshot } from '../../application/insurance-plan/insurance-plan.service.js'
+import { fetchAmilUtilizacao, type AmilUsageItem } from './amil-utilizacao.helper.js'
 
 const BASE = 'https://www.amil.com.br/beneficiario'
 const API = `${BASE}/api/Beneficiario`
@@ -37,6 +38,7 @@ export interface AmilBeneficiarySyncData {
   beneficiary: AmilBeneficiarySnapshot
   plan: PortalPlanSnapshot
   authorizations: AmilAuthorizationItem[]
+  usageItems: import('./amil-utilizacao.helper.js').AmilUsageItem[]
   cardNumber: string
   marcaOtica: string
 }
@@ -929,10 +931,14 @@ export class AmilSyncScraper {
         periodStart: opts?.guidesPeriodStart,
       })
 
+      emit('fetch-utilizacao', `Utilização — ${label}...`, 'running')
+      const usageItems = await fetchAmilUtilizacao(request, token, marcaOtica, API)
+
       beneficiaryData.push({
         beneficiary: snapshot,
         plan,
         authorizations,
+        usageItems,
         cardNumber,
         marcaOtica,
       })

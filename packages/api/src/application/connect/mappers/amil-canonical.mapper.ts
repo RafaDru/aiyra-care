@@ -73,9 +73,26 @@ export function amilResultToCanonicalBatch(
         raw: item as unknown as Record<string, unknown>,
       })
     }
+
+    for (const usage of entry.usageItems ?? []) {
+      records.push({
+        type: 'medical_record',
+        externalKey: usage.invoiceNumber
+          ? `inv:${usage.invoiceNumber}`
+          : `${usage.procedureDate}|${usage.procedureDescription}|${usage.doctorName}`,
+        beneficiaryKey: key,
+        beneficiaryName,
+        recordType: usage.kind,
+        date: usage.procedureDate,
+        providerName: usage.providerName || 'Amil',
+        description: usage.procedureDescription,
+        raw: usage as unknown as Record<string, unknown>,
+      })
+    }
   }
 
   const authCount = records.filter((r) => r.type === 'authorization').length
+  const usageCount = records.filter((r) => r.type === 'medical_record').length
 
   return {
     batchId: randomUUID(),
@@ -89,6 +106,7 @@ export function amilResultToCanonicalBatch(
     stats: {
       beneficiaries: result.beneficiaryData.length,
       authorizations: authCount,
+      medicalRecords: usageCount,
       coverage: records.filter((r) => r.type === 'coverage').length,
     },
   }

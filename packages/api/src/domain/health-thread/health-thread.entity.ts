@@ -1,4 +1,4 @@
-export type HealthThreadKind = 'task' | 'investigation' | 'hypothesis' | 'episode'
+export type HealthThreadKind = 'acompanhamento' | 'investigation' | 'hypothesis' | 'episode'
 export type HealthThreadStatus = 'open' | 'active' | 'paused' | 'resolved' | 'ruled_out' | 'converted'
 export type HealthThreadPriority = 'low' | 'normal' | 'high'
 export type HealthThreadConfidence = 'low' | 'medium' | 'high'

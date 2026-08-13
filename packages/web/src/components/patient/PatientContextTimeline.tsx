@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Popover, Typography } from 'antd'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import type { PatientContext } from '../../lib/api.types.js'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
 import { timelineKindMeta } from './timeline-kind-meta.js'
@@ -12,6 +13,8 @@ type TimelineEvent = PatientContext['timeline'][number]
 
 const COL_WIDTH = 148
 const STACK_OFFSET = 12
+const CARD_BODY_HEIGHT = 56
+const CARD_STACK_OVERLAP = CARD_BODY_HEIGHT - STACK_OFFSET
 const SCROLL_HIDE = { scrollbarWidth: 'none', msOverflowStyle: 'none' } as const
 
 interface TimelineGroup {
@@ -95,17 +98,17 @@ function EventCard({ event }: { event: TimelineEvent }) {
         >
           <Icon style={{ fontSize: 11 }} />
         </span>
-        <Text className="patient-context-timeline__kind" style={{ color: meta.color }}>
+        <span className="patient-context-timeline__kind" style={{ color: meta.color }}>
           {meta.label}
-        </Text>
+        </span>
       </div>
-      <Text className="patient-context-timeline__title" ellipsis={{ tooltip: event.title }}>
+      <div className="patient-context-timeline__title" title={event.title}>
         {event.title}
-      </Text>
+      </div>
       {event.subtitle && (
-        <Text type="secondary" className="patient-context-timeline__subtitle" ellipsis>
+        <div className="patient-context-timeline__subtitle" title={event.subtitle}>
           {event.subtitle}
-        </Text>
+        </div>
       )}
     </div>
   )
@@ -126,34 +129,26 @@ function TimelineColumn({
     <div className="patient-context-timeline__node" style={{ width: COL_WIDTH }}>
       <div className="patient-context-timeline__node-inner">
         <div className="patient-context-timeline__connector">
-          <div
-            className="patient-context-timeline__cards-stack"
-            style={{
-              minHeight: 56 + (count - 1) * STACK_OFFSET,
-            }}
-          >
-            {group.events.map((event, index) => {
-              const offset = (count - 1 - index) * STACK_OFFSET
-              return (
-                <Popover
-                  key={`${event.kind}-${event.date}-${event.entityId ?? index}`}
-                  content={<EventPopoverContent event={event} />}
-                  title={null}
-                  trigger={touchMode ? 'click' : 'hover'}
-                  placement="top"
+          <div className="patient-context-timeline__cards-stack">
+            {group.events.map((event, index) => (
+              <Popover
+                key={`${event.kind}-${event.date}-${event.entityId ?? index}`}
+                content={<EventPopoverContent event={event} />}
+                title={null}
+                trigger={touchMode ? 'click' : 'hover'}
+                placement="top"
+              >
+                <div
+                  className="patient-context-timeline__card-slot"
+                  style={{
+                    marginTop: index === 0 ? 0 : -CARD_STACK_OVERLAP,
+                    zIndex: index + 1,
+                  }}
                 >
-                  <div
-                    className="patient-context-timeline__card-slot"
-                    style={{
-                      transform: `translateY(-${offset}px)`,
-                      zIndex: index + 1,
-                    }}
-                  >
-                    <EventCard event={event} />
-                  </div>
-                </Popover>
-              )
-            })}
+                  <EventCard event={event} />
+                </div>
+              </Popover>
+            ))}
           </div>
           <div
             className="patient-context-timeline__stem"
@@ -191,6 +186,7 @@ interface PatientContextTimelineProps {
 }
 
 export function PatientContextTimeline({ events, maxItems = 8, showHeader = true }: PatientContextTimelineProps) {
+  const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef({ active: false, startX: 0, startScroll: 0, moved: false })
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -206,8 +202,10 @@ export function PatientContextTimeline({ events, maxItems = 8, showHeader = true
 
   const stackPadding = useMemo(() => {
     const maxStack = groups.reduce((max, g) => Math.max(max, g.events.length), 1)
-    return (maxStack - 1) * STACK_OFFSET
+    return CARD_BODY_HEIGHT + (maxStack - 1) * STACK_OFFSET
   }, [groups])
+
+  const scrollTopPadding = 10
 
   const updateScroll = useCallback(() => {
     const el = scrollRef.current
@@ -271,14 +269,11 @@ export function PatientContextTimeline({ events, maxItems = 8, showHeader = true
 
   if (groups.length === 0) return null
 
-  const showLeftCap = !canScrollLeft
-  const showRightCap = !canScrollRight
-
   return (
     <div className="patient-context-timeline">
       {showHeader && (
         <div className="patient-context-timeline__header">
-          <Text strong>Linha do tempo</Text>
+          <Text strong>{t('agenda.timelineTitle')}</Text>
         </div>
       )}
 
@@ -289,7 +284,7 @@ export function PatientContextTimeline({ events, maxItems = 8, showHeader = true
               type="button"
               className="patient-context-timeline__nav-fab"
               onClick={() => scrollBy(-1)}
-              aria-label="Ver eventos anteriores"
+              aria-label={t('agenda.timelinePrev')}
             >
               <LeftOutlined />
             </button>
@@ -302,30 +297,21 @@ export function PatientContextTimeline({ events, maxItems = 8, showHeader = true
               type="button"
               className="patient-context-timeline__nav-fab"
               onClick={() => scrollBy(1)}
-              aria-label="Ver eventos posteriores"
+              aria-label={t('agenda.timelineNext')}
             >
               <RightOutlined />
             </button>
           </div>
         )}
 
-        {showLeftCap && (
-          <div
-            className="patient-context-timeline__rail-cap patient-context-timeline__rail-cap--left"
-            aria-hidden
-          />
-        )}
-        {showRightCap && (
-          <div
-            className="patient-context-timeline__rail-cap patient-context-timeline__rail-cap--right"
-            aria-hidden
-          />
-        )}
-
         <div
           ref={scrollRef}
           className={`patient-context-timeline__scroll${isDragging ? ' patient-context-timeline__scroll--dragging' : ''}`}
-          style={SCROLL_HIDE}
+          style={{
+            ...SCROLL_HIDE,
+            paddingTop: scrollTopPadding,
+            minHeight: stackPadding + scrollTopPadding + 48,
+          }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
@@ -335,7 +321,7 @@ export function PatientContextTimeline({ events, maxItems = 8, showHeader = true
             className="patient-context-timeline__rail"
             style={{
               minWidth: groups.length * COL_WIDTH,
-              paddingTop: 8 + stackPadding,
+              minHeight: stackPadding + 48,
               '--rail-gradient': `linear-gradient(90deg, ${AIYRACARE_TOKENS.colorPrimary} 0%, ${AIYRACARE_TOKENS.colorInfo} 100%)`,
             } as CSSProperties}
           >

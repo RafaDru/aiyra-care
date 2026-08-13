@@ -18,3 +18,7 @@ export const completeProfileSchema = createPatientSchema
   })
 
 export type CompleteProfileInput = z.infer<typeof completeProfileSchema>
+
+export const deleteAccountSchema = z.object({
+  confirmPhrase: z.literal('EXCLUIR'),
+})

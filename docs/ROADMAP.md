@@ -1,9 +1,30 @@
 # Roadmap AiyraCare
 
 > **Fonte estruturada (UI + API):** [`roadmap.json`](./roadmap.json)  
-> **Última revisão de prioridades:** 2026-08-12
+> **Última revisão de prioridades:** 2026-08-13
 
-Documento vivo para acompanhar épicos, pendências e debates. A página **Roadmap** no app lê o JSON via API.
+Documento vivo para acompanhar épicos, pendências e debates. A página **Roadmap** no app lê o JSON via API e organiza os épicos em três filas:
+
+1. **Em execução** — foco atual do time (destaque na UI)
+2. **Backlog** — priorizado, ainda não em desenvolvimento ativo
+3. **Executado** — entregas compactas e expansíveis no final
+
+Categorias no JSON: **Experiência da família** (`negocio`) vs **Por dentro do sistema** (`tecnico`) vs **Regulatório** (`regulacao`).
+
+## Revisão humana / profissional (paralela)
+
+Itens com `reviewBadge` no JSON aparecem com **tags coloridas** no Roadmap e na seção **Revisão humana pendente** (tecnologia pronta; falta parecer externo).
+
+| Badge | Quem |
+|-------|------|
+| Jurídico | Advogado |
+| Fiscal | Contador / Contabilizei |
+| Regulatório | Consultor ANVISA / DPO |
+| Médico | Pediatria / clínico |
+| Segurança | Pentest / auditor |
+| Conteúdo | Revisão de textos |
+
+Épico agregador: `human-review-gates`. Índice com artefatos: [`HUMAN_REVIEW_QUEUE.md`](./HUMAN_REVIEW_QUEUE.md).
 
 ## Princípios
 
@@ -14,74 +35,82 @@ Documento vivo para acompanhar épicos, pendências e debates. A página **Roadm
 
 ## Ordem de prioridade (resumo)
 
-| Prioridade | Foco | Por quê agora |
-|------------|------|----------------|
-| **P0** | Sync silencioso (Connect) | Carteira atualizada sem intervenção; sessão estável + novidades discretas |
-| **P1** | Sequência do cuidado + Neo4j | Estrutura consulta → autorização → exame; base para correlação |
-| **P2** | Scheduler/worker, export médico, dados dos portais | Automação apartada + entrega na consulta |
-| **P3** | OCR/LLM + agentes RAG | Inteligência com fontes citadas, após P1 |
-| **P4** | Rede credenciada, mobile, microserviços | Horizonte de produto |
+| Prioridade | Foco | Estado (2026-08-13) |
+|------------|------|---------------------|
+| **P0** | Sync silencioso (Connect) | ✅ Entregue |
+| **P1** | Sequência do cuidado + Neo4j | ✅ Entregue |
+| **P2** | Scheduler, export, integrações, billing, legal tech, settings | ✅ Código entregue; gates humanos paralelos |
+| **P3** | OCR/LLM ✅ · Agenda + calendários ✅ · **Agentes RAG** 🔜 | Próximo épico de produto |
+| **P4** | Rede credenciada, mobile, microserviços | Horizonte |
 
-## Épicos
+## O que está disponível hoje (produto)
+
+### Família (negócio)
+
+- Perfil paciente: Carteira (sync silencioso), Convênios, Integrações, Resumo clínico, Linha do tempo / Encadeamento, Acompanhamento, Arquivos, Medidas, **Agenda** (calendário + lista + histórico).
+- Export clínico resumido/completo, impressão/PDF, **compartilhar com médico** (link 48h).
+- **Agenda programada** + import ICS; **Google Calendar** e **Outlook** OAuth (sync bidirecional calendário principal).
+- **Configurações:** Geral (tema/idioma), Conta (perfil, exclusão), Plano (Stripe), Legal (aceites, go-live, DPO).
+
+### Sistema (técnico)
+
+- Connect: Unimed, Amil, Mater Dei, Hermes (delta silent), Bradesco; worker agendado; SSE progresso + sync.completed.
+- Sequência clínica (`clinical_entity_links`); Neo4j lineage + path queries.
+- Billing: créditos manuscrito, checkout Stripe, assinatura família, webhook, portal cliente.
+- Legal: compliance gate, 4 documentos versionados, cookies, consentimento menor, exclusão LGPD.
+
+### Pendente antes de go-live público
+
+Ver épico `human-review-gates`: advogado, NFS-e, Stripe live, DPO operacional, revisão médica copy export/OCR, pentest tier 3.
+
+## Épicos — status
 
 Detalhe completo (status, itens, notas): ver `roadmap.json` ou menu **Roadmap** no app.
 
-**Sync delta (portal vs DB):** [`SYNC_DELTA.md`](./SYNC_DELTA.md)
+**Sync delta:** [`SYNC_DELTA.md`](./SYNC_DELTA.md)
 
-**Categorias transversais:** `negocio` (produto/UX) e `tecnico` (arquitetura/dados) — tag nos épicos no JSON.
+### ✅ P0 — Connect silencioso
 
-### P0 — Connect: sincronismo silencioso ✅
-- Pacote `@open-health/connect`, orchestrator, sessões Amil/Unimed ✅
-- `sync_jobs` PG (só Postgres), novelty na UI, refresh CDP ✅
-- Sync incremental Unimed/Amil/Mater Dei/Hermes em silent ✅
-- Hardening sync (sessão, mutex, timeout browser) ✅
-- SSE push-first ✅; intervenção só manual na Carteira ✅
-- `skipped*` novelty todos portais ✅
-- `trigger=scheduled` + script/loop local ✅
+Pacote connect, orchestrator, sessões, incremental, SSE, novelty, worker, hardening.
 
-### P1 — Sequência do cuidado
-- `relation_types`, `clinical_entity_links`, UI Acompanhamento ✅
-- Trilhas no context (`activeThreads`, pendências de acompanhamento) ✅
-- Polish UX sequência + picker tabulado nos modais ✅
+### ✅ P1 — Sequência + Neo4j
 
-### P1 — Grafo Neo4j
-- Projector links + Hypothesis MVP ✅
-- Worker lineage (`packages/neo4j-lineage-worker`), path queries API ✅
-- Timeline modo Encadeamento (grafo) na UI ✅
+`clinical_entity_links`, UI Acompanhamento, trilhas no context, lineage worker, timeline Encadeamento.
 
-### P2 — Scheduler e worker
-- `trigger=scheduled` + `run-scheduled-syncs.mjs` + loop API ✅
-- `packages/connect-worker` (runner apartado) ✅
-- Eventos `sync.completed` (SSE por paciente) ✅
+### ✅ P2 — Automação e entrega
 
-### P2 — Contexto + export médico
-- Context API + UI ✅
-- Export resumido (imprimir/PDF via context) ✅
-- Export completo, compartilhamento 🔜
+- Scheduler + `connect-worker` + `sync.completed` SSE
+- Context + export + share
+- Integrações enriquecidas (Amil utilização, Unimed PDF, Bradesco, assets)
+- Billing Stripe + export Contabilizei + GCP alerts doc
+- Legal/LGPD (código) + feature review framework
+- Settings `/settings/*` + conta/plano separados
 
-### P2 — Integrações (dados)
-- Unimed/Amil core ✅
-- Utilização Amil, carências Unimed PDF, Bradesco, Mater Dei 🔜
+### ✅ P3 — Agenda / calendários
 
-### P3 — Documentos OCR/LLM
-- Identidade + cascade ✅
-- Manuscrito, métricas 🔜
+`scheduled_events`, ICS, Google OAuth, Microsoft Outlook OAuth, UX calendário na Agenda.
 
-### P3 — Agenda / Calendário (categoria **Negócio**)
-- Avaliar Linha do Tempo como sub-visão de Agenda/Calendário 🔜
-- UX calendário (pegada Google): eventos clínicos + entradas programadas («Agendar neurologista») 🔜
-- Integração Google Calendar, Microsoft Outlook; sync bidirecional (fase 2) 🔜
+### ✅ P3 — Documentos OCR/LLM (código)
 
-### P3 — Agentes
-- RAG com citações, `packages/agents` 🔜
+Cascade OCR, manuscrito, métricas OCR — revisão médica disclaimers = human gate.
 
-### P4 — Rede credenciada + plataforma
-- “Decolar” da saúde, mobile, charts, microserviços 🔜
+### 🔜 P3 — Agentes RAG (próximo)
+
+Runtime + `packages/agents` + grafo — **não iniciar** sem gate ANVISA + revisão médica.
+
+### 🔜 P4 — Horizonte
+
+Rede credenciada, app mobile, microserviços Connect, novos tipos Medidas.
+
+### 🧑‍⚖️ Paralelo — human-review-gates
+
+Tecnologia pronta; falta profissional externo.
 
 ## Como atualizar
 
 1. Editar `docs/roadmap.json` (status: `done` | `in_progress` | `planned` | `blocked`).
 2. Ajustar `updatedAt` e este arquivo se mudar prioridades.
-3. Commit — a UI reflete na próxima carga da página.
+3. Registrar sessão em `docs/HISTORICO.md`.
+4. Commit — a UI reflete na próxima carga da página.
 
-Relacionado: [PROJETO.md](./PROJETO.md) (arquitetura), [HISTORICO.md](./HISTORICO.md) (sessões), [CONNECT.md](./CONNECT.md) (boundary integrações).
+Relacionado: [PROJETO.md](./PROJETO.md), [HISTORICO.md](./HISTORICO.md), [CONNECT.md](./CONNECT.md), [ACCOUNT_AND_PLAN.md](./ACCOUNT_AND_PLAN.md), [LEGAL_COMPLIANCE.md](./LEGAL_COMPLIANCE.md).

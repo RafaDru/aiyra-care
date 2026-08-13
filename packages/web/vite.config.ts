@@ -11,9 +11,12 @@ const API_TARGET = `http://127.0.0.1:${API_PORT}`
 
 /** Rotas da API — proxy direto em 127.0.0.1 (porta 3010; evita conflito com Next.js na 3000). */
 const API_ROUTE_PATTERN =
-  '^/(patients|documents|exams|vaccines|medications|allergies|growth-records|medical-records|diagnoses|authorizations|sessions|roadmap|integration-links|scraper|plan-memberships|handwriting-credits|health|auth)'
+  '^/(patients|documents|exams|vaccines|medications|allergies|growth-records|medical-records|diagnoses|authorizations|sessions|roadmap|integration-links|scraper|plan-memberships|handwriting-credits|scheduled-events|billing|compliance|calendar|health|auth|project|care-places|clinical-export|graph)'
 
 /** React Router paths que colidem com prefixos da API — refresh não deve ir ao backend. */
+const SPA_DOCUMENT_EXACT = new Set(['/roadmap', '/compliance/accept'])
+const SPA_DOCUMENT_PREFIXES = ['/patients/']
+
 function isSpaDocumentRequest(req: { url?: string; headers: Record<string, string | string[] | undefined> }): boolean {
   const accept = String(req.headers.accept ?? '')
   const mode = String(req.headers['sec-fetch-mode'] ?? '')
@@ -21,9 +24,8 @@ function isSpaDocumentRequest(req: { url?: string; headers: Record<string, strin
   if (!isDocumentNavigation) return false
 
   const path = (req.url ?? '').split('?')[0]
-  if (path.startsWith('/patients/')) return true
-  if (path === '/roadmap') return true
-  return false
+  if (SPA_DOCUMENT_EXACT.has(path)) return true
+  return SPA_DOCUMENT_PREFIXES.some((prefix) => path.startsWith(prefix))
 }
 
 export default defineConfig({

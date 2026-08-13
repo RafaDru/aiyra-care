@@ -81,6 +81,23 @@ export interface PatientContext {
   textSummary: string
 }
 
+export interface PatientClinicalExportSections {
+  allergies: Array<{ allergen: string; severity: string | null; reaction: string | null }>
+  medications: Array<{ name: string; dose: string | null; frequency: string | null }>
+  vaccines: Array<{ name: string; administeredAt: string | null; doseLabel: string | null }>
+  diagnoses: Array<{ code: string | null; description: string; diagnosedAt: string | null }>
+  documents: Array<{ filename: string; type: string; uploadedAt: string; ocrProcessed: boolean }>
+  authorizations: Array<{ title: string; date: string | null; status: string }>
+  medicalRecords: Array<{ date: string; description: string | null; doctor: string | null }>
+  exams: Array<{ name: string; date: string; laboratory: string | null }>
+}
+
+export interface PatientClinicalExport {
+  mode: 'summary' | 'full'
+  context: PatientContext
+  fullSections?: PatientClinicalExportSections
+}
+
 export interface PatientTimelineEvent {
   date: string
   kind: string
@@ -107,7 +124,7 @@ export interface PatientTimelineQuery {
   offset?: number
 }
 
-export type HealthThreadKind = 'task' | 'investigation' | 'hypothesis' | 'episode'
+export type HealthThreadKind = 'acompanhamento' | 'task' | 'investigation' | 'hypothesis' | 'episode'
 export type HealthThreadStatus = 'open' | 'active' | 'paused' | 'resolved' | 'ruled_out' | 'converted'
 
 export type HealthThreadPriority = 'low' | 'normal' | 'high'
@@ -349,6 +366,61 @@ export interface CompleteProfileInput {
   heightCm?: number
 }
 
+export type PreferredContact = 'email' | 'phone' | 'whatsapp'
+
+export interface AccountProfileFields {
+  fullName: string | null
+  phone: string | null
+  phoneSecondary: string | null
+  whatsapp: string | null
+  cpf: string | null
+  birthDate: string | null
+  gender: string | null
+  city: string | null
+  state: string | null
+  country: string
+  timezone: string | null
+  locale: string | null
+  bio: string | null
+  websiteUrl: string | null
+  linkedinUrl: string | null
+  instagramUrl: string | null
+  xUrl: string | null
+  facebookUrl: string | null
+  preferredContact: PreferredContact | null
+  updatedAt: string | null
+}
+
+export interface AccountProfileView {
+  accountId: string
+  email: string | null
+  displayName: string | null
+  avatarUrl: string | null
+  profile: AccountProfileFields
+}
+
+export interface UpdateAccountProfileInput {
+  fullName?: string
+  phone?: string
+  phoneSecondary?: string
+  whatsapp?: string
+  cpf?: string
+  birthDate?: string
+  gender?: 'male' | 'female' | 'other' | 'prefer_not'
+  city?: string
+  state?: string
+  country?: string
+  timezone?: string
+  locale?: string
+  bio?: string
+  websiteUrl?: string
+  linkedinUrl?: string
+  instagramUrl?: string
+  xUrl?: string
+  facebookUrl?: string
+  preferredContact?: PreferredContact
+}
+
 export interface GrowthRecord {
   id: string
   patientId: string
@@ -361,6 +433,189 @@ export interface GrowthRecord {
   percentileHeight: number | null
   notes: string | null
   createdAt: string
+}
+
+export interface OcrStatsRow {
+  document_type: string
+  total: number
+  ocr_ok: number
+  parse_ok: number
+  paid_count: number
+  avg_quality: number | null
+}
+
+export interface OcrStats {
+  summary: {
+    total?: number
+    ocr_ok?: number
+    parse_ok?: number
+    paid_count?: number
+    avg_quality?: number | null
+  }
+  byType: OcrStatsRow[]
+}
+
+export type ScheduledEventKind = 'appointment' | 'reminder' | 'task'
+export type ScheduledEventStatus = 'planned' | 'done' | 'cancelled'
+export type ScheduledEventSource = 'local' | 'ics_import' | 'google' | 'microsoft'
+
+export interface ScheduledEvent {
+  id: string
+  patientId: string
+  healthThreadId: string | null
+  title: string
+  description: string | null
+  scheduledAt: string
+  endAt: string | null
+  kind: ScheduledEventKind
+  status: ScheduledEventStatus
+  source: ScheduledEventSource
+  externalUid: string | null
+  sourceLabel: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface IcsImportResult {
+  imported: number
+  skippedDuplicate: number
+  skippedInvalid: number
+  totalParsed: number
+}
+
+export interface GoogleCalendarStatus {
+  connected: boolean
+  configured: boolean
+  id?: string
+  calendarId?: string
+  calendarLabel?: string | null
+  lastSyncAt?: string | null
+}
+
+export interface GoogleCalendarSyncResult {
+  pull: IcsImportResult
+  pushed: number
+  pushFailed: number
+}
+
+export interface BillingPackageOffer {
+  id: string
+  credits: number
+  amountCents: number
+  currency: string
+  label: string
+  stripePriceId?: string
+}
+
+export interface BillingOffers {
+  stripeEnabled: boolean
+  packages: BillingPackageOffer[]
+  familyPlan: {
+    tier: string
+    monthlyFreeAllowance: number
+    stripePriceId: string | null
+  }
+}
+
+export interface BillingPurchase {
+  id: string
+  accountId: string
+  stripeSessionId: string | null
+  packageCredits: number
+  amountCents: number
+  currency: string
+  status: string
+  createdAt: string
+  completedAt: string | null
+}
+
+export interface AccountEntitlement {
+  accountId: string
+  planTier: 'free' | 'family'
+  monthlyFreeAllowance: number
+  stripeCustomerId: string | null
+  stripeSubscriptionId: string | null
+  subscriptionStatus: string | null
+  subscriptionCurrentPeriodEnd: string | null
+  subscriptionCancelAtPeriodEnd: boolean
+}
+
+export interface BillingMe {
+  entitlement: AccountEntitlement
+  quota: HandwritingQuota
+  purchases: BillingPurchase[]
+  canExportBilling?: boolean
+}
+
+export type LegalDocumentKind = 'terms_of_use' | 'privacy_policy' | 'cookie_policy' | 'minor_guardian_consent'
+
+export interface LegalDocumentView {
+  id: string
+  kind: LegalDocumentKind
+  version: string
+  title: string
+  summary: string | null
+  contentPath: string
+  contentSha256: string
+  effectiveAt: string
+  publishedAt: string
+  requiresAcceptance: boolean
+}
+
+export interface LegalDocumentWithContent extends LegalDocumentView {
+  content: string
+  publisher: LegalPublisher
+}
+
+export interface LegalPublisher {
+  entityName: string | null
+  cnpj: string | null
+  address: string | null
+  complete: boolean
+}
+
+export interface GoLiveChecklistItem {
+  id: string
+  ok: boolean
+  detail?: string
+}
+
+export interface GoLiveStatus {
+  complianceGateEnabled: boolean
+  publisher: LegalPublisher
+  privacyEmail: string
+  stripeConfigured: boolean
+  stripeLiveMode: boolean
+  dpoSlaDays: number
+  documentsPublished: number
+  requiredDocumentsOk: boolean
+  readyForPublicBilling: boolean
+  checklist: GoLiveChecklistItem[]
+}
+
+export interface ComplianceStatus {
+  compliant: boolean
+  requiredKinds: LegalDocumentKind[]
+  pendingKinds: LegalDocumentKind[]
+  acceptances: Array<{
+    kind: LegalDocumentKind
+    version: string
+    acceptedAt: string
+    documentId: string
+  }>
+}
+
+export interface ComplianceContactInfo {
+  privacyEmail: string
+  supportEmail: string | null
+  dpoSlaDays: number
+  dataSubjectRequestPath: string
+  privacyPolicyUrl: string
+  termsUrl: string
+  cookiePolicyUrl: string
+  dataProcessingMapPath: string
+  incidentResponsePath: string
+  publisher: LegalPublisher
 }
 
 export interface Vaccine {

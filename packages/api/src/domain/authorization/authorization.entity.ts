@@ -45,6 +45,8 @@ export interface AuthorizationProps {
   items?: AuthorizationItemData[]
   medicalRecordId?: string
   providerExternalId?: string
+  doctorPhotoUrl?: string
+  guideDocumentId?: string
 }
 
 export interface AuthorizationData {
@@ -77,6 +79,8 @@ export interface AuthorizationData {
   items: AuthorizationItemData[]
   medicalRecordId: string | null
   providerExternalId: string | null
+  doctorPhotoUrl: string | null
+  guideDocumentId: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -116,6 +120,8 @@ export class Authorization {
       items: props.items ?? [],
       medicalRecordId: props.medicalRecordId ?? null,
       providerExternalId: props.providerExternalId ?? null,
+      doctorPhotoUrl: props.doctorPhotoUrl ?? null,
+      guideDocumentId: props.guideDocumentId ?? null,
       createdAt: now,
       updatedAt: now,
     })
@@ -156,6 +162,8 @@ export class Authorization {
   get items(): AuthorizationItemData[] { return this.data.items }
   get medicalRecordId(): string | null { return this.data.medicalRecordId }
   get providerExternalId(): string | null { return this.data.providerExternalId }
+  get doctorPhotoUrl(): string | null { return this.data.doctorPhotoUrl }
+  get guideDocumentId(): string | null { return this.data.guideDocumentId }
   get createdAt(): Date { return this.data.createdAt }
   get updatedAt(): Date { return this.data.updatedAt }
 

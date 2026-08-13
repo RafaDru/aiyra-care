@@ -3,6 +3,7 @@ import {
   Alert, App, Button, Card, Col, Checkbox, Form, Input, Modal, Popconfirm, Row, Space, Tag, Typography, Upload,
 } from 'antd'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
+import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
 import dayjs from 'dayjs'
 import {
   CheckCircleOutlined,
@@ -235,7 +236,8 @@ export function PersonalDocumentsTab({ patientId }: Props) {
 
   return (
     <>
-      <Alert
+      <DismissibleHint
+        hintId="personal-documents.intro"
         type="info"
         showIcon
         style={{ marginBottom: 20 }}

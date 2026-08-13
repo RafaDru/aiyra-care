@@ -126,9 +126,32 @@ Regra: novas telas com **grupos de cards/linhas** devem manter alinhamento horiz
 - Logos: `packages/web/public/brands/` — `logoSrc` (inline), `logoSquare` (avatar), `logoBanner` (faixa)
 - Exemplos: `IntegrationsTab`, `CoverageTab`
 
+## Legal / LGPD
+
+- Documentos canônicos: `docs/legal/` (markdown versionado); arquitetura em `docs/LEGAL_COMPLIANCE.md`.
+- API `GET /compliance/documents/:kind/current` (público); aceite `POST /compliance/accept` (auth).
+- Seed após migration: `node packages/api/scripts/seed-legal-documents.mjs`.
+- Produção: `COMPLIANCE_GATE_ENABLED=1` no `.env` da API (UI `RequireCompliance`).
+- `LEGAL_CONTENT_ADAPTER=fs|http|gcs` — ver `legal-content.factory.ts`.
+
+## Agenda e calendários externos
+
+- **Agenda:** `scheduled_events` (029); ICS import (034); UI `AgendaTab`.
+- **Google:** `GOOGLE_CALENDAR_CLIENT_ID/SECRET`; redirect `http://127.0.0.1:3010/calendar/google/oauth/callback`; rotas `/calendar/google/*`.
+- **Outlook:** `MICROSOFT_CALENDAR_*` (ou `AZURE_*`); redirect **`http://localhost:3010/calendar/microsoft/oauth/callback`** (Azure Web não aceita `127.0.0.1`); rotas `/calendar/microsoft/*`.
+- Migrations `035_calendar_connections.sql`, `036_calendar_microsoft_provider.sql`.
+
+## Configurações (web)
+
+- `/settings/general` | `/account` | `/plan` | `/legal` — `SettingsLayout`, `docs/ACCOUNT_AND_PLAN.md`.
+
+## Revisões de feature (skills)
+
+Antes de features tier 2+, usar skills em `.cursor/skills/aiyracare-*` — ver `docs/FEATURE_REVIEW_FRAMEWORK.md`. Orquestrador: `aiyracare-feature-release`. **Não** rodar quatro análises em cada typo — usar matriz de tier.
+
 ## Migrations
 
-SQL em `database/relational/`. Aplicar novas colunas manualmente se necessário (ex.: via `npx tsx` + `pg` no dir `packages/api`). Última relevante: `010_integration_link_session.sql` (`encrypted_session_token`, `session_expires_at`).
+SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs` em `packages/api/scripts/`. Últimas: **036** (`calendar_microsoft_provider`); ver também 026–035 (agenda, billing, legal, account). `docs/LEGAL_COMPLIANCE.md`.
 
 ## Testes API
 

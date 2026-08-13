@@ -5,7 +5,7 @@ import type { FileStorage } from '../../domain/document/file-storage.js'
 import type { PrescriptionUnderstandingPort } from '../../domain/document/handwriting-understanding.js'
 import type { VaccineCardUnderstandingPort } from '../../domain/document/vaccine-understanding.js'
 import { isHandwritingDocumentType } from '../../domain/document/handwriting-types.js'
-import { isHandwritingInterpretationEnabled, tierForCreditSource } from '../../domain/document/handwriting-policy.js'
+import { isHandwritingInterpretationEnabled, tierForCreditSource, estimatedInterpretationCostCents } from '../../domain/document/handwriting-policy.js'
 import { NotFoundError } from '../../domain/errors.js'
 
 export class DocumentInterpretationService {
@@ -53,6 +53,13 @@ export class DocumentInterpretationService {
           interpretation.rawTranscription || doc.extractedText || null,
         ],
       )
+
+      await this.enrichInterpretUsageMetadata(scopeId, documentId, {
+        provider: interpretation.provider,
+        tier,
+        estimatedCostCents: estimatedInterpretationCostCents(tier, interpretation.provider),
+        creditSource: source,
+      })
 
       return { interpretation, quota, creditSource: source, tier }
     } catch (err) {
@@ -104,6 +111,13 @@ export class DocumentInterpretationService {
         ],
       )
 
+      await this.enrichInterpretUsageMetadata(scopeId, documentId, {
+        provider: interpretation.provider,
+        tier,
+        estimatedCostCents: estimatedInterpretationCostCents(tier, interpretation.provider),
+        creditSource: source,
+      })
+
       return { interpretation, quota, creditSource: source, tier }
     } catch (err) {
       await this.credits.grantPackage(scopeId, 1, {
@@ -113,6 +127,23 @@ export class DocumentInterpretationService {
       })
       throw err
     }
+  }
+
+  private async enrichInterpretUsageMetadata(
+    scopeId: string,
+    documentId: string,
+    meta: Record<string, unknown>,
+  ) {
+    await this.pool.query(
+      `UPDATE handwriting_credit_events
+       SET metadata = COALESCE(metadata, '{}'::jsonb) || $3::jsonb
+       WHERE id = (
+         SELECT id FROM handwriting_credit_events
+         WHERE scope_id = $1 AND document_id = $2 AND event_type = 'interpret'
+         ORDER BY created_at DESC LIMIT 1
+       )`,
+      [scopeId, documentId, JSON.stringify(meta)],
+    )
   }
 
   async getInterpretation(documentId: string) {

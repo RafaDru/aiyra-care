@@ -26,11 +26,15 @@ import {
 import type { WalletDockJob } from '../../../components/scraper/WalletSyncDock.js'
 import { IntegrationsSyncSidebar } from '../../../components/integrations/IntegrationsSyncSidebar.js'
 import { GroupedAlignedTables } from '../../../components/layout/GroupedAlignedTables.js'
+import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
+import { isHintDismissed } from '../../../lib/dismissed-hints.js'
 import { ALIGNED_COL } from '../../../components/layout/aligned-table-columns.js'
 import { useIntegrationSyncHistory } from '../../../hooks/useIntegrationSyncHistory.js'
 import type { SyncablePortalType } from '../../../lib/sync-portal-profile.js'
 import type { SyncJobOverallStatus } from '../../../lib/sync-job-progress.js'
 import { useAuth } from '../../../contexts/AuthContext.js'
+import { GoogleCalendarConnectCard } from '../../../components/calendar/GoogleCalendarConnectCard.js'
+import { OutlookCalendarConnectCard } from '../../../components/calendar/OutlookCalendarConnectCard.js'
 import {
   INSURANCE_PORTALS,
   HOSPITAL_PORTALS,
@@ -513,13 +517,21 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           </Space>
         </div>
 
+        <GoogleCalendarConnectCard patientId={patient.id} />
+        <OutlookCalendarConnectCard patientId={patient.id} />
+
         {rows.length === 0 ? (
-          <Alert
-            type="info"
-            showIcon
-            message="Nenhuma integração"
-            description="Use Nova integração para vincular Unimed, Amil, Mater Dei ou importar do gov.br."
-          />
+          isHintDismissed('integrations.empty') ? (
+            <Typography.Text type="secondary">Nenhuma integração — use Nova integração para vincular um portal.</Typography.Text>
+          ) : (
+            <DismissibleHint
+              hintId="integrations.empty"
+              type="info"
+              showIcon
+              message="Nenhuma integração"
+              description="Use Nova integração para vincular Unimed, Amil, Mater Dei ou importar do gov.br."
+            />
+          )
         ) : (
           <GroupedAlignedTables<TableRow>
             groups={integrationGroups}

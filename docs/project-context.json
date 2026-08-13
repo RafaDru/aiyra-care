@@ -1,120 +1,115 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-08-12",
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-13",
   "application": {
     "name": "AiyraCare (Filhos)",
     "repository": "https://github.com/RafaDru/open-health",
-    "stack": ["Fastify API", "React/Vite", "PostgreSQL", "Neo4j (projeção)", "Supabase Auth"],
+    "stack": ["Fastify API", "React/Vite", "PostgreSQL", "Neo4j (projeção)", "Supabase Auth", "Stripe"],
     "localUrls": {
       "api": "http://127.0.0.1:3010",
       "web": "http://localhost:5173"
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Carteira: sync silencioso (sessionReady + stale 6h); progresso SSE push-first. Incremental em silent: Unimed 2 meses + auth detalhe; Amil PostTokens janela curta sem plano; Mater Dei e Hermes exames desde max(exam_date)−14d. sync_jobs só PG; batch scheduled via script ou SYNC_SCHEDULED_INTERVAL_MS.",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Connect: sync silencioso (sessionReady + stale 6h), incremental por portal, SSE push-first, worker agendado. Agenda com scheduled_events + OAuth Google/Outlook. Billing Stripe (pacotes + assinatura). Legal: compliance gate, docs versionados, exclusão LGPD. Próximo épico: Agentes RAG (gate ANVISA+médico).",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
-    "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, import_lineage, sync_jobs",
-    "neo4jRole": "Projeção read-model para relações e futuros agentes; não define vocabulário de relações",
-    "principle": "Atalhos em trilhas não duplicam dados — chamam use cases existentes e criam health_thread_links"
+    "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, billing, legal, agenda, calendar_connections, sync_jobs",
+    "neo4jRole": "Projeção read-model para caminhos e futuros agentes",
+    "principle": "PatientContext determinístico sem LLM; agentes RAG citam fontes PG"
   },
   "layers": [
-    { "id": "A", "name": "Dados estruturados", "description": "Postgres: consultas, exames, vacinas, meds, alergias, autorizações, plano, import_lineage", "usesLlm": false, "status": "operational" },
-    { "id": "B", "name": "Contexto determinístico", "description": "GET /patients/:id/context e /timeline — alertas, textSummary, timeline clínica", "usesLlm": false, "status": "operational" },
-    { "id": "C", "name": "Trilhas de saúde", "description": "HealthThread + entries + links; drawer workflow; adicionar/vincular artefatos", "usesLlm": false, "status": "operational" },
-    { "id": "D", "name": "Documentos + OCR/LLM", "description": "Upload, cascade OCR, interpretação prescrição/vacina/manuscrito", "usesLlm": true, "status": "in_progress" },
-    { "id": "E", "name": "Grafo Neo4j", "description": "Lineage worker, path queries API, timeline Encadeamento; Doctor/Procedure nodes", "usesLlm": false, "status": "done" },
-    { "id": "F", "name": "Agentes de apoio", "description": "RAG com PatientContext + trilhas + fontes citadas", "usesLlm": true, "status": "planned" }
+    { "id": "A", "name": "Dados estruturados", "description": "Postgres: consultas, exames, vacinas, meds, alergias, autorizações, plano, agenda, billing", "usesLlm": false, "status": "operational" },
+    { "id": "B", "name": "Contexto determinístico", "description": "GET /patients/:id/context e /timeline — alertas, textSummary, export clínico", "usesLlm": false, "status": "operational" },
+    { "id": "C", "name": "Trilhas de saúde", "description": "HealthThread + acompanhamento + clinical_entity_links", "usesLlm": false, "status": "operational" },
+    { "id": "D", "name": "Documentos + OCR/LLM", "description": "Cascade OCR, interpretação manuscrito, créditos billing", "usesLlm": true, "status": "operational" },
+    { "id": "E", "name": "Grafo Neo4j", "description": "Lineage worker, path queries, timeline Encadeamento", "usesLlm": false, "status": "done" },
+    { "id": "F", "name": "Agenda + calendários", "description": "scheduled_events, ICS, Google/Microsoft OAuth sync", "usesLlm": false, "status": "done" },
+    { "id": "G", "name": "Billing SaaS", "description": "Stripe checkout, webhook, assinatura, entitlements", "usesLlm": false, "status": "done" },
+    { "id": "H", "name": "Legal / LGPD", "description": "Compliance gate, aceite versionado, exclusão conta", "usesLlm": false, "status": "operational" },
+    { "id": "I", "name": "Agentes de apoio", "description": "RAG com PatientContext + citações — próximo épico P3", "usesLlm": true, "status": "planned" }
   ],
   "domains": [
-    { "name": "Patient", "table": "patients", "description": "Pacientes e vínculos familiares (parent_ids)" },
-    { "name": "MedicalRecord", "table": "medical_records", "description": "Consultas, extrato Unimed, retornos" },
-    { "name": "Exam", "table": "exams", "description": "Exames laboratoriais e de imagem" },
-    { "name": "Vaccine", "table": "vaccines", "description": "Vacinas aplicadas" },
-    { "name": "Medication", "table": "medications", "description": "Medicamentos e receitas" },
-    { "name": "Allergy", "table": "allergies", "description": "Alergias confirmadas" },
-    { "name": "Diagnosis", "table": "diagnoses", "description": "Diagnósticos formais (conclusão)" },
-    { "name": "Authorization", "table": "authorizations", "description": "Guias, tokens, autorizações de plano" },
-    { "name": "Document", "table": "documents", "description": "Arquivos, OCR, identidade" },
-    { "name": "HealthThread", "table": "health_threads", "description": "Trilhas: task, investigation, hypothesis, episode" },
-    { "name": "HealthThreadEntry", "table": "health_thread_entries", "description": "Notas e entradas de workflow" },
-    { "name": "HealthThreadLink", "table": "health_thread_links", "description": "Vínculo trilha→entidade com role (workflow)" },
-    { "name": "IntegrationLink", "table": "integration_links", "description": "Credenciais portal por paciente" },
-    { "name": "InsurancePlan", "table": "insurance_plans", "description": "Plano + membership multi-operadora" },
-    { "name": "ImportLineage", "table": "import_lineage", "description": "Proveniência de imports externos" },
-    { "name": "SyncJob", "table": "sync_jobs", "description": "Jobs de sync portal (trigger manual|scheduled, novelty JSONB)" },
-    { "name": "ProjectContext", "description": "GET /project/context — foto da app e decisões para LLM/agentes" }
+    { "name": "Patient", "table": "patients", "description": "Pacientes e vínculos familiares" },
+    { "name": "MedicalRecord", "table": "medical_records", "description": "Consultas, extrato" },
+    { "name": "Exam", "table": "exams", "description": "Exames" },
+    { "name": "Authorization", "table": "authorizations", "description": "Guias, tokens, PDF guia, foto médico" },
+    { "name": "HealthThread", "table": "health_threads", "description": "Trilhas; kind acompanhamento (026)" },
+    { "name": "ClinicalEntityLink", "table": "clinical_entity_links", "description": "Sequência consulta → auth → exame" },
+    { "name": "ScheduledEvent", "table": "scheduled_events", "description": "Agenda programada + external UID ICS" },
+    { "name": "CalendarConnection", "table": "calendar_connections", "description": "OAuth google | microsoft por conta+paciente" },
+    { "name": "LegalCompliance", "tables": ["legal_documents", "legal_document_acceptances"], "description": "Docs versionados + aceite" },
+    { "name": "Billing", "tables": ["billing_purchases", "account_entitlements", "handwriting_credit_accounts"], "description": "Stripe, créditos, assinatura" },
+    { "name": "AccountProfile", "table": "account_profiles", "description": "Perfil estendido conta" },
+    { "name": "ClinicalExportShare", "table": "clinical_export_shares", "description": "Links públicos export 48h" },
+    { "name": "IntegrationLink", "table": "integration_links", "description": "Credenciais portal" },
+    { "name": "SyncJob", "table": "sync_jobs", "description": "Jobs sync manual|scheduled" }
   ],
   "apiRoutes": [
-    { "method": "GET", "path": "/project/context", "description": "Contexto estruturado do projeto para LLMs e agentes" },
-    { "method": "GET", "path": "/patients/:id/context", "description": "Contexto clínico determinístico do paciente" },
-    { "method": "GET", "path": "/patients/:id/timeline", "description": "Timeline filtrada por tipo e período" },
-    { "method": "GET", "path": "/health-threads/:id/detail", "description": "Drawer: timeline da trilha, links, entries" },
-    { "method": "POST", "path": "/health-threads/:id/links", "description": "Vincular entidade existente à trilha" },
-    { "method": "POST", "path": "/health-threads/:id/artifacts/*", "description": "Criar exame/consulta/autorização/med/vacina e vincular" },
-    { "method": "GET", "path": "/sessions", "description": "Histórico de sessões parseado de HISTORICO.md" },
-    { "method": "POST", "path": "/integration-links/:id/sync", "description": "Sync assíncrono portal (jobId + SSE/polling fallback)" },
-    { "method": "GET", "path": "/integration-links/sync-progress/:jobId/stream", "description": "SSE progresso de sync (push-first)" },
-    { "method": "GET", "path": "/roadmap", "description": "Roadmap priorizado (docs/roadmap.json)" }
+    { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },
+    { "method": "GET", "path": "/roadmap", "description": "Roadmap priorizado" },
+    { "method": "GET", "path": "/patients/:id/context", "description": "Contexto clínico determinístico" },
+    { "method": "GET", "path": "/patients/:id/clinical-export", "description": "Export resumido|full" },
+    { "method": "POST", "path": "/patients/:id/clinical-export/shares", "description": "Link share export" },
+    { "method": "GET", "path": "/clinical-export/share/:token", "description": "Export público por token" },
+    { "method": "GET", "path": "/scheduled-events", "description": "Agenda programada CRUD" },
+    { "method": "POST", "path": "/scheduled-events/import/ics", "description": "Import ICS" },
+    { "method": "GET", "path": "/calendar/google/oauth/start", "description": "Início OAuth Google Calendar" },
+    { "method": "GET", "path": "/calendar/microsoft/oauth/start", "description": "Início OAuth Outlook" },
+    { "method": "GET", "path": "/billing/me", "description": "Saldo billing + assinatura" },
+    { "method": "POST", "path": "/billing/checkout", "description": "Checkout Stripe pacote" },
+    { "method": "POST", "path": "/billing/checkout-subscription", "description": "Checkout assinatura família" },
+    { "method": "POST", "path": "/billing/webhook", "description": "Webhook Stripe" },
+    { "method": "GET", "path": "/compliance/documents/:kind/current", "description": "Documento legal vigente (público)" },
+    { "method": "GET", "path": "/compliance/status", "description": "Pendências aceite" },
+    { "method": "POST", "path": "/compliance/accept", "description": "Registrar aceite" },
+    { "method": "DELETE", "path": "/auth/account", "description": "Exclusão conta LGPD" },
+    { "method": "POST", "path": "/integration-links/:id/sync", "description": "Sync portal assíncrono" }
   ],
   "integrations": [
-    { "portal": "unimed", "syncAutomatic": true, "authMethod": "Playwright SSO + storageState; probe extrato", "imports": ["extrato/consultas", "autorizações", "cartão virtual/plano"], "notes": "silent: 2 meses extrato; auth detalhe desde lastSync−14d" },
-    { "portal": "amil", "syncAutomatic": true, "authMethod": "JWT → API AuthOGS → CDP (manual only) → Playwright fallback", "imports": ["plano", "carências", "guias/tokens → Authorization"], "notes": "silent: PostTokens desde lastSync−14d; skip plano/carências" },
-    { "portal": "bradesco_saude", "syncAutomatic": false, "authMethod": "vínculo manual", "imports": [] },
-    { "portal": "conectesus", "syncAutomatic": false, "authMethod": "import manual gov.br", "imports": ["vacinas", "exames"] },
-    { "portal": "mater_dei", "syncAutomatic": true, "authMethod": "scraper dedicado", "imports": ["exames", "atendimentos", "laudos/imagens"], "notes": "fetch exames incremental desde max(exam_date)−14d" },
-    { "portal": "hermes_pardini", "syncAutomatic": true, "authMethod": "Keycloak ROPC + browser fallback", "imports": ["exames via GET /pedidos + /exames"], "notes": "paciente/api/v1; dedup hermes_pardini:{pedido}:{exame}" }
+    { "portal": "unimed", "syncAutomatic": true, "imports": ["extrato", "autorizações", "cartão virtual", "carências PDF", "guia PDF"] },
+    { "portal": "amil", "syncAutomatic": true, "imports": ["plano", "guias", "utilização → consultas", "dependentes"] },
+    { "portal": "bradesco_saude", "syncAutomatic": true, "imports": ["exames", "vacinas"] },
+    { "portal": "mater_dei", "syncAutomatic": true, "imports": ["exames", "atendimentos"] },
+    { "portal": "hermes_pardini", "syncAutomatic": true, "imports": ["pedidos", "exames", "laudo PDF"] },
+    { "portal": "google_calendar", "syncAutomatic": false, "authMethod": "OAuth API", "imports": ["calendar pull/push primary"] },
+    { "portal": "microsoft_outlook", "syncAutomatic": false, "authMethod": "Microsoft Graph OAuth", "imports": ["calendarView −30d/+180d"] }
   ],
   "healthThreads": {
-    "kinds": ["task", "investigation", "hypothesis", "episode"],
-    "linkRoles": ["ordered", "scheduled", "result", "related", "blocked_by"],
-    "linkEntityTypes": ["exam", "medical_record", "authorization", "medication", "vaccine", "document", "diagnosis", "allergy", "appointment"],
-    "workflowNotes": [
-      "role descreve passo na trilha (não relação clínica entre entidades)",
-      "Timeline da trilha ordenada por data da entidade, não data do vínculo",
-      "Adicionar… cria registro canônico; Vincular… usa health_thread_links",
-      "Exemplo Rafael check-up 40: consulta=related; exame pedido=ordered; autorização=ordered"
-    ]
+    "kinds": ["acompanhamento", "investigation", "hypothesis", "episode", "task"],
+    "notes": ["kind task legado → acompanhamento na UI"]
   },
   "relationCatalog": {
-    "status": "planned",
-    "summary": "Catálogo relation_types em Postgres para vocabulário controlado, UX assistida e validação LLM; separar thread↔entidade vs entidade↔entidade (consulta ORDERED exame)",
-    "plannedTables": ["relation_types", "clinical_entity_links", "relation_type_rules"],
-    "separation": {
-      "threadEntity": "Papel do artefato na história da trilha (check-up, investigação)",
-      "entityEntity": "Relação clínica causal entre registros (consulta gerou exame)"
-    }
+    "status": "done",
+    "tables": ["relation_types", "clinical_entity_links"]
   },
   "decisions": [
-    { "id": "postgres-source-of-truth", "date": "2026-08-06", "title": "Postgres como fonte da verdade", "decision": "Neo4j apenas projeta; CRUD e links em PG", "rationale": "Proveniência, auditoria, sync com portais", "status": "active" },
-    { "id": "patient-context-no-llm", "date": "2026-08-06", "title": "Resumo clínico sem LLM", "decision": "PatientContextService com template determinístico", "rationale": "Evitar alucinação no resumo base", "status": "active" },
-    { "id": "health-thread-kinds", "date": "2026-08-06", "title": "Trilhas unificadas na UI", "decision": "HealthThread com kinds task/investigation/hypothesis/episode", "rationale": "Um card Em andamento; inputs diferentes", "status": "active" },
-    { "id": "diagnosis-separate", "date": "2026-08-06", "title": "Diagnóstico formal separado", "decision": "diagnoses para conclusão; trilhas para pré-diagnóstico", "rationale": "Hipóteses não são diagnóstico até conversão", "status": "active" },
-    { "id": "relation-catalog-pg", "date": "2026-08-06", "title": "Catálogo de relações em PG", "decision": "Não hardcodar tipos nem só Neo4j", "rationale": "Governança, UX, LLM com schema estável", "status": "planned" },
-    { "id": "auth-sync-no-block-ui", "date": "2026-08-06", "title": "Sync auth não desmonta UI", "decision": "loading do AuthContext sem incluir syncing em gate de rotas", "rationale": "Token refresh ao refocar browser resetava aba do paciente", "status": "active" },
-    { "id": "vite-spa-proxy-bypass", "date": "2026-08-10", "title": "Refresh SPA vs API no dev", "decision": "Vite proxy bypass para navegação HTML em /patients/* e /roadmap", "rationale": "Hard refresh não deve chamar API sem Bearer (401 Token ausente)", "status": "active" },
-    { "id": "sync-progress-sse", "date": "2026-08-10", "title": "Progresso sync push-first", "decision": "SSE em updateJob + reconciliação GET se stream mudo", "rationale": "Substituir polling contínuo; heartbeat de conectividade", "status": "active" },
-    { "id": "sync-jobs-pg-only", "date": "2026-08-12", "title": "sync_jobs só Postgres", "decision": "Remover Map in-memory; createJob/updateJob persistem PG; SSE via publishSyncJobEvent", "rationale": "Histórico e sync-status estáveis; base para worker scheduled", "status": "active" },
-    { "id": "hermes-bff-pedidos", "date": "2026-08-12", "title": "Hermes BFF portalpaciente", "decision": "GET /pedidos + /pedidos/{id}/exames em paciente/api/v1", "rationale": "Shell precision-care/api não lista exames; SPA Fleury usa microfrontend portalpaciente", "status": "active" }
+    { "id": "postgres-source-of-truth", "date": "2026-08-06", "title": "Postgres como fonte da verdade", "status": "active" },
+    { "id": "patient-context-no-llm", "date": "2026-08-06", "title": "Resumo clínico sem LLM", "status": "active" },
+    { "id": "sync-jobs-pg-only", "date": "2026-08-12", "title": "sync_jobs só Postgres", "status": "active" },
+    { "id": "compliance-gate", "date": "2026-08-13", "title": "COMPLIANCE_GATE_ENABLED bloqueia API", "status": "active" },
+    { "id": "settings-split", "date": "2026-08-13", "title": "Configurações em /settings/*", "status": "active" },
+    { "id": "outlook-oauth-localhost", "date": "2026-08-13", "title": "Azure Web redirect localhost only", "decision": "MICROSOFT_CALENDAR_REDIRECT_URI=http://localhost:3010/...", "status": "active" },
+    { "id": "agents-next-epic", "date": "2026-08-13", "title": "Próximo épico: Agentes RAG", "decision": "Gate ANVISA + médico antes de clínico", "status": "active" }
   ],
   "plannedWork": [
-    { "id": "hermes-pdf-laudo", "title": "Import PDF laudo Hermes (POST /pedidos/{id}/download)", "status": "done" },
-    { "id": "connect-worker-package", "title": "packages/connect-worker runner apartado", "status": "planned" },
-    { "id": "relation-catalog-4.1", "title": "Migration relation_types + GET /relation-types", "status": "planned" },
-    { "id": "entity-links-4.2", "title": "clinical_entity_links (consulta → exame)", "status": "planned" },
-    { "id": "neo4j-lineage-worker", "title": "Worker import_lineage → Neo4j", "status": "done" },
-    { "id": "agent-rag", "title": "Agente com PatientContext + citações", "status": "planned" },
-    { "id": "export-pdf", "title": "Export resumido médico PDF", "status": "planned" }
+    { "id": "agent-rag", "title": "packages/agents + runtime citações", "status": "planned", "priority": "P3" },
+    { "id": "rede-credenciada", "title": "Busca unificada rede", "status": "planned", "priority": "P4" },
+    { "id": "mobile-app", "title": "React Native Expo", "status": "planned", "priority": "P4" },
+    { "id": "connect-microservice", "title": "Connect Fase 3 HTTP+fila", "status": "planned", "priority": "P4" },
+    { "id": "human-review-gates", "title": "Advogado, NFS-e, Stripe live, pentest", "status": "in_progress", "priority": "parallel" }
   ],
   "documentationSources": [
-    { "path": "docs/project-context.json", "role": "Foto estruturada curada (este arquivo)", "format": "json" },
-    { "path": "GET /project/context", "role": "API agrega JSON + HISTORICO + migrations", "format": "json" },
-    { "path": "docs/PROJETO.md", "role": "Documento vivo — arquitetura, endpoints, roadmap", "format": "markdown" },
-    { "path": "docs/HISTORICO.md", "role": "Decisões cronológicas por sessão", "format": "markdown" },
-    { "path": "AGENTS.md", "role": "Instruções operacionais para agentes Cursor", "format": "markdown" },
-    { "path": "docs/roadmap.json", "role": "Roadmap priorizado P0–P4", "format": "json" },
-    { "path": "docs/SYNC_DELTA.md", "role": "Auditoria delta sync por portal", "format": "markdown" },
-    { "path": "docs/CONNECT.md", "role": "Boundary Connect vs Core", "format": "markdown" },
-    { "path": "docs/SUPABASE.md", "role": "Auth e memberships", "format": "markdown" }
+    { "path": "docs/project-context.json", "role": "Foto estruturada curada" },
+    { "path": "GET /project/context", "role": "API agrega JSON + HISTORICO + migrations" },
+    { "path": "docs/PROJETO.md", "role": "Documento vivo" },
+    { "path": "docs/HISTORICO.md", "role": "Decisões cronológicas" },
+    { "path": "docs/roadmap.json", "role": "Roadmap P0–P4" },
+    { "path": "docs/ROADMAP.md", "role": "Resumo roadmap markdown" },
+    { "path": "docs/ACCOUNT_AND_PLAN.md", "role": "Mapa /settings/*" },
+    { "path": "docs/LEGAL_COMPLIANCE.md", "role": "LGPD e compliance" },
+    { "path": "docs/BILLING.md", "role": "Stripe" },
+    { "path": "docs/GO_LIVE_TECHNICAL_READINESS.md", "role": "Checklist go-live" },
+    { "path": "AGENTS.md", "role": "Instruções agentes Cursor" }
   ]
 }

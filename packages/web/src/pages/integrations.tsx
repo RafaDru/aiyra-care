@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Card, Row, Col, Typography, Tag, Select, Alert, Button } from 'antd'
+import { Card, Row, Col, Typography, Tag, Select, Button } from 'antd'
 import { CloudDownloadOutlined, MedicineBoxOutlined, SafetyCertificateOutlined, GlobalOutlined, UserOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/ui/PageHeader.js'
+import { DismissibleHint } from '../components/ui/DismissibleHint.js'
 import { ImportInsuranceModal } from '../components/scraper/ImportInsuranceModal.js'
 import { PublicHealthIntegrationModal } from '../components/integrations/PublicHealthIntegrationModal.js'
 import { api } from '../lib/api.js'
@@ -75,7 +76,8 @@ export function IntegrationsPage() {
     <div>
       <PageHeader title="Integrações" subtitle="Conecte portais de saúde ao cadastro de um paciente" />
 
-      <Alert
+      <DismissibleHint
+        hintId="integrations.per-patient"
         type="info"
         showIcon
         icon={<UserOutlined />}

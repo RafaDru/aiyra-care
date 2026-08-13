@@ -4,6 +4,7 @@ import { BulbOutlined, MedicineBoxOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
 import type { Document_, HandwritingQuota, PrescriptionInterpretation } from '../../lib/api.types.js'
 import { AiInsightCard } from '../ui/AiInsightCard.js'
+import { DismissibleHint } from '../ui/DismissibleHint.js'
 
 const HANDWRITING_TYPES = new Set(['prescription', 'exam', 'report'])
 
@@ -183,7 +184,8 @@ export function InterpretHandwritingModal({ document, patientId, open, onClose, 
             </Paragraph>
           </AiInsightCard>
         ) : (
-          <Alert
+          <DismissibleHint
+            hintId="interpret-handwriting.intro"
             type="info"
             showIcon
             message="Interpretação sob demanda"

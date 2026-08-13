@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
-import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -21,7 +21,7 @@ import { AuthorizationsTab } from './tabs/AuthorizationsTab.js'
 import { WalletCardsTab } from './tabs/WalletCardsTab.js'
 import { CoverageTab } from './tabs/CoverageTab.js'
 import { IntegrationsTab, type IntegrationsTabHandle } from './tabs/IntegrationsTab.js'
-import { TimelineTab } from './tabs/TimelineTab.js'
+import { AgendaTab } from './tabs/AgendaTab.js'
 import { PatientContextPanel } from '../../components/patient/PatientContextPanel.js'
 import { HealthThreadsPanel } from '../../components/patient/HealthThreadsPanel.js'
 import { useAuth } from '../../contexts/AuthContext.js'
@@ -279,7 +279,7 @@ export function PatientDetail() {
   const tabLabel = (key: PatientTabKey): ReactNode => {
     switch (key) {
       case 'basic': return <><UserOutlined /> {t('tabs.basic')}</>
-      case 'timeline': return <><HistoryOutlined /> {t('tabs.timeline')}</>
+      case 'agenda': return <><CalendarOutlined /> {t('tabs.agenda')}</>
       case 'personal-documents': return <><FileProtectOutlined /> {t('tabs.personalDocuments')}</>
       case 'wallet': return <><IdcardOutlined /> {t('tabs.wallet')}</>
       case 'coverage': return <><SafetyCertificateOutlined /> {t('tabs.coverage')}</>
@@ -363,8 +363,8 @@ export function PatientDetail() {
             </Space>
           </>
         )
-      case 'timeline':
-        return <TimelineTab patientId={patient.id} />
+      case 'agenda':
+        return <AgendaTab patientId={patient.id} />
       case 'personal-documents':
         return <PersonalDocumentsTab patientId={patient.id} />
       case 'wallet':
@@ -466,16 +466,7 @@ export function PatientDetail() {
         </div>
       </Card>
 
-      <Card style={{ borderRadius: 16 }} styles={{ body: { padding: 0 } }}>
-        <div className="patient-section-nav">
-          <Segmented
-            block
-            size="large"
-            value={activeSection}
-            onChange={(value) => setActiveSection(value as PatientSection)}
-            options={sectionOptions}
-          />
-        </div>
+      <Card style={{ borderRadius: 16, overflow: 'visible' }} styles={{ body: { padding: 0, overflow: 'visible' } }}>
         {sectionTabKeys.length > 1 ? (
           <Tabs
             className="patient-sub-tabs"
@@ -484,9 +475,36 @@ export function PatientDetail() {
             onChange={setActiveTab}
             destroyInactiveTabPane
             items={subTabItems}
+            renderTabBar={(props, DefaultTabBar) => (
+              <div className="patient-detail-sticky-nav">
+                <div className="patient-section-nav">
+                  <Segmented
+                    block
+                    size="large"
+                    value={activeSection}
+                    onChange={(value) => setActiveSection(value as PatientSection)}
+                    options={sectionOptions}
+                  />
+                </div>
+                <DefaultTabBar {...props} />
+              </div>
+            )}
           />
         ) : (
-          <div style={{ padding: 24 }}>{renderTabContent(activeTab)}</div>
+          <>
+            <div className="patient-detail-sticky-nav">
+              <div className="patient-section-nav">
+                <Segmented
+                  block
+                  size="large"
+                  value={activeSection}
+                  onChange={(value) => setActiveSection(value as PatientSection)}
+                  options={sectionOptions}
+                />
+              </div>
+            </div>
+            <div style={{ padding: 24 }}>{renderTabContent(activeTab)}</div>
+          </>
         )}
       </Card>
 

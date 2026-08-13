@@ -1,8 +1,27 @@
 # Open Health - Documento Vivo do Projeto
 
-> **Última atualização:** 2026-08-06  
-> **Status:** Sync Unimed BH + **Amil validado**; P0 Connect fechado; P1 Neo4j + sequência clínica; P2 export resumido + Hermes PDF + sync.completed (2026-08-12)  
+> **Última atualização:** 2026-08-13  
+> **Status:** P0–P2 código entregue; agenda Google+Outlook; billing Stripe; legal/compliance tech; **próximo:** Agentes RAG (P3)  
 > **Repositório:** https://github.com/RafaDru/open-health
+
+---
+
+## Estado atual do produto (2026-08-13)
+
+| Área | Disponível |
+|------|------------|
+| **Sync portais** | Unimed, Amil, Mater Dei, Hermes (silent delta); Bradesco; worker agendado; SSE |
+| **Clínico** | Contexto determinístico, timeline, trilhas, sequência consulta→auth→exame, Neo4j Encadeamento |
+| **Export** | Resumido/completo, PDF/impressão, share link 48h |
+| **Agenda** | Eventos programados, ICS import, Google + Outlook OAuth sync |
+| **Documentos** | Upload, OCR cascade, manuscrito (créditos), métricas OCR |
+| **Billing** | Franquia grátis, pacotes, assinatura família, Stripe checkout/portal/webhook |
+| **Conta** | Perfil, plano, legal em `/settings/*`; exclusão LGPD |
+| **Legal** | Termos/privacidade/cookies/menor v1.0, gate compliance, DPO canal |
+| **Roadmap** | UI com badges revisão humana; `human-review-gates` paralelo |
+
+**Próximo épico código:** Agentes RAG (`packages/agents`) — após gate ANVISA + médico.  
+**Go-live público:** `COMPLIANCE_GATE_ENABLED=1`, Stripe live, pareceres — ver `GO_LIVE_TECHNICAL_READINESS.md`.
 
 ---
 

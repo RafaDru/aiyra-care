@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-const kindSchema = z.enum(['task', 'investigation', 'hypothesis', 'episode'])
+const kindSchema = z.enum(['acompanhamento', 'task', 'investigation', 'hypothesis', 'episode'])
+  .transform((v) => (v === 'task' ? 'acompanhamento' : v))
 const statusSchema = z.enum(['open', 'active', 'paused', 'resolved', 'ruled_out', 'converted'])
 const prioritySchema = z.enum(['low', 'normal', 'high'])
 const confidenceSchema = z.enum(['low', 'medium', 'high'])

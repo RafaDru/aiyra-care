@@ -102,6 +102,8 @@ export class PortalSyncOrchestrator {
         jobId,
         extratoMonths,
         authorizationSince,
+        patientId: link.patientId,
+        fetchCarenciaPdf: !incremental,
       },
     )
 
