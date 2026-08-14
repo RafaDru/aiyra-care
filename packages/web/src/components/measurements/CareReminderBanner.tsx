@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Space } from 'antd'
-import { BellOutlined, ClockCircleOutlined } from '@ant-design/icons'
+import { BellOutlined, ClockCircleOutlined, NotificationOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
+import { requestCareReminderNotificationPermission } from '../../hooks/useCareReminderNotifications.js'
 import type { CareReminderRow } from '../../lib/api.types.js'
 
 interface Props {
@@ -25,10 +26,30 @@ export function CareReminderBanner({ patientId, onMeasure, onMedication }: Props
     return () => window.clearInterval(id)
   }, [load])
 
-  if (!pending.length) return null
+  const enableNotifications = async () => {
+    const ok = await requestCareReminderNotificationPermission()
+    if (ok) load()
+  }
+
+  const showNotifyBtn = typeof Notification !== 'undefined' && Notification.permission !== 'granted'
+
+  if (!pending.length && !showNotifyBtn) return null
 
   return (
     <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="small">
+      {showNotifyBtn && (
+        <Alert
+          type="info"
+          showIcon
+          icon={<NotificationOutlined />}
+          message={t('measurement.enableNotifications')}
+          action={
+            <Button size="small" onClick={enableNotifications}>
+              {t('measurement.enableNotificationsBtn')}
+            </Button>
+          }
+        />
+      )}
       {pending.map((r) => (
         <Alert
           key={r.id}

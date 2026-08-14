@@ -239,15 +239,17 @@ Caso de uso: febre/virose — temperatura, BPM e SpO₂ várias vezes ao dia; me
 - UI: banner de lembretes, iniciar monitoramento, export imprimível, faixa normal nos gráficos
 - Pendências no resumo clínico (`measurement_reminder`, `medication_reminder`)
 
-### Fase 2b (backlog)
+### Fase 3 (implementada)
 
-- Push notifications (web/mobile)
-- Fluxo notificação nativa → modal de entrada
+- Curvas WHO pediátricas (P3/P50/P97) — eixo por idade em meses; percentil estimado em `context.whoPercentile`
+- `GET /measurements/who-growth` + UI `WhoGrowthChartGrid` na aba Antropometria
+- Import glicemia de exames — `POST /measurements/import-glucose` (parser `resultSummary` → `source_ref=exam:{id}`)
+- Notificações web — polling de `care-reminders/pending` + `Notification` API (opt-in)
 
-### Fase 3 (backlog)
+### Fase 4 (backlog)
 
-- Import glicemia de exames; dispositivos (oxímetro, termômetro BLE)
-- Curvas WHO pediátricas
+- Dispositivos (oxímetro, termômetro BLE)
+- Service worker para push em background
 
 ## Plano de implementação
 

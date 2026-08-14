@@ -1,4 +1,5 @@
 import { NotFoundError } from '../../domain/errors.js'
+import type { WhoGrowthService } from './who-growth.service.js'
 import type { MeasurementRepository } from '../../domain/measurement/measurement.repository.js'
 import { MeasurementObservation } from '../../domain/measurement/measurement-observation.entity.js'
 import type { MeasurementObservationProps } from '../../domain/measurement/measurement-observation.entity.js'
@@ -25,7 +26,10 @@ export type ChartSeriesPayload = {
 }
 
 export class MeasurementService {
-  constructor(private readonly repo: MeasurementRepository) {}
+  constructor(
+    private readonly repo: MeasurementRepository,
+    private readonly whoGrowth?: WhoGrowthService,
+  ) {}
 
   listTypes() {
     return this.repo.listTypes(true)
@@ -40,7 +44,17 @@ export class MeasurementService {
     }
 
     const unit = data.unit ?? type.defaultUnit
-    const obs = MeasurementObservation.create({ ...data, unit })
+    let context = data.context ?? {}
+    if (this.whoGrowth && data.valueNumeric != null) {
+      context = await this.whoGrowth.enrichContext(
+        data.patientId,
+        data.typeCode,
+        data.observedAt,
+        data.valueNumeric,
+        context,
+      )
+    }
+    const obs = MeasurementObservation.create({ ...data, unit, context })
     return this.repo.saveObservation(obs)
   }
 

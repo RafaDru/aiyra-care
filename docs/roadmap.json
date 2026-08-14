@@ -638,8 +638,8 @@
         {
           "id": "plat-medidas",
           "title": "Medidas — catálogo + observações + gráficos composables",
-          "status": "in_progress",
-          "detail": "037 observations + 038 care_reminders + export + UI MeasurementsTab; Fase 3: WHO curves, devices"
+          "status": "done",
+          "detail": "037–038 + monitoramento + WHO curves + glucose import + browser notifications"
         }
       ]
     },

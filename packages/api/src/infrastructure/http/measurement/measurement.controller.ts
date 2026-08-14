@@ -1,5 +1,7 @@
 import type { FastifyReply } from 'fastify'
 import type { MeasurementService } from '../../../application/measurement/measurement.service.js'
+import type { WhoGrowthService } from '../../../application/measurement/who-growth.service.js'
+import type { GlucoseExamImportService } from '../../../application/measurement/glucose-exam-import.service.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess } from '../auth/patient-access.guard.js'
 import { guardPatientEntity } from '../auth/patient-entity.guard.js'
@@ -14,12 +16,18 @@ import {
   administrationQuerySchema,
   administrationParamsSchema,
   timelineQuerySchema,
+  whoGrowthQuerySchema,
+  importGlucoseSchema,
   parseMeasurementQuery,
   parseChartCategories,
 } from './measurement.schema.js'
 
 export class MeasurementController {
-  constructor(private readonly service: MeasurementService) {}
+  constructor(
+    private readonly service: MeasurementService,
+    private readonly whoGrowth: WhoGrowthService,
+    private readonly glucoseImport: GlucoseExamImportService,
+  ) {}
 
   async listTypes(_req: AuthenticatedRequest, reply: FastifyReply) {
     const types = await this.service.listTypes()
@@ -114,6 +122,25 @@ export class MeasurementController {
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
     const row = await this.service.createAdministration(parsed.data)
     return reply.status(201).send(row.toJSON())
+  }
+
+  async whoGrowth(req: AuthenticatedRequest, reply: FastifyReply) {
+    const parsed = whoGrowthQuerySchema.safeParse(req.query)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+    if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
+    const payload = await this.whoGrowth.buildPayload(parsed.data.patientId, parsed.data.typeCode)
+    if (!payload) {
+      return reply.status(404).send({ message: 'WHO reference unavailable (sexo ou tipo inválido)' })
+    }
+    return reply.send(payload)
+  }
+
+  async importGlucose(req: AuthenticatedRequest, reply: FastifyReply) {
+    const parsed = importGlucoseSchema.safeParse(req.body)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+    if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
+    const result = await this.glucoseImport.importForPatient(parsed.data.patientId)
+    return reply.send(result)
   }
 
   async deleteAdministration(req: AuthenticatedRequest, reply: FastifyReply) {

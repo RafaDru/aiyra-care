@@ -117,6 +117,15 @@ export const api = {
       if (params.to) qs.set('to', params.to)
       return request<import('./api.types.js').MonitoringTimelineRow[]>(`/measurements/timeline?${qs}`)
     },
+    whoGrowth: (params: { patientId: string; typeCode: 'weight' | 'height' | 'head_circumference' }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId, typeCode: params.typeCode })
+      return request<import('./api.types.js').WhoGrowthPayload>(`/measurements/who-growth?${qs}`)
+    },
+    importGlucose: (patientId: string) =>
+      request<import('./api.types.js').GlucoseImportResult>('/measurements/import-glucose', {
+        method: 'POST',
+        body: JSON.stringify({ patientId }),
+      }),
   },
   medicationAdministrations: {
     create: (data: object) =>

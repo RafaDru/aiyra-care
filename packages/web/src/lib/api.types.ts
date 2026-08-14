@@ -481,6 +481,27 @@ export interface MeasurementChartSeriesPayload {
   }>
 }
 
+export interface WhoGrowthPayload {
+  typeCode: 'weight' | 'height' | 'head_circumference'
+  unit: string
+  gender: 'male' | 'female'
+  percentilesAvailable: true
+  patientPoints: Array<{
+    ageMonths: number
+    value: number
+    observedAt: string
+    percentile: number | null
+    observationId?: string
+  }>
+  referenceCurve: Array<{ ageMonths: number; p3: number; p50: number; p97: number }>
+}
+
+export interface GlucoseImportResult {
+  imported: number
+  skipped: number
+  examIds: string[]
+}
+
 export interface MedicationAdministrationRow {
   id: string
   patientId: string

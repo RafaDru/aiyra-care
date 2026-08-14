@@ -9,7 +9,9 @@ import dayjs from 'dayjs'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import { MeasurementChartGrid } from '../../../components/measurements/MeasurementChartGrid.js'
+import { WhoGrowthChartGrid } from '../../../components/measurements/WhoGrowthChartGrid.js'
 import { MonitoringExportSheet } from '../../../components/measurements/MonitoringExportSheet.js'
+import { requestCareReminderNotificationPermission } from '../../../hooks/useCareReminderNotifications.js'
 import type { MeasurementChartSeries } from '../../../components/measurements/measurement-chart.types.js'
 import { api } from '../../../lib/api.js'
 import type { HealthThread, MonitoringExportReport, MonitoringTimelineRow } from '../../../lib/api.types.js'
@@ -17,6 +19,8 @@ import type { HealthThread, MonitoringExportReport, MonitoringTimelineRow } from
 interface Props {
   patientId: string
   patientName?: string
+  birthDate?: string | null
+  gender?: string | null
   monitoringAction?: {
     kind: 'vitals' | 'medication'
     reminderId: string
@@ -27,7 +31,7 @@ interface Props {
 
 const COMMON_MEDS = ['Dipirona', 'Paracetamol', 'Ibuprofeno', 'Nimesulida']
 
-export function MeasurementsTab({ patientId, patientName, monitoringAction, onMonitoringActionHandled }: Props) {
+export function MeasurementsTab({ patientId, patientName, birthDate, gender, monitoringAction, onMonitoringActionHandled }: Props) {
   const { t } = useTranslation()
   const { message } = App.useApp()
   const [view, setView] = useState<'monitoring' | 'charts' | 'anthropometry'>('monitoring')
@@ -45,6 +49,24 @@ export function MeasurementsTab({ patientId, patientName, monitoringAction, onMo
   const [exportOpen, setExportOpen] = useState(false)
   const [exportReport, setExportReport] = useState<MonitoringExportReport | null>(null)
   const [pendingReminderId, setPendingReminderId] = useState<string | undefined>()
+  const [importingGlucose, setImportingGlucose] = useState(false)
+
+  const importGlucoseFromExams = async () => {
+    setImportingGlucose(true)
+    try {
+      const result = await api.measurements.importGlucose(patientId)
+      if (result.imported > 0) {
+        message.success(t('measurement.glucoseImported', { count: result.imported }))
+        load()
+      } else {
+        message.info(t('measurement.glucoseNone'))
+      }
+    } catch {
+      message.error(t('measurement.error'))
+    } finally {
+      setImportingGlucose(false)
+    }
+  }
 
   const loadThreads = useCallback(() => {
     api.healthThreads.list(patientId, true).then(setThreads).catch(() => setThreads([]))
@@ -200,13 +222,21 @@ export function MeasurementsTab({ patientId, patientName, monitoringAction, onMo
       )}
 
       {view === 'charts' && (
-        chartSeries.length
-          ? <MeasurementChartGrid series={chartSeries as MeasurementChartSeries[]} />
-          : <Empty description={t('measurement.noChartData')} />
+        <>
+          <div style={{ marginBottom: 12 }}>
+            <Button loading={importingGlucose} onClick={importGlucoseFromExams}>
+              {t('measurement.importGlucose')}
+            </Button>
+          </div>
+          {chartSeries.length
+            ? <MeasurementChartGrid series={chartSeries as MeasurementChartSeries[]} />
+            : <Empty description={t('measurement.noChartData')} />}
+        </>
       )}
 
       {view === 'anthropometry' && (
         <>
+          <WhoGrowthChartGrid patientId={patientId} birthDate={birthDate} gender={gender} />
           <div style={{ marginBottom: 16 }}>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setAnthroOpen(true)}>
               {t('growth.new')}
@@ -338,6 +368,7 @@ export function MeasurementsTab({ patientId, patientName, monitoringAction, onMo
             medicationIntervalMinutes: values.medicationIntervalMinutes as number | undefined,
             doseHint: values.doseHint as string | undefined,
           })
+          await requestCareReminderNotificationPermission()
         }}
       >
         <Form.Item name="vitalsIntervalMinutes" label={t('measurement.vitalsInterval')} initialValue={240}>

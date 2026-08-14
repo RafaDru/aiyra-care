@@ -10,6 +10,7 @@ import { api } from '../../lib/api.js'
 import type { Patient, IntegrationLink } from '../../lib/api.types.js'
 import { MeasurementsTab } from './tabs/MeasurementsTab.js'
 import { CareReminderBanner } from '../../components/measurements/CareReminderBanner.js'
+import { useCareReminderNotifications } from '../../hooks/useCareReminderNotifications.js'
 import type { CareReminderRow } from '../../lib/api.types.js'
 import { VaccinesTab } from './tabs/VaccinesTab.js'
 import { MedicationsTab } from './tabs/MedicationsTab.js'
@@ -83,6 +84,8 @@ export function PatientDetail() {
     healthThreadId?: string | null
   } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
+
+  useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
   const { section: activeSection, tab: activeTab } = resolvePatientNav(
     searchParams.get('section'),
@@ -409,6 +412,8 @@ export function PatientDetail() {
           <MeasurementsTab
             patientId={patient.id}
             patientName={patient.name}
+            birthDate={patient.birthDate}
+            gender={patient.gender}
             monitoringAction={monitoringAction}
             onMonitoringActionHandled={() => setMonitoringAction(null)}
           />

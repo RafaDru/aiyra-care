@@ -151,7 +151,7 @@ Antes de features tier 2+, usar skills em `.cursor/skills/aiyracare-*` — ver `
 
 ## Migrations
 
-SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs`. Última: **037** (`measurement_observations` + monitoramento dia-a-dia); ver `docs/MEASUREMENTS.md`.
+SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs`. Medidas: **037** (`measurement_observations`) + **038** (`care_reminders`); Fase 3 WHO/import/notifications sem nova migration — ver `docs/MEASUREMENTS.md`.
 
 ## Testes API
 

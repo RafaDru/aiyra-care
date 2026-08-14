@@ -74,6 +74,15 @@ export const timelineQuerySchema = z.object({
   to: z.coerce.date().optional(),
 })
 
+export const whoGrowthQuerySchema = z.object({
+  patientId: z.string().uuid(),
+  typeCode: z.enum(['weight', 'height', 'head_circumference']),
+})
+
+export const importGlucoseSchema = z.object({
+  patientId: z.string().uuid(),
+})
+
 function splitCsv(v?: string): string[] | undefined {
   if (!v?.trim()) return undefined
   return v.split(',').map((s) => s.trim()).filter(Boolean)

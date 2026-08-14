@@ -1,5 +1,20 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-14] - Medidas Fase 3: WHO, glicemia import, notificações web
+
+### Contexto
+
+Fechar épico `plat-medidas` antes do épico **Agentes RAG**.
+
+### Entregas
+
+- **Curvas WHO:** `who-growth-reference.ts` (P3/P50/P97 0–60 meses); `GET /measurements/who-growth`; UI `WhoGrowthChartGrid` na aba Antropometria; percentil em `context.whoPercentile` ao registrar peso/altura/PC.
+- **Import glicemia:** parser de `exams.resultSummary` → `POST /measurements/import-glucose`; botão na aba Gráficos.
+- **Notificações web:** `useCareReminderNotifications` + opt-in no banner; polling 60s com `Notification` API.
+- **Roadmap:** `plat-medidas` → done; doc `docs/MEASUREMENTS.md`.
+
+---
+
 ## [2026-08-13] - Sprint go-live tech: agenda, calendários, settings, billing, legal UX
 
 ### Contexto
