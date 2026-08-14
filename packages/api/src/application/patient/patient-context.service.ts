@@ -263,6 +263,29 @@ export class PatientContextService {
     const linkCountMap = buildThreadLinkCountMap(threadIds, threadLinkCounts)
     pendencies.push(...deriveThreadPendencies(activeThreadList, linkCountMap, now))
 
+    const { rows: dueReminders } = await this.pool.query<{
+      id: string
+      reminder_kind: string
+      title: string
+      medication_name: string | null
+      health_thread_id: string | null
+    }>(
+      `SELECT id, reminder_kind, title, medication_name, health_thread_id
+       FROM care_reminders
+       WHERE patient_id = $1 AND active = true AND next_fire_at <= NOW()
+       ORDER BY next_fire_at
+       LIMIT 8`,
+      [patientId],
+    )
+    for (const r of dueReminders) {
+      pendencies.push({
+        kind: r.reminder_kind === 'medication' ? 'medication_reminder' : 'measurement_reminder',
+        title: r.title,
+        detail: r.medication_name ? r.medication_name : undefined,
+        threadId: r.health_thread_id ?? undefined,
+      })
+    }
+
     const activeThreads = mapActiveThreadsForContext(activeThreadList, linkCountMap)
 
     const timeline = await this.collectTimeline(patientId, {

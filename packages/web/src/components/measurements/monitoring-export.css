@@ -1,0 +1,48 @@
+.monitoring-export-sheet {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-size: 14px;
+}
+
+.monitoring-export-sheet h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.monitoring-export-sheet h2 {
+  margin: 16px 0 8px;
+}
+
+.monitoring-export-sheet h3 {
+  margin: 20px 0 8px;
+  font-size: 16px;
+}
+
+.monitoring-export-muted {
+  color: #666;
+  font-size: 13px;
+}
+
+.monitoring-export-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.monitoring-export-table th,
+.monitoring-export-table td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.monitoring-export-charts {
+  margin-top: 16px;
+}
+
+@media print {
+  .monitoring-export-sheet {
+    padding: 0;
+  }
+}

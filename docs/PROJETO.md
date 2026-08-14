@@ -20,7 +20,8 @@
 | **Legal** | Termos/privacidade/cookies/menor v1.0, gate compliance, DPO canal |
 | **Roadmap** | UI com badges revisão humana; `human-review-gates` paralelo |
 
-**Próximo épico código:** Agentes RAG (`packages/agents`) — após gate ANVISA + médico.  
+| **Próximo épico código (alternativa):** Medidas expandidas (`docs/MEASUREMENTS.md`) antes ou em paralelo a Agentes.  
+**Próximo épico produto:** Agentes RAG — após gate ANVISA + médico.  
 **Go-live público:** `COMPLIANCE_GATE_ENABLED=1`, Stripe live, pareceres — ver `GO_LIVE_TECHNICAL_READINESS.md`.
 
 ---

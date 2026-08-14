@@ -89,6 +89,70 @@ export const api = {
     list: (patientId?: string) => request<import('./api.types.js').GrowthRecord[]>(`/growth-records${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').GrowthRecord>('/growth-records', { method: 'POST', body: JSON.stringify(data) }),
   },
+  measurements: {
+    listTypes: () => request<import('./api.types.js').MeasurementType[]>('/measurement-types'),
+    list: (params: { patientId: string; healthThreadId?: string; typeCodes?: string; categories?: string }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId })
+      if (params.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      if (params.typeCodes) qs.set('typeCodes', params.typeCodes)
+      if (params.categories) qs.set('categories', params.categories)
+      return request<import('./api.types.js').MeasurementObservation[]>(`/measurements?${qs}`)
+    },
+    create: (data: object) =>
+      request<import('./api.types.js').MeasurementObservation>('/measurements', { method: 'POST', body: JSON.stringify(data) }),
+    createBatch: (data: object) =>
+      request<import('./api.types.js').MeasurementObservation[]>('/measurements/batch', { method: 'POST', body: JSON.stringify(data) }),
+    chartSeries: (params: { patientId: string; healthThreadId?: string; categories?: string; from?: string; to?: string }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId })
+      if (params.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      if (params.categories) qs.set('categories', params.categories)
+      if (params.from) qs.set('from', params.from)
+      if (params.to) qs.set('to', params.to)
+      return request<{ series: import('./api.types.js').MeasurementChartSeriesPayload[] }>(`/measurements/chart-series?${qs}`)
+    },
+    timeline: (params: { patientId: string; healthThreadId?: string; from?: string; to?: string }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId })
+      if (params.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      if (params.from) qs.set('from', params.from)
+      if (params.to) qs.set('to', params.to)
+      return request<import('./api.types.js').MonitoringTimelineRow[]>(`/measurements/timeline?${qs}`)
+    },
+  },
+  medicationAdministrations: {
+    create: (data: object) =>
+      request<import('./api.types.js').MedicationAdministrationRow>('/medication-administrations', { method: 'POST', body: JSON.stringify(data) }),
+    list: (params: { patientId: string; healthThreadId?: string }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId })
+      if (params.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      return request<import('./api.types.js').MedicationAdministrationRow[]>(`/medication-administrations?${qs}`)
+    },
+  },
+  careReminders: {
+    list: (params: { patientId: string; healthThreadId?: string }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId, activeOnly: 'true' })
+      if (params.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      return request<import('./api.types.js').CareReminderRow[]>(`/care-reminders?${qs}`)
+    },
+    pending: (patientId: string) =>
+      request<import('./api.types.js').CareReminderRow[]>(`/care-reminders/pending?patientId=${patientId}`),
+    create: (data: object) =>
+      request<import('./api.types.js').CareReminderRow>('/care-reminders', { method: 'POST', body: JSON.stringify(data) }),
+    createIllnessPack: (data: object) =>
+      request<import('./api.types.js').CareReminderRow[]>('/care-reminders/illness-pack', { method: 'POST', body: JSON.stringify(data) }),
+    complete: (id: string) =>
+      request<import('./api.types.js').CareReminderRow>(`/care-reminders/${id}/complete`, { method: 'POST', body: '{}' }),
+    snooze: (id: string, minutes = 30) =>
+      request<import('./api.types.js').CareReminderRow>(`/care-reminders/${id}/snooze`, { method: 'POST', body: JSON.stringify({ minutes }) }),
+    deactivate: (id: string) =>
+      request<import('./api.types.js').CareReminderRow>(`/care-reminders/${id}/deactivate`, { method: 'POST', body: '{}' }),
+  },
+  monitoringExport: (params: { patientId: string; healthThreadId?: string; from?: string; to?: string }) => {
+    const qs = new URLSearchParams({ patientId: params.patientId })
+    if (params.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+    if (params.from) qs.set('from', params.from)
+    if (params.to) qs.set('to', params.to)
+    return request<import('./api.types.js').MonitoringExportReport>(`/monitoring-export?${qs}`)
+  },
   scheduledEvents: {
     list: (patientId?: string, params?: { status?: string; healthThreadId?: string }) => {
       const qs = new URLSearchParams()

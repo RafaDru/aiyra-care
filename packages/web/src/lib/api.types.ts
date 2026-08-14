@@ -435,6 +435,112 @@ export interface GrowthRecord {
   createdAt: string
 }
 
+export interface MeasurementType {
+  code: string
+  category: string
+  labelKey: string
+  defaultUnit: string | null
+  valueKind: string
+  precision: number
+  normalRange: Record<string, number> | null
+  chartConfig: Record<string, unknown>
+  sortOrder: number
+  active: boolean
+}
+
+export interface MeasurementObservation {
+  id: string
+  patientId: string
+  typeCode: string
+  observedAt: string
+  valueNumeric: number | null
+  valueSecondary: number | null
+  unit: string | null
+  source: string
+  sourceRef: string | null
+  healthThreadId: string | null
+  context: Record<string, unknown>
+  notes: string | null
+  createdAt: string
+}
+
+export interface MeasurementChartSeriesPayload {
+  typeCode: string
+  labelKey: string
+  category: string
+  unit: string | null
+  valueKind: string
+  chartConfig: Record<string, unknown>
+  normalRange: Record<string, number> | null
+  points: Array<{
+    observedAt: string
+    value: number | null
+    valueSecondary: number | null
+    notes: string | null
+    healthThreadId: string | null
+  }>
+}
+
+export interface MedicationAdministrationRow {
+  id: string
+  patientId: string
+  medicationId: string | null
+  medicationName: string
+  administeredAt: string
+  doseGiven: string | null
+  healthThreadId: string | null
+  notes: string | null
+  createdAt: string
+}
+
+export interface MonitoringTimelineRow {
+  kind: 'measurement' | 'medication' | 'symptom'
+  at: string
+  id: string
+  labelKey: string
+  display: string
+  healthThreadId: string | null
+  notes: string | null
+}
+
+export interface CareReminderRow {
+  id: string
+  patientId: string
+  healthThreadId: string | null
+  reminderKind: 'measurement' | 'medication'
+  targetCode: string | null
+  medicationName: string | null
+  title: string
+  intervalMinutes: number
+  nextFireAt: string
+  lastCompletedAt: string | null
+  active: boolean
+  doseHint: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MonitoringExportReport {
+  generatedAt: string
+  patientId: string
+  patientName: string | null
+  healthThreadId: string | null
+  threadTitle: string | null
+  timeline: MonitoringTimelineRow[]
+  series: MeasurementChartSeriesPayload[]
+  stats: Array<{
+    typeCode: string
+    labelKey: string
+    unit: string | null
+    count: number
+    min: number | null
+    max: number | null
+    last: number | null
+    lastAt: string | null
+  }>
+  alerts: Array<{ typeCode: string; labelKey: string; value: number; message: string }>
+}
+
 export interface OcrStatsRow {
   document_type: string
   total: number

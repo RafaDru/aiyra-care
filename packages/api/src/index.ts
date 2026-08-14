@@ -104,6 +104,8 @@ async function registerRoutes() {
   const { legalComplianceRoutes } = await import('./infrastructure/http/legal-compliance/legal-compliance.routes.js')
   const { googleCalendarRoutes } = await import('./infrastructure/http/calendar/google-calendar.routes.js')
   const { microsoftCalendarRoutes } = await import('./infrastructure/http/calendar/microsoft-calendar.routes.js')
+  const { measurementRoutes } = await import('./infrastructure/http/measurement/measurement.routes.js')
+  const { careReminderRoutes } = await import('./infrastructure/http/care-reminder/care-reminder.routes.js')
 
   await app.register(patientRoutes)
   await app.register(growthRecordRoutes)
@@ -134,6 +136,8 @@ async function registerRoutes() {
   await app.register(legalComplianceRoutes)
   await app.register(googleCalendarRoutes)
   await app.register(microsoftCalendarRoutes)
+  await app.register(measurementRoutes)
+  await app.register(careReminderRoutes)
   await app.register(roadmapRoutes)
   await app.register(projectContextRoutes)
 }

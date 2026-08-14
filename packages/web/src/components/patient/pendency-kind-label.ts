@@ -4,4 +4,6 @@ export const PENDENCY_KIND_LABEL: Record<string, string> = {
   authorization_expiring: 'Autorização',
   health_thread_due: 'Prazo vencido',
   health_thread_unlinked: 'Acompanhamento',
+  measurement_reminder: 'Medir agora',
+  medication_reminder: 'Medicação',
 }

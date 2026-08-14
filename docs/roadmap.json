@@ -637,9 +637,9 @@
         },
         {
           "id": "plat-medidas",
-          "title": "Medidas — novos tipos além antropometria",
-          "status": "planned",
-          "detail": "Evoluir entidade growth_records."
+          "title": "Medidas — catálogo + observações + gráficos composables",
+          "status": "in_progress",
+          "detail": "037 observations + 038 care_reminders + export + UI MeasurementsTab; Fase 3: WHO curves, devices"
         }
       ]
     },

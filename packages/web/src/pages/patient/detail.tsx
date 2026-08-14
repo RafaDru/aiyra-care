@@ -8,7 +8,9 @@ import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { Patient, IntegrationLink } from '../../lib/api.types.js'
-import { GrowthTab } from './tabs/GrowthTab.js'
+import { MeasurementsTab } from './tabs/MeasurementsTab.js'
+import { CareReminderBanner } from '../../components/measurements/CareReminderBanner.js'
+import type { CareReminderRow } from '../../lib/api.types.js'
 import { VaccinesTab } from './tabs/VaccinesTab.js'
 import { MedicationsTab } from './tabs/MedicationsTab.js'
 import { AllergiesTab } from './tabs/AllergiesTab.js'
@@ -75,6 +77,11 @@ export function PatientDetail() {
   const [syncJobId, setSyncJobId] = useState<string | null>(null)
   const [syncPortalType, setSyncPortalType] = useState<'unimed' | 'amil' | 'mater_dei' | 'hermes_pardini' | null>(null)
   const [openThreadId, setOpenThreadId] = useState<string | null>(null)
+  const [monitoringAction, setMonitoringAction] = useState<{
+    kind: 'vitals' | 'medication'
+    reminderId: string
+    healthThreadId?: string | null
+  } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
 
   const { section: activeSection, tab: activeTab } = resolvePatientNav(
@@ -398,7 +405,14 @@ export function PatientDetail() {
           />
         )
       case 'growth':
-        return <GrowthTab patientId={patient.id} />
+        return (
+          <MeasurementsTab
+            patientId={patient.id}
+            patientName={patient.name}
+            monitoringAction={monitoringAction}
+            onMonitoringActionHandled={() => setMonitoringAction(null)}
+          />
+        )
       case 'vaccines':
         return <VaccinesTab patientId={patient.id} />
       case 'medications':
@@ -465,6 +479,18 @@ export function PatientDetail() {
           </div>
         </div>
       </Card>
+
+      <CareReminderBanner
+        patientId={patient.id}
+        onMeasure={(r: CareReminderRow) => {
+          setMonitoringAction({ kind: 'vitals', reminderId: r.id, healthThreadId: r.healthThreadId })
+          setActiveTab('growth')
+        }}
+        onMedication={(r: CareReminderRow) => {
+          setMonitoringAction({ kind: 'medication', reminderId: r.id, healthThreadId: r.healthThreadId })
+          setActiveTab('growth')
+        }}
+      />
 
       <Card style={{ borderRadius: 16, overflow: 'visible' }} styles={{ body: { padding: 0, overflow: 'visible' } }}>
         {sectionTabKeys.length > 1 ? (

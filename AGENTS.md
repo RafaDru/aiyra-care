@@ -151,7 +151,7 @@ Antes de features tier 2+, usar skills em `.cursor/skills/aiyracare-*` — ver `
 
 ## Migrations
 
-SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs` em `packages/api/scripts/`. Últimas: **036** (`calendar_microsoft_provider`); ver também 026–035 (agenda, billing, legal, account). `docs/LEGAL_COMPLIANCE.md`.
+SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs`. Última: **037** (`measurement_observations` + monitoramento dia-a-dia); ver `docs/MEASUREMENTS.md`.
 
 ## Testes API
 
