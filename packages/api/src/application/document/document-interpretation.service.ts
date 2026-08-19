@@ -1,6 +1,7 @@
 import type { Pool } from 'pg'
 import type { DocumentService } from './document.service.js'
 import type { HandwritingCreditsService } from '../handwriting/handwriting-credits.service.js'
+import type { LlmQuotaService } from '../llm/llm-quota.service.js'
 import type { FileStorage } from '../../domain/document/file-storage.js'
 import type { PrescriptionUnderstandingPort } from '../../domain/document/handwriting-understanding.js'
 import type { VaccineCardUnderstandingPort } from '../../domain/document/vaccine-understanding.js'
@@ -16,6 +17,7 @@ export class DocumentInterpretationService {
     private readonly storage: FileStorage,
     private readonly understanding: PrescriptionUnderstandingPort,
     private readonly vaccineUnderstanding?: VaccineCardUnderstandingPort,
+    private readonly llmQuota?: LlmQuotaService,
   ) {}
 
   async interpretHandwritingDocument(documentId: string, scopeId: string) {
@@ -60,6 +62,14 @@ export class DocumentInterpretationService {
         estimatedCostCents: estimatedInterpretationCostCents(tier, interpretation.provider),
         creditSource: source,
       })
+
+      if (this.llmQuota) {
+        await this.llmQuota.recordHandwritingInterpret(scopeId, {
+          documentId,
+          provider: interpretation.provider,
+          tier,
+        })
+      }
 
       return { interpretation, quota, creditSource: source, tier }
     } catch (err) {
@@ -117,6 +127,14 @@ export class DocumentInterpretationService {
         estimatedCostCents: estimatedInterpretationCostCents(tier, interpretation.provider),
         creditSource: source,
       })
+
+      if (this.llmQuota) {
+        await this.llmQuota.recordHandwritingInterpret(scopeId, {
+          documentId,
+          provider: interpretation.provider,
+          tier,
+        })
+      }
 
       return { interpretation, quota, creditSource: source, tier }
     } catch (err) {

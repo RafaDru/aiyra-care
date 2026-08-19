@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { api } from '../../lib/api.js'
-import type { CareReminderRow } from '../../lib/api.types.js'
+import { api } from '../lib/api.js'
+import type { CareReminderRow } from '../lib/api.types.js'
 
 export async function requestCareReminderNotificationPermission(): Promise<boolean> {
   if (typeof Notification === 'undefined') return false

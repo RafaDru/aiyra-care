@@ -1,4 +1,5 @@
 import { chromium, type Browser, type Page } from 'playwright'
+import { preparePortalPage } from './portal-browser-ui.helper.js'
 
 export class BrowserManager {
   private browser: Browser | null = null
@@ -11,6 +12,7 @@ export class BrowserManager {
       timezoneId: 'America/Sao_Paulo',
     })
     this.page = await context.newPage()
+    await preparePortalPage(this.page)
     return this.page
   }
 

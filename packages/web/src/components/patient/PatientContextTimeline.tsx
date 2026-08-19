@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { Popover, Typography } from 'antd'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import type { PatientContext } from '../../lib/api.types.js'
+import type { PatientContext, PatientTimelineEvent } from '../../lib/api.types.js'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
 import { timelineKindMeta } from './timeline-kind-meta.js'
 import './patient-context-timeline.css'
@@ -10,6 +10,7 @@ import './patient-context-timeline.css'
 const { Text } = Typography
 
 type TimelineEvent = PatientContext['timeline'][number]
+type TimelineItem = NonNullable<TimelineEvent['items']>[number]
 
 const COL_WIDTH = 148
 const STACK_OFFSET = 12
@@ -17,7 +18,9 @@ const CARD_BODY_HEIGHT = 56
 const CARD_STACK_OVERLAP = CARD_BODY_HEIGHT - STACK_OFFSET
 const SCROLL_HIDE = { scrollbarWidth: 'none', msOverflowStyle: 'none' } as const
 
-interface TimelineGroup {
+const AGENDA_KIND_ORDER = ['appointment', 'reminder', 'task'] as const
+
+interface TimelineDayGroup {
   key: string
   date: string
   events: TimelineEvent[]
@@ -35,12 +38,16 @@ function formatFullDate(iso: string): string {
   })
 }
 
+function formatItemTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
 function dayKey(iso: string): string {
   const d = new Date(iso)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function groupEventsByDay(events: TimelineEvent[]): TimelineGroup[] {
+function groupEventsByDay(events: TimelineEvent[]): TimelineDayGroup[] {
   const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   const map = new Map<string, TimelineEvent[]>()
 
@@ -51,11 +58,102 @@ function groupEventsByDay(events: TimelineEvent[]): TimelineGroup[] {
     map.set(key, list)
   }
 
-  return [...map.entries()].map(([key, groupEvents]) => ({
+  return [...map.entries()].map(([key, dayEvents]) => ({
     key,
-    date: groupEvents[0].date,
-    events: groupEvents,
+    date: dayEvents.reduce(
+      (max, e) => (new Date(e.date).getTime() > new Date(max).getTime() ? e.date : max),
+      dayEvents[0].date,
+    ),
+    events: dayEvents.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
   }))
+}
+
+function isGroupedEvent(event: TimelineEvent): boolean {
+  return (event.count ?? 0) > 1 || (event.items?.length ?? 0) > 1
+}
+
+function ExamItemsList({ items }: { items: TimelineItem[] }) {
+  const { t } = useTranslation()
+  const byOrder = new Map<string, TimelineItem[]>()
+  const noOrder: TimelineItem[] = []
+
+  for (const item of items) {
+    if (item.examOrderId) {
+      const list = byOrder.get(item.examOrderId) ?? []
+      list.push(item)
+      byOrder.set(item.examOrderId, list)
+    } else {
+      noOrder.push(item)
+    }
+  }
+
+  return (
+    <div className="patient-context-timeline__popover-items">
+      {[...byOrder.entries()].map(([orderId, orderItems]) => (
+        <div key={orderId} className="patient-context-timeline__popover-pedido">
+          <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>
+            {t('timeline.pedidoGroup', { count: orderItems.length })}
+          </Text>
+          {orderItems.map((item, index) => (
+            <div key={item.entityId ?? `${orderId}-${index}`} className="patient-context-timeline__popover-item">
+              <Text style={{ fontSize: 12 }}>{item.title}</Text>
+              {item.subtitle && (
+                <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>
+                  {item.subtitle}
+                </Text>
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+      {noOrder.map((item, index) => (
+        <div key={item.entityId ?? `no-order-${index}`} className="patient-context-timeline__popover-item">
+          <Text style={{ fontSize: 12 }}>{item.title}</Text>
+          {item.subtitle && (
+            <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>
+              {item.subtitle}
+            </Text>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function GroupPopoverContent({ event }: { event: TimelineEvent }) {
+  const meta = timelineKindMeta(event.kind)
+  const items = event.items ?? []
+
+  return (
+    <div style={{ maxWidth: 300 }}>
+      <Text strong style={{ display: 'block', marginBottom: 6, color: meta.color }}>
+        {meta.label}
+        {event.count != null && event.count > 1 ? ` · ${event.count}` : ''}
+      </Text>
+      {event.kind === 'exam' ? (
+        <ExamItemsList items={items} />
+      ) : (
+        <div className="patient-context-timeline__popover-items">
+          {items.map((item, index) => (
+            <div key={item.entityId ?? index} className="patient-context-timeline__popover-item">
+              <Text style={{ fontSize: 12 }}>{item.title}</Text>
+              {item.subtitle && (
+                <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>
+                  {item.subtitle}
+                </Text>
+              )}
+              <Text type="secondary" style={{ fontSize: 10 }}>
+                {formatItemTime(item.date)} · {item.source}
+              </Text>
+            </div>
+          ))}
+        </div>
+      )}
+      <Text type="secondary" style={{ display: 'block', fontSize: 11, marginTop: 8 }}>
+        {formatFullDate(event.date)}
+      </Text>
+    </div>
+  )
 }
 
 function EventPopoverContent({ event }: { event: TimelineEvent }) {
@@ -82,6 +180,8 @@ function EventPopoverContent({ event }: { event: TimelineEvent }) {
 function EventCard({ event }: { event: TimelineEvent }) {
   const meta = timelineKindMeta(event.kind)
   const { Icon } = meta
+  const grouped = isGroupedEvent(event)
+  const displayTitle = grouped && event.count ? event.title : event.title
 
   return (
     <div
@@ -100,10 +200,11 @@ function EventCard({ event }: { event: TimelineEvent }) {
         </span>
         <span className="patient-context-timeline__kind" style={{ color: meta.color }}>
           {meta.label}
+          {grouped && event.count != null && event.count > 1 ? ` (${event.count})` : ''}
         </span>
       </div>
-      <div className="patient-context-timeline__title" title={event.title}>
-        {event.title}
+      <div className="patient-context-timeline__title" title={displayTitle}>
+        {displayTitle}
       </div>
       {event.subtitle && (
         <div className="patient-context-timeline__subtitle" title={event.subtitle}>
@@ -118,11 +219,11 @@ function TimelineColumn({
   group,
   touchMode,
 }: {
-  group: TimelineGroup
+  group: TimelineDayGroup
   touchMode: boolean
 }) {
-  const count = group.events.length
-  const primary = group.events[count - 1]
+  const kindCount = group.events.length
+  const primary = group.events[0]
   const primaryMeta = timelineKindMeta(primary.kind)
 
   return (
@@ -132,8 +233,12 @@ function TimelineColumn({
           <div className="patient-context-timeline__cards-stack">
             {group.events.map((event, index) => (
               <Popover
-                key={`${event.kind}-${event.date}-${event.entityId ?? index}`}
-                content={<EventPopoverContent event={event} />}
+                key={`${event.kind}-${event.entityId ?? index}`}
+                content={
+                  isGroupedEvent(event)
+                    ? <GroupPopoverContent event={event} />
+                    : <EventPopoverContent event={event} />
+                }
                 title={null}
                 trigger={touchMode ? 'click' : 'hover'}
                 placement="top"
@@ -159,14 +264,14 @@ function TimelineColumn({
         <div className="patient-context-timeline__axis-fixed">
           <div className="patient-context-timeline__dot-row">
             <div
-              className={`patient-context-timeline__dot${count > 1 ? ' patient-context-timeline__dot--badge' : ''}`}
+              className={`patient-context-timeline__dot${kindCount > 1 ? ' patient-context-timeline__dot--badge' : ''}`}
               style={{
                 background: primaryMeta.color,
                 boxShadow: `0 0 0 3px ${primaryMeta.bg}, 0 0 0 4px ${primaryMeta.color}40`,
               }}
             >
-              {count > 1 && (
-                <span className="patient-context-timeline__dot-count">{count}</span>
+              {kindCount > 1 && (
+                <span className="patient-context-timeline__dot-count">{kindCount}</span>
               )}
             </div>
           </div>
@@ -194,10 +299,8 @@ export function PatientContextTimeline({ events, maxItems = 8, showHeader = true
   const [isDragging, setIsDragging] = useState(false)
 
   const groups = useMemo(() => {
-    const sliced = [...events]
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(-maxItems)
-    return groupEventsByDay(sliced)
+    const dayGroups = groupEventsByDay(events)
+    return dayGroups.slice(-maxItems)
   }, [events, maxItems])
 
   const stackPadding = useMemo(() => {
@@ -333,4 +436,22 @@ export function PatientContextTimeline({ events, maxItems = 8, showHeader = true
       </div>
     </div>
   )
+}
+
+/** Group scheduled agenda events by kind for a single calendar day. */
+export function groupAgendaEventsByKind<T extends { kind: string }>(events: T[]): Map<string, T[]> {
+  const map = new Map<string, T[]>()
+  for (const event of events) {
+    const list = map.get(event.kind) ?? []
+    list.push(event)
+    map.set(event.kind, list)
+  }
+  return map
+}
+
+export const AGENDA_KIND_DISPLAY_ORDER = AGENDA_KIND_ORDER
+
+/** Day buckets for timeline list view (API events are already grouped by kind per day). */
+export function groupTimelineEventsByDay(events: PatientTimelineEvent[]): TimelineDayGroup[] {
+  return groupEventsByDay(events as TimelineEvent[])
 }

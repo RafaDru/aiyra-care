@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-13",
+  "generatedAt": "2026-08-19",
   "application": {
     "name": "AiyraCare (Filhos)",
     "repository": "https://github.com/RafaDru/open-health",
@@ -11,23 +11,26 @@
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres é fonte da verdade; Neo4j projeta relações. Connect: sync silencioso (sessionReady + stale 6h), incremental por portal, SSE push-first, worker agendado. Agenda com scheduled_events + OAuth Google/Outlook. Billing Stripe (pacotes + assinatura). Legal: compliance gate, docs versionados, exclusão LGPD. Próximo épico: Agentes RAG (gate ANVISA+médico).",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades e atributos (fonte da verdade); Neo4j = associações entre entidades (caminhos, pins Ava, higienização). Ava companheira global na conta (roadmap P1). Observabilidade proativa (product_events planejado). Connect: sync silencioso, SSE, billing Stripe, compliance LGPD.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
-    "postgresRole": "Fonte da verdade — entidades clínicas, trilhas, plano, billing, legal, agenda, calendar_connections, sync_jobs",
-    "neo4jRole": "Projeção read-model para caminhos e futuros agentes",
-    "principle": "PatientContext determinístico sem LLM; agentes RAG citam fontes PG"
+    "postgresRole": "Fonte da verdade — entidades clínicas, conversas Ava (planejado), billing, legal, telemetria llm_usage + product_events (planejado)",
+    "neo4jRole": "Associações entre entidades PG — caminhos clínicos, pins de sessão, candidatos dedup, analytics Topic (opt-in); não duplica atributos",
+    "principle": "PatientContext determinístico sem LLM; Ava com pins transparentes; grafo opcional para expansão"
   },
   "layers": [
     { "id": "A", "name": "Dados estruturados", "description": "Postgres: consultas, exames, vacinas, meds, alergias, autorizações, plano, agenda, billing", "usesLlm": false, "status": "operational" },
     { "id": "B", "name": "Contexto determinístico", "description": "GET /patients/:id/context e /timeline — alertas, textSummary, export clínico", "usesLlm": false, "status": "operational" },
     { "id": "C", "name": "Trilhas de saúde", "description": "HealthThread + acompanhamento + clinical_entity_links", "usesLlm": false, "status": "operational" },
     { "id": "D", "name": "Documentos + OCR/LLM", "description": "Cascade OCR, interpretação manuscrito, créditos billing", "usesLlm": true, "status": "operational" },
-    { "id": "E", "name": "Grafo Neo4j", "description": "Lineage worker, path queries, timeline Encadeamento", "usesLlm": false, "status": "done" },
+    { "id": "E", "name": "Grafo Neo4j", "description": "Associações entre entidades PG; lineage; pins Ava (planejado)", "usesLlm": false, "status": "done" },
     { "id": "F", "name": "Agenda + calendários", "description": "scheduled_events, ICS, Google/Microsoft OAuth sync", "usesLlm": false, "status": "done" },
     { "id": "G", "name": "Billing SaaS", "description": "Stripe checkout, webhook, assinatura, entitlements", "usesLlm": false, "status": "done" },
     { "id": "H", "name": "Legal / LGPD", "description": "Compliance gate, aceite versionado, exclusão conta", "usesLlm": false, "status": "operational" },
-    { "id": "I", "name": "Agentes de apoio", "description": "RAG com PatientContext + citações — próximo épico P3", "usesLlm": true, "status": "planned" }
+    { "id": "I", "name": "Agentes de apoio (Ava)", "description": "Ava chat + reflexão; roadmap: conversas persistidas, pins, grafo", "usesLlm": true, "status": "operational" },
+    { "id": "J", "name": "Observabilidade", "description": "llm_usage_events, sync_jobs; product_events planejado", "usesLlm": false, "status": "planned" },
+    { "id": "K", "name": "Higienização (dedup)", "description": "Detectores exams/vacinas; hygiene_candidates (042); bloqueio na inserção", "usesLlm": false, "status": "operational" },
+    { "id": "L", "name": "Classificação de rótulos", "description": "Motor hexagonal (port/engine/adapter) roteia atendimento Amil → consulta/exame; reuso em jobs", "usesLlm": false, "status": "operational" }
   ],
   "domains": [
     { "name": "Patient", "table": "patients", "description": "Pacientes e vínculos familiares" },
@@ -43,7 +46,11 @@
     { "name": "AccountProfile", "table": "account_profiles", "description": "Perfil estendido conta" },
     { "name": "ClinicalExportShare", "table": "clinical_export_shares", "description": "Links públicos export 48h" },
     { "name": "IntegrationLink", "table": "integration_links", "description": "Credenciais portal" },
-    { "name": "SyncJob", "table": "sync_jobs", "description": "Jobs sync manual|scheduled" }
+    { "name": "SyncJob", "table": "sync_jobs", "description": "Jobs sync manual|scheduled" },
+    { "name": "ExamOrder", "table": "exam_orders", "description": "Pedidos de exame (041); exams.exam_order_id" },
+    { "name": "EmergencyDirectory", "tables": ["emergency_directory", "patient_emergency_contacts"], "description": "Guia/contatos de emergência (039)" },
+    { "name": "HygieneCandidate", "table": "hygiene_candidates", "description": "Pares candidatos a duplicata + resolução (042)" },
+    { "name": "LlmUsageEvent", "table": "llm_usage_events", "description": "Metering de chamadas LLM Ava (040)" }
   ],
   "apiRoutes": [
     { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },
@@ -64,11 +71,16 @@
     { "method": "GET", "path": "/compliance/status", "description": "Pendências aceite" },
     { "method": "POST", "path": "/compliance/accept", "description": "Registrar aceite" },
     { "method": "DELETE", "path": "/auth/account", "description": "Exclusão conta LGPD" },
-    { "method": "POST", "path": "/integration-links/:id/sync", "description": "Sync portal assíncrono" }
+    { "method": "POST", "path": "/integration-links/:id/sync", "description": "Sync portal assíncrono" },
+    { "method": "GET", "path": "/hygiene/candidates", "description": "Candidatos a duplicata (higienização)" },
+    { "method": "POST", "path": "/hygiene/candidates/:id/resolve", "description": "Resolver candidato (same_entity/dismiss)" },
+    { "method": "GET", "path": "/exam-orders", "description": "Pedidos de exame CRUD" },
+    { "method": "POST", "path": "/ava/chat", "description": "Chat Ava (companheira)" },
+    { "method": "GET", "path": "/emergency/directory", "description": "Guia de emergência por paciente" }
   ],
   "integrations": [
     { "portal": "unimed", "syncAutomatic": true, "imports": ["extrato", "autorizações", "cartão virtual", "carências PDF", "guia PDF"] },
-    { "portal": "amil", "syncAutomatic": true, "imports": ["plano", "guias", "utilização → consultas", "dependentes"] },
+    { "portal": "amil", "syncAutomatic": true, "imports": ["plano", "guias", "utilização → consultas/exames (classificador)", "dependentes"] },
     { "portal": "bradesco_saude", "syncAutomatic": true, "imports": ["exames", "vacinas"] },
     { "portal": "mater_dei", "syncAutomatic": true, "imports": ["exames", "atendimentos"] },
     { "portal": "hermes_pardini", "syncAutomatic": true, "imports": ["pedidos", "exames", "laudo PDF"] },
@@ -90,13 +102,15 @@
     { "id": "compliance-gate", "date": "2026-08-13", "title": "COMPLIANCE_GATE_ENABLED bloqueia API", "status": "active" },
     { "id": "settings-split", "date": "2026-08-13", "title": "Configurações em /settings/*", "status": "active" },
     { "id": "outlook-oauth-localhost", "date": "2026-08-13", "title": "Azure Web redirect localhost only", "decision": "MICROSOFT_CALENDAR_REDIRECT_URI=http://localhost:3010/...", "status": "active" },
-    { "id": "agents-next-epic", "date": "2026-08-13", "title": "Próximo épico: Agentes RAG", "decision": "Gate ANVISA + médico antes de clínico", "status": "active" }
+    { "id": "agents-next-epic", "date": "2026-08-13", "title": "Próximo épico: Agentes RAG", "decision": "Gate ANVISA + médico antes de clínico", "status": "active" },
+    { "id": "classification-engine", "date": "2026-08-19", "title": "Classificador de rótulos hexagonal (Amil)", "decision": "Port no domínio; engine rules+fuzzy em application; adapter em infra; reuse em integração e jobs; fallback LLM só documentado (não integrado)", "status": "active" }
   ],
   "plannedWork": [
     { "id": "agent-rag", "title": "packages/agents + runtime citações", "status": "planned", "priority": "P3" },
     { "id": "rede-credenciada", "title": "Busca unificada rede", "status": "planned", "priority": "P4" },
     { "id": "mobile-app", "title": "React Native Expo", "status": "planned", "priority": "P4" },
     { "id": "connect-microservice", "title": "Connect Fase 3 HTTP+fila", "status": "planned", "priority": "P4" },
+    { "id": "amil-routing-classifier", "title": "Classificador de rótulos + roteamento Amil", "status": "in_progress", "priority": "P2" },
     { "id": "human-review-gates", "title": "Advogado, NFS-e, Stripe live, pentest", "status": "in_progress", "priority": "parallel" }
   ],
   "documentationSources": [
@@ -110,6 +124,11 @@
     { "path": "docs/LEGAL_COMPLIANCE.md", "role": "LGPD e compliance" },
     { "path": "docs/BILLING.md", "role": "Stripe" },
     { "path": "docs/GO_LIVE_TECHNICAL_READINESS.md", "role": "Checklist go-live" },
+    { "path": "docs/CLASSIFICATION_ENGINE.md", "role": "Motor de classificação de rótulos (hexagonal)" },
+    { "path": "docs/DATA_HYGIENE.md", "role": "Higienização/dedup (exames + vacinas)" },
+    { "path": "docs/EMERGENCY.md", "role": "Guia e contatos de emergência" },
+    { "path": "docs/LLM_USAGE.md", "role": "Metering de LLM Ava" },
+    { "path": "docs/EXAM_ARTIFACT_PIPELINE.md", "role": "Artefatos de exame → modelo canônico" },
     { "path": "AGENTS.md", "role": "Instruções agentes Cursor" }
   ]
 }

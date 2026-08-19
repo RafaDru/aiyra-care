@@ -25,7 +25,7 @@ import {
 export class MeasurementController {
   constructor(
     private readonly service: MeasurementService,
-    private readonly whoGrowth: WhoGrowthService,
+    private readonly whoGrowthService: WhoGrowthService,
     private readonly glucoseImport: GlucoseExamImportService,
   ) {}
 
@@ -128,7 +128,7 @@ export class MeasurementController {
     const parsed = whoGrowthQuerySchema.safeParse(req.query)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
-    const payload = await this.whoGrowth.buildPayload(parsed.data.patientId, parsed.data.typeCode)
+    const payload = await this.whoGrowthService.buildPayload(parsed.data.patientId, parsed.data.typeCode)
     if (!payload) {
       return reply.status(404).send({ message: 'WHO reference unavailable (sexo ou tipo inválido)' })
     }

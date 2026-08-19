@@ -32,8 +32,15 @@ Isso tende a ficar **fora** de Software como Dispositivo Médico (SaMD) de alto 
 
 - Respostas **sempre** com citação a registro do Postgres.
 - Disclaimer fixo: não substitui pediatra.
-- Sem triagem de urgência automatizada.
+- **Sem afirmar diagnóstico** — apenas temas para debate médico (`docs/AGENTS_APOIO.md`).
+- **Hard stops determinísticos** (ex.: alergia × medicação → `do_not_apply`) — não são “triagem autônoma”; são contraindicação com base em dado registrado + linguagem firme. Revisão médica obrigatória ao expandir catálogo.
 - Sem dosagem ou prescrição.
+- Triagem de urgência **generalizada** por LLM sozinha — não no MVP; red flags via regras + catálogo emergência curado.
+
+## Horizonte (roadmap — gate regulatório)
+
+- Notificação ativa / escalonamento em cenários extremos (opt-in, dispositivos, persistência de vital crítico).
+- Validar enquadramento SaMD antes de automação sem confirmação humana.
 
 ## Referências
 

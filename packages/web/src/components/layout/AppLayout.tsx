@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined } from '@ant-design/icons'
+import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -34,9 +34,11 @@ export function AppLayout() {
   const mainSelectedKey =
     location.pathname === '/' || location.pathname.startsWith('/patients')
       ? '/'
-      : location.pathname.startsWith('/settings')
-        ? '/settings'
-        : ''
+      : location.pathname.startsWith('/emergency')
+        ? '/emergency'
+        : location.pathname.startsWith('/settings')
+          ? '/settings'
+          : ''
 
   const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
@@ -78,6 +80,12 @@ export function AppLayout() {
             selectedKeys={[mainSelectedKey]}
             items={[
               { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
+              {
+                key: '/emergency',
+                icon: <PhoneOutlined />,
+                label: t('nav.emergency'),
+                style: { color: 'var(--emergency-nav, #cf1322)', fontWeight: 600 },
+              },
               { key: '/settings', icon: <SettingOutlined />, label: t('nav.settings') },
             ]}
             onClick={({ key }) => navigate(key)}
@@ -150,7 +158,7 @@ export function AppLayout() {
             <LanguageSwitcher />
           </div>
         </Header>
-        <Content style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto' }}>
+        <Content style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }}>
           <Outlet />
         </Content>
       </Layout>

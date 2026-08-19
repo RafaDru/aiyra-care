@@ -1,4 +1,4 @@
-import { documentDownloadUrl } from './api.js'
+import { fetchAuthenticatedBlob } from './api.js'
 import { getCachedSliceBlob, putCachedSliceBlob } from './exam-slice-cache.js'
 
 const FETCH_CONCURRENCY = 10
@@ -12,9 +12,7 @@ export interface SliceLoadProgress {
 async function fetchSliceBlob(documentId: string, signal?: AbortSignal): Promise<Blob> {
   const cached = await getCachedSliceBlob(documentId)
   if (cached) return cached
-  const res = await fetch(documentDownloadUrl(documentId), { signal })
-  if (!res.ok) throw new Error(`Falha ao baixar corte (${res.status})`)
-  const blob = await res.blob()
+  const blob = await fetchAuthenticatedBlob(`/documents/${documentId}/download`)
   await putCachedSliceBlob(documentId, blob)
   return blob
 }

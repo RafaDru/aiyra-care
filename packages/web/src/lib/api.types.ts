@@ -44,6 +44,16 @@ export interface PatientContext {
     subtitle?: string
     source: string
     entityId?: string
+    count?: number
+    items?: Array<{
+      date: string
+      title: string
+      subtitle?: string
+      source: string
+      entityId?: string
+      examOrderId?: string
+    }>
+    examOrderId?: string
   }>
   pendencies: Array<{
     kind: string
@@ -98,6 +108,15 @@ export interface PatientClinicalExport {
   fullSections?: PatientClinicalExportSections
 }
 
+export interface PatientTimelineItem {
+  date: string
+  title: string
+  subtitle?: string
+  source: string
+  entityId?: string
+  examOrderId?: string
+}
+
 export interface PatientTimelineEvent {
   date: string
   kind: string
@@ -105,6 +124,9 @@ export interface PatientTimelineEvent {
   subtitle?: string
   source: string
   entityId?: string
+  count?: number
+  items?: PatientTimelineItem[]
+  examOrderId?: string
 }
 
 export interface PatientTimeline {
@@ -473,11 +495,14 @@ export interface MeasurementChartSeriesPayload {
   chartConfig: Record<string, unknown>
   normalRange: Record<string, number> | null
   points: Array<{
+    id?: string
     observedAt: string
     value: number | null
     valueSecondary: number | null
     notes: string | null
     healthThreadId: string | null
+    source?: string
+    sourceRef?: string | null
   }>
 }
 
@@ -500,6 +525,139 @@ export interface GlucoseImportResult {
   imported: number
   skipped: number
   examIds: string[]
+}
+
+export type FamilySupportInsightKind =
+  | 'vital_alert'
+  | 'medication_safety'
+  | 'discuss_with_doctor'
+  | 'consult_prep'
+
+export type FamilySupportAction =
+  | 'verify_reading'
+  | 'discuss_with_doctor'
+  | 'seek_medical_care'
+  | 'inform_doctor'
+  | 'review_before_dose'
+  | 'do_not_apply'
+
+export interface FamilySupportCitation {
+  kind: 'measurement' | 'allergy' | 'medication' | 'health_thread'
+  entityId?: string
+  label: string
+  observedAt?: string
+}
+
+export interface FamilySupportInsight {
+  id: string
+  kind: FamilySupportInsightKind
+  action: FamilySupportAction
+  priority: 'info' | 'attention' | 'urgent' | 'critical'
+  title: string
+  message: string
+  citations: FamilySupportCitation[]
+  audience: 'family' | 'clinical'
+}
+
+export interface FamilySupportBundle {
+  disclaimer: string
+  insights: FamilySupportInsight[]
+  generatedAt: string
+  patientId: string
+}
+
+export type LlmQuotaStatus = 'ok' | 'warn' | 'exhausted'
+
+export interface LlmUsageQuota {
+  scopeId: string
+  tokensPerCredit: number
+  monthlyTokenAllowance: number
+  monthlyTokensUsed: number
+  monthlyTokensRemaining: number
+  packageTokenBalance: number
+  totalTokensRemaining: number
+  creditsEquivalentRemaining: number
+  warnAtPercent: number
+  usagePercent: number
+  status: LlmQuotaStatus
+  monthlyPeriod: string
+  handwritingCredits: {
+    monthlyFreeRemaining: number
+    packageCredits: number
+    totalAvailable: number
+  }
+  llmEnabled: boolean
+}
+
+export interface AvaReflectionOutcome {
+  satisfactory: boolean
+  issues: string[]
+  severity: 'ok' | 'minor' | 'critical'
+  revised: boolean
+  attempts: number
+  steps: string[]
+}
+
+export interface AvaChatResponse {
+  reply: string
+  provider: string
+  model: string
+  tier: 'free' | 'premium'
+  usage: {
+    tokensIn: number
+    tokensOut: number
+    tokensTotal: number
+    usageSource: string
+  }
+  quota: LlmUsageQuota
+  disclaimer: string
+  insightsIncluded: number
+  reflection: AvaReflectionOutcome
+}
+
+export type EmergencyDirectoryCategory =
+  | 'medical'
+  | 'fire_rescue'
+  | 'police'
+  | 'poison'
+  | 'mental_health'
+  | 'violence_support'
+  | 'human_rights'
+  | 'venomous_animal'
+  | 'civil_defense'
+  | 'insurance'
+  | 'other'
+
+export interface EmergencyDirectoryEntry {
+  id: string
+  category: EmergencyDirectoryCategory
+  scope: 'national' | 'state' | 'city'
+  stateCode: string | null
+  cityName: string | null
+  name: string
+  phone: string
+  phoneAlt: string | null
+  description: string | null
+  instructions: string | null
+  sourceUrl: string | null
+  officialOrg: string | null
+  available24h: boolean
+  sortOrder: number
+}
+
+export interface PatientEmergencyContact {
+  id: string
+  patientId: string
+  name: string
+  phone: string
+  phoneAlt: string | null
+  relationship: string | null
+  notes: string | null
+  sortOrder: number
+  deletedAt: string | null
+  deletedBy: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface MedicationAdministrationRow {
@@ -804,6 +962,7 @@ export interface Exam {
   id: string
   patientId: string
   medicalRecordId: string | null
+  examOrderId: string | null
   examType: string
   examDate: string
   resultSummary: string | null
@@ -811,6 +970,20 @@ export interface Exam {
   laboratory: string | null
   notes: string | null
   source: string
+  createdAt: string
+}
+
+export interface ExamOrder {
+  id: string
+  patientId: string
+  externalKey: string
+  source: string
+  portalOrderId: string | null
+  orderDate: string | null
+  laboratory: string | null
+  resultFileUrl: string | null
+  documentId: string | null
+  notes: string | null
   createdAt: string
 }
 
@@ -1065,6 +1238,8 @@ export interface Authorization {
   items: AuthorizationItem[]
   medicalRecordId: string | null
   providerExternalId: string | null
+  doctorPhotoUrl: string | null
+  guideDocumentId: string | null
   createdAt: string
   updatedAt: string
 }

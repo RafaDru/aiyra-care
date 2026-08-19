@@ -10,10 +10,12 @@ import type { AuthorizationRepository } from '../../domain/authorization/authori
 import type { IntegrationLinkRepository } from '../../domain/integration-link/integration-link.repository.js'
 import type { InsurancePlanService } from '../insurance-plan/insurance-plan.service.js'
 import type { HealthThreadRepository } from '../../domain/health-thread/health-thread.repository.js'
-import { NotFoundError } from '../../domain/errors.js'
+import { isExamHygieneDuplicate } from '../../domain/hygiene/exam-canonical.js'
+import { isVaccineHygieneDuplicate } from '../../domain/hygiene/vaccine-notes.js'
 import { ageInYears } from '../../domain/patient/age-rules.js'
 import { enrichIntegrationLinksWithSyncAuthority } from '../integration-link/integration-link-sync-authority.js'
 import { isOcrPending } from '../../domain/document/ocr-policy.js'
+import { groupTimelineEvents } from './timeline-grouping.js'
 import type {
   PatientContext,
   PatientContextAlert,
@@ -317,7 +319,8 @@ export class PatientContextService {
     const recentConsultations = records.filter(
       (r) => r.recordDate >= timelineCutoff && mapMedicalRecordKind(r.recordType) === 'consultation',
     ).length
-    const recentExams = examList.filter((e) => e.examDate >= timelineCutoff).length
+    const recentExams = examList
+      .filter((e) => !isExamHygieneDuplicate(e) && e.examDate >= timelineCutoff).length
 
     const textSummary = buildTextSummary({
       name: patient.name,
@@ -410,7 +413,7 @@ export class PatientContextService {
         dose: m.dosage,
         frequency: m.frequency,
       })),
-      vaccines: vaccines.map((v) => ({
+      vaccines: vaccines.filter((v) => !isVaccineHygieneDuplicate(v)).map((v) => ({
         name: v.vaccineName,
         administeredAt: iso(v.applicationDate),
         doseLabel: v.doseNumber != null ? `Dose ${v.doseNumber}` : null,
@@ -436,7 +439,7 @@ export class PatientContextService {
         description: r.description,
         doctor: r.doctorName,
       })),
-      exams: exams.map((e) => ({
+      exams: exams.filter((e) => !isExamHygieneDuplicate(e)).map((e) => ({
         name: e.examType,
         date: e.examDate.toISOString(),
         laboratory: e.laboratory,
@@ -514,7 +517,7 @@ export class PatientContextService {
       })
     }
 
-    for (const e of examList) {
+    for (const e of examList.filter((x) => !isExamHygieneDuplicate(x))) {
       if (e.examDate < cutoff || e.examDate > upperBound) continue
       timeline.push({
         date: e.examDate.toISOString(),
@@ -523,10 +526,11 @@ export class PatientContextService {
         subtitle: e.laboratory ?? e.resultSummary?.slice(0, 80) ?? undefined,
         source: e.source,
         entityId: e.id,
+        examOrderId: e.examOrderId ?? undefined,
       })
     }
 
-    for (const v of vaccineList) {
+    for (const v of vaccineList.filter((x) => !isVaccineHygieneDuplicate(x))) {
       if (v.applicationDate < cutoff || v.applicationDate > upperBound) continue
       timeline.push({
         date: v.applicationDate.toISOString(),
@@ -577,7 +581,7 @@ export class PatientContextService {
     }
 
     timeline.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    return timeline
+    return groupTimelineEvents(timeline)
   }
 
   private async listThreadNotesForTimeline(

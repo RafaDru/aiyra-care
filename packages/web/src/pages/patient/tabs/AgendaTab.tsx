@@ -11,6 +11,10 @@ import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import { AgendaTimelineHeader } from '../../../components/patient/AgendaTimelineHeader.js'
+import {
+  AGENDA_KIND_DISPLAY_ORDER,
+  groupAgendaEventsByKind,
+} from '../../../components/patient/PatientContextTimeline.js'
 import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
 import type { HealthThread, ScheduledEvent } from '../../../lib/api.types.js'
 import { ensureAccessToken } from '../../../lib/supabase.js'
@@ -110,6 +114,18 @@ export function AgendaTab({ patientId }: Props) {
   const selectedDayEvents = useMemo(() => {
     return eventsByDay.get(selectedDate.format('YYYY-MM-DD')) ?? []
   }, [eventsByDay, selectedDate])
+
+  const selectedDayByKind = useMemo(
+    () => groupAgendaEventsByKind(selectedDayEvents),
+    [selectedDayEvents],
+  )
+
+  const kindMarksForDay = (items: ScheduledEvent[]) => {
+    const byKind = groupAgendaEventsByKind(items)
+    return AGENDA_KIND_DISPLAY_ORDER
+      .map((kind) => ({ kind, items: byKind.get(kind) ?? [] }))
+      .filter((mark) => mark.items.length > 0)
+  }
 
   const selectedEvent = useMemo(
     () => data.find((e) => e.id === selectedEventId) ?? null,
@@ -347,7 +363,8 @@ export function AgendaTab({ patientId }: Props) {
   const fullCellRender = (date: Dayjs) => {
     const key = date.format('YYYY-MM-DD')
     const items = eventsByDay.get(key) ?? []
-    const visibleMarks = items.slice(0, MAX_MARKS_PER_CELL)
+    const kindMarks = kindMarksForDay(items)
+    const visibleMarks = kindMarks.slice(0, MAX_MARKS_PER_CELL)
     const isToday = date.isSame(dayjs(), 'day')
     const isSelected = date.isSame(selectedDate, 'day')
     const isCurrentMonth = date.isSame(calendarValue, 'month')
@@ -379,27 +396,29 @@ export function AgendaTab({ patientId }: Props) {
           </button>
         </div>
         <div className="agenda-cal-marks" role="list" aria-label={t('agenda.dayEvents')}>
-          {visibleMarks.map((item) => (
+          {visibleMarks.map((mark) => (
             <button
-              key={item.id}
+              key={mark.kind}
               type="button"
               role="listitem"
-              className={[
-                'agenda-cal-mark',
-                selectedEventId === item.id && 'agenda-cal-mark--active',
-                item.status !== 'planned' && 'agenda-cal-mark--muted',
-              ].filter(Boolean).join(' ')}
-              style={{ background: KIND_COLORS[item.kind] }}
-              title={`${formatEventTime(item.scheduledAt)} — ${item.title}`}
-              aria-label={`${formatEventTime(item.scheduledAt)} — ${item.title}`}
+              className="agenda-cal-mark agenda-cal-mark--kind"
+              style={{ background: KIND_COLORS[mark.kind] }}
+              title={t('agenda.kindGroupCount', {
+                kind: t(`agenda.kind.${mark.kind}`),
+                count: mark.items.length,
+              })}
+              aria-label={t('agenda.kindGroupCount', {
+                kind: t(`agenda.kind.${mark.kind}`),
+                count: mark.items.length,
+              })}
               onClick={(ev) => {
                 ev.stopPropagation()
-                selectEvent(date, item)
+                selectDay(date)
               }}
             />
           ))}
-          {items.length > MAX_MARKS_PER_CELL && (
-            <span className="agenda-cal-more">+{items.length - MAX_MARKS_PER_CELL}</span>
+          {kindMarks.length > MAX_MARKS_PER_CELL && (
+            <span className="agenda-cal-more">+{kindMarks.length - MAX_MARKS_PER_CELL}</span>
           )}
         </div>
       </div>
@@ -509,22 +528,39 @@ export function AgendaTab({ patientId }: Props) {
                 <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
                   {t('agenda.pickEventHint')}
                 </Typography.Text>
-                {selectedDayEvents.map((e) => (
-                  <button
-                    key={e.id}
-                    type="button"
-                    className="agenda-day-list__item"
-                    onClick={() => selectEvent(selectedDate, e)}
-                  >
-                    <span
-                      className="agenda-day-list__mark"
-                      style={{ background: KIND_COLORS[e.kind] }}
-                      aria-hidden
-                    />
-                    <span className="agenda-day-list__time">{formatEventTime(e.scheduledAt)}</span>
-                    <span className="agenda-day-list__title">{e.title}</span>
-                  </button>
-                ))}
+                {AGENDA_KIND_DISPLAY_ORDER.map((kind) => {
+                  const items = selectedDayByKind.get(kind)
+                  if (!items?.length) return null
+                  return (
+                    <div key={kind} className="agenda-day-kind-group">
+                      <Typography.Text strong className="agenda-day-kind-group__title">
+                        {t('agenda.kindGroupCount', {
+                          kind: t(`agenda.kind.${kind}`),
+                          count: items.length,
+                        })}
+                      </Typography.Text>
+                      {items.map((e) => (
+                        <button
+                          key={e.id}
+                          type="button"
+                          className={[
+                            'agenda-day-list__item',
+                            selectedEventId === e.id && 'agenda-day-list__item--active',
+                          ].filter(Boolean).join(' ')}
+                          onClick={() => selectEvent(selectedDate, e)}
+                        >
+                          <span
+                            className="agenda-day-list__mark"
+                            style={{ background: KIND_COLORS[e.kind] }}
+                            aria-hidden
+                          />
+                          <span className="agenda-day-list__time">{formatEventTime(e.scheduledAt)}</span>
+                          <span className="agenda-day-list__title">{e.title}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </Card>

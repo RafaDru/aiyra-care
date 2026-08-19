@@ -7,13 +7,20 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:critical": "vitest run tests/llm-policy.test.ts tests/llm-router.test.ts tests/ava-reflection.test.ts tests/crypto-helper.test.ts tests/compliance-gate.test.ts tests/billing-allowances.test.ts tests/sync-delta.helper.test.ts tests/timeline-grouping.test.ts tests/family-support-rules.test.ts tests/exam-duplicate-detector.test.ts tests/vaccine-duplicate-detector.test.ts tests/hygiene-canonical-pick.test.ts",
+    "scan:hygiene": "tsx scripts/run-hygiene-scan.ts",
+    "normalize:exam-artifacts": "tsx scripts/run-exam-artifact-normalize.ts",
+    "test:smoke:llm": "tsx scripts/llm-smoke-test.ts",
+    "test:smoke:billing": "node scripts/billing-smoke-test.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/multipart": "^10.1.0",
     "@google-cloud/storage": "^7.21.0",
     "@google-cloud/vision": "^5.3.7",
+    "@nlptools/distance": "^0.0.8",
     "@open-health/connect": "*",
     "@supabase/supabase-js": "^2.111.0",
     "dotenv": "^16.4.7",

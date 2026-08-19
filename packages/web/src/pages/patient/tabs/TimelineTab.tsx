@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Card, Checkbox, DatePicker, Select, Space, Spin, Typography, Segmented, List, Tag, Empty } from 'antd'
+import { Card, Checkbox, Collapse, DatePicker, Select, Space, Spin, Typography, Segmented, List, Tag, Empty } from 'antd'
 import { AppstoreOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
 import { api } from '../../../lib/api.js'
 import type { PatientTimeline, PatientTimelineEvent, ClinicalFlow } from '../../../lib/api.types.js'
-import { PatientContextTimeline } from '../../../components/patient/PatientContextTimeline.js'
+import {
+  PatientContextTimeline,
+  groupTimelineEventsByDay,
+} from '../../../components/patient/PatientContextTimeline.js'
 import { ClinicalEntityFlow } from '../../../components/patient/ClinicalEntityFlow.js'
 import { TIMELINE_KIND_OPTIONS, timelineKindMeta } from '../../../components/patient/timeline-kind-meta.js'
 
@@ -16,6 +19,62 @@ interface TimelineTabProps {
 }
 
 type ViewMode = 'timeline' | 'list' | 'chain'
+
+function formatDayLabel(iso: string): string {
+  return new Date(iso).toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
+function TimelineListItem({ event }: { event: PatientTimelineEvent }) {
+  const meta = timelineKindMeta(event.kind)
+  const grouped = (event.count ?? 0) > 1 || (event.items?.length ?? 0) > 1
+
+  return (
+    <List.Item>
+      <List.Item.Meta
+        title={
+          <Space wrap>
+            <Tag color={meta.color}>{meta.label}</Tag>
+            <Text strong>{event.title}</Text>
+            {grouped && event.count != null && event.count > 1 && (
+              <Tag>{event.count}</Tag>
+            )}
+          </Space>
+        }
+        description={
+          <Space direction="vertical" size={4} style={{ width: '100%' }}>
+            {event.subtitle && <Text type="secondary">{event.subtitle}</Text>}
+            {grouped && event.items && (
+              <List
+                size="small"
+                dataSource={event.items}
+                renderItem={(item) => (
+                  <List.Item style={{ padding: '4px 0' }}>
+                    <Text style={{ fontSize: 13 }}>{item.title}</Text>
+                    {item.subtitle && (
+                      <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                        {item.subtitle}
+                      </Text>
+                    )}
+                  </List.Item>
+                )}
+              />
+            )}
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {new Date(event.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              {' · '}
+              {event.source}
+            </Text>
+          </Space>
+        }
+      />
+    </List.Item>
+  )
+}
 
 export function TimelineTab({ patientId }: TimelineTabProps) {
   const [data, setData] = useState<PatientTimeline | null>(null)
@@ -69,6 +128,10 @@ export function TimelineTab({ patientId }: TimelineTabProps) {
   }, [patientId, viewMode])
 
   const events = data?.events ?? []
+  const dayGroups = useMemo(
+    () => [...groupTimelineEventsByDay(events)].sort((a, b) => b.key.localeCompare(a.key)),
+    [events],
+  )
 
   return (
     <div>
@@ -135,36 +198,24 @@ export function TimelineTab({ patientId }: TimelineTabProps) {
       )}
 
       {!loading && !error && events.length > 0 && viewMode === 'list' && (
-        <List
-          dataSource={events}
-          renderItem={(event: PatientTimelineEvent) => {
-            const meta = timelineKindMeta(event.kind)
-            return (
-              <List.Item>
-                <List.Item.Meta
-                  title={
-                    <Space wrap>
-                      <Tag color={meta.color}>{meta.label}</Tag>
-                      <Text strong>{event.title}</Text>
-                    </Space>
-                  }
-                  description={
-                    <Space direction="vertical" size={0}>
-                      {event.subtitle && <Text type="secondary">{event.subtitle}</Text>}
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {new Date(event.date).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: 'long',
-                          year: 'numeric',
-                        })}{' '}
-                        · {event.source}
-                      </Text>
-                    </Space>
-                  }
-                />
-              </List.Item>
-            )
-          }}
+        <Collapse
+          accordion={false}
+          defaultActiveKey={dayGroups.slice(0, 3).map((g) => g.key)}
+          items={dayGroups.map((day) => ({
+            key: day.key,
+            label: (
+              <Space>
+                <Text strong>{formatDayLabel(day.date)}</Text>
+                <Text type="secondary">({day.events.length} tipo(s))</Text>
+              </Space>
+            ),
+            children: (
+              <List
+                dataSource={day.events}
+                renderItem={(event) => <TimelineListItem event={event} />}
+              />
+            ),
+          }))}
         />
       )}
 

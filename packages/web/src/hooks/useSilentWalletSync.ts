@@ -18,11 +18,11 @@ const SILENT_FAIL_RE =
  */
 export function useSilentWalletSync(links: IntegrationLink[], onUpdated?: () => void) {
   const { message } = App.useApp()
-  const { loading: authLoading, session, configured: authConfigured } = useAuth()
+  const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
   const runningRef = useRef(false)
 
   useEffect(() => {
-    if (authConfigured && (authLoading || !session)) return
+    if (authConfigured && (authLoading || !authUserId)) return
 
     const targets = collectSyncTargets(links).filter((link) => {
       const syncLinkId = link.effectiveSyncLinkId ?? link.id
@@ -60,5 +60,5 @@ export function useSilentWalletSync(links: IntegrationLink[], onUpdated?: () => 
     return () => {
       cancelled = true
     }
-  }, [links, authLoading, session, authConfigured, message, onUpdated])
+  }, [links, authLoading, authUserId, authConfigured, message, onUpdated])
 }

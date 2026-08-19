@@ -79,6 +79,16 @@ describe('hermes-pardini-bff.service', () => {
     expect(result.exams[0].name).toBe('TSH')
   })
 
+  it('probe rejects 401', async () => {
+    const request = {
+      get: vi.fn(async () => ({ status: () => 401, ok: () => false })),
+    } as unknown as APIRequestContext
+    const { probeHermesPardiniPacienteAccess } = await import(
+      '../src/infrastructure/scraper/hermes-pardini-bff.service.js'
+    )
+    expect(await probeHermesPardiniPacienteAccess(request, 'bad')).toBe(false)
+  })
+
   it('downloads pedido PDF via POST /download', async () => {
     const pdfBytes = Buffer.from('%PDF-1.4 test')
     const request = {

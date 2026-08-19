@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons'
 import type { Document_, OcrLayout, OcrRegion, SuggestedPatientFields, VaccineCardInterpretation } from '../../lib/api.types.js'
 import { api, documentDownloadUrl } from '../../lib/api.js'
+import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import { textFromOcrLayout, normalizeOcrLayoutForDisplay } from '../../lib/ocr-layout.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
 
@@ -46,6 +47,7 @@ export function OcrRegionReviewModal({
   onConfirm,
 }: Props) {
   const { message } = App.useApp()
+  const { runLlmTask } = useLlmActivity()
   const imgRef = useRef<HTMLImageElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const [regions, setRegions] = useState<OcrRegion[]>([])
@@ -148,7 +150,7 @@ export function OcrRegionReviewModal({
     if (!document) return
     setInterpreting(true)
     try {
-      const result = await api.documents.interpretVaccineCard(document.id)
+      const result = await runLlmTask(() => api.documents.interpretVaccineCard(document.id))
       setVaccineInterpretation(result.interpretation)
       message.success('Carteira interpretada — revise vacinas e anotações manuscritas')
     } catch (err) {

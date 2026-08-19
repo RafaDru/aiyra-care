@@ -55,11 +55,11 @@ export function useWalletLinkSyncStatus(
   pausePolling = false,
 ) {
   const [byLinkId, setByLinkId] = useState<Record<string, WalletLinkSyncMeta>>({})
-  const { loading: authLoading, session, configured: authConfigured } = useAuth()
+  const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
 
   useEffect(() => {
     if (pausePolling) return
-    if (authConfigured && (authLoading || !session)) return
+    if (authConfigured && (authLoading || !authUserId)) return
     if (!links.length) {
       setByLinkId({})
       return
@@ -89,7 +89,7 @@ export function useWalletLinkSyncStatus(
       cancelled = true
       window.clearInterval(id)
     }
-  }, [links, refreshKey, pausePolling, authLoading, session, authConfigured])
+  }, [links, refreshKey, pausePolling, authLoading, authUserId, authConfigured])
 
   return byLinkId
 }

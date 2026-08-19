@@ -21,3 +21,13 @@ export function dismissHint(hintId: string): void {
   set.add(hintId)
   localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]))
 }
+
+/** IDs estáveis para hints de apoio familiar (por paciente). */
+export function familySupportHintId(
+  patientId: string,
+  part: 'disclaimer' | 'no-insights' | { insightId: string },
+): string {
+  if (part === 'disclaimer') return `family-support.disclaimer.${patientId}`
+  if (part === 'no-insights') return `family-support.no-insights.${patientId}`
+  return `family-support.insight.${patientId}.${part.insightId}`
+}

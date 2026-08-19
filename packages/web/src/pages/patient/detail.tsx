@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
-import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,8 @@ import { api } from '../../lib/api.js'
 import type { Patient, IntegrationLink } from '../../lib/api.types.js'
 import { MeasurementsTab } from './tabs/MeasurementsTab.js'
 import { CareReminderBanner } from '../../components/measurements/CareReminderBanner.js'
+import { FamilySupportPanel } from '../../components/family-support/FamilySupportPanel.js'
+import { AvaDockWidget } from '../../components/ava/AvaDockWidget.js'
 import { useCareReminderNotifications } from '../../hooks/useCareReminderNotifications.js'
 import type { CareReminderRow } from '../../lib/api.types.js'
 import { VaccinesTab } from './tabs/VaccinesTab.js'
@@ -40,6 +42,7 @@ import {
 } from '../../lib/patient-navigation.js'
 import '../../components/patient/patient-basic-summary.css'
 import '../../components/patient/patient-detail-nav.css'
+import '../../components/ava/ava-dock.css'
 
 const { Title, Text } = Typography
 
@@ -62,7 +65,7 @@ export function PatientDetail() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { message } = App.useApp()
   const { t } = useTranslation()
-  const { loading: authLoading, session, configured: authConfigured } = useAuth()
+  const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [parents, setParents] = useState<Patient[]>([])
   const [children, setChildren] = useState<Patient[]>([])
@@ -162,9 +165,9 @@ export function PatientDetail() {
 
   useEffect(() => {
     if (!id) return
-    if (authConfigured && (authLoading || !session)) return
+    if (authConfigured && (authLoading || !authUserId)) return
     load()
-  }, [id, authLoading, session, authConfigured])
+  }, [id, authLoading, authUserId, authConfigured])
 
   const SYNCABLE_PORTALS = new Set(['unimed', 'amil', 'mater_dei', 'hermes_pardini'])
   const CPF_LOGIN_PORTALS = new Set(['amil', 'bradesco_saude', 'mater_dei', 'hermes_pardini'])
@@ -459,7 +462,7 @@ export function PatientDetail() {
         {t('common.back')}
       </Button>
 
-      <Card style={{ borderRadius: 16, marginBottom: 20 }}>
+      <Card style={{ borderRadius: 16, marginBottom: 20, overflow: 'clip' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
           <Avatar size={96} src={patient.photoUrl} style={{ backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5', fontSize: 40 }}>
             {patient.name.charAt(0).toUpperCase()}
@@ -467,6 +470,15 @@ export function PatientDetail() {
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <Title level={4} style={{ margin: 0 }}>{patient.name}</Title>
+              <Button
+                size="small"
+                danger
+                type="primary"
+                icon={<PhoneOutlined />}
+                onClick={() => navigate(`/emergency?patientId=${patient.id}`)}
+              >
+                {t('nav.emergency')}
+              </Button>
               <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
               <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); message.success('OK'); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : 'Erro ao excluir') } }}>
                 <Button size="small" danger icon={<DeleteOutlined />} />
@@ -482,6 +494,11 @@ export function PatientDetail() {
               {patient.bloodType && <Tag color="purple">{t('patient.bloodType')} {patient.bloodType}</Tag>}
             </div>
           </div>
+          <AvaDockWidget
+            patientId={patient.id}
+            healthThreadId={openThreadId ?? undefined}
+            patientAvatarSize={96}
+          />
         </div>
       </Card>
 
@@ -496,6 +513,8 @@ export function PatientDetail() {
           setActiveTab('growth')
         }}
       />
+
+      <FamilySupportPanel patientId={patient.id} />
 
       <Card style={{ borderRadius: 16, overflow: 'visible' }} styles={{ body: { padding: 0, overflow: 'visible' } }}>
         {sectionTabKeys.length > 1 ? (

@@ -2,14 +2,24 @@ import type { APIRequestContext } from 'playwright'
 import {
   HERMES_PARDINI_PEDIDOS_PAGE_SIZE,
   HERMES_PARDINI_PRECISION_CARE,
+  hermesPardiniResultadosExameUrl,
 } from './hermes-pardini.portal.js'
+import { extractHermesPardiniExamSummary } from './hermes-pardini-exam-summary.js'
+import {
+  hermesPardiniPedidoApiId,
+  hermesPardiniPedidoDisplayFromPedido,
+} from './hermes-pardini-pedido-id.js'
 
 export interface HermesPardiniExamItem {
   externalKey: string
+  /** ID para rotas `/pedidos/{id}` na API Hermes */
   pedidoId: string
+  /** Label legível (ex. `1244885-34`) — `numeroPedido` do portal quando disponível */
+  pedidoDisplayId: string
   name: string
   performedAt?: string | null
   laboratory?: string | null
+  resultSummary?: string | null
   raw: Record<string, unknown>
 }
 
@@ -36,11 +46,47 @@ interface HermesPardiniExame {
   status?: number
 }
 
-function authHeaders(accessToken: string): Record<string, string> {
+export type HermesPardiniApiHeaderProfile = Record<string, string>
+
+/** Headers de marca exigidos pela API paciente (Precision Care / Pardini). */
+export const HERMES_PARDINI_PACIENTE_API_DEFAULT_HEADERS: Record<string, string> = {
+  'marca-selecionada': 'pardini',
+  'marca-origem': 'pardini',
+  grupo: 'grupo-pardini',
+}
+
+function authHeaders(
+  accessToken: string,
+  profile?: HermesPardiniApiHeaderProfile,
+): Record<string, string> {
   return {
+    ...HERMES_PARDINI_PACIENTE_API_DEFAULT_HEADERS,
+    ...profile,
     Authorization: `Bearer ${accessToken}`,
-    Accept: 'application/json',
+    Accept: profile?.Accept ?? profile?.accept ?? 'application/json',
+    Origin: profile?.Origin ?? profile?.origin ?? HERMES_PARDINI_PRECISION_CARE.portalOrigin,
+    Referer: profile?.Referer ?? profile?.referer ?? hermesPardiniResultadosExameUrl(),
   }
+}
+
+/** Verifica se o token funciona na API de pedidos (não só exp do JWT). */
+export async function probeHermesPardiniPacienteAccess(
+  request: APIRequestContext,
+  accessToken: string,
+  headerProfile?: HermesPardiniApiHeaderProfile,
+): Promise<boolean> {
+  const base = HERMES_PARDINI_PRECISION_CARE.pacienteApiBase
+  const res = await request.get(`${base}/pedidos`, {
+    headers: authHeaders(accessToken, headerProfile),
+    params: cleanParams({
+      limit: 1,
+      offset: 0,
+      crescente: 'false',
+      status: '',
+    }),
+  })
+  if (res.status() === 401 || res.status() === 403) return false
+  return res.ok()
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -72,8 +118,8 @@ function pickPedidoList(payload: unknown): { pedidos: HermesPardiniPedido[]; has
 
 function pickExameList(payload: unknown): HermesPardiniExame[] {
   const root = asRecord(payload)
-  const data = asRecord(root.data ?? root)
-  const exames = data.exames ?? root.exames
+  const data = asRecord(root.data ?? root.dados ?? root)
+  const exames = data.exames ?? root.exames ?? data.listaExames ?? root.listaExames
   return Array.isArray(exames) ? exames as HermesPardiniExame[] : []
 }
 
@@ -98,19 +144,25 @@ function mapExamItem(
   const name = String(exam.nomeExame ?? '').trim()
   if (!name) return null
 
-  const pedidoId = pedido.idPedido ?? pedido.numeroPedido ?? 'unknown'
-  const examId = exam.id ?? `${pedidoId}:${index}`
+  const pedidoApiId = hermesPardiniPedidoApiId(pedido)
+  const pedidoDisplayId = hermesPardiniPedidoDisplayFromPedido(pedido)
+  const examId = exam.id ?? `${pedidoApiId}:${index}`
   const performedAt = pickExamDate(exam, pedido)
+  const pedidoRecord = asRecord(pedido)
+  const examRecord = asRecord(exam)
+  const resultSummary = extractHermesPardiniExamSummary(examRecord, pedidoRecord)
 
   return {
-    externalKey: `hermes_pardini:${String(pedidoId)}:${String(examId)}`,
-    pedidoId: String(pedidoId),
+    externalKey: `hermes_pardini:${String(pedidoApiId)}:${String(examId)}`,
+    pedidoId: pedidoApiId,
+    pedidoDisplayId,
     name,
     performedAt,
     laboratory: pedido.nomeUnidade ?? 'Hermes Pardini',
+    resultSummary,
     raw: {
-      pedido: asRecord(pedido),
-      exame: asRecord(exam),
+      pedido: pedidoRecord,
+      exame: examRecord,
     },
   }
 }
@@ -124,6 +176,7 @@ async function fetchPedidosPage(
     startDate?: string
     endDate?: string
   },
+  headerProfile?: HermesPardiniApiHeaderProfile,
 ): Promise<{ pedidos: HermesPardiniPedido[]; hasNext: boolean }> {
   const base = HERMES_PARDINI_PRECISION_CARE.pacienteApiBase
   const query = cleanParams({
@@ -136,7 +189,7 @@ async function fetchPedidosPage(
   })
 
   const res = await request.get(`${base}/pedidos`, {
-    headers: authHeaders(accessToken),
+    headers: authHeaders(accessToken, headerProfile),
     params: query,
   })
 
@@ -155,10 +208,11 @@ async function fetchExamesForPedido(
   request: APIRequestContext,
   accessToken: string,
   pedidoId: number | string,
+  headerProfile?: HermesPardiniApiHeaderProfile,
 ): Promise<HermesPardiniExame[]> {
   const base = HERMES_PARDINI_PRECISION_CARE.pacienteApiBase
   const res = await request.get(`${base}/pedidos/${pedidoId}/exames`, {
-    headers: authHeaders(accessToken),
+    headers: authHeaders(accessToken, headerProfile),
     params: cleanParams({}),
   })
 
@@ -175,6 +229,7 @@ async function fetchAllPedidos(
   request: APIRequestContext,
   accessToken: string,
   opts?: { startDate?: string; endDate?: string },
+  headerProfile?: HermesPardiniApiHeaderProfile,
 ): Promise<HermesPardiniPedido[]> {
   const limit = HERMES_PARDINI_PEDIDOS_PAGE_SIZE
   const endDate = opts?.endDate ?? formatDateYmd(new Date())
@@ -188,7 +243,7 @@ async function fetchAllPedidos(
       offset,
       startDate: opts?.startDate,
       endDate,
-    })
+    }, headerProfile)
     pedidos.push(...page.pedidos)
     hasNext = page.hasNext && page.pedidos.length > 0
     offset += limit
@@ -218,26 +273,27 @@ async function mapInBatches<T, R>(
 export async function fetchHermesPardiniExams(
   request: APIRequestContext,
   accessToken: string,
-  opts?: { startDate?: string; endDate?: string },
+  opts?: { startDate?: string; endDate?: string; headerProfile?: HermesPardiniApiHeaderProfile },
 ): Promise<HermesPardiniBffFetchResult> {
   const warnings: string[] = []
-  const pedidos = await fetchAllPedidos(request, accessToken, opts)
+  const headerProfile = opts?.headerProfile
+  const pedidos = await fetchAllPedidos(request, accessToken, opts, headerProfile)
 
   if (!pedidos.length) {
     return { exams: [], pedidosCount: 0, warnings }
   }
 
   const examGroups = await mapInBatches(pedidos, 5, async (pedido) => {
-    const pedidoId = pedido.idPedido ?? pedido.numeroPedido
-    if (pedidoId == null) {
+    const pedidoApiId = hermesPardiniPedidoApiId(pedido)
+    if (pedidoApiId === 'unknown') {
       warnings.push('Pedido sem idPedido ignorado')
       return []
     }
     try {
-      return await fetchExamesForPedido(request, accessToken, pedidoId)
+      return await fetchExamesForPedido(request, accessToken, pedidoApiId, headerProfile)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      warnings.push(`Pedido ${pedidoId}: ${msg}`)
+      warnings.push(`Pedido ${pedidoApiId}: ${msg}`)
       return []
     }
   })
@@ -268,11 +324,12 @@ export async function downloadHermesPardiniPedidoPdf(
   request: APIRequestContext,
   accessToken: string,
   pedidoId: number | string,
+  headerProfile?: HermesPardiniApiHeaderProfile,
 ): Promise<HermesPardiniPdfFile | null> {
   const base = HERMES_PARDINI_PRECISION_CARE.pacienteApiBase
   const res = await request.post(`${base}/pedidos/${pedidoId}/download`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      ...authHeaders(accessToken, headerProfile),
       Accept: 'application/pdf, application/octet-stream',
       'Content-Type': 'application/json',
     },

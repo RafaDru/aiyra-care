@@ -1,5 +1,115 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-19] - Classificador de rótulos Amil + roteamento consulta/exame
+
+### Contexto
+Usuário apontou que a tela "Atendimentos Realizados" da Amil exibe consultas (e, em tese, exames) que iam **sempre** para `medical_records` (Authorization), sem analisar o conteúdo. Pediu análise da lógica atual e melhoria de identificação/destino, respeitando Hexagonal e modularizando "motores" reutilizáveis em integração e jobs.
+
+### Decisão de arquitetura
+| Decisão | Motivo |
+|---------|--------|
+| Port `LabelClassifierEngine` no domínio | Trocar de motor (rules→fuzzy→embeddings/LLM) sem tocar consumidores |
+| Engine `AmilLabelClassifier` (application) | Catálogo exato + sinônimos/siglas + keywords + fuzzy + fallback |
+| Adapter `FuzzyExamCatalogLookup` (infra) | Edit-distance `@nlptools/distance` (leve); substituível por embedding |
+| Fallback LLM | **Só documentado** (hook `llmFallback`/`classifyWithLlm`); integração com `llm-router` fica planejada |
+
+### Realizado
+- `domain/classification/` — `label-classification.ts` (port + tipos + normalize), `exam-catalog.ts` (catálogo canônico versionado + keywords)
+- `application/classification/amil-label-classifier.ts` — engine rules+fuzzy + fallback LLM opcional
+- `infrastructure/classification/fuzzy-exam-catalog-lookup.ts` — adapter edit-distance
+- `amil-canonical.mapper.ts` — injeta motor e **roteia** `exame→exam`, `consulta/procedimento/outro→medical_record`
+- `canonical-batch-importer.service.ts` — ramo `importAmilExam` (importa em `exams`)
+- `scripts/reclassify-amil-medical-records.ts` — job de re-mapeamento (dry-run/`--apply`) reusa o motor
+- Testes `amil-label-classifier.test.ts` (9 casos); registro na tabela de docs (`AGENTS.md`), `docs/CLASSIFICATION_ENGINE.md`, `docs/roadmap.json`, `docs/project-context.json`
+
+### Docs
+- `docs/CLASSIFICATION_ENGINE.md` — novo
+
+---
+
+## [2026-08-18] - Emergência, metering LLM Ava, pedidos de exame, higienização
+
+### Migrations 037–042
+| # | Arquivo | Tema |
+|---|---------|------|
+| 037 | `measurement_observations` | Observações em medidas |
+| 038 | `care_reminders` | Lembretes de cuidado |
+| 039 | `emergency_directory` | Guia/contatos de emergência por paciente |
+| 040 | `llm_usage` | Metering de chamadas LLM Ava |
+| 041 | `exam_orders` | Pedidos de exame + `exams.exam_order_id` |
+| 042 | `hygiene_candidates` | Fila de candidatos a duplicata + resolução |
+
+### Higienização (dedup — estende `DATA_HYGIENE.md`)
+- Detectores de **exame**: `exam_dedup_key`, `exam_date_type_lab`, `exam_date_type`, `exam_date_result`, `exam_pedido_type`
+- Detectores de **vacina**: `vaccine_catalog_slot`, `vaccine_date_catalog_dose`, `vaccine_date_name`, `vaccine_date_catalog`
+- Scan após create + varredura batch (`scanPatient` exames + vacinas); blocking na inserção (score ≥ 88) em `ExamService`/`VaccineService`; listagens ocultam `hygieneCanonicalId`
+- API: `GET /hygiene/candidates`, `POST /hygiene/candidates/:id/resolve`
+- Scripts: `scan:hygiene`, `apply-hygiene-resolutions.ts`, `fix-rafael-covid-exams.mjs`, `fix-rafael-dengue-vaccines.mjs`
+- Casos reais corrigidos: 5 COVID em 11/04/2021 (Rafael); 3 vacinas dengue 1ª dose (Rafael)
+
+### Pedidos de exame (041) + Hermes
+- `exam_orders` + `exams.exam_order_id`; domínio/API `exam-order`; Hermes sync + laudo PDF vinculado a pedido
+- Web: `ExamsTab` agrupada por pedido
+
+### Emergência (039) + metering LLM (040)
+- `emergency-directory` + contactos de emergência; `GET /emergency/directory`
+- `llm_usage_events` + `llm-usage.pg.repository`; metering Ava
+
+### Docs novos
+- `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`, `docs/EXAM_OCR.md`, `docs/OBSERVABILITY.md`
+
+### Visão Ava
+- `docs/AVA_VISION.md` — companheira global, sessões, pins (moonshot)
+
+---
+
+## [2026-08-18] - Visão Ava, arquitetura PG/Neo4j, observabilidade e roadmap
+
+### Decisão de arquitetura
+
+- **Postgres:** entidades, atributos, relacionamentos de negócio (FK, `clinical_entity_links`), conversas Ava (planejado), telemetria.
+- **Neo4j:** apenas **associações** entre entidades PG (caminhos, pins de sessão, candidatos higienização, analytics opt-in) — não duplicar prontuário.
+
+### Produto Ava (moonshot documentado)
+
+- Companheira global na **conta**; sessões persistidas; painel de contexto (pins); hooks troca paciente; higienização estilo Google Photos.
+- ML personalizado cedo; agora: eventos + grafo + regras; NLP agregado com opt-in separado do Zen.
+
+### Documentação nova
+
+- `docs/AVA_VISION.md` — visão, sessões, LGPD, fases moonshot
+- `docs/ARCHITECTURE_DATA_LAYERS.md` — split PG vs Neo4j
+- `docs/DATA_HYGIENE.md` — dedup on-insert, weekly, login
+- `docs/OBSERVABILITY.md` — monitoramento proativo, `product_events` planejado
+
+### Roadmap (`roadmap.json`)
+
+- `ava-companion-platform` (P1)
+- `ava-context-transparency` (P2)
+- `ava-graph-associations` (P2)
+- `data-hygiene-dedup` (P2)
+- `observability-platform` (P1)
+- `product-analytics-optin` (P3)
+
+---
+
+## [2026-08-14] - Ava: política de segurança (sem diagnóstico + hard stops)
+
+### Decisão de produto
+
+- IA **nunca afirma diagnóstico** — só temas para debate com o pediatra.
+- **Hard stops** determinísticos (regras antes da LLM): ex. alergia registrada × medicação cogitada → `do_not_apply`, prioridade `critical`, linguagem firme (não aplicar; pediatra / urgência do plano / SAMU 192).
+- Roadmap horizonte: catálogo emergência, notificação ativa, dispositivos — com gate ANVISA.
+
+### Docs / código
+
+- `docs/AGENTS_APOIO.md` — política de linguagem
+- `docs/legal/ANVISA_SAMD_POSITION.md` — hard stops vs triagem autônoma
+- `family-support-rules` — alergia × med atualizado
+- `roadmap.json` — `agent-emergency-knowledge`, `agent-active-emergency`, `agent-devices-monitoring`
+
+---
+
 ## [2026-08-14] - Medidas Fase 3: WHO, glicemia import, notificações web
 
 ### Contexto

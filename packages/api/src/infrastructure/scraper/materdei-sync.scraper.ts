@@ -8,6 +8,7 @@ import {
 } from './materdei-exam.mapper.js'
 import { ensureCdpChromeRunning } from './cdp-chrome.helper.js'
 import { fillMaterDeiCredentials } from './materdei-login.helper.js'
+import { dismissPortalBlockingUi, preparePortalPage } from './portal-browser-ui.helper.js'
 
 export const MATER_DEI_ORIGIN = 'https://meu.materdei.com.br'
 
@@ -550,6 +551,7 @@ async function pollMaterDeiTokenFromPage(
   emit?.('login', waitMessage, 'running')
 
   while (Date.now() < deadline) {
+    await dismissPortalBlockingUi(page).catch(() => {})
     const token = await readTokenFromPage(page)
     if (token && token.length > 20) return token
 
@@ -601,7 +603,10 @@ export async function loginMaterDeiViaCdp(
     let page = context.pages().find((p) => p.url().includes('meu.materdei.com.br'))
     if (!page) {
       page = await context.newPage()
+      await preparePortalPage(page)
       await page.goto(MATER_DEI_ORIGIN, { waitUntil: 'domcontentloaded', timeout: 60_000 })
+    } else {
+      await preparePortalPage(page)
     }
 
     const existing = await readTokenFromPage(page)
@@ -659,6 +664,7 @@ export async function waitForMaterDeiLogin(
   emit?: (step: string, message: string, status: ScraperProgress['status']) => void,
 ): Promise<string> {
   const timeout = opts.timeoutMs ?? 300_000
+  await preparePortalPage(page)
 
   if (opts.cpf && opts.password) {
     emit?.('login', 'Autenticando via API Mater Dei...', 'running')
@@ -895,6 +901,7 @@ async function acquireMaterDeiSession(
   const browser = await pw.launch({ headless: false, channel: 'chrome' })
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+    await preparePortalPage(page)
     const token = await waitForMaterDeiLogin(
       page,
       { cpf, password },

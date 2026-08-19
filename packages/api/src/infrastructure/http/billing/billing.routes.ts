@@ -11,7 +11,9 @@ import {
   parseBillingExportMonth,
 } from '../../../application/billing/billing-export.js'
 import { HandwritingCreditsService } from '../../../application/handwriting/handwriting-credits.service.js'
+import { LlmQuotaService } from '../../../application/llm/llm-quota.service.js'
 import { HandwritingCreditsPgRepository } from '../../persistence/handwriting-credits.pg.repository.js'
+import { LlmUsagePgRepository } from '../../persistence/llm-usage.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
@@ -93,7 +95,9 @@ function entitlementJson(entitlement: Awaited<ReturnType<BillingService['getOrCr
 
 export async function billingRoutes(app: FastifyInstance) {
   const billing = new BillingService(pgPool)
-  const credits = new HandwritingCreditsService(new HandwritingCreditsPgRepository(pgPool))
+  const creditsRepo = new HandwritingCreditsPgRepository(pgPool)
+  const credits = new HandwritingCreditsService(creditsRepo)
+  const llmQuota = new LlmQuotaService(new LlmUsagePgRepository(pgPool), creditsRepo, credits)
 
   app.get('/billing/offers', async (_req, reply) => {
     const stripeEnabled = !!process.env.STRIPE_SECRET_KEY?.trim()
@@ -111,11 +115,14 @@ export async function billingRoutes(app: FastifyInstance) {
   app.get('/billing/me', async (req: AuthenticatedRequest, reply: FastifyReply) => {
     if (!req.accountId) return reply.status(401).send({ message: 'Não autenticado' })
     const entitlement = await billing.getOrCreateEntitlement(req.accountId)
-    const quota = await credits.getQuota(resolveHandwritingScopeId(req))
+    const scopeId = resolveHandwritingScopeId(req)
+    const quota = await credits.getQuota(scopeId)
+    const llmUsage = await llmQuota.getQuota(scopeId)
     const purchases = await billing.listPurchases(req.accountId)
     return reply.send({
       entitlement: entitlementJson(entitlement),
       quota,
+      llmUsage,
       purchases,
       canExportBilling: isBillingExportOperator(req.accountId),
     })

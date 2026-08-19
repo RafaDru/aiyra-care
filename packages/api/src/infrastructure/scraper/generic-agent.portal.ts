@@ -6,6 +6,7 @@ import { GroqLlmAdapter } from '../llm/groq-llm.adapter.js'
 import { AuthAgent } from './agents/auth.agent.js'
 import { NavAgent } from './agents/nav.agent.js'
 import { ExtractAgent } from './agents/extract.agent.js'
+import { preparePortalPage } from './portal-browser-ui.helper.js'
 
 export interface AgentPortalConfig {
   portalType: 'unimed' | 'amil' | 'bradesco_saude'
@@ -44,6 +45,7 @@ export class GenericAgentPortalAdapter implements HealthPortalScraper {
       Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false })
     })
     const page = await context.newPage()
+    await preparePortalPage(page)
 
     try {
       emit('navigate', `Abrindo ${this.portalConfig.label}...`, 'running')

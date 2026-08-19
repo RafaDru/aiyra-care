@@ -1,0 +1,275 @@
+/* Shell externo — glow não é cortado pelo overflow do círculo */
+.ava-avatar-shell {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  line-height: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.ava-avatar-shell--analyzing::before {
+  content: '';
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 61, 168, 0.15),
+    rgba(147, 51, 234, 0.55),
+    rgba(255, 230, 102, 0.45),
+    rgba(255, 61, 168, 0.15)
+  );
+  filter: blur(10px);
+  opacity: 0.9;
+  animation: ava-shell-glow-spin 2.4s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ava-avatar-shell--analyzing::after {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 61, 168, 0.55);
+  background: transparent;
+  animation: ava-shell-ring-pulse 1.6s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+  box-shadow:
+    0 0 18px rgba(147, 51, 234, 0.45),
+    0 0 32px rgba(255, 61, 168, 0.25);
+}
+
+@keyframes ava-shell-glow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ava-shell-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.ava-avatar {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.18);
+  --ava-star-cycle: 14s;
+  --ava-star-stagger: 0.2s;
+  z-index: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ava-avatar__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Estrelas neurais — só na faixa superior (fundo do PNG) */
+.ava-avatar__neural {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 26%,
+    rgba(0, 0, 0, 0.35) 30%,
+    transparent 34%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 26%,
+    rgba(0, 0, 0, 0.35) 30%,
+    transparent 34%
+  );
+}
+
+.ava-avatar__neural--analyzing {
+  mix-blend-mode: plus-lighter;
+}
+
+.ava-avatar__neural-line {
+  opacity: 0.1;
+}
+
+.ava-avatar__xmas-core {
+  fill: #ffe566;
+  opacity: 0.2;
+}
+
+.ava-avatar__xmas-glow {
+  fill: #ffe566;
+  opacity: 0;
+}
+
+/* Reposo — ~4s de brilho + 10s de pausa */
+.ava-avatar--animated .ava-avatar__xmas-core {
+  animation: ava-star-core var(--ava-star-cycle) ease-in-out infinite;
+  animation-delay: calc(var(--order) * var(--ava-star-stagger));
+}
+
+.ava-avatar--animated .ava-avatar__xmas-glow {
+  animation: ava-star-glow var(--ava-star-cycle) ease-in-out infinite;
+  animation-delay: calc(var(--order) * var(--ava-star-stagger));
+}
+
+@keyframes ava-star-core {
+  0%,
+  28%,
+  100% {
+    opacity: 0.1;
+  }
+  4%,
+  10% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes ava-star-glow {
+  0%,
+  28%,
+  100% {
+    opacity: 0;
+  }
+  4%,
+  10% {
+    opacity: 0.7;
+  }
+}
+
+.ava-avatar--animated .ava-avatar__neural-line {
+  animation: ava-star-line var(--ava-star-cycle) ease-in-out infinite;
+}
+
+@keyframes ava-star-line {
+  0%,
+  28%,
+  100% {
+    opacity: 0.06;
+  }
+  12%,
+  22% {
+    opacity: 0.22;
+  }
+}
+
+/* LLM analisando — cascata contínua + brilho forte */
+.ava-avatar--analyzing {
+  --ava-star-cycle: 2.2s;
+  --ava-star-stagger: 0.11s;
+  box-shadow:
+    0 0 0 2px rgba(255, 230, 102, 0.35),
+    0 4px 24px rgba(147, 51, 234, 0.35);
+}
+
+.ava-avatar--animated.ava-avatar--analyzing .ava-avatar__xmas-core {
+  animation-name: ava-star-core-analyze;
+}
+
+.ava-avatar--animated.ava-avatar--analyzing .ava-avatar__xmas-glow {
+  animation-name: ava-star-glow-analyze;
+}
+
+.ava-avatar--animated.ava-avatar--analyzing .ava-avatar__neural-line {
+  animation-name: ava-star-line-analyze;
+}
+
+@keyframes ava-star-core-analyze {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  15%,
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes ava-star-glow-analyze {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+  15%,
+  40% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes ava-star-line-analyze {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  35%,
+  65% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ava-avatar-shell--analyzing::before,
+  .ava-avatar-shell--analyzing::after {
+    animation: none;
+  }
+
+  .ava-avatar-shell--analyzing::before {
+    opacity: 0.5;
+  }
+
+  .ava-avatar-shell--analyzing::after {
+    opacity: 0.75;
+  }
+
+  .ava-avatar--animated .ava-avatar__xmas-core,
+  .ava-avatar--animated .ava-avatar__xmas-glow,
+  .ava-avatar--animated .ava-avatar__neural-line {
+    animation: none;
+  }
+
+  .ava-avatar--animated.ava-avatar--analyzing .ava-avatar__xmas-core,
+  .ava-avatar--animated.ava-avatar--analyzing .ava-avatar__xmas-glow {
+    opacity: 0.75;
+  }
+
+  .ava-avatar--animated.ava-avatar--analyzing .ava-avatar__neural-line {
+    opacity: 0.3;
+  }
+
+  .ava-avatar--animated .ava-avatar__xmas-core {
+    opacity: 0.5;
+  }
+
+  .ava-avatar--animated .ava-avatar__xmas-glow {
+    opacity: 0.25;
+  }
+
+  .ava-avatar--animated .ava-avatar__neural-line {
+    opacity: 0.15;
+  }
+}

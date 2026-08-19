@@ -351,6 +351,51 @@ export class CanonicalBatchImporterService {
     return true
   }
 
+  private async importAmilExam(
+    record: CanonicalRecord & { type: 'exam' },
+    patientId: string,
+    batchId: string,
+    existingExamKeys: Set<string>,
+    examKeyFn: (e: Exam) => string,
+  ): Promise<boolean> {
+    const item = record.raw as AmilUsageItem | undefined
+    const parsedDate = parseDate(record.performedAt || item?.procedureDate || '')
+    if (!parsedDate || !record.name) return false
+
+    const draft = Exam.create({
+      patientId,
+      examType: record.name,
+      examDate: parsedDate,
+      laboratory: item?.providerName || record.laboratory || 'Amil',
+      notes: item?.invoiceNumber ? `Nota: ${item.invoiceNumber}` : undefined,
+      source: 'amil',
+    })
+
+    const key = examKeyFn(draft)
+    if (existingExamKeys.has(key)) return false
+
+    const saved = await this.examRepo.save(draft)
+    existingExamKeys.add(key)
+    const rawId = await this.lineage.recordRaw({
+      batchId,
+      patientId,
+      source: 'amil',
+      recordType: 'exam',
+      externalKey: record.externalKey,
+      rawJson: (record.raw as Record<string, unknown>) ?? {},
+      processed: { table: 'exams', id: saved.id },
+    })
+    scheduleImportLineageProjection({
+      patientId,
+      processedTable: 'exams',
+      processedId: saved.id,
+      batchId,
+      rawRecordId: rawId,
+      source: 'amil',
+    })
+    return true
+  }
+
   private async importUnimedExam(
     record: CanonicalRecord & { type: 'exam' },
     patientId: string,
@@ -653,24 +698,44 @@ export class CanonicalBatchImporterService {
       const savedConsultas: MedicalRecord[] = [...existingRecords]
 
       const usageRecords = batch.records.filter(
-        (r) => r.type === 'medical_record' && r.beneficiaryKey === marca,
+        (r) => (r.type === 'medical_record' || r.type === 'exam') && r.beneficiaryKey === marca,
       )
+      const existingExams = await this.examRepo.findAll({ patientId: patient.id })
+      const examKeyFn = (e: Exam) => `${e.examType}|${e.examDate.toISOString().slice(0, 10)}`
+      const existingExamKeys = new Set(existingExams.map(examKeyFn))
       for (const usageRecord of usageRecords) {
-        if (usageRecord.type !== 'medical_record') continue
-        const imported = await this.importAmilMedicalRecord(
-          usageRecord,
-          patient.id,
-          batchId,
-          existingRecordKeys,
-          recordKeyFn,
-          savedConsultas,
-        )
-        if (imported) {
-          outcome.medicalRecords++
-          outcome.imported++
-        } else {
-          outcome.skipped++
-          outcome.skippedMedicalRecords++
+        let imported = false
+        if (usageRecord.type === 'exam') {
+          imported = await this.importAmilExam(
+            usageRecord,
+            patient.id,
+            batchId,
+            existingExamKeys,
+            examKeyFn,
+          )
+          if (imported) {
+            outcome.exams++
+            outcome.imported++
+          } else {
+            outcome.skipped++
+            outcome.skippedExams++
+          }
+        } else if (usageRecord.type === 'medical_record') {
+          imported = await this.importAmilMedicalRecord(
+            usageRecord,
+            patient.id,
+            batchId,
+            existingRecordKeys,
+            recordKeyFn,
+            savedConsultas,
+          )
+          if (imported) {
+            outcome.medicalRecords++
+            outcome.imported++
+          } else {
+            outcome.skipped++
+            outcome.skippedMedicalRecords++
+          }
         }
       }
 

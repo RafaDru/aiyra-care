@@ -14,6 +14,8 @@ type AuthContextValue = {
   loading: boolean
   syncing: boolean
   session: Session | null
+  /** Estável para effects de carga de dados (não muda em TOKEN_REFRESHED). */
+  authUserId: string | null
   user: User | null
   account: AppAccount | null
   needsProfile: boolean
@@ -102,6 +104,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setNeedsProfile(false)
         return
       }
+      if (event === 'TOKEN_REFRESHED') {
+        setMemoryAccessToken(next?.access_token ?? null)
+        setSession(next)
+        return
+      }
       setSession(next)
       setMemoryAccessToken(next?.access_token ?? null)
       await runSync(next?.access_token)
@@ -128,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     syncing,
     session,
+    authUserId: session?.user?.id ?? null,
     user: session?.user ?? null,
     account,
     needsProfile,

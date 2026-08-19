@@ -20,15 +20,20 @@ export async function waitForUnimedScreenService(
   page.on('response', onResponse)
 
   let loginWatchDone = false
+  let loginTimer: ReturnType<typeof setTimeout> | undefined
+  const stopLoginWatch = () => {
+    loginWatchDone = true
+    if (loginTimer !== undefined) clearTimeout(loginTimer)
+  }
   const loginWatch = new Promise<never>((_, reject) => {
     const tick = () => {
       if (loginWatchDone) return
       if (isUnimedLoginPage(page.url())) {
-        loginWatchDone = true
+        stopLoginWatch()
         reject(new Error(unimedSessionExpiredMessage(page.url())))
         return
       }
-      setTimeout(tick, 400)
+      loginTimer = setTimeout(tick, 400)
     }
     tick()
   })
@@ -41,7 +46,7 @@ export async function waitForUnimedScreenService(
       ),
       loginWatch,
     ])
-    loginWatchDone = true
+    stopLoginWatch()
     return res
   } catch (err) {
     const pageUrl = page.url()
@@ -51,7 +56,7 @@ export async function waitForUnimedScreenService(
     const base = err instanceof Error ? err.message : String(err)
     throw new Error(`${base} | página=${pageUrl} | ${hint}`)
   } finally {
-    loginWatchDone = true
+    stopLoginWatch()
     page.off('response', onResponse)
   }
 }

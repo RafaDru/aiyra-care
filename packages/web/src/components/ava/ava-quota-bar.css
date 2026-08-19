@@ -1,0 +1,42 @@
+.ava-quota-bar {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+  border: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+}
+
+.ava-quota-bar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ava-quota-bar__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+}
+
+.ava-quota-bar__percent {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ava-quota-bar__progress {
+  margin-bottom: 4px;
+}
+
+.ava-quota-bar__progress .ant-progress-inner {
+  border-radius: 999px;
+}
+
+.ava-quota-bar__detail {
+  display: block;
+  font-size: 11px;
+  line-height: 1.35;
+}

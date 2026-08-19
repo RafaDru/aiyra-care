@@ -8,6 +8,8 @@ export interface AlignedTableGroup<T> {
   key: string
   title: string
   data: T[]
+  /** Ações ao lado do título do grupo (ex.: PDF do pedido). */
+  actions?: React.ReactNode
   /** Conteúdo quando `data` está vazio (ex.: Empty). */
   empty?: React.ReactNode
 }
@@ -43,7 +45,10 @@ export function GroupedAlignedTables<T extends object>({
 
         return (
           <div key={group.key} style={{ marginBottom: groupSpacing }}>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>{group.title}</Text>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+              <Text strong>{group.title}</Text>
+              {group.actions ?? null}
+            </div>
             {group.data.length === 0 ? (
               group.empty ?? null
             ) : (

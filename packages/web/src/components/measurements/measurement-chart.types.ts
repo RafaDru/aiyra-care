@@ -1,9 +1,12 @@
 export type MeasurementChartPoint = {
+  id?: string
   observedAt: string
   value: number | null
   valueSecondary: number | null
   notes: string | null
   healthThreadId: string | null
+  source?: string
+  sourceRef?: string | null
 }
 
 export type MeasurementChartSeries = {

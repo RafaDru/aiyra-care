@@ -11,6 +11,8 @@ export interface HermesPardiniSession {
   subject?: string | null
   name?: string | null
   sessionExpiresAt: Date
+  /** Headers capturados do GET /pedidos no browser (replay HTTP). */
+  pacienteApiHeaders?: Record<string, string>
 }
 
 export function formatHermesPardiniUsername(raw: string): string {

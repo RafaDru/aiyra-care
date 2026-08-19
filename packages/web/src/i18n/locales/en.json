@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "emergency": "Emergency",
     "integrations": "Integrations",
     "roadmap": "Roadmap",
     "session": "Sessions",
@@ -164,6 +165,19 @@
     },
     "devTools": "Development",
     "devToolsHint": "Product roadmap and development session log (HISTORICO.md).",
+    "accessibility": {
+      "title": "Accessibility",
+      "hint": "Visual adjustments for easier reading. Icons and labels accompany colors — not color alone.",
+      "modeLabel": "Visual profile",
+      "mode": {
+        "default": "Default (improved contrast)",
+        "highContrast": "High contrast",
+        "deuteranopia": "Color blindness (blue/orange)"
+      },
+      "auditTitle": "Current app status",
+      "auditBody": "Critical areas mapped: session tags (e.g. Login required), sync alerts and status icons + text. Brand light yellow (#FFE566) is not used for critical warnings. Color-blind mode swaps green/red for blue/orange/pink on success/warning/error.",
+      "resourcesTitle": "External resources"
+    },
     "nav": {
       "general": "General",
       "account": "Account",
@@ -172,6 +186,13 @@
     },
     "legalAcceptTitle": "Document acceptance",
     "legalAcceptSubtitle": "Current versions of terms and policies linked to your account."
+  },
+  "sync": {
+    "diagnostics": {
+      "expand": "Show details",
+      "collapse": "Collapse",
+      "copy": "Copy"
+    }
   },
   "session": {
     "title": "Session History",
@@ -246,7 +267,34 @@
     "coverage": "Coverage",
     "integrations": "Integrations",
     "timeline": "Timeline",
-    "agenda": "Agenda"
+    "agenda": "Agenda",
+    "ava": "Ava"
+  },
+  "ava": {
+    "title": "Ava — Aiyra Virtual Agent",
+    "subtitle": "Aiyra Virtual Agent",
+    "name": "Ava",
+    "you": "You",
+    "intro": "Describe what is going on. Ava organizes record context and helps prepare the visit with the pediatrician — not a replacement for medical care.",
+    "placeholder": "E.g. Fever since yesterday and refusing to eat…",
+    "quotaHint": "AI balance: ~{{credits}} credits ({{tokens}} tokens est.)",
+    "quotaUsageLabel": "Interaction allowance usage",
+    "quotaUsageDetail": "~{{credits}} credits left ({{tokens}} tokens)",
+    "quotaWarn": "AI allowance at {{percent}}% — consider a package for more chats.",
+    "quotaExhausted": "AI allowance exhausted for this cycle.",
+    "upgradePlan": "View plan",
+    "revised": "revised",
+    "defaultDisclaimer": "Ava supports communication — not a substitute for medical evaluation.",
+    "openChat": "Open chat with Ava",
+    "dockHint": "Help preparing for the pediatrician",
+    "dockGreeting": "Hi, I'm Ava!",
+    "dockOffer": "If you need me, I'm here to help",
+    "dockCta": "Talk to Ava",
+    "chatDisclaimerShort": "Family support — not a substitute for medical care. Emergency: 192 (SAMU).",
+    "thinking": "Organizing context…",
+    "send": "Send",
+    "allowDataSharing": "Use free model (Zen) with data sharing",
+    "allowDataSharingHint": "When unchecked, we use OpenCode Go or other providers with zero retention for health data. When checked, free DeepSeek on Zen may use your messages to improve the model (OpenCode)."
   },
   "agenda": {
     "new": "New reminder",
@@ -300,7 +348,11 @@
     "timelineEmpty": "No recent clinical events in this period.",
     "timelineMonths": "{{count}} months",
     "timelinePrev": "View earlier events",
-    "timelineNext": "View later events"
+    "timelineNext": "View later events",
+    "kindGroupCount": "{{kind}} ({{count}})"
+  },
+  "timeline": {
+    "pedidoGroup": "Order · {{count}} exams"
   },
   "calendar": {
     "title": "Google Calendar",
@@ -428,8 +480,80 @@
     "glucoseImported": "{{count}} measurement(s) imported",
     "glucoseNone": "No new glucose exams to import",
     "enableNotifications": "Get browser alerts when it is time to measure or medicate",
-    "enableNotificationsBtn": "Enable notifications"
+    "enableNotificationsBtn": "Enable notifications",
+    "tabEvolution": "Evolution",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "pointCount": "{{count}} record(s)",
+    "trendDelta": "Δ {{delta}} vs previous",
+    "sourceFromExam": "Imported from exam (OCR)",
+    "viewSourceExam": "View source exam",
+    "compareSection": "Compare over time",
+    "compareIntro": "Overlay markers your pediatrician often reviews together — each keeps its own scale; points align by date and time.",
+    "compareCustom": "Pick markers…",
+    "comparePickHint": "Pick a shortcut above or choose up to 3 markers to overlay.",
+    "compareFullscreenTitle": "Marker comparison",
+    "vitalsSection": "Vital signs",
+    "labSection": "Laboratory",
+    "ocrAutoHint": "New synced reports feed charts automatically.",
+    "compare.feverVitals": "Fever + heart rate",
+    "compare.feverVitalsHint": "Temperature and heart rate in the same period",
+    "compare.respiratory": "SpO₂ + heart rate",
+    "compare.respiratoryHint": "Oxygen saturation and heart rate",
+    "compare.bloodPressure": "Blood pressure"
   },
+  "familySupport": {
+    "title": "Family support",
+    "sources": "Sources in the record",
+    "noInsights": "No alerts right now — keep logging vitals and medications for context at the visit.",
+    "priority": {
+      "info": "info",
+      "attention": "attention",
+      "urgent": "important",
+      "critical": "urgent — do not ignore"
+    },
+    "openEmergency": "Open emergency & contacts"
+  },
+  "emergency": {
+    "title": "Emergency",
+    "subtitle": "Official channels and patient personal contacts",
+    "disclaimer": "If life is at risk, call 192 (SAMU) or 193 (Firefighters). This page lists official numbers — it does not replace emergency care.",
+    "officialDirectory": "Official channels in Brazil",
+    "patientContacts": "Patient emergency contacts",
+    "selectPatient": "Select patient",
+    "selectPatientHint": "Choose a patient to view or add contacts (pediatrician, plan, family).",
+    "addContact": "Add contact",
+    "editContact": "Edit contact",
+    "save": "Save",
+    "contactName": "Name",
+    "contactPhone": "Phone",
+    "contactPhoneAlt": "Alternate phone",
+    "contactRelationship": "Relationship",
+    "relationshipPlaceholder": "Pediatrician, health plan, grandparent…",
+    "contactCreated": "Contact saved",
+    "contactUpdated": "Contact updated",
+    "contactRemoved": "Contact removed",
+    "error": "Could not save",
+    "noContacts": "No contacts for this patient.",
+    "filterState": "Filter by state (regional channels)",
+    "stateHint": "Includes national channels + selected state entries.",
+    "available24h": "24h",
+    "source": "Official source",
+    "category": {
+      "medical": "Medical emergency",
+      "fire_rescue": "Fire & rescue",
+      "police": "Police",
+      "poison": "Poisoning",
+      "mental_health": "Emotional support",
+      "violence_support": "Violence support",
+      "human_rights": "Human rights",
+      "venomous_animal": "Venomous animals",
+      "civil_defense": "Civil defense",
+      "insurance": "Health plan",
+      "other": "Other"
+    }
+  },
+  "vaccine": {
     "new": "Register Vaccine",
     "edit": "Edit vaccine",
     "success": "Vaccine registered",
@@ -488,15 +612,25 @@
     "new": "New Exam",
     "success": "Exam registered",
     "type": "Exam Type",
+    "column": "Exam",
     "date": "Exam Date",
     "laboratory": "Laboratory",
     "result": "Result Summary",
     "file": "File",
     "viewFile": "View report",
+    "viewLaudo": "Result PDF",
     "fileStored": "File saved",
     "slices": "images",
     "viewSeries": "View series",
-    "upload": "Import exam"
+    "upload": "Import exam",
+    "orderBadge": "Order",
+    "orderCount": "{{count}} exams",
+    "orderRowTitle": "Order {{id}} · {{count}} exams",
+    "orderResultSummary": "{{count}} results in order",
+    "orderChildrenTitle": "Exams in this order ({{count}})",
+    "expandOrder": "Expand order {{id}}",
+    "orderGroup": "Order {{id}} · {{date}} · {{lab}} ({{count}} exams)",
+    "orderPdf": "Order PDF"
   },
   "examSliceViewer": {
     "phaseDownload": "Downloading slices…",

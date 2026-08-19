@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "emergency": "Emergência",
     "integrations": "Integrações",
     "roadmap": "Roadmap",
     "session": "Sessões",
@@ -164,6 +165,19 @@
     },
     "devTools": "Desenvolvimento",
     "devToolsHint": "Roadmap do produto e histórico de sessões de desenvolvimento (HISTORICO.md).",
+    "accessibility": {
+      "title": "Acessibilidade",
+      "hint": "Ajustes visuais para melhor leitura. Ícones e texto acompanham as cores — não dependemos só de verde/vermelho.",
+      "modeLabel": "Perfil visual",
+      "mode": {
+        "default": "Padrão (contraste melhorado)",
+        "highContrast": "Alto contraste",
+        "deuteranopia": "Daltonismo (azul/laranja)"
+      },
+      "auditTitle": "Estado atual do app",
+      "auditBody": "Pontos críticos mapeados: tags de sessão (ex.: Login necessário), alertas de sync e status com ícone + texto. Amarelo claro da marca (#FFE566) não é usado em avisos críticos. Modo daltonismo troca verde/vermelho por azul/laranja/rosa em sucesso/alerta/erro.",
+      "resourcesTitle": "Recursos externos"
+    },
     "nav": {
       "general": "Geral",
       "account": "Conta",
@@ -172,6 +186,13 @@
     },
     "legalAcceptTitle": "Aceite dos documentos",
     "legalAcceptSubtitle": "Versões vigentes dos termos e políticas vinculadas à sua conta."
+  },
+  "sync": {
+    "diagnostics": {
+      "expand": "Ver detalhes",
+      "collapse": "Recolher",
+      "copy": "Copiar"
+    }
   },
   "session": {
     "title": "Histórico de Sessões",
@@ -246,7 +267,34 @@
     "coverage": "Convênios",
     "integrations": "Integrações",
     "timeline": "Linha do tempo",
-    "agenda": "Agenda"
+    "agenda": "Agenda",
+    "ava": "Ava"
+  },
+  "ava": {
+    "title": "Ava — Agente Virtual Aiyra",
+    "subtitle": "Agente Virtual Aiyra",
+    "name": "Ava",
+    "you": "Você",
+    "intro": "Descreva o que está ocorrendo. Ava organiza o contexto do prontuário e ajuda a preparar a conversa com o pediatra — sem substituir o médico.",
+    "placeholder": "Ex.: Ele está com febre desde ontem e não quer comer…",
+    "quotaHint": "Saldo IA: ~{{credits}} créditos ({{tokens}} tokens estimados)",
+    "quotaUsageLabel": "Uso da franquia de interações",
+    "quotaUsageDetail": "~{{credits}} créditos restantes ({{tokens}} tokens)",
+    "quotaWarn": "Franquia de IA em {{percent}}% — considere um pacote se precisar de mais conversas.",
+    "quotaExhausted": "Franquia de IA esgotada neste ciclo.",
+    "upgradePlan": "Ver plano",
+    "revised": "revisada",
+    "defaultDisclaimer": "Ava é apoio à comunicação — não substitui avaliação médica.",
+    "openChat": "Abrir conversa com Ava",
+    "dockHint": "Apoio para conversar com o pediatra",
+    "dockGreeting": "Oi, eu sou a Ava!",
+    "dockOffer": "Se precisar de mim, estou aqui para ajudá-lo",
+    "dockCta": "Falar com a Ava",
+    "chatDisclaimerShort": "Apoio à família — não substitui consulta médica. Emergência: 192 (SAMU).",
+    "thinking": "Organizando o contexto…",
+    "send": "Enviar",
+    "allowDataSharing": "Usar modelo gratuito (Zen) com compartilhamento de dados",
+    "allowDataSharingHint": "Sem marcar, usamos OpenCode Go ou outros provedores com retenção zero para dados de saúde. Com marcar, o DeepSeek gratuito no Zen pode usar suas mensagens para melhorar o modelo (OpenCode)."
   },
   "agenda": {
     "new": "Novo lembrete",
@@ -300,7 +348,11 @@
     "timelineEmpty": "Nenhum evento clínico recente neste período.",
     "timelineMonths": "{{count}} meses",
     "timelinePrev": "Ver eventos anteriores",
-    "timelineNext": "Ver eventos posteriores"
+    "timelineNext": "Ver eventos posteriores",
+    "kindGroupCount": "{{kind}} ({{count}})"
+  },
+  "timeline": {
+    "pedidoGroup": "Pedido · {{count}} exames"
   },
   "calendar": {
     "title": "Google Calendar",
@@ -432,8 +484,80 @@
     "glucoseImported": "{{count}} medição(ões) importada(s)",
     "glucoseNone": "Nenhum exame de glicemia novo para importar",
     "enableNotifications": "Receba avisos do navegador quando chegar hora de medir ou medicar",
-    "enableNotificationsBtn": "Ativar notificações"
+    "enableNotificationsBtn": "Ativar notificações",
+    "tabEvolution": "Evolução",
+    "fullscreen": "Tela cheia",
+    "exitFullscreen": "Sair da tela cheia",
+    "pointCount": "{{count}} registro(s)",
+    "trendDelta": "Δ {{delta}} vs anterior",
+    "sourceFromExam": "Importado de exame (OCR)",
+    "viewSourceExam": "Ver exame de origem",
+    "compareSection": "Comparar na linha do tempo",
+    "compareIntro": "Combine marcadores que o pediatra costuma analisar juntos — cada um mantém sua escala; pontos alinhados pela data e hora.",
+    "compareCustom": "Escolher marcadores…",
+    "comparePickHint": "Selecione um atalho acima ou escolha até 3 marcadores para sobrepor.",
+    "compareFullscreenTitle": "Comparação de marcadores",
+    "vitalsSection": "Sinais vitais",
+    "labSection": "Laboratorial",
+    "ocrAutoHint": "Novos laudos sincronizados alimentam os gráficos automaticamente.",
+    "compare.feverVitals": "Febre + batimentos",
+    "compare.feverVitalsHint": "Temperatura e frequência cardíaca no mesmo período",
+    "compare.respiratory": "Oxigenação + batimentos",
+    "compare.respiratoryHint": "SpO₂ e frequência cardíaca",
+    "compare.bloodPressure": "Pressão arterial"
   },
+  "familySupport": {
+    "title": "Apoio familiar",
+    "sources": "Fontes no prontuário",
+    "noInsights": "Sem alertas no momento — continue registrando medidas e medicações para contexto na consulta.",
+    "priority": {
+      "info": "informação",
+      "attention": "atenção",
+      "urgent": "importante",
+      "critical": "urgente — não ignore"
+    },
+    "openEmergency": "Abrir emergência e contatos"
+  },
+  "emergency": {
+    "title": "Emergência",
+    "subtitle": "Canais oficiais e contatos pessoais do paciente",
+    "disclaimer": "Em risco de vida, ligue 192 (SAMU) ou 193 (Bombeiros). Esta página organiza números oficiais — não substitui atendimento de emergência.",
+    "officialDirectory": "Canais oficiais no Brasil",
+    "patientContacts": "Contatos de emergência do paciente",
+    "selectPatient": "Selecionar paciente",
+    "selectPatientHint": "Escolha um paciente para ver ou cadastrar contatos (pediatra, plano, família).",
+    "addContact": "Adicionar contato",
+    "editContact": "Editar contato",
+    "save": "Salvar",
+    "contactName": "Nome",
+    "contactPhone": "Telefone",
+    "contactPhoneAlt": "Telefone alternativo",
+    "contactRelationship": "Relação",
+    "relationshipPlaceholder": "Pediatra, plano de saúde, avó…",
+    "contactCreated": "Contato salvo",
+    "contactUpdated": "Contato atualizado",
+    "contactRemoved": "Contato removido",
+    "error": "Não foi possível salvar",
+    "noContacts": "Nenhum contato cadastrado para este paciente.",
+    "filterState": "Filtrar por UF (canais estaduais)",
+    "stateHint": "Inclui canais nacionais + entradas do estado selecionado.",
+    "available24h": "24h",
+    "source": "Fonte oficial",
+    "category": {
+      "medical": "Urgência médica",
+      "fire_rescue": "Bombeiros e resgate",
+      "police": "Polícia",
+      "poison": "Intoxicação e envenenamento",
+      "mental_health": "Apoio emocional",
+      "violence_support": "Violência e proteção",
+      "human_rights": "Direitos humanos",
+      "venomous_animal": "Animais peçonhentos",
+      "civil_defense": "Defesa civil",
+      "insurance": "Plano de saúde",
+      "other": "Outros"
+    }
+  },
+  "vaccine": {
     "new": "Registrar Vacina",
     "edit": "Editar vacina",
     "success": "Vacina registrada",
@@ -492,15 +616,25 @@
     "new": "Novo Exame",
     "success": "Exame registrado",
     "type": "Tipo de Exame",
+    "column": "Exame",
     "date": "Data do Exame",
     "laboratory": "Laboratório",
     "result": "Resumo do Resultado",
     "file": "Arquivo",
     "viewFile": "Ver laudo",
+    "viewLaudo": "PDF do laudo",
     "fileStored": "Arquivo salvo",
     "slices": "imagens",
     "viewSeries": "Ver série",
-    "upload": "Importar exame"
+    "upload": "Importar exame",
+    "orderBadge": "Pedido",
+    "orderCount": "{{count}} exames",
+    "orderRowTitle": "Pedido {{id}} · {{count}} exames",
+    "orderResultSummary": "{{count}} resultados no pedido",
+    "orderChildrenTitle": "Exames do pedido ({{count}})",
+    "expandOrder": "Expandir pedido {{id}}",
+    "orderGroup": "Pedido {{id}} · {{date}} · {{lab}} ({{count}} exames)",
+    "orderPdf": "PDF do pedido"
   },
   "examSliceViewer": {
     "phaseDownload": "Baixando cortes…",

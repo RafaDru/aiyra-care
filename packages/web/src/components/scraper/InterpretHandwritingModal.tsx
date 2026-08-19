@@ -3,6 +3,7 @@ import { Alert, App, Button, Descriptions, List, Modal, Space, Tag, Typography }
 import { BulbOutlined, MedicineBoxOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
 import type { Document_, HandwritingQuota, PrescriptionInterpretation } from '../../lib/api.types.js'
+import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import { AiInsightCard } from '../ui/AiInsightCard.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
 
@@ -20,6 +21,7 @@ const { Text, Paragraph } = Typography
 
 export function InterpretHandwritingModal({ document, patientId, open, onClose, onMedicationsCreated }: Props) {
   const { message } = App.useApp()
+  const { runLlmTask } = useLlmActivity()
   const [loading, setLoading] = useState(false)
   const [creatingMeds, setCreatingMeds] = useState(false)
   const [interpretation, setInterpretation] = useState<PrescriptionInterpretation | null>(null)
@@ -40,7 +42,7 @@ export function InterpretHandwritingModal({ document, patientId, open, onClose, 
     if (!document) return
     setLoading(true)
     try {
-      const result = await api.documents.interpretHandwriting(document.id)
+      const result = await runLlmTask(() => api.documents.interpretHandwriting(document.id))
       setInterpretation(result.interpretation)
       setQuota(result.quota)
       message.success(

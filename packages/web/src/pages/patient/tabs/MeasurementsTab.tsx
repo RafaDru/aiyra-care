@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Button, DatePicker, Form, Input, InputNumber, Select, Space, Table, Typography, Segmented, App, Tag, AutoComplete, Empty, Modal,
+  Button, DatePicker, Form, Input, InputNumber, Select, Space, Table, Typography, Segmented, App, Tag, AutoComplete, Modal,
 } from 'antd'
 import { PlusOutlined, MedicineBoxOutlined, ThunderboltOutlined, FilePdfOutlined, NotificationOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +8,7 @@ import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
+import { MeasurementEvolutionView } from '../../../components/measurements/MeasurementEvolutionView.js'
 import { MeasurementChartGrid } from '../../../components/measurements/MeasurementChartGrid.js'
 import { WhoGrowthChartGrid } from '../../../components/measurements/WhoGrowthChartGrid.js'
 import { MonitoringExportSheet } from '../../../components/measurements/MonitoringExportSheet.js'
@@ -182,7 +183,7 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
           onChange={(v) => setView(v as typeof view)}
           options={[
             { label: t('measurement.tabMonitoring'), value: 'monitoring' },
-            { label: t('measurement.tabCharts'), value: 'charts' },
+            { label: t('measurement.tabEvolution'), value: 'charts' },
             { label: t('measurement.tabAnthropometry'), value: 'anthropometry' },
           ]}
         />
@@ -222,16 +223,13 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
       )}
 
       {view === 'charts' && (
-        <>
-          <div style={{ marginBottom: 12 }}>
-            <Button loading={importingGlucose} onClick={importGlucoseFromExams}>
-              {t('measurement.importGlucose')}
-            </Button>
-          </div>
-          {chartSeries.length
-            ? <MeasurementChartGrid series={chartSeries as MeasurementChartSeries[]} />
-            : <Empty description={t('measurement.noChartData')} />}
-        </>
+        <MeasurementEvolutionView
+          patientId={patientId}
+          series={chartSeries as MeasurementChartSeries[]}
+          loading={loading}
+          onImportGlucose={importGlucoseFromExams}
+          importingGlucose={importingGlucose}
+        />
       )}
 
       {view === 'anthropometry' && (

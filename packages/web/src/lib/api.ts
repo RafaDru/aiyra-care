@@ -5,6 +5,34 @@ export function documentDownloadUrl(documentId: string): string {
   return `${BASE_URL}/documents/${documentId}/download`
 }
 
+export function examResultFileUrl(examId: string): string {
+  return `${BASE_URL}/exams/${examId}/result-file`
+}
+
+/** Download autenticado (Bearer) — links diretos `<a href>` não enviam o token Supabase. */
+export async function fetchAuthenticatedBlob(path: string): Promise<Blob> {
+  const headers: Record<string, string> = {}
+  const { ensureAccessToken, supabaseConfigured } = await import('./supabase.js')
+  const token = await ensureAccessToken()
+  if (supabaseConfigured && !token) {
+    throw new Error('Sessão não disponível — faça login novamente')
+  }
+  if (token) headers.Authorization = `Bearer ${token}`
+  const res = await fetch(`${BASE_URL}${path}`, { headers })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { message?: string }
+    throw new Error(body.message || `HTTP ${res.status}`)
+  }
+  return res.blob()
+}
+
+export async function openAuthenticatedDownload(path: string): Promise<void> {
+  const blob = await fetchAuthenticatedBlob(path)
+  const blobUrl = URL.createObjectURL(blob)
+  window.open(blobUrl, '_blank', 'noopener,noreferrer')
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000)
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const isFormData = options?.body instanceof FormData
   const headers: Record<string, string> = options?.body && !isFormData ? { 'Content-Type': 'application/json' } : {}
@@ -18,14 +46,29 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     headers: { ...headers, ...options?.headers },
     ...options,
   })
+  const contentType = res.headers.get('content-type') ?? ''
   if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { message?: string; code?: string; error?: unknown }
-    const zodMsg = body.error && typeof body.error === 'object' && 'fieldErrors' in (body.error as object)
-      ? JSON.stringify(body.error)
-      : undefined
-    throw new Error(body.message || zodMsg || `HTTP ${res.status}`)
+    if (contentType.includes('application/json')) {
+      const body = await res.json().catch(() => ({})) as { message?: string; code?: string; error?: unknown }
+      const zodMsg = body.error && typeof body.error === 'object' && 'fieldErrors' in (body.error as object)
+        ? JSON.stringify(body.error)
+        : undefined
+      throw new Error(body.message || zodMsg || `HTTP ${res.status}`)
+    }
+    const text = await res.text().catch(() => '')
+    if (text.trimStart().startsWith('<!DOCTYPE') || text.trimStart().startsWith('<html')) {
+      throw new Error('API indisponível ou rota não encontrada — recarregue a página ou reinicie os serviços')
+    }
+    throw new Error(text.slice(0, 120) || `HTTP ${res.status}`)
   }
   if (res.status === 204) return undefined as T
+  if (!contentType.includes('application/json')) {
+    const text = await res.text().catch(() => '')
+    if (text.trimStart().startsWith('<!DOCTYPE') || text.trimStart().startsWith('<html')) {
+      throw new Error('Resposta inválida da API (HTML) — verifique se a API está rodando em :3010')
+    }
+    throw new Error('Resposta inválida da API')
+  }
   return res.json()
 }
 
@@ -162,6 +205,62 @@ export const api = {
     if (params.to) qs.set('to', params.to)
     return request<import('./api.types.js').MonitoringExportReport>(`/monitoring-export?${qs}`)
   },
+  familySupport: {
+    insights: (
+      patientId: string,
+      params?: { medicationName?: string; healthThreadId?: string },
+    ) => {
+      const qs = new URLSearchParams()
+      if (params?.medicationName) qs.set('medicationName', params.medicationName)
+      if (params?.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      const query = qs.toString()
+      return request<import('./api.types.js').FamilySupportBundle>(
+        `/patients/${patientId}/family-support/insights${query ? `?${query}` : ''}`,
+      )
+    },
+  },
+  ava: {
+    chat: (patientId: string, body: {
+      message: string
+      healthThreadId?: string
+      history?: Array<{ role: 'user' | 'assistant'; content: string }>
+      allowLlmDataSharing?: boolean
+    }) =>
+      request<import('./api.types.js').AvaChatResponse>(`/patients/${patientId}/ava/chat`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+  },
+  llm: {
+    quota: () => request<import('./api.types.js').LlmUsageQuota>('/llm/usage/quota'),
+  },
+  emergency: {
+    directory: (params?: { category?: string; stateCode?: string }) => {
+      const qs = new URLSearchParams()
+      if (params?.category) qs.set('category', params.category)
+      if (params?.stateCode) qs.set('stateCode', params.stateCode)
+      const query = qs.toString()
+      return request<import('./api.types.js').EmergencyDirectoryEntry[]>(
+        `/emergency/directory${query ? `?${query}` : ''}`,
+      )
+    },
+    contacts: (patientId: string) =>
+      request<import('./api.types.js').PatientEmergencyContact[]>(
+        `/emergency/contacts?patientId=${patientId}`,
+      ),
+    createContact: (data: object) =>
+      request<import('./api.types.js').PatientEmergencyContact>('/emergency/contacts', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    updateContact: (id: string, data: object) =>
+      request<import('./api.types.js').PatientEmergencyContact>(`/emergency/contacts/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    deleteContact: (id: string) =>
+      request<void>(`/emergency/contacts/${id}`, { method: 'DELETE' }),
+  },
   scheduledEvents: {
     list: (patientId?: string, params?: { status?: string; healthThreadId?: string }) => {
       const qs = new URLSearchParams()
@@ -283,6 +382,10 @@ export const api = {
   exams: {
     list: (patientId?: string) => request<import('./api.types.js').Exam[]>(`/exams${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').Exam>('/exams', { method: 'POST', body: JSON.stringify(data) }),
+  },
+  examOrders: {
+    list: (patientId?: string) =>
+      request<import('./api.types.js').ExamOrder[]>(`/exam-orders${patientId ? `?patientId=${patientId}` : ''}`),
   },
   documents: {
     list: (patientId?: string) => request<import('./api.types.js').Document_[]>(`/documents${patientId ? `?patientId=${patientId}` : ''}`),

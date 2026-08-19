@@ -1,12 +1,8 @@
 import { useRef } from 'react'
-import {
-  CheckCircleFilled,
-  CloseCircleFilled,
-  LoadingOutlined,
-  WarningFilled,
-} from '@ant-design/icons'
 import { Alert, Card, Steps, Typography } from 'antd'
 import { BrandIntegrationChip, SYNC_CHIP_LOGO_MAX } from '../brands/BrandIntegrationChip.js'
+import { SyncOverallIcon } from '../ui/StatusTag.js'
+import { SyncDiagnosticMessage } from './SyncDiagnosticsPanel.js'
 import { useSyncJobProgress } from '../../hooks/useSyncJobProgress.js'
 import {
   fetchGroupHasFailure,
@@ -42,10 +38,7 @@ export function resolveSnapshotOverallStatus(
 }
 
 function StatusIcon({ status }: { status: SyncJobOverallStatus }) {
-  if (status === 'running') return <LoadingOutlined spin style={{ color: '#1677ff' }} />
-  if (status === 'success') return <CheckCircleFilled style={{ color: '#52c41a' }} />
-  if (status === 'partial') return <WarningFilled style={{ color: '#faad14' }} />
-  return <CloseCircleFilled style={{ color: '#ff4d4f' }} />
+  return <SyncOverallIcon status={status} />
 }
 
 export interface SyncJobCardViewProps {
@@ -134,12 +127,23 @@ export function SyncJobCardView({
       )}
 
       {footer && status !== 'running' && (
-        <Text
-          type={status === 'failed' ? 'danger' : status === 'partial' ? 'warning' : 'secondary'}
-          style={{ fontSize: 11, display: 'block', marginTop: 8 }}
-        >
-          {footer}
-        </Text>
+        footer.length > 140 || status === 'failed'
+          ? (
+            <SyncDiagnosticMessage
+              variant={status === 'failed' ? 'error' : 'warning'}
+              title={status === 'failed' ? 'Erro na sincronização' : 'Avisos'}
+              message={footer}
+              collapsedMaxHeight={72}
+            />
+          )
+          : (
+            <Text
+              type={status === 'partial' ? 'warning' : 'secondary'}
+              style={{ fontSize: 11, display: 'block', marginTop: 8 }}
+            >
+              {footer}
+            </Text>
+          )
       )}
 
       {longRunning && status === 'running' && (

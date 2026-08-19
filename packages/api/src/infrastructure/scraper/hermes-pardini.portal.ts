@@ -41,6 +41,11 @@ export function hermesPardiniPortalEntryUrl(): string {
   return HERMES_PARDINI_PRECISION_CARE.portalEntryUrl
 }
 
+/** Lista de exames no microfrontend portalpaciente (dispara GET /pedidos). */
+export function hermesPardiniResultadosExameUrl(): string {
+  return `${HERMES_PARDINI_PRECISION_CARE.portalOrigin}/pardini/portalpaciente/resultadosExame`
+}
+
 export function resolveHermesPardiniRegion(): HermesPardiniRegion {
   const raw = (process.env.HERMES_PARDINI_REGION ?? 'mg').toLowerCase()
   return raw === 'sp' ? 'sp' : 'mg'

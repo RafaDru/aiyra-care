@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-13",
+  "updatedAt": "2026-08-19",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -100,7 +100,8 @@
     }
   ],
   "principles": [
-    "Os dados clínicos ficam no Postgres; o Neo4j ajuda a ver caminhos e correlações, não substitui o prontuário.",
+    "Os dados clínicos ficam no Postgres; o Neo4j guarda associações entre entidades (não duplica o prontuário).",
+    "Entidades e atributos no PG; relações de negócio no PG; Neo4j para caminhos, pins de sessão Ava e candidatos de higienização.",
     "Os portais (Unimed, Amil, etc.) trazem pedaços soltos — o app organiza e liga o que importa para o cuidado.",
     "O resumo clínico é montado de forma determinística (sem “inventar” com IA) para você confiar no que leva ao pediatra.",
     "Sync silencioso quando possível; browser ou login manual só quando o portal exige."
@@ -542,15 +543,54 @@
       "priority": "P3",
       "title": "Agentes de apoio (RAG)",
       "summary": "Assistentes que respondem com base no histórico real do paciente e citam a fonte — apoio à família, não substituto do pediatra.",
-      "status": "planned",
-      "statusLabel": "Próximo épico de produto — gate ANVISA + médico",
+      "status": "in_progress",
+      "statusLabel": "Fase 1 — apoio familiar (regras + citações)",
       "reviewBadge": ["medical", "regulatory"],
       "items": [
         {
+          "id": "agent-family-support",
+          "title": "Apoio familiar — vitals + medicação (regras)",
+          "status": "done",
+          "detail": "GET /patients/:id/family-support/insights; UI FamilySupportPanel; docs/AGENTS_APOIO.md"
+        },
+        {
+          "id": "agent-ava-chat-mvp",
+          "title": "Chat Ava — Agente Virtual Aiyra (LLM + contexto clínico)",
+          "status": "done",
+          "detail": "Drawer 45vw, Gemini Pro cascade, contexto expandido (prontuário + acompanhamento), glow neural quando LLM ativa."
+        },
+        {
+          "id": "ava-llm-activity-ui",
+          "title": "Glow neural Ava em todas as operações LLM",
+          "status": "done",
+          "detail": "LlmActivityContext: chat, interpretação manuscrito/carteira; dock reage globalmente."
+        },
+        {
+          "id": "ava-expressions",
+          "title": "Ava — expressões contextuais (empatia, seriedade, alerta)",
+          "status": "planned",
+          "detail": "Sprites/PNG por mood inferido do diálogo (reflection + heurísticas de tom); aplicar em chat, dock e prep de consulta. Viabilidade: mapear mood→asset em AvaAvatar; reflection já classifica revisões.",
+          "reviewBadge": ["medical", "content"]
+        },
+        {
+          "id": "ava-platform-presence",
+          "title": "Ava em múltiplos pontos da plataforma",
+          "status": "planned",
+          "detail": "Widget contextual: interpretação de documentos, export clínico, onboarding, integrações; presença visual + glow quando LLM ativa.",
+          "reviewBadge": ["content"]
+        },
+        {
+          "id": "ava-avatar-picker",
+          "title": "Escolha de representação — múltiplas Avas (diversidade)",
+          "status": "planned",
+          "detail": "Catálogo de avatares (etnias, estilos) + preferência em conta/settings; PNG/SVG por variante; default inclusivo.",
+          "reviewBadge": ["content"]
+        },
+        {
           "id": "agent-runtime",
           "title": "Runtime com contexto determinístico + citações",
-          "status": "planned",
-          "detail": "RAG sobre PG; disclaimer fixo.",
+          "status": "in_progress",
+          "detail": "Base em family-support; LLM redação Fase 2.",
           "reviewBadge": ["medical", "regulatory"]
         },
         {
@@ -559,6 +599,33 @@
           "status": "planned",
           "detail": "Pediatria, farmacêutico, integração OCR.",
           "reviewBadge": ["medical"]
+        },
+        {
+          "id": "agent-safety-policy",
+          "title": "Política Ava — sem diagnóstico + hard stops",
+          "status": "done",
+          "detail": "docs/AGENTS_APOIO.md: do_not_apply alergia×med; critical priority; SAMU/plano"
+        },
+        {
+          "id": "agent-emergency-knowledge",
+          "title": "Catálogo clínico de emergência (SAMU, plano, red flags)",
+          "status": "in_progress",
+          "detail": "039 emergency_directory seed + UI /emergency; expandir UF/município; ver docs/EMERGENCY.md",
+          "reviewBadge": ["medical"]
+        },
+        {
+          "id": "agent-active-emergency",
+          "title": "Notificação ativa / escalonamento (horizonte)",
+          "status": "planned",
+          "detail": "Alertas proativos em hard stop ou vital crítico persistente; opt-in; gate ANVISA",
+          "reviewBadge": ["medical", "regulatory"]
+        },
+        {
+          "id": "agent-devices-monitoring",
+          "title": "Dispositivos + monitoramento contínuo (horizonte)",
+          "status": "planned",
+          "detail": "BLE oxímetro/termômetro; wearables; integração com hard stops Ava",
+          "reviewBadge": ["medical", "regulatory"]
         },
         {
           "id": "agent-graph",
@@ -1066,6 +1133,302 @@
       ]
     },
     {
+      "id": "ava-companion-platform",
+      "category": "negocio",
+      "priority": "P1",
+      "title": "Ava companheira — conversas persistidas (conta global)",
+      "summary": "Ava global na conta; histórico servidor; retomar sessões; LGPD; base para pins e grafo. Ver docs/AVA_VISION.md.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "items": [
+        {
+          "id": "ava-conv-migration",
+          "title": "Migration ava_conversations + ava_messages",
+          "status": "planned",
+          "detail": "042+; account_id; cascade delete com conta."
+        },
+        {
+          "id": "ava-conv-api",
+          "title": "API CRUD conversas + chat com conversationId",
+          "status": "planned",
+          "detail": "GET/POST /ava/conversations; ligar llm_usage_events.conversation_id."
+        },
+        {
+          "id": "ava-dock-global",
+          "title": "Dock Ava global + lista de conversas",
+          "status": "planned",
+          "detail": "Web: histórico persistido; retomar; título auto opcional."
+        },
+        {
+          "id": "ava-lgpd-retention",
+          "title": "Retenção e exclusão LGPD",
+          "status": "planned",
+          "detail": "Política privacidade; export conta; DELETE cascade; docs/AVA_VISION.md.",
+          "reviewBadge": ["legal"]
+        },
+        {
+          "id": "ava-vision-doc",
+          "title": "Documentação visão Ava + moonshot",
+          "status": "done",
+          "detail": "docs/AVA_VISION.md, ARCHITECTURE_DATA_LAYERS.md."
+        }
+      ]
+    },
+    {
+      "id": "ava-context-transparency",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Ava — contexto visível (pins + hooks)",
+      "summary": "Painel lateral: pacientes, exames, acompanhamentos no contexto; troca de paciente com hooks; compactação gerenciada.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "items": [
+        {
+          "id": "ava-session-pins",
+          "title": "ava_session_context (pins PG)",
+          "status": "planned",
+          "detail": "entity_type/id; active; source user|auto|inferred."
+        },
+        {
+          "id": "ava-context-panel-ui",
+          "title": "UI painel / marcadores de contexto",
+          "status": "planned",
+          "detail": "Sidebar expansível; chips no composer."
+        },
+        {
+          "id": "ava-prompt-builder",
+          "title": "Prompt só de pins + K mensagens",
+          "status": "planned",
+          "detail": "Reduz tokens; docs/AVA_VISION.md compactação."
+        },
+        {
+          "id": "ava-patient-switch-hooks",
+          "title": "Hooks troca paciente / inatividade",
+          "status": "planned",
+          "detail": "Manter ou remover pins; product_events."
+        },
+        {
+          "id": "ava-context-accelerators",
+          "title": "Atalhos: paciente, tema, thread",
+          "status": "planned",
+          "detail": "Falar sobre Luís; exames recentes; health_thread."
+        }
+      ]
+    },
+    {
+      "id": "ava-graph-associations",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Neo4j — associações de sessão Ava",
+      "summary": "Neo4j só associações; entidades no PG. Pins de conversa no grafo; expansão relacionada; degradar se grafo off.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "items": [
+        {
+          "id": "graph-ava-pin-edges",
+          "title": "Arestas PINNED Conversation → entidades",
+          "status": "planned",
+          "detail": "IDs espelham PG; docs/ARCHITECTURE_DATA_LAYERS.md."
+        },
+        {
+          "id": "graph-context-expand-api",
+          "title": "GET contexto expandido (1–2 hops)",
+          "status": "planned",
+          "detail": "Sugestões no painel Ava; não alterar prompt sem pin."
+        },
+        {
+          "id": "graph-ava-degrade",
+          "title": "Degradação sem Neo4j",
+          "status": "planned",
+          "detail": "Pins PG suficientes; aviso UI Encadeamento."
+        }
+      ]
+    },
+    {
+      "id": "data-hygiene-dedup",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Higienização de dados (estilo Google Photos)",
+      "summary": "Detector na inserção; job semanal; prompt no login; merge só com confirmação. docs/DATA_HYGIENE.md.",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
+      "items": [
+        {
+          "id": "hygiene-candidates-table",
+          "title": "Fila hygiene_candidates (PG)",
+          "status": "done",
+          "detail": "Migration 042; API list/resolve."
+        },
+        {
+          "id": "hygiene-on-insert",
+          "title": "Detector após sync/upload",
+          "status": "done",
+          "detail": "Exame manual + post-sync; detectores dedup/date+tipo+lab/pedido."
+        },
+        {
+          "id": "hygiene-weekly-job",
+          "title": "Varredura semanal por conta",
+          "status": "planned",
+          "detail": "npm run scan:hygiene; agendar em connect-worker."
+        },
+        {
+          "id": "hygiene-login-ui",
+          "title": "Modal proativo no login",
+          "status": "planned",
+          "detail": "Photos-style; dismiss = not duplicate."
+        },
+        {
+          "id": "hygiene-neo4j-candidate",
+          "title": "Arestas DUPLICATE_CANDIDATE no grafo",
+          "status": "planned",
+          "detail": "Opcional; PG authoritative."
+        }
+      ]
+    },
+    {
+      "id": "exam-artifact-normalization",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Artefatos de exame → modelo canônico",
+      "summary": "PDF/PPT/DOC/imagens de laudo → OCR, corpus, medidas e campos estruturados. Depende de higienização. docs/EXAM_ARTIFACT_PIPELINE.md.",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
+      "items": [
+        {
+          "id": "exam-artifact-orchestrator",
+          "title": "Motor ExamArtifactNormalizationService",
+          "status": "done",
+          "detail": "Ignora hygieneCanonicalId; delega medidas."
+        },
+        {
+          "id": "exam-artifact-hygiene-gate",
+          "title": "Gate higienização no import de medidas",
+          "status": "done",
+          "detail": "glucose-exam-import + exam-canonical.ts."
+        },
+        {
+          "id": "exam-artifact-backfill-ocr",
+          "title": "Backfill OCR laudos sem extracted_text",
+          "status": "planned",
+          "detail": "Job batch result_file_url + documents."
+        },
+        {
+          "id": "exam-artifact-parsers",
+          "title": "Parsers adicionais (hemograma, lipídios, etc.)",
+          "status": "planned",
+          "detail": "Regex/tabela por lab; measurement_types."
+        },
+        {
+          "id": "exam-artifact-office",
+          "title": "PPT/DOC pipeline dedicado",
+          "status": "planned",
+          "detail": "Conversão antes do OCR cascade."
+        },
+        {
+          "id": "exam-artifact-structured",
+          "title": "Tabela exam_result_items",
+          "status": "planned",
+          "detail": "Analito, valor, ref, unidade; além de medidas pontuais."
+        },
+        {
+          "id": "exam-artifact-doc",
+          "title": "Documentação pipeline",
+          "status": "done",
+          "detail": "docs/EXAM_ARTIFACT_PIPELINE.md."
+        }
+      ]
+    },
+    {
+      "id": "observability-platform",
+      "category": "tecnico",
+      "priority": "P1",
+      "title": "Observabilidade e monitoramento proativo",
+      "summary": "Saúde sistema + eventos de produto sem PHI + alertas. Operação autônoma. docs/OBSERVABILITY.md.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "items": [
+        {
+          "id": "obs-product-events",
+          "title": "Tabela product_events + API ingest",
+          "status": "planned",
+          "detail": "event_name, account_id, properties allowlist; sem texto clínico."
+        },
+        {
+          "id": "obs-web-tracker",
+          "title": "trackProductEvent no web",
+          "status": "planned",
+          "detail": "Ava, sync, billing, hygiene, onboarding."
+        },
+        {
+          "id": "obs-llm-dashboard-sql",
+          "title": "Queries p50/p95 tokens Ava",
+          "status": "planned",
+          "detail": "llm_usage_events; script ou GET /ops/metrics admin."
+        },
+        {
+          "id": "obs-sync-alerts",
+          "title": "Alertas sync stuck / fail rate",
+          "status": "planned",
+          "detail": "sync_jobs; integrar GCP ou runbook."
+        },
+        {
+          "id": "obs-llm-cascade-alert",
+          "title": "Alerta cascata LLM 100% fail",
+          "status": "planned",
+          "detail": "Proativo antes de usuário reportar."
+        },
+        {
+          "id": "obs-doc",
+          "title": "Documentação observabilidade",
+          "status": "done",
+          "detail": "docs/OBSERVABILITY.md."
+        },
+        {
+          "id": "obs-log-sanitization",
+          "title": "Revisão logs sem PHI",
+          "status": "planned",
+          "detail": "Fastify; não logar body ava/chat/documentos.",
+          "reviewBadge": ["security"]
+        }
+      ]
+    },
+    {
+      "id": "product-analytics-optin",
+      "category": "tecnico",
+      "priority": "P3",
+      "title": "Analytics de produto (opt-in, sem expor usuário)",
+      "summary": "NLP batch + Neo4j Topic nodes; cohorts internos; não mapa de temas na UI ainda. LGPD opt-in separado do Zen.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "items": [
+        {
+          "id": "analytics-optin-flag",
+          "title": "Opt-in aprimorar serviços (conta)",
+          "status": "planned",
+          "detail": "Checkbox settings; distinto allowLlmDataSharing.",
+          "reviewBadge": ["legal"]
+        },
+        {
+          "id": "analytics-batch-nlp",
+          "title": "Job semanal resumo/tópicos (opt-in)",
+          "status": "planned",
+          "detail": "Neo4j :Topic; sem texto em dashboard público."
+        },
+        {
+          "id": "analytics-aggregates",
+          "title": "Relatórios agregados produto",
+          "status": "planned",
+          "detail": "Dúvidas frequentes; franquia; abandono fluxos."
+        },
+        {
+          "id": "analytics-no-user-heatmap",
+          "title": "Mapa de temas na UI — adiado",
+          "status": "planned",
+          "detail": "Somente conhecimento interno por enquanto."
+        }
+      ]
+    },
+    {
       "id": "feature-review-framework",
       "category": "regulacao",
       "priority": "P2",
@@ -1104,6 +1467,53 @@
           "status": "done",
           "detail": ".github/workflows/tier3-review.yml + PR template; subagent manual.",
           "reviewBadge": ["security"]
+        }
+      ]
+    },
+    {
+      "id": "amil-routing-classifier",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Classificador de rótulos Amil (consulta/exame) + roteamento canônico",
+      "summary": "Motor modular Hexagonal (port + engine + adapter) que classifica descrições de 'Atendimentos Realizados' e roteia consulta→medical_records, exame→exams. Reutilizável em integração e jobs. docs/CLASSIFICATION_ENGINE.md.",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
+      "items": [
+        {
+          "id": "classifier-port-engine",
+          "title": "Port + motor rules/fuzzy (Hexagonal)",
+          "status": "done",
+          "detail": "domain/classification (port+catálogo), application/classification (AmilLabelClassifier), infrastructure/classification (FuzzyExamCatalogLookup)."
+        },
+        {
+          "id": "amil-usage-routing",
+          "title": "Roteamento él exame→exams no mapper/importer",
+          "status": "done",
+          "detail": "amil-canonical.mapper injeta motor; importer importAmilExam."
+        },
+        {
+          "id": "amil-reclassify-job",
+          "title": "Job de re-mapeamento de medical_records Amil",
+          "status": "done",
+          "detail": "scripts/reclassify-amil-medical-records.ts (dry-run + --apply)."
+        },
+        {
+          "id": "classifier-llm-fallback",
+          "title": "Hook fallback LLM (llm-router) para rótulos ambíguos",
+          "status": "planned",
+          "detail": "AmilLabelClassifier.classifyWithLlm; integrar ava-orchestrator/llm-router."
+        },
+        {
+          "id": "classifier-embedding-engine",
+          "title": "Motor de embedding/semântico alternativo (adapter)",
+          "status": "planned",
+          "detail": "Substituir FuzzyExamCatalogLookup sem tocar domínio."
+        },
+        {
+          "id": "beneficiary-view-filter",
+          "title": "Seletor de período/beneficiário na tela Atendimentos Amil",
+          "status": "planned",
+          "detail": "Fetch todas as faixas; comparar raw para dedup antes do destino."
         }
       ]
     }

@@ -339,3 +339,25 @@
 .patient-context-timeline__nav-fab:active {
   transform: scale(0.98);
 }
+
+.patient-context-timeline__popover-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.patient-context-timeline__popover-pedido {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+}
+
+.patient-context-timeline__popover-pedido:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.patient-context-timeline__popover-item {
+  padding: 2px 0;
+}

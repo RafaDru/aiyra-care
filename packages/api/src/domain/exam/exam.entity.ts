@@ -1,6 +1,7 @@
 export interface ExamProps {
   patientId: string
   medicalRecordId?: string
+  examOrderId?: string
   examType: string
   examDate: Date
   resultSummary?: string
@@ -14,6 +15,7 @@ export interface ExamData {
   id: string
   patientId: string
   medicalRecordId: string | null
+  examOrderId: string | null
   examType: string
   examDate: Date
   resultSummary: string | null
@@ -32,6 +34,7 @@ export class Exam {
       id: id ?? crypto.randomUUID(),
       patientId: props.patientId,
       medicalRecordId: props.medicalRecordId ?? null,
+      examOrderId: props.examOrderId ?? null,
       examType: props.examType,
       examDate: props.examDate,
       resultSummary: props.resultSummary ?? null,
@@ -48,6 +51,7 @@ export class Exam {
   get id(): string { return this.data.id }
   get patientId(): string { return this.data.patientId }
   get medicalRecordId(): string | null { return this.data.medicalRecordId }
+  get examOrderId(): string | null { return this.data.examOrderId }
   get examType(): string { return this.data.examType }
   get examDate(): Date { return this.data.examDate }
   get resultSummary(): string | null { return this.data.resultSummary }

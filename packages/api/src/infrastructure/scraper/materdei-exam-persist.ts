@@ -10,21 +10,8 @@ import type { MaterDeiExamItem } from './materdei-exam.mapper.js'
 import { materDeiExamDedupKey } from './materdei-exam.mapper.js'
 import { downloadMaterDeiExamFile } from './materdei-exam-files.js'
 import { scrapeMaterDeiVueMotionForExam } from './materdei-vuemotion.scraper.js'
-
-function parseExamNotes(notes: string | null): { dedup: string; meta: Record<string, unknown> } {
-  if (!notes) return { dedup: '', meta: {} }
-  const nl = notes.indexOf('\n')
-  if (nl < 0) return { dedup: notes, meta: {} }
-  try {
-    return { dedup: notes.slice(0, nl), meta: JSON.parse(notes.slice(nl + 1)) as Record<string, unknown> }
-  } catch {
-    return { dedup: notes.slice(0, nl), meta: {} }
-  }
-}
-
-function buildExamNotes(dedup: string, meta: Record<string, unknown>): string {
-  return `${dedup}\n${JSON.stringify(meta)}`
-}
+import { clipExamSummary, extractReportPdfText } from './exam-pdf-text.helper.js'
+import { parseExamNotes, buildExamNotes } from '../../domain/exam/exam-notes.js'
 
 export async function persistMaterDeiExamFiles(args: {
   pool: Pool
@@ -79,9 +66,21 @@ export async function persistMaterDeiExamFiles(args: {
       ? existingMeta.meta.documentId
       : null
 
+    let reportSummary: string | null = existing?.resultSummary ?? null
+
     if (!reportDocId && (item.reportAvailable || item.imageAvailable)) {
       const file = await downloadMaterDeiExamFile(request, accessToken, gatewayPatientId, item)
       if (file) {
+        let extractedText: string | null = null
+        const isPdf = file.mimeType?.toLowerCase().includes('pdf')
+        if (isPdf) {
+          try {
+            extractedText = await extractReportPdfText(file.buffer, file.mimeType)
+          } catch {
+            extractedText = null
+          }
+        }
+
         const { path, sizeBytes } = await storage.upload(targetPatientId, file.filename, file.buffer, file.mimeType)
         const doc = await docRepo.save(Document.create({
           patientId: targetPatientId,
@@ -90,9 +89,16 @@ export async function persistMaterDeiExamFiles(args: {
           storagePath: path,
           fileSizeBytes: sizeBytes,
           mimeType: file.mimeType,
+          extractedText: extractedText ?? undefined,
+          ocrProcessed: extractedText ? true : undefined,
+          ocrProvider: extractedText ? 'cascade:report' : undefined,
         }))
         reportPath = path
         reportDocId = doc.id
+
+        if (extractedText && isPdf) {
+          reportSummary = clipExamSummary(extractedText)
+        }
       }
     }
 
@@ -174,6 +180,7 @@ export async function persistMaterDeiExamFiles(args: {
       const updated = Exam.restore({
         ...existing.toJSON(),
         resultFileUrl: resultPath,
+        resultSummary: reportSummary ?? existing.resultSummary,
         notes: buildExamNotes(dedup, meta),
       })
       await examRepo.update(updated)
@@ -185,7 +192,7 @@ export async function persistMaterDeiExamFiles(args: {
         examType: item.examType,
         examDate: parsedDate,
         laboratory: item.provider || 'Mater Dei',
-        resultSummary: item.status || undefined,
+        resultSummary: reportSummary ?? item.status ?? undefined,
         resultFileUrl: resultPath ?? undefined,
         source: 'mater_dei',
         notes: buildExamNotes(dedup, meta),

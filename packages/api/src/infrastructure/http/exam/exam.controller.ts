@@ -12,6 +12,7 @@ export class ExamController {
   constructor(
     private readonly service: ExamService,
     private readonly carePlaces?: CarePlaceService,
+    private readonly hygieneDetector?: import('../../../application/hygiene/hygiene-detector.service.js').HygieneDetectorService,
   ) {}
 
   async create(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -20,6 +21,7 @@ export class ExamController {
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
     const exam = await this.service.create(parsed.data)
     await this.carePlaces?.recordUsage(parsed.data.laboratory)
+    void this.hygieneDetector?.scanAfterExamUpsert(exam).catch(() => undefined)
     const json = exam.toJSON()
     scheduleCanonicalEntityProjection({
       patientId: json.patientId,
@@ -76,5 +78,26 @@ export class ExamController {
       await this.service.delete(parsed.data.id)
       return reply.status(204).send()
     } catch (err) { return err instanceof NotFoundError ? reply.status(404).send({ message: err.message }) : [] }
+  }
+
+  async downloadResultFile(req: AuthenticatedRequest, reply: FastifyReply) {
+    const parsed = examParamsSchema.safeParse(req.params)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+    try {
+      const exam = await this.service.findById(parsed.data.id)
+      if (!guardPatientEntity(req, reply, exam)) return
+      const path = exam.resultFileUrl
+      if (!path) return reply.status(404).send({ message: 'Exame sem arquivo de resultado' })
+      const file = await this.service.readResultFile(path)
+      const name = `${exam.examType.replace(/[^\w\s.-]/g, '_').slice(0, 60) || 'laudo'}.pdf`
+      return reply
+        .header('Content-Type', file.contentType ?? 'application/pdf')
+        .header('Content-Disposition', `inline; filename="${name}"`)
+        .send(file.buffer)
+    } catch (err) {
+      return err instanceof NotFoundError
+        ? reply.status(404).send({ message: err.message })
+        : reply.status(500).send({ message: err instanceof Error ? err.message : 'Erro ao baixar laudo' })
+    }
   }
 }

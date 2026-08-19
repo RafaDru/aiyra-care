@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Space } from 'antd'
+import { Button, Space } from 'antd'
 import { BellOutlined, ClockCircleOutlined, NotificationOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import { requestCareReminderNotificationPermission } from '../../hooks/useCareReminderNotifications.js'
 import type { CareReminderRow } from '../../lib/api.types.js'
+import { DismissibleHint } from '../ui/DismissibleHint.js'
 
 interface Props {
   patientId: string
@@ -15,6 +16,7 @@ interface Props {
 export function CareReminderBanner({ patientId, onMeasure, onMedication }: Props) {
   const { t } = useTranslation()
   const [pending, setPending] = useState<CareReminderRow[]>([])
+  const [sessionHidden, setSessionHidden] = useState<Set<string>>(() => new Set())
 
   const load = useCallback(() => {
     api.careReminders.pending(patientId).then(setPending).catch(() => setPending([]))
@@ -33,15 +35,19 @@ export function CareReminderBanner({ patientId, onMeasure, onMedication }: Props
 
   const showNotifyBtn = typeof Notification !== 'undefined' && Notification.permission !== 'granted'
 
-  if (!pending.length && !showNotifyBtn) return null
+  const visiblePending = pending.filter((r) => !sessionHidden.has(r.id))
+
+  if (!visiblePending.length && !showNotifyBtn) return null
 
   return (
     <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="small">
       {showNotifyBtn && (
-        <Alert
+        <DismissibleHint
+          hintId={`care-reminder.notifications.${patientId}`}
           type="info"
           showIcon
           icon={<NotificationOutlined />}
+          acknowledge={false}
           message={t('measurement.enableNotifications')}
           action={
             <Button size="small" onClick={enableNotifications}>
@@ -50,12 +56,15 @@ export function CareReminderBanner({ patientId, onMeasure, onMedication }: Props
           }
         />
       )}
-      {pending.map((r) => (
-        <Alert
+      {visiblePending.map((r) => (
+        <DismissibleHint
           key={r.id}
+          hintId={`care-reminder.pending.${r.id}`}
+          persist={false}
           type="warning"
           showIcon
           icon={<BellOutlined />}
+          acknowledge={false}
           message={r.title}
           description={r.doseHint ? `${t('measurement.dose')}: ${r.doseHint}` : undefined}
           action={
@@ -79,6 +88,7 @@ export function CareReminderBanner({ patientId, onMeasure, onMedication }: Props
               </Button>
             </Space>
           }
+          onClose={() => setSessionHidden((prev) => new Set(prev).add(r.id))}
         />
       ))}
     </Space>

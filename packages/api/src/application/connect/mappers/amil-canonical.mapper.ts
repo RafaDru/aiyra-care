@@ -1,6 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import type { CanonicalSyncBatch, CanonicalRecord } from '@open-health/connect'
 import type { AmilSyncResult } from '../../../infrastructure/scraper/amil-sync.scraper.js'
+import { AmilLabelClassifier } from '../../classification/amil-label-classifier.js'
+import { FuzzyExamCatalogLookup } from '../../../infrastructure/classification/fuzzy-exam-catalog-lookup.js'
+import type { LabelClassifierEngine } from '../../../domain/classification/label-classification.js'
+
+/** Motor default: regras + fuzzy local (sem LLM). Trocável via ctx.classifier. */
+const defaultClassifier: LabelClassifierEngine = new AmilLabelClassifier({
+  lookup: new FuzzyExamCatalogLookup(),
+})
 
 export function amilResultToCanonicalBatch(
   result: AmilSyncResult,
@@ -10,8 +18,11 @@ export function amilResultToCanonicalBatch(
     tenantRef?: string | null
     /** Sync silencioso — não emite coverage (evita upsert com plano stub). */
     skipCoverage?: boolean
+    /** Motor de classificação de rótulos (ox. injetável; default = AmilLabelClassifier). */
+    classifier?: LabelClassifierEngine
   },
 ): CanonicalSyncBatch {
+  const classifier: LabelClassifierEngine = ctx.classifier ?? defaultClassifier
   const records: CanonicalRecord[] = []
 
   for (const entry of result.beneficiaryData) {
@@ -75,24 +86,49 @@ export function amilResultToCanonicalBatch(
     }
 
     for (const usage of entry.usageItems ?? []) {
-      records.push({
-        type: 'medical_record',
-        externalKey: usage.invoiceNumber
-          ? `inv:${usage.invoiceNumber}`
-          : `${usage.procedureDate}|${usage.procedureDescription}|${usage.doctorName}`,
-        beneficiaryKey: key,
-        beneficiaryName,
-        recordType: usage.kind,
-        date: usage.procedureDate,
-        providerName: usage.providerName || 'Amil',
-        description: usage.procedureDescription,
-        raw: usage as unknown as Record<string, unknown>,
-      })
+      const procDesc = usage.procedureDescription || usage.kind || ''
+      const classification = classifier.classifySync
+        ? classifier.classifySync(procDesc)
+        : null
+
+      const dest: 'exam' | 'medical_record' =
+        classification && classification.destination === 'exam' ? 'exam' : 'medical_record'
+
+      const externalKey = usage.invoiceNumber
+        ? `inv:${usage.invoiceNumber}`
+        : `${usage.procedureDate}|${procDesc}|${usage.doctorName}`
+
+      if (dest === 'exam') {
+        records.push({
+          type: 'exam',
+          externalKey,
+          beneficiaryKey: key,
+          beneficiaryName,
+          name: classification?.canonicalName || procDesc,
+          performedAt: usage.procedureDate,
+          laboratory: usage.providerName || 'Amil',
+          raw: { ...(usage as unknown as Record<string, unknown>), __amilClassified: classification },
+        })
+      } else {
+        records.push({
+          type: 'medical_record',
+          externalKey,
+          beneficiaryKey: key,
+          beneficiaryName,
+          recordType: usage.kind,
+          date: usage.procedureDate,
+          providerName: usage.providerName || 'Amil',
+          description: procDesc,
+          raw: { ...(usage as unknown as Record<string, unknown>), __amilClassified: classification },
+        })
+      }
     }
   }
 
   const authCount = records.filter((r) => r.type === 'authorization').length
-  const usageCount = records.filter((r) => r.type === 'medical_record').length
+  const medicalCount = records.filter((r) => r.type === 'medical_record').length
+  const examCount = records.filter((r) => r.type === 'exam').length
+  const usageCount = medicalCount + examCount
 
   return {
     batchId: randomUUID(),
@@ -106,7 +142,8 @@ export function amilResultToCanonicalBatch(
     stats: {
       beneficiaries: result.beneficiaryData.length,
       authorizations: authCount,
-      medicalRecords: usageCount,
+      medicalRecords: medicalCount,
+      exams: examCount,
       coverage: records.filter((r) => r.type === 'coverage').length,
     },
   }

@@ -22,7 +22,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ReactNode; co
 export function Dashboard() {
   const { t } = useTranslation()
   const { message } = App.useApp()
-  const { loading: authLoading, session, configured: authConfigured } = useAuth()
+  const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -44,9 +44,9 @@ export function Dashboard() {
       })
   }
   useEffect(() => {
-    if (authConfigured && (authLoading || !session)) return
+    if (authConfigured && (authLoading || !authUserId)) return
     load().finally(() => setLoading(false))
-  }, [authConfigured, authLoading, session])
+  }, [authConfigured, authLoading, authUserId])
 
   const handleCreate = async () => {
     try {

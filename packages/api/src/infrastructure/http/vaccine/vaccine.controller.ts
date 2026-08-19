@@ -11,6 +11,7 @@ export class VaccineController {
   constructor(
     private readonly service: VaccineService,
     private readonly carePlaces?: CarePlaceService,
+    private readonly hygieneDetector?: import('../../../application/hygiene/hygiene-detector.service.js').HygieneDetectorService,
   ) {}
 
   async create(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -19,6 +20,7 @@ export class VaccineController {
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
     const vaccine = await this.service.create(parsed.data)
     await this.carePlaces?.recordUsage(parsed.data.clinic)
+    void this.hygieneDetector?.scanAfterVaccineUpsert(vaccine).catch(() => undefined)
     return reply.status(201).send(vaccine.toJSON())
   }
 

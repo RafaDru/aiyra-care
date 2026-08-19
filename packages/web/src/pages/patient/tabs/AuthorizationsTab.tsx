@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Table, Tag, Space, Typography, Descriptions, List, Button } from 'antd'
-import { CheckCircleFilled, CloseCircleFilled, ClockCircleFilled, LinkOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
-import { api } from '../../../lib/api.js'
+import { CheckCircleFilled, CloseCircleFilled, ClockCircleFilled, LinkOutlined, DownOutlined, UpOutlined, FilePdfOutlined, ExportOutlined } from '@ant-design/icons'
+import { api, documentDownloadUrl } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { useClinicalLinkCounts } from '../../../hooks/useClinicalLinkCounts.js'
 import { clinicalEntityRowProps, useClinicalEntityHighlight } from '../../../hooks/useClinicalEntityHighlight.js'
 import { SourceTag } from '../../../components/ui/SourceTag.js'
 import { EntityClinicalLinksCell } from '../../../components/patient/EntityClinicalLinksCell.js'
 import { EntityClinicalLinksExpandedPanel } from '../../../components/patient/EntityClinicalLinksExpandedPanel.js'
+import { ClinicalIndentPanel } from '../../../components/patient/ClinicalIndentPanel.js'
 import { CLINICAL_SEQUENCE_COPY } from '../../../components/patient/clinical-sequence-copy.js'
 import '../../../components/patient/clinical-entity-highlight.css'
 import type { Authorization } from '../../../lib/api.types.js'
@@ -87,6 +88,27 @@ export function AuthorizationsTab({ patientId, highlightEntityId }: Props) {
     },
     { title: 'Origem', dataIndex: 'source', render: (v: string) => <SourceTag source={v} /> },
     {
+      title: 'Arquivo',
+      key: 'files',
+      render: (_: unknown, r: Authorization) => {
+        if (!r.guideDocumentId && !r.solicitationUrl) return '-'
+        return (
+          <Space size="small">
+            {r.guideDocumentId && (
+              <a href={documentDownloadUrl(r.guideDocumentId)} target="_blank" rel="noreferrer">
+                <FilePdfOutlined /> Guia PDF
+              </a>
+            )}
+            {r.solicitationUrl && (
+              <a href={r.solicitationUrl} target="_blank" rel="noreferrer">
+                <ExportOutlined /> Portal
+              </a>
+            )}
+          </Space>
+        )
+      },
+    },
+    {
       title: CLINICAL_SEQUENCE_COPY.columnTitle,
       key: 'clinicalLinks',
       width: 160,
@@ -138,7 +160,7 @@ export function AuthorizationsTab({ patientId, highlightEntityId }: Props) {
             const linkCount = getCount('authorization', record.id)
             const title = record.classification ?? record.procedureDescription ?? record.guideNumber ?? 'Autorização'
             return (
-              <div style={{ padding: '8px 12px' }}>
+              <ClinicalIndentPanel accentColor="#FF3DA8">
                 {linkCount > 0 && (
                   <div style={{ marginBottom: 16 }}>
                     <EntityClinicalLinksExpandedPanel
@@ -206,7 +228,7 @@ export function AuthorizationsTab({ patientId, highlightEntityId }: Props) {
                     )}
                   />
                 )}
-              </div>
+              </ClinicalIndentPanel>
             )
           },
         }}

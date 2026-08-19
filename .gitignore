@@ -4,6 +4,7 @@ build/
 .env
 .env.local
 gcp-key.json
+openhealth-*.json
 *.log
 .DS_Store
 coverage/

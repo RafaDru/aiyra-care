@@ -1,7 +1,11 @@
 import type { ExamRepository } from '../../domain/exam/exam.repository.js'
+import type { DocumentRepository } from '../../domain/document/document.repository.js'
+import type { ExamOrderRepository } from '../../domain/exam-order/exam-order.repository.js'
 import type { MeasurementRepository } from '../../domain/measurement/measurement.repository.js'
 import { MeasurementObservation } from '../../domain/measurement/measurement-observation.entity.js'
 import { isGlucoseExamLabel, parseGlucoseMgDl } from '../../domain/measurement/who-growth-reference.js'
+import { buildExamOcrCorpus, buildExamOcrCorpusContext } from '../exam/exam-ocr-text.js'
+import { isExamHygieneDuplicate } from '../../domain/hygiene/exam-canonical.js'
 
 export type GlucoseImportResult = {
   imported: number
@@ -13,10 +17,16 @@ export class GlucoseExamImportService {
   constructor(
     private readonly exams: ExamRepository,
     private readonly measurements: MeasurementRepository,
+    private readonly documents?: DocumentRepository,
+    private readonly examOrders?: ExamOrderRepository,
   ) {}
 
   async importForPatient(patientId: string): Promise<GlucoseImportResult> {
     const allExams = await this.exams.findAll({ patientId })
+    const ocrCtx = this.documents && this.examOrders
+      ? await buildExamOcrCorpusContext(allExams, this.documents, this.examOrders)
+      : { documentTextById: new Map<string, string>(), orderTextByOrderId: new Map<string, string>() }
+
     const existing = await this.measurements.findObservations({ patientId, typeCodes: ['glucose'] })
     const existingRefs = new Set(
       existing.map((o) => o.sourceRef).filter((r): r is string => r?.startsWith('exam:')),
@@ -27,18 +37,18 @@ export class GlucoseExamImportService {
     const examIds: string[] = []
 
     for (const exam of allExams) {
+      if (isExamHygieneDuplicate(exam)) {
+        skipped++
+        continue
+      }
+
       const sourceRef = `exam:${exam.id}`
       if (existingRefs.has(sourceRef)) {
         skipped++
         continue
       }
 
-      const labelParts = [
-        exam.examType,
-        exam.laboratory,
-        exam.resultSummary,
-        exam.notes,
-      ].filter(Boolean).join(' ')
+      const labelParts = buildExamOcrCorpus(exam, ocrCtx)
 
       if (!isGlucoseExamLabel(labelParts)) {
         skipped++

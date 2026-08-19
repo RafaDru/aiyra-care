@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="Ava">
+  <defs>
+    <linearGradient id="ava-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3DA8" />
+      <stop offset="50%" stop-color="#FF5BC4" />
+      <stop offset="100%" stop-color="#9333EA" />
+    </linearGradient>
+    <linearGradient id="ava-glow" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFE566" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#FFE566" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#ava-bg)" />
+  <rect x="8" y="8" width="104" height="52" rx="28" fill="url(#ava-glow)" />
+  <!-- network dots (marca Aiyra) -->
+  <g fill="#FFE566" opacity="0.55">
+    <circle cx="28" cy="32" r="2" />
+    <circle cx="36" cy="28" r="1.5" />
+    <circle cx="44" cy="34" r="2" />
+    <circle cx="32" cy="40" r="1.2" />
+    <circle cx="40" cy="42" r="1.2" />
+  </g>
+  <!-- rosto amig�vel -->
+  <circle cx="46" cy="58" r="5" fill="#FFE566" opacity="0.95" />
+  <circle cx="74" cy="58" r="5" fill="#FFE566" opacity="0.95" />
+  <path d="M42 72 Q60 84 78 72" stroke="#FFE566" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.9" />
+  <!-- destaque "A" sutil -->
+  <path d="M60 38 L68 52 H52 L60 38 Z" fill="#FFFFFF" opacity="0.18" />
+</svg>

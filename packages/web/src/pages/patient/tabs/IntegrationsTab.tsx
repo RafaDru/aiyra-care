@@ -27,6 +27,7 @@ import type { WalletDockJob } from '../../../components/scraper/WalletSyncDock.j
 import { IntegrationsSyncSidebar } from '../../../components/integrations/IntegrationsSyncSidebar.js'
 import { GroupedAlignedTables } from '../../../components/layout/GroupedAlignedTables.js'
 import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
+import { SessionStatusTag } from '../../../components/ui/StatusTag.js'
 import { isHintDismissed } from '../../../lib/dismissed-hints.js'
 import { ALIGNED_COL } from '../../../components/layout/aligned-table-columns.js'
 import { useIntegrationSyncHistory } from '../../../hooks/useIntegrationSyncHistory.js'
@@ -73,11 +74,11 @@ type TableRow = {
 
 function LinkSyncStatusCell({ linkId, hidden, pausePolling }: { linkId: string; hidden?: boolean; pausePolling?: boolean }) {
   const [status, setStatus] = useState<IntegrationLinkSyncStatus | null>(null)
-  const { loading: authLoading, session, configured: authConfigured } = useAuth()
+  const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
 
   useEffect(() => {
     if (hidden || pausePolling) return
-    if (authConfigured && (authLoading || !session)) return
+    if (authConfigured && (authLoading || !authUserId)) return
     let cancelled = false
     const poll = () => {
       api.integrationLinks.syncStatus(linkId)
@@ -87,7 +88,7 @@ function LinkSyncStatusCell({ linkId, hidden, pausePolling }: { linkId: string; 
     poll()
     const id = window.setInterval(poll, 15000)
     return () => { cancelled = true; window.clearInterval(id) }
-  }, [linkId, hidden, pausePolling, authLoading, session, authConfigured])
+  }, [linkId, hidden, pausePolling, authLoading, authUserId, authConfigured])
 
   if (hidden) return <Text type="secondary">—</Text>
 
@@ -148,7 +149,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   linkedChildrenCount = 0,
 }, ref) {
   const { message } = App.useApp()
-  const { loading: authLoading, session, configured: authConfigured } = useAuth()
+  const { loading: authLoading, configured: authConfigured } = useAuth()
   const [dockJobs, setDockJobs] = useState<WalletDockJob[]>([])
   const [startingLinkIds, setStartingLinkIds] = useState<Set<string>>(new Set())
   const [syncAllBusy, setSyncAllBusy] = useState(false)
@@ -368,8 +369,8 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           return <Tag>Vínculo manual</Tag>
         }
         return isLinkSessionReady(link)
-          ? <Tag color="success">Conectado</Tag>
-          : <Tag color="warning">Login necessário</Tag>
+          ? <SessionStatusTag ready />
+          : <SessionStatusTag ready={false} />
       },
     },
     {

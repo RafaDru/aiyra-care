@@ -19,6 +19,8 @@ import { Vaccine } from '../../domain/vaccine/vaccine.entity.js'
 import { MedicalRecord } from '../../domain/medical-record/medical-record.entity.js'
 import { encrypt, decrypt } from '../../infrastructure/crypto-helper.js'
 import { ExamPgRepository } from '../../infrastructure/persistence/exam.pg.repository.js'
+import { ExamOrderPgRepository } from '../../infrastructure/persistence/exam-order.pg.repository.js'
+import { ExamOrderService } from '../exam-order/exam-order.service.js'
 import { VaccinePgRepository } from '../../infrastructure/persistence/vaccine.pg.repository.js'
 import { MedicalRecordPgRepository } from '../../infrastructure/persistence/medical-record.pg.repository.js'
 import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg.repository.js'
@@ -48,6 +50,8 @@ import type { MatchablePatient } from '../insurance-plan/amil-beneficiary-matche
 import { request as playwrightRequest } from 'playwright'
 import { AgenticScraperService } from '../scraper/agentic-scraper.service.js'
 import type { Patient } from '../../domain/patient/patient.entity.js'
+import { runExamMeasurementImport } from '../measurement/exam-measurement-import.helper.js'
+import { runHygieneScanForPatient } from '../hygiene/hygiene-scan.helper.js'
 
 const SYNCABLE_PORTALS = new Set<string>(['unimed', 'amil', 'mater_dei', 'hermes_pardini', 'bradesco_saude'])
 const RECENT_SYNC_MS = Number(process.env.SYNC_MIN_INTERVAL_MS ?? String(30 * 60 * 1000))
@@ -157,6 +161,8 @@ export class IntegrationLinkSyncService {
       dispatchBackgroundTask(async () => {
         try {
           await run()
+        } catch (err) {
+          opts.log?.error(err, 'Background sync failed')
         } finally {
           this.syncLocks.delete(lockKey)
         }
@@ -491,6 +497,9 @@ export class IntegrationLinkSyncService {
         'success',
       )
 
+      const materDeiWarnings: string[] = []
+      await this.tryImportExamMeasurements(link.patientId, materDeiWarnings, log)
+
       link.setSessionToken(
         encrypt(JSON.stringify(result.session)),
         result.session.sessionExpiresAt,
@@ -507,7 +516,7 @@ export class IntegrationLinkSyncService {
         filesSkipped: skippedFiles,
       }
 
-      const warnings = result.warnings ?? []
+      const warnings = [...(result.warnings ?? []), ...materDeiWarnings]
       void updateJob(jobId, {
         step: 'done',
         message: warnings.length > 0
@@ -570,6 +579,7 @@ export class IntegrationLinkSyncService {
       )
 
       const examRepo = new ExamPgRepository(this.pool)
+      const examOrderService = new ExamOrderService(new ExamOrderPgRepository(this.pool))
       const existingExams = await examRepo.findAll({ patientId: link.patientId })
       const existingKeys = new Set(
         existingExams.map((e) => {
@@ -580,21 +590,68 @@ export class IntegrationLinkSyncService {
 
       let importedExams = 0
       let skippedExams = 0
+      let skippedNoDate = 0
+      let updatedSummaries = 0
       for (const exam of result.exams) {
         const dedup = exam.externalKey
-        if (existingKeys.has(dedup)) {
-          skippedExams++
-          continue
-        }
         const parsedDate = exam.performedAt
           ? (parsePortalDate(exam.performedAt) ?? parseFlexiblePortalDate(exam.performedAt))
           : null
-        if (!parsedDate) continue
+
+        const existing = existingExams.find((e) => e.notes?.split('\n')[0] === dedup)
+        if (existing) {
+          let examOrderId = existing.examOrderId
+          if (!examOrderId && exam.pedidoId && exam.pedidoId !== 'unknown') {
+            const order = await examOrderService.upsertFromPortal({
+              patientId: link.patientId,
+              source: 'hermes_pardini',
+              portalOrderId: exam.pedidoId,
+              orderDate: parsedDate ?? undefined,
+              laboratory: exam.laboratory ?? 'Hermes Pardini',
+              portalOrderLabel: exam.pedidoDisplayId,
+            })
+            examOrderId = order.id
+          }
+          if ((exam.resultSummary && !existing.resultSummary) || (examOrderId && !existing.examOrderId)) {
+            const updated = Exam.restore({
+              ...existing.toJSON(),
+              examOrderId: examOrderId ?? existing.examOrderId,
+              resultSummary: exam.resultSummary && !existing.resultSummary
+                ? exam.resultSummary
+                : existing.resultSummary,
+            })
+            await examRepo.update(updated)
+            if (exam.resultSummary && !existing.resultSummary) updatedSummaries++
+          }
+          skippedExams++
+          continue
+        }
+
+        if (!parsedDate) {
+          skippedNoDate++
+          continue
+        }
+
+        let examOrderId: string | undefined
+        if (exam.pedidoId && exam.pedidoId !== 'unknown') {
+          const order = await examOrderService.upsertFromPortal({
+            patientId: link.patientId,
+            source: 'hermes_pardini',
+            portalOrderId: exam.pedidoId,
+            orderDate: parsedDate,
+            laboratory: exam.laboratory ?? 'Hermes Pardini',
+            portalOrderLabel: exam.pedidoDisplayId,
+          })
+          examOrderId = order.id
+        }
+
         const savedExam = await examRepo.save(Exam.create({
           patientId: link.patientId,
+          examOrderId,
           examType: exam.name,
           examDate: parsedDate,
           laboratory: exam.laboratory ?? 'Hermes Pardini',
+          resultSummary: exam.resultSummary ?? undefined,
           source: 'hermes_pardini',
           notes: hermesPardiniExamNotes(dedup, { pedidoId: exam.pedidoId }),
         }))
@@ -612,17 +669,24 @@ export class IntegrationLinkSyncService {
       const dlRequest = await playwrightRequest.newContext()
       let downloadedFiles = 0
       let skippedFiles = 0
+      let pdfPersistWarning: string | undefined
       try {
         const fileResult = await persistHermesPardiniLaudos({
           pool: this.pool,
           request: dlRequest,
           accessToken: result.session.accessToken,
+          headerProfile: result.session.pacienteApiHeaders,
           patientId: link.patientId,
           exams: result.exams,
           onProgress: (msg) => emit('fetch-files', msg, 'running'),
         })
         downloadedFiles = fileResult.downloaded
         skippedFiles = fileResult.skipped
+      } catch (fileErr) {
+        const msg = fileErr instanceof Error ? fileErr.message : String(fileErr)
+        pdfPersistWarning = `Laudos PDF não gravados: ${msg.slice(0, 120)}`
+        log?.warn(fileErr, 'Hermes Pardini PDF persist failed')
+        emit('fetch-files', pdfPersistWarning, 'running')
       } finally {
         await dlRequest.dispose()
       }
@@ -630,9 +694,14 @@ export class IntegrationLinkSyncService {
         'fetch-files',
         downloadedFiles > 0
           ? `${downloadedFiles} laudo(s) PDF baixado(s)`
-          : 'Laudos PDF: nada novo para baixar',
+          : pdfPersistWarning
+            ? 'Exames importados — laudos PDF não gravados'
+            : 'Laudos PDF: nada novo para baixar',
         'success',
       )
+
+      const hermesMeasurementWarnings: string[] = []
+      await this.tryImportExamMeasurements(link.patientId, hermesMeasurementWarnings, log)
 
       link.setSessionToken(
         encrypt(JSON.stringify(result.session)),
@@ -641,7 +710,14 @@ export class IntegrationLinkSyncService {
       link.markSynced()
       await this.linkRepo.update(link)
 
-      const warnings = result.warnings
+      const warnings = [...result.warnings, ...hermesMeasurementWarnings]
+      if (pdfPersistWarning) warnings.push(pdfPersistWarning)
+      if (skippedNoDate > 0) {
+        warnings.push(`${skippedNoDate} exame(s) sem data válida — não importados`)
+      }
+      if (updatedSummaries > 0) {
+        warnings.push(`${updatedSummaries} exame(s) atualizados com resumo do portal`)
+      }
       const novelty: SyncNoveltySummary = {
         portalExams: result.exams.length,
         newExamRecords: importedExams,
@@ -672,11 +748,14 @@ export class IntegrationLinkSyncService {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro na sincronização Hermes Pardini'
       log?.error(err, 'Hermes Pardini sync failed')
-      if (/401|403|sess[aã]o|token|expirad|login|invalid_grant/i.test(message)) {
+      if (/401|403|sess[aã]o|token|expirad|login|invalid_grant|rejeitado/i.test(message)) {
         link.clearSessionToken()
         await this.linkRepo.update(link).catch(() => {})
       }
-      void updateJob(jobId, { step: 'error', message, status: 'failed' })
+      const userMessage = /401|403|rejeitado/i.test(message)
+        ? 'Hermes Pardini: sessão expirada — abra Integrações e clique em Sincronizar (login manual)'
+        : message
+      void updateJob(jobId, { step: 'error', message: userMessage, status: 'failed' })
     }
   }
 
@@ -763,6 +842,25 @@ export class IntegrationLinkSyncService {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro na sincronização Bradesco'
       void updateJob(jobId, { step: 'error', message, status: 'failed' })
+    }
+  }
+
+  private async tryImportExamMeasurements(
+    patientId: string,
+    warnings: string[],
+    log?: FastifyBaseLogger,
+  ): Promise<void> {
+    try {
+      const { glucose } = await runExamMeasurementImport(this.pool, patientId)
+      if (glucose.imported > 0) {
+        warnings.push(`${glucose.imported} glicemia(s) importada(s) do OCR dos exames`)
+      }
+      const hygienePairs = await runHygieneScanForPatient(this.pool, patientId)
+      if (hygienePairs > 0) {
+        warnings.push(`${hygienePairs} possível(is) duplicata(s) de exame/vacina para revisar`)
+      }
+    } catch (err) {
+      log?.warn(err, 'exam measurement import after sync failed')
     }
   }
 }

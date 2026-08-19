@@ -11,12 +11,14 @@ export function parsePortalDate(dateStr: string): Date | null {
 
 export function parseFlexiblePortalDate(dateStr: string): Date | null {
   if (!dateStr) return null
-  const iso = parsePortalDate(dateStr)
-  if (iso) return iso
+  const fromPortal = parsePortalDate(dateStr)
+  if (fromPortal) return fromPortal
   const m = /^(\d{4}-\d{2}-\d{2})/.exec(dateStr)
   if (m) {
     const d = new Date(`${m[1]}T12:00:00`)
     if (!isNaN(d.getTime())) return d
   }
+  const parsed = new Date(dateStr)
+  if (!isNaN(parsed.getTime())) return parsed
   return null
 }

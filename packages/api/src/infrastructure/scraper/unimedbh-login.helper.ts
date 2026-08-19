@@ -1,4 +1,5 @@
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright'
+import { preparePortalPage, dismissPortalBlockingUi } from './portal-browser-ui.helper.js'
 
 const SUCCESS_ALERT = /parab[eé]ns|validados?\s+com\s+sucesso|login\s+realizado|autenticado/i
 const FAILURE_ALERT = /inv[aá]lid|incorret|erro|falha|bloquead|expirad|obrigat[oó]ri/i
@@ -81,6 +82,7 @@ export async function captureUnimedStorageState(context: BrowserContext): Promis
 /** Valida sessão salva com navegação ao extrato (não só home). */
 async function probeStoredSession(page: Page): Promise<boolean> {
   await page.goto(EXTRATO_PROBE_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
+  await dismissPortalBlockingUi(page)
   await page.waitForTimeout(800)
   if (isUnimedLoginPage(page.url())) return false
   return isOnUnimedPortalApp(page.url())
@@ -93,8 +95,10 @@ async function performCredentialLogin(
 ): Promise<{ browser: Browser; context: BrowserContext; page: Page }> {
   const context = await newStealthContext(browser)
   const page = await context.newPage()
+  await preparePortalPage(page)
 
   await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
+  await dismissPortalBlockingUi(page)
 
   await page.waitForSelector('#username', { timeout: 15000 })
   await page.fill('#username', email)
@@ -147,6 +151,7 @@ export async function acquireUnimedBhSession(
     try {
       const context = await newStealthContext(browser, opts.storageStateJson)
       const page = await context.newPage()
+      await preparePortalPage(page)
       await page.goto(PORTAL_HOME, { waitUntil: 'domcontentloaded', timeout: 45000 })
       await page.waitForTimeout(1200)
       if (!(await isUnimedPortalLoggedIn(page))) {

@@ -1,0 +1,196 @@
+/* Chat Ava — layout drawer com input fixo no bottom */
+.ava-chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.ava-chat-panel--embedded {
+  height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px);
+}
+
+.ava-chat-panel__disclaimer {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.45));
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+  border: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+}
+
+.ava-chat-panel__meta {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--ant-color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.ava-chat-panel__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 2px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ava-chat-panel__intro {
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+  margin: 0;
+}
+
+.ava-chat-bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.ava-chat-bubble-row--user {
+  justify-content: flex-end;
+}
+
+.ava-chat-bubble-row--ava {
+  justify-content: flex-start;
+}
+
+.ava-chat-bubble-row--thinking {
+  align-items: center;
+  gap: 14px;
+}
+
+.ava-chat-bubble-row--thinking .ava-chat-bubble--thinking {
+  animation: ava-chat-bubble-pulse 1.8s ease-in-out infinite;
+  box-shadow:
+    0 2px 14px rgba(147, 51, 234, 0.16),
+    0 0 0 1px rgba(255, 61, 168, 0.15);
+}
+
+.ava-chat-thinking-text {
+  display: inline-block;
+  animation: ava-chat-thinking-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes ava-chat-bubble-pulse {
+  0%,
+  100% {
+    box-shadow: 0 2px 10px rgba(147, 51, 234, 0.08);
+  }
+  50% {
+    box-shadow: 0 4px 22px rgba(147, 51, 234, 0.22);
+  }
+}
+
+@keyframes ava-chat-thinking-shimmer {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ava-chat-bubble-row--ava .ava-avatar-shell {
+  flex-shrink: 0;
+}
+
+.ava-chat-bubble {
+  position: relative;
+  max-width: min(88%, 420px);
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.ava-chat-bubble--ava {
+  background: var(--ant-color-bg-container, #fff);
+  border: 1px solid rgba(255, 61, 168, 0.2);
+  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.08);
+  border-bottom-left-radius: 4px;
+}
+
+.ava-chat-bubble--ava::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  bottom: 10px;
+  width: 10px;
+  height: 10px;
+  background: var(--ant-color-bg-container, #fff);
+  border-left: 1px solid rgba(255, 61, 168, 0.2);
+  border-bottom: 1px solid rgba(255, 61, 168, 0.2);
+  transform: rotate(45deg);
+}
+
+.ava-chat-bubble--user {
+  background: linear-gradient(135deg, rgba(255, 61, 168, 0.12) 0%, rgba(147, 51, 234, 0.14) 100%);
+  border: 1px solid rgba(147, 51, 234, 0.18);
+  border-bottom-right-radius: 4px;
+}
+
+.ava-chat-bubble--user::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  bottom: 10px;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, rgba(255, 61, 168, 0.12) 0%, rgba(147, 51, 234, 0.14) 100%);
+  border-right: 1px solid rgba(147, 51, 234, 0.18);
+  border-bottom: 1px solid rgba(147, 51, 234, 0.18);
+  transform: rotate(-45deg);
+}
+
+.ava-chat-bubble__tag {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--ant-color-primary, #9333ea);
+}
+
+.ava-chat-panel__composer {
+  flex-shrink: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  background: var(--ant-color-bg-container, #fff);
+}
+
+.ava-chat-panel__sharing-opt {
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.ava-chat-panel__sharing-label {
+  font-size: 12px;
+}
+
+.ava-chat-panel__sharing-hint {
+  font-size: 11px;
+  margin-bottom: 8px !important;
+  line-height: 1.35;
+}
+
+.ava-chat-drawer .ant-drawer-body {
+  padding: 8px 16px 12px !important;
+  height: calc(100% - 55px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ava-chat-drawer .ava-chat-panel__messages {
+  max-height: none;
+  min-height: 0;
+}

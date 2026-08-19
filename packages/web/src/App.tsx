@@ -13,6 +13,7 @@ import { SettingsAccountPage } from './pages/settings/account.js'
 import { SettingsPlanPage } from './pages/settings/plan.js'
 import { SettingsLegalPage } from './pages/settings/legal.js'
 import { RoadmapPage } from './pages/roadmap.js'
+import { EmergencyPage } from './pages/emergency.js'
 import { ComplianceAcceptPage } from './pages/compliance-accept.js'
 import { LegalDocumentPage } from './pages/legal-document.js'
 import { CookieConsentBanner } from './components/legal/CookieConsentBanner.js'
@@ -34,6 +35,7 @@ export function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/patients/:id" element={<PatientDetail />} />
               <Route path="/session" element={<Navigate to="/roadmap#dev-sessions" replace />} />
+              <Route path="/emergency" element={<EmergencyPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />
               <Route path="/settings" element={<SettingsLayout />}>

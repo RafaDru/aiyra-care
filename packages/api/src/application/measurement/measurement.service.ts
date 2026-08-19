@@ -7,11 +7,14 @@ import { MedicationAdministration } from '../../domain/measurement/medication-ad
 import type { MedicationAdministrationProps } from '../../domain/measurement/medication-administration.entity.js'
 
 export type ChartSeriesPoint = {
+  id: string
   observedAt: Date
   value: number | null
   valueSecondary: number | null
   notes: string | null
   healthThreadId: string | null
+  source: string
+  sourceRef: string | null
 }
 
 export type ChartSeriesPayload = {
@@ -138,11 +141,14 @@ export class MeasurementService {
       const points = rows
         .sort((a, b) => a.observedAt.getTime() - b.observedAt.getTime())
         .map((o) => ({
+          id: o.id,
           observedAt: o.observedAt,
           value: o.valueNumeric,
           valueSecondary: o.valueSecondary,
           notes: o.notes,
           healthThreadId: o.healthThreadId,
+          source: o.source,
+          sourceRef: o.sourceRef,
         }))
       series.push({
         typeCode: type.code,

@@ -42,6 +42,15 @@ export interface PatientContextActiveThread {
   linkCount: number
 }
 
+export interface PatientContextTimelineItem {
+  date: string
+  title: string
+  subtitle?: string
+  source: string
+  entityId?: string
+  examOrderId?: string
+}
+
 export interface PatientContextTimelineEvent {
   date: string
   kind: PatientContextTimelineKind
@@ -49,6 +58,11 @@ export interface PatientContextTimelineEvent {
   subtitle?: string
   source: string
   entityId?: string
+  /** When >1 same-day events of this kind were collapsed into one row */
+  count?: number
+  items?: PatientContextTimelineItem[]
+  /** Present on raw exam rows before grouping; copied into items */
+  examOrderId?: string
 }
 
 export interface PatientContextPendency {

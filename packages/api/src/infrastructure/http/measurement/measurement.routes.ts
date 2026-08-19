@@ -6,13 +6,20 @@ import { GlucoseExamImportService } from '../../../application/measurement/gluco
 import { MeasurementPgRepository } from '../../persistence/measurement.pg.repository.js'
 import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
 import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
+import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
+import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
 
 export async function measurementRoutes(app: FastifyInstance) {
   const measurementRepo = new MeasurementPgRepository(pgPool)
   const patientRepo = new PatientPgRepository(pgPool)
   const whoGrowth = new WhoGrowthService(patientRepo, measurementRepo)
-  const glucoseImport = new GlucoseExamImportService(new ExamPgRepository(pgPool), measurementRepo)
+  const glucoseImport = new GlucoseExamImportService(
+    new ExamPgRepository(pgPool),
+    measurementRepo,
+    new DocumentPgRepository(pgPool),
+    new ExamOrderPgRepository(pgPool),
+  )
   const service = new MeasurementService(measurementRepo, whoGrowth)
   const controller = new MeasurementController(service, whoGrowth, glucoseImport)
 

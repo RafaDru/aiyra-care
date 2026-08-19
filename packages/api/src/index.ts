@@ -8,6 +8,11 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 config({ path: resolve(__dirname, '../../../.env') })
 
+// .env usa GCP_SERVICE_ACCOUNT_KEY; @google-cloud/storage lê GOOGLE_APPLICATION_CREDENTIALS
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GCP_SERVICE_ACCOUNT_KEY) {
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GCP_SERVICE_ACCOUNT_KEY
+}
+
 // Relative GCP key in .env is resolved from monorepo root (API cwd is packages/api)
 {
   const key = process.env.GOOGLE_APPLICATION_CREDENTIALS
@@ -80,6 +85,8 @@ async function registerRoutes() {
   const { medicationRoutes } = await import('./infrastructure/http/medication/medication.routes.js')
   const { allergyRoutes } = await import('./infrastructure/http/allergy/allergy.routes.js')
   const { examRoutes } = await import('./infrastructure/http/exam/exam.routes.js')
+  const { examOrderRoutes } = await import('./infrastructure/http/exam-order/exam-order.routes.js')
+  const { hygieneRoutes } = await import('./infrastructure/http/hygiene/hygiene.routes.js')
   const { documentRoutes } = await import('./infrastructure/http/document/document.routes.js')
   const { handwritingCreditsRoutes } = await import('./infrastructure/http/handwriting/handwriting-credits.routes.js')
   const { medicalRecordRoutes } = await import('./infrastructure/http/medical-record/medical-record.routes.js')
@@ -108,11 +115,19 @@ async function registerRoutes() {
   const { careReminderRoutes } = await import('./infrastructure/http/care-reminder/care-reminder.routes.js')
 
   await app.register(patientRoutes)
+  const { familySupportRoutes } = await import('./infrastructure/http/family-support/family-support.routes.js')
+  await app.register(familySupportRoutes)
+  const { avaRoutes } = await import('./infrastructure/http/ava/ava.routes.js')
+  await app.register(avaRoutes)
+  const { emergencyRoutes } = await import('./infrastructure/http/emergency/emergency.routes.js')
+  await app.register(emergencyRoutes)
   await app.register(growthRecordRoutes)
   await app.register(vaccineRoutes)
   await app.register(medicationRoutes)
   await app.register(allergyRoutes)
   await app.register(examRoutes)
+  await app.register(hygieneRoutes)
+  await app.register(examOrderRoutes)
   await app.register(documentRoutes)
   await app.register(handwritingCreditsRoutes)
   await app.register(medicalRecordRoutes)

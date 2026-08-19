@@ -12,6 +12,8 @@ import { CascadeOcrProvider } from '../../ocr/cascade-ocr.provider.js'
 import { buildDocumentOcrProviders } from '../../ocr/document-ocr.factory.js'
 import { pgPool } from '../../../db/postgres.js'
 import { HandwritingCreditsPgRepository } from '../../persistence/handwriting-credits.pg.repository.js'
+import { LlmUsagePgRepository } from '../../persistence/llm-usage.pg.repository.js'
+import { LlmQuotaService } from '../../../application/llm/llm-quota.service.js'
 import { CascadePrescriptionUnderstandingProvider } from '../../llm/cascade-prescription-understanding.provider.js'
 import { GeminiVaccineCardUnderstandingProvider } from '../../llm/gemini-vaccine.provider.js'
 import type { DocumentType } from '../../../domain/document/document.entity.js'
@@ -32,13 +34,17 @@ export async function documentRoutes(app: FastifyInstance) {
     new PatientPgRepository(pgPool),
     ocrFactory,
   )
+  const creditsRepo = new HandwritingCreditsPgRepository(pgPool)
+  const handwritingCredits = new HandwritingCreditsService(creditsRepo)
+  const llmQuota = new LlmQuotaService(new LlmUsagePgRepository(pgPool), creditsRepo, handwritingCredits)
   const interpretation = new DocumentInterpretationService(
     pgPool,
     service,
-    new HandwritingCreditsService(new HandwritingCreditsPgRepository(pgPool)),
+    handwritingCredits,
     new GcsFileStorage(),
     new CascadePrescriptionUnderstandingProvider(),
     new GeminiVaccineCardUnderstandingProvider(),
+    llmQuota,
   )
   const controller = new DocumentController(service, interpretation)
   app.post('/documents', controller.create.bind(controller))

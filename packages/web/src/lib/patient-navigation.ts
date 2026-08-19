@@ -64,6 +64,8 @@ export function resolvePatientNav(
     tab = tabParam
   } else if (tabParam === 'timeline') {
     tab = 'agenda'
+  } else if (tabParam === 'ava') {
+    tab = 'basic'
   } else {
     tab = 'basic'
   }

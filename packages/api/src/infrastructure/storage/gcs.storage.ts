@@ -4,18 +4,35 @@ import { resolve, isAbsolute } from 'path'
 import { existsSync } from 'fs'
 import type { FileStorage, UploadResult } from '../../domain/document/file-storage.js'
 
-function resolveKeyPath(): string | undefined {
-  const env = process.env.GOOGLE_APPLICATION_CREDENTIALS
-  if (!env) return undefined
+function resolveKeyFromPath(env: string): string | undefined {
   if (isAbsolute(env) && existsSync(env)) return env
   if (existsSync(env)) return resolve(env)
+  const fromApiCwd = resolve(process.cwd(), env)
+  if (existsSync(fromApiCwd)) return fromApiCwd
   const fromRoot = resolve(process.cwd(), '..', '..', env)
   if (existsSync(fromRoot)) return fromRoot
   return undefined
 }
 
+function resolveGcpKeyFile(): string | undefined {
+  const candidates = [
+    process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    process.env.GCP_SERVICE_ACCOUNT_KEY,
+  ].filter((v): v is string => Boolean(v?.trim()))
+  for (const raw of candidates) {
+    const resolved = resolveKeyFromPath(raw.trim())
+    if (resolved) return resolved
+  }
+  return undefined
+}
+
+/** GCS upload disponível (service account key no disco). */
+export function isGcsStorageConfigured(): boolean {
+  return resolveGcpKeyFile() !== undefined
+}
+
 const bucketName = process.env.GCS_BUCKET || 'openhealth-documents-503119'
-const keyFile = resolveKeyPath()
+const keyFile = resolveGcpKeyFile()
 
 const storage = new Storage({
   projectId: process.env.GCP_PROJECT_ID,

@@ -1,6 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright'
 import type { APIRequestContext } from 'playwright'
 import { MATER_DEI_PROXY } from './materdei-sync.scraper.js'
+import { preparePortalPage } from './portal-browser-ui.helper.js'
 
 const CHROME_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -383,6 +384,7 @@ export async function scrapeMaterDeiVueMotionSeries(
     })
     const context = await browser.newContext({ userAgent: CHROME_UA, viewport: { width: 1400, height: 900 } })
     const page = await context.newPage()
+    await preparePortalPage(page)
 
     const collectState = beginCollectFromPage(page)
     await page.goto(viewerUrl, { waitUntil: 'domcontentloaded', timeout: 90_000 })

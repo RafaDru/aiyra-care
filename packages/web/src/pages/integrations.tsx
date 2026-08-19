@@ -52,16 +52,16 @@ const integrations = [
 
 export function IntegrationsPage() {
   const navigate = useNavigate()
-  const { loading: authLoading, session, configured: authConfigured } = useAuth()
+  const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
   const [patients, setPatients] = useState<Patient[]>([])
   const [patientId, setPatientId] = useState<string>()
   const [publicHealthPortal, setPublicHealthPortal] = useState<'conectesus' | null>(null)
   const [insuranceOpen, setInsuranceOpen] = useState<{ portal: 'unimed' | 'amil' | 'bradesco_saude'; label: string } | null>(null)
 
   useEffect(() => {
-    if (authConfigured && (authLoading || !session)) return
+    if (authConfigured && (authLoading || !authUserId)) return
     api.patients.list().then(setPatients).catch(() => {})
-  }, [authConfigured, authLoading, session])
+  }, [authConfigured, authLoading, authUserId])
 
   const handleCardClick = (int: typeof integrations[number]) => {
     if (!int.available) return

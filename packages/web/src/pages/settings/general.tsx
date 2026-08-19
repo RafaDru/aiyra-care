@@ -1,17 +1,19 @@
-import { Card, Select, Space, Switch, Typography, Button } from 'antd'
-import { MoonOutlined, SunOutlined, ProjectOutlined } from '@ant-design/icons'
+import { Card, Select, Space, Switch, Typography, Button, Alert } from 'antd'
+import { MoonOutlined, SunOutlined, ProjectOutlined, LinkOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme/ThemeProvider.js'
 import { setLanguage } from '../../i18n/index.js'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
+import { ACCESSIBILITY_RESOURCES } from '../../lib/accessibility-preferences.js'
+import type { AccessibilityMode } from '../../lib/accessibility-preferences.js'
 
-const { Text, Title } = Typography
+const { Text, Title, Link } = Typography
 
 export function SettingsGeneralPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { darkMode, toggleDarkMode } = useTheme()
+  const { darkMode, toggleDarkMode, accessibilityMode, setAccessibilityMode } = useTheme()
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -33,6 +35,43 @@ export function SettingsGeneralPage() {
             </Space>
             <Switch checked={darkMode} onChange={toggleDarkMode} />
           </div>
+        </Space>
+      </Card>
+
+      <Card>
+        <Title level={5} style={{ marginTop: 0 }}>{t('settings.accessibility.title')}</Title>
+        <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
+          {t('settings.accessibility.hint')}
+        </Text>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+          <Text>{t('settings.accessibility.modeLabel')}</Text>
+          <Select<AccessibilityMode>
+            value={accessibilityMode}
+            onChange={setAccessibilityMode}
+            style={{ width: 220 }}
+            options={[
+              { value: 'default', label: t('settings.accessibility.mode.default') },
+              { value: 'highContrast', label: t('settings.accessibility.mode.highContrast') },
+              { value: 'deuteranopia', label: t('settings.accessibility.mode.deuteranopia') },
+            ]}
+          />
+        </div>
+        <Alert
+          type="info"
+          showIcon
+          message={t('settings.accessibility.auditTitle')}
+          description={t('settings.accessibility.auditBody')}
+          style={{ marginBottom: 12 }}
+        />
+        <Text strong style={{ display: 'block', marginBottom: 8 }}>
+          {t('settings.accessibility.resourcesTitle')}
+        </Text>
+        <Space direction="vertical" size={4}>
+          {ACCESSIBILITY_RESOURCES.map((r) => (
+            <Link key={r.id} href={r.url} target="_blank" rel="noopener noreferrer">
+              <LinkOutlined /> {r.label}
+            </Link>
+          ))}
         </Space>
       </Card>
 

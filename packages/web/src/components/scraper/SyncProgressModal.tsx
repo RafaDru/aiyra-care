@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal, Steps, Typography, Spin, Button, Space, Descriptions, List, Tag, Alert } from 'antd'
-import { LoadingOutlined, CheckCircleFilled, CloseCircleFilled, WarningFilled, UserAddOutlined } from '@ant-design/icons'
+import { Modal, Steps, Typography, Button, Space, Descriptions, List, Tag, Alert } from 'antd'
+import { CheckCircleFilled, CloseCircleFilled, LoadingOutlined, UserAddOutlined } from '@ant-design/icons'
+import { SyncDiagnosticsPanel, SyncDiagnosticMessage } from './SyncDiagnosticsPanel.js'
+import { SyncOverallIcon } from '../ui/StatusTag.js'
 import { api } from '../../lib/api.js'
 import {
   fetchGroupHasFailure,
@@ -117,25 +119,11 @@ function SyncSummary({
   return (
     <>
       {summary.showWarnings && warnings.length > 0 && (
-        <Alert
-          type="warning"
-          showIcon
-          style={{ marginTop: 12, textAlign: 'left' }}
-          message="Algumas etapas falharam"
-          action={
-            <Button
-              size="small"
-              type="link"
-              onClick={() => void navigator.clipboard.writeText(warnings.join('\n'))}
-            >
-              Copiar
-            </Button>
-          }
-          description={
-            <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
-              {warnings.map((w) => <li key={w}><Text style={{ fontSize: 12 }}>{w}</Text></li>)}
-            </ul>
-          }
+        <SyncDiagnosticsPanel
+          variant="warning"
+          title="Algumas etapas falharam"
+          items={warnings}
+          collapsedMaxHeight={96}
         />
       )}
 
@@ -400,11 +388,11 @@ export function SyncProgressModal({
       <Modal open={isOpen} footer={null} closable={canClose} onCancel={onDone} width={600} centered maskClosable={canClose}>
         <div style={{ textAlign: 'center', padding: '16px 0' }}>
           {status === 'running' && (
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 40 }} spin />} />
+            <SyncOverallIcon status="running" />
           )}
-          {status === 'success' && <CheckCircleFilled style={{ fontSize: 40, color: '#52c41a' }} />}
-          {status === 'partial' && <WarningFilled style={{ fontSize: 40, color: '#faad14' }} />}
-          {status === 'failed' && <CloseCircleFilled style={{ fontSize: 40, color: '#ff4d4f' }} />}
+          {status === 'success' && <SyncOverallIcon status="success" style={{ fontSize: 40 }} />}
+          {status === 'partial' && <SyncOverallIcon status="partial" style={{ fontSize: 40 }} />}
+          {status === 'failed' && <SyncOverallIcon status="failed" style={{ fontSize: 40 }} />}
 
           <Title level={4} style={{ marginTop: 16 }}>
             {status === 'running'
@@ -464,7 +452,9 @@ export function SyncProgressModal({
                               <LoadingOutlined spin style={{ fontSize: 12, color: '#1677ff' }} />
                             )}
                             <Text type={subStatus === 'failed' ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
-                              {sub.label}: {detail.message}
+                              {sub.label}: {detail.message.length > 120
+                                ? `${detail.message.slice(0, 117)}…`
+                                : detail.message}
                             </Text>
                           </Space>
                         </List.Item>
@@ -478,14 +468,21 @@ export function SyncProgressModal({
             />
           </div>
 
-          {message && !showInteractiveLoginHint && (
+          {message && !showInteractiveLoginHint && status === 'failed' && message.length > 140 ? (
+            <SyncDiagnosticMessage
+              variant="error"
+              title="Erro na sincronização"
+              message={message}
+              collapsedMaxHeight={96}
+            />
+          ) : message && !showInteractiveLoginHint ? (
             <Text
               type={status === 'failed' ? 'danger' : status === 'partial' ? 'warning' : 'secondary'}
               style={{ marginTop: 12, display: 'block' }}
             >
               {message}
             </Text>
-          )}
+          ) : null}
 
           {(status === 'success' || status === 'partial') && (
             <div style={{ marginTop: 20, textAlign: 'left', background: '#f5f5f5', borderRadius: 8, padding: 16 }}>

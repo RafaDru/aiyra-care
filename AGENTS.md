@@ -48,7 +48,7 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 | **Bradesco Saúde** | Não (só vínculo/import manual) | — | — |
 | **ConecteSUS** | Import manual gov.br | Login interativo FHIR | Vacinas, exames |
 | **Mater Dei** | Sim | Scraper + sessão JSON | Exames, atendimentos, laudos/imagens |
-| **Hermes Pardini** | Sim | Keycloak ROPC + browser fallback | Exames via API `paciente/api/v1/pedidos` + laudo PDF `POST /pedidos/{id}/download` |
+| **Hermes Pardini** | Sim (sessão PKCE) | Browser OAuth PKCE (+ refresh HTTP); ROPC não autoriza `/pedidos` | Exames via API `paciente/api/v1/pedidos` + laudo PDF `POST /pedidos/{id}/download` |
 
 ### Amil — variáveis de ambiente
 
@@ -101,8 +101,9 @@ JWT Amil: carteirinha/marca ótica em `objeto.login` (não `marcaOtica`). Login 
 - `hermes-pardini-sync.scraper.ts` — sessão Keycloak + fetch BFF
 - `integration-link-sync.service.ts` — execução centralizada de sync (manual + scheduled)
 
-### Neo4j — projeção (opcional)
+### Neo4j — associações (entidades no Postgres)
 
+- Entidades e atributos no **Postgres**; Neo4j guarda **associações** entre IDs PG (caminhos, pins Ava, dedup). Ver `docs/ARCHITECTURE_DATA_LAYERS.md`.
 - `NEO4J_SYNC_ENABLED=1` — projeta entidades, links, lineage (Doctor/Procedure) após sync/import
 - `neo4j-lineage-worker` — backfill de `import_raw_records`; scripts `npm run neo4j-lineage-worker:once|backfill`
 - Leitura: `GET /patients/:id/graph/clinical-paths`, `/timeline/graph`; UI Linha do tempo → **Encacheamento**
@@ -151,7 +152,18 @@ Antes de features tier 2+, usar skills em `.cursor/skills/aiyracare-*` — ver `
 
 ## Migrations
 
-SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs`. Medidas: **037** (`measurement_observations`) + **038** (`care_reminders`); Fase 3 WHO/import/notifications sem nova migration — ver `docs/MEASUREMENTS.md`.
+SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Ava conversas (planejado): **043+** — ver `docs/AVA_VISION.md`.
+
+## Documentação de produto (Ava, dados, ops)
+
+| Doc | Conteúdo |
+|-----|----------|
+| `docs/AVA_VISION.md` | Companheira global, sessões, pins, moonshot |
+| `docs/ARCHITECTURE_DATA_LAYERS.md` | Postgres entidades vs Neo4j associações |
+| `docs/DATA_HYGIENE.md` | Dedup estilo Google Photos |
+| `docs/CLASSIFICATION_ENGINE.md` | Motor modular de classificação de rótulos de operadora (port/engine/adapter; integração + jobs) |
+| `docs/OBSERVABILITY.md` | Monitoramento proativo, product_events |
+| `docs/roadmap.json` | Épicos `ava-*`, `observability-platform`, `data-hygiene-dedup` |
 
 ## Testes API
 

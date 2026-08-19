@@ -6,6 +6,7 @@ import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper
 import type { PlanAddOn, PlanWaitingPeriod } from '../../domain/insurance-plan/insurance-plan.entity.js'
 import type { PortalPlanSnapshot } from '../../application/insurance-plan/insurance-plan.service.js'
 import { fetchAmilUtilizacao, type AmilUsageItem } from './amil-utilizacao.helper.js'
+import { preparePortalPage, dismissPortalBlockingUi } from './portal-browser-ui.helper.js'
 
 const BASE = 'https://www.amil.com.br/beneficiario'
 const API = `${BASE}/api/Beneficiario`
@@ -1013,6 +1014,7 @@ export class AmilSyncScraper {
 
     const reusable = context.pages().find((p) => !p.url().startsWith('devtools://'))
     const page = reusable ?? await context.newPage()
+    await preparePortalPage(page)
     if (!page.url().includes('amil.com.br')) {
       await page.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
     }
@@ -1120,8 +1122,10 @@ export class AmilSyncScraper {
     emit?: (step: string, message: string, status: ScraperProgress['status']) => void,
   ): Promise<string> {
     const page = context.pages()[0] ?? await context.newPage()
+    await preparePortalPage(page)
 
     await warmAmilLoginPage(page)
+    await dismissPortalBlockingUi(page)
 
     const existingToken = await this.readUserToken(page, context)
     if (existingToken && isAmilSessionValid(existingToken)) {

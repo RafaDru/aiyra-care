@@ -11,13 +11,13 @@ import { COMPLIANCE_ACCEPT_PATH } from '../../lib/legal-paths.js'
  * Independente de COMPLIANCE_GATE_ENABLED na API (UI sempre verifica).
  */
 export function RequireCompliance() {
-  const { configured, loading: authLoading, session } = useAuth()
+  const { configured, loading: authLoading, session, authUserId } = useAuth()
   const location = useLocation()
   const [checking, setChecking] = useState(true)
   const [compliant, setCompliant] = useState(true)
 
   useEffect(() => {
-    if (!configured || !session) {
+    if (!configured || !authUserId) {
       setChecking(false)
       setCompliant(true)
       return
@@ -27,7 +27,7 @@ export function RequireCompliance() {
       .then((s) => setCompliant(s.compliant))
       .catch(() => setCompliant(true))
       .finally(() => setChecking(false))
-  }, [configured, session, location.pathname])
+  }, [configured, authUserId, location.pathname])
 
   if (!configured) return <Outlet />
 

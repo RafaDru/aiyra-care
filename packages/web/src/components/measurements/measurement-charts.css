@@ -1,0 +1,190 @@
+.measurement-chart-card {
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+  border-radius: 14px;
+  background: var(--surface-elevated, #fff);
+  padding: 16px 18px 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.measurement-chart-card:hover {
+  border-color: var(--border-strong, rgba(22, 119, 255, 0.25));
+  box-shadow: 0 4px 14px rgba(22, 119, 255, 0.08);
+}
+
+.measurement-chart-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.measurement-chart-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary, rgba(0, 0, 0, 0.88));
+}
+
+.measurement-chart-card__last {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+.measurement-chart-card__meta {
+  font-size: 12px;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.45));
+  margin-top: 4px;
+}
+
+.measurement-chart-card__actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.measurement-chart-trend--up { color: #cf1322; }
+.measurement-chart-trend--down { color: #389e0d; }
+.measurement-chart-trend--flat { color: rgba(0, 0, 0, 0.45); }
+
+.measurement-evolution-section {
+  margin-bottom: 28px;
+}
+
+.measurement-evolution-section__title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.45));
+  margin-bottom: 12px;
+}
+
+.measurement-compare-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.measurement-compare-chip.ant-tag {
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 4px 12px;
+  user-select: none;
+}
+
+.measurement-fullscreen-host {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  background: var(--fullscreen-bg, #f5f7fa);
+  color: var(--text-primary, rgba(0, 0, 0, 0.88));
+}
+
+.measurement-fullscreen-host:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+
+.measurement-fullscreen-host__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+  background: var(--surface-elevated, #fff);
+  flex-shrink: 0;
+}
+
+.measurement-fullscreen-host__title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.measurement-fullscreen-host__subtitle {
+  font-size: 13px;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.45));
+  margin-top: 2px;
+}
+
+.measurement-fullscreen-host__body {
+  flex: 1;
+  min-height: 0;
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.measurement-fullscreen-host__chart {
+  flex: 1;
+  min-height: 280px;
+  width: 100%;
+  position: relative;
+}
+
+.measurement-fullscreen-host__chart .recharts-responsive-container {
+  min-height: 240px;
+}
+
+.measurement-chart-tooltip {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-width: 280px;
+}
+
+.measurement-chart-tooltip__when {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.measurement-chart-tooltip__value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.measurement-chart-tooltip__source {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.55);
+  margin-top: 6px;
+}
+
+.measurement-chart-tooltip__link {
+  font-size: 11px;
+  margin-top: 4px;
+  color: #1677ff;
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  .measurement-fullscreen-host {
+    --fullscreen-bg: #141414;
+    --surface-elevated: #1f1f1f;
+    --text-primary: rgba(255, 255, 255, 0.88);
+    --text-secondary: rgba(255, 255, 255, 0.45);
+    --border-subtle: rgba(255, 255, 255, 0.1);
+  }
+
+  .measurement-chart-card {
+    background: #1f1f1f;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .measurement-chart-tooltip {
+    background: #1f1f1f;
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.88);
+  }
+}

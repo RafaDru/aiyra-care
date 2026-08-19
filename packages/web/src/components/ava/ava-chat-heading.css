@@ -1,0 +1,22 @@
+.ava-chat-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.ava-chat-heading__name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ff3da8 0%, #9333ea 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ava-chat-heading__subtitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.45));
+}
