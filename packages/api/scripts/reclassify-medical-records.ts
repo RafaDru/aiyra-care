@@ -1,16 +1,18 @@
 /**
- * Job: re-mapeamento de atendimentos Amil que foram armazenados como
- * `medical_records` (consulta) mas que pela classificação seriam `exams`.
+ * Job geral: re-mapeamento de atendimentos de QUALQUER operadora que foram
+ * armazenados como `medical_records` (consulta) mas que pela classificação
+ * seriam `exams`. Generaliza `reclassify-amil-medical-records.ts`.
  *
- * Reutiliza o mesmo motor da integração (AmilLabelClassifier + FuzzyExamCatalogLookup),
- * garantindo consistência entre tempo-de-integração e jobs de otimização. Com `--llm`,
- * os rótulos ambíguos passam pelo fallback LLM (custo INTERNO nosso, metrito e teto R$100/mês).
+ * Reutiliza o mesmo motor da integração (LlmBackedLabelClassifier) — regras/fuzzy
+ * local; com `--llm`, os rótulos ambíguos passam pelo fallback LLM (custo INTERNO,
+ * metrito e teto R$100/mês).
  *
  * Usage:
- *   npx tsx packages/api/scripts/reclassify-amil-medical-records.ts             # dry-run (regras/fuzzy)
- *   npx tsx packages/api/scripts/reclassify-amil-medical-records.ts --apply     # cria os exams (regras/fuzzy)
- *   npx tsx packages/api/scripts/reclassify-amil-medical-records.ts --llm       # dry-run + fallback LLM
- *   npx tsx packages/api/scripts/reclassify-amil-medical-records.ts --apply --llm
+ *   npx tsx packages/api/scripts/reclassify-medical-records.ts                    # dry-run (regras/fuzzy)
+ *   npx tsx packages/api/scripts/reclassify-medical-records.ts --apply            # cria os exams
+ *   npx tsx packages/api/scripts/reclassify-medical-records.ts --llm              # dry-run + fallback LLM
+ *   npx tsx packages/api/scripts/reclassify-medical-records.ts --apply --llm
+ *   npx tsx packages/api/scripts/reclassify-medical-records.ts --source=unimed    # limita a uma fonte
  */
 import { config } from 'dotenv'
 import { resolve, dirname } from 'path'
@@ -26,6 +28,9 @@ config({ path: resolve(root, '.env') })
 
 const apply = process.argv.includes('--apply')
 const useLlm = process.argv.includes('--llm')
+const sourceArg = process.argv.find((a) => a.startsWith('--source='))
+const source = sourceArg ? sourceArg.slice('--source='.length) : null
+
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
 })
@@ -47,12 +52,17 @@ type Row = {
   source: string
 }
 
+const where = source
+  ? `WHERE source = $1 AND description IS NOT NULL AND btrim(description) <> ''`
+  : `WHERE description IS NOT NULL AND btrim(description) <> ''`
+const params: string[] = source ? [source] : []
+
 const { rows } = await pool.query<Row>(
   `SELECT id, patient_id, record_date, description, source
      FROM medical_records
-    WHERE source = 'amil'
-      AND description IS NOT NULL
- ORDER BY patient_id, record_date`,
+     ${where}
+    ORDER BY patient_id, record_date`,
+  params,
 )
 
 const chunk = <T>(arr: T[], n: number): T[][] => {
@@ -61,25 +71,29 @@ const chunk = <T>(arr: T[], n: number): T[][] => {
   return out
 }
 
-const moveByRecord = new Map<string, { id: string; patient_id: string; description: string; date: string | null }>()
+const moveByRecord = new Map<string, { id: string; patient_id: string; description: string; date: string | null; source: string }>()
 let wouldMove = 0
+const byDest = new Map<string, number>()
 
 for (const batch of chunk(rows, 40)) {
   const labels = batch.map((r) => r.description!)
   const results = await classifier.classifyBatch(labels)
   batch.forEach((r, i) => {
     const c = results[i]
-    if (!c || c.destination !== 'exam') return
-    wouldMove++
-    moveByRecord.set(r.id, { id: r.id, patient_id: r.patient_id, description: r.description!, date: r.record_date })
+    if (!c) return
+    byDest.set(c.destination, (byDest.get(c.destination) ?? 0) + 1)
     console.log(
-      `  -> [exam] '${r.description}' (${r.record_date ?? '-'}) method=${c.method} conf=${c.confidence.toFixed(2)} ${c.catalogId ? 'cat=' + c.catalogId : ''} ${c.canonicalName ? 'as=' + c.canonicalName : ''}`,
+      `  [${r.source}] '${r.description}' (${r.record_date ? String(r.record_date).slice(0, 10) : '-'}) -> ${c.destination} (${c.method}, conf=${c.confidence.toFixed(2)})${c.canonicalName ? ' as=' + c.canonicalName : ''}`,
     )
+    if (c.destination === 'exam') {
+      wouldMove++
+      moveByRecord.set(r.id, { id: r.id, patient_id: r.patient_id, description: r.description!, date: r.record_date, source: r.source })
+    }
   })
 }
 
 const budget = await budgetService.getBudget()
-console.log(`\nTotal medical_records Amil: ${rows.length}; candidatos a exame: ${wouldMove}`)
+console.log(`\nTotal medical_records: ${rows.length} (fonte: ${source ?? 'todas'}) | classificados: ${rows.length ? [...byDest.entries()].map(([k, v]) => `${k}=${v}`).join(', ') : '-'} | candidatos a exame: ${wouldMove}`)
 console.log(
   `LLM interno: ${useLlm ? 'ligado' : 'desligado (use --llm)'} | custo do mês R$ ${(budget.spentBrlCents / 100).toFixed(2)} / R$ ${(budget.monthlyBudgetBrlCents / 100).toFixed(2)}${budget.exhausted ? ' (TETO ESGOTADO)' : ''}`,
 )
@@ -92,8 +106,8 @@ if (apply) {
   let created = 0
   let skippedExisting = 0
   for (const [patientId, moves] of byPatient) {
-    const examRes = await pool.query<{ id: string; exam_type: string; exam_date: string }>(
-      `SELECT id, exam_type, exam_date FROM exams WHERE patient_id = $1`,
+    const examRes = await pool.query<{ exam_type: string; exam_date: string }>(
+      `SELECT exam_type, exam_date FROM exams WHERE patient_id = $1`,
       [patientId],
     )
     const existingKeys = new Set(examRes.rows.map((e) => `${e.exam_type}|${e.exam_date}`))
@@ -109,9 +123,9 @@ if (apply) {
       }
       const ins = await pool.query(
         `INSERT INTO exams (patient_id, exam_type, exam_date, source, created_at)
-         VALUES ($1, $2, $3, 'amil', now())
+         VALUES ($1, $2, $3, $4, now())
          ON CONFLICT DO NOTHING RETURNING id`,
-        [patientId, m.description, examDateKey],
+        [patientId, m.description, examDateKey, m.source || 'unimed'],
       )
       if (ins.rows.length) {
         created++

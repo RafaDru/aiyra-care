@@ -1,5 +1,78 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-19] - Amil: Descoberta e captura da API de Atendimentos Realizados (BuscarDemonstrativoUtilizacao)
+
+### Contexto
+Identificada a lacuna na integração Amil: o sync capturava guias (`PostTokens`) com tipo genérico (`CONSULTA SP/SADT`, `EXAMES`), mas não capturava a lista de atendimentos reais da tela `#/atendimentos-realizados` com a descrição do procedimento específico (ex.: `10101039 - Consulta Em Pronto Socorro`, `40324192 - Antígeno Ns1 Do Vírus Da Dengue`, `40201210 - Vídeo-Endoscopia Naso-Sinusal`).
+
+### Descoberta e Realizado
+- **Mapeamento do Endpoint Real**: A API da tela de Atendimentos Realizados utiliza o endpoint:
+  `GET /beneficiario/api/Beneficiario/Beneficiario/BuscarDemonstrativoUtilizacao/{marcaOtica}/{startDate}/{endDate}`
+- **Atualização do Helper `fetchAmilUtilizacao`**: Reescrito em `amil-utilizacao.helper.ts` para consultar semestres (de até 2 anos atrás) para cada beneficiário, extraindo todos os `atendimentos` (`procedimento`, `prestador`, `dataRealizacao`, `quantidade`).
+- **Normalização e Roteamento**:
+  - Adicionada limpeza de prefixos numéricos TUSS (`\d{5,10} - `) em `normalizeHealthLabel`.
+  - Expandidas palavras-chave de exame em `EXAM_KEYWORDS` (`DENGUE`, `PESQUISA`, `ENDOSCOPIA`, `NASOSINUSAL`).
+  - Roteamento inteligente via `LlmBackedLabelClassifier`: exames vão para `exams` (ou `medical_records` tipo `exame`), consultas e pronto-socorro para `medical_records`.
+- **Validação com Dados Reais**:
+  - Testado e confirmado a extração e ingestão com sucesso de **27+ atendimentos reais** para Rafael, Luis, Bruno e Jenifer no banco de dados.
+- **Testes**: `npm run test:critical` executado com 100% de aprovação (16/16 suítes, 75/75 testes).
+
+---
+
+## [2026-08-19] - Backlog: catálogo de medicações (base dinâmica)
+
+### Contexto
+Usuário adicionou ao backlog a evolução da medicação em **catálogo único e dinâmico**: ao cadastrar uma medicação, buscar pelo nome/composto e auto-sugerir o nome genérico ou comercial (de preferência de forma **semântica**); cada nova medicação identificada alimenta uma base que facilita cadastros futuros de outros usuários. Value: (1) catalogar medicações, (2) bulas, (3) imagens oficiais de embalagem/medicação para identificação, (4) analítica/cruzamentos futuros.
+
+### Decisão de arquitetura
+- **Candidato ≠ automático**: novo input do cliente que não casa com o catálogo vira **CANDIDATO** a nova medicação (fila curada), não entra direto no catálogo.
+- **Base dinâmica**: catálogo único reutilizável em cadastros futuros (multi-usuário); com higienização/dedup semântico ao longo do tempo (estilo Google Photos).
+- **Aproveita modelo atual**: `Medication` já tem `genericName`/`brandName` (domain/medication) e vínculos com health-thread, reminders e administração de medidas.
+
+### Realizado (backlog)
+- Épico `medication-catalog` (P4, categoria `tecnico`) com 7 itens em `docs/roadmap.json`: auto-sugestão semântica, fluxo de candidato, catálogo único dinâmico, higienização do catálogo, bula, imagens oficiais e analítica/cruzamentos.
+
+### Docs
+- `docs/roadmap.json` — épico `medication-catalog` (+ 7 itens).
+
+---
+
+## [2026-08-19] - Fallback LLM de classificação + metering de custo interno
+
+### Contexto
+Usuário aprovou a integração real do fallback LLM (`llmFallback`) no classificador de rótulos de operadora (antes só documentado). Exigiu **monitoramento de uso** e **separação** do custo de LLM em duas categorias: (a) **desejo do usuário final** (Ava, leitura manuscrita) — ligado aos pacotes/entitlements do cliente; (b) **operacional nosso** (classificação de rótulos e jobs de otimização) — custo interno, com cascata Zen free → Go DeepSeek → Gemini e **teto de R$ 100/mês**.
+
+### Decisão de arquitetura
+| Decisão | Motivo |
+|---------|--------|
+| `cost_bucket` em `llm_usage_events` (`client` vs `internal`) | Separa uso do cliente do operacional sem nova tabela de eventos |
+| `llm_internal_budget` (migration 043) em centavos de R$ | Orçamento mensal interno com teto default R$100 |
+| `LlmBackedLabelClassifier` (application) | Envolve o engine local e aciona `LlmRouter` só p/ rótulos ambíguos (conf < 0.6) |
+| `LlmInternalCostService` | Checa teto antes da chamada; registra evento + saldo; audit `local_fallback`/`budget_exhausted` |
+| Custo estimado por tokens × preço por 1M do modelo | Determinístico, sem depender de fatura; preços configuráveis via env |
+| Ativado na integração (sync Amil) **e** no job | `amilResultToCanonicalBatchAsync` (classifyBatch) + `--llm` no reclassify |
+
+### Realizado
+- Migration **043** `internal_llm_budget.sql`: `cost_bucket` em eventos + `llm_internal_budget`
+- `domain/llm/` — `llm-internal-cost-policy.ts` (preços/teto/câmbio), `llm-internal-prompt.ts` (prompt + parse JSON)
+- `infrastructure/persistence/` — `llm-internal-budget.pg.repository.ts`; `llm-usage.pg.repository.ts` (`cost_bucket` + stats)
+- `application/llm/` — `llm-internal-cost.service.ts`, `llm-internal-cost.factory.ts`
+- `application/classification/llm-backed-label-classifier.ts` — fallback LLM com budget + audit
+- `amil-canonical.mapper.ts` — `amilResultToCanonicalBatchAsync` (lote); `portal-sync.orchestrator.ts` usa `buildClassificationClassifier`
+- Job `reclassify-amil-medical-records.ts` — suporte `--llm`/`--apply --llm` + relatório de custo
+- Scripts `report-internal-llm-usage.ts` (+`--top`) e `llm-internal-classify-smoke.ts`
+- API `GET /llm/usage/internal` (observabilidade, ops key) em `ava.routes.ts`
+- Env: `LLM_INTERNAL_CLASSIFY_LLM`, `LLM_INTERNAL_ALLOW_ZEN_FREE`, `LLM_INTERNAL_MONTHLY_BUDGET_CENTS` (R$100), `LLM_INTERNAL_USD_BRL`, `LLM_INTERNAL_OBSERVABILITY_KEY`, `LLM_INTERNAL_PRICE_OVERRIDE_JSON`
+- Testes: `llm-internal-prompt`, `llm-internal-cost.service`, `llm-backed-classifier`, `amil-label-classifier` (+async); adicionados ao `test:critical`
+
+### Docs
+- `docs/LLM_USAGE.md` — seção "Custo CLIENTE vs INTERNO" (env + fluxo + observabilidade)
+- `docs/OBSERVABILITY.md` — indicadores do LLM interno
+- `docs/CLASSIFICATION_ENGINE.md` — fallback LLM integrado
+- `AGENTS.md` — migration 043; `docs/project-context.json` — entidade `LlmInternalBudget`, rota, decisão
+
+---
+
 ## [2026-08-19] - Classificador de rótulos Amil + roteamento consulta/exame
 
 ### Contexto

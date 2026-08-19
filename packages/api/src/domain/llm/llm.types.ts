@@ -1,6 +1,9 @@
-export type LlmFeature = 'ava_chat' | 'handwriting' | 'ava_consult_prep'
+export type LlmFeature = 'ava_chat' | 'handwriting' | 'ava_consult_prep' | 'label_classification'
 
 export type LlmTier = 'free' | 'premium'
+
+/** Categoria de custo: uso do CLIENTE (pacotes) vs operacional INTERNO nosso. */
+export type LlmCostBucket = 'client' | 'internal'
 
 export type LlmUsageSource = 'api' | 'estimated'
 
@@ -74,5 +77,14 @@ export interface LlmUsageEventInput {
   tokensTotal: number
   usageSource: LlmUsageSource
   estimatedCostCents?: number
+  /** Custos: 'client' (pacotes/entitlements) ou 'internal' (operacional nosso). */
+  costBucket?: LlmCostBucket
   metadata?: Record<string, unknown>
+}
+
+/** Orçamento mensal interno em centavos (default R$100/mês). */
+export interface LlmInternalBudgetAccount {
+  scopeId: string
+  monthlyCostCents: number
+  monthlyPeriod: string
 }

@@ -1,13 +1,14 @@
 # LLM usage metering (Ava MVP)
 
-> Migration **040** · `docs/AGENTS_APOIO.md`
+> Migration **040** · `docs/AGENTS_APOIO.md` · custo interno: **043** (`docs/LLM_USAGE.md`)
 
 ## Modelo
 
 | Tabela | Uso |
 |--------|-----|
-| `llm_usage_accounts` | Cache `monthly_tokens_used` por `scope_id` (= `accountId`) |
-| `llm_usage_events` | Auditoria por chamada (tokens, provider, feature) |
+| `llm_usage_accounts` | Cache `monthly_tokens_used` por `scope_id` (= `accountId`) **cliente** |
+| `llm_usage_events` | Auditoria por chamada (tokens, provider, feature, `cost_bucket`) |
+| `llm_internal_budget` | Orçamento mensal interno em **centavos de R$** (`scope_id` global `internal-operations`) |
 
 Pool compartilhado com créditos manuscrito (`handwriting_credit_accounts`):
 
@@ -17,6 +18,52 @@ tokens_remaining = token_budget − monthly_tokens_used (Ava)
 ```
 
 Manuscrito consome **crédito** (1×); evento LLM só audita. Ava debita **tokens** reais da API.
+
+## Custo CLIENTE vs INTERNO (migration 043)
+
+Todo evento LLM agora é rotulado com `cost_bucket`:
+
+| Bucket | Significado | A quem pertence | Desconta de? |
+|--------|-------------|-----------------|--------------|
+| `client` | Ava, handwritting (leitura manuscrito), consulta pré | desejo do usuário final | créditos/tokens **dos pacotes** do cliente |
+| `internal` | classificação de rótulos de operadora (`feature=label_classification`) | otimização **nossa** | orçamento interno (`llm_internal_budget`) |
+
+O uso interno **não** desconta créditos/pacotes do cliente. Ele é debitado de um orçamento mensal próprio, em **centavos de R$**, com teto default **R$ 100/mês**.
+
+### Fluxo (fallback LLM de classificação)
+
+1. Regras/fuzzy local (`AmilLabelClassifier`) — determinístico, sem custo.
+2. Se confiança < `0.6`, consulta `LlmRouter` (cascata) **se** o orçamento interno permitir.
+3. `LlmInternalCostService.recordCall` registra evento `cost_bucket=internal` + soma custo estimado.
+4. Se o teto estourar: **não** chama LLM, cai no determinístico e grava evento de auditoria `outcome='budget_exhausted'`.
+
+Custo estimado por chamada = tokens × preço por 1M do modelo usado (centavos), convertido USD→BRL ([`llm-internal-cost-policy.ts`](../packages/api/src/domain/llm/llm-internal-cost-policy.ts)).
+
+### Env (interno)
+
+| Variável | Default | Efeito |
+|----------|---------|--------|
+| `LLM_INTERNAL_CLASSIFY_LLM` | on se Go/Gemini configurados | Liga o fallback LLM na classificação (logs/os proibem) |
+| `LLM_INTERNAL_ALLOW_ZEN_FREE` | `1` | Permite Zen free (reterm dados p/ treinar — **LGPD: off em prod** se reter) |
+| `LLM_INTERNAL_MONTHLY_BUDGET_CENTS` | `10000` | Teto mensal interno em centavos de R$ (R$100) |
+| `LLM_INTERNAL_USD_BRL` | `5.2` | Câmbio estimado para converter custo |
+| `LLM_INTERNAL_OBSERVABILITY_KEY` | — | Chave p/ `GET /llm/usage/internal` (vazia = abre p/ auth) |
+| `LLM_INTERNAL_PRICE_OVERRIDE_JSON` | — | Override de preço por `provider:model` |
+
+### Observabilidade
+
+```http
+GET /llm/usage/internal        # budget + indicadores (calls, llmResolved, localFallback, budgetExhausted, custo)
+```
+
+```bash
+npm run llm:internal-usage      # relatório de orçamento + indicadores
+npm run llm:internal-usage:top  # + quebra por provedor/modelo
+node packages/api/scripts/reclassify-amil-medical-records.ts --llm   # job com LLM (dry-run)
+node packages/api/scripts/reclassify-amil-medical-records.ts --apply --llm
+```
+
+Preços default calibrados (2026-08): DeepSeek V4 Flash `$0.14/$0.28`/1M; Gemini 2.5 Flash `$0.30/$2.50`; Zen free `$0`. Com teto R$100/mês e rótulos curtos, cabem milhares de chamadas no pior caso.
 
 ## API MVP
 

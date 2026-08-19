@@ -9,7 +9,7 @@ Auditoria de consumo de dados em integrações. Objetivo: **buscar no terceiro s
 | Portal | Fetch no portal | Import no DB | Arquivos/PDF | Gap principal |
 |--------|-----------------|--------------|--------------|---------------|
 | **Unimed BH** | **Incremental em silent:** 2 meses extrato; auth detalhe só desde `lastSync−14d`. Manual: 6 meses + detalhe full | Dedup por chave; auth atualiza se mudou | N/A | Lista de autorizações ainda vem completa do portal (detalhe é o que cortamos) |
-| **Amil** | **Incremental em silent:** `PostTokens` desde `lastSync−14d` (ou 2 meses); **plano/carências omitidos** (só guias). Manual: 12 meses + plano full | Dedup + update autorizações; matcher dependentes; `skipped*` no novelty | N/A | — |
+| **Amil** | **Incremental em silent:** `PostTokens` (guias) desde `lastSync−14d` + `BuscarDemonstrativoUtilizacao` (atendimentos) por semestres; **plano/carências omitidos** em silent. Manual: 12 meses guias + 2 anos utilização + plano full | Dedup + update autorizações; roteamento `usageItems` → `medical_records`/`exams` via `AmilLabelClassifier`; matcher dependentes | N/A | — |
 | **Mater Dei** | Atendimentos/cirurgias: APIs “últimos”; **exames**: search paginado desde `examStartDate` | Dedup atendimento/exame; laudos skip se `documentId` ou séries já salvas | Skip PDF/imagem se já persistido | Atendimentos sem cursor por data |
 | **Hermes Pardini** | **Incremental:** `GET /pedidos` desde `max(exam_date)−14d` ou `lastSync−14d`; expande `GET /pedidos/{id}/exames` | Dedup `hermes_pardini:{pedido}:{exame}` em `notes` + `pedidoId` em meta JSON | Laudo PDF via `POST /pedidos/{id}/download` → GCS + `resultFileUrl` | — |
 | **ConecteSUS** | Import manual gov.br | Dedup no import | — | Sem sync automático |

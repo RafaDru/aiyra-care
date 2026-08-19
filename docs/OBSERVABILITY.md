@@ -104,6 +104,23 @@ Implementação incremental:
 2. GCP Cloud Monitoring ou simples `GET /ops/metrics` (admin key).
 3. Depois: Grafana / Better Stack.
 
+## LLM interno (custo operacional) — indicadores
+
+Metering separado do cliente em `llm_usage_events` (`cost_bucket=internal`) + `llm_internal_budget`.
+
+| Indicador | Query/fonte | O que alerta |
+|-----------|-------------|--------------|
+| Orçamento interno R$/mês | `GET /llm/usage/internal` · `llm_internal_budget` | teto esgotado → classificação cai p/ regras (sem LLM) |
+| Chamadas de classificação | `feature=label_classification AND cost_bucket=internal` | volume das operações |
+| Resolvidos via LLM vs fallback local | `metadata.outcome='local_fallback'` | eficiência do novo motor |
+| Bloqueados pelo teto | `metadata.outcome='budget_exhausted'` | pico de custo / teto baixo |
+| Custo por provedor/modelo | `SUM(estimated_cost_cents)` agrupado | roteamento (Zen free → Go → Gemini) |
+
+```bash
+npm run llm:internal-usage      # relatório mensal
+npm run llm:internal-usage:top  # + por provedor/modelo
+```
+
 ## Autonomia e recuperação
 
 | Componente | Recuperação |

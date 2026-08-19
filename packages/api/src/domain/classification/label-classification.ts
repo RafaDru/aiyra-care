@@ -50,7 +50,8 @@ export interface LabelClassifierEngine {
 
 /** Função auxiliar de normalização exposta pelo domínio (reutilizável). */
 export function normalizeHealthLabel(raw: string): string {
-  return (raw ?? '')
+  const clean = (raw ?? '').replace(/^\d{5,10}\s*[-–—:]\s*/, '').trim()
+  return clean
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
     .toLowerCase()

@@ -20,6 +20,8 @@ import { AuthorizationPgRepository } from '../../persistence/authorization.pg.re
 import { HealthThreadPgRepository } from '../../persistence/health-thread.pg.repository.js'
 import { CareReminderPgRepository } from '../../persistence/care-reminder.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
+import { LlmInternalBudgetPgRepository } from '../../persistence/llm-internal-budget.pg.repository.js'
+import { LlmInternalCostService } from '../../../application/llm/llm-internal-cost.service.js'
 import { AvaController } from './ava.controller.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
@@ -61,5 +63,19 @@ export async function avaRoutes(app: FastifyInstance) {
     const scopeId = resolveHandwritingScopeId(req)
     const quota = await llmQuota.getQuota(scopeId)
     return reply.send(quota)
+  })
+
+  // Observabilidade operacional INTERNA (custo nosso, não do cliente). Protegida por chave de ops.
+  app.get('/llm/usage/internal', async (req: AuthenticatedRequest, reply: FastifyReply) => {
+    const opsKey = process.env.LLM_INTERNAL_OBSERVABILITY_KEY?.trim()
+    if (opsKey && req.headers['x-internal-ops-key'] !== opsKey) {
+      return reply.code(403).send({ error: 'ops key required' })
+    }
+    const costService = new LlmInternalCostService(
+      new LlmUsagePgRepository(pgPool),
+      new LlmInternalBudgetPgRepository(pgPool),
+    )
+    const indicators = await costService.getIndicators()
+    return reply.send(indicators)
   })
 }

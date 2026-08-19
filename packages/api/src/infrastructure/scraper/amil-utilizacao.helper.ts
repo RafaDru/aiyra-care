@@ -6,50 +6,18 @@ export interface AmilUsageItem {
   doctorName: string
   providerName: string
   invoiceNumber: string
-  kind: 'consulta' | 'exame' | 'outro'
 }
 
 type Json = Record<string, unknown>
 
-const UTILIZATION_PATHS = [
-  (marca: string) => `/Beneficiario/${marca}/Utilizacao`,
-  (marca: string) => `/Beneficiario/${marca}/ExtratoUtilizacao`,
-  (marca: string) => `/Utilizacao/${marca}`,
-  (marca: string) => `/ExtratoUtilizacao/${marca}`,
-]
-
 function asRecord(v: unknown): Json | null {
-  return v && typeof v === 'object' && !Array.isArray(v) ? v as Json : null
+  return v && typeof v === 'object' && !Array.isArray(v) ? (v as Json) : null
 }
 
 function asArray(v: unknown): unknown[] {
-  return Array.isArray(v) ? v : []
+  return Array.isArray(v) ? (v as unknown[]) : []
 }
 
-function pickList(raw: unknown): Json[] {
-  const rec = asRecord(raw)
-  if (!rec) return []
-  const direct = asArray(rec.lista ?? rec.Lista ?? rec.items ?? rec.data)
-  if (direct.length) return direct.map((x) => asRecord(x) ?? {})
-  const objeto = asRecord(rec.objeto)
-  if (objeto) {
-    const nested = asArray(objeto.lista ?? objeto.Lista ?? objeto.items)
-    if (nested.length) return nested.map((x) => asRecord(x) ?? {})
-  }
-  for (const val of Object.values(rec)) {
-    if (Array.isArray(val) && val.length) {
-      return val.map((x) => asRecord(x) ?? {})
-    }
-  }
-  return []
-}
-
-function classify(description: string): AmilUsageItem['kind'] {
-  const d = description.toUpperCase()
-  if (d.includes('CONSULTA')) return 'consulta'
-  if (d.includes('EXAME') || d.includes('LABORATOR') || d.includes('RAIO')) return 'exame'
-  return 'outro'
-}
 
 function formatDate(raw: unknown): string {
   const s = String(raw ?? '').trim()
@@ -63,52 +31,77 @@ function formatDate(raw: unknown): string {
   return `${dd}/${mm}/${yyyy}`
 }
 
-function mapRow(row: Json): AmilUsageItem | null {
-  const description = String(
-    row.descricao ?? row.Descricao ?? row.procedimento ?? row.Procedimento ?? row.evento ?? '',
-  ).trim()
-  const doctorName = String(
-    row.nomeMedico ?? row.NomeMedico ?? row.prestador ?? row.Prestador ?? row.nomePrestador ?? '',
-  ).trim()
-  const providerName = String(
-    row.nomePrestador ?? row.NomePrestador ?? row.prestador ?? row.Prestador ?? doctorName,
-  ).trim()
-  const date = formatDate(
-    row.dataAtendimento ?? row.DataAtendimento ?? row.data ?? row.Data ?? row.dataRealizacao,
-  )
-  if (!date && !description) return null
-  return {
-    procedureDate: date,
-    procedureDescription: description || 'Utilização',
-    doctorName,
-    providerName,
-    invoiceNumber: String(row.notaFiscal ?? row.NotaFiscal ?? row.numeroGuia ?? row.NumeroGuia ?? '').trim(),
-    kind: classify(description),
-  }
-}
-
 export async function fetchAmilUtilizacao(
   request: APIRequestContext,
   token: string,
   marcaOtica: string,
   apiBase: string,
+  opts?: { periodStart?: Date; periodEnd?: Date },
 ): Promise<AmilUsageItem[]> {
   const headers = {
     Authorization: `Bearer ${token}`,
     Accept: 'application/json',
     'Content-Type': 'application/json',
+    Origin: 'https://www.amil.com.br',
+    Referer: 'https://www.amil.com.br/beneficiario/',
   }
 
-  for (const buildPath of UTILIZATION_PATHS) {
-    const path = buildPath(marcaOtica)
-    const url = `${apiBase}${path}`
-    const res = await request.get(url, { headers, timeout: 20000 }).catch(() => null)
-    if (!res || !res.ok()) continue
-    const raw = await res.json().catch(() => null)
-    const rows = pickList(raw)
-    const mapped = rows.map(mapRow).filter((x): x is AmilUsageItem => x !== null)
-    if (mapped.length) return mapped
+  const now = new Date()
+  const start = opts?.periodStart ?? new Date(now.getFullYear() - 1, 0, 1) // default 1.5 anos atrás
+  const end = opts?.periodEnd ?? now
+
+  const windows: Array<{ startStr: string; endStr: string }> = []
+  let currYear = start.getFullYear()
+  const endYear = end.getFullYear()
+
+  while (currYear <= endYear) {
+    windows.push({ startStr: `${currYear}-01-01`, endStr: `${currYear}-06-30` })
+    windows.push({ startStr: `${currYear}-07-01`, endStr: `${currYear}-12-31` })
+    currYear++
   }
 
-  return []
+  const items: AmilUsageItem[] = []
+  const seenKeys = new Set<string>()
+
+  for (const w of windows) {
+    const baseClean = apiBase.replace(/\/+$/, '')
+    const url = `${baseClean}/Beneficiario/BuscarDemonstrativoUtilizacao/${marcaOtica}/${w.startStr}/${w.endStr}`
+    try {
+      const res = await request.get(url, { headers, timeout: 5000 })
+      if (!res.ok()) continue
+      const data = (await res.json().catch(() => null)) as Json | null
+      const obj = asRecord(data?.dadosDemonstrativoUtilizacao)
+      const servicos = asArray(obj?.servicos)
+
+      for (const s of servicos) {
+        const sRec = asRecord(s)
+        const atendimentos = asArray(sRec?.atendimentos)
+        for (const a of atendimentos) {
+          const aRec = asRecord(a)
+          if (!aRec) continue
+          const procedimento = String(aRec.procedimento || aRec.descricao || '').trim()
+          const prestador = String(aRec.prestador || aRec.nomePrestador || '').trim()
+          const rawDate = String(aRec.dataRealizacao || aRec.dataAtendimento || '').trim()
+          const date = formatDate(rawDate)
+          const id = String(aRec.id || '').trim()
+
+          const key = `${date}|${procedimento}|${prestador}`
+          if (seenKeys.has(key)) continue
+          seenKeys.add(key)
+
+          items.push({
+            procedureDate: date,
+            procedureDescription: procedimento || 'Atendimento Amil',
+            doctorName: String(aRec.medico || aRec.nomeMedico || '').trim(),
+            providerName: prestador || 'Amil',
+            invoiceNumber: id,
+          })
+        }
+      }
+    } catch {
+      // silencia erros de janela individual
+    }
+  }
+
+  return items
 }

@@ -3,12 +3,16 @@ import type { CanonicalSyncBatch, CanonicalRecord } from '@open-health/connect'
 import type { AmilSyncResult } from '../../../infrastructure/scraper/amil-sync.scraper.js'
 import { AmilLabelClassifier } from '../../classification/amil-label-classifier.js'
 import { FuzzyExamCatalogLookup } from '../../../infrastructure/classification/fuzzy-exam-catalog-lookup.js'
-import type { LabelClassifierEngine } from '../../../domain/classification/label-classification.js'
+import type { LabelClassifierEngine, LabelClassification } from '../../../domain/classification/label-classification.js'
 
 /** Motor default: regras + fuzzy local (sem LLM). Trocável via ctx.classifier. */
 const defaultClassifier: LabelClassifierEngine = new AmilLabelClassifier({
   lookup: new FuzzyExamCatalogLookup(),
 })
+
+function procDescOf(usage: AmilSyncResult['beneficiaryData'][number]['usageItems'][number]): string {
+  return usage.procedureDescription || usage.kind || ''
+}
 
 export function amilResultToCanonicalBatch(
   result: AmilSyncResult,
@@ -20,9 +24,12 @@ export function amilResultToCanonicalBatch(
     skipCoverage?: boolean
     /** Motor de classificação de rótulos (ox. injetável; default = AmilLabelClassifier). */
     classifier?: LabelClassifierEngine
+    /** Classificações pré-computadas (label -> classification) — evita re-classificar. */
+    classifications?: Map<string, LabelClassification>
   },
 ): CanonicalSyncBatch {
   const classifier: LabelClassifierEngine = ctx.classifier ?? defaultClassifier
+  const classifications = ctx.classifications ?? new Map<string, LabelClassification>()
   const records: CanonicalRecord[] = []
 
   for (const entry of result.beneficiaryData) {
@@ -86,10 +93,11 @@ export function amilResultToCanonicalBatch(
     }
 
     for (const usage of entry.usageItems ?? []) {
-      const procDesc = usage.procedureDescription || usage.kind || ''
-      const classification = classifier.classifySync
-        ? classifier.classifySync(procDesc)
-        : null
+      const procDesc = procDescOf(usage)
+      const classification = classifications.get(procDesc)
+        ?? (classifier.classifySync
+          ? classifier.classifySync(procDesc)
+          : null)
 
       const dest: 'exam' | 'medical_record' =
         classification && classification.destination === 'exam' ? 'exam' : 'medical_record'
@@ -104,7 +112,7 @@ export function amilResultToCanonicalBatch(
           externalKey,
           beneficiaryKey: key,
           beneficiaryName,
-          name: classification?.canonicalName || procDesc,
+          name: classification?.canonicalName || classification?.normalizedLabel || procDesc,
           performedAt: usage.procedureDate,
           laboratory: usage.providerName || 'Amil',
           raw: { ...(usage as unknown as Record<string, unknown>), __amilClassified: classification },
@@ -115,7 +123,7 @@ export function amilResultToCanonicalBatch(
           externalKey,
           beneficiaryKey: key,
           beneficiaryName,
-          recordType: usage.kind,
+          recordType: classification?.kind || 'outro',
           date: usage.procedureDate,
           providerName: usage.providerName || 'Amil',
           description: procDesc,
@@ -147,4 +155,28 @@ export function amilResultToCanonicalBatch(
       coverage: records.filter((r) => r.type === 'coverage').length,
     },
   }
+}
+
+/** Idêntico ao síncrono, mas classifica os rótulos em LOTE (async) — permite fallback LLM. */
+export async function amilResultToCanonicalBatchAsync(
+  result: AmilSyncResult,
+  ctx: Parameters<typeof amilResultToCanonicalBatch>[1],
+): Promise<CanonicalSyncBatch> {
+  const classifier: LabelClassifierEngine = ctx.classifier ?? defaultClassifier
+  const labels = new Set<string>()
+  for (const entry of result.beneficiaryData) {
+    for (const usage of entry.usageItems ?? []) {
+      const d = procDescOf(usage)
+      if (d) labels.add(d)
+    }
+  }
+  const uniqueLabels = Array.from(labels)
+  const classifications = new Map<string, LabelClassification>()
+  if (uniqueLabels.length && typeof classifier.classifyBatch === 'function') {
+    const batch = await classifier.classifyBatch(uniqueLabels)
+    uniqueLabels.forEach((label, i) => {
+      if (batch[i]) classifications.set(label, batch[i])
+    })
+  }
+  return amilResultToCanonicalBatch(result, { ...ctx, classifications })
 }

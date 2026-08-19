@@ -30,7 +30,8 @@
     { "id": "I", "name": "Agentes de apoio (Ava)", "description": "Ava chat + reflexão; roadmap: conversas persistidas, pins, grafo", "usesLlm": true, "status": "operational" },
     { "id": "J", "name": "Observabilidade", "description": "llm_usage_events, sync_jobs; product_events planejado", "usesLlm": false, "status": "planned" },
     { "id": "K", "name": "Higienização (dedup)", "description": "Detectores exams/vacinas; hygiene_candidates (042); bloqueio na inserção", "usesLlm": false, "status": "operational" },
-    { "id": "L", "name": "Classificação de rótulos", "description": "Motor hexagonal (port/engine/adapter) roteia atendimento Amil → consulta/exame; reuso em jobs", "usesLlm": false, "status": "operational" }
+    { "id": "L", "name": "Classificação de rótulos", "description": "Motor hexagonal (port/engine/adapter) roteia atendimento Amil → consulta/exame; reuso em jobs", "usesLlm": false, "status": "operational" },
+    { "id": "M", "name": "Catálogo de medicações (backlog)", "description": "Base dinâmica: auto-sugestão semântica no cadastro, candidatos curados, bula/imagem/analítica; épico medication-catalog (P4)", "usesLlm": false, "status": "planned" }
   ],
   "domains": [
     { "name": "Patient", "table": "patients", "description": "Pacientes e vínculos familiares" },
@@ -50,7 +51,9 @@
     { "name": "ExamOrder", "table": "exam_orders", "description": "Pedidos de exame (041); exams.exam_order_id" },
     { "name": "EmergencyDirectory", "tables": ["emergency_directory", "patient_emergency_contacts"], "description": "Guia/contatos de emergência (039)" },
     { "name": "HygieneCandidate", "table": "hygiene_candidates", "description": "Pares candidatos a duplicata + resolução (042)" },
-    { "name": "LlmUsageEvent", "table": "llm_usage_events", "description": "Metering de chamadas LLM Ava (040)" }
+    { "name": "LlmUsageEvent", "table": "llm_usage_events", "description": "Metering LLM Ava (040) + cost_bucket client|internal (043)" },
+    { "name": "LlmInternalBudget", "table": "llm_internal_budget", "description": "Orçamento mensal interno em centavos de R$ (043), teto default R$100" },
+    { "name": "Medication", "table": "medications", "description": "Medicamentos; genericName + brandName; roadmap: catálogo dinâmico (épico medication-catalog)" }
   ],
   "apiRoutes": [
     { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },
@@ -76,6 +79,7 @@
     { "method": "POST", "path": "/hygiene/candidates/:id/resolve", "description": "Resolver candidato (same_entity/dismiss)" },
     { "method": "GET", "path": "/exam-orders", "description": "Pedidos de exame CRUD" },
     { "method": "POST", "path": "/ava/chat", "description": "Chat Ava (companheira)" },
+    { "method": "GET", "path": "/llm/usage/internal", "description": "Indicadores do LLM interno (cost_bucket=internal) — ops key" },
     { "method": "GET", "path": "/emergency/directory", "description": "Guia de emergência por paciente" }
   ],
   "integrations": [
@@ -103,7 +107,7 @@
     { "id": "settings-split", "date": "2026-08-13", "title": "Configurações em /settings/*", "status": "active" },
     { "id": "outlook-oauth-localhost", "date": "2026-08-13", "title": "Azure Web redirect localhost only", "decision": "MICROSOFT_CALENDAR_REDIRECT_URI=http://localhost:3010/...", "status": "active" },
     { "id": "agents-next-epic", "date": "2026-08-13", "title": "Próximo épico: Agentes RAG", "decision": "Gate ANVISA + médico antes de clínico", "status": "active" },
-    { "id": "classification-engine", "date": "2026-08-19", "title": "Classificador de rótulos hexagonal (Amil)", "decision": "Port no domínio; engine rules+fuzzy em application; adapter em infra; reuse em integração e jobs; fallback LLM só documentado (não integrado)", "status": "active" }
+    { "id": "classification-engine", "date": "2026-08-19", "title": "Classificador de rótulos hexagonal (Amil)", "decision": "Port no domínio; engine rules+fuzzy em application; adapter em infra; reuse em integração e jobs. Fallback LLM integrado (LlmBackedLabelClassifier + LlmRouter) com metering de custo INTERNO (cost_bucket=internal, orçamento R$100/mês, 043)", "status": "active" }
   ],
   "plannedWork": [
     { "id": "agent-rag", "title": "packages/agents + runtime citações", "status": "planned", "priority": "P3" },

@@ -13,7 +13,8 @@ import {
 import { encrypt, decrypt } from '../../infrastructure/crypto-helper.js'
 import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg.repository.js'
 import { unimedResultToCanonicalBatch } from './mappers/unimed-canonical.mapper.js'
-import { amilResultToCanonicalBatch } from './mappers/amil-canonical.mapper.js'
+import { amilResultToCanonicalBatchAsync } from './mappers/amil-canonical.mapper.js'
+import { buildClassificationClassifier, type BuildClassificationClassifierOpts } from '../llm/llm-internal-cost.factory.js'
 import { CanonicalBatchImporterService, type CanonicalImportOutcome } from './canonical-batch-importer.service.js'
 import {
   computeUnimedAuthorizationSince,
@@ -201,10 +202,11 @@ export class PortalSyncOrchestrator {
 
     onProgress('importing', 'Salvando dados Amil...', 'running')
 
-    const batch = amilResultToCanonicalBatch(result, {
+    const batch = await amilResultToCanonicalBatchAsync(result, {
       connectionId: link.id,
       jobId,
       skipCoverage: incremental,
+      classifier: this.buildAmilClassifier(link.patientId),
     })
 
     const importOutcome = await this.importer.ingestBatch(batch, link.patientId, link.id)
@@ -235,5 +237,11 @@ export class PortalSyncOrchestrator {
       await this.linkRepo.update(link).catch(() => {})
     }
     return message
+  }
+
+  /** Classificador Amil com fallback LLM (custo interno) — degrada p/ regras se desligado/teto esgotado. */
+  private buildAmilClassifier(patientId: string): ReturnType<typeof buildClassificationClassifier> {
+    const opts: BuildClassificationClassifierOpts = { patientId, trigger: 'sync' }
+    return buildClassificationClassifier(this.pool, opts)
   }
 }

@@ -189,6 +189,18 @@ export const EXAM_CATALOG: CatalogEntry[] = [
     aliases: def('CULTURA DE SECRECAO', 'CULTURA DE SECREÇÃO', 'CULTURA SECRECAO'),
     fuzzables: ['CULTURA DE SECRECAO', 'CULTURA DE SECREÇÃO', 'SECRECAO'],
   },
+  {
+    id: 'ANTIGENO_NS1_DENGUE',
+    name: 'Antígeno NS1 do Vírus da Dengue, Pesquisa',
+    aliases: def('ANTIGENO NS1 DO VIRUS DA DENGUE, PESQUISA', 'DENGUE, ANTIGENO NS1', 'NS1 DENGUE', 'DENGUE ANTIGENO NS1'),
+    fuzzables: ['ANTIGENO NS1 DENGUE', 'DENGUE NS1'],
+  },
+  {
+    id: 'VIDEO_ENDOSCOPIA_NASO_SINUSAL',
+    name: 'Vídeo-Endoscopia Naso-Sinusal Com Ótica Flexível',
+    aliases: def('VIDEO-ENDOSCOPIA NASO-SINUSAL COM OTICA FLEXIVEL', 'ENDOSCOPIA NASO-SINUSAL', 'NASOFARINGOSCOPIA', 'ENDOSCOPIA'),
+    fuzzables: ['VIDEO ENDOSCOPIA NASO SINUSAL', 'ENDOSCOPIA NASO-SINUSAL', 'NASOFARINGOSCOPIA'],
+  },
 ]
 
 /** Palavras-chave que indicam exames mesmo fora do catálogo. */
@@ -197,6 +209,7 @@ export const EXAM_KEYWORDS = [
   'RADIOGRAFIA', 'RESSONANCIA', 'TOMOGRAFIA', 'ULTRASSON', 'ECOCARDIOGRAMA',
   'ELETROCARDIOGRAMA', 'ESPELHOMETRIA', 'MAPEAMENTO', 'AVE', 'PACIENTE',
   'GLICEMIA', 'PROCTOSCOPIA', 'MANOMETRIA', 'ERITROGRAMA', 'HEMOGRAMA',
+  'DENGUE', 'PESQUISA', 'ENDOSCOPIA', 'NASOFARINGOSCOPIA', 'NASOSINUSAL',
 ]
 
 /** Palavras-chave que indicam consulta. */

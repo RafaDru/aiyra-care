@@ -27,9 +27,12 @@ infrastructure/classification/
 - **Adapter em infrastructure** (`FuzzyExamCatalogLookup`): implementa o lookup
   com distância de edição (`@nlptools/distance`, leve). Pode ser substituído por
   um matcher semântico/embedding sem impacto no domínio.
-- **Fallback LLM plugável**: `AmilLabelClassifier` aceita `llmFallback` no
-  construtor e expõe `classifyWithLlm` para rótulos ambíguos (confiança baixa).
-  A integração real com `llm-router` fica como hook opcional.
+- **Fallback LLM plugável e integrado**: `AmilLabelClassifier` aceita `llmFallback`.
+  O `LlmBackedLabelClassifier` (application) une o motor local ao `LlmRouter`
+  (cascata Zen free → Go DeepSeek → Gemini) para rótulos ambíguos (confiança < 0.6),
+  com **metering de custo interno** (`LlmInternalCostService`, `cost_bucket=internal`
+  + orçamento R$100/mês). Ver `docs/LLM_USAGE.md#custo-cliente-vs-interno-migration-043`.
+  Fábrica: `buildClassificationClassifier(pool, opts)` (application/llm/llm-internal-cost.factory.ts).
 
 ## Onde é usado
 
@@ -38,9 +41,12 @@ infrastructure/classification/
    e roteia cada `usageItem`: `exam → record type 'exam'` (importado em `exams`),
    senão `medical_record` (importado em `medical_records`).
    O importer (`canonical-batch-importer.service.ts`) ganhou o ramo `importAmilExam`.
-2. **Jobs de otimização** — `scripts/reclassify-amil-medical-records.ts` reutiliza
-   o **mesmo motor** para revisar `medical_records` de origem Amil e criar os
-   `exams` correspondentes (dry-run por padrão; `--apply` cria).
+2. **Jobs de otimização** — `scripts/reclassify-medical-records.ts` reutiliza o
+   **mesmo motor** para revisar `medical_records` de **qualquer fonte** (default todas;
+   `--source=unimed|amil|...`) e criar os `exams` correspondentes (dry-run por padrão;
+   `--apply` cria; `--llm` aciona o fallback LLM). `reclassify-amil-medical-records.ts`
+   é a variante focada em Amil. Comandos: `npm run reclassify:all`, `reclassify:apply`,
+   `reclassify:amil`.
 
 ## Evoluindo o catálogo
 

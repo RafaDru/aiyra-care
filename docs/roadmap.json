@@ -1516,6 +1516,59 @@
           "detail": "Fetch todas as faixas; comparar raw para dedup antes do destino."
         }
       ]
+    },
+    {
+      "id": "medication-catalog",
+      "category": "tecnico",
+      "priority": "P4",
+      "title": "Catálogo de medicações (base dinâmica) — bula, imagem e analítica",
+      "summary": "Ao cadastrar medicação, buscar por nome/composto e auto-sugerir o nome genérico ou da medicação (de preferência de forma semântica); cada nova medicação identificada alimenta um catálogo único dinâmico que facilita cadastros futuros de outros usuários. Novo input do cliente vira CANDIDATO a medicação (não automático), com higienização/atualização ao longo do tempo. Suporta bula, imagem oficial de embalagem/medicação e análises/cruzamentos futuros. Base: Medication já tem genericName/brandName.",
+      "status": "planned",
+      "statusLabel": "Backlog",
+      "items": [
+        {
+          "id": "med-auto-suggest",
+          "title": "Auto-sugestão no cadastro (nome genérico/composto)",
+          "status": "planned",
+          "detail": "Busca por nome genérico, nome comercial e substância/composto; preferir busca semântica; sugerir preenchimento de genericName/brandName a partir do catálogo."
+        },
+        {
+          "id": "med-candidate-flow",
+          "title": "Nova medicação vira candidato (não automático)",
+          "status": "planned",
+          "detail": "Input do cliente que não casa com o catálogo entra como CANDIDATO a nova medicação; fila para revisão/incorporação — sem auto-cadastro no catálogo."
+        },
+        {
+          "id": "med-unique-catalog",
+          "title": "Catálogo único dinâmico",
+          "status": "planned",
+          "detail": "Base de medicações reutilizável em cadastros futuros (inclusive de outros usuários); dedup por princípio ativo × marca; alimentada pelos candidatos aprovados."
+        },
+        {
+          "id": "med-catalog-hygiene",
+          "title": "Higienização/atualização do catálogo",
+          "status": "planned",
+          "detail": "Over time: dedup semântico, sinônimos, acentos, atualizações de apresentação; estilo Google Photos aplicado a medicamentos."
+        },
+        {
+          "id": "med-bula",
+          "title": "Catalogar bulas",
+          "status": "planned",
+          "detail": "Vincular bula (fonte regulatória) à medicação do catálogo."
+        },
+        {
+          "id": "med-imagens",
+          "title": "Imagens oficiais de embalagem/medicação",
+          "status": "planned",
+          "detail": "Fotos oficiais para facilitar identificação na UI."
+        },
+        {
+          "id": "med-analytics",
+          "title": "Análises e cruzamentos futuros",
+          "status": "planned",
+          "detail": "Medicação × diagnóstico/idade/efeito; base para aplicações analíticas e de apoio (Ava)."
+        }
+      ]
     }
   ]
 }

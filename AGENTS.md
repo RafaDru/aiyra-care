@@ -152,7 +152,7 @@ Antes de features tier 2+, usar skills em `.cursor/skills/aiyracare-*` — ver `
 
 ## Migrations
 
-SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Ava conversas (planejado): **043+** — ver `docs/AVA_VISION.md`.
+SQL em `database/relational/`. Scripts `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Orçamento LLM interno (cliente vs interno + teto R$100): **043** — ver `docs/LLM_USAGE.md#custo-cliente-vs-interno-migration-043`. Ava conversas (planejado): **044+** — ver `docs/AVA_VISION.md`.
 
 ## Documentação de produto (Ava, dados, ops)
 
