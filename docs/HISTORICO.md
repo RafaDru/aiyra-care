@@ -1,5 +1,49 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-20] - Backlog: Padrão de cores/logos em Origens + Estrutura de Marcadores Clínicos / Resultados de Exames
+
+### Contexto
+Registrados no backlog dois aprimoramentos de UX e de arquitetura de dados clínicos:
+1. **Origens de Entidades com Identidade de Marca**: Evoluir o componente de Origem nas listagens (`ExamsTab`, `MedicalRecordsTab`, `AuthorizationsTab`, `VaccinesTab`) para adotar a identidade visual com logomarcas, ícones e tinting de operadora/provedor (estilo da aba Convênios/CoverageTab).
+2. **Normalização de Resultados de Exames (Marcadores Médicos)**: Criação de um sub-domínio dedicado a marcadores e analitos de exames (`exam_result_items` / Marcadores Médicos) para armazenar valores mensuráveis (Glicose, Hemoglobina, TSH, PCR, etc.) com unidades, faixas de referência e tendência temporal para dashboards.
+
+### Realizado (backlog)
+- `docs/roadmap.json` atualizado com o item `int-source-tag-brand-tint` no épico de integrações e com os itens `exam-artifact-structured` e `exam-markers-dashboards` no épico de artefatos de exame.
+
+---
+
+## [2026-08-20] - Motor de Classificação Semântica em 3 Tiers (Embeddings Vetoriais + LLM + Catálogo Dinâmico)
+
+### Contexto
+Implementada arquitetura genérica e reutilizável de **classificação semântica** em 3 camadas (3 Tiers), desenhada para escalar não apenas para rótulos de operadoras de saúde (Amil, Unimed, etc.), mas para múltiplos cenários da plataforma: OCR de documentos, receitas médicas, analitos de laudos laboratoriais e futuras integrações.
+
+### Decisão de arquitetura
+| Tier | Mecanismo | Comportamento |
+|------|-----------|---------------|
+| **Tier 1** | **Embeddings Vetoriais & Catálogo** | Vetorização por N-Grams e Similaridade de Cosseno com score de confiança quantitativo em `[0.0, 1.0]`. Se `similaridade >= 0.80`, classifica instantaneamente (`method: 'vector'`). |
+| **Tier 2** | **Fallback LLM** | Se a confiança vetorial não atinge o limite aceitável (< 0.80), aciona o LLM com teto e metering interno. |
+| **Tier 3** | **Auto-Categorização no Catálogo Dinâmico** | O resultado do LLM é gravado automaticamente na tabela `semantic_catalog_cache` (Migration 044). Consultas futuras desse termo ou de variações similares dão hit vetorial/cache direto em 1ms sem custo de LLM. |
+
+### Realizado
+- **Migration 044 (`semantic_catalog_cache.sql`)**: Tabela para persistência do catálogo dinâmico aprendido por domínio (`domain`, `normalized_label`, `kind`, `destination`, `confidence`, `times_hit`).
+- **Domain (`domain/semantic-classification/`)**:
+  - `semantic-classification.types.ts`: Tipos genéricos do motor (`SemanticDomain`, `SemanticClassificationResult`, `SemanticCacheRepositoryPort`).
+  - `vector-embedding.engine.ts`: Motor de vetorização L2 + Cosseno de similaridade + score de confiança.
+- **Infrastructure (`infrastructure/persistence/` & `classification/`)**:
+  - `semantic-catalog-cache.pg.repository.ts`: Repositório Postgres do catálogo dinâmico.
+  - `vector-exam-catalog-lookup.ts`: Adapter de busca do catálogo via embeddings vetoriais.
+- **Application (`application/semantic-classification/` & `llm/`)**:
+  - `unified-semantic-classifier.service.ts`: Orquestrador genérico dos 3 Tiers.
+  - `llm-internal-cost.factory.ts`: Injeta `VectorExamCatalogLookup` e `SemanticCatalogCachePgRepository` no classificador.
+  - `llm-backed-label-classifier.ts`: Auto-salva aprendizados do LLM no catálogo dinâmico.
+- **Testes & Scripts**:
+  - `tests/vector-embedding.engine.test.ts` (4 testes de vetorização e similaridade de cosseno).
+  - `tests/unified-semantic-classifier.test.ts` (testes do fluxo completo 3-Tier com cache dinâmico).
+  - Adicionados a `npm run test:critical` (18/18 suítes, 82/82 testes 100% aprovados).
+  - Script smoke: `packages/api/scripts/semantic-classification-smoke.ts`.
+
+---
+
 ## [2026-08-19] - Amil: Descoberta e captura da API de Atendimentos Realizados (BuscarDemonstrativoUtilizacao)
 
 ### Contexto
@@ -8,7 +52,7 @@ Identificada a lacuna na integração Amil: o sync capturava guias (`PostTokens`
 ### Descoberta e Realizado
 - **Mapeamento do Endpoint Real**: A API da tela de Atendimentos Realizados utiliza o endpoint:
   `GET /beneficiario/api/Beneficiario/Beneficiario/BuscarDemonstrativoUtilizacao/{marcaOtica}/{startDate}/{endDate}`
-- **Atualização do Helper `fetchAmilUtilizacao`**: Reescrito em `amil-utilizacao.helper.ts` para consultar semestres (de até 2 anos atrás) para cada beneficiário, extraindo todos os `atendimentos` (`procedimento`, `prestador`, `dataRealizacao`, `quantidade`).
+- **Atualização do Helper `fetchAmilUtilizacao`**: Reescrito em `amil-utilizacao.helper.ts` para consultar semestres (de até 1.5 anos atrás) para cada beneficiário, extraindo todos os `atendimentos` (`procedimento`, `prestador`, `dataRealizacao`, `quantidade`).
 - **Normalização e Roteamento**:
   - Adicionada limpeza de prefixos numéricos TUSS (`\d{5,10} - `) em `normalizeHealthLabel`.
   - Expandidas palavras-chave de exame em `EXAM_KEYWORDS` (`DENGUE`, `PESQUISA`, `ENDOSCOPIA`, `NASOSINUSAL`).
@@ -16,6 +60,40 @@ Identificada a lacuna na integração Amil: o sync capturava guias (`PostTokens`
 - **Validação com Dados Reais**:
   - Testado e confirmado a extração e ingestão com sucesso de **27+ atendimentos reais** para Rafael, Luis, Bruno e Jenifer no banco de dados.
 - **Testes**: `npm run test:critical` executado com 100% de aprovação (16/16 suítes, 75/75 testes).
+
+---
+
+## [2026-08-19] - Amil: Heurística de correlação Autorização ↔ Atendimento (backlog)
+
+### Contexto
+A API da Amil (`BuscarDemonstrativoUtilizacao`) não fornece uma chave explícita que vincule os atendimentos (consultas/exames) com suas respectivas guias de autorização (`PostTokens`). O banco de dados canônico possui `authorization_id` nas tabelas `medical_records` e `exams` para esta finalidade, mas a informação não vem da fonte.
+
+### Decisão de arquitetura
+- Será necessário desenvolver uma **lógica de matching heurística** dentro do `CanonicalBatchImporterService` para correlacionar atendimentos com autorizações existentes. Isso pode ser feito baseando-se em `patient_id`, `authorization_date` próximo ao `record_date`/`exam_date`, `procedure_description` similar e `prestador`.
+- Este trabalho é um item de backlog, a ser implementado em uma fase futura.
+
+### Realizado (backlog)
+- Adicionado ao `docs/roadmap.json` como item `int-amil-correlacao` no épico `integracoes-dados`.
+
+### Docs
+- `docs/roadmap.json` — item `int-amil-correlacao`.
+
+---
+
+## [2026-08-19] - Amil: Heurística de correlação Autorização ↔ Atendimento (backlog)
+
+### Contexto
+A API da Amil (`BuscarDemonstrativoUtilizacao`) não fornece uma chave explícita que vincule os atendimentos (consultas/exames) com suas respectivas guias de autorização (`PostTokens`). O banco de dados canônico possui `authorization_id` nas tabelas `medical_records` e `exams` para esta finalidade, mas a informação não vem da fonte.
+
+### Decisão de arquitetura
+- Será necessário desenvolver uma **lógica de matching heurística** dentro do `CanonicalBatchImporterService` para correlacionar atendimentos com autorizações existentes. Isso pode ser feito baseando-se em `patient_id`, `authorization_date` próximo ao `record_date`/`exam_date`, `procedure_description` similar e `prestador`.
+- Este trabalho é um item de backlog, a ser implementado em uma fase futura.
+
+### Realizado (backlog)
+- Adicionado ao `docs/roadmap.json` como item `int-amil-correlacao` no épico `integracoes-dados`.
+
+### Docs
+- `docs/roadmap.json` — item `int-amil-correlacao`.
 
 ---
 
