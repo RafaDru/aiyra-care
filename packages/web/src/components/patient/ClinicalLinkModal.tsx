@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, Form, Modal, Select, Typography } from 'antd'
+import { CalendarOutlined } from '@ant-design/icons'
+import { Alert, Form, Modal, Select, Space, Tag, Typography } from 'antd'
 import { api } from '../../lib/api.js'
 import type { ClinicalEntityType, ClinicalFlow } from '../../lib/api.types.js'
 import { ENTITY_TYPE_LABEL } from './health-thread-link-roles.js'
@@ -17,6 +18,10 @@ const { Text } = Typography
 interface EntityOption {
   value: string
   label: string
+  typeLabel: string
+  dateFormatted: string
+  title: string
+  subtitle: string
   entityType: ClinicalEntityType
   entityId: string
 }
@@ -28,6 +33,33 @@ interface ClinicalLinkModalProps {
   flow: ClinicalFlow | null
   onClose: () => void
   onCreated: () => void
+}
+
+function renderFlowOption(opt: EntityOption) {
+  return (
+    <div style={{ padding: '2px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+        <Space size={6} align="center" style={{ flex: 1, minWidth: 0 }}>
+          <Tag color="blue" style={{ margin: 0, fontSize: 11, fontWeight: 600 }}>
+            {opt.typeLabel}
+          </Tag>
+          {opt.dateFormatted && (
+            <Tag color="cyan" icon={<CalendarOutlined />} style={{ margin: 0, fontSize: 11 }}>
+              {opt.dateFormatted}
+            </Tag>
+          )}
+          <Text strong style={{ fontSize: 13, wordBreak: 'break-word' }}>
+            {opt.title}
+          </Text>
+        </Space>
+      </div>
+      {opt.subtitle && (
+        <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 2, paddingLeft: 2 }}>
+          {opt.subtitle}
+        </Text>
+      )}
+    </div>
+  )
 }
 
 export function ClinicalLinkModal({
@@ -43,12 +75,24 @@ export function ClinicalLinkModal({
 
   const entityOptions: EntityOption[] = useMemo(() => {
     if (!flow) return []
-    return flow.nodes.map((n) => ({
-      value: entityKey(n.entityType, n.entityId),
-      label: `${ENTITY_TYPE_LABEL[n.entityType] ?? n.entityType}: ${n.title}`,
-      entityType: n.entityType,
-      entityId: n.entityId,
-    }))
+    return flow.nodes.map((n) => {
+      const typeLabel = ENTITY_TYPE_LABEL[n.entityType] ?? n.entityType
+      const dateFormatted = n.date ? new Date(n.date).toLocaleDateString('pt-BR') : ''
+      const title = n.title
+      const subtitle = n.subtitle || ''
+      const searchVal = `${dateFormatted} ${typeLabel} ${title} ${subtitle}`.toLowerCase()
+
+      return {
+        value: entityKey(n.entityType, n.entityId),
+        label: searchVal,
+        typeLabel,
+        dateFormatted,
+        title,
+        subtitle,
+        entityType: n.entityType,
+        entityId: n.entityId,
+      }
+    })
   }, [flow])
 
   const fromKey = Form.useWatch('fromKey', form)
@@ -119,9 +163,16 @@ export function ClinicalLinkModal({
   const pairReady = Boolean(fromKey && toKey && fromKey !== toKey)
   const canSubmit = pairReady && relationTypes.length > 0 && !loadingTypes
 
+  const selectOptions = entityOptions.map((opt) => ({
+    value: opt.value,
+    label: opt.label,
+    rawOption: opt,
+  }))
+
   return (
     <Modal
       open={open}
+      width={640}
       title={CLINICAL_SEQUENCE_COPY.modalTitle}
       onCancel={handleClose}
       onOk={() => submit()}
@@ -151,10 +202,15 @@ export function ClinicalLinkModal({
           rules={[{ required: true, message: 'Escolha o que aconteceu antes' }]}
         >
           <Select
-            options={entityOptions}
+            options={selectOptions}
             placeholder="Ex.: consulta com a médica"
             showSearch
             optionFilterProp="label"
+            dropdownStyle={{ minWidth: 360, maxWidth: '90vw' }}
+            optionRender={(option) => {
+              const raw = (option.data as { rawOption?: EntityOption }).rawOption
+              return raw ? renderFlowOption(raw) : option.label
+            }}
           />
         </Form.Item>
         <Form.Item
@@ -163,10 +219,15 @@ export function ClinicalLinkModal({
           rules={[{ required: true, message: 'Escolha o que veio depois' }]}
         >
           <Select
-            options={entityOptions.filter((o) => o.value !== fromKey)}
+            options={selectOptions.filter((o) => o.value !== fromKey)}
             placeholder="Ex.: pedido de autorização de exame"
             showSearch
             optionFilterProp="label"
+            dropdownStyle={{ minWidth: 360, maxWidth: '90vw' }}
+            optionRender={(option) => {
+              const raw = (option.data as { rawOption?: EntityOption }).rawOption
+              return raw ? renderFlowOption(raw) : option.label
+            }}
           />
         </Form.Item>
         <ClinicalRelationTypeField

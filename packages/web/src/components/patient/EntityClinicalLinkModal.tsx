@@ -107,6 +107,7 @@ export function EntityClinicalLinkModal({
   return (
     <Modal
       open={open}
+      width={640}
       title={CLINICAL_SEQUENCE_COPY.entityModalTitle}
       onCancel={handleClose}
       onOk={() => submit()}
