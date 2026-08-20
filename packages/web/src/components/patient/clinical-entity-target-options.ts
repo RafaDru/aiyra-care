@@ -14,6 +14,7 @@ export interface ClinicalEntityTargetOption {
   entityId: string
   group: ClinicalEntityTargetGroup
   title: string
+  rawDate: string
   dateFormatted: string
   subtitle?: string
   source?: string
@@ -93,6 +94,7 @@ export function buildClinicalEntityTargetOptions(
   for (const e of exams) {
     if (exclude?.entityType === 'exam' && exclude.entityId === e.id) continue
     const title = e.examType || 'Exame'
+    const rawDate = e.examDate || ''
     const dateFormatted = formatDate(e.examDate)
     const subtitle = formatExamSubtitle(e)
     const source = e.source || 'manual'
@@ -105,6 +107,7 @@ export function buildClinicalEntityTargetOptions(
       entityId: e.id,
       group: 'exam',
       title,
+      rawDate,
       dateFormatted,
       subtitle,
       source,
@@ -115,6 +118,7 @@ export function buildClinicalEntityTargetOptions(
   for (const r of records) {
     if (exclude?.entityType === 'medical_record' && exclude.entityId === r.id) continue
     const title = formatRecordTitle(r)
+    const rawDate = r.recordDate || ''
     const dateFormatted = formatDate(r.recordDate)
     const subtitle = formatRecordSubtitle(r)
     const source = r.source || 'manual'
@@ -127,6 +131,7 @@ export function buildClinicalEntityTargetOptions(
       entityId: r.id,
       group: 'medical_record',
       title,
+      rawDate,
       dateFormatted,
       subtitle,
       source,
@@ -137,6 +142,7 @@ export function buildClinicalEntityTargetOptions(
   for (const a of auths) {
     if (exclude?.entityType === 'authorization' && exclude.entityId === a.id) continue
     const title = formatAuthTitle(a)
+    const rawDate = a.authorizationDate || ''
     const dateFormatted = formatDate(a.authorizationDate)
     const subtitle = formatAuthSubtitle(a)
     const source = a.source || 'manual'
@@ -150,6 +156,7 @@ export function buildClinicalEntityTargetOptions(
       entityId: a.id,
       group: 'authorization',
       title,
+      rawDate,
       dateFormatted,
       subtitle,
       source,
@@ -158,8 +165,12 @@ export function buildClinicalEntityTargetOptions(
     })
   }
 
-  // Ordena por data mais recente primeiro
-  options.sort((a, b) => (b.dateFormatted > a.dateFormatted ? 1 : -1))
+  // Ordena rigorosamente DECRESCENTE pela data real do evento clínico (mais recente primeiro)
+  options.sort((a, b) => {
+    const timeA = a.rawDate ? new Date(a.rawDate).getTime() : 0
+    const timeB = b.rawDate ? new Date(b.rawDate).getTime() : 0
+    return (isNaN(timeB) ? 0 : timeB) - (isNaN(timeA) ? 0 : timeA)
+  })
 
   return options
 }
