@@ -4,6 +4,9 @@
  *  Puro (sem I/O) → reutilizável em integração e em jobs.
  */
 import {
+  TELEMEDICINA_KEYWORDS,
+  PRONTO_SOCORRO_KEYWORDS,
+  RETORNO_KEYWORDS,
   CONSULTA_KEYWORDS,
   EXAM_KEYWORDS,
   PROCEDIMENTO_KEYWORDS,
@@ -76,14 +79,24 @@ export class AmilLabelClassifier implements LabelClassifierEngine {
     // Categoria via palavras-chave (sobre o rótulo original e normalizado).
     if (norm) {
       const upperSource = `${rawLabel} ${norm}`.toUpperCase()
-      if (this.consultaKeywords.some((k) => upperSource.includes(k))) {
-        return this.base(rawLabel, norm, 'consulta', 'medical_record', 0.8, 'Palavra-chave de consulta')
+
+      if (TELEMEDICINA_KEYWORDS.some((k) => upperSource.includes(k))) {
+        return this.base(rawLabel, norm, 'telemedicina', 'medical_record', 0.9, 'Palavra-chave de telemedicina/telesaúde')
+      }
+      if (PRONTO_SOCORRO_KEYWORDS.some((k) => upperSource.includes(k))) {
+        return this.base(rawLabel, norm, 'pronto-socorro', 'medical_record', 0.9, 'Palavra-chave de pronto-socorro/urgência')
+      }
+      if (RETORNO_KEYWORDS.some((k) => upperSource.includes(k))) {
+        return this.base(rawLabel, norm, 'retorno', 'medical_record', 0.85, 'Palavra-chave de retorno')
       }
       if (this.procedimentoKeywords.some((k) => upperSource.includes(k))) {
         return this.base(rawLabel, norm, 'procedimento', 'medical_record', 0.7, 'Palavra-chave de procedimento')
       }
       if (this.examKeywords.some((k) => upperSource.includes(k))) {
         return this.base(rawLabel, norm, 'exame', 'exam', 0.7, 'Palavra-chave de exame')
+      }
+      if (this.consultaKeywords.some((k) => upperSource.includes(k))) {
+        return this.base(rawLabel, norm, 'consulta', 'medical_record', 0.8, 'Palavra-chave de consulta')
       }
     }
 

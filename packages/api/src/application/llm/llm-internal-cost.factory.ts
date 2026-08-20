@@ -5,7 +5,8 @@ import { LlmInternalBudgetPgRepository } from '../../infrastructure/persistence/
 import { LlmInternalCostService } from './llm-internal-cost.service.js'
 import { LlmBackedLabelClassifier, defaultAllowLlm } from '../classification/llm-backed-label-classifier.js'
 import { AmilLabelClassifier } from '../classification/amil-label-classifier.js'
-import { FuzzyExamCatalogLookup } from '../../infrastructure/classification/fuzzy-exam-catalog-lookup.js'
+import { VectorExamCatalogLookup } from '../../infrastructure/classification/vector-exam-catalog-lookup.js'
+import { SemanticCatalogCachePgRepository } from '../../infrastructure/persistence/semantic-catalog-cache.pg.repository.js'
 
 export interface BuildClassificationClassifierOpts {
   patientId?: string
@@ -25,13 +26,14 @@ export function buildClassificationClassifier(
     new LlmInternalBudgetPgRepository(pool),
   )
   return new LlmBackedLabelClassifier({
-    local: new AmilLabelClassifier({ lookup: new FuzzyExamCatalogLookup() }),
+    local: new AmilLabelClassifier({ lookup: new VectorExamCatalogLookup() }),
     costService,
     router: new LlmRouter(),
     allowLlm: opts.allowLlm ?? defaultAllowLlm(),
     patientId: opts.patientId,
     tier: opts.tier,
     metadata: { trigger: opts.trigger ?? 'job' },
+    cacheRepo: new SemanticCatalogCachePgRepository(pool),
   })
 }
 

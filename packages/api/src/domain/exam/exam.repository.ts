@@ -1,6 +1,6 @@
 import type { Exam } from './exam.entity.js'
 
-export type ExamFilter = { patientId?: string }
+export type ExamFilter = { patientId?: string | string[] }
 
 export interface ExamRepository {
   findById(id: string): Promise<Exam | null>

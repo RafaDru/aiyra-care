@@ -5,7 +5,7 @@ import { parseHistoricoMarkdown } from '../src/infrastructure/docs/historico.par
 describe('ProjectContextService', () => {
   it('builds context with migrations and historico', () => {
     const ctx = new ProjectContextService().build()
-    expect(ctx.schemaVersion).toBe(1)
+    expect(ctx.schemaVersion).toBe(2)
     expect(ctx.migrations.length).toBeGreaterThan(10)
     expect(ctx.historico.sessionCount).toBeGreaterThan(0)
     expect(ctx.decisions.some((d) => d.id === 'postgres-source-of-truth')).toBe(true)

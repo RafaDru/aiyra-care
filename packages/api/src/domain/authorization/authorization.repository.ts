@@ -1,6 +1,6 @@
 import type { Authorization } from './authorization.entity.js'
 
-export type AuthorizationFilter = { patientId?: string; status?: string }
+export type AuthorizationFilter = { patientId?: string | string[]; status?: string }
 
 export interface AuthorizationRepository {
   findById(id: string): Promise<Authorization | null>

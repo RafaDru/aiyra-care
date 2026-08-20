@@ -37,8 +37,8 @@ describe('resolveMaterDeiExamPatientIds', () => {
     sessionExpiresAt: new Date(Date.now() + 3600_000),
   }
 
-  it('uses patientId 0 for titular profile, not gateway id', () => {
-    expect(resolveMaterDeiExamPatientIds(base)).toEqual([0])
+  it('uses gatewayPatientId for titular profile, not patientId 0', () => {
+    expect(resolveMaterDeiExamPatientIds(base)).toEqual([609856])
   })
 
   it('includes dependents with positive patientId', () => {
@@ -50,13 +50,14 @@ describe('resolveMaterDeiExamPatientIds', () => {
         dependents: [{ patientId: 12345, name: 'Bruno' }],
       },
     }
-    expect(resolveMaterDeiExamPatientIds(session)).toEqual([0, 12345])
+    expect(resolveMaterDeiExamPatientIds(session)).toEqual([609856, 12345])
   })
 
   it('uses own patientId when child account logs in directly', () => {
     const session = {
       ...base,
       patientId: 888,
+      gatewayPatientId: 888,
       patient: { patientId: 888, gatewayPatientId: 888 },
     }
     expect(resolveMaterDeiExamPatientIds(session)).toEqual([888])

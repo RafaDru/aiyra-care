@@ -4,6 +4,8 @@ import type { LabelClassifierEngine, LabelClassification, LabelClassificationMet
 import type { LlmInternalCostService } from '../llm/llm-internal-cost.service.js'
 import { estimateTokenUsage } from '../../domain/llm/llm-internal-prompt.js'
 import { buildClassificationMessages, parseClassificationJson } from '../../domain/llm/llm-internal-prompt.js'
+import type { SemanticCacheRepositoryPort } from '../../domain/semantic-classification/semantic-classification.types.js'
+import { normalizeHealthLabel } from '../../domain/classification/label-classification.js'
 
 export interface LlmBackedLabelClassifierOptions {
   /** Motor local determinístico (regras + fuzzy) — sempre como base. Deve ter classifySync. */
@@ -19,6 +21,7 @@ export interface LlmBackedLabelClassifierOptions {
   minConfidence?: number
   tier?: LlmTier
   metadata?: Record<string, unknown>
+  cacheRepo?: SemanticCacheRepositoryPort
 }
 
 /**
@@ -38,6 +41,7 @@ export class LlmBackedLabelClassifier implements LabelClassifierEngine {
   private readonly minConfidence: number
   private readonly tier: LlmTier
   private readonly metadata?: Record<string, unknown>
+  private readonly cacheRepo?: SemanticCacheRepositoryPort
 
   constructor(opts: LlmBackedLabelClassifierOptions) {
     this.local = opts.local
@@ -49,6 +53,7 @@ export class LlmBackedLabelClassifier implements LabelClassifierEngine {
     this.minConfidence = opts.minConfidence ?? 0.6
     this.tier = opts.tier ?? 'premium'
     this.metadata = opts.metadata
+    this.cacheRepo = opts.cacheRepo
   }
 
   classifySync(rawLabel: string): LabelClassification {
@@ -126,6 +131,20 @@ export class LlmBackedLabelClassifier implements LabelClassifierEngine {
           confidence: 0.9,
           reason: 'classificação via LLM (custo interno)',
         })
+
+        const norm = normalizeHealthLabel(original)
+        if (this.cacheRepo && norm) {
+          this.cacheRepo.saveOrIncrement({
+            domain: 'health_label',
+            rawLabel: original,
+            normalizedLabel: norm,
+            kind: p.kind,
+            destination: p.destination,
+            canonicalName: p.canonicalName,
+            confidence: 0.9,
+            sourceMethod: 'llm',
+          }).catch(() => {})
+        }
       }
       return result
     } catch {

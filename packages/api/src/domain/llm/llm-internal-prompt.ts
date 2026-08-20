@@ -1,26 +1,31 @@
 import type { LlmMessage, LlmTokenUsage } from './llm.types.js'
 import { estimatePromptTokens } from './llm-policy.js'
 
+import type { ClinicalEntityKind } from '../classification/label-classification.js'
+
 export interface LlmParsedClassification {
   label: string
   normalizedLabel?: string
-  kind: 'consulta' | 'exame' | 'vacina' | 'procedimento' | 'outro'
+  kind: ClinicalEntityKind
   destination: 'medical_record' | 'exam' | 'vaccine'
   canonicalName?: string
 }
 
 const SYSTEM_PROMPT = `Você classifica rótulos de procedimentos de saúde de operadora brasileira para um prontuário.
 Para cada rótulo, responda um JSON array, um objeto por rótulo, usando SEMPRE esta forma:
-[{"label":"<rótulo original>","kind":"consulta|exame|vacina|procedimento|outro","destination":"medical_record|exam|vaccine","canonicalName":"<nome canônico, se óbvio>"}]
+[{"label":"<rótulo original>","kind":"consulta|pronto-socorro|telemedicina|retorno|exame|vacina|procedimento|outro","destination":"medical_record|exam|vaccine","canonicalName":"<nome canônico, se óbvio>"}]
 
-Regras de destino:
-- consulta (consulta médica, pronto socorro, atendimento clínico, retorno) -> medical_record
+Regras de destino e kind:
+- consulta (consulta agendada em consultório/clínica) -> medical_record
+- pronto-socorro (pronto atendimento, emergência, PS, urgência) -> medical_record
+- telemedicina (telesaúde, teleconsulta, atendimento remoto) -> medical_record
+- retorno (consulta de retorno) -> medical_record
 - exame (laboratorial, imagem, hemograma, glicemia, raio-x etc.) -> exam
 - vacina -> vaccine
 - procedimento (cirurgia, sessão, fisioterapia etc.) -> medical_record
 - outro -> medical_record
 
-Use seu conhecimento de siglas, acrônimos, acentuação e sinônimos (ex.: HBA1C = hemoglobina glicada; glicemia/glicose = exame).
+Use seu conhecimento de siglas, acrônimos, acentuação e sinônimos (ex.: HBA1C = hemoglobina glicada; glicemia/glicose = exame; PSOC = pronto socorro).
 Não invente informações. Se absolutamente não souber, use kind=outro, destination=medical_record.`
 
 export function buildClassificationMessages(rawLabels: string[]): LlmMessage[] {
@@ -74,9 +79,17 @@ export function parseClassificationJson(text: string): LlmParsedClassification[]
 
 function asKind(v: unknown): LlmParsedClassification['kind'] {
   const s = String(v ?? '').toLowerCase().trim()
-  return s === 'consulta' || s === 'exame' || s === 'vacina' || s === 'procedimento' || s === 'outro'
-    ? s
-    : 'outro'
+  const validKinds: ClinicalEntityKind[] = [
+    'consulta',
+    'pronto-socorro',
+    'telemedicina',
+    'retorno',
+    'exame',
+    'vacina',
+    'procedimento',
+    'outro',
+  ]
+  return validKinds.includes(s as ClinicalEntityKind) ? (s as ClinicalEntityKind) : 'outro'
 }
 
 function asDestination(v: unknown, kind: LlmParsedClassification['kind']): LlmParsedClassification['destination'] {

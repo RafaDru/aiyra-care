@@ -100,6 +100,41 @@ export class PatientPgRepository implements PatientRepository {
     )
   }
 
+  async findAllByHousehold(patientId: string): Promise<Patient[]> {
+    const { rows: patientRows } = await this.pool.query(`SELECT owner_account_id, parent_ids FROM patients WHERE id = $1`, [patientId])
+    if (patientRows.length === 0) return []
+
+    const ownerAccountId = patientRows[0].owner_account_id
+    const parentIds = patientRows[0].parent_ids || []
+
+    let allHouseholdIds = [patientId]
+
+    // Se o paciente atual tem owner_account_id, busca todos os pacientes desse owner
+    if (ownerAccountId) {
+      const { rows: ownerPatients } = await this.pool.query(
+        `SELECT id FROM patients WHERE owner_account_id = $1`,
+        [ownerAccountId],
+      )
+      allHouseholdIds.push(...ownerPatients.map((r) => r.id))
+    }
+
+    // Adiciona os pais diretos
+    if (parentIds.length > 0) {
+      allHouseholdIds.push(...parentIds)
+    }
+
+    // Adiciona os filhos de todos os pacientes já encontrados
+    const { rows: childrenRows } = await this.pool.query(
+      `SELECT id FROM patients WHERE parent_ids && $1::uuid[]`, // && = overlap operator
+      [Array.from(new Set(allHouseholdIds))],
+    )
+    allHouseholdIds.push(...childrenRows.map((r) => r.id))
+
+    // Filtra IDs únicos e busca todos os pacientes
+    const uniqueIds = Array.from(new Set(allHouseholdIds))
+    return this.findByIds(uniqueIds)
+  }
+
   async delete(id: string): Promise<void> {
     await this.pool.query('DELETE FROM patients WHERE id = $1', [id])
   }

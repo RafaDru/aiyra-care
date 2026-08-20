@@ -3,22 +3,33 @@ import type { CanonicalSyncBatch, CanonicalRecord } from '@open-health/connect'
 import type { UnimedBhSyncResult } from '../../../infrastructure/scraper/unimedbh-sync.scraper.js'
 import type { UnimedBhUsageItem } from '../../../infrastructure/scraper/unimedbh-extrato.scraper.js'
 import type { UnimedBhAuthorizationItem } from '../../../infrastructure/scraper/unimedbh-autorizacoes.scraper.js'
+import type { PatientMatcher } from '../../domain/patient/patient-matcher.js'
 
-export function unimedResultToCanonicalBatch(
+export async function unimedResultToCanonicalBatch(
   result: UnimedBhSyncResult,
   ctx: {
     connectionId: string
     jobId: string
     tenantRef?: string | null
+    patientMatcher?: PatientMatcher
+    possiblePatientIds?: string[] // IDs de pacientes da conexão
   },
-): CanonicalSyncBatch {
+): Promise<CanonicalSyncBatch> {
   const records: CanonicalRecord[] = []
+  const possibleIds = ctx.possiblePatientIds ?? []
   const allItems: UnimedBhUsageItem[] = [...result.extrato.paciente]
   for (const depItems of Object.values(result.extrato.dependentes)) {
     allItems.push(...depItems)
   }
 
   for (const item of allItems) {
+    const patientId = (possibleIds.length && ctx.patientMatcher)
+      ? (await ctx.patientMatcher.findMatchingPatientId(
+          item.patientName,
+          possibleIds,
+        )) ?? ctx.connectionId
+      : ctx.connectionId
+
     if (item.kind === 'consulta' || (item.kind === 'outro' && item.doctorName)) {
       records.push({
         type: 'medical_record',
@@ -28,6 +39,8 @@ export function unimedResultToCanonicalBatch(
             ? `prov:${item.providerExternalId}|${item.procedureDate}|${item.procedureDescription || ''}`
             : `${item.procedureDate}|${item.doctorName || ''}|${item.procedureDescription || ''}`,
         beneficiaryName: item.patientName,
+        beneficiaryKey: item.cardNumber,
+        patientId,
         recordType: item.kind === 'consulta' ? 'consulta' : 'outro',
         date: item.procedureDate,
         providerName: 'Unimed BH',
@@ -40,6 +53,8 @@ export function unimedResultToCanonicalBatch(
         type: 'exam',
         externalKey: `${item.procedureDescription}|${item.procedureDate}`,
         beneficiaryName: item.patientName,
+        beneficiaryKey: item.cardNumber,
+        patientId,
         name: item.procedureDescription,
         performedAt: item.procedureDate,
         laboratory: item.doctorName || undefined,
@@ -54,11 +69,18 @@ export function unimedResultToCanonicalBatch(
   }
 
   for (const item of allAuths) {
+    const patientId = (possibleIds.length && ctx.patientMatcher)
+      ? (await ctx.patientMatcher.findMatchingPatientId(
+          item.patientName,
+          possibleIds,
+        )) ?? ctx.connectionId
+      : ctx.connectionId
     const solicitationNumber = item.solicitationNumber || item.guideNumber || ''
     records.push({
       type: 'authorization',
       externalKey: solicitationNumber || `${item.procedureCode || ''}|${item.guideNumber || ''}`,
       beneficiaryName: item.patientName,
+      patientId,
       solicitationNumber: solicitationNumber || undefined,
       status: item.status || undefined,
       classification: item.classification || item.procedureDescription || undefined,
@@ -79,9 +101,16 @@ export function unimedResultToCanonicalBatch(
   }
 
   if (result.planCard) {
+    const patientId = (possibleIds.length && ctx.patientMatcher)
+      ? (await ctx.patientMatcher.findMatchingPatientId(
+          result.planCard.patientName,
+          possibleIds,
+        )) ?? ctx.connectionId
+      : ctx.connectionId
     records.push({
       type: 'coverage',
       externalKey: result.planCard.externalKey,
+      patientId,
       planName: result.planCard.planName,
       operatorName: result.planCard.operatorName,
       productCode: result.planCard.productCode,
@@ -93,6 +122,7 @@ export function unimedResultToCanonicalBatch(
       records.push({
         type: 'coverage_membership',
         externalKey: result.planCard.cardNumber,
+        patientId,
         memberNumber: result.planCard.cardNumber,
         role: 'holder',
         status: 'active',

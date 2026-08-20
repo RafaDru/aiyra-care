@@ -64,7 +64,13 @@ export class AuthorizationPgRepository implements AuthorizationRepository {
 
   async findAll(filter?: AuthorizationFilter) {
     const conditions: string[] = []; const params: unknown[] = []
-    if (filter?.patientId) conditions.push('patient_id = $' + (params.push(filter.patientId)))
+    if (filter?.patientId) {
+      if (Array.isArray(filter.patientId)) {
+        conditions.push('patient_id = ANY($' + (params.push(filter.patientId)) + '::uuid[])')
+      } else {
+        conditions.push('patient_id = $' + (params.push(filter.patientId)))
+      }
+    }
     if (filter?.status) conditions.push('status = $' + (params.push(filter.status)))
     const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : ''
     const { rows } = await this.pool.query(

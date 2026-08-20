@@ -7,5 +7,6 @@ export interface PatientRepository {
   save(patient: Patient): Promise<Patient>
   update(patient: Patient): Promise<Patient>
   setOwnerAccountId(patientId: string, accountId: string): Promise<void>
+  findAllByHousehold(patientId: string): Promise<Patient[]>
   delete(id: string): Promise<void>
 }

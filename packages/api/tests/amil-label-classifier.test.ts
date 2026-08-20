@@ -10,10 +10,10 @@ import type { AmilSyncResult } from '../src/infrastructure/scraper/amil-sync.scr
 const engine = new AmilLabelClassifier({ lookup: new FuzzyExamCatalogLookup() })
 
 describe('AmilLabelClassifier', () => {
-  it('classifica consulta -> medical_record', () => {
+  it('classifica consulta em pronto socorro -> pronto-socorro / medical_record', () => {
     const c = engine.classifySync('CONSULTA EM PRONTO SOCORRO')
     expect(c.destination).toBe('medical_record')
-    expect(c.kind).toBe('consulta')
+    expect(c.kind).toBe('pronto-socorro')
   })
 
   it('classifica exame por catálogo exato -> exam', () => {

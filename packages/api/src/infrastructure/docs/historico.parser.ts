@@ -25,7 +25,7 @@ const __dirname = dirname(__filename)
 export const HISTORICO_PATH = resolve(__dirname, '../../../../../docs/HISTORICO.md')
 
 export function parseHistoricoMarkdown(content: string): HistoricoSession[] {
-  const lines = content.split('\n')
+  const lines = (content ?? '').replace(/\r/g, '').split('\n')
   const sessions: HistoricoSession[] = []
   let current: HistoricoSession | null = null
 

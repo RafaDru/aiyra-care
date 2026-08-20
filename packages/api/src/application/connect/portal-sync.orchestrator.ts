@@ -117,9 +117,13 @@ export class PortalSyncOrchestrator {
 
     onProgress('importing', 'Salvando dados...', 'running')
 
-    const batch = unimedResultToCanonicalBatch(result, {
+    const householdPatients = await this.patientRepo.findAllByHousehold(link.patientId)
+    const possiblePatientIds = householdPatients.map((p) => p.id)
+
+    const batch = await unimedResultToCanonicalBatch(result, {
       connectionId: link.id,
       jobId,
+      possiblePatientIds,
     })
 
     const importOutcome = await this.importer.ingestBatch(batch, link.patientId, link.id)

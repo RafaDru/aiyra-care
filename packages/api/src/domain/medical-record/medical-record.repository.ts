@@ -1,6 +1,6 @@
 import type { MedicalRecord } from './medical-record.entity.js'
 
-export type MedicalRecordFilter = { patientId?: string }
+export type MedicalRecordFilter = { patientId?: string | string[] }
 
 export interface MedicalRecordRepository {
   findById(id: string): Promise<MedicalRecord | null>

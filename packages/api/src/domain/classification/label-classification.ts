@@ -1,6 +1,14 @@
 /** Classificação de rótulos de assistência (operadora) → tipo clínico e destino. */
 
-export type ClinicalEntityKind = 'consulta' | 'exame' | 'vacina' | 'procedimento' | 'outro'
+export type ClinicalEntityKind =
+  | 'consulta'
+  | 'pronto-socorro'
+  | 'telemedicina'
+  | 'retorno'
+  | 'exame'
+  | 'vacina'
+  | 'procedimento'
+  | 'outro'
 
 export type ClinicalEntityDestination = 'medical_record' | 'exam' | 'vaccine'
 

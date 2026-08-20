@@ -13,6 +13,9 @@ import { MedicalRecordPgRepository } from '../../infrastructure/persistence/medi
 import { InsurancePlanPgRepository } from '../../infrastructure/persistence/insurance-plan.pg.repository.js'
 import { PlanMembershipPgRepository } from '../../infrastructure/persistence/plan-membership.pg.repository.js'
 import { ImportLineagePgRepository } from '../../infrastructure/persistence/import-lineage.pg.repository.js'
+import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg.repository.js'
+import { PatientMatcher } from '../../domain/patient/patient-matcher.js'
+import { PgPatientMatcher } from '../../infrastructure/persistence/patient-matcher.pg.repository.js'
 import { scheduleImportLineageProjection } from '../../infrastructure/graph/import-lineage-graph.js'
 import type { SyncAuthorizationDetail, SyncBeneficiaryDetail, SyncUnmatchedBeneficiary } from '../../infrastructure/scraper/sync-progress-store.js'
 import type { UnimedBhAuthorizationItem } from '../../infrastructure/scraper/unimedbh-autorizacoes.scraper.js'
@@ -75,6 +78,8 @@ export class CanonicalBatchImporterService {
   private readonly recordRepo: MedicalRecordPgRepository
   private readonly authRepo: AuthorizationPgRepository
   private readonly planService: InsurancePlanService
+  private readonly patientMatcher: PatientMatcher
+  private readonly patientRepo: PatientPgRepository
 
   constructor(private readonly pool: Pool) {
     this.lineage = new ImportLineageService(new ImportLineagePgRepository(pool))
@@ -85,6 +90,8 @@ export class CanonicalBatchImporterService {
       new InsurancePlanPgRepository(pool),
       new PlanMembershipPgRepository(pool),
     )
+    this.patientMatcher = new PgPatientMatcher(pool)
+    this.patientRepo = new PatientPgRepository(pool)
   }
 
   async ingestBatch(
