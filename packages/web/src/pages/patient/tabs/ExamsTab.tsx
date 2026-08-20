@@ -3,6 +3,7 @@ import { Button, Form, Input, Tag, Space, message, Table, Typography, Segmented 
 import type { ColumnsType } from 'antd/es/table'
 import { QuickClinicalUploadButton } from '../../../components/document/QuickClinicalUploadButton.js'
 import { ExamMarkersDashboard } from '../../../components/patient/ExamMarkersDashboard.js'
+import { InlineExamMarkersList } from '../../../components/patient/InlineExamMarkersList.js'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { CarePlaceAutocomplete } from '../../../components/ui/CarePlaceAutocomplete.js'
 import { PlusOutlined, FilePdfOutlined, PlayCircleOutlined, LinkOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
@@ -388,20 +389,25 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
               showExpandColumn: false,
               expandedRowKeys,
               onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as string[]),
-              rowExpandable: (exam) => getCount('exam', exam.id) > 0,
+              rowExpandable: () => true,
               expandedRowRender: (exam) => (
-                <EntityClinicalLinksExpandedPanel
-                  patientId={patientId}
-                  entityType="exam"
-                  entityId={exam.id}
-                  entityTitle={exam.examType}
-                  onUpdated={() => {
-                    reloadLinkCounts()
-                    if (getCount('exam', exam.id) === 0) {
-                      setExpandedRowKeys((prev) => prev.filter((k) => k !== exam.id))
-                    }
-                  }}
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <InlineExamMarkersList examId={exam.id} />
+                  {getCount('exam', exam.id) > 0 && (
+                    <EntityClinicalLinksExpandedPanel
+                      patientId={patientId}
+                      entityType="exam"
+                      entityId={exam.id}
+                      entityTitle={exam.examType}
+                      onUpdated={() => {
+                        reloadLinkCounts()
+                        if (getCount('exam', exam.id) === 0) {
+                          setExpandedRowKeys((prev) => prev.filter((k) => k !== exam.id))
+                        }
+                      }}
+                    />
+                  )}
+                </div>
               ),
             }}
           />
@@ -410,23 +416,28 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
     }
 
     return (
-      <EntityClinicalLinksExpandedPanel
-        patientId={patientId}
-        entityType="exam"
-        entityId={row.exam.id}
-        entityTitle={row.exam.examType}
-        onUpdated={() => {
-          reloadLinkCounts()
-          if (getCount('exam', row.exam.id) === 0) {
-            setExpandedRowKeys((prev) => prev.filter((k) => k !== row.exam.id))
-          }
-        }}
-      />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <InlineExamMarkersList examId={row.exam.id} />
+        {getCount('exam', row.exam.id) > 0 && (
+          <EntityClinicalLinksExpandedPanel
+            patientId={patientId}
+            entityType="exam"
+            entityId={row.exam.id}
+            entityTitle={row.exam.examType}
+            onUpdated={() => {
+              reloadLinkCounts()
+              if (getCount('exam', row.exam.id) === 0) {
+                setExpandedRowKeys((prev) => prev.filter((k) => k !== row.exam.id))
+              }
+            }}
+          />
+        )}
+      </div>
     )
   }
 
   const rowExpandable = (row: ExamListRow) =>
-    row.type === 'order' || getCount('exam', row.exam.id) > 0
+    row.type === 'order' || true
 
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'markers'>('list')
 
