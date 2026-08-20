@@ -268,13 +268,17 @@ export class UnimedBhSyncScraper {
       }
     }
 
-    const firstWait = waitForScreenService(page, 'DataActionListarExtratoUtilizacao')
+    const firstWait = waitForScreenService(page, 'DataActionListarExtratoUtilizacao').catch(() => null)
     const compWait = waitForScreenService(page, 'DataActionListarCompetencias').catch(() => null)
     await page.goto(EXTRATO_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
     this.assertUnimedPortalSession(page)
     const [firstRes, compRes] = await Promise.all([firstWait, compWait])
-    const firstJson = await firstRes.json() as { data?: { ExtratoUtilizacao?: { List?: ExtratoBeneficiario[] } } }
-    if (firstJson.data) ingest(firstJson.data)
+    if (firstRes) {
+      const firstJson = (await firstRes.json().catch(() => null)) as {
+        data?: { ExtratoUtilizacao?: { List?: ExtratoBeneficiario[] } }
+      } | null
+      if (firstJson?.data) ingest(firstJson.data)
+    }
 
     type Competencia = { Data?: string; DataFormatada?: string }
     let competencias: Competencia[] = []
@@ -320,14 +324,19 @@ export class UnimedBhSyncScraper {
       'running',
     )
 
-    const listWait = waitForScreenService(page, 'DataActionListarSolicCliente')
+    const listWait = waitForScreenService(page, 'DataActionListarSolicCliente').catch(() => null)
     await page.goto(LIST_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
     this.assertUnimedPortalSession(page)
     const listRes = await listWait
-    const listJson = await listRes.json() as { data?: {
-      LocalDadosAutorizacaoAUTORIZACOES?: { List?: OutSystemsListItem[] }
-      LocalDadosAutorizacaoEXAMES?: { List?: OutSystemsListItem[] }
-    } }
+    if (!listRes) {
+      return { paciente: [], dependentes: {} as Record<string, UnimedBhAuthorizationItem[]> }
+    }
+    const listJson = (await listRes.json().catch(() => null)) as {
+      data?: {
+        LocalDadosAutorizacaoAUTORIZACOES?: { List?: OutSystemsListItem[] }
+        LocalDadosAutorizacaoEXAMES?: { List?: OutSystemsListItem[] }
+      }
+    } | null
 
     const rawList = [
       ...(listJson.data?.LocalDadosAutorizacaoAUTORIZACOES?.List ?? []),
@@ -372,7 +381,7 @@ export class UnimedBhSyncScraper {
       return this.mapListItemOnly(listItem)
     }
 
-    const infoWait = waitForScreenService(page, 'DataActionObterInformacoesSolicitacao')
+    const infoWait = waitForScreenService(page, 'DataActionObterInformacoesSolicitacao').catch(() => null)
     const histWait = waitForScreenService(page, 'DataActionListarHistoricoSolic').catch(() => null)
     const prestadorWait = waitForScreenService(page, 'DataActionObterPrestador').catch(() => null)
     const infoPrestWait = waitForScreenService(page, 'DataActionObterInfoPrestador').catch(() => null)
@@ -380,6 +389,9 @@ export class UnimedBhSyncScraper {
     await page.goto(`${DETAIL_BASE}${enc}`, { waitUntil: 'domcontentloaded', timeout: 45000 })
 
     const [infoRes, histRes, prestadorRes, infoPrestRes] = await Promise.all([infoWait, histWait, prestadorWait, infoPrestWait])
+    if (!infoRes) {
+      return this.mapListItemOnly(listItem)
+    }
 
     const infoJson = await infoRes.json() as { data?: {
       ListaProcedimento?: { List?: Array<{

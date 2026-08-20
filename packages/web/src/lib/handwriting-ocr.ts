@@ -1,4 +1,4 @@
-import type { Document_ } from '../../lib/api.types.js'
+import type { Document_ } from './api.types.js'
 
 const HANDWRITING_TYPES = new Set(['prescription', 'exam', 'report'])
 
@@ -7,7 +7,7 @@ export function isHandwritingClinicalType(type: string): boolean {
 }
 
 /** OCR local em receita manuscrita costuma ser insuficiente — sugere interpretação IA. */
-export function isPoorHandwritingOcr(doc: Pick<Document_, 'documentType' | 'ocrProcessed' | 'ocrQualityScore' | 'extractedText'>): boolean {
+export function isPoorHandwritingOcr(doc: Partial<Pick<Document_, 'documentType' | 'ocrProcessed' | 'ocrQualityScore' | 'extractedText'>> & { documentType: string }): boolean {
   if (!isHandwritingClinicalType(doc.documentType)) return false
   if (!doc.ocrProcessed) return true
   if ((doc.ocrQualityScore ?? 0) < 55) return true

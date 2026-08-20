@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Button, Form, Input, Tag, Space, message, Table, Typography } from 'antd'
+import { Button, Form, Input, Tag, Space, message, Table, Typography, Segmented } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { QuickClinicalUploadButton } from '../../../components/document/QuickClinicalUploadButton.js'
+import { ExamMarkersDashboard } from '../../../components/patient/ExamMarkersDashboard.js'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { CarePlaceAutocomplete } from '../../../components/ui/CarePlaceAutocomplete.js'
 import { PlusOutlined, FilePdfOutlined, PlayCircleOutlined, LinkOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
@@ -427,33 +428,48 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
   const rowExpandable = (row: ExamListRow) =>
     row.type === 'order' || getCount('exam', row.exam.id) > 0
 
+  const [activeSubTab, setActiveSubTab] = useState<'list' | 'markers'>('list')
+
   return (
     <>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <Space wrap>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>{t('exam.new')}</Button>
           <QuickClinicalUploadButton patientId={patientId} documentType="exam" onRecordsUpdated={reloadAll} />
         </Space>
+        <Segmented
+          value={activeSubTab}
+          onChange={(val) => setActiveSubTab(val as 'list' | 'markers')}
+          options={[
+            { value: 'list', label: 'Laudos & Pedidos' },
+            { value: 'markers', label: 'Marcadores do Exame' },
+          ]}
+        />
       </div>
-      <Table<ExamListRow>
-        dataSource={listRows}
-        columns={topLevelColumns}
-        rowKey="key"
-        loading={loading}
-        pagination={false}
-        size="small"
-        tableLayout="fixed"
-        style={ALIGNED_TABLE_FRAME_STYLE}
-        onRow={(row) =>
-          row.type === 'exam' ? clinicalEntityRowProps(row.exam.id, highlightEntityId) : {}
-        }
-        expandable={{
-          expandedRowKeys,
-          onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as string[]),
-          rowExpandable,
-          expandedRowRender,
-        }}
-      />
+
+      {activeSubTab === 'markers' ? (
+        <ExamMarkersDashboard patientId={patientId} />
+      ) : (
+        <Table<ExamListRow>
+          dataSource={listRows}
+          columns={topLevelColumns}
+          rowKey="key"
+          loading={loading}
+          pagination={false}
+          size="small"
+          tableLayout="fixed"
+          style={ALIGNED_TABLE_FRAME_STYLE}
+          onRow={(row) =>
+            row.type === 'exam' ? clinicalEntityRowProps(row.exam.id, highlightEntityId) : {}
+          }
+          expandable={{
+            expandedRowKeys,
+            onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as string[]),
+            rowExpandable,
+            expandedRowRender,
+          }}
+        />
+      )}
       <EntityFormModal
         open={open}
         title={t('exam.new')}

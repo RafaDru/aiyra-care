@@ -53,7 +53,8 @@
     { "name": "HygieneCandidate", "table": "hygiene_candidates", "description": "Pares candidatos a duplicata + resolução (042)" },
     { "name": "LlmUsageEvent", "table": "llm_usage_events", "description": "Metering LLM Ava (040) + cost_bucket client|internal (043)" },
     { "name": "LlmInternalBudget", "table": "llm_internal_budget", "description": "Orçamento mensal interno em centavos de R$ (043), teto default R$100" },
-    { "name": "Medication", "table": "medications", "description": "Medicamentos; genericName + brandName; roadmap: catálogo dinâmico (épico medication-catalog)" }
+    { "name": "Medication", "table": "medications", "description": "Medicamentos; genericName + brandName; roadmap: catálogo dinâmico (épico medication-catalog)" },
+    { "name": "SemanticCatalogCache", "table": "semantic_catalog_cache", "description": "Catálogo dinâmico aprendido por vetor/LLM (044)" }
   ],
   "apiRoutes": [
     { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },

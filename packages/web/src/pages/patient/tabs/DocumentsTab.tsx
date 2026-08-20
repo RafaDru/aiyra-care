@@ -356,7 +356,12 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
       render: (v: boolean, r: Document_) => {
         const link = linkIndex.get(r.id)
         if (link) return <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
-        const poor = isPoorHandwritingOcr(r)
+        const poor = isPoorHandwritingOcr({
+          documentType: r.documentType,
+          ocrProcessed: r.ocrProcessed,
+          ocrQualityScore: r.ocrQualityScore,
+          extractedText: r.extractedText,
+        })
         const label = poor ? 'Fraco — use IA' : v ? t('document.processed') : t('document.pending')
         const color = poor ? 'orange' : v ? 'green' : 'default'
         const useVisual = canUseOcrRegionReview(r.mimeType, r.ocrLayout)

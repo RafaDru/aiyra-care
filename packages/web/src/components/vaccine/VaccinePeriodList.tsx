@@ -85,7 +85,7 @@ function DoseRow({
 
 /** Detecta sequências (mesma vacina, múltiplas doses) para ligação visual. */
 function annotateSeries(rows: VaccineDoseRow[]): Array<{ row: VaccineDoseRow; showLink: boolean; isLastInSeries: boolean }> {
-  const result: Array<{ row: VaccineDoseRow; showLink: boolean; lastInSeries: boolean }> = []
+  const result: Array<{ row: VaccineDoseRow; showLink: boolean; isLastInSeries: boolean }> = []
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
     const prev = rows[i - 1]
@@ -95,7 +95,7 @@ function annotateSeries(rows: VaccineDoseRow[]): Array<{ row: VaccineDoseRow; sh
     result.push({
       row,
       showLink: Boolean(row.linkFromAbove) || samePrev || sameNext,
-      lastInSeries: !sameNext,
+      isLastInSeries: !sameNext,
     })
   }
   return result
@@ -120,12 +120,12 @@ export function VaccinePeriodSection({ group }: Props) {
         <div style={{ flex: 1, height: 1, background: '#e8e8e8' }} />
       </div>
       <div style={{ paddingLeft: 4 }}>
-        {annotated.map(({ row, showLink, lastInSeries }) => (
+        {annotated.map(({ row, showLink, isLastInSeries }) => (
           <DoseRow
             key={row.id}
             row={row}
             showSeriesLink={showLink}
-            isLastInSeries={lastInSeries}
+            isLastInSeries={isLastInSeries}
           />
         ))}
       </div>

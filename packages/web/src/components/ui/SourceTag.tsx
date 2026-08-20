@@ -1,17 +1,37 @@
 import { Tag } from 'antd'
-import { CloudDownloadOutlined, MedicineBoxOutlined, SafetyCertificateOutlined, GlobalOutlined, UserOutlined } from '@ant-design/icons'
-
-const SOURCE_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
-  manual: { color: 'default', label: 'Manual', icon: <UserOutlined /> },
-  conectesus: { color: 'green', label: 'ConecteSUS', icon: <CloudDownloadOutlined /> },
-  caderneta: { color: 'blue', label: 'Caderneta', icon: <CloudDownloadOutlined /> },
-  unimed: { color: 'purple', label: 'Unimed BH', icon: <MedicineBoxOutlined /> },
-  amil: { color: 'red', label: 'Amil', icon: <SafetyCertificateOutlined /> },
-  bradesco_saude: { color: 'blue', label: 'Bradesco Saúde', icon: <GlobalOutlined /> },
-  mater_dei: { color: 'geekblue', label: 'Mater Dei', icon: <MedicineBoxOutlined /> },
-}
+import { UserOutlined } from '@ant-design/icons'
+import { brandOrFallback } from '../brands/brand-config.js'
+import { BrandLogo } from '../brands/BrandLogo.js'
 
 export function SourceTag({ source }: { source?: string }) {
-  const config = SOURCE_CONFIG[source || 'manual'] || SOURCE_CONFIG.manual
-  return <Tag icon={config.icon} color={config.color} style={{ margin: 0 }}>{config.label}</Tag>
+  if (!source || source === 'manual') {
+    return (
+      <Tag icon={<UserOutlined />} color="default" style={{ margin: 0, fontSize: 11 }}>
+        Manual
+      </Tag>
+    )
+  }
+
+  const meta = brandOrFallback(source)
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '2px 8px 2px 4px',
+        borderRadius: 8,
+        background: `${meta.color}14`,
+        border: `1px solid ${meta.color}33`,
+        fontSize: 12,
+        fontWeight: 600,
+        color: meta.color,
+        lineHeight: 1.2,
+      }}
+    >
+      <BrandLogo brand={source} size={20} compact compactMax={18} />
+      <span>{meta.shortLabel}</span>
+    </span>
+  )
 }

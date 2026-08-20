@@ -7,16 +7,39 @@ canônico (`consulta → medical_records`, `exame → exams`, ...).
 ## Arquitetura (Hexagonal)
 
 ```
+domain/semantic-classification/
+  semantic-classification.types.ts  # Contrato genérico reusável (SemanticDomain, SemanticClassificationResult, CachePort)
+  vector-embedding.engine.ts        # Motor de Embeddings Vetoriais (Cosseno + N-Gram) com Score de Confiança [0..1]
+
 domain/classification/
-  label-classification.ts   # Tipos + port LabelClassifierEngine + normalizeHealthLabel
-  exam-catalog.ts           # Catálogo canônico de procedimentos (fonte de verdade versionada)
+  label-classification.ts           # Tipos de rótulo + port LabelClassifierEngine + normalizeHealthLabel
+  exam-catalog.ts                   # Catálogo canônico de procedimentos (fonte de verdade versionada)
+
+application/semantic-classification/
+  unified-semantic-classifier.service.ts # Motor Genérico em 3 Tiers (Vetor -> LLM -> Auto-Categorização no Catálogo Dinâmico)
 
 application/classification/
-  amil-label-classifier.ts  # Motor rules+fuzzy (implementa o port); fallback LLM opcional
+  amil-label-classifier.ts          # Motor rules+fuzzy (implementa o port); fallback LLM opcional
 
 infrastructure/classification/
-  fuzzy-exam-catalog-lookup.ts  # Adapter do lookup (edit-distance leve)
+  vector-exam-catalog-lookup.ts     # Adapter do lookup via Embeddings Vetoriais (Cosseno)
+  fuzzy-exam-catalog-lookup.ts      # Adapter de edição (Jaro-Winkler)
+
+infrastructure/persistence/
+  semantic-catalog-cache.pg.repository.ts # Repositório da tabela `semantic_catalog_cache` (Migration 044)
 ```
+
+- **Motor Semântico Genérico em 3 Tiers (`UnifiedSemanticClassifierService`)**:
+  1. **Tier 1 (Embeddings Vetoriais & Catálogo Dinâmico)**:
+     - Normalização + vetorização N-Gram/Cosseno + busca no catálogo estático e dinâmico.
+     - Se similaridade $\ge$ `acceptableVectorThreshold` (ex.: 0.80), retorna com `method: 'vector'` e grau de confiança quantitativo.
+  2. **Tier 2 (Fallback LLM para Ambíguos)**:
+     - Se o vetor não atinge o limite aceitável de confiança, aciona o LLM (com metering e orçamento interno).
+  3. **Tier 3 (Auto-Categorização no Catálogo Dinâmico)**:
+     - Após a classificação do LLM, salva automaticamente o aprendizado na tabela `semantic_catalog_cache` (Migration 044).
+     - Buscas futuras desse termo ou de variações similares batem direto no vetor/cache em 1ms sem custo de LLM.
+- **Reusabilidade Multidomínio**:
+  - Desenhado para ser reutilizado além das operadoras de saúde: OCR de documentos (`ocr_document`), analitos de laudo (`lab_analyte`), receitas (`medication`), etc.
 
 - **Port no domínio** (`LabelClassifierEngine`): `classify`, `classifyBatch`,
   `classifySync`. Permite **trocar de motor** (rules → fuzzy → embeddings/LLM)

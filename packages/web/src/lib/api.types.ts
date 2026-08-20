@@ -973,6 +973,40 @@ export interface Exam {
   createdAt: string
 }
 
+export interface ExamMarker {
+  id: string
+  examId: string
+  patientId: string
+  markerName: string
+  technicalName: string | null
+  numericValue: number | null
+  displayValue: string
+  unit: string | null
+  referenceRange: string | null
+  status: 'normal' | 'altered' | 'critical'
+  collectedAt: string
+  createdAt: string
+}
+
+export interface MarkerTrendPoint {
+  collectedAt: string
+  numericValue: number | null
+  displayValue: string
+  unit: string | null
+  status: string
+  examId: string
+}
+
+export interface MarkerTrendGroup {
+  markerName: string
+  technicalName?: string
+  unit?: string
+  latestValue: string
+  latestStatus: string
+  latestCollectedAt: string
+  points: MarkerTrendPoint[]
+}
+
 export interface ExamOrder {
   id: string
   patientId: string

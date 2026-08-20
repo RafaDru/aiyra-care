@@ -191,10 +191,10 @@ export async function scrapeUnimedBhVirtualCardFromPage(
   page: Page,
   opts?: { patientName?: string; cardNumber?: string; requireToken?: boolean },
 ): Promise<UnimedBhVirtualCard | null> {
-  const firstWait = waitForScreenService(page, 'DataActionGetDataAction')
+  const firstWait = waitForScreenService(page, 'DataActionGetDataAction').catch(() => null)
   await page.goto(CARTAO_VIRTUAL_URL, { waitUntil: 'domcontentloaded', timeout: 45000 })
   const firstRes = await firstWait
-  let card = await readGetDataAction(firstRes)
+  let card = firstRes ? await readGetDataAction(firstRes) : null
 
   await page.waitForTimeout(800)
   const selected = await trySelectBeneficiary(page, opts?.patientName, opts?.cardNumber)

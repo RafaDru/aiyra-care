@@ -62,7 +62,7 @@ export function ImportInsuranceModal({
       }
       if (usesEmail) payload.email = values.email
       else payload.cpf = values.cpf.replace(/\D/g, '')
-      const data = await scraperFn(payload as Parameters<typeof scraperFn>[0])
+      const data = await (scraperFn as (p: unknown) => Promise<ScraperResult>)(payload)
       setResult(data)
       message.success(`${data.vaccines.length} vacinas, ${data.exams.length} exames encontrados`)
     } catch (err) {

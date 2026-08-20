@@ -61,7 +61,7 @@ export function conferRawLabel(
   const inferred = inferDoseNumber(doseLabel, doseNumber)
   const doseDef = entry.doses.find((d) => d.dose === inferred) ?? entry.doses[0]
   const slot = getCatalogSlot(entry.id, doseDef.dose)
-  return { slot, doseNumber: doseDef.dose }
+  return { slot: slot ?? null, doseNumber: doseDef.dose }
 }
 
 export function conferScheduleItem(item: VaccineScheduleItem): ConferenceResult {
@@ -80,7 +80,7 @@ export function conferAppliedVaccine(vaccine: Vaccine): ConferenceResult {
   return { ...result, entryId: vaccine.id }
 }
 
-function collectSources(prev?: SlotVariableData, next: SlotVariableData): string[] {
+function collectSources(prev: SlotVariableData | undefined, next: SlotVariableData): string[] {
   const set = new Set<string>()
   for (const s of prev?.sources ?? []) if (s) set.add(s)
   if (prev?.source) set.add(prev.source)
@@ -89,7 +89,7 @@ function collectSources(prev?: SlotVariableData, next: SlotVariableData): string
   return Array.from(set)
 }
 
-export function mergeSlotData(prev?: SlotVariableData, next: SlotVariableData): SlotVariableData {
+export function mergeSlotData(prev: SlotVariableData | undefined, next: SlotVariableData): SlotVariableData {
   if (!prev) {
     const sources = collectSources(undefined, next)
     return { ...next, sources }

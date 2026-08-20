@@ -113,6 +113,7 @@ async function registerRoutes() {
   const { microsoftCalendarRoutes } = await import('./infrastructure/http/calendar/microsoft-calendar.routes.js')
   const { measurementRoutes } = await import('./infrastructure/http/measurement/measurement.routes.js')
   const { careReminderRoutes } = await import('./infrastructure/http/care-reminder/care-reminder.routes.js')
+  const { examResultItemRoutes } = await import('./infrastructure/http/exam-result-item/exam-result-item.routes.js')
 
   await app.register(patientRoutes)
   const { familySupportRoutes } = await import('./infrastructure/http/family-support/family-support.routes.js')
@@ -153,6 +154,7 @@ async function registerRoutes() {
   await app.register(microsoftCalendarRoutes)
   await app.register(measurementRoutes)
   await app.register(careReminderRoutes)
+  await app.register(examResultItemRoutes)
   await app.register(roadmapRoutes)
   await app.register(projectContextRoutes)
 }

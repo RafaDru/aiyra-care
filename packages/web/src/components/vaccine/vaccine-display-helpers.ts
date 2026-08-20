@@ -79,7 +79,7 @@ export const DOSE_STATUS_COLOR: Record<DoseVisualStatus, string> = {
 
 export function resolveVisualStatus(
   hasApplication: boolean,
-  scheduleStatus?: string | null,
+  scheduleStatus: string | null | undefined,
   expectedAgeMonths: number,
   childAgeMonths: number,
 ): DoseVisualStatus {

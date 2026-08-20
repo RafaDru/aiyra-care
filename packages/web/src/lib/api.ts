@@ -383,6 +383,21 @@ export const api = {
     list: (patientId?: string) => request<import('./api.types.js').Exam[]>(`/exams${patientId ? `?patientId=${patientId}` : ''}`),
     create: (data: object) => request<import('./api.types.js').Exam>('/exams', { method: 'POST', body: JSON.stringify(data) }),
   },
+  examMarkers: {
+    listByPatient: (patientId: string, markerName?: string) =>
+      request<import('./api.types.js').ExamMarker[]>(
+        `/exam-markers?patientId=${patientId}${markerName ? `&markerName=${encodeURIComponent(markerName)}` : ''}`
+      ),
+    listByExam: (examId: string) =>
+      request<import('./api.types.js').ExamMarker[]>(`/exams/${examId}/markers`),
+    getTrends: (patientId: string) =>
+      request<import('./api.types.js').MarkerTrendGroup[]>(`/patients/${patientId}/exam-markers/trends`),
+    createBatch: (items: object[]) =>
+      request<import('./api.types.js').ExamMarker[]>('/exam-markers/batch', {
+        method: 'POST',
+        body: JSON.stringify({ items }),
+      }),
+  },
   examOrders: {
     list: (patientId?: string) =>
       request<import('./api.types.js').ExamOrder[]>(`/exam-orders${patientId ? `?patientId=${patientId}` : ''}`),
