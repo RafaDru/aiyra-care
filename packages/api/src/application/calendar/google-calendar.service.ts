@@ -7,7 +7,7 @@ import type { ScheduledEventService, IcsImportResult } from '../scheduled-event/
 import { encrypt, decrypt } from '../../infrastructure/crypto-helper.js'
 import { ScheduledEvent } from '../../domain/scheduled-event/scheduled-event.entity.js'
 
-const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
+const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.profile'
 
 export interface GoogleCalendarSyncResult {
   pull: IcsImportResult
@@ -114,6 +114,23 @@ export class GoogleCalendarService {
       updatedAt: new Date(),
     })
     const saved = await this.connections.upsert(connection)
+
+    // Tenta obter foto de perfil da conta Google para aplicar no paciente
+    try {
+      const oauth2User = new google.auth.OAuth2(clientId, clientSecret, redirectUri())
+      oauth2User.setCredentials({ access_token: tokens.access_token })
+      const oauth2Api = google.oauth2({ version: 'v2', auth: oauth2User })
+      const userInfo = await oauth2Api.userinfo.get()
+      if (userInfo.data.picture) {
+        const { PatientPgRepository } = await import('../../infrastructure/persistence/patient.pg.repository.js')
+        const { PatientService } = await import('../patient/patient.service.js')
+        const patientService = new PatientService(new PatientPgRepository((this.connections as any).pool))
+        await patientService.update(patientId, { photoUrl: userInfo.data.picture })
+      }
+    } catch {
+      // foto opcional — não falha o callback OAuth
+    }
+
     return { connection: saved, returnTo }
   }
 

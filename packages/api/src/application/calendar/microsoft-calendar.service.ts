@@ -7,7 +7,7 @@ import { ScheduledEvent } from '../../domain/scheduled-event/scheduled-event.ent
 
 const GRAPH_BASE = 'https://graph.microsoft.com/v1.0'
 const AUTH_BASE = 'https://login.microsoftonline.com/common/oauth2/v2.0'
-const SCOPES = 'offline_access Calendars.ReadWrite'
+const SCOPES = 'offline_access Calendars.ReadWrite User.Read'
 
 export interface MicrosoftCalendarSyncResult {
   pull: IcsImportResult
@@ -145,6 +145,26 @@ export class MicrosoftCalendarService {
       updatedAt: new Date(),
     })
     const saved = await this.connections.upsert(connection)
+
+    // Tenta obter foto de perfil Microsoft Graph para aplicar no paciente (se disponível)
+    try {
+      const photoRes = await fetch(`${GRAPH_BASE}/me/photos/48x48/$value`, {
+        headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+      })
+      if (photoRes.ok) {
+        const arrayBuf = await photoRes.arrayBuffer()
+        const base64 = Buffer.from(arrayBuf).toString('base64')
+        const contentType = photoRes.headers.get('content-type') || 'image/jpeg'
+        const dataUrl = `data:${contentType};base64,${base64}`
+        const { PatientPgRepository } = await import('../../infrastructure/persistence/patient.pg.repository.js')
+        const { PatientService } = await import('../patient/patient.service.js')
+        const patientService = new PatientService(new PatientPgRepository((this.connections as any).pool))
+        await patientService.update(patientId, { photoUrl: dataUrl })
+      }
+    } catch {
+      // foto opcional — não bloqueia callback OAuth
+    }
+
     return { connection: saved, returnTo }
   }
 

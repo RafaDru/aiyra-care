@@ -257,6 +257,7 @@ export function PatientDetail() {
       parentIds: patient.parentIds,
       cpf: patient.cpf,
       cns: patient.cns,
+      photoUrl: patient.photoUrl,
     })
     setEditOpen(true)
   }
@@ -274,6 +275,7 @@ export function PatientDetail() {
         parentIds: values.parentIds || [],
         cpf: values.cpf?.replace(/\D/g, '') || undefined,
         cns: values.cns?.replace(/\D/g, '') || undefined,
+        photoUrl: values.photoUrl?.trim() || undefined,
       })
       message.success('Dados atualizados')
       setEditOpen(false)
@@ -671,6 +673,9 @@ export function PatientDetail() {
           <Form.Item name="heightCm" label={`Altura (${t('patient.height')})`}><Input type="number" step="0.1" /></Form.Item>
           <Form.Item name="cpf" label="CPF"><Input placeholder="000.000.000-00" maxLength={14} /></Form.Item>
           <Form.Item name="cns" label="CNS"><Input placeholder="Nº do Cartão SUS" maxLength={15} /></Form.Item>
+          <Form.Item name="photoUrl" label="URL do Avatar / Foto de Perfil">
+            <Input placeholder="https://lh3.googleusercontent.com/... ou https://graph.microsoft.com/..." />
+          </Form.Item>
           <Form.Item name="parentIds" label="Pais/Responsáveis">
             <Select
               mode="multiple"
