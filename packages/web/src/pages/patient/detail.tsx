@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented } from 'antd'
+import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
-import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -673,8 +673,35 @@ export function PatientDetail() {
           <Form.Item name="heightCm" label={`Altura (${t('patient.height')})`}><Input type="number" step="0.1" /></Form.Item>
           <Form.Item name="cpf" label="CPF"><Input placeholder="000.000.000-00" maxLength={14} /></Form.Item>
           <Form.Item name="cns" label="CNS"><Input placeholder="Nº do Cartão SUS" maxLength={15} /></Form.Item>
-          <Form.Item name="photoUrl" label="URL do Avatar / Foto de Perfil">
-            <Input placeholder="https://lh3.googleusercontent.com/... ou https://graph.microsoft.com/..." />
+          <Form.Item name="photoUrl" label="Foto de Perfil / Avatar (Upload ou URL)">
+            <Space.Compact style={{ width: '100%' }}>
+              <Form.Item name="photoUrl" noStyle>
+                <Input placeholder="Cole a URL ou faça upload de imagem (máx. 2 MB)" allowClear />
+              </Form.Item>
+              <Upload
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                showUploadList={false}
+                beforeUpload={(file) => {
+                  const isLt2M = file.size / 1024 / 1024 < 2
+                  if (!isLt2M) {
+                    message.error('A imagem de perfil deve ser menor que 2 MB')
+                    return Upload.LIST_IGNORE
+                  }
+                  const reader = new FileReader()
+                  reader.onload = (e) => {
+                    const base64 = e.target?.result as string
+                    if (base64) {
+                      editForm.setFieldValue('photoUrl', base64)
+                      message.success('Imagem carregada')
+                    }
+                  }
+                  reader.readAsDataURL(file)
+                  return false
+                }}
+              >
+                <Button icon={<UploadOutlined />}>Upload</Button>
+              </Upload>
+            </Space.Compact>
           </Form.Item>
           <Form.Item name="parentIds" label="Pais/Responsáveis">
             <Select
