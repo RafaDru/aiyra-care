@@ -14,6 +14,8 @@ export const createPatientSchema = z.object({
   parentIds: z.array(z.string().uuid()).optional(),
   cpf: z.string().regex(/^\d{11}$/, 'CPF deve ter 11 dígitos').optional(),
   cns: z.string().optional(),
+  /** Marca este paciente como o titular da conta (role membership `self`). Apenas adultos. */
+  markAsSelf: z.boolean().optional(),
 })
 
 export const updatePatientSchema = z.object({

@@ -243,7 +243,9 @@
     "female": "Feminino",
     "weight": "kg",
     "height": "cm",
-    "bloodType": "Tipo"
+    "bloodType": "Tipo",
+    "you": "Você",
+    "markAsSelf": "Este paciente é você (titular da conta)"
   },
   "sections": {
     "overview": "Visão geral",

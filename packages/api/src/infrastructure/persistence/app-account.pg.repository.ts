@@ -96,8 +96,44 @@ export class PatientMembershipPgRepository implements PatientMembershipRepositor
   async ensureMembership(accountId: string, patientId: string, role = 'guardian') {
     await this.pool.query(
       `INSERT INTO patient_memberships (account_id, patient_id, role)
-       VALUES ($1,$2,$3) ON CONFLICT (account_id, patient_id) DO NOTHING`,
+       VALUES ($1,$2,$3)
+       ON CONFLICT (account_id, patient_id) DO NOTHING`,
       [accountId, patientId, role],
     )
+  }
+
+  async listRolesForAccount(accountId: string): Promise<Record<string, string>> {
+    const { rows } = await this.pool.query(
+      `SELECT patient_id, role FROM patient_memberships WHERE account_id = $1`,
+      [accountId],
+    )
+    const map: Record<string, string> = {}
+    for (const row of rows) {
+      map[row.patient_id as string] = row.role as string
+    }
+    return map
+  }
+
+  async setSelfPatient(accountId: string, patientId: string): Promise<void> {
+    const client = await this.pool.connect()
+    try {
+      await client.query('BEGIN')
+      await client.query(
+        `UPDATE patient_memberships SET role = 'guardian' WHERE account_id = $1 AND role = 'self'`,
+        [accountId],
+      )
+      await client.query(
+        `INSERT INTO patient_memberships (account_id, patient_id, role)
+         VALUES ($1, $2, 'self')
+         ON CONFLICT (account_id, patient_id) DO UPDATE SET role = 'self'`,
+        [accountId, patientId],
+      )
+      await client.query('COMMIT')
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    } finally {
+      client.release()
+    }
   }
 }

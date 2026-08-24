@@ -1,0 +1,17 @@
+{"ts":"2026-08-24T20:13:58.641Z","event":"preToolUse","tool":"","path":null}
+{"ts":"2026-08-24T20:14:02.028Z","event":"preToolUse","tool":"","path":null}
+{"ts":"2026-08-24T20:14:46.259Z","event":"preToolUse","tool":"Write","path":"docs/test.md"}
+{"ts":"2026-08-24T20:17:50.196Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:18:02.691Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:18:08.730Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:18:15.182Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:18:36.834Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:18:44.082Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:18:48.647Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:18:55.212Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:19:02.280Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:19:28.142Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:20:17.255Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:20:31.441Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:20:39.098Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:20:39.297Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}

@@ -4,6 +4,20 @@ import type { PatientContextService } from '../../../application/patient/patient
 import type { LegalComplianceService } from '../../../application/legal-compliance/legal-compliance.service.js'
 import type { PatientMembershipRepository } from '../../../domain/auth/app-account.repository.js'
 import { isMinorBirthDate } from '../../../domain/patient/patient-age.js'
+
+function enrichPatientJson(
+  patient: { toJSON: () => Record<string, unknown> },
+  roleMap: Record<string, string>,
+) {
+  const json = patient.toJSON() as Record<string, unknown>
+  const id = String(json.id)
+  const membershipRole = roleMap[id] ?? 'guardian'
+  return {
+    ...json,
+    membershipRole,
+    isSelf: membershipRole === 'self',
+  }
+}
 import {
   createPatientSchema,
   updatePatientSchema,
@@ -51,9 +65,18 @@ export class PatientController {
     }
     const patient = await this.service.create(parsed.data)
     if (req.accountId && this.memberships) {
-      await this.memberships.ensureMembership(req.accountId, patient.id, 'guardian')
+      const wantsSelf = Boolean(parsed.data.markAsSelf) && !isMinorBirthDate(parsed.data.birthDate)
+      if (wantsSelf) {
+        await this.memberships.setSelfPatient(req.accountId, patient.id)
+      } else {
+        await this.memberships.ensureMembership(req.accountId, patient.id, 'guardian')
+      }
     }
-    return reply.status(201).send(patient.toJSON())
+    const roleMap =
+      req.accountId && this.memberships
+        ? await this.memberships.listRolesForAccount(req.accountId)
+        : {}
+    return reply.status(201).send(enrichPatientJson(patient, roleMap))
   }
 
   async getContext(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -142,7 +165,11 @@ export class PatientController {
     if (!assertPatientAccess(req, reply, parsed.data.id)) return
     try {
       const patient = await this.service.findById(parsed.data.id)
-      return reply.send(patient.toJSON())
+      const roleMap =
+        req.accountId && this.memberships
+          ? await this.memberships.listRolesForAccount(req.accountId)
+          : {}
+      return reply.send(enrichPatientJson(patient, roleMap))
     } catch (err) {
       if (err instanceof NotFoundError) return reply.status(404).send({ message: err.message })
       throw err
@@ -150,13 +177,17 @@ export class PatientController {
   }
 
   async findAll(req: AuthenticatedRequest, reply: FastifyReply) {
+    const roleMap =
+      req.accountId && this.memberships
+        ? await this.memberships.listRolesForAccount(req.accountId)
+        : {}
     if (isAuthEnforcementEnabled()) {
       const ids = [...getAllowedPatientIds(req)]
       const patients = await this.service.findByIds(ids)
-      return reply.send(patients.map((p) => p.toJSON()))
+      return reply.send(patients.map((p) => enrichPatientJson(p, roleMap)))
     }
     const patients = await this.service.findAll()
-    return reply.send(patients.map((p) => p.toJSON()))
+    return reply.send(patients.map((p) => enrichPatientJson(p, roleMap)))
   }
 
   async update(req: AuthenticatedRequest, reply: FastifyReply) {

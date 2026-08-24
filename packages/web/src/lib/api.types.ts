@@ -13,6 +13,8 @@ export interface Patient {
   ageCategory: 'children' | 'adolescents' | 'adults'
   createdAt: string
   updatedAt: string
+  membershipRole?: string
+  isSelf?: boolean
 }
 
 export type PatientContextAlertSeverity = 'info' | 'warning' | 'critical'

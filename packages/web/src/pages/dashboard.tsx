@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, Select, App, Alert } from 'antd'
+import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, Select, App, Alert, Checkbox } from 'antd'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
@@ -32,6 +32,9 @@ export function Dashboard() {
   const showMinorConsent = birthDateWatch
     ? isMinorBirthDate(birthDateWatch.toDate?.() ?? birthDateWatch)
     : false
+  const showMarkAsSelf = birthDateWatch
+    ? !isMinorBirthDate(birthDateWatch.toDate?.() ?? birthDateWatch)
+    : false
   const navigate = useNavigate()
 
   const load = () => {
@@ -63,6 +66,7 @@ export function Dashboard() {
         heightCm: values.heightCm ? Number(values.heightCm) : undefined,
         cpf: values.cpf?.replace(/\D/g, '') || undefined,
         cns: values.cns?.replace(/\D/g, '') || undefined,
+        markAsSelf: showMarkAsSelf && Boolean(values.markAsSelf),
       })
       message.success('Paciente cadastrado com sucesso')
       setModalOpen(false)
@@ -150,6 +154,11 @@ export function Dashboard() {
             <Input placeholder="000.000.000-00" maxLength={14} />
           </Form.Item>
           <Form.Item name="cns" label="CNS"><Input placeholder="Nº do Cartão SUS" maxLength={15} /></Form.Item>
+          {showMarkAsSelf && (
+            <Form.Item name="markAsSelf" valuePropName="checked" initialValue={false}>
+              <Checkbox>{t('patient.markAsSelf')}</Checkbox>
+            </Form.Item>
+          )}
           {showMinorConsent && <MinorGuardianConsentFormItem />}
         </Form>
       </Modal>
@@ -182,6 +191,7 @@ function PatientCard({ patient, onClick }: { patient: Patient; onClick: () => vo
         {catCfg && <Tag icon={catCfg.icon} color={catCfg.color}>{catCfg.label}</Tag>}
         {patient.gender === 'male' && <Tag icon={<ManOutlined />} color="blue">{t('patient.male')}</Tag>}
         {patient.gender === 'female' && <Tag icon={<WomanOutlined />} color="pink">{t('patient.female')}</Tag>}
+        {patient.isSelf && <Tag color="purple">{t('patient.you')}</Tag>}
         {patient.weightKg && <Tag color="green">{patient.weightKg} {t('patient.weight')}</Tag>}
         {patient.heightCm && <Tag color="cyan">{patient.heightCm} {t('patient.height')}</Tag>}
       </div>

@@ -11,4 +11,6 @@ export interface PatientMembershipRepository {
   hasSelfProfile(accountId: string): Promise<boolean>
   ensureMembership(accountId: string, patientId: string, role?: string): Promise<void>
   listAccessiblePatientIds(accountId: string): Promise<string[]>
+  listRolesForAccount(accountId: string): Promise<Record<string, string>>
+  setSelfPatient(accountId: string, patientId: string): Promise<void>
 }

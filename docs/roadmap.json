@@ -596,6 +596,18 @@
           "detail": "Modal dedicado com conversa renderizada + Imprimir/Salvar PDF (janela de impressão formatada com disclaimers)."
         },
         {
+          "id": "ava-chat-conversational-ux",
+          "title": "Chat conversacional — margens, pensamento, avatares",
+          "status": "done",
+          "detail": "Balão de pensamento com frases rotativas; Ava maior nas bolhas; avatar usuário à direita; contexto exam_result_items."
+        },
+        {
+          "id": "ava-account-self-patient",
+          "title": "Paciente titular da conta — badge Você",
+          "status": "done",
+          "detail": "membership role self; markAsSelf no cadastro adulto; tag Você no dashboard; script set-self-patient.ts."
+        },
+        {
           "id": "ava-expressions",
           "title": "Ava — expressões contextuais (empatia, seriedade, alerta)",
           "status": "planned",
@@ -1334,7 +1346,7 @@
       "title": "Artefatos de exame → modelo canônico",
       "summary": "PDF/PPT/DOC/imagens de laudo → OCR, corpus, medidas e campos estruturados. Depende de higienização. docs/EXAM_ARTIFACT_PIPELINE.md.",
       "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "statusLabel": "Marcadores + pipeline unificado entregues",
       "items": [
         {
           "id": "exam-artifact-orchestrator",
@@ -1357,8 +1369,8 @@
         {
           "id": "exam-artifact-parsers",
           "title": "Parsers adicionais (hemograma, lipídios, etc.)",
-          "status": "planned",
-          "detail": "Regex/tabela por lab; measurement_types."
+          "status": "in_progress",
+          "detail": "MaterDei v2 (hemograma + triagem neonatal) entregue; regex/tabela por lab; measurement_types."
         },
         {
           "id": "exam-artifact-office",
@@ -1369,14 +1381,26 @@
         {
           "id": "exam-artifact-structured",
           "title": "Tabela exam_result_items (Marcadores Médicos / Analitos)",
-          "status": "planned",
-          "detail": "Entidade de sub-domínio para resultados mensuráveis de laudos (Glicose, Hemoglobina, TSH, PCR, etc.) com valor numérico, unidade de medida, faixa de referência e status de alteração."
+          "status": "done",
+          "detail": "Migration 045–046; valor, unidade, ref, status, source_document_id, idempotência ON CONFLICT."
+        },
+        {
+          "id": "exam-artifact-pipeline-unified",
+          "title": "Pipeline unificado de extração",
+          "status": "done",
+          "detail": "exam-artifact.pipeline.ts — PyMuPDF → parser fonte → LLM fallback interno metered."
+        },
+        {
+          "id": "exam-source-document-lineage",
+          "title": "Lastro documental dos marcadores",
+          "status": "done",
+          "detail": "source_document_id + backfill SQL; AvaPatientContextService inclui marcadores estruturados."
         },
         {
           "id": "exam-markers-dashboards",
           "title": "Dashboards e gráficos de evolução de marcadores",
-          "status": "planned",
-          "detail": "Visualizações e gráficos de tendência para marcadores laboratoriais do paciente ao longo do tempo (independente do laboratório gerador)."
+          "status": "done",
+          "detail": "ExamMarkersDashboard master-detail + faixas de referência; sub-aba Marcadores em ExamsTab."
         },
         {
           "id": "exam-artifact-doc",
@@ -1548,20 +1572,132 @@
         {
           "id": "classifier-llm-fallback",
           "title": "Hook fallback LLM (llm-router) para rótulos ambíguos",
-          "status": "planned",
-          "detail": "AmilLabelClassifier.classifyWithLlm; integrar ava-orchestrator/llm-router."
+          "status": "in_progress",
+          "detail": "LlmBackedLabelClassifier + testes; integração completa no fluxo Amil sync pendente de tuning."
         },
         {
           "id": "classifier-embedding-engine",
           "title": "Motor de embedding/semântico alternativo (adapter)",
-          "status": "planned",
-          "detail": "Substituir FuzzyExamCatalogLookup sem tocar domínio."
+          "status": "done",
+          "detail": "UnifiedSemanticClassifier + VectorEmbeddingEngine + vector-exam-catalog-lookup."
         },
         {
           "id": "beneficiary-view-filter",
           "title": "Seletor de período/beneficiário na tela Atendimentos Amil",
           "status": "planned",
           "detail": "Fetch todas as faixas; comparar raw para dedup antes do destino."
+        }
+      ]
+    },
+    {
+      "id": "dev-delivery-pipeline",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Pipeline de entrega dev → beta",
+      "summary": "Ciclo mínimo para merges seguros: contexto, hooks, tier review, CI. docs/DELIVERY_PIPELINE.md.",
+      "status": "in_progress",
+      "statusLabel": "Hooks + CI endurecido",
+      "items": [
+        {
+          "id": "del-hooks-audit",
+          "title": "Cursor hooks pré/pós + auditoria JSONL",
+          "status": "done",
+          "detail": ".cursor/hooks.json; docs/dev-audit/; bloqueio .env; shell destrutivo."
+        },
+        {
+          "id": "del-cursor-agent-ops-doc",
+          "title": "Documentação operação agêntica LLM-agnóstica",
+          "status": "done",
+          "detail": "docs/CURSOR_AGENT_OPS.md — skills, hooks, troca de modelo."
+        },
+        {
+          "id": "del-ci-vitest-critical",
+          "title": "CI: vitest critical na API",
+          "status": "done",
+          "detail": ".github/workflows/ci.yml — test:critical + parsers/marcadores."
+        },
+        {
+          "id": "del-ci-web-build",
+          "title": "CI: build web (tsc + vite)",
+          "status": "done",
+          "detail": "Job web em ci.yml."
+        },
+        {
+          "id": "del-tier-review-gate",
+          "title": "Tier 0–3 + skills antes de merge tier 2+",
+          "status": "done",
+          "detail": "FEATURE_REVIEW_FRAMEWORK.md + .cursor/skills/aiyracare-*."
+        },
+        {
+          "id": "del-e2e-smoke",
+          "title": "Smoke E2E web mínimo",
+          "status": "planned",
+          "detail": "Login → paciente → exames; Playwright em CI opcional."
+        },
+        {
+          "id": "del-migration-dry-run",
+          "title": "Migration dry-run em PR",
+          "status": "planned",
+          "detail": "Script apply-migration contra PG ephemeral ou validação SQL."
+        },
+        {
+          "id": "del-deploy-runbook",
+          "title": "Deploy beta + runbook",
+          "status": "planned",
+          "detail": "API+web+worker+PG; rollback; secrets; checklist MVP beta."
+        }
+      ]
+    },
+    {
+      "id": "prod-run-intelligence",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Run — captura inteligente de bugs e acionamentos",
+      "summary": "Operação em produção: eventos sem PHI, alertas sync/LLM, triagem proativa. Complementa observability-platform.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "items": [
+        {
+          "id": "run-product-events-ingest",
+          "title": "product_events + ingest API",
+          "status": "planned",
+          "detail": "Allowlist properties; sem texto clínico; migration + POST ingest."
+        },
+        {
+          "id": "run-web-tracker",
+          "title": "trackProductEvent no web",
+          "status": "planned",
+          "detail": "Sync fail, Ava errors, billing, hygiene dismiss — opt-in."
+        },
+        {
+          "id": "run-sync-stuck-alerts",
+          "title": "Alertas sync stuck / fail rate",
+          "status": "planned",
+          "detail": "sync_jobs + connect-worker heartbeat; e-mail/Slack interno."
+        },
+        {
+          "id": "run-llm-cascade-alert",
+          "title": "Alerta cascata LLM 100% fail + budget",
+          "status": "planned",
+          "detail": "llm_usage_events; teto R$100 interno; runbook OBSERVABILITY.md."
+        },
+        {
+          "id": "run-error-fingerprint",
+          "title": "Fingerprint de erros recorrentes",
+          "status": "planned",
+          "detail": "Agrupar product_events + API logs sanitizados; dashboard ops admin."
+        },
+        {
+          "id": "run-user-escalation",
+          "title": "Acionamento proativo (opt-in)",
+          "status": "planned",
+          "detail": "Notificar família em sync crítico falho persistente; sem PHI no canal."
+        },
+        {
+          "id": "run-dev-audit-bridge",
+          "title": "Bridge dev-audit → staging metrics",
+          "status": "planned",
+          "detail": "Correlacionar hooks de dev com product_events em ambiente staging."
         }
       ]
     },

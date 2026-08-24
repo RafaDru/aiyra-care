@@ -1,5 +1,17 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-24b] - Pipeline de entrega, hooks Cursor, paciente titular (Você)
+
+### Contexto
+Endurecer operação agêntica (LLM-agnóstica), lastrear desenvolvimento, atualizar roadmap com ciclo Build/Run e entregar diferenciação do paciente titular da conta.
+
+### Realizado
+- **Cursor hooks** (`.cursor/hooks.json`): `sessionStart`, `beforeShellExecution`, `afterFileEdit`, `preToolUse` — auditoria em `docs/dev-audit/`; bloqueio `.env`/credenciais; shell destrutivo.
+- **Docs:** `DELIVERY_PIPELINE.md`, `CURSOR_AGENT_OPS.md`, `docs/dev-audit/README.md`.
+- **CI:** `vitest critical` + job **web build** em `.github/workflows/ci.yml`; parsers/marcadores em `test:critical`.
+- **Roadmap:** épicos `dev-delivery-pipeline`, `prod-run-intelligence`; exam markers/pipeline marcados done.
+- **Paciente titular:** API `isSelf`/`membershipRole`; `markAsSelf` no cadastro adulto; tag **Você** no dashboard; `set-self-patient.ts`.
+
 ## [2026-08-24] - Marcadores estruturados, pipeline unificado, Ava conversacional + lastro documental
 
 ### Contexto

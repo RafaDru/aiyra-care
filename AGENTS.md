@@ -140,6 +140,12 @@ SQL in `database/relational/`. Scripts: `apply-migration-NNN.mjs`. Medidas: **03
 
 For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/FEATURE_REVIEW_FRAMEWORK.md`. Orchestrator: `aiyracare-feature-release`. **Don't** run four analyses on every typo — use the tier matrix.
 
+## Cursor hooks + entrega
+
+- Hooks: `.cursor/hooks.json` — auditoria em `docs/dev-audit/`; ver `docs/CURSOR_AGENT_OPS.md`.
+- Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → CI (build API + critical + web).
+- Roadmap entrega: épicos `dev-delivery-pipeline`, `prod-run-intelligence`.
+
 ## Tests API
 
 ```powershell

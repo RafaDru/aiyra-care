@@ -1,6 +1,6 @@
 # Framework de revisão paralela — AiyraCare
 
-> **Última atualização:** 2026-08-13  
+> **Última atualização:** 2026-08-24  
 > Complementa [`LEGAL_COMPLIANCE.md`](./LEGAL_COMPLIANCE.md) e skills em `.cursor/skills/aiyracare-review-*`.
 
 ## Objetivo

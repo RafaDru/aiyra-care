@@ -243,7 +243,9 @@
     "female": "Female",
     "weight": "kg",
     "height": "cm",
-    "bloodType": "Type"
+    "bloodType": "Type",
+    "you": "You",
+    "markAsSelf": "This patient is you (account holder)"
   },
   "sections": {
     "overview": "Overview",
