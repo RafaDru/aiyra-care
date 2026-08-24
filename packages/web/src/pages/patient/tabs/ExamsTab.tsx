@@ -6,7 +6,7 @@ import { ExamMarkersDashboard } from '../../../components/patient/ExamMarkersDas
 import { InlineExamMarkersList } from '../../../components/patient/InlineExamMarkersList.js'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { CarePlaceAutocomplete } from '../../../components/ui/CarePlaceAutocomplete.js'
-import { PlusOutlined, FilePdfOutlined, PlayCircleOutlined, LinkOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
+import { PlusOutlined, FilePdfOutlined, PlayCircleOutlined, LinkOutlined, DownOutlined, UpOutlined, FileTextOutlined, DashboardOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api, openAuthenticatedDownload } from '../../../lib/api.js'
 import {
@@ -60,12 +60,22 @@ function syntheticOrder(orderId: string, exams: Exam[]): ExamOrder {
   }
 }
 
+/** Data do evento: sempre a data do EXAME (mais recente do grupo), nunca a data de inserção/pedido. */
+function examEventDate(row: ExamListRow): Date | null {
+  const candidates =
+    row.type === 'order'
+      ? [...row.exams.map((e) => e.examDate), row.order.orderDate]
+      : [row.exam.examDate]
+  const times = candidates
+    .filter((d): d is string => !!d)
+    .map((d) => new Date(d).getTime())
+    .filter((t) => !Number.isNaN(t))
+  if (times.length === 0) return null
+  return new Date(Math.max(...times))
+}
+
 function rowSortDate(row: ExamListRow): number {
-  if (row.type === 'order') {
-    if (row.order.orderDate) return new Date(row.order.orderDate).getTime()
-    return Math.max(...row.exams.map((e) => new Date(e.examDate).getTime()))
-  }
-  return new Date(row.exam.examDate).getTime()
+  return examEventDate(row)?.getTime() ?? 0
 }
 
 export function ExamsTab({ patientId, highlightEntityId }: Props) {
@@ -318,12 +328,8 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
       title: t('exam.date'),
       key: 'date',
       render: (_: unknown, row: ExamListRow) => {
-        if (row.type === 'order') {
-          return row.order.orderDate
-            ? new Date(row.order.orderDate).toLocaleDateString()
-            : new Date(row.exams[0].examDate).toLocaleDateString()
-        }
-        return new Date(row.exam.examDate).toLocaleDateString()
+        const d = examEventDate(row)
+        return d ? d.toLocaleDateString() : '-'
       },
     },
     {
@@ -452,9 +458,11 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
           value={activeSubTab}
           onChange={(val) => setActiveSubTab(val as 'list' | 'markers')}
           options={[
-            { value: 'list', label: 'Laudos & Pedidos' },
-            { value: 'markers', label: 'Marcadores do Exame' },
+            { value: 'list', icon: <FileTextOutlined />, label: 'Laudos & Pedidos' },
+            { value: 'markers', icon: <DashboardOutlined />, label: 'Marcadores do Exame' },
           ]}
+          size="large"
+          style={{ backgroundColor: '#f5f5f5', padding: 3, borderRadius: 10 }}
         />
       </div>
 

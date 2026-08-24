@@ -11,6 +11,8 @@ export interface ExamResultItemProps {
   referenceRange?: string
   status?: ExamMarkerStatus
   collectedAt: Date
+  /** Lastro: documento de origem (PDF/laudo) que forneceu este valor. */
+  sourceDocumentId?: string | null
 }
 
 export interface ExamResultItemData {
@@ -25,6 +27,7 @@ export interface ExamResultItemData {
   referenceRange: string | null
   status: ExamMarkerStatus
   collectedAt: Date
+  sourceDocumentId: string | null
   createdAt: Date
 }
 
@@ -44,6 +47,7 @@ export class ExamResultItem {
       referenceRange: props.referenceRange ?? null,
       status: props.status ?? 'normal',
       collectedAt: props.collectedAt,
+      sourceDocumentId: props.sourceDocumentId ?? null,
       createdAt: new Date(),
     })
   }
@@ -63,6 +67,7 @@ export class ExamResultItem {
   get referenceRange(): string | null { return this.data.referenceRange }
   get status(): ExamMarkerStatus { return this.data.status }
   get collectedAt(): Date { return this.data.collectedAt }
+  get sourceDocumentId(): string | null { return this.data.sourceDocumentId }
   get createdAt(): Date { return this.data.createdAt }
 
   toJSON(): ExamResultItemData {

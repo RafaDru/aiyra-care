@@ -9,6 +9,7 @@ import type { AuthorizationRepository } from '../../domain/authorization/authori
 import type { HealthThreadRepository } from '../../domain/health-thread/health-thread.repository.js'
 import type { CareReminderRepository } from '../../domain/care-reminder/care-reminder.repository.js'
 import type { MeasurementRepository } from '../../domain/measurement/measurement.repository.js'
+import type { ExamResultItemRepository } from '../../domain/exam-result-item/exam-result-item.repository.js'
 import { NotFoundError } from '../../domain/errors.js'
 import { ageInYears } from '../../domain/patient/age-rules.js'
 
@@ -55,6 +56,7 @@ export class AvaPatientContextService {
     private readonly healthThreads: HealthThreadRepository,
     private readonly careReminders: CareReminderRepository,
     private readonly measurements: MeasurementRepository,
+    private readonly examResultItems?: ExamResultItemRepository,
   ) {}
 
   async buildContextBlock(patientId: string): Promise<{
@@ -64,7 +66,7 @@ export class AvaPatientContextService {
     clinicianLabel: string
   }> {
     const patient = await this.patients.findById(patientId)
-    if (!patient) throw new NotFoundError('Paciente não encontrado')
+    if (!patient) throw new NotFoundError('Paciente', patientId)
 
     const ageYears = ageInYears(patient.birthDate)
     const ageLabel = AGE_CATEGORY_PT[patient.ageCategory] ?? patient.ageCategory
@@ -104,6 +106,27 @@ export class AvaPatientContextService {
       (a) => a.authorizationDate!,
     ).slice(0, 8)
     const recentMeasurements = sortByDateDesc(measurementRows, (m) => m.observedAt).slice(0, 12)
+
+    const markerRows = this.examResultItems
+      ? await this.examResultItems.findAll({ patientId })
+      : []
+    // Agrupa por marcador: pega as 4 medições mais recentes de cada analito
+    const byMarker = new Map<string, typeof markerRows>()
+    for (const item of sortByDateDesc(markerRows, (m) => m.collectedAt)) {
+      const key = item.markerName.toLowerCase()
+      const list = byMarker.get(key) ?? []
+      if (list.length < 4) list.push(item)
+      byMarker.set(key, list)
+    }
+    const markerLines = [...byMarker.values()].slice(0, 30).map((items) => {
+      const latest = items[0]
+      const ref = latest.referenceRange ? ` ref: ${latest.referenceRange}` : ''
+      const history = items.length > 1
+        ? ` | histórico: ${[...items].reverse().map((i) => `${formatDate(i.collectedAt)}=${i.displayValue}${i.unit ? i.unit : ''}`).join(', ')}`
+        : ''
+      const status = latest.status !== 'normal' ? ` [${latest.status.toUpperCase()}]` : ''
+      return `- ${latest.markerName}: ${latest.displayValue}${latest.unit ? ` ${latest.unit}` : ''} (${formatDate(latest.collectedAt)})${status}${ref}${history}`
+    }).join('\n')
 
     const allergyLines = allergyRows.length
       ? allergyRows.map((a) => `- ${a.allergen}${a.reaction ? ` (${a.reaction})` : ''}`).join('\n')
@@ -216,6 +239,9 @@ export class AvaPatientContextService {
       '',
       'Medições recentes (vitals, monitoramento):',
       measurementLines,
+      '',
+      'Marcadores laboratoriais estruturados (valores exatos com referência e histórico):',
+      markerLines || '- Nenhum marcador estruturado registrado',
     ].join('\n')
 
     return {

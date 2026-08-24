@@ -9,6 +9,7 @@ import { useTheme } from '../../theme/ThemeProvider.js'
 import { AppLogo } from '../brand/AppLogo.js'
 import { LanguageSwitcher } from '../ui/LanguageSwitcher.js'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
+import { AvaGlobalDock } from '../ava/AvaGlobalDock.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -162,6 +163,7 @@ export function AppLayout() {
           <Outlet />
         </Content>
       </Layout>
+      <AvaGlobalDock />
     </Layout>
   )
 }

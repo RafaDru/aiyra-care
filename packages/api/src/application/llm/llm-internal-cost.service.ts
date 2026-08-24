@@ -14,6 +14,8 @@ export interface InternalLlmCall {
   usage: LlmTokenUsage
   patientId?: string
   conversationId?: string
+  /** Feature de metering (default: label_classification). */
+  feature?: string
   /** Extra contexto de observabilidade (ex.: qual job/integração originou). */
   metadata?: Record<string, unknown>
 }
@@ -102,7 +104,7 @@ export class LlmInternalCostService {
     await this.budgetRepo.save(next)
     await this.usageRepo.appendEvent({
       scopeId: 'internal-operations',
-      feature: 'label_classification',
+      feature: (call.feature ?? 'label_classification') as Parameters<typeof this.usageRepo.appendEvent>[0]['feature'],
       patientId: call.patientId,
       conversationId: call.conversationId,
       provider: call.provider,

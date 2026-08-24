@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-19",
+  "generatedAt": "2026-08-24",
   "application": {
     "name": "AiyraCare (Filhos)",
     "repository": "https://github.com/RafaDru/open-health",
@@ -30,8 +30,9 @@
     { "id": "I", "name": "Agentes de apoio (Ava)", "description": "Ava chat + reflexão; roadmap: conversas persistidas, pins, grafo", "usesLlm": true, "status": "operational" },
     { "id": "J", "name": "Observabilidade", "description": "llm_usage_events, sync_jobs; product_events planejado", "usesLlm": false, "status": "planned" },
     { "id": "K", "name": "Higienização (dedup)", "description": "Detectores exams/vacinas; hygiene_candidates (042); bloqueio na inserção", "usesLlm": false, "status": "operational" },
-    { "id": "L", "name": "Classificação de rótulos", "description": "Motor hexagonal (port/engine/adapter) roteia atendimento Amil → consulta/exame; reuso em jobs", "usesLlm": false, "status": "operational" },
-    { "id": "M", "name": "Catálogo de medicações (backlog)", "description": "Base dinâmica: auto-sugestão semântica no cadastro, candidatos curados, bula/imagem/analítica; épico medication-catalog (P4)", "usesLlm": false, "status": "planned" }
+    { "id": "L", "name": "Classificação de rótulos", "description": "Motor 3-tier (vetor + LLM + catálogo 044); roteia Amil → consulta/exame", "usesLlm": true, "status": "operational" },
+    { "id": "M", "name": "Catálogo de medicações (backlog)", "description": "Base dinâmica: auto-sugestão semântica no cadastro", "usesLlm": false, "status": "planned" },
+    { "id": "N", "name": "Artefatos de exame → marcadores", "description": "Pipeline unificado PDF/OCR/parser/LLM → exam_result_items (045–046); dashboard marcadores", "usesLlm": true, "status": "operational" }
   ],
   "domains": [
     { "name": "Patient", "table": "patients", "description": "Pacientes e vínculos familiares" },
@@ -54,7 +55,8 @@
     { "name": "LlmUsageEvent", "table": "llm_usage_events", "description": "Metering LLM Ava (040) + cost_bucket client|internal (043)" },
     { "name": "LlmInternalBudget", "table": "llm_internal_budget", "description": "Orçamento mensal interno em centavos de R$ (043), teto default R$100" },
     { "name": "Medication", "table": "medications", "description": "Medicamentos; genericName + brandName; roadmap: catálogo dinâmico (épico medication-catalog)" },
-    { "name": "SemanticCatalogCache", "table": "semantic_catalog_cache", "description": "Catálogo dinâmico aprendido por vetor/LLM (044)" }
+    { "name": "SemanticCatalogCache", "table": "semantic_catalog_cache", "description": "Catálogo dinâmico aprendido por vetor/LLM (044)" },
+    { "name": "ExamResultItem", "table": "exam_result_items", "description": "Marcadores laboratoriais estruturados (045); idempotência + source_document_id (046)" }
   ],
   "apiRoutes": [
     { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },
@@ -79,7 +81,9 @@
     { "method": "GET", "path": "/hygiene/candidates", "description": "Candidatos a duplicata (higienização)" },
     { "method": "POST", "path": "/hygiene/candidates/:id/resolve", "description": "Resolver candidato (same_entity/dismiss)" },
     { "method": "GET", "path": "/exam-orders", "description": "Pedidos de exame CRUD" },
-    { "method": "POST", "path": "/ava/chat", "description": "Chat Ava (companheira)" },
+    { "method": "GET", "path": "/patients/:id/exam-markers/trends", "description": "Tendências de marcadores laboratoriais" },
+    { "method": "GET", "path": "/exam-result-items", "description": "Marcadores estruturados CRUD/list" },
+    { "method": "POST", "path": "/patients/:id/ava/chat", "description": "Chat Ava (contexto + marcadores)" },
     { "method": "GET", "path": "/llm/usage/internal", "description": "Indicadores do LLM interno (cost_bucket=internal) — ops key" },
     { "method": "GET", "path": "/emergency/directory", "description": "Guia de emergência por paciente" }
   ],
@@ -108,7 +112,9 @@
     { "id": "settings-split", "date": "2026-08-13", "title": "Configurações em /settings/*", "status": "active" },
     { "id": "outlook-oauth-localhost", "date": "2026-08-13", "title": "Azure Web redirect localhost only", "decision": "MICROSOFT_CALENDAR_REDIRECT_URI=http://localhost:3010/...", "status": "active" },
     { "id": "agents-next-epic", "date": "2026-08-13", "title": "Próximo épico: Agentes RAG", "decision": "Gate ANVISA + médico antes de clínico", "status": "active" },
-    { "id": "classification-engine", "date": "2026-08-19", "title": "Classificador de rótulos hexagonal (Amil)", "decision": "Port no domínio; engine rules+fuzzy em application; adapter em infra; reuse em integração e jobs. Fallback LLM integrado (LlmBackedLabelClassifier + LlmRouter) com metering de custo INTERNO (cost_bucket=internal, orçamento R$100/mês, 043)", "status": "active" }
+    { "id": "classification-engine", "date": "2026-08-19", "title": "Classificador semântico 3-tier", "decision": "Vetor (≥0.80) → LLM interno metered → semantic_catalog_cache (044). Fallback LLM com cost_bucket=internal, orçamento R$100/mês (043)", "status": "active" },
+    { "id": "exam-artifact-pipeline", "date": "2026-08-24", "title": "Pipeline unificado de artefatos de exame", "decision": "PyMuPDF → parser fonte (Hermes/MaterDei) → LLM fallback interno (exam_marker_extraction) → exam_result_items com source_document_id (046). Ava recebe marcadores no contexto.", "status": "active" },
+    { "id": "ava-global-dock", "date": "2026-08-21", "title": "Ava global na conta", "decision": "FAB fixo via AppLayout; patientId da rota; conversas persistidas planejadas (047+)", "status": "active" }
   ],
   "plannedWork": [
     { "id": "agent-rag", "title": "packages/agents + runtime citações", "status": "planned", "priority": "P3" },

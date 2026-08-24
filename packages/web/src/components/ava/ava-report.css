@@ -1,0 +1,14 @@
+/* Bolhas do modal de relatório Ava */
+.ava-report-bubble {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(253, 242, 248, 0.8);
+  border: 1px solid rgba(251, 207, 232, 0.6);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.ava-report-bubble--user {
+  background: rgba(240, 237, 255, 0.7);
+  border-color: rgba(199, 210, 254, 0.5);
+}

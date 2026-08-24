@@ -11,7 +11,6 @@ import type { Patient, IntegrationLink } from '../../lib/api.types.js'
 import { MeasurementsTab } from './tabs/MeasurementsTab.js'
 import { CareReminderBanner } from '../../components/measurements/CareReminderBanner.js'
 import { FamilySupportPanel } from '../../components/family-support/FamilySupportPanel.js'
-import { AvaDockWidget } from '../../components/ava/AvaDockWidget.js'
 import { useCareReminderNotifications } from '../../hooks/useCareReminderNotifications.js'
 import type { CareReminderRow } from '../../lib/api.types.js'
 import { VaccinesTab } from './tabs/VaccinesTab.js'
@@ -496,11 +495,6 @@ export function PatientDetail() {
               {patient.bloodType && <Tag color="purple">{t('patient.bloodType')} {patient.bloodType}</Tag>}
             </div>
           </div>
-          <AvaDockWidget
-            patientId={patient.id}
-            healthThreadId={openThreadId ?? undefined}
-            patientAvatarSize={96}
-          />
         </div>
       </Card>
 

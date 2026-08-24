@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Checkbox, Input, Tag, Typography, App } from 'antd'
-import { SendOutlined } from '@ant-design/icons'
+import { Avatar, Button, Checkbox, Input, Tag, Typography, App } from 'antd'
+import { FileTextOutlined, SendOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { AvaChatResponse, LlmUsageQuota } from '../../lib/api.types.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
+import { useAuth } from '../../contexts/AuthContext.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
 import { AvaAvatar } from './AvaAvatar.js'
 import { AvaQuotaBar } from './AvaQuotaBar.js'
 import { AvaChatHeading } from './AvaChatHeading.js'
+import { useAvaThinkingPhrase } from './useAvaThinkingPhrase.js'
 import {
   AVA_CHAT_AVATAR_SIZE,
   AVA_CHAT_THINKING_AVATAR_SIZE,
@@ -18,7 +20,10 @@ import {
   readAvaAllowLlmDataSharing,
   writeAvaAllowLlmDataSharing,
 } from '../../lib/ava-llm-preferences.js'
+import { AvaMarkdown } from './AvaMarkdown.js'
+import { AvaReportModal } from './AvaReportModal.js'
 import './ava-chat.css'
+import './ava-report.css'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -33,6 +38,17 @@ interface Props {
   showTitle?: boolean
 }
 
+/** Iniciais do nome para o fallback do avatar do usuário. */
+function initialsOf(name: string | null | undefined): string {
+  if (!name) return '?'
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join('')
+}
+
 export function AvaChatPanel({
   patientId,
   healthThreadId,
@@ -41,6 +57,7 @@ export function AvaChatPanel({
 }: Props) {
   const { t } = useTranslation()
   const { message } = App.useApp()
+  const { account } = useAuth()
   const { runLlmTask } = useLlmActivity()
   const [quota, setQuota] = useState<LlmUsageQuota | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -48,7 +65,10 @@ export function AvaChatPanel({
   const [loading, setLoading] = useState(false)
   const [lastModel, setLastModel] = useState<string | null>(null)
   const [allowLlmDataSharing, setAllowLlmDataSharing] = useState(() => readAvaAllowLlmDataSharing())
+  const [reportOpen, setReportOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const thinkingPhrase = useAvaThinkingPhrase(loading)
 
   const loadQuota = useCallback(() => {
     api.llm.quota().then(setQuota).catch(() => setQuota(null))
@@ -129,6 +149,25 @@ export function AvaChatPanel({
     variant === 'embedded' && 'ava-chat-panel--embedded',
   ].filter(Boolean).join(' ')
 
+  // Identidade visual do usuário no chat (você à direita da conversa)
+  const userAvatarUrl = account?.avatarUrl ?? null
+  const userDisplayName = account?.displayName ?? account?.email ?? null
+
+  const userAvatar = (
+    <Avatar
+      size={40}
+      src={userAvatarUrl ?? undefined}
+      style={{
+        backgroundColor: userAvatarUrl ? undefined : '#4F46E5',
+        fontSize: 15,
+        flexShrink: 0,
+        border: '1.5px solid rgba(79, 70, 229, 0.25)',
+      }}
+    >
+      {initialsOf(userDisplayName)}
+    </Avatar>
+  )
+
   return (
     <div className={panelClass}>
       <div className="ava-chat-panel__disclaimer">
@@ -149,7 +188,35 @@ export function AvaChatPanel({
       )}
 
       {quota && quota.llmEnabled && (
-        <AvaQuotaBar quota={quota} lastModel={lastModel} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <AvaQuotaBar quota={quota} lastModel={lastModel} />
+          </div>
+          {messages.length > 0 && (
+            <Button
+              size="small"
+              type="text"
+              icon={<FileTextOutlined />}
+              onClick={() => setReportOpen(true)}
+              title={t('ava.report')}
+            >
+              {t('ava.report')}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Relatório também disponível sem cota ativa */}
+      {!quota?.llmEnabled && messages.length > 0 && (
+        <Button
+          size="small"
+          type="text"
+          icon={<FileTextOutlined />}
+          onClick={() => setReportOpen(true)}
+          style={{ alignSelf: 'flex-end' }}
+        >
+          {t('ava.report')}
+        </Button>
       )}
 
       {quotaAlert}
@@ -184,17 +251,24 @@ export function AvaChatPanel({
                   )}
                 </span>
               )}
-              {item.text}
+              {item.role === 'assistant' ? <AvaMarkdown content={item.text} /> : item.text}
             </div>
+            {item.role === 'user' && (
+              <span className="ava-chat-user-avatar" title={userDisplayName ?? undefined}>
+                {userAvatar}
+              </span>
+            )}
           </div>
         ))}
 
         {loading && (
           <div className="ava-chat-bubble-row ava-chat-bubble-row--ava ava-chat-bubble-row--thinking">
             <AvaAvatar size={AVA_CHAT_THINKING_AVATAR_SIZE} analyzing />
-            <div className="ava-chat-bubble ava-chat-bubble--ava ava-chat-bubble--thinking">
-              <span className="ava-chat-bubble__tag">{t('ava.name')}</span>
-              <span className="ava-chat-thinking-text">{t('ava.thinking')}</span>
+            {/* Balão de pensamento: contorno pontilhado + frases rotativas */}
+            <div className="ava-chat-thought">
+              <span className="ava-chat-thought__dot ava-chat-thought__dot--1" aria-hidden="true" />
+              <span className="ava-chat-thought__dot ava-chat-thought__dot--2" aria-hidden="true" />
+              <span className="ava-chat-thinking-text">{thinkingPhrase}</span>
             </div>
           </div>
         )}
@@ -240,6 +314,13 @@ export function AvaChatPanel({
           {t('ava.send')}
         </Button>
       </div>
+
+      <AvaReportModal
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        title={`${t('ava.name')} — ${t('ava.report')}`}
+        messages={messages}
+      />
     </div>
   )
 }

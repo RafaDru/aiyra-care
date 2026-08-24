@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-19",
+  "updatedAt": "2026-08-24",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -578,6 +578,24 @@
           "detail": "LlmActivityContext: chat, interpretação manuscrito/carteira; dock reage globalmente."
         },
         {
+          "id": "ava-global-dock",
+          "title": "Ava global — orb fixo em todas as telas",
+          "status": "done",
+          "detail": "Removida do profile; orb fixo (FAB) sobreposto ao conteúdo via AppLayout. Paciente da lente derivado da rota (/patients/:id ou ?patientId=) com fallback para 1º paciente da conta."
+        },
+        {
+          "id": "ava-rich-rendering",
+          "title": "Respostas ricas — markdown, tabelas e cores",
+          "status": "done",
+          "detail": "react-markdown + GFM nos balões: tabelas de dados, listas, destaques; CSS temático roxo/rosa. System prompt instrui uso de tabelas para comparativos."
+        },
+        {
+          "id": "ava-report-modal",
+          "title": "Relatório da conversa em tela separada + PDF",
+          "status": "done",
+          "detail": "Modal dedicado com conversa renderizada + Imprimir/Salvar PDF (janela de impressão formatada com disclaimers)."
+        },
+        {
           "id": "ava-expressions",
           "title": "Ava — expressões contextuais (empatia, seriedade, alerta)",
           "status": "planned",
@@ -587,9 +605,21 @@
         {
           "id": "ava-platform-presence",
           "title": "Ava em múltiplos pontos da plataforma",
-          "status": "planned",
-          "detail": "Widget contextual: interpretação de documentos, export clínico, onboarding, integrações; presença visual + glow quando LLM ativa.",
+          "status": "in_progress",
+          "detail": "Orb global entregue (todas as telas). Faltam: aceleradores contextuais por entidade e widget em documentos/export/integrações; presença visual + glow quando LLM ativa.",
           "reviewBadge": ["content"]
+        },
+        {
+          "id": "ava-accelerators",
+          "title": "Aceleradores 'Pergunte à Ava' nas entidades",
+          "status": "planned",
+          "detail": "Botões/hints contextuais (exames, marcadores, laudos, autorizações): 'Não sabe interpretar? Pergunte à Ava' — abre dock com pergunta pré-montada sobre o registro (pin implícito da entidade). Ava recebe o contexto do registro específico no prompt."
+        },
+        {
+          "id": "ava-charts-in-chat",
+          "title": "Gráficos renderizados dentro do chat",
+          "status": "planned",
+          "detail": "Ava emite blocos ```chart com JSON (tipo, série, faixa de referência) → web renderiza recharts inline (linha/barras) nos balões. Reuso de parseReferenceLimits para bandas. Custo zero de LLM extra."
         },
         {
           "id": "ava-avatar-picker",
@@ -1223,7 +1253,7 @@
           "id": "ava-context-accelerators",
           "title": "Atalhos: paciente, tema, thread",
           "status": "planned",
-          "detail": "Falar sobre Luís; exames recentes; health_thread."
+          "detail": "Falar sobre Luís; exames recentes; health_thread. Complementa ava-accelerators (botões por entidade)."
         }
       ]
     },

@@ -294,7 +294,8 @@
     "thinking": "Organizing context…",
     "send": "Send",
     "allowDataSharing": "Use free model (Zen) with data sharing",
-    "allowDataSharingHint": "When unchecked, we use OpenCode Go or other providers with zero retention for health data. When checked, free DeepSeek on Zen may use your messages to improve the model (OpenCode)."
+    "allowDataSharingHint": "When unchecked, we use OpenCode Go or other providers with zero retention for health data. When checked, free DeepSeek on Zen may use your messages to improve the model (OpenCode).",
+    "report": "Report"
   },
   "agenda": {
     "new": "New reminder",

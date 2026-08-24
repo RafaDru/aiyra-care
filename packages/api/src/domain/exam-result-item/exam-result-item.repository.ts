@@ -13,4 +13,6 @@ export interface ExamResultItemRepository {
   saveBatch(items: ExamResultItem[]): Promise<ExamResultItem[]>
   delete(id: string): Promise<void>
   deleteByExamId(examId: string): Promise<void>
+  /** Backfill do lastro documental (marcadores órfãos → documento do exame). */
+  backfillSourceDocuments(): Promise<number>
 }

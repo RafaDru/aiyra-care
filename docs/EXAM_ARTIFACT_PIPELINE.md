@@ -1,100 +1,121 @@
 # Pipeline de artefatos de exame → modelo canônico
 
-> **Última atualização:** 2026-08-19  
-> Relacionado: `docs/EXAM_OCR.md`, `docs/DATA_HYGIENE.md`, `docs/ARCHITECTURE_DATA_LAYERS.md`
+> **Última atualização:** 2026-08-24  
+> Relacionado: `docs/EXAM_OCR.md`, `docs/DATA_HYGIENE.md`, `docs/ARCHITECTURE_DATA_LAYERS.md`, `docs/CLASSIFICATION_ENGINE.md`
 
 ## Objetivo
 
-Converter **todos os laudos e anexos de exame** (PDF, PPT, DOC, imagens) em dados **normalizados e transpostos** no modelo canônico do AiyraCare:
+Converter **laudos e anexos de exame** (PDF, imagem, office) em dados **normalizados** no modelo canônico:
 
-- Entidade `exams` (metadados + resumo)
-- `documents` + `extracted_text` (texto OCR)
-- `exam_orders` (pedido consolidado quando aplicável)
-- `measurement_observations` (valores pontuais: glicemia, etc.)
-- Futuro: campos estruturados por analito, referências, flags
+| Destino | Conteúdo |
+|---------|----------|
+| `exams` | Metadados + resumo textual |
+| `documents` + `extracted_text` | Texto nativo/OCR |
+| `exam_orders` | Pedido consolidado quando aplicável |
+| `exam_result_items` | **Marcadores estruturados** (analito, valor, unidade, ref, status, data) |
+| `measurement_observations` | Valores pontuais legados (ex.: glicemia via corpus OCR) |
+
+## Sequência motora unificada (2026-08-21+)
+
+Todos os fornecedores (Hermes Pardini, Mater Dei, upload manual) passam pelo mesmo pipeline em `exam-artifact.pipeline.ts`:
+
+```text
+Artefato (GCS / portal / upload)
+    ↓
+[1] Extração de texto
+    → PyMuPDF nativo (python-pdf-extractor.py)
+    → fallback OCR imagem se PDF sem texto
+    ↓
+[2] Parser determinístico por fonte (se canHandle)
+    → HermesPardiniPdfReportParser (+ resultados anteriores)
+    → MaterDeiPdfReportParser v2 (seções; hemograma; triagem neonatal)
+    ↓
+[3] LLM fallback interno (se 0 marcadores e budget OK)
+    → llm-marker-fallback.extractor.ts
+    → metering cost_bucket=internal, feature=exam_marker_extraction
+    → aprendizado em semantic_catalog_cache (domain: lab_analyte)
+    ↓
+[4] Persistência idempotente em exam_result_items
+    → ON CONFLICT (patient, marker, collected_at, display_value)
+    → source_document_id = lastro ao documento de origem
+```
+
+Código principal:
+
+| Componente | Caminho |
+|------------|---------|
+| Pipeline orquestrador | `infrastructure/exam-artifact/exam-artifact.pipeline.ts` |
+| LLM fallback | `application/exam-artifact/llm-marker-fallback.extractor.ts` |
+| Prompt/parser LLM | `domain/llm/llm-marker-extraction-prompt.ts` |
+| Mater Dei parser | `infrastructure/ocr/materdei-pdf.parser.ts` |
+| Hermes parser | `infrastructure/ocr/hermes-pardini-pdf.parser.ts` |
+| Repositório marcadores | `infrastructure/persistence/exam-result-item.pg.repository.ts` |
+
+## Lastro documental (`source_document_id`)
+
+Migration **046** adiciona `source_document_id` em `exam_result_items` (FK → `documents.id`).
+
+- Parsers e re-extração gravam o vínculo ao PDF/laudo de origem.
+- Backfill retroativo: `database/relational/backfill-exam-result-item-source-doc.sql` — extrai `documentId` de `exams.notes` (JSON Hermes/Mater Dei).
+- Método reutilizável: `ExamResultItemPgRepository.backfillSourceDocuments()`.
+
+**Status atual (família):** 58 marcadores, 100% com lastro após backfill.
 
 ## Dependência da higienização
 
-Antes de extrair medidas ou enriquecer timeline, o motor precisa de **identidade canônica** do exame:
+1. Sync/import pode duplicar o mesmo laudo (portal + upload).
+2. `hygiene_candidates` sugere pares; usuário confirma `same_entity`.
+3. Duplicata recebe `hygieneCanonicalId` em meta; motor ignora não-canônicos.
 
-1. Sync/import pode criar o mesmo laudo em Hermes + Mater Dei + upload manual.
-2. Detector de higienização (`hygiene_candidates`) sugere pares.
-3. Usuário confirma `same_entity` → duplicata recebe `hygieneCanonicalId` em `exams.notes` meta.
-4. **Motor de normalização ignora duplicatas** e processa só o registro canônico (`isExamHygieneDuplicate`).
+Ver `docs/DATA_HYGIENE.md`.
 
-Sem isso, medidas e OCR se multiplicam e o contexto Ava infla.
+## UI — Marcadores do Exame
 
-## Estágios do pipeline
+- Aba **Exames** → sub-aba **Marcadores do Exame** (`ExamMarkersDashboard`).
+- Master-detail: lista compacta + gráfico de evolução na mesma tela.
+- Faixas de referência no gráfico (`refLow`/`refHigh` parseados de texto).
+- API: `GET /patients/:id/exam-markers/trends`, `GET /exam-result-items`.
 
-```text
-Artefato (GCS / portal)
-    ↓
-[1] Persistência + dedup na importação (skippedExams, dedup key em notes)
-    ↓
-[2] OCR / extração de texto (Cascade local → Vision)
-    → documents.extracted_text, exams.result_summary
-    ↓
-[3] Higienização (on-insert + scan batch)
-    → hygiene_candidates; resolve same_entity → hygieneCanonicalId
-    ↓
-[4] Corpus OCR (tipo + lab + resumo + doc + pedido)
-    → buildExamOcrCorpus
-    ↓
-[5] Parsers por analito / layout de lab
-    → measurement_observations (sourceRef exam:{id})
-    ↓
-[6] Futuro: LLM estruturado + validação + Neo4j associações
-```
+## Contexto Ava
 
-## Formatos suportados hoje
-
-| Formato | OCR | Notas |
-|---------|-----|-------|
-| PDF laudo | ✅ Cascade `report` | Hermes, Mater Dei, upload manual |
-| Imagem laudo | ✅ | Upload `exam` / `report` |
-| PPT / DOC | ⚠️ parcial | Via cascade document OCR quando upload manual |
-| TC / série imagem | ❌ exempt | Sem texto; só artefato |
-
-## Onde roda hoje
-
-| Etapa | Código |
-|-------|--------|
-| OCR PDF sync | `exam-pdf-text.helper.ts`, scrapers Hermes/Mater Dei |
-| Corpus | `application/exam/exam-ocr-text.ts` |
-| Medidas (glicemia) | `glucose-exam-import.service.ts` |
-| Hook após sync | `exam-measurement-import.helper.ts`, `integration-link-sync.service.ts` |
-| Motor orquestrador | `exam-artifact-normalization.service.ts` |
-| Higienização | `hygiene-detector.service.ts`, `exam-canonical.ts` |
+`AvaPatientContextService` inclui seção **"Marcadores laboratoriais estruturados"** com valor, unidade, referência, status e histórico (últimas 4 medições por analito). Sem isso a Ava só via `exams.result_summary` textual.
 
 ## API e scripts
 
 ```powershell
-# Varredura de duplicatas (todos pacientes ou um)
 cd packages/api
+
+# Higienização
 npm run scan:hygiene
 npx tsx scripts/run-hygiene-scan.ts <patientId>
 
-# Normalização artefato → medidas (após higienização)
-npx tsx scripts/run-exam-artifact-normalize.ts <patientId>
+# Migration 046
+node scripts/apply-migration-046.mjs
 
-# API higienização
-GET  /hygiene/candidates?patientId=
-POST /hygiene/candidates/:id/resolve  { "decision": "same_entity" | "distinct" | "dismissed" }
+# Re-extração Mater Dei (Bruno) — reset + pipeline v2
+npx tsx scripts/reextract-bruno-markers.ts
+
+# Diagnóstico parser Mater Dei
+npx tsx scripts/diagnose-materdei-parser.ts
+
+# Tabela de normalização por documento
+npx tsx scripts/report-bruno-normalization-table.ts
 ```
 
 ## Roadmap técnico (próximos incrementos)
 
-1. **Backfill OCR** — job que reprocessa `result_file_url` sem `extracted_text`.
-2. **Parsers** — hemograma, perfil lipídico, função renal (regex + tabelas por lab).
-3. **Office formats** — pipeline dedicado PPT/DOC (LibreOffice headless ou Cloud Convert).
-4. **Merge físico** — após `same_entity`, consolidar `documentId` / laudo no canônico.
-5. **Structured exam results** — tabela `exam_result_items` (analito, valor, ref, unidade).
-6. **Job agendado** — `normalize-all` após `scan:hygiene` semanal.
+1. ~~**Structured exam results**~~ — `exam_result_items` (045) + idempotência (046) ✅
+2. **Backfill OCR** — reprocessar laudos sem `extracted_text`.
+3. **Parsers adicionais** — perfil lipídico, função renal (outros labs).
+4. **Office formats** — PPT/DOC dedicado.
+5. **Job agendado** — `normalize-all` após `scan:hygiene`.
+6. **Ava aceleradores** — "Pergunte à Ava" com pin implícito do exame/marcador.
 
-Épico: `exam-artifact-normalization` em `docs/roadmap.json`.
+Épico: `exam-artifact-normalization` + `exam-markers-dashboards` em `docs/roadmap.json`.
 
 ## LGPD / clínica
 
-- OCR e parsers rodam **sem LLM** nos laudos (custo, latência, PHI).
-- LLM só em interpretação de manuscrito/receita (`DocumentInterpretationService`), com consentimento quando aplicável.
+- Parsers determinísticos rodam **sem LLM** (latência, PHI).
+- LLM fallback de marcadores = **custo operacional interno** (não franquia do cliente).
+- LLM de manuscrito/receita = **custo cliente** (`DocumentInterpretationService`).
 - Export e timeline usam entidade **canônica** após higienização.

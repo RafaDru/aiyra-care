@@ -1001,6 +1001,9 @@ export interface MarkerTrendGroup {
   markerName: string
   technicalName?: string
   unit?: string
+  referenceRange?: string
+  refLow?: number
+  refHigh?: number
   latestValue: string
   latestStatus: string
   latestCollectedAt: string

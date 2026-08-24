@@ -9,6 +9,7 @@ import { LlmRouter } from '../../llm/llm-router.js'
 import { LlmUsagePgRepository } from '../../persistence/llm-usage.pg.repository.js'
 import { HandwritingCreditsPgRepository } from '../../persistence/handwriting-credits.pg.repository.js'
 import { MeasurementPgRepository } from '../../persistence/measurement.pg.repository.js'
+import { ExamResultItemPgRepository } from '../../persistence/exam-result-item.pg.repository.js'
 import { AllergyPgRepository } from '../../persistence/allergy.pg.repository.js'
 import { MedicationPgRepository } from '../../persistence/medication.pg.repository.js'
 import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
@@ -53,6 +54,7 @@ export async function avaRoutes(app: FastifyInstance) {
     new HealthThreadPgRepository(pgPool),
     new CareReminderPgRepository(pgPool),
     new MeasurementPgRepository(pgPool),
+    new ExamResultItemPgRepository(pgPool),
   )
   const avaChat = new AvaChatService(familySupport, patientContext, orchestrator)
   const controller = new AvaController(avaChat)

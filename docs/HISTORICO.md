@@ -1,5 +1,51 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-24] - Marcadores estruturados, pipeline unificado, Ava conversacional + lastro documental
+
+### Contexto
+Consolidar extração de laudos (Hermes/Mater Dei), UI de marcadores históricos, experiência de chat da Ava (global, humanizada) e garantir que a Ava enxerga valores laboratoriais normalizados com rastreabilidade ao documento de origem.
+
+### Realizado — dados e pipeline
+- **Migration 045** `exam_result_items`: marcadores estruturados (analito, valor, unidade, ref, status, `collected_at`).
+- **Migration 046**: idempotência (`uq_exam_result_items_dedup`) + `source_document_id` (lastro ao `documents`).
+- **Pipeline unificado** (`exam-artifact.pipeline.ts`): PyMuPDF → parser fonte → LLM fallback interno metered → catálogo semântico.
+- **MaterDeiPdfReportParser v2**: seções (sem contaminação), hemograma completo, triagem neonatal.
+- **LLM marker extraction**: `exam_marker_extraction` em `llm.types`; orçamento interno R$100.
+- **Backfill lastro**: 58/58 marcadores com `source_document_id` via `exams.notes` JSON.
+- **Ava contexto**: `AvaPatientContextService` inclui marcadores com histórico (antes só `result_summary` textual).
+
+### Realizado — UI
+- **Marcadores do Exame**: dashboard master-detail + gráficos com faixa de referência; sub-abas com iconografia em `ExamsTab`.
+- **Ava global**: `AvaGlobalDock` (FAB fixo); removida do header do perfil.
+- **Chat Ava**: markdown GFM, relatório PDF, margens, avatar usuário à direita, balão de pensamento com frases rotativas, rosto maior (64px).
+- **RequireCompliance**: validação 1x por sessão (elimina "refresh" do layout em cada navegação).
+
+### Testes
+- `materdei-pdf.parser.test.ts`, `llm-marker-fallback.extractor.test.ts`, `llm-marker-extraction-prompt.test.ts`
+- Suite API: **62 arquivos, 219 testes** passando (`npx vitest run`).
+
+### Docs
+- `docs/EXAM_ARTIFACT_PIPELINE.md` reescrito; `AGENTS.md`, `AVA_VISION.md`, `roadmap.json`, `project-context.json`.
+
+---
+
+## [2026-08-21] - Ava Global (orb fixo) + Renderização Rica + Relatório PDF
+
+### Contexto
+Ava era presa ao header do profile do paciente. Decisão: presença global na conta, com "poder de fogo" para representar dados de forma humanizada.
+
+### Realizado
+- **Orb global (`AvaGlobalDock`)**: FAB fixo sobreposto ao conteúdo (canto inferior direito), montado no `AppLayout` — presente em todas as telas (dashboard, emergência, settings, paciente). `patientId` derivado da rota (`/patients/:id` ou `?patientId=`) com fallback para o 1º paciente da conta. Removido o dock do header do perfil.
+- **Renderização rica**: `AvaMarkdown` (react-markdown + remark-gfm) nos balões — tabelas comparativas GFM, listas, negrito, CSS temático. System prompt da Ava instrui uso de tabelas para múltiplos exames/marcadores e estrutura com subtítulos.
+- **Relatório**: modal dedicado (`AvaReportModal`) com conversa renderizada + botão Imprimir/Salvar PDF (janela formatada com disclaimers LGPD/médico).
+- **Fixes pré-existentes**: `NotFoundError` assinatura em `ava-patient-context.service.ts`; tipo `AvaCritiqueResult` no fallback de crítica (`ava-orchestrator.service.ts`).
+- **Roadmap**: novos itens `ava-global-dock`, `ava-rich-rendering`, `ava-report-modal` (done); `ava-accelerators` ("Pergunte à Ava" por entidade) e `ava-charts-in-chat` (gráficos inline via blocos ```chart) planejados; `ava-platform-presence` → in_progress.
+
+### Decisão de abordagem
+FAB flutuante escolhido em vez de widget no Header (64px já saturado com user/theme/language): funciona em todas as páginas sem disputar espaço, alcançável a um toque, permite animação de presença constante.
+
+---
+
 ## [2026-08-20] - Backlog: Padrão de cores/logos em Origens + Estrutura de Marcadores Clínicos / Resultados de Exames
 
 ### Contexto

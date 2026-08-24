@@ -7,8 +7,12 @@ import { api } from '../../lib/api.js'
 import { COMPLIANCE_ACCEPT_PATH } from '../../lib/legal-paths.js'
 
 /**
- * Redireciona a /compliance/accept quando há pendência legal.
+ * Redireciona para /compliance/accept quando há pendência legal.
  * Independente de COMPLIANCE_GATE_ENABLED na API (UI sempre verifica).
+ *
+ * Valida UMA vez por sessão/conta (não a cada navegação): re-checar no
+ * `location.pathname` desmontava todo o AppLayout (sidebar/header) com um
+ * Spinner em cada clique — o "refresh completo" percebido pelo usuário.
  */
 export function RequireCompliance() {
   const { configured, loading: authLoading, session, authUserId } = useAuth()
@@ -22,12 +26,23 @@ export function RequireCompliance() {
       setCompliant(true)
       return
     }
+    let cancelled = false
     setChecking(true)
     api.compliance.status()
-      .then((s) => setCompliant(s.compliant))
-      .catch(() => setCompliant(true))
-      .finally(() => setChecking(false))
-  }, [configured, authUserId, location.pathname])
+      .then((s) => {
+        if (!cancelled) setCompliant(s.compliant)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setChecking(false)
+      })
+    const onAccepted = () => setCompliant(true)
+    window.addEventListener('aiyracare:compliance-accepted', onAccepted)
+    return () => {
+      cancelled = true
+      window.removeEventListener('aiyracare:compliance-accepted', onAccepted)
+    }
+  }, [configured, authUserId])
 
   if (!configured) return <Outlet />
 

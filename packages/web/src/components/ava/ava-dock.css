@@ -185,6 +185,10 @@
   overflow-x: hidden;
 }
 
+.ava-chat-drawer {
+  z-index: 1050;
+}
+
 .ava-chat-drawer .ant-drawer-body {
   overflow-x: hidden;
 }

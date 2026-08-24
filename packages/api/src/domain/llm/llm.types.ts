@@ -1,4 +1,4 @@
-export type LlmFeature = 'ava_chat' | 'handwriting' | 'ava_consult_prep' | 'label_classification'
+export type LlmFeature = 'ava_chat' | 'handwriting' | 'ava_consult_prep' | 'label_classification' | 'exam_marker_extraction'
 
 export type LlmTier = 'free' | 'premium'
 

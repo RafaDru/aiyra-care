@@ -1,12 +1,11 @@
 import type { FastifyInstance } from 'fastify'
-import type { Pool } from 'pg'
+import { pgPool } from '../../../db/postgres.js'
 import { ExamResultItemPgRepository } from '../../persistence/exam-result-item.pg.repository.js'
 import { ExamResultItemService } from '../../../application/exam-result-item/exam-result-item.service.js'
 import { ExamResultItemController } from './exam-result-item.controller.js'
 
 export async function examResultItemRoutes(app: FastifyInstance) {
-  const pool = app.pgPool as Pool
-  const repo = new ExamResultItemPgRepository(pool)
+  const repo = new ExamResultItemPgRepository(pgPool)
   const service = new ExamResultItemService(repo)
   const controller = new ExamResultItemController(service)
 

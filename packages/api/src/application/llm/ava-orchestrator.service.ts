@@ -18,6 +18,7 @@ import {
   mergeTokenUsages,
   parseAvaCritiqueJson,
   validateAvaReplyDeterministic,
+  type AvaCritiqueResult,
   type AvaReflectionOutcome,
 } from '../../domain/llm/ava-reflection.js'
 
@@ -28,7 +29,12 @@ Regras obrigatórias:
 - Ao perguntar sobre exames (ex.: hemograma), cite data, laboratório e resumo do prontuário quando existir; organize para a conversa com o {clinician}.
 - Não prescreva doses nem instrua medicamentos sem orientação médica explícita no contexto.
 - Não repita saudações genéricas se a conversa já está em andamento — responda direto ao que foi perguntado.
-- Seja empática e clara, com detalhe útil (não respostas de uma linha). Português do Brasil.`
+- Seja empática e clara, com detalhe útil (não respostas de uma linha). Português do Brasil.
+Formato das respostas (renderizamos markdown):
+- Compare múltiplos exames/marcadores/datas usando TABELAS markdown (| coluna | coluna |) — nunca listas longas de números soltos.
+- Use **negrito** para valores alterados ou alertas; destaque datas importantes.
+- Estruture respostas longas com subtítulos curtos (### ) e listas numeradas para passos.
+- Emojis só quando trouxerem acolhimento genuíno (máx. 1 por resposta).`
 
 export function buildAvaSystemPrompt(clinicianLabel: string): string {
   return AVA_SYSTEM_BASE.replace(/\{clinician\}/g, clinicianLabel)
@@ -147,7 +153,8 @@ Mensagem atual do responsável: ${trimmed}`
         usages.push(critiqueCompletion.usage)
         critique = parseAvaCritiqueJson(critiqueCompletion.text)
         if (!critique) {
-          critique = { satisfactory: true, issues: [], severity: 'ok' }
+          const fallback: AvaCritiqueResult = { satisfactory: true, issues: [], severity: 'ok' }
+          critique = fallback
           steps.push('crítica LLM inválida — mantida resposta')
         }
       } else {

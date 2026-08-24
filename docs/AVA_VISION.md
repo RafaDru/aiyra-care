@@ -22,11 +22,18 @@ Horizonte: export rico para médico, portabilidade para operadora (com consentim
 
 | Hoje | Direção |
 |------|---------|
-| Chat na aba paciente + dock | **Global na conta** (`account_id`) |
+| **Orb global fixo (FAB)** em todas as telas via `AppLayout` — paciente derivado da rota (`/patients/:id` ou `?patientId=`), fallback 1º paciente da conta | **Global na conta** (`account_id`) com conversas persistidas |
 | Histórico só no browser | **Persistido no servidor** |
 | Contexto = prontuário inteiro do paciente da URL | **Pins** + slices por entidade |
 
-O paciente continua importante como **lente** e atalho (“Falar sobre Luís”), não como único container da experiência.
+O componente é `AvaGlobalDock` (`packages/web/src/components/ava/AvaGlobalDock.tsx`) montado no `AppLayout`; o widget de perfil (`AvaDockWidget`) foi removido do header do paciente. O paciente continua importante como **lente** e atalho (“Falar sobre Luís”), não como único container da experiência.
+
+## Renderização rica e aceleradores
+
+- **Respostas em markdown (GFM):** tabelas comparativas, listas, negrito — o system prompt da Ava instrui uso de tabelas para múltiplos exames/marcadores; render via `AvaMarkdown` (`react-markdown` + `remark-gfm`).
+- **Relatório:** botão "Relatório" abre modal dedicado com a conversa formatada + **Imprimir / Salvar PDF** (janela de impressão com disclaimers).
+- **Chat conversacional (2026-08-24):** margens no painel; avatar Ava maior nas bolhas; avatar do usuário à direita (OAuth); balão de pensamento com frases rotativas; contexto inclui `exam_result_items` (marcadores com histórico).
+- **Aceleradores "Pergunte à Ava"** (roadmap `ava-accelerators`): botões contextuais por entidade (exame, marcador, laudo) que abrem o dock com pergunta pré-montada sobre o registro. Próximo passo planejado: gráficos inline no chat (`ava-charts-in-chat`, blocos ```chart renderizados com recharts).
 
 ## Sessões e conversas
 

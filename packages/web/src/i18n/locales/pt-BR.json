@@ -294,7 +294,8 @@
     "thinking": "Organizando o contexto…",
     "send": "Enviar",
     "allowDataSharing": "Usar modelo gratuito (Zen) com compartilhamento de dados",
-    "allowDataSharingHint": "Sem marcar, usamos OpenCode Go ou outros provedores com retenção zero para dados de saúde. Com marcar, o DeepSeek gratuito no Zen pode usar suas mensagens para melhorar o modelo (OpenCode)."
+    "allowDataSharingHint": "Sem marcar, usamos OpenCode Go ou outros provedores com retenção zero para dados de saúde. Com marcar, o DeepSeek gratuito no Zen pode usar suas mensagens para melhorar o modelo (OpenCode).",
+    "report": "Relatório"
   },
   "agenda": {
     "new": "Novo lembrete",

@@ -84,6 +84,8 @@ export function AvaDockWidget({
         </div>
       </button>
 
+      {/* Header-less drawer: todo o cabeçalho vive DENTRO do painel, na área
+          rolável — impossível do conteúdo passar por baixo de um header fixo. */}
       <Drawer
         rootClassName="ava-chat-drawer"
         styles={{
@@ -92,29 +94,33 @@ export function AvaDockWidget({
             minWidth: 360,
             maxWidth: '92vw',
           },
+          header: { display: 'none' },
+          body: { padding: 0 },
         }}
-        title={
-          <Space size={12} align="start">
-            <AvaAvatar size={AVA_CHAT_DRAWER_AVATAR_SIZE} analyzing={llmAnalyzing} />
-            <AvaChatHeading />
-          </Space>
-        }
         placement="right"
         open={open}
         onClose={() => setOpen(false)}
         destroyOnClose={false}
-        extra={
-          <Button type="link" size="small" onClick={() => setOpen(false)}>
-            {t('common.close')}
-          </Button>
-        }
       >
-        <AvaChatPanel
-          patientId={patientId}
-          healthThreadId={healthThreadId}
-          variant="embedded"
-          showTitle={false}
-        />
+        <div className="ava-chat-shell">
+          <div className="ava-chat-shell__head">
+            <Space size={12} align="center">
+              <AvaAvatar size={AVA_CHAT_DRAWER_AVATAR_SIZE} analyzing={llmAnalyzing} />
+              <AvaChatHeading />
+            </Space>
+            <Button type="link" size="small" onClick={() => setOpen(false)}>
+              {t('common.close')}
+            </Button>
+          </div>
+          <div className="ava-chat-shell__body">
+            <AvaChatPanel
+              patientId={patientId}
+              healthThreadId={healthThreadId}
+              variant="embedded"
+              showTitle={false}
+            />
+          </div>
+        </div>
       </Drawer>
     </>
   )

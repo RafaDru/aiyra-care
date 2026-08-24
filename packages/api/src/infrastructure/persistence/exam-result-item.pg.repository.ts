@@ -11,7 +11,7 @@ import {
 const COLUMNS = `
   id, exam_id, patient_id, marker_name, technical_name,
   numeric_value, display_value, unit, reference_range,
-  status, collected_at, created_at
+  status, collected_at, source_document_id, created_at
 `
 
 function rowToEntity(row: Record<string, unknown>): ExamResultItem {
@@ -27,6 +27,7 @@ function rowToEntity(row: Record<string, unknown>): ExamResultItem {
     referenceRange: (row.reference_range as string | null) ?? null,
     status: (row.status as ExamMarkerStatus) ?? 'normal',
     collectedAt: row.collected_at as Date,
+    sourceDocumentId: (row.source_document_id as string | null) ?? null,
     createdAt: row.created_at as Date,
   })
 }
@@ -69,8 +70,17 @@ export class ExamResultItemPgRepository implements ExamResultItemRepository {
       `INSERT INTO exam_result_items (
          id, exam_id, patient_id, marker_name, technical_name,
          numeric_value, display_value, unit, reference_range,
-         status, collected_at
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         status, collected_at, source_document_id
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       ON CONFLICT (patient_id, LOWER(marker_name), collected_at, LOWER(display_value))
+       DO UPDATE SET
+         numeric_value = EXCLUDED.numeric_value,
+         unit = EXCLUDED.unit,
+         reference_range = EXCLUDED.reference_range,
+         status = EXCLUDED.status,
+         technical_name = COALESCE(EXCLUDED.technical_name, exam_result_items.technical_name),
+         exam_id = EXCLUDED.exam_id,
+         source_document_id = COALESCE(EXCLUDED.source_document_id, exam_result_items.source_document_id)
        RETURNING ${COLUMNS}`,
       [
         item.id,
@@ -84,6 +94,7 @@ export class ExamResultItemPgRepository implements ExamResultItemRepository {
         item.referenceRange,
         item.status,
         item.collectedAt,
+        item.sourceDocumentId ?? null,
       ],
     )
     return rowToEntity(rows[0])
@@ -103,5 +114,31 @@ export class ExamResultItemPgRepository implements ExamResultItemRepository {
 
   async deleteByExamId(examId: string): Promise<void> {
     await this.pool.query(`DELETE FROM exam_result_items WHERE exam_id = $1`, [examId])
+  }
+
+  /** Remove todos os marcadores derivados de um documento (re-extração). */
+  async deleteBySourceDocumentId(documentId: string): Promise<void> {
+    await this.pool.query(`DELETE FROM exam_result_items WHERE source_document_id = $1`, [documentId])
+  }
+
+  /**
+   * Backfill de lastro: vincula marcadores órfãos ao documento do exame de origem
+   * (documentId extraído de exams.notes, padrão Hermes Pardini / Mater Dei).
+   */
+  async backfillSourceDocuments(): Promise<number> {
+    const { rowCount } = await this.pool.query(
+      `UPDATE exam_result_items eri
+       SET source_document_id = sub.doc_id
+       FROM (
+         SELECT eri2.id AS item_id,
+           (regexp_match(e.notes::text, '"documentId":"([0-9a-f-]{36})"'))[1]::uuid AS doc_id
+         FROM exam_result_items eri2
+         JOIN exams e ON e.id = eri2.exam_id
+         WHERE eri2.source_document_id IS NULL
+           AND e.notes IS NOT NULL
+       ) AS sub
+       WHERE eri.id = sub.item_id AND sub.doc_id IS NOT NULL`,
+    )
+    return rowCount ?? 0
   }
 }

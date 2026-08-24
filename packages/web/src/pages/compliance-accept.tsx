@@ -45,7 +45,11 @@ export function ComplianceAcceptPage() {
     try {
       const next = await api.compliance.accept()
       setStatus(next)
-      if (next.compliant) navigate('/', { replace: true })
+      if (next.compliant) {
+        // Notifica o RequireCompliance (valida 1x por sessão) sem reload
+        window.dispatchEvent(new Event('aiyracare:compliance-accepted'))
+        navigate('/', { replace: true })
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {

@@ -16,8 +16,10 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^17.0.10",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.1",
-    "recharts": "^2.15.4"
+    "recharts": "^2.15.4",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.31",

@@ -1,0 +1,94 @@
+/* Markdown das respostas da Ava — dentro dos balões do chat */
+.ava-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.ava-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.ava-markdown p {
+  margin: 0 0 8px;
+  line-height: 1.55;
+}
+
+.ava-markdown ul,
+.ava-markdown ol {
+  margin: 4px 0 10px;
+  padding-left: 20px;
+}
+
+.ava-markdown li {
+  margin: 2px 0;
+  line-height: 1.5;
+}
+
+.ava-markdown strong {
+  font-weight: 700;
+}
+
+/* Destaques semânticos que a Ava pode usar no texto */
+.ava-markdown code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(147, 51, 234, 0.08);
+  font-size: 0.9em;
+}
+
+/* Tabelas — dados tabulados (exames, marcadores, comparativos) */
+.ava-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 12px;
+  font-size: 12.5px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(147, 51, 234, 0.18);
+}
+
+.ava-markdown thead th {
+  background: rgba(147, 51, 234, 0.08);
+  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+  font-weight: 600;
+  text-align: left;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
+.ava-markdown tbody td {
+  padding: 6px 10px;
+  border-top: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+}
+
+.ava-markdown tbody tr:nth-child(even) {
+  background: rgba(147, 51, 234, 0.03);
+}
+
+.ava-markdown blockquote {
+  margin: 8px 0;
+  padding: 6px 12px;
+  border-inline-start: 3px solid rgba(255, 61, 168, 0.5);
+  background: rgba(255, 61, 168, 0.05);
+  border-radius: 0 8px 8px 0;
+  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65));
+}
+
+.ava-markdown h1,
+.ava-markdown h2,
+.ava-markdown h3,
+.ava-markdown h4 {
+  margin: 12px 0 6px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.ava-markdown h1 { font-size: 1.15em; }
+.ava-markdown h2 { font-size: 1.08em; }
+.ava-markdown h3,
+.ava-markdown h4 { font-size: 1em; }
+
+.ava-markdown hr {
+  border: none;
+  border-top: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  margin: 10px 0;
+}
