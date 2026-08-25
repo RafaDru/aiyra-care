@@ -605,7 +605,25 @@
           "id": "ava-account-self-patient",
           "title": "Paciente titular da conta — badge Você",
           "status": "done",
-          "detail": "membership role self; markAsSelf no cadastro adulto; tag Você no dashboard; script set-self-patient.ts."
+          "detail": "membership role self; markAsSelf no cadastro; tag Você; set-self-patient.ts; Rafael marcado self."
+        },
+        {
+          "id": "ava-patient-lens-select",
+          "title": "Seletor de lente de paciente no drawer",
+          "status": "done",
+          "detail": "useAvaPatientLens: rota → último → self → fallback; docs/AVA_PATIENT_LENS.md."
+        },
+        {
+          "id": "ava-conversational-layout",
+          "title": "Layout conversacional (Ava | chat | usuário)",
+          "status": "done",
+          "detail": "Colunas fixas; nuvem de pensamento com trilha; reset ao trocar paciente."
+        },
+        {
+          "id": "ava-quota-pool-ui",
+          "title": "Barra de tokens coerente com pool total",
+          "status": "done",
+          "detail": "usagePercent = usado / pool (franquia restante + pacotes); AvaQuotaBar atualizado."
         },
         {
           "id": "ava-expressions",

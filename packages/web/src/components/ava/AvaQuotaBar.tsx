@@ -39,9 +39,10 @@ export function AvaQuotaBar({ quota, lastModel }: Props) {
         className="ava-quota-bar__progress"
       />
       <Typography.Text type="secondary" className="ava-quota-bar__detail">
-        {t('ava.quotaUsageDetail', {
+        {t('ava.quotaPoolDetail', {
           credits: quota.creditsEquivalentRemaining,
           tokens: quota.totalTokensRemaining,
+          percent: percent,
         })}
         {lastModel ? ` · ${lastModel}` : ''}
       </Typography.Text>

@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Badge, Button, Drawer, Space } from 'antd'
+import { Badge, Button, Drawer, Space, Typography } from 'antd'
 import { MessageFilled } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { AvaAvatar } from './AvaAvatar.js'
 import { AvaChatPanel } from './AvaChatPanel.js'
 import { AvaDockFlyingBubble } from './AvaDockFlyingBubble.js'
+import { AvaPatientLensSelect } from './AvaPatientLensSelect.js'
 import { useAvaDockIntro } from './useAvaDockIntro.js'
 import { AVA_CHAT_DRAWER_AVATAR_SIZE } from './ava-sizes.js'
 import { AvaChatHeading } from './AvaChatHeading.js'
 import { api } from '../../lib/api.js'
-import type { LlmUsageQuota } from '../../lib/api.types.js'
+import type { LlmUsageQuota, Patient } from '../../lib/api.types.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 
 /** Ava no header: círculo grande, balão à esquerda, CTA após intro. */
@@ -17,6 +18,10 @@ const AVA_SIZE_RATIO = 1
 
 interface Props {
   patientId: string
+  patients: Patient[]
+  onPatientChange: (patientId: string) => void
+  routePatientId?: string | null
+  lensOverridesRoute?: boolean
   healthThreadId?: string
   /** Diâmetro do avatar do paciente no header (px). */
   patientAvatarSize?: number
@@ -24,6 +29,10 @@ interface Props {
 
 export function AvaDockWidget({
   patientId,
+  patients,
+  onPatientChange,
+  routePatientId,
+  lensOverridesRoute,
   healthThreadId,
   patientAvatarSize = 96,
 }: Props) {
@@ -32,6 +41,7 @@ export function AvaDockWidget({
   const { active: llmAnalyzing } = useLlmActivity()
   const [quota, setQuota] = useState<LlmUsageQuota | null>(null)
   const { phase, introDone } = useAvaDockIntro()
+  const [chatEpoch, setChatEpoch] = useState(0)
 
   const avaSize = Math.round(patientAvatarSize * AVA_SIZE_RATIO)
   const chatBadgeSize = Math.max(28, Math.round(avaSize * 0.32))
@@ -40,6 +50,12 @@ export function AvaDockWidget({
   useEffect(() => {
     api.llm.quota().then(setQuota).catch(() => setQuota(null))
   }, [open])
+
+  const handlePatientChange = (id: string) => {
+    if (id === patientId) return
+    onPatientChange(id)
+    setChatEpoch((n) => n + 1)
+  }
 
   const quotaDot = quota?.status === 'exhausted' ? 'error' : quota?.status === 'warn' ? 'warning' : undefined
 
@@ -84,8 +100,6 @@ export function AvaDockWidget({
         </div>
       </button>
 
-      {/* Header-less drawer: todo o cabeçalho vive DENTRO do painel, na área
-          rolável — impossível do conteúdo passar por baixo de um header fixo. */}
       <Drawer
         rootClassName="ava-chat-drawer"
         styles={{
@@ -104,9 +118,27 @@ export function AvaDockWidget({
       >
         <div className="ava-chat-shell">
           <div className="ava-chat-shell__head">
-            <Space size={12} align="center">
+            <Space size={12} align="center" wrap>
               <AvaAvatar size={AVA_CHAT_DRAWER_AVATAR_SIZE} analyzing={llmAnalyzing} />
-              <AvaChatHeading />
+              <div>
+                <AvaChatHeading />
+                <Space size={8} align="center" style={{ marginTop: 4 }}>
+                  <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                    {t('ava.patientLensLabel')}
+                  </Typography.Text>
+                  <AvaPatientLensSelect
+                    patients={patients}
+                    value={patientId}
+                    onChange={handlePatientChange}
+                    routePatientId={routePatientId}
+                  />
+                </Space>
+                {lensOverridesRoute && (
+                  <Typography.Text type="warning" style={{ fontSize: 11, display: 'block', marginTop: 2 }}>
+                    {t('ava.patientLensOverrideHint')}
+                  </Typography.Text>
+                )}
+              </div>
             </Space>
             <Button type="link" size="small" onClick={() => setOpen(false)}>
               {t('common.close')}
@@ -114,6 +146,7 @@ export function AvaDockWidget({
           </div>
           <div className="ava-chat-shell__body">
             <AvaChatPanel
+              key={`${patientId}-${chatEpoch}`}
               patientId={patientId}
               healthThreadId={healthThreadId}
               variant="embedded"

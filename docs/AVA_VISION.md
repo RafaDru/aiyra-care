@@ -1,6 +1,7 @@
 # Ava — visão de produto e arquitetura
 
-> **Última atualização:** 2026-08-18  
+> **Última atualização:** 2026-08-25  
+> Lente de paciente: `docs/AVA_PATIENT_LENS.md`
 > Moonshot: companheira de cuidado (doula digital) — organiza, transparenta, não substitui o médico.  
 > Arquitetura de dados: `docs/ARCHITECTURE_DATA_LAYERS.md`  
 > Observabilidade: `docs/OBSERVABILITY.md`  
@@ -22,7 +23,7 @@ Horizonte: export rico para médico, portabilidade para operadora (com consentim
 
 | Hoje | Direção |
 |------|---------|
-| **Orb global fixo (FAB)** em todas as telas via `AppLayout` — paciente derivado da rota (`/patients/:id` ou `?patientId=`), fallback 1º paciente da conta | **Global na conta** (`account_id`) com conversas persistidas |
+| **Orb global fixo (FAB)** em todas as telas via `AppLayout` — seletor de paciente no drawer; lente: rota → último → `self` → fallback | **Global na conta** (`account_id`) com conversas persistidas |
 | Histórico só no browser | **Persistido no servidor** |
 | Contexto = prontuário inteiro do paciente da URL | **Pins** + slices por entidade |
 

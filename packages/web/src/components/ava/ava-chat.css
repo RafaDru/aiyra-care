@@ -60,10 +60,146 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px 18px;
+  padding: 8px 4px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+}
+
+/* Layout conversacional: Ava | mensagens | usuário */
+.ava-chat-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 8px 12px 0;
+}
+
+.ava-chat-stage__ava {
+  flex-shrink: 0;
+  width: 118px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  gap: 10px;
+}
+
+.ava-chat-stage__ava-face {
+  box-shadow: 0 8px 28px rgba(147, 51, 234, 0.18);
+}
+
+.ava-chat-stage__thread {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ava-chat-stage__user {
+  flex-shrink: 0;
+  width: 64px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+/* Nuvem de pensamento clássica — trilha diagonal + nuvem */
+.ava-chat-thought-cloud {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+  padding-right: 4px;
+}
+
+.ava-chat-thought-cloud__trail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  margin-bottom: 4px;
+  margin-right: 18px;
+}
+
+.ava-chat-thought-cloud__trail-dot {
+  border-radius: 50%;
+  border: 1.5px dashed rgba(147, 51, 234, 0.5);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.ava-chat-thought-cloud__trail-dot--lg {
+  width: 11px;
+  height: 11px;
+}
+
+.ava-chat-thought-cloud__trail-dot--md {
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+}
+
+.ava-chat-thought-cloud__trail-dot--sm {
+  width: 5px;
+  height: 5px;
+  margin-right: 12px;
+}
+
+.ava-chat-thought-cloud__bubble {
+  position: relative;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 22px;
+  border: 1.5px dashed rgba(147, 51, 234, 0.45);
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ant-color-text-secondary);
+  font-style: italic;
+  text-align: center;
+  animation: ava-chat-thought-pulse 1.8s ease-in-out infinite;
+}
+
+.ava-chat-thought-cloud__bubble::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 28px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(147, 51, 234, 0.45);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes ava-chat-thought-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    box-shadow: none;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(147, 51, 234, 0.12);
+  }
+}
+
+.ava-chat-thinking-text {
+  display: inline-block;
+  animation: ava-chat-thinking-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes ava-chat-thinking-shimmer {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Área de conversa com fundo sutil, separando visualmente do composer */
@@ -86,103 +222,17 @@
   max-width: 100%;
 }
 
-.ava-chat-bubble-row--user {
-  justify-content: flex-end;
-}
-
 .ava-chat-bubble-row--ava {
   justify-content: flex-start;
 }
 
-.ava-chat-bubble-row--thinking {
-  align-items: center;
-  gap: 14px;
-}
-
-/* Balão de PENSAMENTO — contorno pontilhado, sem preenchimento,
-   com bolinhas decrescentes conectando à Ava (cloud thinking). */
-.ava-chat-thought {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 18px;
-  border: 1.6px dashed rgba(147, 51, 234, 0.45);
-  background: transparent;
-  font-size: 13px;
-  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65));
-  font-style: italic;
-}
-
-.ava-chat-thought__dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 1.6px dashed rgba(147, 51, 234, 0.45);
-  background: transparent;
-  flex-shrink: 0;
-}
-
-.ava-chat-thought__dot--2 {
-  width: 6px;
-  height: 6px;
-}
-
-.ava-chat-bubble-row--thinking .ava-chat-thought {
-  animation: ava-chat-thought-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes ava-chat-thought-pulse {
-  0%,
-  100% {
-    opacity: 0.7;
-    box-shadow: none;
-  }
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 14px rgba(147, 51, 234, 0.15);
-  }
-}
-
-.ava-chat-thinking-text {
-  display: inline-block;
-  animation: ava-chat-thinking-shimmer 1.4s ease-in-out infinite;
-}
-
-@keyframes ava-chat-bubble-pulse {
-  0%,
-  100% {
-    box-shadow: 0 2px 10px rgba(147, 51, 234, 0.08);
-  }
-  50% {
-    box-shadow: 0 4px 22px rgba(147, 51, 234, 0.22);
-  }
-}
-
-@keyframes ava-chat-thinking-shimmer {
-  0%,
-  100% {
-    opacity: 0.65;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.ava-chat-bubble-row--ava .ava-avatar-shell {
-  flex-shrink: 0;
-}
-
-/* Avatar do usuário (lado direito) — menor que a Ava, alinhado à base */
-.ava-chat-user-avatar {
-  flex-shrink: 0;
-  line-height: 0;
+.ava-chat-bubble-row--user {
+  justify-content: flex-end;
 }
 
 .ava-chat-bubble {
   position: relative;
-  max-width: min(80%, 420px);
+  max-width: min(92%, 440px);
   padding: 12px 16px;
   border-radius: 18px;
   font-size: 14px;

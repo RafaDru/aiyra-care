@@ -171,7 +171,6 @@ export function creditPoolTokens(creditAccount: HandwritingCreditAccount): numbe
 
 function quotaStatus(usagePercent: number, totalRemaining: number): LlmQuotaStatus {
   if (totalRemaining <= 0) return 'exhausted'
-  if (usagePercent >= 100) return 'exhausted'
   if (usagePercent >= llmWarnAtPercent()) return 'warn'
   return 'ok'
 }
@@ -193,8 +192,9 @@ export function computeLlmUsageQuota(
   const monthlyUsed = normalized.monthlyTokensUsed
   const totalRemaining = Math.max(0, totalTokenBudget - monthlyUsed)
 
-  const usagePercent = monthlyTokenAllowance > 0
-    ? Math.min(100, Math.round((monthlyUsed / monthlyTokenAllowance) * 100))
+  // % do pool total (franquia restante + pacotes), não só da franquia nominal mensal
+  const usagePercent = totalTokenBudget > 0
+    ? Math.min(100, Math.round((monthlyUsed / totalTokenBudget) * 100))
     : monthlyUsed > 0 ? 100 : 0
 
   return {

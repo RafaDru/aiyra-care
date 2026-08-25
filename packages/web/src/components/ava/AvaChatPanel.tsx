@@ -13,8 +13,8 @@ import { AvaQuotaBar } from './AvaQuotaBar.js'
 import { AvaChatHeading } from './AvaChatHeading.js'
 import { useAvaThinkingPhrase } from './useAvaThinkingPhrase.js'
 import {
-  AVA_CHAT_AVATAR_SIZE,
-  AVA_CHAT_THINKING_AVATAR_SIZE,
+  AVA_CHAT_STAGE_AVATAR_SIZE,
+  AVA_CHAT_USER_STAGE_SIZE,
 } from './ava-sizes.js'
 import {
   readAvaAllowLlmDataSharing,
@@ -38,7 +38,6 @@ interface Props {
   showTitle?: boolean
 }
 
-/** Iniciais do nome para o fallback do avatar do usuário. */
 function initialsOf(name: string | null | undefined): string {
   if (!name) return '?'
   return name
@@ -149,23 +148,23 @@ export function AvaChatPanel({
     variant === 'embedded' && 'ava-chat-panel--embedded',
   ].filter(Boolean).join(' ')
 
-  // Identidade visual do usuário no chat (você à direita da conversa)
   const userAvatarUrl = account?.avatarUrl ?? null
   const userDisplayName = account?.displayName ?? account?.email ?? null
 
   const userAvatar = (
-    <Avatar
-      size={40}
-      src={userAvatarUrl ?? undefined}
-      style={{
-        backgroundColor: userAvatarUrl ? undefined : '#4F46E5',
-        fontSize: 15,
-        flexShrink: 0,
-        border: '1.5px solid rgba(79, 70, 229, 0.25)',
-      }}
-    >
-      {initialsOf(userDisplayName)}
-    </Avatar>
+    <span title={userDisplayName ?? undefined}>
+      <Avatar
+        size={AVA_CHAT_USER_STAGE_SIZE}
+        src={userAvatarUrl ?? undefined}
+        style={{
+          backgroundColor: userAvatarUrl ? undefined : '#4F46E5',
+          fontSize: 18,
+          border: '2px solid rgba(79, 70, 229, 0.2)',
+        }}
+      >
+        {initialsOf(userDisplayName)}
+      </Avatar>
+    </span>
   )
 
   return (
@@ -188,7 +187,7 @@ export function AvaChatPanel({
       )}
 
       {quota && quota.llmEnabled && (
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '0 18px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <AvaQuotaBar quota={quota} lastModel={lastModel} />
           </div>
@@ -206,14 +205,13 @@ export function AvaChatPanel({
         </div>
       )}
 
-      {/* Relatório também disponível sem cota ativa */}
       {!quota?.llmEnabled && messages.length > 0 && (
         <Button
           size="small"
           type="text"
           icon={<FileTextOutlined />}
           onClick={() => setReportOpen(true)}
-          style={{ alignSelf: 'flex-end' }}
+          style={{ alignSelf: 'flex-end', marginRight: 18 }}
         >
           {t('ava.report')}
         </Button>
@@ -221,58 +219,68 @@ export function AvaChatPanel({
 
       {quotaAlert}
 
-      <div className="ava-chat-panel__messages">
-        {messages.length === 0 && (
-          <Typography.Paragraph className="ava-chat-panel__intro">
-            {t('ava.intro')}
-          </Typography.Paragraph>
-        )}
-
-        {messages.map((item, idx) => (
-          <div
-            key={idx}
-            className={[
-              'ava-chat-bubble-row',
-              item.role === 'user' ? 'ava-chat-bubble-row--user' : 'ava-chat-bubble-row--ava',
-            ].join(' ')}
-          >
-            {item.role === 'assistant' && <AvaAvatar size={AVA_CHAT_AVATAR_SIZE} />}
-            <div
-              className={[
-                'ava-chat-bubble',
-                item.role === 'user' ? 'ava-chat-bubble--user' : 'ava-chat-bubble--ava',
-              ].join(' ')}
-            >
-              {item.role === 'assistant' && (
-                <span className="ava-chat-bubble__tag">
-                  {t('ava.name')}
-                  {item.revised && (
-                    <Tag color="blue" style={{ marginLeft: 6, fontSize: 10 }}>{t('ava.revised')}</Tag>
-                  )}
-                </span>
-              )}
-              {item.role === 'assistant' ? <AvaMarkdown content={item.text} /> : item.text}
-            </div>
-            {item.role === 'user' && (
-              <span className="ava-chat-user-avatar" title={userDisplayName ?? undefined}>
-                {userAvatar}
+      <div className="ava-chat-stage">
+        <div className="ava-chat-stage__ava">
+          <AvaAvatar
+            size={AVA_CHAT_STAGE_AVATAR_SIZE}
+            analyzing={loading}
+            className="ava-chat-stage__ava-face"
+          />
+          {loading && (
+            <div className="ava-chat-thought-cloud" aria-live="polite">
+              <span className="ava-chat-thought-cloud__trail">
+                <span className="ava-chat-thought-cloud__trail-dot ava-chat-thought-cloud__trail-dot--lg" />
+                <span className="ava-chat-thought-cloud__trail-dot ava-chat-thought-cloud__trail-dot--md" />
+                <span className="ava-chat-thought-cloud__trail-dot ava-chat-thought-cloud__trail-dot--sm" />
               </span>
-            )}
-          </div>
-        ))}
-
-        {loading && (
-          <div className="ava-chat-bubble-row ava-chat-bubble-row--ava ava-chat-bubble-row--thinking">
-            <AvaAvatar size={AVA_CHAT_THINKING_AVATAR_SIZE} analyzing />
-            {/* Balão de pensamento: contorno pontilhado + frases rotativas */}
-            <div className="ava-chat-thought">
-              <span className="ava-chat-thought__dot ava-chat-thought__dot--1" aria-hidden="true" />
-              <span className="ava-chat-thought__dot ava-chat-thought__dot--2" aria-hidden="true" />
-              <span className="ava-chat-thinking-text">{thinkingPhrase}</span>
+              <div className="ava-chat-thought-cloud__bubble">
+                <span className="ava-chat-thinking-text">{thinkingPhrase}</span>
+              </div>
             </div>
+          )}
+        </div>
+
+        <div className="ava-chat-stage__thread">
+          <div className="ava-chat-panel__messages">
+            {messages.length === 0 && !loading && (
+              <Typography.Paragraph className="ava-chat-panel__intro">
+                {t('ava.intro')}
+              </Typography.Paragraph>
+            )}
+
+            {messages.map((item, idx) => (
+              <div
+                key={idx}
+                className={[
+                  'ava-chat-bubble-row',
+                  item.role === 'user' ? 'ava-chat-bubble-row--user' : 'ava-chat-bubble-row--ava',
+                ].join(' ')}
+              >
+                <div
+                  className={[
+                    'ava-chat-bubble',
+                    item.role === 'user' ? 'ava-chat-bubble--user' : 'ava-chat-bubble--ava',
+                  ].join(' ')}
+                >
+                  {item.role === 'assistant' && (
+                    <span className="ava-chat-bubble__tag">
+                      {t('ava.name')}
+                      {item.revised && (
+                        <Tag color="blue" style={{ marginLeft: 6, fontSize: 10 }}>{t('ava.revised')}</Tag>
+                      )}
+                    </span>
+                  )}
+                  {item.role === 'assistant' ? <AvaMarkdown content={item.text} /> : item.text}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
-        )}
-        <div ref={messagesEndRef} />
+        </div>
+
+        <div className="ava-chat-stage__user">
+          {userAvatar}
+        </div>
       </div>
 
       <div className="ava-chat-panel__composer">

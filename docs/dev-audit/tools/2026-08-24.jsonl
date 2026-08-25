@@ -15,3 +15,6 @@
 {"ts":"2026-08-24T20:20:31.441Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
 {"ts":"2026-08-24T20:20:39.098Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
 {"ts":"2026-08-24T20:20:39.297Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:23:00.625Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:33:54.381Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}
+{"ts":"2026-08-24T20:34:22.022Z","event":"preToolUseError","error":"SyntaxError: Unexpected token '﻿', \"﻿{\"convers\"... is not valid JSON"}

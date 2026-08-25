@@ -1,5 +1,18 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-25] - Ava: lente de paciente, layout conversacional, pool de tokens
+
+### Contexto
+Corrigir fallback Bruno, seletor de paciente, UX face-a-face e barra de tokens incoerente.
+
+### Realizado
+- **docs/AVA_PATIENT_LENS.md** — estratégia lente + layout + tokens.
+- **useAvaPatientLens** — rota → último usado → `isSelf` → primeiro; override no drawer.
+- **AvaPatientLensSelect** no header do drawer; reset do chat ao trocar (`key` + epoch).
+- **Layout conversacional** — colunas Ava (108px) | mensagens | usuário (52px); nuvem de pensamento com trilha.
+- **computeLlmUsageQuota** — `usagePercent` sobre pool total (franquia restante + pacotes).
+- **AvaQuotaBar** — detalhe com % do pool.
+
 ## [2026-08-24b] - Pipeline de entrega, hooks Cursor, paciente titular (Você)
 
 ### Contexto
