@@ -22,4 +22,8 @@ export const avaChatBodySchema = z.object({
   ]).optional(),
   /** Emite eventos SSE de atividade (ferramentas + reflexão) durante o turno. */
   streamActivity: z.boolean().optional(),
+  /** Conversa persistida — criada automaticamente se omitida. */
+  conversationId: z.string().uuid().optional(),
+  /** Documento (imagem/PDF) anexado neste turno — OCR/interpretação entram no contexto. */
+  attachmentDocumentId: z.string().uuid().optional(),
 })

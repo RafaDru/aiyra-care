@@ -28,6 +28,8 @@ export class AvaController {
       patientId: params.data.id,
       message: body.data.message,
       healthThreadId: body.data.healthThreadId,
+      conversationId: body.data.conversationId,
+      attachmentDocumentId: body.data.attachmentDocumentId,
       history: body.data.history,
       allowLlmDataSharing: body.data.allowLlmDataSharing ?? false,
       entityPin: body.data.entityPin,
@@ -79,6 +81,12 @@ export class AvaController {
           message: 'Ava com LLM desabilitada (configure OPENCODE_ZEN/GO, GEMINI_API_KEY ou GROQ_API_KEY)',
           code: 'AVA_LLM_DISABLED',
         })
+      }
+      if (message === 'AVA_CONVERSATION_NOT_FOUND' || message === 'AVA_CONVERSATION_PATIENT_MISMATCH') {
+        return reply.status(404).send({ message: 'Conversa não encontrada', code: message })
+      }
+      if (message === 'AVA_ATTACHMENT_INVALID' || message === 'AVA_ATTACHMENT_NOT_FOUND') {
+        return reply.status(400).send({ message: 'Documento anexado inválido', code: message })
       }
       return reply.status(500).send({ message })
     }

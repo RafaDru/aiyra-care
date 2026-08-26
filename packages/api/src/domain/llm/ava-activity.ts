@@ -8,6 +8,7 @@ export type AvaActivityCode =
   | 'context.family_alerts'
   | 'context.operational'
   | 'context.entity_pin'
+  | 'context.attachment'
   | 'llm.initial_reply'
   | 'reflection.rules_check'
   | 'reflection.rules_ok'
@@ -30,6 +31,7 @@ export const AVA_ACTIVITY_LABELS: Record<AvaActivityCode, string> = {
   'context.family_alerts': 'Verificando alertas automáticos',
   'context.operational': 'Checando integrações e navegação',
   'context.entity_pin': 'Focando registro selecionado',
+  'context.attachment': 'Lendo documento anexado',
   'llm.initial_reply': 'Organizando resposta',
   'reflection.rules_check': 'Verificação de segurança',
   'reflection.rules_ok': 'Regras de segurança ok',

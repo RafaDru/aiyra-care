@@ -40,20 +40,23 @@ O componente é `AvaGlobalDock` (`packages/web/src/components/ava/AvaGlobalDock.
 
 ## Sessões e conversas
 
-### Modelo (planejado — migration `042+`)
+### Modelo (migration **047** — MVP entregue)
 
 | Tabela | Função |
 |--------|--------|
-| `ava_conversations` | Sessão: `account_id`, título, `status`, `last_activity_at`, LGPD |
-| `ava_messages` | Turnos `user` / `assistant`, provider, tokens, metadata reflexão |
-| `ava_session_context` | Pins: `entity_type`, `entity_id`, `patient_id?`, `source`, `active` |
+| `ava_conversations` | Sessão: `account_id`, `patient_id`, título, `status`, `last_activity_at`, LGPD |
+| `ava_messages` | Turnos `user` / `assistant`, `document_id` opcional, metadata reflexão |
+| `ava_session_context` | **Planejado** — pins: `entity_type`, `entity_id`, `patient_id?`, `source`, `active` |
 
-`llm_usage_events.conversation_id` passa a referenciar `ava_conversations.id`.
+`llm_usage_events.conversation_id` referencia `ava_conversations.id` (preenchido no chat Ava).
+
+**API entregue:** `GET/POST /ava/conversations`, `GET …/messages`, chat com `conversationId` + `attachmentDocumentId`.
 
 ### Retomar onde parou
 
-- Lista de conversas no dock / drawer global.
-- Ao abrir: últimas mensagens + pins ativos + prontuário **só** das entidades pinadas (compactação).
+- Lista de conversas no drawer global (seletor + nova conversa).
+- Ao abrir: retoma última conversa ativa do paciente; mensagens do servidor.
+- **Pendente:** pins ativos + compactação por pin (`ava_session_context`).
 
 ### Múltiplas sessões
 
@@ -128,16 +131,17 @@ Detalhes: `docs/DATA_HYGIENE.md`.
 | **6–18m** | Briefing médico estruturado, grafo no export, analytics opt-in |
 | **18m+** | Portabilidade operadora (B2B), perfil paciente autônomo, módulos supervisionados |
 
-## Estado atual do código (2026-08-18)
+## Estado atual do código (2026-08-26)
 
 | Capacidade | Status |
 |------------|--------|
 | Chat Ava por paciente | ✅ |
 | Cascata LLM + reflexão | ✅ |
 | Metering `llm_usage_*` | ✅ |
-| `conversation_id` em eventos | Coluna existe, **não preenchida** |
-| Histórico persistido | ❌ planejado |
-| Pins / painel contexto | ❌ planejado |
+| `conversation_id` em eventos | ✅ (chat Ava, migration 047) |
+| Histórico persistido | ✅ MVP (lista, retomar, título auto) |
+| Anexo imagem no chat | ✅ upload + OCR no contexto + aviso consumo |
+| Pins / painel contexto | ❌ planejado (`ava_session_context`) |
 | Neo4j sessão Ava | ❌ planejado |
 
 ## APIs planejadas (resumo)

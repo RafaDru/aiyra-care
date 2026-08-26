@@ -15,3 +15,21 @@ export function writeAvaAllowLlmDataSharing(value: boolean): void {
     // ignore
   }
 }
+
+const IMAGE_ATTACH_KEY = 'aiyracare.avaImageAttachWarningDismissed'
+
+export function readAvaImageAttachWarningDismissed(): boolean {
+  try {
+    return localStorage.getItem(IMAGE_ATTACH_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function writeAvaImageAttachWarningDismissed(value: boolean): void {
+  try {
+    localStorage.setItem(IMAGE_ATTACH_KEY, value ? '1' : '0')
+  } catch {
+    // ignore
+  }
+}

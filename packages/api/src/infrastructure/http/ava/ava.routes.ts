@@ -25,10 +25,15 @@ import { LlmInternalBudgetPgRepository } from '../../persistence/llm-internal-bu
 import { LlmInternalCostService } from '../../../application/llm/llm-internal-cost.service.js'
 import { AvaOperationalContextService } from '../../../application/llm/ava-operational-context.service.js'
 import { AvaEntityContextService } from '../../../application/llm/ava-entity-context.service.js'
+import { AvaConversationService } from '../../../application/llm/ava-conversation.service.js'
+import { AvaDocumentContextService } from '../../../application/llm/ava-document-context.service.js'
 import { AppAccountPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { IntegrationLinkPgRepository } from '../../persistence/integration-link.pg.repository.js'
 import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repository.js'
+import { AvaConversationPgRepository } from '../../persistence/ava-conversation.pg.repository.js'
+import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
 import { AvaController } from './ava.controller.js'
+import { AvaConversationController } from './ava-conversation.controller.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
 
@@ -71,6 +76,12 @@ export async function avaRoutes(app: FastifyInstance) {
     new IntegrationLinkPgRepository(pgPool),
     new ExamPgRepository(pgPool),
   )
+  const conversationRepo = new AvaConversationPgRepository(pgPool)
+  const conversations = new AvaConversationService(conversationRepo)
+  const documentContext = new AvaDocumentContextService(
+    new DocumentPgRepository(pgPool),
+    pgPool,
+  )
   const avaChat = new AvaChatService(
     familySupport,
     patientContext,
@@ -78,8 +89,16 @@ export async function avaRoutes(app: FastifyInstance) {
     entityContext,
     operationalContext,
     new AppAccountPgRepository(pgPool),
+    conversations,
+    documentContext,
   )
   const controller = new AvaController(avaChat)
+  const conversationController = new AvaConversationController(conversations)
+
+  app.get('/ava/conversations', conversationController.list.bind(conversationController))
+  app.post('/ava/conversations', conversationController.create.bind(conversationController))
+  app.get('/ava/conversations/:conversationId', conversationController.get.bind(conversationController))
+  app.get('/ava/conversations/:conversationId/messages', conversationController.messages.bind(conversationController))
 
   app.post('/patients/:id/ava/chat', controller.chat.bind(controller))
 

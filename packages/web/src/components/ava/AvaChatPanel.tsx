@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Avatar, Button, Checkbox, Input, Typography, App } from 'antd'
-import { FileTextOutlined, SendOutlined } from '@ant-design/icons'
+import { Avatar, Button, Checkbox, Input, Modal, Select, Typography, App } from 'antd'
+import { FileTextOutlined, PictureOutlined, SendOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
-import type { AvaActivityEvent, AvaChatResponse, LlmUsageQuota } from '../../lib/api.types.js'
+import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from '../../lib/api.types.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
@@ -21,7 +21,9 @@ import {
 } from './ava-sizes.js'
 import {
   readAvaAllowLlmDataSharing,
+  readAvaImageAttachWarningDismissed,
   writeAvaAllowLlmDataSharing,
+  writeAvaImageAttachWarningDismissed,
 } from '../../lib/ava-llm-preferences.js'
 import { isLlmQuotaExhausted } from '../../lib/llm-quota.js'
 import type { AvaEntityPin } from '../../lib/ava-dock-bus.js'
@@ -44,7 +46,14 @@ interface Props {
   initialMessage?: string
   entityPin?: AvaEntityPin
   autoSend?: boolean
+  conversationId?: string | null
+  onConversationIdChange?: (id: string | null) => void
   onAcceleratorConsumed?: () => void
+}
+
+interface PendingAttachment {
+  documentId: string
+  filename: string
 }
 
 function initialsOf(name: string | null | undefined): string {
@@ -65,6 +74,8 @@ export function AvaChatPanel({
   initialMessage,
   entityPin,
   autoSend = false,
+  conversationId = null,
+  onConversationIdChange,
   onAcceleratorConsumed,
 }: Props) {
   const { t } = useTranslation()
@@ -79,8 +90,15 @@ export function AvaChatPanel({
   const [allowLlmDataSharing, setAllowLlmDataSharing] = useState(() => readAvaAllowLlmDataSharing())
   const [reportOpen, setReportOpen] = useState(false)
   const [activityTrace, setActivityTrace] = useState<AvaActivityEvent[]>([])
+  const [conversationOptions, setConversationOptions] = useState<AvaConversation[]>([])
+  const [attachment, setAttachment] = useState<PendingAttachment | null>(null)
+  const [imageWarningOpen, setImageWarningOpen] = useState(false)
+  const [imageWarningDismiss, setImageWarningDismiss] = useState(false)
+  const [uploadingAttachment, setUploadingAttachment] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const autoSendDoneRef = useRef(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const resumeAttemptedRef = useRef(false)
 
   const thinkingPhrase = useAvaThinkingPhrase(loading)
   const statusLabel = useMemo(() => {
@@ -104,6 +122,44 @@ export function AvaChatPanel({
 
   useEffect(() => { loadQuota() }, [loadQuota])
 
+  const loadConversationList = useCallback(() => {
+    api.ava.listConversations(patientId)
+      .then((r) => setConversationOptions(r.items))
+      .catch(() => setConversationOptions([]))
+  }, [patientId])
+
+  const loadConversationMessages = useCallback((id: string) => {
+    api.ava.getMessages(id)
+      .then((r) => {
+        setMessages(r.messages.map((m) => ({
+          role: m.role,
+          text: m.content,
+          revised: Boolean(m.metadata?.reflection && (m.metadata.reflection as { revised?: boolean }).revised),
+        })))
+      })
+      .catch(() => setMessages([]))
+  }, [])
+
+  useEffect(() => {
+    loadConversationList()
+    resumeAttemptedRef.current = false
+  }, [patientId, loadConversationList])
+
+  useEffect(() => {
+    if (conversationId) {
+      loadConversationMessages(conversationId)
+      return
+    }
+    if (resumeAttemptedRef.current || initialMessage?.trim() || autoSend) return
+    resumeAttemptedRef.current = true
+    api.ava.listConversations(patientId)
+      .then((r) => {
+        const latest = r.items[0]
+        if (latest) onConversationIdChange?.(latest.id)
+      })
+      .catch(() => {})
+  }, [conversationId, patientId, initialMessage, autoSend, loadConversationMessages, onConversationIdChange])
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
@@ -116,12 +172,8 @@ export function AvaChatPanel({
       return
     }
 
-    const history = messages.slice(-12).map((m) => ({
-      role: m.role,
-      content: m.text,
-    }))
-
     const pin = pinForTurn ?? entityPin
+    const attachmentForTurn = attachment
 
     if (!overrideText) setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
@@ -134,12 +186,16 @@ export function AvaChatPanel({
           {
             message: text,
             healthThreadId,
-            history,
+            conversationId: conversationId ?? undefined,
+            attachmentDocumentId: attachmentForTurn?.documentId,
             allowLlmDataSharing,
             entityPin: pin,
           },
           (event) => setActivityTrace((prev) => [...prev, event]),
         ))
+      if (res.conversationId) onConversationIdChange?.(res.conversationId)
+      loadConversationList()
+      setAttachment(null)
       if (res.activityTrace?.length) setActivityTrace(res.activityTrace)
       setLastModel(`${res.provider} · ${res.model}`)
       setQuota(res.quota)
@@ -159,6 +215,54 @@ export function AvaChatPanel({
     } finally {
       setLoading(false)
     }
+  }
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click()
+  }
+
+  const requestAttachImage = () => {
+    if (readAvaImageAttachWarningDismissed()) {
+      openFilePicker()
+      return
+    }
+    setImageWarningDismiss(false)
+    setImageWarningOpen(true)
+  }
+
+  const confirmImageWarning = () => {
+    if (imageWarningDismiss) writeAvaImageAttachWarningDismissed(true)
+    setImageWarningOpen(false)
+    openFilePicker()
+  }
+
+  const handleFileSelected = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      message.warning(t('ava.imageAttachFailed'))
+      return
+    }
+    setUploadingAttachment(true)
+    try {
+      const doc = await api.documents.upload(patientId, 'exam', file)
+      setAttachment({ documentId: doc.id, filename: doc.originalFilename })
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : t('ava.imageAttachFailed'))
+    } finally {
+      setUploadingAttachment(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const startNewConversation = () => {
+    onConversationIdChange?.(null)
+    setMessages([])
+    setAttachment(null)
+    resumeAttemptedRef.current = true
+  }
+
+  const handleConversationSelect = (id: string) => {
+    onConversationIdChange?.(id)
+    loadConversationMessages(id)
   }
 
   useEffect(() => {
@@ -256,6 +360,30 @@ export function AvaChatPanel({
 
       {quotaAlert}
 
+      {variant === 'embedded' && (
+        <div className="ava-chat-panel__conversation-bar">
+          <Typography.Text type="secondary" className="ava-chat-panel__conversation-label">
+            {t('ava.conversationLabel')}
+          </Typography.Text>
+          <Select
+            size="small"
+            className="ava-chat-panel__conversation-select"
+            placeholder={t('ava.newConversation')}
+            value={conversationId ?? undefined}
+            allowClear
+            onClear={() => startNewConversation()}
+            onChange={(id) => id && handleConversationSelect(id)}
+            options={conversationOptions.map((c) => ({
+              value: c.id,
+              label: c.title ?? t('ava.resumeConversation'),
+            }))}
+          />
+          <Button size="small" type="link" onClick={startNewConversation}>
+            {t('ava.newConversation')}
+          </Button>
+        </div>
+      )}
+
       <div className="ava-chat-stage">
         <div className="ava-chat-stage__ava">
           <div
@@ -332,6 +460,25 @@ export function AvaChatPanel({
         <Typography.Paragraph type="secondary" className="ava-chat-panel__sharing-hint">
           {t('ava.allowDataSharingHint')}
         </Typography.Paragraph>
+        {attachment && (
+          <div className="ava-chat-panel__attachment">
+            <PictureOutlined />
+            <Typography.Text>{t('ava.attachmentReady', { name: attachment.filename })}</Typography.Text>
+            <Button type="link" size="small" onClick={() => setAttachment(null)}>
+              {t('ava.removeAttachment')}
+            </Button>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="ava-chat-panel__file-input"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void handleFileSelected(file)
+          }}
+        />
         <Input.TextArea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -345,17 +492,42 @@ export function AvaChatPanel({
             }
           }}
         />
-        <Button
-          type="primary"
-          icon={<SendOutlined />}
-          loading={loading}
-          onClick={() => send()}
-          disabled={!input.trim() || quotaBlocked}
-          style={{ marginTop: 8, width: '100%' }}
-        >
-          {t('ava.send')}
-        </Button>
+        <div className="ava-chat-panel__composer-actions">
+          <Button
+            icon={<PictureOutlined />}
+            onClick={requestAttachImage}
+            disabled={loading || quotaBlocked || uploadingAttachment}
+            loading={uploadingAttachment}
+          >
+            {t('ava.attachImage')}
+          </Button>
+          <Button
+            type="primary"
+            icon={<SendOutlined />}
+            loading={loading}
+            onClick={() => send()}
+            disabled={!input.trim() || quotaBlocked}
+          >
+            {t('ava.send')}
+          </Button>
+        </div>
       </div>
+
+      <Modal
+        open={imageWarningOpen}
+        title={t('ava.imageAttachWarningTitle')}
+        onOk={confirmImageWarning}
+        onCancel={() => setImageWarningOpen(false)}
+        okText={t('ava.attachImage')}
+      >
+        <Typography.Paragraph>{t('ava.imageAttachWarningBody')}</Typography.Paragraph>
+        <Checkbox
+          checked={imageWarningDismiss}
+          onChange={(e) => setImageWarningDismiss(e.target.checked)}
+        >
+          {t('ava.imageAttachWarningDontShow')}
+        </Checkbox>
+      </Modal>
 
       <AvaReportModal
         open={reportOpen}

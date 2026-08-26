@@ -4,9 +4,12 @@ import type { AvaPatientContextService } from './ava-patient-context.service.js'
 import type { AvaEntityContextService } from './ava-entity-context.service.js'
 import type { AvaEntityPin } from './ava-entity-context.service.js'
 import type { AvaOperationalContextService } from './ava-operational-context.service.js'
+import type { AvaConversationService } from './ava-conversation.service.js'
+import type { AvaDocumentContextService } from './ava-document-context.service.js'
 import type { AppAccountRepository } from '../../domain/auth/app-account.repository.js'
 import { caregiverFirstName } from '../../domain/llm/ava-personalization.js'
 import type { AvaActivityEmitter } from '../../domain/llm/ava-activity.js'
+import { emitAvaActivity } from '../../domain/llm/ava-activity.js'
 import { runAvaContextTools } from '../../domain/llm/ava-tools.js'
 
 export class AvaChatService {
@@ -17,6 +20,8 @@ export class AvaChatService {
     private readonly entityContext?: AvaEntityContextService,
     private readonly operationalContext?: AvaOperationalContextService,
     private readonly accounts?: AppAccountRepository,
+    private readonly conversations?: AvaConversationService,
+    private readonly documentContext?: AvaDocumentContextService,
   ) {}
 
   async chat(
@@ -26,6 +31,8 @@ export class AvaChatService {
       patientId: string
       message: string
       healthThreadId?: string
+      conversationId?: string
+      attachmentDocumentId?: string
       tier?: import('../../domain/llm/llm.types.js').LlmTier
       history?: Array<{ role: 'user' | 'assistant'; content: string }>
       allowLlmDataSharing?: boolean
@@ -33,6 +40,41 @@ export class AvaChatService {
     },
     activityEmitter?: AvaActivityEmitter,
   ) {
+    let conversationId = input.conversationId
+    let serverHistory = input.history
+
+    if (input.accountId && this.conversations) {
+      const conv = await this.conversations.ensureConversation(input.accountId, {
+        patientId: input.patientId,
+        conversationId: input.conversationId,
+        healthThreadId: input.healthThreadId,
+        firstMessage: input.message,
+      })
+      conversationId = conv.id
+      const loaded = await this.conversations.getMessages(input.accountId, conv.id)
+      if (loaded) {
+        serverHistory = loaded.messages
+          .filter((m) => m.role === 'user' || m.role === 'assistant')
+          .slice(-12)
+          .map((m) => ({ role: m.role, content: m.content }))
+      }
+    }
+
+    let attachmentBlock = ''
+    if (input.attachmentDocumentId && this.documentContext) {
+      emitAvaActivity(activityEmitter, 'context.attachment', 'context', 'start')
+      try {
+        attachmentBlock = await this.documentContext.buildAttachmentBlock(
+          input.patientId,
+          input.attachmentDocumentId,
+        )
+        emitAvaActivity(activityEmitter, 'context.attachment', 'context', 'done')
+      } catch {
+        emitAvaActivity(activityEmitter, 'context.attachment', 'context', 'skip')
+        throw new Error('AVA_ATTACHMENT_INVALID')
+      }
+    }
+
     const { result: gathered, trace: contextTrace } = await runAvaContextTools(
       {
         loadPatientContext: (patientId) => this.patientContext.buildContextBlock(patientId),
@@ -66,6 +108,9 @@ export class AvaChatService {
 
     const orchestratorResult = await this.orchestrator.chat({
       ...input,
+      history: serverHistory,
+      conversationId,
+      attachmentBlock,
       bundle: gathered.bundle,
       patientContextBlock: gathered.patientContextBlock,
       clinicianLabel: gathered.clinicianLabel,
@@ -76,8 +121,23 @@ export class AvaChatService {
       quotaContext: { email: quotaEmail },
     }, activityEmitter)
 
+    if (input.accountId && conversationId && this.conversations) {
+      await this.conversations.persistTurn(input.accountId, {
+        conversationId,
+        userMessage: input.message,
+        assistantMessage: orchestratorResult.reply,
+        attachmentDocumentId: input.attachmentDocumentId,
+        reflection: {
+          revised: orchestratorResult.reflection.revised,
+          satisfactory: orchestratorResult.reflection.satisfactory,
+          severity: orchestratorResult.reflection.severity,
+        },
+      })
+    }
+
     return {
       ...orchestratorResult,
+      conversationId,
       activityTrace: [...contextTrace, ...orchestratorResult.activityTrace],
     }
   }

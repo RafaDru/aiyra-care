@@ -642,7 +642,7 @@
           "id": "ava-platform-presence",
           "title": "Ava em múltiplos pontos da plataforma",
           "status": "in_progress",
-          "detail": "Orb global + aceleradores por entidade (done). Faltam: widget em documentos/export; anexo imagem no chat.",
+          "detail": "Orb global + aceleradores (done). Anexo imagem no chat com aviso consumo IA (done). Faltam: widget em documentos/export.",
           "reviewBadge": ["content"]
         },
         {
@@ -1216,26 +1216,26 @@
       "priority": "P1",
       "title": "Ava companheira — conversas persistidas (conta global)",
       "summary": "Ava global na conta; histórico servidor; retomar sessões; LGPD; base para pins e grafo. Ver docs/AVA_VISION.md.",
-      "status": "planned",
-      "statusLabel": "Planejado",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
       "items": [
         {
           "id": "ava-conv-migration",
           "title": "Migration ava_conversations + ava_messages",
-          "status": "planned",
-          "detail": "042+; account_id; cascade delete com conta."
+          "status": "done",
+          "detail": "047; account_id; cascade delete com conta; llm_usage_events FK."
         },
         {
           "id": "ava-conv-api",
           "title": "API CRUD conversas + chat com conversationId",
-          "status": "planned",
-          "detail": "GET/POST /ava/conversations; ligar llm_usage_events.conversation_id."
+          "status": "done",
+          "detail": "GET/POST /ava/conversations; mensagens; chat persiste turnos; conversation_id em llm_usage_events."
         },
         {
           "id": "ava-dock-global",
           "title": "Dock Ava global + lista de conversas",
-          "status": "planned",
-          "detail": "Web: histórico persistido; retomar; título auto opcional."
+          "status": "done",
+          "detail": "Seletor + nova conversa; retomar última; histórico servidor; título auto da 1ª mensagem."
         },
         {
           "id": "ava-lgpd-retention",

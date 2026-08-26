@@ -51,6 +51,7 @@ export function AvaDockWidget({
   const { account } = useAuth()
   const caregiverName = caregiverFirstName(account?.displayName, account?.email)
   const [quota, setQuota] = useState<LlmUsageQuota | null>(null)
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const { phase, introDone } = useAvaDockIntro()
   const dockExpression = useAvaExpression(llmAnalyzing, '', {
     context: 'dock',
@@ -69,6 +70,7 @@ export function AvaDockWidget({
   const handlePatientChange = (id: string) => {
     if (id === patientId) return
     onPatientChange(id)
+    setConversationId(null)
     setChatEpoch((n) => n + 1)
   }
 
@@ -168,7 +170,7 @@ export function AvaDockWidget({
           </div>
           <div className="ava-chat-shell__body">
             <AvaChatPanel
-              key={`${patientId}-${chatEpoch}-${openRequestEpoch}`}
+              key={`${patientId}-${chatEpoch}`}
               patientId={patientId}
               healthThreadId={healthThreadId}
               variant="embedded"
@@ -176,6 +178,8 @@ export function AvaDockWidget({
               initialMessage={openRequest?.initialMessage}
               entityPin={openRequest?.entityPin}
               autoSend={openRequest?.autoSend}
+              conversationId={conversationId}
+              onConversationIdChange={setConversationId}
               onAcceleratorConsumed={onOpenRequestConsumed}
             />
           </div>

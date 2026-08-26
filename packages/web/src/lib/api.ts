@@ -222,6 +222,22 @@ export const api = {
     },
   },
   ava: {
+    listConversations: (patientId?: string) => {
+      const qs = patientId ? `?patientId=${encodeURIComponent(patientId)}` : ''
+      return request<{ items: import('./api.types.js').AvaConversation[] }>(`/ava/conversations${qs}`)
+    },
+    createConversation: (body: { patientId: string; healthThreadId?: string; title?: string }) =>
+      request<import('./api.types.js').AvaConversation>('/ava/conversations', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    getConversation: (conversationId: string) =>
+      request<import('./api.types.js').AvaConversation>(`/ava/conversations/${conversationId}`),
+    getMessages: (conversationId: string) =>
+      request<{
+        conversation: import('./api.types.js').AvaConversation
+        messages: import('./api.types.js').AvaMessage[]
+      }>(`/ava/conversations/${conversationId}/messages`),
     chat: (patientId: string, body: {
       message: string
       healthThreadId?: string
@@ -229,6 +245,8 @@ export const api = {
       allowLlmDataSharing?: boolean
       entityPin?: import('./ava-dock-bus.js').AvaEntityPin
       streamActivity?: boolean
+      conversationId?: string
+      attachmentDocumentId?: string
     }) =>
       request<import('./api.types.js').AvaChatResponse>(`/patients/${patientId}/ava/chat`, {
         method: 'POST',

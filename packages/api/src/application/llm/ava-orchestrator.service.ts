@@ -86,6 +86,8 @@ export class AvaOrchestratorService {
     allowLlmDataSharing?: boolean
     entityPinBlock?: string
     operationalBlock?: string
+    attachmentBlock?: string
+    conversationId?: string
     caregiverFirstName?: string | null
     quotaContext?: { email?: string | null }
   }, activityEmitter?: AvaActivityEmitter): Promise<AvaChatResult> {
@@ -102,6 +104,7 @@ export class AvaOrchestratorService {
 ${input.patientContextBlock}
 ${input.entityPinBlock ? `\nREGISTRO EM FOCO (priorize este registro na resposta):\n${input.entityPinBlock}\n` : ''}
 ${input.operationalBlock ? `\n${input.operationalBlock}\n` : ''}
+${input.attachmentBlock ? `\n${input.attachmentBlock}\n` : ''}
 ALERTAS AUTOMÁTICOS:
 ${insightBlock}
 
@@ -228,12 +231,14 @@ Mensagem atual do responsável: ${trimmed}`
       accountId: input.accountId,
       feature: 'ava_chat',
       patientId: input.patientId,
+      conversationId: input.conversationId,
       provider,
       model,
       tier,
       usage: mergedUsage,
       metadata: {
         healthThreadId: input.healthThreadId ?? null,
+        conversationId: input.conversationId ?? null,
         reflection: {
           satisfactory: reflection.satisfactory,
           revised: reflection.revised,

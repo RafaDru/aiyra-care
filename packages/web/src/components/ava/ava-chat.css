@@ -502,6 +502,45 @@
   color: #6d28d9;
 }
 
+.ava-chat-panel__composer-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.ava-chat-panel__file-input {
+  display: none;
+}
+
+.ava-chat-panel__attachment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(79, 70, 229, 0.06);
+  font-size: 13px;
+}
+
+.ava-chat-panel__conversation-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px 0;
+  flex-wrap: wrap;
+}
+
+.ava-chat-panel__conversation-select {
+  min-width: 160px;
+  flex: 1;
+}
+
+.ava-chat-panel__conversation-label {
+  font-size: 12px;
+}
+
 .ava-chat-panel__composer {
   flex-shrink: 0;
   padding: 12px 18px 16px;

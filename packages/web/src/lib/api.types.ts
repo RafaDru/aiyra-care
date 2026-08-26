@@ -612,11 +612,34 @@ export interface AvaActivityEvent {
   ts: number
 }
 
+export interface AvaConversation {
+  id: string
+  accountId: string
+  patientId: string
+  healthThreadId: string | null
+  title: string | null
+  status: 'active' | 'archived'
+  lastActivityAt: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AvaMessage {
+  id: string
+  conversationId: string
+  role: 'user' | 'assistant'
+  content: string
+  documentId: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+}
+
 export interface AvaChatResponse {
   reply: string
   provider: string
   model: string
   tier: 'free' | 'premium'
+  conversationId?: string
   usage: {
     tokensIn: number
     tokensOut: number

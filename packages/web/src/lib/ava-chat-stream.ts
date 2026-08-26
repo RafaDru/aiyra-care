@@ -10,6 +10,8 @@ export interface AvaChatRequestBody {
   allowLlmDataSharing?: boolean
   entityPin?: AvaEntityPin
   streamActivity?: boolean
+  conversationId?: string
+  attachmentDocumentId?: string
 }
 
 async function authHeaders(): Promise<Record<string, string>> {

@@ -1,5 +1,14 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-26b] - Ava: conversas persistidas + anexo de imagem no chat
+
+### Realizado
+- **Migration 047:** `ava_conversations`, `ava_messages`; FK `llm_usage_events.conversation_id` → conversa.
+- **API:** `GET/POST /ava/conversations`, mensagens; chat com `conversationId` (auto-criação), persistência de turnos; `attachmentDocumentId` + bloco OCR/interpretação (`AvaDocumentContextService`).
+- **Web:** seletor de conversa no drawer; retomar última sessão do paciente; `conversationId` no dock; anexo de imagem com modal de aviso de consumo IA (dismiss em localStorage).
+- **Atividade:** `context.attachment` no stream SSE.
+- **Testes:** `ava-conversation.test.ts`, `ava-document-context.test.ts`.
+
 ## [2026-08-26] - Ava: expressões, ferramental read-only, status SSE, UX chat
 
 ### Realizado
