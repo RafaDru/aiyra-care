@@ -238,6 +238,44 @@ export const api = {
         conversation: import('./api.types.js').AvaConversation
         messages: import('./api.types.js').AvaMessage[]
       }>(`/ava/conversations/${conversationId}/messages`),
+    getContext: (conversationId: string) =>
+      request<{
+        conversationId: string
+        pins: import('./api.types.js').AvaSessionPin[]
+      }>(`/ava/conversations/${conversationId}/context`),
+    patchContext: (
+      conversationId: string,
+      body: {
+        pin?: {
+          pin: import('./ava-dock-bus.js').AvaEntityPin
+          patientId: string
+          label?: string
+          source?: 'user' | 'accelerator' | 'auto' | 'inferred'
+        }
+        unpin?: import('./ava-dock-bus.js').AvaEntityPin
+      },
+    ) =>
+      request<{ pin?: import('./api.types.js').AvaSessionPin; pins?: import('./api.types.js').AvaSessionPin[] }>(
+        `/ava/conversations/${conversationId}/context`,
+        { method: 'PATCH', body: JSON.stringify(body) },
+      ),
+    archiveConversation: (conversationId: string) =>
+      request<import('./api.types.js').AvaConversation>(`/ava/conversations/${conversationId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'archived' }),
+      }),
+    deleteConversation: (conversationId: string) =>
+      request<{ deleted: boolean; conversationId: string }>(`/ava/conversations/${conversationId}`, {
+        method: 'DELETE',
+      }),
+    exportConversations: () =>
+      request<{
+        exportedAt: string
+        items: Array<{
+          conversation: import('./api.types.js').AvaConversation
+          messages: import('./api.types.js').AvaMessage[]
+        }>
+      }>('/ava/conversations/export'),
     chat: (patientId: string, body: {
       message: string
       healthThreadId?: string

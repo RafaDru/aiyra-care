@@ -537,6 +537,23 @@
   flex: 1;
 }
 
+.ava-context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px 0;
+}
+
+.ava-context-chips__label {
+  font-size: 12px;
+  color: var(--ant-color-text-secondary);
+}
+
+.ava-context-chips__tag {
+  margin: 0;
+}
+
 .ava-chat-panel__conversation-label {
   font-size: 12px;
 }

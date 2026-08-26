@@ -118,7 +118,8 @@
     { "id": "ava-accelerators-g1", "date": "2026-08-25", "title": "Aceleradores Ava + entityPin", "decision": "AvaAcceleratorButton + ava-dock-bus; entityPin no chat API; REGISTRO EM FOCO no prompt", "status": "active" },
     { "id": "ava-tools-g4-partial", "date": "2026-08-26", "title": "Ava ferramental read-only + status SSE", "decision": "ava-tools.ts + streamActivity; G3 mutável pendente; ver AVA_OPERATIONAL.md", "status": "active" },
     { "id": "ava-conversations-047", "date": "2026-08-26", "title": "Conversas Ava persistidas", "decision": "ava_conversations + ava_messages; API /ava/conversations; chat com conversationId; llm_usage_events.conversation_id", "status": "active" },
-    { "id": "ava-chat-image-attach", "date": "2026-08-26", "title": "Anexo imagem no chat Ava", "decision": "Upload documents + attachmentDocumentId; OCR/interpretação no prompt; modal aviso consumo IA", "status": "active" }
+    { "id": "ava-chat-image-attach", "date": "2026-08-26", "title": "Anexo imagem no chat Ava", "decision": "Upload documents + attachmentDocumentId; OCR/interpretação no prompt; modal aviso consumo IA", "status": "active" },
+    { "id": "ava-session-pins-048", "date": "2026-08-26", "title": "Pins de sessão Ava", "decision": "ava_session_context migration 048; GET/PATCH context; chips UI; LGPD export/delete/archive conversas", "status": "active" }
   ],
   "plannedWork": [
     { "id": "agent-rag", "title": "packages/agents + runtime citações", "status": "planned", "priority": "P3" },

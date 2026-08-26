@@ -1,5 +1,14 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-26c] - Ava: pins de sessão + LGPD conversas
+
+### Realizado
+- **Migration 048:** `ava_session_context` (pins por conversa; cascade com conversa).
+- **API contexto:** `GET/PATCH /ava/conversations/:id/context` (pin/unpin); bloco **REGISTROS PINADOS** no prompt; aceleradores auto-pin `source=accelerator`.
+- **LGPD:** `PATCH` arquivar, `DELETE` conversa, `GET /ava/conversations/export` (JSON conta); cascade `DELETE /auth/account` já cobre `ava_conversations`.
+- **Web:** chips de contexto (`AvaContextChips`); arquivar/excluir conversa no drawer.
+- **Testes:** `ava-session-context.test.ts` em `test:critical`.
+
 ## [2026-08-26b] - Ava: conversas persistidas + anexo de imagem no chat
 
 ### Realizado

@@ -6,6 +6,7 @@ import type { AvaEntityPin } from './ava-entity-context.service.js'
 import type { AvaOperationalContextService } from './ava-operational-context.service.js'
 import type { AvaConversationService } from './ava-conversation.service.js'
 import type { AvaDocumentContextService } from './ava-document-context.service.js'
+import type { AvaSessionContextService } from './ava-session-context.service.js'
 import type { AppAccountRepository } from '../../domain/auth/app-account.repository.js'
 import { caregiverFirstName } from '../../domain/llm/ava-personalization.js'
 import type { AvaActivityEmitter } from '../../domain/llm/ava-activity.js'
@@ -22,6 +23,7 @@ export class AvaChatService {
     private readonly accounts?: AppAccountRepository,
     private readonly conversations?: AvaConversationService,
     private readonly documentContext?: AvaDocumentContextService,
+    private readonly sessionContext?: AvaSessionContextService,
   ) {}
 
   async chat(
@@ -58,6 +60,14 @@ export class AvaChatService {
           .slice(-12)
           .map((m) => ({ role: m.role, content: m.content }))
       }
+    }
+
+    if (conversationId && input.entityPin && this.sessionContext) {
+      await this.sessionContext.pin(conversationId, {
+        pin: input.entityPin,
+        patientId: input.patientId,
+        source: 'accelerator',
+      })
     }
 
     let attachmentBlock = ''
@@ -106,6 +116,14 @@ export class AvaChatService {
       quotaEmail = account?.email ?? null
     }
 
+    let entityPinBlock = gathered.entityPinBlock
+    if (conversationId && this.sessionContext) {
+      const sessionBlock = await this.sessionContext.buildSessionPinsBlock(input.patientId, conversationId)
+      if (sessionBlock) {
+        entityPinBlock = [sessionBlock, entityPinBlock].filter(Boolean).join('\n\n')
+      }
+    }
+
     const orchestratorResult = await this.orchestrator.chat({
       ...input,
       history: serverHistory,
@@ -115,7 +133,7 @@ export class AvaChatService {
       patientContextBlock: gathered.patientContextBlock,
       clinicianLabel: gathered.clinicianLabel,
       ageCategory: gathered.ageCategory,
-      entityPinBlock: gathered.entityPinBlock,
+      entityPinBlock,
       operationalBlock: gathered.operationalBlock,
       caregiverFirstName: caregiverFirst,
       quotaContext: { email: quotaEmail },

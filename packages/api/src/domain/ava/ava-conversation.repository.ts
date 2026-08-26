@@ -26,6 +26,7 @@ export interface AvaMessageRow {
 export interface AvaConversationRepository {
   findById(id: string): Promise<AvaConversationRow | null>
   listByAccount(accountId: string, patientId?: string): Promise<AvaConversationRow[]>
+  listAllByAccount(accountId: string): Promise<AvaConversationRow[]>
   create(input: {
     accountId: string
     patientId: string
@@ -41,4 +42,6 @@ export interface AvaConversationRepository {
     documentId?: string | null
     metadata?: Record<string, unknown> | null
   }): Promise<AvaMessageRow>
+  updateStatus(id: string, status: AvaConversationStatus): Promise<void>
+  deleteById(id: string): Promise<void>
 }

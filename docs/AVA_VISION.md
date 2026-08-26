@@ -46,7 +46,7 @@ O componente é `AvaGlobalDock` (`packages/web/src/components/ava/AvaGlobalDock.
 |--------|--------|
 | `ava_conversations` | Sessão: `account_id`, `patient_id`, título, `status`, `last_activity_at`, LGPD |
 | `ava_messages` | Turnos `user` / `assistant`, `document_id` opcional, metadata reflexão |
-| `ava_session_context` | **Planejado** — pins: `entity_type`, `entity_id`, `patient_id?`, `source`, `active` |
+| `ava_session_context` | Pins por conversa: `entity_type`, `entity_id`, `patient_id`, `source`, `active` (migration **048**) |
 
 `llm_usage_events.conversation_id` referencia `ava_conversations.id` (preenchido no chat Ava).
 

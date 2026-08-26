@@ -93,4 +93,26 @@ export class AvaConversationService {
     })
     await this.repo.touchActivity(input.conversationId, title)
   }
+
+  async archive(accountId: string, conversationId: string) {
+    const conv = await this.getForAccount(accountId, conversationId)
+    if (!conv) throw new Error('AVA_CONVERSATION_NOT_FOUND')
+    await this.repo.updateStatus(conversationId, 'archived')
+    return { ...conv, status: 'archived' as const }
+  }
+
+  async delete(accountId: string, conversationId: string) {
+    const conv = await this.getForAccount(accountId, conversationId)
+    if (!conv) throw new Error('AVA_CONVERSATION_NOT_FOUND')
+    await this.repo.deleteById(conversationId)
+    return { deleted: true, conversationId }
+  }
+
+  async exportForAccount(accountId: string) {
+    const conversations = await this.repo.listAllByAccount(accountId)
+    return Promise.all(conversations.map(async (conv) => ({
+      conversation: conv,
+      messages: await this.repo.listMessages(conv.id, 500),
+    })))
+  }
 }

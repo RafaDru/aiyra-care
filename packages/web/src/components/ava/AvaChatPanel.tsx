@@ -4,7 +4,7 @@ import { FileTextOutlined, PictureOutlined, SendOutlined } from '@ant-design/ico
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
-import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from '../../lib/api.types.js'
+import type { AvaActivityEvent, AvaChatResponse, AvaConversation, AvaSessionPin, LlmUsageQuota } from '../../lib/api.types.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
@@ -29,6 +29,7 @@ import { isLlmQuotaExhausted } from '../../lib/llm-quota.js'
 import type { AvaEntityPin } from '../../lib/ava-dock-bus.js'
 import { AvaChatBubble } from './AvaChatBubble.js'
 import { AvaReportModal } from './AvaReportModal.js'
+import { AvaContextChips } from './AvaContextChips.js'
 import './ava-chat.css'
 import './ava-report.css'
 
@@ -91,6 +92,7 @@ export function AvaChatPanel({
   const [reportOpen, setReportOpen] = useState(false)
   const [activityTrace, setActivityTrace] = useState<AvaActivityEvent[]>([])
   const [conversationOptions, setConversationOptions] = useState<AvaConversation[]>([])
+  const [contextPins, setContextPins] = useState<AvaSessionPin[]>([])
   const [attachment, setAttachment] = useState<PendingAttachment | null>(null)
   const [imageWarningOpen, setImageWarningOpen] = useState(false)
   const [imageWarningDismiss, setImageWarningDismiss] = useState(false)
@@ -139,6 +141,20 @@ export function AvaChatPanel({
       })
       .catch(() => setMessages([]))
   }, [])
+
+  const loadContextPins = useCallback(() => {
+    if (!conversationId) {
+      setContextPins([])
+      return
+    }
+    api.ava.getContext(conversationId)
+      .then((r) => setContextPins(r.pins))
+      .catch(() => setContextPins([]))
+  }, [conversationId])
+
+  useEffect(() => {
+    loadContextPins()
+  }, [loadContextPins])
 
   useEffect(() => {
     loadConversationList()
@@ -195,6 +211,7 @@ export function AvaChatPanel({
         ))
       if (res.conversationId) onConversationIdChange?.(res.conversationId)
       loadConversationList()
+      loadContextPins()
       setAttachment(null)
       if (res.activityTrace?.length) setActivityTrace(res.activityTrace)
       setLastModel(`${res.provider} · ${res.model}`)
@@ -257,7 +274,39 @@ export function AvaChatPanel({
     onConversationIdChange?.(null)
     setMessages([])
     setAttachment(null)
+    setContextPins([])
     resumeAttemptedRef.current = true
+  }
+
+  const archiveCurrentConversation = async () => {
+    if (!conversationId) return
+    try {
+      await api.ava.archiveConversation(conversationId)
+      message.success(t('ava.conversationArchived'))
+      onConversationIdChange?.(null)
+      startNewConversation()
+      loadConversationList()
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : t('common.error'))
+    }
+  }
+
+  const deleteCurrentConversation = async () => {
+    if (!conversationId) return
+    Modal.confirm({
+      title: t('ava.deleteConversationTitle'),
+      content: t('ava.deleteConversationBody'),
+      okText: t('common.delete'),
+      okType: 'danger',
+      cancelText: t('common.cancel'),
+      onOk: async () => {
+        await api.ava.deleteConversation(conversationId)
+        message.success(t('ava.conversationDeleted'))
+        onConversationIdChange?.(null)
+        startNewConversation()
+        loadConversationList()
+      },
+    })
   }
 
   const handleConversationSelect = (id: string) => {
@@ -381,7 +430,25 @@ export function AvaChatPanel({
           <Button size="small" type="link" onClick={startNewConversation}>
             {t('ava.newConversation')}
           </Button>
+          {conversationId && (
+            <>
+              <Button size="small" type="link" onClick={() => void archiveCurrentConversation()}>
+                {t('ava.archiveConversation')}
+              </Button>
+              <Button size="small" type="link" danger onClick={() => void deleteCurrentConversation()}>
+                {t('ava.deleteConversation')}
+              </Button>
+            </>
+          )}
         </div>
+      )}
+
+      {conversationId && contextPins.length > 0 && (
+        <AvaContextChips
+          conversationId={conversationId}
+          pins={contextPins}
+          onPinsChange={loadContextPins}
+        />
       )}
 
       <div className="ava-chat-stage">

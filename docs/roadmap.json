@@ -1240,8 +1240,8 @@
         {
           "id": "ava-lgpd-retention",
           "title": "Retenção e exclusão LGPD",
-          "status": "planned",
-          "detail": "Política privacidade; export conta; DELETE cascade; docs/AVA_VISION.md.",
+          "status": "done",
+          "detail": "Arquivar/excluir conversa; export JSON GET /ava/conversations/export; cascade conta (047). Política privacidade — revisão legal pendente.",
           "reviewBadge": ["legal"]
         },
         {
@@ -1258,20 +1258,20 @@
       "priority": "P2",
       "title": "Ava — contexto visível (pins + hooks)",
       "summary": "Painel lateral: pacientes, exames, acompanhamentos no contexto; troca de paciente com hooks; compactação gerenciada.",
-      "status": "planned",
-      "statusLabel": "Planejado",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
       "items": [
         {
           "id": "ava-session-pins",
           "title": "ava_session_context (pins PG)",
-          "status": "planned",
-          "detail": "entity_type/id; active; source user|auto|inferred."
+          "status": "done",
+          "detail": "Migration 048; GET/PATCH context; prompt com REGISTROS PINADOS; accelerator auto-pin."
         },
         {
           "id": "ava-context-panel-ui",
           "title": "UI painel / marcadores de contexto",
-          "status": "planned",
-          "detail": "Sidebar expansível; chips no composer."
+          "status": "done",
+          "detail": "AvaContextChips no drawer; remover pin; arquivar/excluir conversa."
         },
         {
           "id": "ava-prompt-builder",

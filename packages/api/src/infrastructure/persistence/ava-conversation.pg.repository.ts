@@ -61,7 +61,15 @@ export class AvaConversationPgRepository implements AvaConversationRepository {
     return rows.map(rowToConversation)
   }
 
-  async create(input: {
+  async listAllByAccount(accountId: string) {
+    const { rows } = await this.pool.query(
+      `SELECT ${CONV_COLS} FROM ava_conversations
+       WHERE account_id = $1
+       ORDER BY last_activity_at DESC`,
+      [accountId],
+    )
+    return rows.map(rowToConversation)
+  }
     accountId: string
     patientId: string
     healthThreadId?: string | null
@@ -123,5 +131,16 @@ export class AvaConversationPgRepository implements AvaConversationRepository {
       ],
     )
     return rowToMessage(rows[0])
+  }
+
+  async updateStatus(id: string, status: AvaConversationRow['status']) {
+    await this.pool.query(
+      `UPDATE ava_conversations SET status = $2, updated_at = NOW() WHERE id = $1`,
+      [id, status],
+    )
+  }
+
+  async deleteById(id: string) {
+    await this.pool.query(`DELETE FROM ava_conversations WHERE id = $1`, [id])
   }
 }

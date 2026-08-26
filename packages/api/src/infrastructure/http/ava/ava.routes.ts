@@ -27,10 +27,12 @@ import { AvaOperationalContextService } from '../../../application/llm/ava-opera
 import { AvaEntityContextService } from '../../../application/llm/ava-entity-context.service.js'
 import { AvaConversationService } from '../../../application/llm/ava-conversation.service.js'
 import { AvaDocumentContextService } from '../../../application/llm/ava-document-context.service.js'
+import { AvaSessionContextService } from '../../../application/llm/ava-session-context.service.js'
 import { AppAccountPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { IntegrationLinkPgRepository } from '../../persistence/integration-link.pg.repository.js'
 import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repository.js'
 import { AvaConversationPgRepository } from '../../persistence/ava-conversation.pg.repository.js'
+import { AvaSessionContextPgRepository } from '../../persistence/ava-session-context.pg.repository.js'
 import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
 import { AvaController } from './ava.controller.js'
 import { AvaConversationController } from './ava-conversation.controller.js'
@@ -78,6 +80,10 @@ export async function avaRoutes(app: FastifyInstance) {
   )
   const conversationRepo = new AvaConversationPgRepository(pgPool)
   const conversations = new AvaConversationService(conversationRepo)
+  const sessionContext = new AvaSessionContextService(
+    new AvaSessionContextPgRepository(pgPool),
+    entityContext,
+  )
   const documentContext = new AvaDocumentContextService(
     new DocumentPgRepository(pgPool),
     pgPool,
@@ -91,14 +97,20 @@ export async function avaRoutes(app: FastifyInstance) {
     new AppAccountPgRepository(pgPool),
     conversations,
     documentContext,
+    sessionContext,
   )
   const controller = new AvaController(avaChat)
-  const conversationController = new AvaConversationController(conversations)
+  const conversationController = new AvaConversationController(conversations, sessionContext)
 
+  app.get('/ava/conversations/export', conversationController.export.bind(conversationController))
   app.get('/ava/conversations', conversationController.list.bind(conversationController))
   app.post('/ava/conversations', conversationController.create.bind(conversationController))
   app.get('/ava/conversations/:conversationId', conversationController.get.bind(conversationController))
+  app.patch('/ava/conversations/:conversationId', conversationController.patch.bind(conversationController))
+  app.delete('/ava/conversations/:conversationId', conversationController.delete.bind(conversationController))
   app.get('/ava/conversations/:conversationId/messages', conversationController.messages.bind(conversationController))
+  app.get('/ava/conversations/:conversationId/context', conversationController.getContext.bind(conversationController))
+  app.patch('/ava/conversations/:conversationId/context', conversationController.patchContext.bind(conversationController))
 
   app.post('/patients/:id/ava/chat', controller.chat.bind(controller))
 
