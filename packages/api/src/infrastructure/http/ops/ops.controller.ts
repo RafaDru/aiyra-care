@@ -1,5 +1,6 @@
 import type { FastifyReply } from 'fastify'
 import type { OpsMetricsService } from '../../../application/ops/ops-metrics.service.js'
+import type { OpsAlertDispatchService } from '../../../application/ops/ops-alert-dispatch.service.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 
 export function resolveOpsMetricsKey(): string | undefined {
@@ -22,7 +23,10 @@ export function assertOpsMetricsAccess(
 }
 
 export class OpsController {
-  constructor(private readonly metrics: OpsMetricsService) {}
+  constructor(
+    private readonly metrics: OpsMetricsService,
+    private readonly dispatch?: OpsAlertDispatchService,
+  ) {}
 
   async getMetrics(req: AuthenticatedRequest, reply: FastifyReply) {
     if (!assertOpsMetricsAccess(req, reply)) return
@@ -36,6 +40,16 @@ export class OpsController {
     return reply.send({
       generatedAt: result.metrics.generatedAt,
       alerts: result.alerts,
+      errorFingerprints24h: result.metrics.errorFingerprints24h,
     })
+  }
+
+  async dispatchAlerts(req: AuthenticatedRequest, reply: FastifyReply) {
+    if (!assertOpsMetricsAccess(req, reply)) return
+    if (!this.dispatch) {
+      return reply.status(503).send({ message: 'Dispatch não configurado' })
+    }
+    const result = await this.dispatch.checkAndDispatch()
+    return reply.send(result)
   }
 }

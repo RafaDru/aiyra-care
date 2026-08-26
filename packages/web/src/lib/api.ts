@@ -415,6 +415,26 @@ export const api = {
         body: JSON.stringify({ patientId }),
       }),
   },
+  hygiene: {
+    listCandidates: (patientId?: string) => {
+      const qs = patientId ? `?patientId=${encodeURIComponent(patientId)}` : ''
+      return request<{
+        pendingCount: number
+        items: Array<{
+          id: string
+          patientId: string
+          entityType: string
+          status: string
+          score: number
+        }>
+      }>(`/hygiene/candidates${qs}`)
+    },
+    resolve: (candidateId: string, decision: 'same_entity' | 'distinct' | 'dismissed') =>
+      request(`/hygiene/candidates/${candidateId}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ decision }),
+      }),
+  },
   billing: {
     offers: () => request<import('./api.types.js').BillingOffers>('/billing/offers'),
     me: () => request<import('./api.types.js').BillingMe>('/billing/me'),

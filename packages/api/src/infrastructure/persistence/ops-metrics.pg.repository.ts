@@ -186,4 +186,38 @@ export class OpsMetricsPgRepository {
       avaChatFailed: Number(row.ava_chat_failed ?? 0),
     }
   }
+
+  async errorFingerprints24h(limit = 25): Promise<import('../../domain/ops/ops-metrics.types.js').ErrorFingerprintRow[]> {
+    const { rows } = await this.pool.query(
+      `SELECT
+         event_name,
+         COALESCE(
+           properties->>'error_code',
+           properties->>'status',
+           properties->>'portal_type',
+           'unknown'
+         ) AS fingerprint,
+         COUNT(*)::int AS count,
+         MAX(created_at) AS last_seen_at
+       FROM product_events
+       WHERE created_at >= NOW() - INTERVAL '24 hours'
+         AND event_name IN (
+           'ava_chat_failed',
+           'sync_job_terminal',
+           'ava_quota_blocked',
+           'billing_checkout_started',
+           'hygiene_resolved'
+         )
+       GROUP BY event_name, fingerprint
+       ORDER BY count DESC
+       LIMIT $1`,
+      [limit],
+    )
+    return rows.map((row) => ({
+      eventName: row.event_name as string,
+      fingerprint: String(row.fingerprint ?? 'unknown'),
+      count: Number(row.count),
+      lastSeenAt: new Date(row.last_seen_at as string).toISOString(),
+    }))
+  }
 }

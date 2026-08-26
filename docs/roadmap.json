@@ -1283,7 +1283,7 @@
           "id": "ava-patient-switch-hooks",
           "title": "Hooks troca paciente / inatividade",
           "status": "done",
-          "detail": "Modal manter/remover pins; hint 45 min inatividade. product_events pendente (observability)."
+          "detail": "Modal manter/remover pins; hint 45 min inatividade. product_events via Ava/sync/G3 hooks."
         },
         {
           "id": "ava-context-accelerators",
@@ -1453,7 +1453,7 @@
           "id": "obs-web-tracker",
           "title": "trackProductEvent no web",
           "status": "done",
-          "detail": "Ava chat/quota/hook/G3/sync; billing/higiene/onboarding pendentes no tracker."
+          "detail": "Ava, sync, G3, billing checkout, onboarding; higiene via API list/resolve."
         },
         {
           "id": "obs-llm-dashboard-sql",
@@ -1684,32 +1684,32 @@
         {
           "id": "run-product-events-ingest",
           "title": "product_events + ingest API",
-          "status": "planned",
-          "detail": "Allowlist properties; sem texto clínico; migration + POST ingest."
+          "status": "done",
+          "detail": "Migration 049 + POST /telemetry/events."
         },
         {
           "id": "run-web-tracker",
           "title": "trackProductEvent no web",
-          "status": "planned",
-          "detail": "Sync fail, Ava errors, billing, hygiene dismiss — opt-in."
+          "status": "done",
+          "detail": "Billing, onboarding, Ava, sync; higiene server-side."
         },
         {
           "id": "run-sync-stuck-alerts",
           "title": "Alertas sync stuck / fail rate",
-          "status": "planned",
-          "detail": "sync_jobs + connect-worker heartbeat; e-mail/Slack interno."
+          "status": "done",
+          "detail": "GET /ops/alerts + webhook OPS_ALERT_WEBHOOK_URL + cron script."
         },
         {
           "id": "run-llm-cascade-alert",
           "title": "Alerta cascata LLM 100% fail + budget",
-          "status": "planned",
-          "detail": "llm_usage_events; teto R$100 interno; runbook OBSERVABILITY.md."
+          "status": "done",
+          "detail": "evaluateOpsAlerts + dispatch; GCP/e-mail futuro."
         },
         {
           "id": "run-error-fingerprint",
           "title": "Fingerprint de erros recorrentes",
-          "status": "planned",
-          "detail": "Agrupar product_events + API logs sanitizados; dashboard ops admin."
+          "status": "done",
+          "detail": "errorFingerprints24h em GET /ops/metrics."
         },
         {
           "id": "run-user-escalation",

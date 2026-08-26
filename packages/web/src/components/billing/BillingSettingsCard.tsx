@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Alert, Button, Card, List, Space, Tag, Typography, App } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
+import { trackProductEvent } from '../../lib/product-events.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
 import type { BillingMe, BillingOffers } from '../../lib/api.types.js'
 
@@ -53,8 +54,21 @@ export function BillingSettingsCard() {
   useEffect(() => {
     const billingParam = searchParams.get('billing')
     if (!billingParam) return
-    if (billingParam === 'success') message.success(t('billing.paymentSuccess'))
-    if (billingParam === 'subscription-success') message.success(t('billing.subscriptionSuccess'))
+    if (billingParam === 'success') {
+      message.success(t('billing.paymentSuccess'))
+      trackProductEvent('billing_checkout_completed', {
+        checkout_kind: 'pack',
+        status: 'completed',
+      })
+    }
+    if (billingParam === 'subscription-success') {
+      message.success(t('billing.subscriptionSuccess'))
+      trackProductEvent('billing_checkout_completed', {
+        checkout_kind: 'subscription',
+        package_id: 'family',
+        status: 'completed',
+      })
+    }
     if (billingParam === 'cancel') message.info(t('billing.paymentCanceled'))
     loadBilling()
     searchParams.delete('billing')
@@ -63,6 +77,10 @@ export function BillingSettingsCard() {
 
   const startCheckout = async (packageId: 'pack_10' | 'pack_30') => {
     setCheckoutId(packageId)
+    trackProductEvent('billing_checkout_started', {
+      package_id: packageId,
+      checkout_kind: 'pack',
+    })
     try {
       const { url } = await api.billing.checkout(packageId)
       if (url) window.location.href = url
@@ -76,6 +94,10 @@ export function BillingSettingsCard() {
 
   const startFamilySubscription = async () => {
     setSubscribing(true)
+    trackProductEvent('billing_checkout_started', {
+      package_id: 'family',
+      checkout_kind: 'subscription',
+    })
     try {
       const { url } = await api.billing.checkoutSubscription()
       if (url) window.location.href = url

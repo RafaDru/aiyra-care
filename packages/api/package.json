@@ -15,6 +15,7 @@
     "llm:internal-usage": "tsx scripts/report-internal-llm-usage.ts",
     "llm:internal-usage:top": "tsx scripts/report-internal-llm-usage.ts --top",
     "ops:metrics": "tsx scripts/ops-metrics-report.ts",
+    "ops:alerts-check": "tsx scripts/ops-alerts-check.ts",
     "reclassify:all": "tsx scripts/reclassify-medical-records.ts",
     "reclassify:apply": "tsx scripts/reclassify-medical-records.ts --apply",
     "reclassify:amil": "tsx scripts/reclassify-amil-medical-records.ts",

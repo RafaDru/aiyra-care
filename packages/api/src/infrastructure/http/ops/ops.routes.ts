@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { OpsMetricsService } from '../../../application/ops/ops-metrics.service.js'
+import { OpsAlertDispatchService } from '../../../application/ops/ops-alert-dispatch.service.js'
 import { LlmInternalCostService } from '../../../application/llm/llm-internal-cost.service.js'
 import { LlmUsagePgRepository } from '../../persistence/llm-usage.pg.repository.js'
 import { LlmInternalBudgetPgRepository } from '../../persistence/llm-internal-budget.pg.repository.js'
@@ -14,8 +15,10 @@ export async function opsRoutes(app: FastifyInstance) {
     new LlmInternalBudgetPgRepository(pgPool),
   )
   const metrics = new OpsMetricsService(metricsRepo, internalCost)
-  const controller = new OpsController(metrics)
+  const dispatch = new OpsAlertDispatchService(metrics)
+  const controller = new OpsController(metrics, dispatch)
 
   app.get('/ops/metrics', controller.getMetrics.bind(controller))
   app.get('/ops/alerts', controller.getAlerts.bind(controller))
+  app.post('/ops/alerts/check', controller.dispatchAlerts.bind(controller))
 }

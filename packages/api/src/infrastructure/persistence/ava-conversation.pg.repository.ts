@@ -70,6 +70,8 @@ export class AvaConversationPgRepository implements AvaConversationRepository {
     )
     return rows.map(rowToConversation)
   }
+
+  async create(input: {
     accountId: string
     patientId: string
     healthThreadId?: string | null

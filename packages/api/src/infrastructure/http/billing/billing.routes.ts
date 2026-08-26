@@ -17,6 +17,9 @@ import { LlmUsagePgRepository } from '../../persistence/llm-usage.pg.repository.
 import { pgPool } from '../../../db/postgres.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
+import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
+import { trackServerProductEvent } from '../../../application/telemetry/server-product-event.js'
 import { z } from 'zod'
 
 const checkoutSchema = z.object({
@@ -95,6 +98,7 @@ function entitlementJson(entitlement: Awaited<ReturnType<BillingService['getOrCr
 
 export async function billingRoutes(app: FastifyInstance) {
   const billing = new BillingService(pgPool)
+  const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
   const creditsRepo = new HandwritingCreditsPgRepository(pgPool)
   const credits = new HandwritingCreditsService(creditsRepo)
   const llmQuota = new LlmQuotaService(new LlmUsagePgRepository(pgPool), creditsRepo, credits)
@@ -296,6 +300,23 @@ export async function billingRoutes(app: FastifyInstance) {
         if (accountId && customerId) {
           await billing.setStripeCustomerId(accountId, customerId)
         }
+      }
+
+      const completedAccountId = session.metadata?.accountId?.trim()
+        ?? (session.mode === 'subscription' && session.subscription
+          ? await billing.findAccountIdBySubscriptionId(
+            typeof session.subscription === 'string' ? session.subscription : session.subscription.id,
+          )
+          : null)
+      if (completedAccountId) {
+        await trackServerProductEvent(productEvents, completedAccountId, {
+          eventName: 'billing_checkout_completed',
+          properties: {
+            checkout_kind: session.mode === 'subscription' ? 'subscription' : 'pack',
+            package_id: session.metadata?.packageId ?? (session.mode === 'subscription' ? 'family' : 'unknown'),
+            status: 'completed',
+          },
+        })
       }
     }
 

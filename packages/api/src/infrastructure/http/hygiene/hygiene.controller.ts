@@ -1,5 +1,7 @@
 import type { FastifyReply } from 'fastify'
 import type { HygieneService } from '../../../application/hygiene/hygiene.service.js'
+import type { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import { trackServerProductEvent } from '../../../application/telemetry/server-product-event.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import {
   hygieneCandidateParamsSchema,
@@ -8,7 +10,10 @@ import {
 } from './hygiene.schema.js'
 
 export class HygieneController {
-  constructor(private readonly hygiene: HygieneService) {}
+  constructor(
+    private readonly hygiene: HygieneService,
+    private readonly productEvents?: ProductEventService,
+  ) {}
 
   async listPending(req: AuthenticatedRequest, reply: FastifyReply) {
     if (!req.accountId) return reply.status(401).send({ message: 'Não autenticado' })
@@ -16,6 +21,13 @@ export class HygieneController {
     if (!query.success) return reply.status(400).send({ error: query.error.flatten() })
     const items = await this.hygiene.listPendingForAccount(req.accountId, query.data.patientId)
     const pendingCount = await this.hygiene.pendingCount(req.accountId)
+    if (pendingCount > 0) {
+      await trackServerProductEvent(this.productEvents, req.accountId, {
+        eventName: 'hygiene_prompt_shown',
+        patientId: query.data.patientId,
+        properties: { event_count: pendingCount },
+      })
+    }
     return reply.send({ pendingCount, items })
   }
 
@@ -32,6 +44,14 @@ export class HygieneController {
         body.data.decision,
         req.accountId,
       )
+      await trackServerProductEvent(this.productEvents, req.accountId, {
+        eventName: 'hygiene_resolved',
+        patientId: item.patientId,
+        properties: {
+          decision: body.data.decision,
+          entity_type: item.entityType,
+        },
+      })
       return reply.send(item)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)

@@ -1,0 +1,41 @@
+/**
+ * Verifica alertas ops e envia ao webhook (Slack-compatible) se configurado.
+ * Uso: npm run ops:alerts-check
+ */
+import pg from 'pg'
+import { config } from 'dotenv'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
+import { OpsMetricsService } from '../src/application/ops/ops-metrics.service.js'
+import { OpsAlertDispatchService } from '../src/application/ops/ops-alert-dispatch.service.js'
+import { OpsMetricsPgRepository } from '../src/infrastructure/persistence/ops-metrics.pg.repository.js'
+import { LlmInternalCostService } from '../src/application/llm/llm-internal-cost.service.js'
+import { LlmUsagePgRepository } from '../src/infrastructure/persistence/llm-usage.pg.repository.js'
+import { LlmInternalBudgetPgRepository } from '../src/infrastructure/persistence/llm-internal-budget.pg.repository.js'
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
+config({ path: resolve(root, '.env') })
+
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+})
+
+async function main() {
+  const metrics = new OpsMetricsService(
+    new OpsMetricsPgRepository(pool),
+    new LlmInternalCostService(
+      new LlmUsagePgRepository(pool),
+      new LlmInternalBudgetPgRepository(pool),
+    ),
+  )
+  const dispatch = new OpsAlertDispatchService(metrics)
+  const result = await dispatch.checkAndDispatch()
+  console.log(JSON.stringify(result, null, 2))
+  await pool.end()
+}
+
+main().catch(async (err) => {
+  console.error(err)
+  await pool.end()
+  process.exit(1)
+})

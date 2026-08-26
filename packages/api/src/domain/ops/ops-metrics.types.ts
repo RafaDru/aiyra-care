@@ -74,6 +74,14 @@ export interface OpsMetricsSnapshot {
     remainingBrlCents: number
     exhausted: boolean
   }
+  errorFingerprints24h: ErrorFingerprintRow[]
+}
+
+export interface ErrorFingerprintRow {
+  eventName: string
+  fingerprint: string
+  count: number
+  lastSeenAt: string
 }
 
 export type OpsAlertSeverity = 'warning' | 'critical'

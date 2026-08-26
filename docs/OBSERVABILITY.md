@@ -77,8 +77,12 @@ product_events (
 | `ava_patient_switch_hook` | UX multi-filho |
 | `sync_job_terminal` | success/fail por portal |
 | `billing_checkout_started` / `completed` | Conversão |
-| `hygiene_prompt_shown` / `resolved` | Dedup |
+| `hygiene_prompt_shown` / `resolved` | Dedup (API + futura UI) |
 | `onboarding_step` | Onde trava onboarding |
+
+**Alertas externos:** `OPS_ALERT_WEBHOOK_URL` (Slack-compatible) · `npm run ops:alerts-check` · loop `OPS_ALERTS_INTERVAL_MS`.
+
+**Fingerprints:** `errorFingerprints24h` em `GET /ops/metrics` — agrupa `product_events` por erro/status (24h).
 
 Web: helper `trackProductEvent(name, props)` → `POST /telemetry/events` (auth) ou batch.
 

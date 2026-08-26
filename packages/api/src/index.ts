@@ -187,6 +187,31 @@ const start = async () => {
       app.log.info('SYNC_SCHEDULED_INTERVAL_MS ignored — CONNECT_WORKER_EXTERNAL=1 (use packages/connect-worker)')
     }
 
+    const opsAlertsIntervalMs = Number(process.env.OPS_ALERTS_INTERVAL_MS ?? '0')
+    if (opsAlertsIntervalMs > 0) {
+      const { OpsMetricsService } = await import('./application/ops/ops-metrics.service.js')
+      const { OpsAlertDispatchService } = await import('./application/ops/ops-alert-dispatch.service.js')
+      const { OpsMetricsPgRepository } = await import('./infrastructure/persistence/ops-metrics.pg.repository.js')
+      const { LlmInternalCostService } = await import('./application/llm/llm-internal-cost.service.js')
+      const { LlmUsagePgRepository } = await import('./infrastructure/persistence/llm-usage.pg.repository.js')
+      const { LlmInternalBudgetPgRepository } = await import('./infrastructure/persistence/llm-internal-budget.pg.repository.js')
+      const { pgPool } = await import('./db/postgres.js')
+      const metrics = new OpsMetricsService(
+        new OpsMetricsPgRepository(pgPool),
+        new LlmInternalCostService(
+          new LlmUsagePgRepository(pgPool),
+          new LlmInternalBudgetPgRepository(pgPool),
+        ),
+      )
+      const dispatch = new OpsAlertDispatchService(metrics)
+      setInterval(() => {
+        dispatch.checkAndDispatch().catch((err) => {
+          app.log.warn({ err: err instanceof Error ? err.message : String(err) }, 'ops alerts dispatch failed')
+        })
+      }, opsAlertsIntervalMs)
+      app.log.info({ opsAlertsIntervalMs }, 'OPS_ALERTS_INTERVAL_MS loop enabled')
+    }
+
     await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' })
   } catch (err) {
     app.log.error(err)

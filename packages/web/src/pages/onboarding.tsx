@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Alert, Button, Card, Form, Input, Select, Spin, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext.js'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { AuthPageLayout } from '../layouts/AuthPageLayout.js'
 import { api } from '../lib/api.js'
+import { trackProductEvent } from '../lib/product-events.js'
 
 const { Title, Text } = Typography
 
@@ -21,6 +22,10 @@ export function OnboardingPage() {
   const [form] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    trackProductEvent('onboarding_step', { step: 'profile_form_viewed' })
+  }, [])
 
   if (!configured) return <Navigate to="/" replace />
 
@@ -58,6 +63,7 @@ export function OnboardingPage() {
         heightCm: values.heightCm ? Number(values.heightCm) : undefined,
       })
       await refreshSync()
+      trackProductEvent('onboarding_step', { step: 'profile_complete' })
       navigate('/')
     } catch (e) {
       setError(e instanceof Error ? e.message : t('onboarding.error'))

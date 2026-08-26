@@ -42,6 +42,8 @@ export const PRODUCT_EVENT_PROPERTY_KEYS = new Set([
   'step',
   'decision',
   'event_count',
+  'package_id',
+  'checkout_kind',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret/i

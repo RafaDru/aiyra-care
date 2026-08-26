@@ -1,6 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import { HygieneController } from './hygiene.controller.js'
 import { HygieneService } from '../../../application/hygiene/hygiene.service.js'
+import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
 import { HygienePgRepository } from '../../persistence/hygiene.pg.repository.js'
 import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
 import { VaccinePgRepository } from '../../persistence/vaccine.pg.repository.js'
@@ -13,7 +15,8 @@ export async function hygieneRoutes(app: FastifyInstance) {
     new ExamPgRepository(pgPool),
     new VaccinePgRepository(pgPool),
   )
-  const controller = new HygieneController(service)
+  const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
+  const controller = new HygieneController(service, productEvents)
 
   app.get('/hygiene/candidates', controller.listPending.bind(controller))
   app.post('/hygiene/candidates/:id/resolve', controller.resolve.bind(controller))
