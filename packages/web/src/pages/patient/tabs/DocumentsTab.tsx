@@ -23,6 +23,7 @@ import { canUseOcrRegionReview, normalizeDisplayText } from '../../../lib/ocr-la
 import { buildDocumentLinkIndex, groupPortalDocuments } from '../../../lib/document-provenance.js'
 import { SourceTag } from '../../../components/ui/SourceTag.js'
 import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
+import { AvaPlatformHint } from '../../../components/ava/AvaPlatformHint.js'
 
 interface Props {
   patientId: string
@@ -402,6 +403,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
   return (
     <>
       <OcrStatsPanel />
+      <AvaPlatformHint patientId={patientId} context="documents" />
       <DismissibleHint
         hintId="documents.portal-imports"
         type="info"

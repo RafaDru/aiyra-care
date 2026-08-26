@@ -346,6 +346,11 @@
     "acceleratorExam": "What does this exam mean in the context of the medical record?",
     "acceleratorOrder": "What does this exam order indicate and how should I interpret the results?",
     "acceleratorMarker": "What does this marker mean and how should I interpret the trend?",
+    "contextAcceleratorsLabel": "Context shortcuts",
+    "proposedActionsLabel": "Confirmed actions",
+    "openIntegrations": "View integrations",
+    "platformDocumentsMessage": "Need help using a document from this tab for the pediatrician visit?",
+    "platformExportMessage": "Before printing or sharing, want me to highlight what matters most in the record?",
     "expressions": {
       "present": "Present",
       "greeting": "Greeting",

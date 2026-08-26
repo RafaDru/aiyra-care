@@ -346,6 +346,11 @@
     "acceleratorExam": "O que significa este exame no contexto do prontuário?",
     "acceleratorOrder": "O que este pedido de exame indica e como interpretar os resultados?",
     "acceleratorMarker": "O que significa este marcador e como interpretar a evolução?",
+    "contextAcceleratorsLabel": "Atalhos de contexto",
+    "proposedActionsLabel": "Ações confirmadas",
+    "openIntegrations": "Ver integrações",
+    "platformDocumentsMessage": "Quer ajuda para usar um documento nesta aba na conversa com o pediatra?",
+    "platformExportMessage": "Antes de imprimir ou compartilhar, quer que eu destaque o que mais importa no prontuário?",
     "expressions": {
       "present": "Presente",
       "greeting": "Saudação",

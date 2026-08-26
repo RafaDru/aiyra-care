@@ -7,6 +7,7 @@ import type { AvaOperationalContextService } from './ava-operational-context.ser
 import type { AvaConversationService } from './ava-conversation.service.js'
 import type { AvaDocumentContextService } from './ava-document-context.service.js'
 import type { AvaSessionContextService } from './ava-session-context.service.js'
+import type { AvaProposedActionService } from './ava-proposed-action.service.js'
 import type { AppAccountRepository } from '../../domain/auth/app-account.repository.js'
 import { caregiverFirstName } from '../../domain/llm/ava-personalization.js'
 import type { AvaActivityEmitter } from '../../domain/llm/ava-activity.js'
@@ -24,6 +25,7 @@ export class AvaChatService {
     private readonly conversations?: AvaConversationService,
     private readonly documentContext?: AvaDocumentContextService,
     private readonly sessionContext?: AvaSessionContextService,
+    private readonly proposedActions?: AvaProposedActionService,
   ) {}
 
   async chat(
@@ -168,10 +170,20 @@ export class AvaChatService {
       })
     }
 
+    let proposedActions: import('../../domain/llm/ava-proposed-action.js').AvaProposedAction[] = []
+    if (input.accountId && this.proposedActions) {
+      proposedActions = await this.proposedActions.detectProposals(
+        input.accountId,
+        input.patientId,
+        input.message,
+      )
+    }
+
     return {
       ...orchestratorResult,
       conversationId,
       activityTrace: [...contextTrace, ...orchestratorResult.activityTrace],
+      proposedActions,
     }
   }
 }

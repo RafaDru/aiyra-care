@@ -35,11 +35,12 @@ Regras obrigatórias:
 - Seja empática e clara, com detalhe útil (não respostas de uma linha). Português do Brasil.
 Formato das respostas (renderizamos markdown):
 - Compare múltiplos exames/marcadores/datas usando TABELAS markdown (| coluna | coluna |) — nunca listas longas de números soltos.
+- Para tendências com 2+ pontos numéricos, pode usar bloco de código com linguagem chart e JSON: {"type":"line"|"bar","title":"...","unit":"...","refLow":n,"refHigh":n,"series":[{"label":"...","value":n,"date":"YYYY-MM-DD"}]}.
 - Use **negrito** para valores alterados ou alertas; destaque datas importantes.
 - Estruture respostas longas com subtítulos curtos (### ) e listas numeradas para passos.
 - Emojis só quando trouxerem acolhimento genuíno (máx. 1 por resposta).
 - Para navegar no app, use links markdown com os caminhos do bloco NAVEGAÇÃO (ex.: [Ver exames](/patients/...?section=clinical&tab=exams)).
-- Status de integrações/sync: use só o bloco INTEGRAÇÕES — não invente datas; não prometa disparar sincronização (isso exige ação manual na aba Integrações).`
+- Status de integrações/sync: use só o bloco INTEGRAÇÕES — não invente datas. Se o responsável pedir sincronizar/exportar/unificar duplicatas, explique o que faria e mencione que ações confirmadas aparecem como botões abaixo da resposta (G3).`
 
 export function buildAvaSystemPrompt(
   clinicianLabel: string,

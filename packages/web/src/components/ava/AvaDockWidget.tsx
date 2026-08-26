@@ -143,9 +143,9 @@ export function AvaDockWidget({
         rootClassName="ava-chat-drawer"
         styles={{
           wrapper: {
-            width: '52vw',
+            width: '50vw',
             minWidth: 420,
-            maxWidth: 720,
+            maxWidth: '50vw',
           },
           header: { display: 'none' },
           body: { padding: 0 },

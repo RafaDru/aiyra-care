@@ -416,8 +416,8 @@
   border: 1px solid var(--ava-bubble-border);
   background: var(--ava-bubble-fill);
   box-shadow: 0 2px 10px rgba(147, 51, 234, 0.08);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.55;
   word-break: break-word;
   max-width: 100%;
   overflow-x: auto;
@@ -593,4 +593,55 @@
 
 .ava-chat-drawer {
   z-index: 1050;
+}
+
+.ava-context-accelerators {
+  margin: 0 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ava-context-accelerators__label {
+  font-size: 11px;
+}
+
+.ava-proposed-actions {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--ant-color-fill-quaternary, #f5f5f5);
+  max-width: 100%;
+}
+
+.ava-proposed-actions__label {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.ava-proposed-actions__hint {
+  margin: 6px 0 0 !important;
+  font-size: 11px !important;
+}
+
+.ava-inline-chart {
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--ant-color-bg-container, #fff);
+  border: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+}
+
+.ava-inline-chart__title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ava-platform-hint {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--ant-color-fill-quaternary, #f5f5f5);
 }

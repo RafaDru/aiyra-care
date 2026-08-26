@@ -12,6 +12,7 @@ import {
 } from './health-thread-kinds.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
 import { PatientPendenciesSection } from './PatientPendenciesSection.js'
+import { subscribeClinicalExportOpen } from '../../lib/clinical-export-bus.js'
 
 const { Paragraph, Text } = Typography
 
@@ -41,6 +42,12 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
   }, [reloadContext])
 
   usePatientSyncCompletions(patientId, reloadContext)
+
+  useEffect(() => {
+    return subscribeClinicalExportOpen((req) => {
+      if (req.patientId === patientId) setExportOpen(true)
+    })
+  }, [patientId])
 
   if (loading) return <Spin style={{ display: 'block', margin: '16px auto' }} />
   if (error) return <Alert type="error" message={error} showIcon />

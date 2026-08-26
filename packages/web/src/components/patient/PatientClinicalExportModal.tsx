@@ -5,6 +5,7 @@ import type { PatientClinicalExport, PatientContext } from '../../lib/api.types.
 import { api } from '../../lib/api.js'
 import { CLINICAL_EXPORT_COPY } from './clinical-export-copy.js'
 import { PatientClinicalExportSheet, printClinicalExportSheet } from './PatientClinicalExportSheet.js'
+import { AvaPlatformHint } from '../ava/AvaPlatformHint.js'
 
 interface PatientClinicalExportModalProps {
   open: boolean
@@ -85,6 +86,7 @@ export function PatientClinicalExportModal({
       ]}
       destroyOnClose
     >
+      <AvaPlatformHint patientId={patientId} context="export" />
       {activeContext && (
         <div ref={sheetRef}>
           <PatientClinicalExportSheet

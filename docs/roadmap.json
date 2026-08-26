@@ -641,8 +641,8 @@
         {
           "id": "ava-platform-presence",
           "title": "Ava em múltiplos pontos da plataforma",
-          "status": "in_progress",
-          "detail": "Orb global + aceleradores (done). Anexo imagem no chat com aviso consumo IA (done). Faltam: widget em documentos/export.",
+          "status": "done",
+          "detail": "Orb global + aceleradores (done). Anexo imagem no chat (done). Widget em documentos + export clínico (AvaPlatformHint).",
           "reviewBadge": ["content"]
         },
         {
@@ -654,8 +654,8 @@
         {
           "id": "ava-charts-in-chat",
           "title": "Gráficos renderizados dentro do chat",
-          "status": "planned",
-          "detail": "Ava emite blocos ```chart com JSON (tipo, série, faixa de referência) → web renderiza recharts inline (linha/barras) nos balões. Reuso de parseReferenceLimits para bandas. Custo zero de LLM extra."
+          "status": "done",
+          "detail": "Blocos ```chart com JSON → AvaInlineChart (recharts) em AvaMarkdown; prompt Ava instrui formato."
         },
         {
           "id": "ava-avatar-picker",
@@ -668,7 +668,7 @@
           "id": "agent-runtime",
           "title": "Runtime com contexto determinístico + citações",
           "status": "in_progress",
-          "detail": "Ferramentas read-only (ava-tools) + reflexão SSE entregues; LLM redação Fase 2; tool calling mutável G3 pendente.",
+          "detail": "Ferramentas read-only (ava-tools) + reflexão SSE entregues; G3 ações confirmadas (sync/export/higiene) via proposedActions + execute; tool calling mutável amplo pendente.",
           "reviewBadge": ["medical", "regulatory"]
         },
         {
@@ -1288,8 +1288,8 @@
         {
           "id": "ava-context-accelerators",
           "title": "Atalhos: paciente, tema, thread",
-          "status": "planned",
-          "detail": "Falar sobre Luís; exames recentes; health_thread. Complementa ava-accelerators (botões por entidade)."
+          "status": "done",
+          "detail": "GET context-suggestions + AvaContextAccelerators no chat vazio (paciente, exames, threads)."
         }
       ]
     },

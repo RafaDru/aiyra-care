@@ -28,6 +28,12 @@ import { AvaEntityContextService } from '../../../application/llm/ava-entity-con
 import { AvaConversationService } from '../../../application/llm/ava-conversation.service.js'
 import { AvaDocumentContextService } from '../../../application/llm/ava-document-context.service.js'
 import { AvaSessionContextService } from '../../../application/llm/ava-session-context.service.js'
+import { AvaProposedActionService } from '../../../application/llm/ava-proposed-action.service.js'
+import { AvaContextSuggestionsService } from '../../../application/llm/ava-context-suggestions.service.js'
+import { HygieneService } from '../../../application/hygiene/hygiene.service.js'
+import { IntegrationLinkSyncService } from '../../../application/integration-link/integration-link-sync.service.js'
+import { HygienePgRepository } from '../../persistence/hygiene.pg.repository.js'
+import { VaccinePgRepository } from '../../persistence/vaccine.pg.repository.js'
 import { AppAccountPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { IntegrationLinkPgRepository } from '../../persistence/integration-link.pg.repository.js'
 import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repository.js'
@@ -36,6 +42,7 @@ import { AvaSessionContextPgRepository } from '../../persistence/ava-session-con
 import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
 import { AvaController } from './ava.controller.js'
 import { AvaConversationController } from './ava-conversation.controller.js'
+import { AvaActionController } from './ava-action.controller.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
 
@@ -88,6 +95,24 @@ export async function avaRoutes(app: FastifyInstance) {
     new DocumentPgRepository(pgPool),
     pgPool,
   )
+  const linkRepo = new IntegrationLinkPgRepository(pgPool)
+  const hygieneRepo = new HygienePgRepository(pgPool)
+  const hygieneService = new HygieneService(
+    hygieneRepo,
+    new ExamPgRepository(pgPool),
+    new VaccinePgRepository(pgPool),
+  )
+  const proposedActions = new AvaProposedActionService(
+    linkRepo,
+    hygieneRepo,
+    hygieneService,
+    new IntegrationLinkSyncService(pgPool, linkRepo),
+  )
+  const contextSuggestions = new AvaContextSuggestionsService(
+    new PatientPgRepository(pgPool),
+    new ExamPgRepository(pgPool),
+    new HealthThreadPgRepository(pgPool),
+  )
   const avaChat = new AvaChatService(
     familySupport,
     patientContext,
@@ -98,9 +123,11 @@ export async function avaRoutes(app: FastifyInstance) {
     conversations,
     documentContext,
     sessionContext,
+    proposedActions,
   )
   const controller = new AvaController(avaChat)
   const conversationController = new AvaConversationController(conversations, sessionContext)
+  const actionController = new AvaActionController(proposedActions, contextSuggestions)
 
   app.get('/ava/conversations/export', conversationController.export.bind(conversationController))
   app.get('/ava/conversations', conversationController.list.bind(conversationController))
@@ -113,6 +140,8 @@ export async function avaRoutes(app: FastifyInstance) {
   app.patch('/ava/conversations/:conversationId/context', conversationController.patchContext.bind(conversationController))
 
   app.post('/patients/:id/ava/chat', controller.chat.bind(controller))
+  app.get('/patients/:id/ava/context-suggestions', actionController.contextSuggestions.bind(actionController))
+  app.post('/ava/actions/execute', actionController.execute.bind(actionController))
 
   app.get('/llm/usage/quota', async (req: AuthenticatedRequest, reply: FastifyReply) => {
     const scopeId = resolveHandwritingScopeId(req)

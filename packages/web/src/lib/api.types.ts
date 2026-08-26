@@ -612,6 +612,27 @@ export interface AvaActivityEvent {
   ts: number
 }
 
+export type AvaProposedActionType =
+  | 'integration_sync'
+  | 'clinical_export'
+  | 'hygiene_merge'
+  | 'hygiene_dismiss'
+
+export interface AvaProposedAction {
+  id: string
+  type: AvaProposedActionType
+  label: string
+  description?: string
+  payload: Record<string, unknown>
+}
+
+export interface AvaContextSuggestion {
+  id: string
+  label: string
+  message: string
+  kind: 'patient' | 'recent_exams' | 'health_threads'
+}
+
 export interface AvaConversation {
   id: string
   accountId: string
@@ -653,6 +674,7 @@ export interface AvaChatResponse {
   model: string
   tier: 'free' | 'premium'
   conversationId?: string
+  proposedActions?: AvaProposedAction[]
   usage: {
     tokensIn: number
     tokensOut: number

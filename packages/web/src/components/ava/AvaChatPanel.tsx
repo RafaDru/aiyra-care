@@ -4,7 +4,7 @@ import { FileTextOutlined, PictureOutlined, SendOutlined } from '@ant-design/ico
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
-import type { AvaActivityEvent, AvaChatResponse, AvaConversation, AvaSessionPin, LlmUsageQuota } from '../../lib/api.types.js'
+import type { AvaActivityEvent, AvaChatResponse, AvaConversation, AvaProposedAction, AvaSessionPin, LlmUsageQuota } from '../../lib/api.types.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
@@ -32,6 +32,8 @@ import type { AvaEntityPin } from '../../lib/ava-dock-bus.js'
 import { AvaChatBubble } from './AvaChatBubble.js'
 import { AvaReportModal } from './AvaReportModal.js'
 import { AvaContextChips } from './AvaContextChips.js'
+import { AvaContextAccelerators } from './AvaContextAccelerators.js'
+import { AvaProposedActions } from './AvaProposedActions.js'
 import './ava-chat.css'
 import './ava-report.css'
 
@@ -39,6 +41,7 @@ interface ChatMessage {
   role: 'user' | 'assistant'
   text: string
   revised?: boolean
+  proposedActions?: AvaProposedAction[]
 }
 
 interface Props {
@@ -243,6 +246,7 @@ export function AvaChatPanel({
         role: 'assistant',
         text: res.reply,
         revised: res.reflection.revised,
+        proposedActions: res.proposedActions ?? [],
       }])
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : String(e)
@@ -514,11 +518,18 @@ export function AvaChatPanel({
         <div className="ava-chat-stage__thread">
           <div className="ava-chat-panel__messages">
             {messages.length === 0 && !loading && (
-              <Typography.Paragraph className="ava-chat-panel__intro">
-                {caregiverName
-                  ? t('ava.introPersonal', { name: caregiverName })
-                  : t('ava.intro')}
-              </Typography.Paragraph>
+              <>
+                <Typography.Paragraph className="ava-chat-panel__intro">
+                  {caregiverName
+                    ? t('ava.introPersonal', { name: caregiverName })
+                    : t('ava.intro')}
+                </Typography.Paragraph>
+                <AvaContextAccelerators
+                  patientId={patientId}
+                  disabled={loading || quotaBlocked}
+                  onSelect={(msg) => void send(msg)}
+                />
+              </>
             )}
 
             {messages.map((item, idx) => (
@@ -534,6 +545,12 @@ export function AvaChatPanel({
                   text={item.text}
                   revised={item.revised}
                 />
+                {item.role === 'assistant' && item.proposedActions && item.proposedActions.length > 0 && (
+                  <AvaProposedActions
+                    patientId={patientId}
+                    actions={item.proposedActions}
+                  />
+                )}
               </div>
             ))}
             <div ref={messagesEndRef} />

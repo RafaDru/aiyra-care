@@ -295,6 +295,18 @@ export const api = {
       body: Omit<AvaChatRequestBody, 'streamActivity'>,
       onActivity: (event: import('./api.types.js').AvaActivityEvent) => void,
     ) => avaChatWithActivityStream(patientId, body, onActivity),
+    contextSuggestions: (patientId: string) =>
+      request<{ items: import('./api.types.js').AvaContextSuggestion[] }>(
+        `/patients/${patientId}/ava/context-suggestions`,
+      ),
+    executeAction: (body: {
+      type: import('./api.types.js').AvaProposedActionType
+      payload: Record<string, unknown>
+    }) =>
+      request<{ ok: boolean; message: string; data?: Record<string, unknown> }>(
+        '/ava/actions/execute',
+        { method: 'POST', body: JSON.stringify(body) },
+      ),
   },
   llm: {
     quota: () => request<import('./api.types.js').LlmUsageQuota>('/llm/usage/quota'),
