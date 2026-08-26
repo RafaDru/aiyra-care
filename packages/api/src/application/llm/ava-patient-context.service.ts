@@ -251,6 +251,57 @@ export class AvaPatientContextService {
       clinicianLabel,
     }
   }
+
+  /** Contexto mínimo quando há pins de sessão — alergias + meds ativos + identidade. */
+  async buildMinimalContextBlock(patientId: string): Promise<{
+    block: string
+    patientName: string
+    ageCategory: string
+    clinicianLabel: string
+  }> {
+    const patient = await this.patients.findById(patientId)
+    if (!patient) throw new NotFoundError('Paciente', patientId)
+
+    const ageYears = ageInYears(patient.birthDate)
+    const ageLabel = AGE_CATEGORY_PT[patient.ageCategory] ?? patient.ageCategory
+    const gender = patient.gender ? GENDER_PT[patient.gender] ?? patient.gender : 'não informado'
+    const clinicianLabel = clinicianLabelForAgeCategory(patient.ageCategory)
+
+    const [allergyRows, medRows] = await Promise.all([
+      this.allergies.findAll({ patientId }),
+      this.medications.findAll({ patientId }),
+    ])
+    const activeMeds = medRows.filter((m) => m.isActive)
+
+    const allergyLines = allergyRows.length
+      ? allergyRows.map((a) => `- ${a.allergen}${a.reaction ? ` (${a.reaction})` : ''}`).join('\n')
+      : '- Nenhuma alergia registrada'
+
+    const medLines = activeMeds.length
+      ? activeMeds.map((m) => `- ${m.genericName || m.brandName || 'Medicamento'}${m.dosage ? ` — ${m.dosage}` : ''}`).join('\n')
+      : '- Nenhum medicamento ativo registrado'
+
+    const block = [
+      `Nome: ${patient.name}`,
+      `Perfil: ${ageLabel}, ${formatAge(ageYears)}, sexo ${gender}`,
+      `Profissional de referência sugerido na conversa: ${clinicianLabel}`,
+      '',
+      '(Modo compacto — detalhes do prontuário vêm dos registros pinados abaixo.)',
+      '',
+      'Alergias:',
+      allergyLines,
+      '',
+      'Medicamentos ativos:',
+      medLines,
+    ].join('\n')
+
+    return {
+      block,
+      patientName: patient.name,
+      ageCategory: patient.ageCategory,
+      clinicianLabel,
+    }
+  }
 }
 
 function formatAge(years: number): string {

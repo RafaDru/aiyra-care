@@ -6,6 +6,7 @@ import { AvaAvatar } from './AvaAvatar.js'
 import { AvaChatPanel } from './AvaChatPanel.js'
 import { AvaDockFlyingBubble } from './AvaDockFlyingBubble.js'
 import { AvaPatientLensChips } from './AvaPatientLensChips.js'
+import { useAvaPatientSwitchHook } from './useAvaPatientSwitchHook.js'
 import { useAvaDockIntro } from './useAvaDockIntro.js'
 import { useAvaExpression } from './useAvaExpression.js'
 import { caregiverFirstName } from '../../lib/ava-personalization.js'
@@ -73,6 +74,13 @@ export function AvaDockWidget({
     setConversationId(null)
     setChatEpoch((n) => n + 1)
   }
+
+  const { requestPatientChange, patientSwitchModal } = useAvaPatientSwitchHook({
+    patients,
+    conversationId,
+    currentPatientId: patientId,
+    onApplyPatientChange: handlePatientChange,
+  })
 
   useEffect(() => {
     if (!openRequest) return
@@ -156,7 +164,7 @@ export function AvaDockWidget({
               <AvaPatientLensChips
                 patients={patients}
                 value={patientId}
-                onChange={handlePatientChange}
+                onChange={(id) => void requestPatientChange(id)}
               />
               {lensOverridesRoute && (
                 <Typography.Text type="warning" className="ava-chat-shell__head-hint">
@@ -185,6 +193,7 @@ export function AvaDockWidget({
           </div>
         </div>
       </Drawer>
+      {patientSwitchModal}
     </>
   )
 }

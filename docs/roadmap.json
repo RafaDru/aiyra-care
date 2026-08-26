@@ -1276,14 +1276,14 @@
         {
           "id": "ava-prompt-builder",
           "title": "Prompt só de pins + K mensagens",
-          "status": "planned",
-          "detail": "Reduz tokens; docs/AVA_VISION.md compactação."
+          "status": "done",
+          "detail": "Modo compacto quando há pins; minimal = alergias + meds + identidade."
         },
         {
           "id": "ava-patient-switch-hooks",
           "title": "Hooks troca paciente / inatividade",
-          "status": "planned",
-          "detail": "Manter ou remover pins; product_events."
+          "status": "done",
+          "detail": "Modal manter/remover pins; hint 45 min inatividade. product_events pendente (observability)."
         },
         {
           "id": "ava-context-accelerators",

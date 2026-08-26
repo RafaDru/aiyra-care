@@ -70,6 +70,12 @@ export class AvaChatService {
       })
     }
 
+    let compactPrompt = false
+    if (conversationId && this.sessionContext) {
+      const activePins = await this.sessionContext.listActive(conversationId)
+      compactPrompt = activePins.length > 0
+    }
+
     let attachmentBlock = ''
     if (input.attachmentDocumentId && this.documentContext) {
       emitAvaActivity(activityEmitter, 'context.attachment', 'context', 'start')
@@ -87,7 +93,16 @@ export class AvaChatService {
 
     const { result: gathered, trace: contextTrace } = await runAvaContextTools(
       {
-        loadPatientContext: (patientId) => this.patientContext.buildContextBlock(patientId),
+        loadPatientContext: async (patientId) => {
+          const row = compactPrompt
+            ? await this.patientContext.buildMinimalContextBlock(patientId)
+            : await this.patientContext.buildContextBlock(patientId)
+          return {
+            block: row.block,
+            clinicianLabel: row.clinicianLabel,
+            ageCategory: row.ageCategory,
+          }
+        },
         loadFamilyInsights: (patientId, healthThreadId) =>
           this.familySupport.buildInsights(patientId, { healthThreadId }),
         loadOperationalBlock: (patientId) =>

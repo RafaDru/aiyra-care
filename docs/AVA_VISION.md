@@ -56,7 +56,7 @@ O componente é `AvaGlobalDock` (`packages/web/src/components/ava/AvaGlobalDock.
 
 - Lista de conversas no drawer global (seletor + nova conversa).
 - Ao abrir: retoma última conversa ativa do paciente; mensagens do servidor.
-- **Pendente:** pins ativos + compactação por pin (`ava_session_context`).
+- **Pendente:** compactação por pin sem dump completo do prontuário (`ava-prompt-builder`).
 
 ### Múltiplas sessões
 
@@ -119,8 +119,9 @@ Detalhes: `docs/DATA_HYGIENE.md`.
 ## LGPD
 
 - Conversas = dado sensível (saúde + menores).
-- Retenção definida em política de privacidade (prazo ou até exclusão).
-- Inclusão em export de conta e `DELETE /auth/account` (cascade).
+- Retenção até exclusão da conta ou remoção manual da conversa (`DELETE /ava/conversations/:id`).
+- Export JSON: `GET /ava/conversations/export` (LGPD portabilidade parcial).
+- Inclusão em `DELETE /auth/account` via cascade `ava_conversations` → mensagens e pins.
 - Analytics com conteúdo: **somente opt-in**; default = métricas agregadas sem texto.
 
 ## Moonshot (fases)
@@ -141,7 +142,8 @@ Detalhes: `docs/DATA_HYGIENE.md`.
 | `conversation_id` em eventos | ✅ (chat Ava, migration 047) |
 | Histórico persistido | ✅ MVP (lista, retomar, título auto) |
 | Anexo imagem no chat | ✅ upload + OCR no contexto + aviso consumo |
-| Pins / painel contexto | ❌ planejado (`ava_session_context`) |
+| Pins / painel contexto | ✅ chips + pin/unpin; hooks troca paciente + inatividade |
+| Prompt compacto (pins) | ✅ modo minimal quando há pins na conversa |
 | Neo4j sessão Ava | ❌ planejado |
 
 ## APIs planejadas (resumo)

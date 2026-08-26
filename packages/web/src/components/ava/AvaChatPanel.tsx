@@ -22,6 +22,8 @@ import {
 import {
   readAvaAllowLlmDataSharing,
   readAvaImageAttachWarningDismissed,
+  readAvaLastActivityAt,
+  touchAvaLastActivity,
   writeAvaAllowLlmDataSharing,
   writeAvaImageAttachWarningDismissed,
 } from '../../lib/ava-llm-preferences.js'
@@ -56,6 +58,8 @@ interface PendingAttachment {
   documentId: string
   filename: string
 }
+
+const AVA_INACTIVITY_MS = 45 * 60 * 1000
 
 function initialsOf(name: string | null | undefined): string {
   if (!name) return '?'
@@ -97,6 +101,7 @@ export function AvaChatPanel({
   const [imageWarningOpen, setImageWarningOpen] = useState(false)
   const [imageWarningDismiss, setImageWarningDismiss] = useState(false)
   const [uploadingAttachment, setUploadingAttachment] = useState(false)
+  const [showInactivityHint, setShowInactivityHint] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const autoSendDoneRef = useRef(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -145,16 +150,32 @@ export function AvaChatPanel({
   const loadContextPins = useCallback(() => {
     if (!conversationId) {
       setContextPins([])
+      setShowInactivityHint(false)
       return
     }
     api.ava.getContext(conversationId)
-      .then((r) => setContextPins(r.pins))
-      .catch(() => setContextPins([]))
+      .then((r) => {
+        setContextPins(r.pins)
+        const last = readAvaLastActivityAt()
+        setShowInactivityHint(
+          r.pins.length > 0
+          && last !== null
+          && Date.now() - last >= AVA_INACTIVITY_MS,
+        )
+      })
+      .catch(() => {
+        setContextPins([])
+        setShowInactivityHint(false)
+      })
   }, [conversationId])
 
   useEffect(() => {
     loadContextPins()
   }, [loadContextPins])
+
+  useEffect(() => {
+    touchAvaLastActivity()
+  }, [])
 
   useEffect(() => {
     loadConversationList()
@@ -195,6 +216,8 @@ export function AvaChatPanel({
     setMessages((prev) => [...prev, { role: 'user', text }])
     setLoading(true)
     setActivityTrace([])
+    touchAvaLastActivity()
+    setShowInactivityHint(false)
     try {
       const res: AvaChatResponse = await runLlmTask(() =>
         api.ava.chatWithActivity(
@@ -408,6 +431,16 @@ export function AvaChatPanel({
       )}
 
       {quotaAlert}
+
+      {showInactivityHint && conversationId && (
+        <DismissibleHint
+          hintId={`ava.inactivity.${conversationId}`}
+          type="info"
+          showIcon
+          style={{ margin: '0 18px 8px' }}
+          message={t('ava.inactivityHint')}
+        />
+      )}
 
       {variant === 'embedded' && (
         <div className="ava-chat-panel__conversation-bar">

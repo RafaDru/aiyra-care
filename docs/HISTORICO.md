@@ -1,5 +1,12 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-26d] - Ava: prompt compacto + hooks troca paciente
+
+### Realizado
+- **Prompt builder:** com pins ativos na conversa, `buildMinimalContextBlock` (alergias + meds + identidade); detalhes vêm dos pins.
+- **Hooks troca paciente:** modal ao mudar lente com pins de outro paciente (manter ou remover); hint de inatividade (45 min) com pins ativos.
+- **Testes:** `ava-prompt-builder.test.ts`.
+
 ## [2026-08-26c] - Ava: pins de sessão + LGPD conversas
 
 ### Realizado

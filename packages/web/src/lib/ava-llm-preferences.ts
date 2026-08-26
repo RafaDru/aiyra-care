@@ -33,3 +33,24 @@ export function writeAvaImageAttachWarningDismissed(value: boolean): void {
     // ignore
   }
 }
+
+const LAST_ACTIVITY_KEY = 'aiyracare.avaLastActivityAt'
+
+export function touchAvaLastActivity(): void {
+  try {
+    localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()))
+  } catch {
+    // ignore
+  }
+}
+
+export function readAvaLastActivityAt(): number | null {
+  try {
+    const raw = localStorage.getItem(LAST_ACTIVITY_KEY)
+    if (!raw) return null
+    const n = Number(raw)
+    return Number.isFinite(n) ? n : null
+  } catch {
+    return null
+  }
+}
