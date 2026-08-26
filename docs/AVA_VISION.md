@@ -34,7 +34,9 @@ O componente é `AvaGlobalDock` (`packages/web/src/components/ava/AvaGlobalDock.
 - **Respostas em markdown (GFM):** tabelas comparativas, listas, negrito — o system prompt da Ava instrui uso de tabelas para múltiplos exames/marcadores; render via `AvaMarkdown` (`react-markdown` + `remark-gfm`).
 - **Relatório:** botão "Relatório" abre modal dedicado com a conversa formatada + **Imprimir / Salvar PDF** (janela de impressão com disclaimers).
 - **Chat conversacional (2026-08-24):** margens no painel; avatar Ava maior nas bolhas; avatar do usuário à direita (OAuth); balão de pensamento com frases rotativas; contexto inclui `exam_result_items` (marcadores com histórico).
-- **Aceleradores "Pergunte à Ava"** (roadmap `ava-accelerators`): botões contextuais por entidade (exame, marcador, laudo) que abrem o dock com pergunta pré-montada sobre o registro. Próximo passo planejado: gráficos inline no chat (`ava-charts-in-chat`, blocos ```chart renderizados com recharts).
+- **Aceleradores "Pergunte à Ava"** (roadmap `ava-accelerators`, **G1 done 2026-08-25**): `AvaAcceleratorButton` em exames, pedidos e marcadores; evento `aiyracare:ava-open`; API `entityPin` → **REGISTRO EM FOCO**. Ver `docs/AVA_OPERATIONAL.md`.
+- **Expressões visuais + linha narrativa:** catálogo em `docs/AVA_EXPRESSIONS.md`; `AvaAvatar` com overlays; primeiro nome do cuidador no prompt e UI.
+- **Próximo:** gráficos inline no chat (`ava-charts-in-chat`, blocos ```chart renderizados com recharts).
 
 ## Sessões e conversas
 

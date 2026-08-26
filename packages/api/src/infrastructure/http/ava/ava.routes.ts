@@ -23,6 +23,11 @@ import { CareReminderPgRepository } from '../../persistence/care-reminder.pg.rep
 import { pgPool } from '../../../db/postgres.js'
 import { LlmInternalBudgetPgRepository } from '../../persistence/llm-internal-budget.pg.repository.js'
 import { LlmInternalCostService } from '../../../application/llm/llm-internal-cost.service.js'
+import { AvaOperationalContextService } from '../../../application/llm/ava-operational-context.service.js'
+import { AvaEntityContextService } from '../../../application/llm/ava-entity-context.service.js'
+import { AppAccountPgRepository } from '../../persistence/app-account.pg.repository.js'
+import { IntegrationLinkPgRepository } from '../../persistence/integration-link.pg.repository.js'
+import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repository.js'
 import { AvaController } from './ava.controller.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
@@ -34,6 +39,7 @@ export async function avaRoutes(app: FastifyInstance) {
     new LlmUsagePgRepository(pgPool),
     creditsRepo,
     handwritingCredits,
+    new AppAccountPgRepository(pgPool),
   )
   const familySupport = new FamilySupportService(
     new MeasurementPgRepository(pgPool),
@@ -56,7 +62,23 @@ export async function avaRoutes(app: FastifyInstance) {
     new MeasurementPgRepository(pgPool),
     new ExamResultItemPgRepository(pgPool),
   )
-  const avaChat = new AvaChatService(familySupport, patientContext, orchestrator)
+  const entityContext = new AvaEntityContextService(
+    new ExamPgRepository(pgPool),
+    new ExamOrderPgRepository(pgPool),
+    new ExamResultItemPgRepository(pgPool),
+  )
+  const operationalContext = new AvaOperationalContextService(
+    new IntegrationLinkPgRepository(pgPool),
+    new ExamPgRepository(pgPool),
+  )
+  const avaChat = new AvaChatService(
+    familySupport,
+    patientContext,
+    orchestrator,
+    entityContext,
+    operationalContext,
+    new AppAccountPgRepository(pgPool),
+  )
   const controller = new AvaController(avaChat)
 
   app.post('/patients/:id/ava/chat', controller.chat.bind(controller))

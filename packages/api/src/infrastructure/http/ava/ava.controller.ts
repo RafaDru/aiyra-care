@@ -5,6 +5,11 @@ import { assertPatientAccess } from '../auth/patient-access.guard.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
 import { avaChatBodySchema, avaChatParamsSchema } from './ava.schema.js'
 
+function writeSse(res: import('node:http').ServerResponse, event: string, data: unknown) {
+  res.write(`event: ${event}\n`)
+  res.write(`data: ${JSON.stringify(data)}\n\n`)
+}
+
 export class AvaController {
   constructor(private readonly avaChat: AvaChatService) {}
 
@@ -17,16 +22,49 @@ export class AvaController {
     const body = avaChatBodySchema.safeParse(req.body)
     if (!body.success) return reply.status(400).send({ error: body.error.flatten() })
 
-    try {
-      const result = await this.avaChat.chat({
-        scopeId: resolveHandwritingScopeId(req),
-        accountId: req.accountId,
-        patientId: params.data.id,
-        message: body.data.message,
-        healthThreadId: body.data.healthThreadId,
-        history: body.data.history,
-        allowLlmDataSharing: body.data.allowLlmDataSharing ?? false,
+    const chatInput = {
+      scopeId: resolveHandwritingScopeId(req),
+      accountId: req.accountId,
+      patientId: params.data.id,
+      message: body.data.message,
+      healthThreadId: body.data.healthThreadId,
+      history: body.data.history,
+      allowLlmDataSharing: body.data.allowLlmDataSharing ?? false,
+      entityPin: body.data.entityPin,
+    }
+
+    if (body.data.streamActivity) {
+      const res = reply.raw
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
       })
+      res.write('\n')
+
+      try {
+        const result = await this.avaChat.chat(chatInput, (event) => {
+          writeSse(res, 'activity', event)
+        })
+        writeSse(res, 'complete', result)
+        res.end()
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        if (message === 'LLM_QUOTA_EXCEEDED') {
+          writeSse(res, 'error', { code: 'LLM_QUOTA_EXCEEDED', message: 'Franquia de IA esgotada.' })
+        } else if (message === 'AVA_LLM_DISABLED') {
+          writeSse(res, 'error', { code: 'AVA_LLM_DISABLED', message: 'Ava com LLM desabilitada.' })
+        } else {
+          writeSse(res, 'error', { code: 'AVA_CHAT_FAILED', message })
+        }
+        res.end()
+      }
+      return reply
+    }
+
+    try {
+      const result = await this.avaChat.chat(chatInput)
       return reply.send(result)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)

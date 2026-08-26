@@ -1,7 +1,9 @@
 import { Button, Modal, Space, Typography } from 'antd'
 import { PrinterOutlined } from '@ant-design/icons'
 import { AvaAvatar } from './AvaAvatar.js'
-import { AvaMarkdown } from './AvaMarkdown.js'
+import { AvaChatBubble } from './AvaChatBubble.js'
+import './ava-chat.css'
+import './ava-report.css'
 
 const { Text } = Typography
 
@@ -85,30 +87,21 @@ export function AvaReportModal({ open, onClose, title, messages }: Props) {
         </Space>
       }
     >
-      <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: 4 }}>
+      <div className="ava-report-scroll" style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: 4 }}>
         {messages.length === 0 && (
           <Text type="secondary">Nada para exibir ainda.</Text>
         )}
         {messages.map((m, idx) => (
-          <div key={idx} style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+          <div
+            key={idx}
+            className={[
+              'ava-report-msg',
+              m.role === 'user' ? 'ava-report-msg--user' : 'ava-report-msg--ava',
+            ].join(' ')}
+          >
             {m.role === 'assistant' && <AvaAvatar size={30} />}
-            <div style={{ flex: 1 }}>
-              <Text
-                type="secondary"
-                style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}
-              >
-                {m.role === 'user' ? 'Você' : 'Ava'}
-                {m.revised && m.role === 'assistant' ? ' · revisada' : ''}
-              </Text>
-              <div
-                className={`ava-report-bubble ${m.role === 'user' ? 'ava-report-bubble--user' : ''}`}
-              >
-                {m.role === 'assistant' ? (
-                  <AvaMarkdown content={m.text} />
-                ) : (
-                  m.text
-                )}
-              </div>
+            <div className="ava-report-msg__content">
+              <AvaChatBubble role={m.role} text={m.text} revised={m.revised} />
             </div>
           </div>
         ))}

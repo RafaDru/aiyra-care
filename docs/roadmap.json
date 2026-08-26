@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-24",
+  "updatedAt": "2026-08-26",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -628,21 +628,27 @@
         {
           "id": "ava-expressions",
           "title": "Ava — expressões contextuais (empatia, seriedade, alerta)",
-          "status": "planned",
-          "detail": "Sprites/PNG por mood inferido do diálogo (reflection + heurísticas de tom); aplicar em chat, dock e prep de consulta. Viabilidade: mapear mood→asset em AvaAvatar; reflection já classifica revisões.",
+          "status": "done",
+          "detail": "PNGs dedicados + crossfade dock/chat; useAvaExpression; AVA_EXPRESSIONS.md; overlays SVG removidos no chat.",
           "reviewBadge": ["medical", "content"]
+        },
+        {
+          "id": "ava-activity-stream",
+          "title": "Status SSE — ferramentas read-only + reflexão na UI",
+          "status": "done",
+          "detail": "ava-tools.ts + streamActivity SSE; chatWithActivity; balão com trilha de passos. G4 parcial — ver AVA_OPERATIONAL.md."
         },
         {
           "id": "ava-platform-presence",
           "title": "Ava em múltiplos pontos da plataforma",
           "status": "in_progress",
-          "detail": "Orb global entregue (todas as telas). Faltam: aceleradores contextuais por entidade e widget em documentos/export/integrações; presença visual + glow quando LLM ativa.",
+          "detail": "Orb global + aceleradores por entidade (done). Faltam: widget em documentos/export; anexo imagem no chat.",
           "reviewBadge": ["content"]
         },
         {
           "id": "ava-accelerators",
           "title": "Aceleradores 'Pergunte à Ava' nas entidades",
-          "status": "planned",
+          "status": "done",
           "detail": "Botões/hints contextuais (exames, marcadores, laudos, autorizações): 'Não sabe interpretar? Pergunte à Ava' — abre dock com pergunta pré-montada sobre o registro (pin implícito da entidade). Ava recebe o contexto do registro específico no prompt."
         },
         {
@@ -662,7 +668,7 @@
           "id": "agent-runtime",
           "title": "Runtime com contexto determinístico + citações",
           "status": "in_progress",
-          "detail": "Base em family-support; LLM redação Fase 2.",
+          "detail": "Ferramentas read-only (ava-tools) + reflexão SSE entregues; LLM redação Fase 2; tool calling mutável G3 pendente.",
           "reviewBadge": ["medical", "regulatory"]
         },
         {

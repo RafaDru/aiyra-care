@@ -8,6 +8,10 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 config({ path: resolve(__dirname, '../../../.env') })
 
+if (process.env.LLM_QUOTA_UNLIMITED?.trim() === '1') {
+  console.info('[llm] LLM_QUOTA_UNLIMITED=1 — franquia de IA desativada para todas as contas')
+}
+
 // .env usa GCP_SERVICE_ACCOUNT_KEY; @google-cloud/storage lê GOOGLE_APPLICATION_CREDENTIALS
 if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GCP_SERVICE_ACCOUNT_KEY) {
   process.env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GCP_SERVICE_ACCOUNT_KEY

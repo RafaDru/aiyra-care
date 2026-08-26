@@ -32,12 +32,19 @@ const LINKS: Array<[number, number]> = [
   [10, 11], [11, 12], [12, 13],
 ]
 
-export function AvaNeuralOverlay({ analyzing = false }: { analyzing?: boolean }) {
+export function AvaNeuralOverlay({
+  analyzing = false,
+  transitioning = false,
+}: {
+  analyzing?: boolean
+  transitioning?: boolean
+}) {
   return (
     <svg
       className={[
         'ava-avatar__neural',
         analyzing && 'ava-avatar__neural--analyzing',
+        transitioning && 'ava-avatar__neural--transitioning',
       ].filter(Boolean).join(' ')}
       viewBox="0 0 100 100"
       aria-hidden="true"

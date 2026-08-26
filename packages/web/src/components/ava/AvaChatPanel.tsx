@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Avatar, Button, Checkbox, Input, Tag, Typography, App } from 'antd'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Avatar, Button, Checkbox, Input, Typography, App } from 'antd'
 import { FileTextOutlined, SendOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
-import type { AvaChatResponse, LlmUsageQuota } from '../../lib/api.types.js'
+import type { AvaActivityEvent, AvaChatResponse, LlmUsageQuota } from '../../lib/api.types.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
@@ -12,6 +12,9 @@ import { AvaAvatar } from './AvaAvatar.js'
 import { AvaQuotaBar } from './AvaQuotaBar.js'
 import { AvaChatHeading } from './AvaChatHeading.js'
 import { useAvaThinkingPhrase } from './useAvaThinkingPhrase.js'
+import { useAvaExpression } from './useAvaExpression.js'
+import { caregiverFirstName } from '../../lib/ava-personalization.js'
+import { AvaThinkingAura } from './AvaThinkingAura.js'
 import {
   AVA_CHAT_STAGE_AVATAR_SIZE,
   AVA_CHAT_USER_STAGE_SIZE,
@@ -20,7 +23,9 @@ import {
   readAvaAllowLlmDataSharing,
   writeAvaAllowLlmDataSharing,
 } from '../../lib/ava-llm-preferences.js'
-import { AvaMarkdown } from './AvaMarkdown.js'
+import { isLlmQuotaExhausted } from '../../lib/llm-quota.js'
+import type { AvaEntityPin } from '../../lib/ava-dock-bus.js'
+import { AvaChatBubble } from './AvaChatBubble.js'
 import { AvaReportModal } from './AvaReportModal.js'
 import './ava-chat.css'
 import './ava-report.css'
@@ -36,6 +41,10 @@ interface Props {
   healthThreadId?: string
   variant?: 'card' | 'embedded'
   showTitle?: boolean
+  initialMessage?: string
+  entityPin?: AvaEntityPin
+  autoSend?: boolean
+  onAcceleratorConsumed?: () => void
 }
 
 function initialsOf(name: string | null | undefined): string {
@@ -53,6 +62,10 @@ export function AvaChatPanel({
   healthThreadId,
   variant = 'card',
   showTitle = true,
+  initialMessage,
+  entityPin,
+  autoSend = false,
+  onAcceleratorConsumed,
 }: Props) {
   const { t } = useTranslation()
   const { message } = App.useApp()
@@ -65,9 +78,25 @@ export function AvaChatPanel({
   const [lastModel, setLastModel] = useState<string | null>(null)
   const [allowLlmDataSharing, setAllowLlmDataSharing] = useState(() => readAvaAllowLlmDataSharing())
   const [reportOpen, setReportOpen] = useState(false)
+  const [activityTrace, setActivityTrace] = useState<AvaActivityEvent[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const autoSendDoneRef = useRef(false)
 
   const thinkingPhrase = useAvaThinkingPhrase(loading)
+  const statusLabel = useMemo(() => {
+    const last = activityTrace[activityTrace.length - 1]
+    if (last) return last.label
+    return thinkingPhrase
+  }, [activityTrace, thinkingPhrase])
+  const avaExpression = useAvaExpression(loading, statusLabel, { context: 'chat' })
+  const caregiverName = caregiverFirstName(account?.displayName, account?.email)
+  const quotaBlocked = isLlmQuotaExhausted(quota)
+
+  useEffect(() => {
+    if (initialMessage?.trim()) {
+      setInput(initialMessage.trim())
+    }
+  }, [initialMessage])
 
   const loadQuota = useCallback(() => {
     api.llm.quota().then(setQuota).catch(() => setQuota(null))
@@ -79,30 +108,39 @@ export function AvaChatPanel({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  const send = async () => {
-    const text = input.trim()
+  const send = async (overrideText?: string, pinForTurn?: AvaEntityPin) => {
+    const text = (overrideText ?? input).trim()
     if (!text || loading) return
-    if (quota && quota.totalTokensRemaining <= 0) {
+    if (isLlmQuotaExhausted(quota)) {
       message.warning(t('ava.quotaExhausted'))
       return
     }
 
-    const history = messages.slice(-8).map((m) => ({
+    const history = messages.slice(-12).map((m) => ({
       role: m.role,
       content: m.text,
     }))
 
-    setInput('')
+    const pin = pinForTurn ?? entityPin
+
+    if (!overrideText) setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
     setLoading(true)
+    setActivityTrace([])
     try {
       const res: AvaChatResponse = await runLlmTask(() =>
-        api.ava.chat(patientId, {
-          message: text,
-          healthThreadId,
-          history,
-          allowLlmDataSharing,
-        }))
+        api.ava.chatWithActivity(
+          patientId,
+          {
+            message: text,
+            healthThreadId,
+            history,
+            allowLlmDataSharing,
+            entityPin: pin,
+          },
+          (event) => setActivityTrace((prev) => [...prev, event]),
+        ))
+      if (res.activityTrace?.length) setActivityTrace(res.activityTrace)
       setLastModel(`${res.provider} · ${res.model}`)
       setQuota(res.quota)
       setMessages((prev) => [...prev, {
@@ -123,7 +161,17 @@ export function AvaChatPanel({
     }
   }
 
-  const quotaAlert = quota && quota.status !== 'ok' ? (
+  useEffect(() => {
+    if (!autoSend || autoSendDoneRef.current) return
+    if (!initialMessage?.trim()) return
+    if (quota === null) return
+    if (isLlmQuotaExhausted(quota)) return
+    autoSendDoneRef.current = true
+    onAcceleratorConsumed?.()
+    void send(initialMessage.trim(), entityPin)
+  }, [autoSend, initialMessage, entityPin, quota, onAcceleratorConsumed])
+
+  const quotaAlert = quota && !quota.quotaBypassed && quota.status !== 'ok' ? (
     <DismissibleHint
       hintId={`ava.quota.${quota.monthlyPeriod}.${quota.status}`}
       type={quota.status === 'exhausted' ? 'error' : 'warning'}
@@ -169,17 +217,6 @@ export function AvaChatPanel({
 
   return (
     <div className={panelClass}>
-      <div className="ava-chat-panel__disclaimer">
-        <DismissibleHint
-          hintId={`ava.disclaimer.${patientId}`}
-          type="info"
-          acknowledge={false}
-          showIcon={false}
-          message={t('ava.chatDisclaimerShort')}
-          style={{ marginBottom: 0, padding: 0, background: 'transparent', border: 'none' }}
-        />
-      </div>
-
       {showTitle && (
         <div style={{ marginBottom: 8 }}>
           <AvaChatHeading />
@@ -221,30 +258,38 @@ export function AvaChatPanel({
 
       <div className="ava-chat-stage">
         <div className="ava-chat-stage__ava">
-          <AvaAvatar
-            size={AVA_CHAT_STAGE_AVATAR_SIZE}
-            analyzing={loading}
-            className="ava-chat-stage__ava-face"
-          />
-          {loading && (
-            <div className="ava-chat-thought-cloud" aria-live="polite">
-              <span className="ava-chat-thought-cloud__trail">
-                <span className="ava-chat-thought-cloud__trail-dot ava-chat-thought-cloud__trail-dot--lg" />
-                <span className="ava-chat-thought-cloud__trail-dot ava-chat-thought-cloud__trail-dot--md" />
-                <span className="ava-chat-thought-cloud__trail-dot ava-chat-thought-cloud__trail-dot--sm" />
-              </span>
-              <div className="ava-chat-thought-cloud__bubble">
-                <span className="ava-chat-thinking-text">{thinkingPhrase}</span>
+          <div
+            className="ava-chat-stage__ava-anchor"
+            style={{
+              width: AVA_CHAT_STAGE_AVATAR_SIZE,
+              height: AVA_CHAT_STAGE_AVATAR_SIZE,
+            }}
+          >
+            <AvaAvatar
+              size={AVA_CHAT_STAGE_AVATAR_SIZE}
+              analyzing={loading}
+              expression={avaExpression}
+              className="ava-chat-stage__ava-face"
+              neural={false}
+              softCrossfade
+              crossfadeVariant="lite"
+              crossfadeMs={1000}
+            />
+            {loading && (
+              <div className="ava-thinking-stack">
+                <AvaThinkingAura text={statusLabel} activityTrace={activityTrace} />
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="ava-chat-stage__thread">
           <div className="ava-chat-panel__messages">
             {messages.length === 0 && !loading && (
               <Typography.Paragraph className="ava-chat-panel__intro">
-                {t('ava.intro')}
+                {caregiverName
+                  ? t('ava.introPersonal', { name: caregiverName })
+                  : t('ava.intro')}
               </Typography.Paragraph>
             )}
 
@@ -256,22 +301,11 @@ export function AvaChatPanel({
                   item.role === 'user' ? 'ava-chat-bubble-row--user' : 'ava-chat-bubble-row--ava',
                 ].join(' ')}
               >
-                <div
-                  className={[
-                    'ava-chat-bubble',
-                    item.role === 'user' ? 'ava-chat-bubble--user' : 'ava-chat-bubble--ava',
-                  ].join(' ')}
-                >
-                  {item.role === 'assistant' && (
-                    <span className="ava-chat-bubble__tag">
-                      {t('ava.name')}
-                      {item.revised && (
-                        <Tag color="blue" style={{ marginLeft: 6, fontSize: 10 }}>{t('ava.revised')}</Tag>
-                      )}
-                    </span>
-                  )}
-                  {item.role === 'assistant' ? <AvaMarkdown content={item.text} /> : item.text}
-                </div>
+                <AvaChatBubble
+                  role={item.role}
+                  text={item.text}
+                  revised={item.revised}
+                />
               </div>
             ))}
             <div ref={messagesEndRef} />
@@ -303,7 +337,7 @@ export function AvaChatPanel({
           onChange={(e) => setInput(e.target.value)}
           placeholder={t('ava.placeholder')}
           autoSize={{ minRows: 2, maxRows: 4 }}
-          disabled={loading || (quota?.totalTokensRemaining ?? 1) <= 0}
+          disabled={loading || quotaBlocked}
           onPressEnter={(e) => {
             if (!e.shiftKey) {
               e.preventDefault()
@@ -316,7 +350,7 @@ export function AvaChatPanel({
           icon={<SendOutlined />}
           loading={loading}
           onClick={() => send()}
-          disabled={!input.trim() || (quota?.totalTokensRemaining ?? 1) <= 0}
+          disabled={!input.trim() || quotaBlocked}
           style={{ marginTop: 8, width: '100%' }}
         >
           {t('ava.send')}

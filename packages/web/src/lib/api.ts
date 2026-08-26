@@ -72,6 +72,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json()
 }
 
+import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream.js'
+
 export const api = {
   patients: {
     list: () => request<import('./api.types.js').Patient[]>('/patients'),
@@ -225,11 +227,18 @@ export const api = {
       healthThreadId?: string
       history?: Array<{ role: 'user' | 'assistant'; content: string }>
       allowLlmDataSharing?: boolean
+      entityPin?: import('./ava-dock-bus.js').AvaEntityPin
+      streamActivity?: boolean
     }) =>
       request<import('./api.types.js').AvaChatResponse>(`/patients/${patientId}/ava/chat`, {
         method: 'POST',
         body: JSON.stringify(body),
       }),
+    chatWithActivity: (
+      patientId: string,
+      body: Omit<AvaChatRequestBody, 'streamActivity'>,
+      onActivity: (event: import('./api.types.js').AvaActivityEvent) => void,
+    ) => avaChatWithActivityStream(patientId, body, onActivity),
   },
   llm: {
     quota: () => request<import('./api.types.js').LlmUsageQuota>('/llm/usage/quota'),

@@ -42,7 +42,8 @@ $env:PORT = "$apiPort"
 if (-not $Cloud) {
   $env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/openhealth"
 }
-$cmdApi = "set PORT=$apiPort&&set DATABASE_URL=$env:DATABASE_URL&&set OPENCODE_GO_API_KEY=$env:OPENCODE_GO_API_KEY&&set OPENCODE_ZEN_API_KEY=$env:OPENCODE_ZEN_API_KEY&&set GEMINI_API_KEY=$env:GEMINI_API_KEY&&set GROQ_API_KEY=$env:GROQ_API_KEY&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
+$llmQuotaUnlimited = $env:LLM_QUOTA_UNLIMITED
+$cmdApi = "set PORT=$apiPort&&set DATABASE_URL=$env:DATABASE_URL&&set LLM_QUOTA_UNLIMITED=$llmQuotaUnlimited&&set OPENCODE_GO_API_KEY=$env:OPENCODE_GO_API_KEY&&set OPENCODE_ZEN_API_KEY=$env:OPENCODE_ZEN_API_KEY&&set GEMINI_API_KEY=$env:GEMINI_API_KEY&&set GROQ_API_KEY=$env:GROQ_API_KEY&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
 cmd /c "start /B cmd /c `"$cmdApi`""
 
 for ($i = 0; $i -lt 12; $i++) {

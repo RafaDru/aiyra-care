@@ -35,15 +35,23 @@
   font-size: 0.9em;
 }
 
-/* Tabelas — dados tabulados (exames, marcadores, comparativos) */
-.ava-markdown table {
-  width: 100%;
-  border-collapse: collapse;
+/* Tabelas — scroll horizontal dentro do balão */
+.ava-markdown__table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
   margin: 8px 0 12px;
-  font-size: 12.5px;
-  overflow: hidden;
   border-radius: 8px;
   border: 1px solid rgba(147, 51, 234, 0.18);
+  -webkit-overflow-scrolling: touch;
+}
+
+.ava-markdown table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 12.5px;
+  border: none;
 }
 
 .ava-markdown thead th {

@@ -61,6 +61,8 @@ export interface LlmUsageQuota {
     totalAvailable: number
   }
   llmEnabled: boolean
+  /** Franquia desativada para esta conta (env `LLM_QUOTA_BYPASS_*`). */
+  quotaBypassed?: boolean
 }
 
 export interface LlmUsageEventInput {

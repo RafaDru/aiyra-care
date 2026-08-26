@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-24",
+  "generatedAt": "2026-08-26",
   "application": {
     "name": "AiyraCare (Filhos)",
     "repository": "https://github.com/RafaDru/open-health",
@@ -27,7 +27,7 @@
     { "id": "F", "name": "Agenda + calendários", "description": "scheduled_events, ICS, Google/Microsoft OAuth sync", "usesLlm": false, "status": "done" },
     { "id": "G", "name": "Billing SaaS", "description": "Stripe checkout, webhook, assinatura, entitlements", "usesLlm": false, "status": "done" },
     { "id": "H", "name": "Legal / LGPD", "description": "Compliance gate, aceite versionado, exclusão conta", "usesLlm": false, "status": "operational" },
-    { "id": "I", "name": "Agentes de apoio (Ava)", "description": "Ava chat + reflexão; roadmap: conversas persistidas, pins, grafo", "usesLlm": true, "status": "operational" },
+    { "id": "I", "name": "Agentes de apoio (Ava)", "description": "Ava chat + reflexão + ferramentas read-only (ava-tools) + SSE activityTrace; conversas persistidas planejadas", "usesLlm": true, "status": "operational" },
     { "id": "J", "name": "Observabilidade", "description": "llm_usage_events, sync_jobs; product_events planejado", "usesLlm": false, "status": "planned" },
     { "id": "K", "name": "Higienização (dedup)", "description": "Detectores exams/vacinas; hygiene_candidates (042); bloqueio na inserção", "usesLlm": false, "status": "operational" },
     { "id": "L", "name": "Classificação de rótulos", "description": "Motor 3-tier (vetor + LLM + catálogo 044); roteia Amil → consulta/exame", "usesLlm": true, "status": "operational" },
@@ -83,7 +83,7 @@
     { "method": "GET", "path": "/exam-orders", "description": "Pedidos de exame CRUD" },
     { "method": "GET", "path": "/patients/:id/exam-markers/trends", "description": "Tendências de marcadores laboratoriais" },
     { "method": "GET", "path": "/exam-result-items", "description": "Marcadores estruturados CRUD/list" },
-    { "method": "POST", "path": "/patients/:id/ava/chat", "description": "Chat Ava (contexto + marcadores)" },
+    { "method": "POST", "path": "/patients/:id/ava/chat", "description": "Chat Ava (entityPin, streamActivity SSE, activityTrace, reflexão)" },
     { "method": "GET", "path": "/llm/usage/internal", "description": "Indicadores do LLM interno (cost_bucket=internal) — ops key" },
     { "method": "GET", "path": "/emergency/directory", "description": "Guia de emergência por paciente" }
   ],
@@ -114,7 +114,9 @@
     { "id": "agents-next-epic", "date": "2026-08-13", "title": "Próximo épico: Agentes RAG", "decision": "Gate ANVISA + médico antes de clínico", "status": "active" },
     { "id": "classification-engine", "date": "2026-08-19", "title": "Classificador semântico 3-tier", "decision": "Vetor (≥0.80) → LLM interno metered → semantic_catalog_cache (044). Fallback LLM com cost_bucket=internal, orçamento R$100/mês (043)", "status": "active" },
     { "id": "exam-artifact-pipeline", "date": "2026-08-24", "title": "Pipeline unificado de artefatos de exame", "decision": "PyMuPDF → parser fonte (Hermes/MaterDei) → LLM fallback interno (exam_marker_extraction) → exam_result_items com source_document_id (046). Ava recebe marcadores no contexto.", "status": "active" },
-    { "id": "ava-global-dock", "date": "2026-08-21", "title": "Ava global na conta", "decision": "FAB fixo via AppLayout; patientId da rota; conversas persistidas planejadas (047+)", "status": "active" }
+    { "id": "ava-global-dock", "date": "2026-08-21", "title": "Ava global na conta", "decision": "FAB fixo via AppLayout; patientId da rota; conversas persistidas planejadas (047+)", "status": "active" },
+    { "id": "ava-accelerators-g1", "date": "2026-08-25", "title": "Aceleradores Ava + entityPin", "decision": "AvaAcceleratorButton + ava-dock-bus; entityPin no chat API; REGISTRO EM FOCO no prompt", "status": "active" },
+    { "id": "ava-tools-g4-partial", "date": "2026-08-26", "title": "Ava ferramental read-only + status SSE", "decision": "ava-tools.ts + streamActivity; G3 mutável pendente; ver AVA_OPERATIONAL.md", "status": "active" }
   ],
   "plannedWork": [
     { "id": "agent-rag", "title": "packages/agents + runtime citações", "status": "planned", "priority": "P3" },

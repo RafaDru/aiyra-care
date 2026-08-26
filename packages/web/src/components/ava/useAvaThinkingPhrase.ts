@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const THINKING_PHRASES = [
-  'Pensando…',
-  'Analisando o prontuário…',
-  'Pesquisando nos exames…',
-  'Organizando as informações…',
-  'Conferindo os dados…',
-]
+const PHRASE_KEYS = [
+  'ava.thinkingPhrases.pensando',
+  'ava.thinkingPhrases.analisando',
+  'ava.thinkingPhrases.exames',
+  'ava.thinkingPhrases.organizando',
+  'ava.thinkingPhrases.conferindo',
+] as const
 
-/** Frase de "pensando" que rotaciona a cada 2s enquanto a LLM processa. */
+/** Frases rotativas (pool fixo) enquanto a LLM processa — não é texto ao vivo do modelo. */
 export function useAvaThinkingPhrase(active: boolean): string {
+  const { t } = useTranslation()
+  const phrases = useMemo(() => PHRASE_KEYS.map((key) => t(key)), [t])
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -17,12 +20,11 @@ export function useAvaThinkingPhrase(active: boolean): string {
       setIndex(0)
       return
     }
-    const timer = window.setInterval(
-      () => setIndex((i) => (i + 1) % THINKING_PHRASES.length),
-      2000,
-    )
+    const timer = window.setInterval(() => {
+      setIndex((i) => (i + 1) % phrases.length)
+    }, 2400)
     return () => window.clearInterval(timer)
-  }, [active])
+  }, [active, phrases.length])
 
-  return THINKING_PHRASES[index]
+  return phrases[index] ?? phrases[0] ?? t('ava.thinking')
 }

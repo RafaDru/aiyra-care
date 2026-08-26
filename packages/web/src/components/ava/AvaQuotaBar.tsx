@@ -10,6 +10,16 @@ interface Props {
 
 export function AvaQuotaBar({ quota, lastModel }: Props) {
   const { t } = useTranslation()
+  if (quota.quotaBypassed) {
+    return (
+      <div className="ava-quota-bar">
+        <Typography.Text type="secondary" className="ava-quota-bar__detail">
+          {t('ava.quotaBypassed')}
+          {lastModel ? ` · ${lastModel}` : ''}
+        </Typography.Text>
+      </div>
+    )
+  }
   const percent = Math.min(100, Math.max(0, quota.usagePercent))
 
   const strokeColor =

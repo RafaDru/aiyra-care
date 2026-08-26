@@ -589,6 +589,7 @@ export interface LlmUsageQuota {
     totalAvailable: number
   }
   llmEnabled: boolean
+  quotaBypassed?: boolean
 }
 
 export interface AvaReflectionOutcome {
@@ -598,6 +599,17 @@ export interface AvaReflectionOutcome {
   revised: boolean
   attempts: number
   steps: string[]
+}
+
+export type AvaActivityKind = 'context' | 'tool' | 'llm' | 'reflection'
+export type AvaActivityStatus = 'start' | 'done' | 'skip'
+
+export interface AvaActivityEvent {
+  code: string
+  kind: AvaActivityKind
+  status: AvaActivityStatus
+  label: string
+  ts: number
 }
 
 export interface AvaChatResponse {
@@ -615,6 +627,7 @@ export interface AvaChatResponse {
   disclaimer: string
   insightsIncluded: number
   reflection: AvaReflectionOutcome
+  activityTrace?: AvaActivityEvent[]
 }
 
 export type EmergencyDirectoryCategory =

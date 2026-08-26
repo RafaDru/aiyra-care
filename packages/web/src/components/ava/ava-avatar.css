@@ -8,56 +8,10 @@
   background: transparent;
 }
 
-.ava-avatar-shell--analyzing::before {
-  content: '';
-  position: absolute;
-  inset: -14%;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    rgba(255, 61, 168, 0.15),
-    rgba(147, 51, 234, 0.55),
-    rgba(255, 230, 102, 0.45),
-    rgba(255, 61, 168, 0.15)
-  );
-  filter: blur(10px);
-  opacity: 0.9;
-  animation: ava-shell-glow-spin 2.4s linear infinite;
-  z-index: 0;
-  pointer-events: none;
-}
-
+.ava-avatar-shell--analyzing::before,
 .ava-avatar-shell--analyzing::after {
-  content: '';
-  position: absolute;
-  inset: -5%;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 61, 168, 0.55);
-  background: transparent;
-  animation: ava-shell-ring-pulse 1.6s ease-in-out infinite;
-  z-index: 0;
-  pointer-events: none;
-  box-shadow:
-    0 0 18px rgba(147, 51, 234, 0.45),
-    0 0 32px rgba(255, 61, 168, 0.25);
-}
-
-@keyframes ava-shell-glow-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes ava-shell-ring-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.04);
-  }
+  content: none;
+  display: none;
 }
 
 .ava-avatar {
@@ -71,17 +25,329 @@
   --ava-star-cycle: 14s;
   --ava-star-stagger: 0.2s;
   z-index: 1;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.ava-avatar__photo {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.ava-avatar__layer {
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
-  position: relative;
+  opacity: 0;
+  transition: opacity var(--ava-crossfade-duration, 2.2s) ease-in-out;
+  will-change: opacity;
+}
+
+.ava-avatar__layers {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.ava-avatar__layer--shown {
+  opacity: 1;
+  z-index: 2;
+}
+
+.ava-avatar__layer--hidden {
+  opacity: 0;
   z-index: 1;
+}
+
+/* Dock — greeting com crop levemente mais próximo */
+.ava-avatar__layer--expr-greeting .ava-avatar__photo {
+  width: 116%;
+  height: 116%;
+  left: -8%;
+  top: -8%;
+  object-position: 50% 30%;
+}
+
+/* Transição suave dock — esfumaçado + glow neural */
+.ava-avatar-shell--soft-morph {
+  animation: ava-morph-shell-ring var(--ava-crossfade-duration, 2.2s) ease-in-out;
+}
+
+.ava-avatar__morph-smoke {
+  position: absolute;
+  inset: -35%;
+  border-radius: 50%;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.92) 0%, transparent 38%),
+    radial-gradient(circle at 42% 38%, rgba(255, 230, 102, 0.55) 0%, transparent 52%),
+    radial-gradient(circle at 58% 42%, rgba(147, 51, 234, 0.4) 0%, transparent 55%);
+  filter: blur(18px);
+  opacity: 0;
+  animation: ava-morph-smoke var(--ava-crossfade-duration, 2.2s) ease-out forwards;
+}
+
+.ava-avatar__morph-veil {
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.65) 0%, transparent 42%),
+    radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.5) 0%, transparent 58%),
+    radial-gradient(circle at 50% 50%, rgba(255, 230, 102, 0.42) 0%, transparent 70%);
+  filter: blur(12px);
+  opacity: 0;
+  animation: ava-morph-veil var(--ava-crossfade-duration, 2.2s) ease-out forwards;
+}
+
+.ava-avatar__morph-veil--lite {
+  inset: -18%;
+  filter: blur(10px);
+  animation: ava-morph-veil-lite var(--ava-crossfade-duration, 1s) ease-out forwards;
+}
+
+.ava-avatar--soft-morph-lite .ava-avatar__layer {
+  transition: opacity var(--ava-crossfade-duration, 1s) ease-in-out;
+}
+
+@keyframes ava-morph-veil-lite {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  30% {
+    opacity: 0.65;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+.ava-avatar--soft-morph .ava-avatar__layer--outgoing .ava-avatar__photo {
+  animation: ava-morph-outgoing var(--ava-crossfade-duration, 2.2s) ease-in-out forwards;
+}
+
+.ava-avatar--soft-morph .ava-avatar__layer--incoming .ava-avatar__photo {
+  animation: ava-morph-incoming var(--ava-crossfade-duration, 2.2s) ease-out forwards;
+}
+
+.ava-avatar--soft-morph.ava-avatar--animated .ava-avatar__layer--outgoing .ava-avatar__photo,
+.ava-avatar--soft-morph.ava-avatar--animated .ava-avatar__layer--incoming .ava-avatar__photo {
+  animation-duration: var(--ava-crossfade-duration, 2.2s);
+}
+
+@keyframes ava-morph-shell-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 230, 102, 0);
+  }
+  30% {
+    box-shadow:
+      0 0 0 4px rgba(255, 230, 102, 0.45),
+      0 0 40px rgba(147, 51, 234, 0.55),
+      0 0 64px rgba(255, 61, 168, 0.28);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 230, 102, 0);
+  }
+}
+
+@keyframes ava-morph-smoke {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  20% {
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+  55% {
+    opacity: 0.7;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+}
+
+@keyframes ava-morph-veil {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  22% {
+    opacity: 0.95;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+}
+
+@keyframes ava-morph-outgoing {
+  0% {
+    width: 116%;
+    height: 116%;
+    left: -8%;
+    top: -8%;
+    object-position: 50% 30%;
+    filter: brightness(1) blur(0) saturate(1);
+  }
+  100% {
+    width: 118%;
+    height: 118%;
+    left: -9%;
+    top: -9%;
+    object-position: 50% 33%;
+    filter: brightness(1.45) blur(7px) saturate(1.1);
+  }
+}
+
+@keyframes ava-morph-incoming {
+  0% {
+    width: 118%;
+    height: 118%;
+    left: -9%;
+    top: -9%;
+    object-position: 50% 33%;
+    filter: brightness(1.4) blur(6px) saturate(1.12);
+  }
+  40% {
+    filter: brightness(1.15) blur(2px) saturate(1.06);
+  }
+  100% {
+    width: 118%;
+    height: 118%;
+    left: -9%;
+    top: -9%;
+    object-position: 50% 33%;
+    filter: brightness(1) blur(0) saturate(1);
+  }
+}
+
+.ava-avatar__neural--transitioning {
+  mix-blend-mode: plus-lighter;
+  --ava-star-cycle: var(--ava-crossfade-duration, 1.8s);
+  --ava-star-stagger: 0.06s;
+}
+
+.ava-avatar--animated .ava-avatar__neural--transitioning .ava-avatar__xmas-core {
+  animation-name: ava-star-core-morph;
+  animation-duration: var(--ava-crossfade-duration, 1.8s);
+}
+
+.ava-avatar--animated .ava-avatar__neural--transitioning .ava-avatar__xmas-glow {
+  animation-name: ava-star-glow-morph;
+  animation-duration: var(--ava-crossfade-duration, 1.8s);
+}
+
+.ava-avatar--animated .ava-avatar__neural--transitioning .ava-avatar__neural-line {
+  animation-name: ava-star-line-morph;
+  animation-duration: var(--ava-crossfade-duration, 1.8s);
+}
+
+@keyframes ava-star-core-morph {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes ava-star-glow-morph {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+  40% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes ava-star-line-morph {
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+  40% {
+    opacity: 0.55;
+  }
+}
+
+.ava-avatar__photo-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+/* Crop unificado — todas as poses PNG alinhadas ao mesmo enquadramento */
+.ava-avatar__photo {
+  position: absolute;
+  width: 118%;
+  height: 118%;
+  left: -9%;
+  top: -9%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 33%;
+  border-radius: 0;
+  z-index: 1;
+  backface-visibility: hidden;
+  display: block;
+}
+
+/* Pulso “pensando” — dentro do círculo, sem margem externa */
+.ava-avatar--analyzing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 24px rgba(147, 51, 234, 0.45),
+    inset 0 0 12px rgba(255, 61, 168, 0.25);
+  animation: ava-inner-glow-pulse 1.6s ease-in-out infinite;
+}
+
+.ava-avatar--analyzing::after {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  z-index: 4;
+  pointer-events: none;
+  border: 1px solid rgba(255, 230, 102, 0.35);
+  box-shadow: inset 0 0 16px rgba(255, 230, 102, 0.2);
+  animation: ava-inner-ring-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ava-inner-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes ava-inner-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+.ava-avatar-shell--warm::before {
+  opacity: 0.65;
 }
 
 /* Estrelas neurais — só na faixa superior (fundo do PNG) */
@@ -91,7 +357,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
   mix-blend-mode: screen;
   -webkit-mask-image: linear-gradient(
     to bottom,
@@ -127,7 +393,6 @@
   opacity: 0;
 }
 
-/* Reposo — ~4s de brilho + 10s de pausa */
 .ava-avatar--animated .ava-avatar__xmas-core {
   animation: ava-star-core var(--ava-star-cycle) ease-in-out infinite;
   animation-delay: calc(var(--order) * var(--ava-star-stagger));
@@ -178,13 +443,9 @@
   }
 }
 
-/* LLM analisando — cascata contínua + brilho forte */
 .ava-avatar--analyzing {
   --ava-star-cycle: 2.2s;
   --ava-star-stagger: 0.11s;
-  box-shadow:
-    0 0 0 2px rgba(255, 230, 102, 0.35),
-    0 4px 24px rgba(147, 51, 234, 0.35);
 }
 
 .ava-avatar--animated.ava-avatar--analyzing .ava-avatar__xmas-core {
@@ -233,22 +494,43 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ava-avatar-shell--analyzing::before,
-  .ava-avatar-shell--analyzing::after {
+  .ava-avatar--analyzing::before,
+  .ava-avatar--analyzing::after {
     animation: none;
   }
 
-  .ava-avatar-shell--analyzing::before {
+  .ava-avatar--analyzing::before {
     opacity: 0.5;
   }
 
-  .ava-avatar-shell--analyzing::after {
-    opacity: 0.75;
+  .ava-avatar--analyzing::after {
+    opacity: 0.6;
+  }
+
+  .ava-avatar-shell--soft-morph {
+    animation: none;
+  }
+
+  .ava-avatar__morph-smoke,
+  .ava-avatar__morph-veil {
+    animation: none;
+    opacity: 0;
+  }
+
+  .ava-avatar__layer {
+    transition: none;
+  }
+
+  .ava-avatar--soft-morph .ava-avatar__layer--outgoing .ava-avatar__photo,
+  .ava-avatar--soft-morph .ava-avatar__layer--incoming .ava-avatar__photo {
+    animation: none;
+    filter: none;
   }
 
   .ava-avatar--animated .ava-avatar__xmas-core,
   .ava-avatar--animated .ava-avatar__xmas-glow,
-  .ava-avatar--animated .ava-avatar__neural-line {
+  .ava-avatar--animated .ava-avatar__neural-line,
+  .ava-avatar--animated .ava-avatar__photo {
     animation: none;
   }
 

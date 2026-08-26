@@ -81,6 +81,9 @@ Respostas `402 LLM_QUOTA_EXCEEDED` quando franquia esgotada.
 |----------|---------|--------|
 | `LLM_TOKENS_PER_CREDIT` | `10000` | 1 crédito manuscrito ≈ N tokens no orçamento |
 | `LLM_WARN_AT_PERCENT` | `80` | `status: warn` na quota |
+| `LLM_QUOTA_UNLIMITED` | `0` | `1` desativa franquia para **todas** as contas (só dev local) |
+| `LLM_QUOTA_BYPASS_ACCOUNT_IDS` | — | UUIDs separados por vírgula com franquia desativada |
+| `LLM_QUOTA_BYPASS_EMAILS` | — | E-mails (login) com franquia desativada — ex.: `rafael@…` |
 | `LLM_AVA_MAX_OUTPUT_TOKENS` | `1024` | Teto resposta Ava |
 | `AVA_LLM_ENABLED` | on se Groq/Gemini/OpenCode Zen/Go | Kill switch |
 | `GROQ_CHAT_MODEL` | `qwen/qwen3.6-27b` | Fallback Groq |

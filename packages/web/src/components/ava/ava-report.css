@@ -1,4 +1,39 @@
-/* Bolhas do modal de relatório Ava */
+/* Modal de relatório — reutiliza balões do chat */
+.ava-report-scroll {
+  --ava-thread-surface: var(--ant-color-bg-container, #fff);
+}
+
+.ava-report-msg {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  align-items: flex-end;
+}
+
+.ava-report-msg--user {
+  flex-direction: row-reverse;
+}
+
+.ava-report-msg__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ava-report-msg--ava .ava-chat-bubble {
+  max-width: 100%;
+}
+
+.ava-report-msg--user .ava-chat-bubble {
+  max-width: 100%;
+  margin-left: auto;
+}
+
+.ava-report-msg--user .ava-report-msg__content {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Legado — mantido se impressão inline referenciar */
 .ava-report-bubble {
   padding: 10px 14px;
   border-radius: 12px;

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+  <!-- Livro aberto  canto inferior -->
+  <rect x="62" y="72" width="34" height="26" rx="4" fill="rgba(255, 255, 255, 0.92)" stroke="rgba(109, 40, 217, 0.45)" stroke-width="1.5" />
+  <path d="M79 72 L79 98" stroke="rgba(109, 40, 217, 0.35)" stroke-width="1.2" />
+  <path d="M66 78 H92 M66 84 H90 M66 90 H88" stroke="rgba(147, 51, 234, 0.35)" stroke-width="1" stroke-linecap="round" />
+  <path
+    d="M48 58 L56 66 L48 74"
+    stroke="rgba(109, 40, 217, 0.4)"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

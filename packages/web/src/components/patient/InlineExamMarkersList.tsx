@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Space, Spin, Tag, Typography } from 'antd'
+import { AvaAcceleratorButton } from '../ava/AvaAcceleratorButton.js'
 import { api } from '../../lib/api.js'
 import type { ExamMarker } from '../../lib/api.types.js'
+import { useTranslation } from 'react-i18next'
 
 const { Text } = Typography
 
@@ -12,6 +14,7 @@ function getStatusTag(status: string) {
 }
 
 export function InlineExamMarkersList({ examId }: { examId: string }) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [markers, setMarkers] = useState<ExamMarker[]>([])
 
@@ -67,6 +70,12 @@ export function InlineExamMarkersList({ examId }: { examId: string }) {
               {m.displayValue} {m.unit || ''}
             </Text>
             {getStatusTag(m.status)}
+            <AvaAcceleratorButton
+              patientId={m.patientId}
+              initialMessage={t('ava.acceleratorMarker')}
+              entityPin={{ entityType: 'exam_result_item', entityId: m.id }}
+              type="text"
+            />
           </div>
         ))}
       </Space>

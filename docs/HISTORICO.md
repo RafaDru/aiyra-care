@@ -1,5 +1,32 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-26] - Ava: expressões, ferramental read-only, status SSE, UX chat
+
+### Realizado
+- **Expressões:** PNGs dedicados (`greeting`, `listening`, `reflective`, `researching`); crossfade dock ~2,2s; chat lite 1s; `docs/AVA_EXPRESSIONS.md`.
+- **UX chat:** layout conversacional estável; balão de pensamento à direita (overlay no thread); trilha de status sem disclaimer redundante.
+- **Ferramental G4 (parcial):** `ava-tools.ts` + `ava-activity.ts`; ferramentas read-only com heurísticas; SSE `streamActivity` no chat; UI `chatWithActivity` + passos no balão.
+- **Quota dev:** `LLM_QUOTA_UNLIMITED` / bypass por e-mail; web `isLlmQuotaExhausted` respeita `quotaBypassed`.
+- **Docs:** `AVA_OPERATIONAL.md` G4 parcial; testes `ava-tools.test.ts` em `test:critical`.
+
+## [2026-08-25c] - Ava G2 + UX chat (chips, balão flutuante)
+
+### Realizado
+- **G2:** `AvaOperationalContextService` (navegação, sync read-only, laudos); links internos no markdown.
+- **UX drawer:** removida Ava duplicada no header; chips de paciente em vez de dropdown.
+- **Balão de pensamento:** overlay flutuante no thread durante LLM; sem trilha pontilhada.
+
+## [2026-08-25b] - Ava G1: aceleradores + entity pins
+
+### Contexto
+Primeiro grupo de Ava operacional: botões contextuais que abrem o dock com lente correta e registro em foco no prompt.
+
+### Realizado
+- **API:** `entityPin` no body de `POST /patients/:id/ava/chat`; `AvaEntityContextService` (exam, exam_order, exam_result_item, exam_marker); bloco **REGISTRO EM FOCO** no orchestrator.
+- **Web:** `ava-dock-bus.ts` (`aiyracare:ava-open`); `AvaAcceleratorButton`; integração em `ExamsTab`, `ExamMarkersDashboard`, `InlineExamMarkersList`.
+- **Docs:** `AVA_OPERATIONAL.md`; `ava-accelerators` → done no roadmap.
+- **Testes:** `ava-entity-context.test.ts` em `test:critical`.
+
 ## [2026-08-25] - Ava: lente de paciente, layout conversacional, pool de tokens
 
 ### Contexto

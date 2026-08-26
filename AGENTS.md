@@ -116,7 +116,7 @@ Entities and attributes live in **Postgres**; Neo4j stores **associations** betw
 ## Frontend — where to edit
 
 - Patient profile: `packages/web/src/pages/patient/detail.tsx` (tabs **Carteira**, **Convênios**, **Integrações**)
-- **Ava global:** `AvaGlobalDock` em `AppLayout.tsx` — orb fixo (FAB) em todas as telas; chat em drawer (`AvaDockWidget`, `AvaChatPanel`)
+- **Ava global:** `AvaGlobalDock` em `AppLayout.tsx` — orb fixo (FAB) em todas as telas; chat em drawer (`AvaDockWidget`, `AvaChatPanel`); lente de paciente (`useAvaPatientLens`, `AvaPatientLensSelect`); aceleradores G1 (`AvaAcceleratorButton`, `ava-dock-bus.ts`, `entityPin` na API)
 - Exam markers dashboard: `ExamMarkersDashboard.tsx`, sub-aba em `ExamsTab.tsx`
 - Silent wallet: `useSilentWalletSync.ts`, `useWalletLinkSyncStatus.ts`, `silent-sync.ts`
 - Sync modal: `packages/web/src/components/scraper/SyncProgressModal.tsx`
@@ -163,6 +163,9 @@ Only commit or open a PR when the user explicitly asks. Follow PR template in `.
 | Doc | Content |
 |-----|---------|
 | `docs/AVA_VISION.md` | Global companion, sessions, pins, moonshot |
+| `docs/AVA_OPERATIONAL.md` | Fases G1–G4 Ava operacional (aceleradores, ações) |
+| `docs/AVA_EXPRESSIONS.md` | Expressões visuais + linha narrativa (nome do cuidador) |
+| `docs/AVA_PATIENT_LENS.md` | Lente de paciente, layout conversacional, tokens |
 | `docs/ARCHITECTURE_DATA_LAYERS.md` | Postgres entities vs Neo4j associations |
 | `docs/DATA_HYGIENE.md` | Dedup (Google Photos style) |
 | `docs/CLASSIFICATION_ENGINE.md` | Operator label classification engine |

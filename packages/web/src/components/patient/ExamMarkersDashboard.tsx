@@ -30,8 +30,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { AvaAcceleratorButton } from '../ava/AvaAcceleratorButton.js'
 import { api } from '../../lib/api.js'
 import type { MarkerTrendGroup } from '../../lib/api.types.js'
+import { useTranslation } from 'react-i18next'
 
 const { Text, Title } = Typography
 
@@ -57,6 +59,7 @@ function TrendIcon({ group }: { group: MarkerTrendGroup }) {
 }
 
 export function ExamMarkersDashboard({ patientId }: ExamMarkersDashboardProps) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [groups, setGroups] = useState<MarkerTrendGroup[]>([])
   const [search, setSearch] = useState('')
@@ -246,6 +249,11 @@ export function ExamMarkersDashboard({ patientId }: ExamMarkersDashboardProps) {
                     </Tooltip>
                   )}
                   <Tag color="cyan">{activeGroup.unit || 'Valor'}</Tag>
+                  <AvaAcceleratorButton
+                    patientId={patientId}
+                    initialMessage={t('ava.acceleratorMarker')}
+                    entityPin={{ entityType: 'exam_marker', markerName: activeGroup.markerName }}
+                  />
                 </Space>
               </div>
               <Text type="secondary" style={{ fontSize: 11 }}>

@@ -8,6 +8,7 @@ import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { CarePlaceAutocomplete } from '../../../components/ui/CarePlaceAutocomplete.js'
 import { PlusOutlined, FilePdfOutlined, PlayCircleOutlined, LinkOutlined, DownOutlined, UpOutlined, FileTextOutlined, DashboardOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { AvaAcceleratorButton } from '../../../components/ava/AvaAcceleratorButton.js'
 import { api, openAuthenticatedDownload } from '../../../lib/api.js'
 import {
   examDocumentIdFromNotes,
@@ -257,6 +258,18 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
       width: 160,
       render: (_: unknown, row: Exam) => renderClinicalLinksCell(row),
     },
+    {
+      title: t('patient.ava'),
+      key: 'ava',
+      width: 140,
+      render: (_: unknown, row: Exam) => (
+        <AvaAcceleratorButton
+          patientId={patientId}
+          initialMessage={t('ava.acceleratorExam')}
+          entityPin={{ entityType: 'exam', entityId: row.id }}
+        />
+      ),
+    },
   ]
 
   const listRows = useMemo((): ExamListRow[] => {
@@ -374,6 +387,29 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
       render: (_: unknown, row: ExamListRow) => {
         if (row.type === 'order') return '-'
         return renderClinicalLinksCell(row.exam)
+      },
+    },
+    {
+      title: t('patient.ava'),
+      key: 'ava',
+      width: 140,
+      render: (_: unknown, row: ExamListRow) => {
+        if (row.type === 'order') {
+          return (
+            <AvaAcceleratorButton
+              patientId={patientId}
+              initialMessage={t('ava.acceleratorOrder')}
+              entityPin={{ entityType: 'exam_order', entityId: row.order.id }}
+            />
+          )
+        }
+        return (
+          <AvaAcceleratorButton
+            patientId={patientId}
+            initialMessage={t('ava.acceleratorExam')}
+            entityPin={{ entityType: 'exam', entityId: row.exam.id }}
+          />
+        )
       },
     },
   ]

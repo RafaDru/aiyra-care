@@ -45,6 +45,14 @@ describe('llm-policy', () => {
     expect(['ok', 'warn', 'exhausted']).toContain(quota.status)
   })
 
+  it('bypasses quota when flagged', () => {
+    const exhausted: LlmUsageAccount = { ...usage, monthlyTokensUsed: creditPoolTokens(credits) }
+    const quota = computeLlmUsageQuota(exhausted, credits, true, true)
+    expect(quota.quotaBypassed).toBe(true)
+    expect(quota.totalTokensRemaining).toBeGreaterThan(1_000_000)
+    expect(() => assertTokenBudget(exhausted, credits, 1, true)).not.toThrow()
+  })
+
   it('blocks when token budget exceeded', () => {
     const exhausted: LlmUsageAccount = { ...usage, monthlyTokensUsed: creditPoolTokens(credits) }
     expect(() => assertTokenBudget(exhausted, credits, 1)).toThrow('LLM_QUOTA_EXCEEDED')

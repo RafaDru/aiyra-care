@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
 
-export type AvaDockIntroPhase = 'greeting' | 'offer' | 'done'
+export type AvaDockIntroPhase = 'greeting' | 'settling' | 'done'
 
-const GREETING_MS = 3000
-const OFFER_MS = 3000
+const GREETING_MS = 4200
+const SETTLE_MS = 2200
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
+/** Intro: saudação → transição suave (settling) → neutro. */
 export function useAvaDockIntro(): { phase: AvaDockIntroPhase; introDone: boolean } {
   const [phase, setPhase] = useState<AvaDockIntroPhase>(() =>
     prefersReducedMotion() ? 'done' : 'greeting',
@@ -18,10 +19,10 @@ export function useAvaDockIntro(): { phase: AvaDockIntroPhase; introDone: boolea
   useEffect(() => {
     if (prefersReducedMotion()) return
 
-    const toOffer = window.setTimeout(() => setPhase('offer'), GREETING_MS)
-    const toDone = window.setTimeout(() => setPhase('done'), GREETING_MS + OFFER_MS)
+    const toSettling = window.setTimeout(() => setPhase('settling'), GREETING_MS)
+    const toDone = window.setTimeout(() => setPhase('done'), GREETING_MS + SETTLE_MS)
     return () => {
-      window.clearTimeout(toOffer)
+      window.clearTimeout(toSettling)
       window.clearTimeout(toDone)
     }
   }, [])

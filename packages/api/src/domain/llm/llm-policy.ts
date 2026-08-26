@@ -179,6 +179,7 @@ export function computeLlmUsageQuota(
   usageAccount: LlmUsageAccount,
   creditAccount: HandwritingCreditAccount,
   llmEnabled: boolean,
+  quotaBypassed = false,
 ): LlmUsageQuota {
   const normalized = normalizeLlmUsagePeriod(usageAccount)
   const perCredit = tokensPerCredit()
@@ -196,6 +197,30 @@ export function computeLlmUsageQuota(
   const usagePercent = totalTokenBudget > 0
     ? Math.min(100, Math.round((monthlyUsed / totalTokenBudget) * 100))
     : monthlyUsed > 0 ? 100 : 0
+
+  if (quotaBypassed) {
+    return {
+      scopeId: normalized.scopeId,
+      tokensPerCredit: perCredit,
+      monthlyTokenAllowance,
+      monthlyTokensUsed: monthlyUsed,
+      monthlyTokensRemaining: 999_999_999,
+      packageTokenBalance: creditAccount.packageCredits * perCredit,
+      totalTokensRemaining: 999_999_999,
+      creditsEquivalentRemaining: 999_999,
+      warnAtPercent: warnAt,
+      usagePercent: 0,
+      status: 'ok',
+      monthlyPeriod: normalized.monthlyPeriod,
+      handwritingCredits: {
+        monthlyFreeRemaining: monthlyRemainingCredits,
+        packageCredits: creditAccount.packageCredits,
+        totalAvailable: monthlyRemainingCredits + creditAccount.packageCredits,
+      },
+      llmEnabled,
+      quotaBypassed: true,
+    }
+  }
 
   return {
     scopeId: normalized.scopeId,
@@ -223,7 +248,9 @@ export function assertTokenBudget(
   usageAccount: LlmUsageAccount,
   creditAccount: HandwritingCreditAccount,
   estimatedTokens: number,
+  quotaBypassed = false,
 ): void {
+  if (quotaBypassed) return
   const normalized = normalizeLlmUsagePeriod(usageAccount)
   const remaining = creditPoolTokens(creditAccount) - normalized.monthlyTokensUsed
   if (estimatedTokens > remaining) {
