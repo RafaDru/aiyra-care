@@ -27,6 +27,7 @@ import {
   writeAvaAllowLlmDataSharing,
   writeAvaImageAttachWarningDismissed,
 } from '../../lib/ava-llm-preferences.js'
+import { trackProductEvent } from '../../lib/product-events.js'
 import { isLlmQuotaExhausted } from '../../lib/llm-quota.js'
 import type { AvaEntityPin } from '../../lib/ava-dock-bus.js'
 import { AvaChatBubble } from './AvaChatBubble.js'
@@ -221,6 +222,8 @@ export function AvaChatPanel({
     setActivityTrace([])
     touchAvaLastActivity()
     setShowInactivityHint(false)
+    const startedAt = Date.now()
+    trackProductEvent('ava_chat_started', {}, { patientId })
     try {
       const res: AvaChatResponse = await runLlmTask(() =>
         api.ava.chatWithActivity(
@@ -248,12 +251,24 @@ export function AvaChatPanel({
         revised: res.reflection.revised,
         proposedActions: res.proposedActions ?? [],
       }])
+      trackProductEvent('ava_chat_completed', {
+        duration_ms: Date.now() - startedAt,
+        conversation_id: res.conversationId,
+        tokens_total: res.usage.tokensTotal,
+        provider: res.provider,
+        tier: res.tier,
+      }, { patientId })
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : String(e)
       if (errMsg.includes('402') || errMsg.includes('Franquia') || errMsg.includes('LLM_QUOTA')) {
+        trackProductEvent('ava_quota_blocked', { error_code: 'LLM_QUOTA_EXCEEDED' }, { patientId })
         message.error(t('ava.quotaExhausted'))
         loadQuota()
       } else {
+        trackProductEvent('ava_chat_failed', {
+          duration_ms: Date.now() - startedAt,
+          error_code: errMsg.slice(0, 64),
+        }, { patientId })
         message.error(errMsg)
       }
     } finally {

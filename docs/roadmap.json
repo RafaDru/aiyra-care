@@ -1440,20 +1440,20 @@
       "priority": "P1",
       "title": "Observabilidade e monitoramento proativo",
       "summary": "Saúde sistema + eventos de produto sem PHI + alertas. Operação autônoma. docs/OBSERVABILITY.md.",
-      "status": "planned",
-      "statusLabel": "Planejado",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
       "items": [
         {
           "id": "obs-product-events",
           "title": "Tabela product_events + API ingest",
-          "status": "planned",
-          "detail": "event_name, account_id, properties allowlist; sem texto clínico."
+          "status": "done",
+          "detail": "Migration 049; POST /telemetry/events; allowlist properties."
         },
         {
           "id": "obs-web-tracker",
           "title": "trackProductEvent no web",
-          "status": "planned",
-          "detail": "Ava, sync, billing, hygiene, onboarding."
+          "status": "done",
+          "detail": "Ava chat/quota/hook/G3; sync_job_terminal via SSE paciente."
         },
         {
           "id": "obs-llm-dashboard-sql",

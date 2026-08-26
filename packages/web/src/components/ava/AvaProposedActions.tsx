@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../../lib/api.js'
 import type { AvaProposedAction } from '../../lib/api.types.js'
 import { requestClinicalExportOpen } from '../../lib/clinical-export-bus.js'
+import { trackProductEvent } from '../../lib/product-events.js'
 
 interface Props {
   patientId: string
@@ -31,6 +32,10 @@ export function AvaProposedActions({ patientId, actions, onDone }: Props) {
         requestClinicalExportOpen({ patientId, mode })
       }
       message.success(result.message)
+      trackProductEvent('ava_proposed_action_executed', {
+        action_type: action.type,
+        status: result.ok ? 'ok' : 'skipped',
+      }, { patientId })
       onDone?.()
     } catch (e) {
       message.error(e instanceof Error ? e.message : t('common.error'))

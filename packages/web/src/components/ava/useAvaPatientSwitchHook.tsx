@@ -3,6 +3,7 @@ import { Button, Modal } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { AvaSessionPin, Patient } from '../../lib/api.types.js'
+import { trackProductEvent } from '../../lib/product-events.js'
 import type { AvaEntityPin } from '../../lib/ava-dock-bus.js'
 
 function pinToEntity(pin: AvaSessionPin): AvaEntityPin {
@@ -65,7 +66,13 @@ export function useAvaPatientSwitchHook({
   }
 
   const applyKeepPins = () => {
-    if (pendingPatientId) onApplyPatientChange(pendingPatientId)
+    if (pendingPatientId) {
+      trackProductEvent('ava_patient_switch_hook', {
+        accepted: true,
+        hook: 'keep_pins',
+      }, { patientId: currentPatientId })
+      onApplyPatientChange(pendingPatientId)
+    }
     closeModal()
   }
 
@@ -79,7 +86,14 @@ export function useAvaPatientSwitchHook({
         // segue com troca de lente
       }
     }
-    applyKeepPins()
+    if (pendingPatientId) {
+      trackProductEvent('ava_patient_switch_hook', {
+        accepted: false,
+        hook: 'remove_pins',
+      }, { patientId: currentPatientId })
+      onApplyPatientChange(pendingPatientId)
+    }
+    closeModal()
   }
 
   const patientSwitchModal = (

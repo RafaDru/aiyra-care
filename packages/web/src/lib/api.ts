@@ -308,6 +308,21 @@ export const api = {
         { method: 'POST', body: JSON.stringify(body) },
       ),
   },
+  telemetry: {
+    track: (body: {
+      events: Array<{
+        eventName: import('./api.types.js').ProductEventName
+        sessionId?: string
+        route?: string
+        patientId?: string
+        properties?: Record<string, unknown>
+      }>
+    }) =>
+      request<{ accepted: number; rejected: number }>('/telemetry/events', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+  },
   llm: {
     quota: () => request<import('./api.types.js').LlmUsageQuota>('/llm/usage/quota'),
   },

@@ -10,7 +10,7 @@
 |-------|----------------|------|
 | **Saúde do sistema** | API, DB, Neo4j, workers, Stripe webhook | Health, alertas GCP |
 | **Operação clínica** | Sync jobs, OCR, LLM cascade failures | `sync_jobs`, `llm_usage_events` |
-| **Produto / comportamento** | Onde o usuário trava, abandona, esgota franquia | `product_events` (planejado) |
+| **Produto / comportamento** | Onde o usuário trava, abandona, esgota franquia | `product_events` |
 | **Custo** | Tokens LLM, créditos, Stripe | `llm_usage_events`, billing |
 
 ## Filosofia: proativo vs reativo
@@ -36,23 +36,24 @@ Proativo    → alerta: 100% cascade LLM falhou 5 min
 
 **Lacuna:** não há **eventos de produto** unificados (cliques, abandono de fluxo, hooks Ava, tempo em tela).
 
-## Camada planejada: `product_events`
-
-Migration futura (épico `observability-platform`):
+## Camada `product_events` (migration 049)
 
 ```sql
--- esboço — não aplicado ainda
 product_events (
   id UUID,
-  account_id UUID NULL,      -- null = anon pré-login se existir
-  session_id VARCHAR(64),    -- browser session, não PHI
-  event_name VARCHAR(64),    -- ava_chat_sent, sync_started, hygiene_dismissed
+  account_id UUID NULL,
+  session_id VARCHAR(64),
+  event_name VARCHAR(64),
   route VARCHAR(128),
-  patient_id UUID NULL,      -- opcional; não logar texto
-  properties JSONB,            -- sem conteúdo clínico; ex: { hook: 'patient_switch', accepted: true }
+  patient_id UUID NULL,
+  properties JSONB,
   created_at TIMESTAMPTZ
 )
 ```
+
+**API:** `POST /telemetry/events` (auth) — batch até 25 eventos; allowlist de `event_name` e chaves em `properties` (`product-event.ts`).
+
+**Web:** `trackProductEvent(name, props, { patientId })` em `packages/web/src/lib/product-events.ts`.
 
 **Regras de `properties`:**
 
@@ -157,5 +158,6 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 ## Estado atual
 
 - Telemetria LLM e sync parcial em PG.
-- Sem `product_events`, sem alertas automatizados além GCP budget.
+- `product_events` + ingest web (Ava, sync terminal, G3).
+- Sem alertas automatizados além GCP budget.
 - Smoke tests: `test:smoke:llm`, `test:smoke:billing`, `test:critical`.

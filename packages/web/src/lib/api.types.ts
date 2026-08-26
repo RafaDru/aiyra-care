@@ -633,6 +633,22 @@ export interface AvaContextSuggestion {
   kind: 'patient' | 'recent_exams' | 'health_threads'
 }
 
+export type ProductEventName =
+  | 'ava_chat_started'
+  | 'ava_chat_completed'
+  | 'ava_chat_failed'
+  | 'ava_quota_blocked'
+  | 'ava_context_pin'
+  | 'ava_context_unpin'
+  | 'ava_patient_switch_hook'
+  | 'ava_proposed_action_executed'
+  | 'sync_job_terminal'
+  | 'billing_checkout_started'
+  | 'billing_checkout_completed'
+  | 'hygiene_prompt_shown'
+  | 'hygiene_resolved'
+  | 'onboarding_step'
+
 export interface AvaConversation {
   id: string
   accountId: string
