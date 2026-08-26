@@ -1,5 +1,6 @@
 import { createWorkerPool, loadMonorepoEnv } from './env.js'
 import { startConnectWorkerLoop } from '../../api/src/infrastructure/sync/connect-worker.runner.js'
+import { runOpsAlertsCheck } from './ops-alerts.js'
 
 loadMonorepoEnv()
 
@@ -17,8 +18,23 @@ const worker = startConnectWorkerLoop(pool, intervalMs)
 
 console.log(`[connect-worker] running scheduled sync every ${intervalMs}ms`)
 
+const opsAlertsIntervalMs = Number(process.env.OPS_ALERTS_INTERVAL_MS ?? '0')
+let opsAlertsTimer: ReturnType<typeof setInterval> | undefined
+
+if (Number.isFinite(opsAlertsIntervalMs) && opsAlertsIntervalMs > 0) {
+  const tick = () => {
+    runOpsAlertsCheck(pool)
+      .then((result) => console.log('[connect-worker] ops-alerts', JSON.stringify(result)))
+      .catch((err) => console.error('[connect-worker] ops-alerts failed', err instanceof Error ? err.message : err))
+  }
+  opsAlertsTimer = setInterval(tick, opsAlertsIntervalMs)
+  setTimeout(tick, 10_000)
+  console.log(`[connect-worker] ops alerts every ${opsAlertsIntervalMs}ms (single-instance; prefer over API loop in prod)`)
+}
+
 async function shutdown(signal: string) {
   console.log(`[connect-worker] ${signal} — stopping`)
+  if (opsAlertsTimer) clearInterval(opsAlertsTimer)
   worker.stop()
   await pool.end()
   process.exit(0)

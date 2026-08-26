@@ -80,7 +80,9 @@ product_events (
 | `hygiene_prompt_shown` / `resolved` | Dedup (API + futura UI) |
 | `onboarding_step` | Onde trava onboarding |
 
-**Alertas externos:** `OPS_ALERT_WEBHOOK_URL` (Slack-compatible) · `npm run ops:alerts-check` · loop `OPS_ALERTS_INTERVAL_MS`.
+**Alertas externos:** `OPS_ALERT_WEBHOOK_URL` (Slack-compatible) · `npm run ops:alerts-check` · loop `OPS_ALERTS_INTERVAL_MS` no **connect-worker** (preferido) ou cron.
+
+**Produção:** checklist em `docs/infra/OPS_ALERTS_PRODUCTION.md` · setup `npm run setup:ops-alerts` · smoke `npm run ops:smoke`.
 
 **Fingerprints:** `errorFingerprints24h` em `GET /ops/metrics` — agrupa `product_events` por erro/status (24h).
 
@@ -168,7 +170,11 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 
 ## Estado atual
 
-- Telemetria LLM e sync parcial em PG.
-- `product_events` + ingest web (Ava, sync terminal, G3).
-- Sem alertas automatizados além GCP budget.
-- Smoke tests: `test:smoke:llm`, `test:smoke:billing`, `test:critical`.
+- `product_events` + ingest web/API (Ava, sync, billing, onboarding, higiene).
+- Métricas e alertas: `GET /ops/metrics`, `GET /ops/alerts`, CLI `ops:metrics`, dispatch webhook.
+- Auth ops: `OPS_METRICS_KEY` + header `x-internal-ops-key` (sem JWT).
+- Agendamento: connect-worker, Task Scheduler (`setup-ops-alerts.ps1`), ou cron Linux.
+- Logs sanitizados (Pino redact).
+- GCP billing budgets: `docs/infra/GCP_BILLING_ALERTS.md`.
+- Smoke: `npm run ops:smoke`, `test:smoke:llm`, `test:smoke:billing`, `test:critical`.
+- Pendente fase 2: Grafana/Better Stack dashboard.

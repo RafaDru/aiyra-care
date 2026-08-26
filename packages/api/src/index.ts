@@ -209,7 +209,10 @@ const start = async () => {
           app.log.warn({ err: err instanceof Error ? err.message : String(err) }, 'ops alerts dispatch failed')
         })
       }, opsAlertsIntervalMs)
-      app.log.info({ opsAlertsIntervalMs }, 'OPS_ALERTS_INTERVAL_MS loop enabled')
+      app.log.info(
+        { opsAlertsIntervalMs },
+        'OPS_ALERTS_INTERVAL_MS loop enabled — use connect-worker or cron se API tem múltiplas réplicas',
+      )
     }
 
     await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' })

@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
-    "once": "tsx src/run-once.ts"
+    "once": "tsx src/run-once.ts",
+    "ops-alerts:once": "tsx src/ops-alerts-once.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

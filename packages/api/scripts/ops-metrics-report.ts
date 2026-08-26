@@ -65,6 +65,13 @@ async function main() {
       console.log(`  ${job.jobId} ${job.portalType} ${job.minutesRunning}min`)
     }
   }
+  if (metrics.errorFingerprints24h?.length) {
+    console.log('')
+    console.log('Error fingerprints 24h:')
+    for (const fp of metrics.errorFingerprints24h.slice(0, 10)) {
+      console.log(`  ${fp.eventName}/${fp.status}: ${fp.count}`)
+    }
+  }
   console.log('')
   console.log('Product events 1h: completed=%d failed=%d quota_blocked=%d',
     metrics.productEvents.last1h.avaChatCompleted,

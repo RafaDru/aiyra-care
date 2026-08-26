@@ -5,6 +5,7 @@ import { PatientMembershipPgRepository } from '../../persistence/app-account.pg.
 import { createAuthHook, type AuthenticatedRequest } from './auth.middleware.js'
 import { getLegalComplianceService } from '../legal-compliance/legal-compliance.routes.js'
 import { isComplianceExemptPath, isComplianceGateEnabled } from '../legal-compliance/compliance-gate.js'
+import { isOpsKeyAuthorized, isOpsRoute } from '../ops/ops-auth.js'
 
 const PUBLIC_PATHS = new Set(['/health', '/health/db'])
 
@@ -32,6 +33,8 @@ export async function registerSecurityPlugin(app: FastifyInstance, authService: 
   app.addHook('onRequest', async (request, reply: FastifyReply) => {
     const path = normalizePath(request.url)
     if (PUBLIC_PATHS.has(path) || path.startsWith('/auth/') || path.startsWith('/clinical-export/share/') || path.startsWith('/calendar/google/oauth/callback') || path.startsWith('/calendar/microsoft/oauth/callback') || isPublicCompliancePath(path) || path === '/billing/webhook') return
+
+    if (isOpsRoute(path) && isOpsKeyAuthorized(request as AuthenticatedRequest)) return
 
     await requireAuth(request as AuthenticatedRequest, reply)
     if (reply.sent) return

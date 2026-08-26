@@ -95,6 +95,9 @@ There is **no top-level lint or typecheck** — root `npm run lint` is a no-op (
 | `SYNC_MIN_INTERVAL_MS` | `1800000` (30 min) | Skip sync if last OK job recent (unless `force=1`) |
 | `SYNC_SCHEDULED_INTERVAL_MS` | `0` (off) | Built-in scheduled loop (use `0` with external worker) |
 | `CONNECT_WORKER_EXTERNAL` | `0` | `1` disables built-in loop — run `packages/connect-worker` |
+| `OPS_METRICS_KEY` | — | Protege `GET /ops/metrics` e `/ops/alerts`; header `x-internal-ops-key` |
+| `OPS_ALERT_WEBHOOK_URL` | — | Slack webhook; `npm run ops:alerts-check`; ver `docs/infra/OPS_ALERTS_PRODUCTION.md` |
+| `OPS_ALERTS_INTERVAL_MS` | `0` | Loop alertas no connect-worker (preferido) ou API single-instance |
 | `VITE_SILENT_SYNC_STALE_MS` | `21600000` (6h) | Web auto silent sync on Carteira open **only with `sessionReady`** |
 
 ### Key files per integration

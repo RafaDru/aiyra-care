@@ -14,6 +14,11 @@
     "test": "echo 'tests'",
     "connect-worker": "cd packages/connect-worker && npm run start",
     "connect-worker:once": "cd packages/connect-worker && npm run once",
+    "connect-worker:ops-alerts": "cd packages/connect-worker && npm run ops-alerts:once",
+    "ops:metrics": "cd packages/api && npm run ops:metrics",
+    "ops:alerts-check": "cd packages/api && npm run ops:alerts-check",
+    "ops:smoke": "cd packages/api && npm run ops:smoke",
+    "setup:ops-alerts": "powershell -File scripts/setup-ops-alerts.ps1",
     "neo4j-lineage-worker": "cd packages/neo4j-lineage-worker && npm run start",
     "neo4j-lineage-worker:once": "cd packages/neo4j-lineage-worker && npm run once",
     "neo4j-lineage-worker:backfill": "cd packages/neo4j-lineage-worker && npm run backfill"
