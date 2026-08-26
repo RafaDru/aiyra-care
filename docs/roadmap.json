@@ -1440,8 +1440,8 @@
       "priority": "P1",
       "title": "Observabilidade e monitoramento proativo",
       "summary": "Saúde sistema + eventos de produto sem PHI + alertas. Operação autônoma. docs/OBSERVABILITY.md.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Completo",
       "items": [
         {
           "id": "obs-product-events",
@@ -1453,7 +1453,7 @@
           "id": "obs-web-tracker",
           "title": "trackProductEvent no web",
           "status": "done",
-          "detail": "Ava chat/quota/hook/G3; sync_job_terminal via SSE paciente."
+          "detail": "Ava chat/quota/hook/G3/sync; billing/higiene/onboarding pendentes no tracker."
         },
         {
           "id": "obs-llm-dashboard-sql",
@@ -1482,8 +1482,8 @@
         {
           "id": "obs-log-sanitization",
           "title": "Revisão logs sem PHI",
-          "status": "planned",
-          "detail": "Fastify; não logar body ava/chat/documentos.",
+          "status": "done",
+          "detail": "Pino redact + hooks + serializers; log-sanitization.ts; testes.",
           "reviewBadge": ["security"]
         }
       ]

@@ -25,8 +25,10 @@ if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GCP_SERVICE_ACCOU
     if (existsSync(fromRoot)) process.env.GOOGLE_APPLICATION_CREDENTIALS = fromRoot
   }
 }
+import { createApiLoggerConfig } from './infrastructure/http/log-sanitization.js'
+
 const app = Fastify({
-  logger: true,
+  logger: createApiLoggerConfig(),
   rewriteUrl: (req) => req.url ?? '/',
 })
 
@@ -78,6 +80,9 @@ app.get('/health/db', async () => {
 })
 
 async function registerRoutes() {
+  const { registerLogSanitizationPlugin } = await import('./infrastructure/http/log-sanitization.plugin.js')
+  await registerLogSanitizationPlugin(app)
+
   const { getAuthService } = await import('./infrastructure/http/auth/auth.routes.js')
   const { registerSecurityPlugin } = await import('./infrastructure/http/auth/security.plugin.js')
   const authService = getAuthService()

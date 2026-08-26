@@ -145,7 +145,7 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 
 | Camada | Prática |
 |--------|---------|
-| Logs API | Fastify logger — não logar body de `/ava/chat`, documentos |
+| Logs API | Fastify/pino — `log-sanitization.ts`: redact + serializers sem body; rotas sensíveis marcadas |
 | `product_events` | allowlist de keys em `properties` |
 | `llm_usage_events.metadata` | reflexão ok; sem prompt completo |
 | Export ops | só `BILLING_EXPORT_ACCOUNT_IDS` |
