@@ -1216,8 +1216,8 @@
       "priority": "P1",
       "title": "Ava companheira — conversas persistidas (conta global)",
       "summary": "Ava global na conta; histórico servidor; retomar sessões; LGPD; base para pins e grafo. Ver docs/AVA_VISION.md.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "ava-conv-migration",
