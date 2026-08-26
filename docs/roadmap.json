@@ -1458,20 +1458,20 @@
         {
           "id": "obs-llm-dashboard-sql",
           "title": "Queries p50/p95 tokens Ava",
-          "status": "planned",
-          "detail": "llm_usage_events; script ou GET /ops/metrics admin."
+          "status": "done",
+          "detail": "GET /ops/metrics + npm run ops:metrics; llm_usage_events feature=ava_chat."
         },
         {
           "id": "obs-sync-alerts",
           "title": "Alertas sync stuck / fail rate",
-          "status": "planned",
-          "detail": "sync_jobs; integrar GCP ou runbook."
+          "status": "done",
+          "detail": "GET /ops/alerts: stuck jobs, fail rate 24h por portal; evaluateOpsAlerts."
         },
         {
           "id": "obs-llm-cascade-alert",
           "title": "Alerta cascata LLM 100% fail",
-          "status": "planned",
-          "detail": "Proativo antes de usuário reportar."
+          "status": "done",
+          "detail": "product_events 5m: falhas Ava sem sucesso + quota spike 1h."
         },
         {
           "id": "obs-doc",

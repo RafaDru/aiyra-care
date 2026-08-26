@@ -55,6 +55,13 @@ product_events (
 
 **Web:** `trackProductEvent(name, props, { patientId })` em `packages/web/src/lib/product-events.ts`.
 
+### Métricas ops
+
+- `GET /ops/metrics` — Ava p50/p95 tokens, sync por portal, alertas derivados.
+- `GET /ops/alerts` — só alertas ativos.
+- Header `x-internal-ops-key` quando `OPS_METRICS_KEY` ou `LLM_INTERNAL_OBSERVABILITY_KEY` definido.
+- CLI: `npm run ops:metrics`.
+
 **Regras de `properties`:**
 
 - ✅ duração, contagem, feature flags, error codes, `conversation_id`
@@ -101,8 +108,8 @@ Distinto de:
 
 Implementação incremental:
 
-1. Scripts cron / worker lê PG e emite métricas.
-2. GCP Cloud Monitoring ou simples `GET /ops/metrics` (admin key).
+1. Scripts cron / worker lê PG e emite métricas — `npm run ops:metrics`.
+2. `GET /ops/metrics` e `GET /ops/alerts` (header `x-internal-ops-key` = `OPS_METRICS_KEY` ou `LLM_INTERNAL_OBSERVABILITY_KEY`).
 3. Depois: Grafana / Better Stack.
 
 ## LLM interno (custo operacional) — indicadores
