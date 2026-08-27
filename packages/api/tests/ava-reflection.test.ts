@@ -4,6 +4,7 @@ import {
   parseAvaCritiqueJson,
   mergeTokenUsages,
   combineReflectionOutcome,
+  shouldSkipLlmCritique,
 } from '../src/domain/llm/ava-reflection.js'
 import type { FamilySupportInsight } from '../src/domain/family-support/family-support.types.js'
 
@@ -62,5 +63,11 @@ describe('ava-reflection', () => {
     )
     expect(outcome.satisfactory).toBe(true)
     expect(outcome.attempts).toBe(2)
+  })
+
+  it('skips LLM critique when deterministic ok and reply not too long', () => {
+    const ok = { issues: [] as string[], severity: 'ok' as const }
+    expect(shouldSkipLlmCritique(ok, 'Resposta curta e adequada.', 'últimas vacinas?')).toBe(true)
+    expect(shouldSkipLlmCritique(ok, 'x'.repeat(3000), 'últimas vacinas?')).toBe(false)
   })
 })

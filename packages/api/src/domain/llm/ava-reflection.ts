@@ -48,6 +48,29 @@ export function avaReflectionMaxRevisions(): number {
   return Number.isFinite(n) ? Math.max(0, Math.min(2, Math.floor(n))) : 1
 }
 
+/** Pula 2ª chamada LLM de crítica quando regras determinísticas passaram (latência + tokens). */
+export function shouldSkipLlmCritique(
+  deterministic: { issues: string[]; severity: AvaReflectionSeverity },
+  reply: string,
+  userMessage: string,
+): boolean {
+  const force = process.env.AVA_ALWAYS_CRITIQUE?.trim() === '1'
+  if (force) return false
+  const skipWhenOk = process.env.AVA_SKIP_CRITIQUE_WHEN_OK?.trim() !== '0'
+  if (!skipWhenOk) return false
+  if (deterministic.severity !== 'ok' || deterministic.issues.length > 0) return false
+  if (EMERGENCY_USER_KEYWORDS.test(userMessage)) return false
+  const longReplyChars = Number(process.env.AVA_CRITIQUE_MIN_REPLY_CHARS ?? 2800)
+  if (reply.length >= longReplyChars) return false
+  return true
+}
+
+function clipContext(text: string, max = 2800): string {
+  const t = text.trim()
+  if (t.length <= max) return t
+  return `${t.slice(0, max)}… [contexto truncado para crítica]`
+}
+
 export function estimateAvaTurnTokenReserve(baseReserve: number): number {
   if (!isAvaReflectionEnabled()) return baseReserve
   const multiplier = Number(process.env.AVA_REFLECTION_RESERVE_MULTIPLIER ?? 2.5)
@@ -175,7 +198,7 @@ export function buildCritiqueUserPrompt(
 ${userMessage}
 
 Contexto determinístico do prontuário:
-${contextBlock}
+${clipContext(contextBlock)}
 
 Resposta proposta da Ava:
 ${proposedReply}

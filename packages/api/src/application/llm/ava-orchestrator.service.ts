@@ -15,14 +15,17 @@ import {
   estimateAvaTurnTokenReserve,
   isAvaReflectionEnabled,
   avaReflectionMaxRevisions,
+  shouldSkipLlmCritique,
   mergeTokenUsages,
   parseAvaCritiqueJson,
   validateAvaReplyDeterministic,
   type AvaCritiqueResult,
   type AvaReflectionOutcome,
 } from '../../domain/llm/ava-reflection.js'
-import type { AvaActivityEmitter, AvaActivityEvent } from '../../domain/llm/ava-activity.js'
-import { emitAvaActivity } from '../../domain/llm/ava-activity.js'
+import {
+  EXAM_INTENT_RE,
+  VACCINE_INTENT_RE,
+} from '../../domain/llm/ava-context-aggregate.js'
 
 const AVA_SYSTEM_BASE = `Você é Ava, agente virtual de apoio familiar do AiyraCare.
 Regras obrigatórias:
@@ -97,6 +100,8 @@ export class AvaOrchestratorService {
     const trimmed = input.message.trim()
     if (!trimmed) throw new Error('Mensagem vazia')
 
+    const compoundQuestion = VACCINE_INTENT_RE.test(trimmed) && EXAM_INTENT_RE.test(trimmed)
+
     const insightBlock = input.bundle.insights.length
       ? input.bundle.insights.map((i) => `[${i.priority}] ${i.title}: ${i.message}`).join('\n')
       : 'Sem alertas determinísticos no momento.'
@@ -121,7 +126,13 @@ Mensagem atual do responsável: ${trimmed}`
       .map((h) => ({ role: h.role, content: h.content }))
 
     const baseMessages: LlmMessage[] = [
-      { role: 'system', content: buildAvaSystemPrompt(input.clinicianLabel, input.caregiverFirstName) },
+      {
+        role: 'system',
+        content: buildAvaSystemPrompt(input.clinicianLabel, input.caregiverFirstName)
+          + (compoundQuestion
+            ? '\n- A mensagem pede MAIS DE UM tópico: responda com clareza mas evite repetir tabelas gigantes; priorize o que foi perguntado.'
+            : ''),
+      },
       ...historyMessages,
       { role: 'user', content: contextUser },
     ]
@@ -166,30 +177,36 @@ Mensagem atual do responsável: ${trimmed}`
       if (deterministic.severity !== 'critical' && deterministic.issues.length === 0) {
         steps.push('verificação por regras ok')
         emit('reflection.rules_ok', 'reflection', 'done')
-        const critiqueMessages: LlmMessage[] = [
-          { role: 'system', content: AVA_CRITIQUE_SYSTEM },
-          {
-            role: 'user',
-            content: buildCritiqueUserPrompt(
-              trimmed,
-              `${input.patientContextBlock}\n\nAlertas:\n${insightBlock}`,
-              reply,
-              deterministic.issues,
-            ),
-          },
-        ]
-        attempts += 1
-        steps.push('crítica de qualidade')
-        emit('reflection.quality_critique', 'reflection', 'start')
-        const critiqueCompletion = await this.router.completeJson(critiqueMessages, tier, routerOpts)
-        emit('reflection.quality_critique', 'reflection', 'done')
-        usages.push(critiqueCompletion.usage)
-        critique = parseAvaCritiqueJson(critiqueCompletion.text)
-        if (!critique) {
-          const fallback: AvaCritiqueResult = { satisfactory: true, issues: [], severity: 'ok' }
-          critique = fallback
-          steps.push('crítica LLM inválida — mantida resposta')
-          emit('reflection.critique_invalid', 'reflection', 'done')
+        if (shouldSkipLlmCritique(deterministic, reply, trimmed)) {
+          critique = { satisfactory: true, issues: [], severity: 'ok' }
+          steps.push('crítica LLM omitida (regras ok)')
+          emit('reflection.quality_critique', 'reflection', 'skip')
+        } else {
+          const critiqueMessages: LlmMessage[] = [
+            { role: 'system', content: AVA_CRITIQUE_SYSTEM },
+            {
+              role: 'user',
+              content: buildCritiqueUserPrompt(
+                trimmed,
+                `${input.patientContextBlock}\n\nAlertas:\n${insightBlock}`,
+                reply,
+                deterministic.issues,
+              ),
+            },
+          ]
+          attempts += 1
+          steps.push('crítica de qualidade')
+          emit('reflection.quality_critique', 'reflection', 'start')
+          const critiqueCompletion = await this.router.completeJson(critiqueMessages, tier, routerOpts)
+          emit('reflection.quality_critique', 'reflection', 'done')
+          usages.push(critiqueCompletion.usage)
+          critique = parseAvaCritiqueJson(critiqueCompletion.text)
+          if (!critique) {
+            const fallback: AvaCritiqueResult = { satisfactory: true, issues: [], severity: 'ok' }
+            critique = fallback
+            steps.push('crítica LLM inválida — mantida resposta')
+            emit('reflection.critique_invalid', 'reflection', 'done')
+          }
         }
       } else {
         steps.push('regras detectaram problemas — revisão direta')
