@@ -67,4 +67,25 @@ describe('AvaProposedActionService.detectProposals', () => {
     const proposals = await svc.detectProposals('acc', 'pat-1', 'Preciso exportar o prontuário em PDF')
     expect(proposals.some((p) => p.type === 'clinical_export')).toBe(true)
   })
+
+  it('detects hygiene merge after assistant duplicate hint + user confirm', async () => {
+    const hygieneRepo = {
+      listForAccount: vi.fn(async () => [{
+        id: 'cand-1',
+        entityType: 'vaccine',
+        detector: 'vaccine_catalog_slot',
+        evidence: { vaccineName: 'DNG', applicationDate: '2026-01-16' },
+      }]),
+    }
+    const svc = new AvaProposedActionService(
+      { findAllByPatient: vi.fn(), findById: vi.fn() } as never,
+      hygieneRepo as never,
+      hygieneService as never,
+      syncService as never,
+    )
+    const assistant = '3 registros no prontuário (possível duplicidade)'
+    const user = 'Pode averiguada nas vacinas, manter só uma referência'
+    const proposals = await svc.detectProposals('acc', 'pat-1', user, { recentAssistantText: assistant })
+    expect(proposals.some((p) => p.type === 'hygiene_merge' && p.label.includes('vacina'))).toBe(true)
+  })
 })

@@ -98,7 +98,7 @@ export class AvaChatService {
         loadPatientContext: async (patientId) => {
           const row = compactPrompt
             ? await this.patientContext.buildMinimalContextBlock(patientId)
-            : await this.patientContext.buildContextBlock(patientId)
+            : await this.patientContext.buildContextBlock(patientId, { userMessage: input.message })
           return {
             block: row.block,
             clinicianLabel: row.clinicianLabel,
@@ -172,10 +172,14 @@ export class AvaChatService {
 
     let proposedActions: import('../../domain/llm/ava-proposed-action.js').AvaProposedAction[] = []
     if (input.accountId && this.proposedActions) {
+      const lastAssistant = serverHistory
+        ?.filter((m) => m.role === 'assistant')
+        .slice(-1)[0]?.content
       proposedActions = await this.proposedActions.detectProposals(
         input.accountId,
         input.patientId,
         input.message,
+        { recentAssistantText: lastAssistant },
       )
     }
 

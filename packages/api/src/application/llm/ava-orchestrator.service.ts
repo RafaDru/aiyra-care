@@ -40,7 +40,7 @@ Formato das respostas (renderizamos markdown):
 - Estruture respostas longas com subtítulos curtos (### ) e listas numeradas para passos.
 - Emojis só quando trouxerem acolhimento genuíno (máx. 1 por resposta).
 - Para navegar no app, use links markdown com os caminhos do bloco NAVEGAÇÃO (ex.: [Ver exames](/patients/...?section=clinical&tab=exams)).
-- Status de integrações/sync: use só o bloco INTEGRAÇÕES — não invente datas. Se o responsável pedir sincronizar/exportar/unificar duplicatas, explique o que faria e mencione que ações confirmadas aparecem como botões abaixo da resposta (G3).`
+- Status de integrações/sync: use só o bloco INTEGRAÇÕES — não invente datas. Se o responsável pedir sincronizar/exportar/unificar duplicatas, indique os botões G3 abaixo (unificar vacina/exame duplicado com confirmação).`
 
 export function buildAvaSystemPrompt(
   clinicianLabel: string,

@@ -12,6 +12,12 @@ import type { MeasurementRepository } from '../../domain/measurement/measurement
 import type { ExamResultItemRepository } from '../../domain/exam-result-item/exam-result-item.repository.js'
 import { NotFoundError } from '../../domain/errors.js'
 import { ageInYears } from '../../domain/patient/age-rules.js'
+import {
+  EXAM_INTENT_RE,
+  groupExamRows,
+  groupVaccineRows,
+  VACCINE_INTENT_RE,
+} from '../../domain/llm/ava-context-aggregate.js'
 
 const AGE_CATEGORY_PT: Record<string, string> = {
   children: 'criança',
@@ -59,7 +65,10 @@ export class AvaPatientContextService {
     private readonly examResultItems?: ExamResultItemRepository,
   ) {}
 
-  async buildContextBlock(patientId: string): Promise<{
+  async buildContextBlock(
+    patientId: string,
+    options?: { userMessage?: string },
+  ): Promise<{
     block: string
     patientName: string
     ageCategory: string
@@ -97,10 +106,18 @@ export class AvaPatientContextService {
       this.measurements.findObservations({ patientId }),
     ])
 
+    const userMessage = options?.userMessage?.trim() ?? ''
+    const vaccineOnly = userMessage && VACCINE_INTENT_RE.test(userMessage) && !EXAM_INTENT_RE.test(userMessage)
+    const examOnly = userMessage && EXAM_INTENT_RE.test(userMessage) && !VACCINE_INTENT_RE.test(userMessage)
+
     const activeMeds = medRows.filter((m) => m.isActive)
-    const recentExams = sortByDateDesc(examRows, (e) => e.examDate).slice(0, 20)
-    const recentRecords = sortByDateDesc(recordRows, (r) => r.recordDate).slice(0, 15)
-    const recentVaccines = sortByDateDesc(vaccineRows, (v) => v.applicationDate).slice(0, 10)
+    const vaccineSlice = vaccineOnly ? vaccineRows.length : 18
+    const examSlice = examOnly ? 25 : 20
+    const recentExams = sortByDateDesc(examRows, (e) => e.examDate).slice(0, examSlice)
+    const recentRecords = examOnly
+      ? sortByDateDesc(recordRows, (r) => r.recordDate).slice(0, 5)
+      : sortByDateDesc(recordRows, (r) => r.recordDate).slice(0, 15)
+    const recentVaccines = sortByDateDesc(vaccineRows, (v) => v.applicationDate).slice(0, vaccineSlice)
     const recentAuths = sortByDateDesc(
       authRows.filter((a) => a.authorizationDate),
       (a) => a.authorizationDate!,
@@ -118,7 +135,8 @@ export class AvaPatientContextService {
       if (list.length < 4) list.push(item)
       byMarker.set(key, list)
     }
-    const markerLines = [...byMarker.values()].slice(0, 30).map((items) => {
+    const markerLimit = examOnly ? 35 : vaccineOnly ? 12 : 30
+    const markerLines = [...byMarker.values()].slice(0, markerLimit).map((items) => {
       const latest = items[0]
       const ref = latest.referenceRange ? ` ref: ${latest.referenceRange}` : ''
       const history = items.length > 1
@@ -137,14 +155,19 @@ export class AvaPatientContextService {
       : '- Nenhum medicamento ativo registrado'
 
     const examLines = recentExams.length
-      ? recentExams.map((e) => {
+      ? groupExamRows(recentExams).map(({ items }) => {
+        const e = items[0]
         const parts = [
           formatDate(e.examDate),
           e.examType,
           e.laboratory ? `lab: ${e.laboratory}` : null,
         ].filter(Boolean)
         const summary = clip(e.resultSummary, 500) || clip(e.notes, 300)
-        return `- ${parts.join(' | ')}${summary ? `\n  Resultado/resumo: ${summary}` : '\n  (sem resumo textual no prontuário)'}`
+        const dup = items.length > 1 ? ` ×${items.length} registros (possível duplicidade)` : ''
+        const resultLine = summary
+          ? `\n  Resultado/resumo: ${summary}`
+          : '\n  (sem resumo textual no prontuário — laudo/marcadores podem estar pendentes)'
+        return `- ${parts.join(' | ')}${dup}${resultLine}`
       }).join('\n')
       : '- Nenhum exame registrado no prontuário'
 
@@ -174,7 +197,13 @@ export class AvaPatientContextService {
       : '- Nenhum diagnóstico registrado'
 
     const vaccineLines = recentVaccines.length
-      ? recentVaccines.map((v) => `- ${formatDate(v.applicationDate)} | ${v.vaccineName}${v.doseNumber ? ` dose ${v.doseNumber}` : ''}${v.clinic ? ` — ${v.clinic}` : ''}`).join('\n')
+      ? groupVaccineRows(recentVaccines).map(({ items }) => {
+        const v = items[0]
+        const dose = v.doseNumber ? ` dose ${v.doseNumber}` : ''
+        const clinic = v.clinic ? ` — ${v.clinic}` : ''
+        const dup = items.length > 1 ? ` ×${items.length} registros (possível duplicidade)` : ''
+        return `- ${formatDate(v.applicationDate)} | ${v.vaccineName}${dose}${clinic}${dup}`
+      }).join('\n')
       : '- Nenhuma vacina registrada'
 
     const authLines = recentAuths.length

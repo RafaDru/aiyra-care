@@ -6,10 +6,13 @@ import type { IntegrationLinkSyncService } from '../integration-link/integration
 import type { IntegrationLink } from '../../domain/integration-link/integration-link.entity.js'
 import { isIntegrationLinkSessionReady } from '../integration-link/integration-link-session.js'
 import type { AvaActionExecuteInput, AvaProposedAction } from '../../domain/llm/ava-proposed-action.js'
+import {
+  formatHygieneCandidateDescription,
+  shouldOfferHygieneActions,
+} from '../../domain/llm/ava-context-aggregate.js'
 
 const SYNC_RE = /\b(sincroniz|sync|integra[cç][aã]o|portal|unimed|amil|mater|hermes|pardini)\b/i
 const EXPORT_RE = /\b(export|exportar|pdf|imprimir|compartilhar.*pront[uá]rio|relat[oó]rio cl[ií]nico)\b/i
-const HYGIENE_RE = /\b(duplicat|higieniz|mesmo exame|mesma vacina|unificar|merge)\b/i
 
 export class AvaProposedActionService {
   constructor(
@@ -23,6 +26,7 @@ export class AvaProposedActionService {
     accountId: string,
     patientId: string,
     userMessage: string,
+    opts?: { recentAssistantText?: string },
   ): Promise<AvaProposedAction[]> {
     const trimmed = userMessage.trim()
     if (!trimmed) return []
@@ -56,26 +60,34 @@ export class AvaProposedActionService {
       })
     }
 
-    if (HYGIENE_RE.test(trimmed)) {
+    if (shouldOfferHygieneActions(trimmed, opts?.recentAssistantText)) {
       const pending = await this.hygieneRepo.listForAccount(accountId, {
         status: 'pending',
         patientId,
-        limit: 3,
+        limit: 5,
       })
-      for (const row of pending) {
+      for (const row of pending.slice(0, 3)) {
+        const entityLabel = row.entityType === 'vaccine' ? 'vacina' : row.entityType
+        const description = formatHygieneCandidateDescription(
+          row.entityType,
+          row.evidence ?? {},
+          row.detector,
+        )
         proposals.push({
           id: randomUUID(),
           type: 'hygiene_merge',
-          label: 'Unificar duplicata',
-          description: row.reason ?? 'Marcar como mesmo registro',
+          label: `Unificar ${entityLabel} duplicada`,
+          description,
           payload: { candidateId: row.id, decision: 'same_entity' },
         })
+      }
+      if (pending.length > 0 && proposals.every((p) => p.type !== 'hygiene_dismiss')) {
         proposals.push({
           id: randomUUID(),
           type: 'hygiene_dismiss',
           label: 'Manter registros distintos',
-          description: 'Descartar sugestão de duplicata',
-          payload: { candidateId: row.id, decision: 'dismissed' },
+          description: 'Descartar sugestões de duplicata pendentes',
+          payload: { candidateId: pending[0].id, decision: 'dismissed' },
         })
       }
     }
