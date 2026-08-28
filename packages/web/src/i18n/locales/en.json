@@ -389,6 +389,10 @@
     "later": "Later",
     "openPatient": "Open chart",
     "resolveFailed": "Could not save: {{message}}",
+    "pendingBannerTitle": "{{count}} pending duplicates in the chart",
+    "pendingBannerBody": "Repeated vaccines or exams need your confirmation. Click Review to merge or keep separate.",
+    "reviewNow": "Review now",
+    "resolveSuccessWithRemaining": "Saved. {{remaining}} duplicates left to review.",
     "resolveSuccess": {
       "same_entity": "Records merged — duplicate marked in the chart.",
       "distinct": "Marked as distinct records.",

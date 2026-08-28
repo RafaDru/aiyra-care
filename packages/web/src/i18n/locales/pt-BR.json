@@ -389,6 +389,10 @@
     "later": "Depois",
     "openPatient": "Abrir prontuário",
     "resolveFailed": "Não foi possível salvar: {{message}}",
+    "pendingBannerTitle": "{{count}} duplicatas pendentes no prontuário",
+    "pendingBannerBody": "Vacinas ou exames repetidos aguardam sua confirmação. Clique em Revisar para unificar ou manter separados.",
+    "reviewNow": "Revisar agora",
+    "resolveSuccessWithRemaining": "Salvo. Restam {{remaining}} duplicatas para revisar.",
     "resolveSuccess": {
       "same_entity": "Registros unificados — duplicata marcada no prontuário.",
       "distinct": "Marcado como registros distintos.",

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Modal, Space, Typography, App } from 'antd'
+import { Alert, Button, Modal, Space, Typography, App } from 'antd'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
@@ -9,6 +9,12 @@ import { isHygienePromptSnoozed, snoozeHygienePrompt } from '../../lib/hygiene-p
 import { COMPLIANCE_ACCEPT_PATH } from '../../lib/legal-paths.js'
 
 const { Text, Paragraph } = Typography
+
+const CATALOG_SLOT_LABELS: Record<string, string> = {
+  'dengue:1': 'Dengue (dose 1)',
+  'pneumo10:1': 'Pneumo 10 (dose 1)',
+  'covid:1': 'Covid (dose 1)',
+}
 
 function formatDate(value: unknown): string | null {
   if (!value) return null
@@ -47,6 +53,10 @@ function formatEntityLine(
   return String(entity.id ?? t('hygiene.genericRecord'))
 }
 
+function formatCatalogSlot(slot: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
+  return CATALOG_SLOT_LABELS[slot] ?? t('hygiene.slotLabel', { slot })
+}
+
 function formatEvidenceSummary(
   item: HygieneCandidateItem,
   t: (key: string, opts?: Record<string, unknown>) => string,
@@ -57,7 +67,7 @@ function formatEvidenceSummary(
   if (evidence.vaccineName) parts.push(String(evidence.vaccineName))
   if (evidence.examType) parts.push(String(evidence.examType))
   if (evidence.applicationDate) parts.push(formatDate(evidence.applicationDate) ?? '')
-  if (evidence.catalogSlotKey) parts.push(t('hygiene.slotLabel', { slot: String(evidence.catalogSlotKey) }))
+  if (evidence.catalogSlotKey) parts.push(formatCatalogSlot(String(evidence.catalogSlotKey), t))
   const filtered = parts.filter(Boolean)
   return filtered.length ? filtered.join(' · ') : null
 }
@@ -100,6 +110,7 @@ export function HygieneLoginPrompt() {
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<HygieneCandidateItem[]>([])
+  const [pendingCount, setPendingCount] = useState(0)
   const [index, setIndex] = useState(0)
   const [resolving, setResolving] = useState(false)
 
@@ -107,6 +118,13 @@ export function HygieneLoginPrompt() {
   const entityTypeLabel = current
     ? t(`hygiene.entityTypes.${current.entityType}`, { defaultValue: current.entityType })
     : ''
+
+  const refreshCandidates = useCallback(async () => {
+    const res = await api.hygiene.listCandidates()
+    setPendingCount(res.pendingCount)
+    setItems(res.items)
+    return res
+  }, [])
 
   const closeAndMaybeSnooze = useCallback((snooze: boolean) => {
     setOpen(false)
@@ -116,40 +134,35 @@ export function HygieneLoginPrompt() {
   useEffect(() => {
     if (!configured || !user) return
     if (location.pathname === COMPLIANCE_ACCEPT_PATH) return
-    if (isHygienePromptSnoozed()) return
 
     let cancelled = false
-    api.hygiene.listCandidates()
+    refreshCandidates()
       .then((res) => {
         if (cancelled || res.pendingCount === 0 || res.items.length === 0) return
-        setItems(res.items)
-        setIndex(0)
-        setOpen(true)
+        if (!isHygienePromptSnoozed()) {
+          setIndex(0)
+          setOpen(true)
+        }
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [configured, user, location.pathname])
-
-  const advanceAfterResolve = useCallback((resolvedId: string, decision: 'same_entity' | 'distinct' | 'dismissed') => {
-    setItems((prev) => {
-      const remaining = prev.filter((item) => item.id !== resolvedId)
-      if (remaining.length === 0) {
-        setOpen(false)
-        message.success(t(`hygiene.resolveSuccess.${decision}`))
-      } else {
-        setIndex((i) => Math.min(i, remaining.length - 1))
-        message.success(t(`hygiene.resolveSuccess.${decision}`))
-      }
-      return remaining
-    })
-  }, [message, t])
+  }, [configured, user, location.pathname, refreshCandidates])
 
   const resolve = async (decision: 'same_entity' | 'distinct' | 'dismissed') => {
     if (!current || resolving) return
     setResolving(true)
     try {
       await api.hygiene.resolve(current.id, decision)
-      advanceAfterResolve(current.id, decision)
+      const res = await refreshCandidates()
+      if (res.pendingCount === 0) {
+        setOpen(false)
+        message.success(t(`hygiene.resolveSuccess.${decision}`))
+      } else {
+        setIndex(0)
+        message.success(t('hygiene.resolveSuccessWithRemaining', {
+          remaining: res.pendingCount,
+        }))
+      }
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : String(e)
       message.error(t('hygiene.resolveFailed', { message: errMsg }))
@@ -158,79 +171,109 @@ export function HygieneLoginPrompt() {
     }
   }
 
-  if (!current) return null
+  const openReview = () => {
+    setIndex(0)
+    setOpen(true)
+  }
 
-  const entityA = current.entityA ?? { id: current.entityIdA }
-  const entityB = current.entityB ?? { id: current.entityIdB }
-  const evidenceSummary = formatEvidenceSummary(current, t)
-  const progressLabel = t('hygiene.progressLabel', {
-    current: index + 1,
-    total: items.length,
-  })
+  const entityA = current ? (current.entityA ?? { id: current.entityIdA }) : {}
+  const entityB = current ? (current.entityB ?? { id: current.entityIdB }) : {}
+  const evidenceSummary = current ? formatEvidenceSummary(current, t) : null
+  const progressLabel = current
+    ? t('hygiene.progressLabel', { current: index + 1, total: items.length })
+    : ''
 
   return (
-    <Modal
-      open={open}
-      title={t('hygiene.loginPromptTitle')}
-      onCancel={() => closeAndMaybeSnooze(true)}
-      footer={null}
-      width={600}
-      destroyOnClose
-    >
-      <Paragraph type="secondary" style={{ marginBottom: 8 }}>
-        {t('hygiene.loginPromptBody', { count: items.length })}
-      </Paragraph>
-      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
-        {progressLabel}
-      </Text>
-      <div
-        style={{
-          marginBottom: 16,
-          padding: 12,
-          borderRadius: 8,
-          background: 'var(--surface-elevated, rgba(0,0,0,0.03))',
-        }}
-      >
-        <Text strong style={{ display: 'block' }}>
-          {t('hygiene.patientLabel', { name: current.patientName ?? t('hygiene.patientUnknown') })}
-        </Text>
-        <Text type="secondary" style={{ fontSize: 13 }}>
-          {t('hygiene.entityTypeLabel', { type: entityTypeLabel })}
-        </Text>
-        {evidenceSummary && (
-          <Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0, fontSize: 13 }}>
-            {evidenceSummary}
-          </Paragraph>
-        )}
-      </div>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <EntityCard label={t('hygiene.recordA')} entityType={current.entityType} entity={entityA} t={t} />
-        <EntityCard label={t('hygiene.recordB')} entityType={current.entityType} entity={entityB} t={t} />
-      </div>
-      {current.score > 0 && (
-        <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 16 }}>
-          {t('hygiene.similarityHint', { score: Math.round(current.score * 100) })}
-        </Text>
+    <>
+      {pendingCount > 0 && !open && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 72,
+            left: 236,
+            right: 24,
+            zIndex: 999,
+            maxWidth: 520,
+          }}
+        >
+          <Alert
+            type="warning"
+            showIcon
+            message={t('hygiene.pendingBannerTitle', { count: pendingCount })}
+            description={t('hygiene.pendingBannerBody')}
+            action={
+              <Button size="small" type="primary" onClick={openReview}>
+                {t('hygiene.reviewNow')}
+              </Button>
+            }
+          />
+        </div>
       )}
-      <Space wrap>
-        <Button type="primary" loading={resolving} onClick={() => resolve('same_entity')}>
-          {t('hygiene.sameEntity')}
-        </Button>
-        <Button loading={resolving} onClick={() => resolve('distinct')}>
-          {t('hygiene.distinct')}
-        </Button>
-        <Button loading={resolving} onClick={() => resolve('dismissed')}>
-          {t('hygiene.dismiss')}
-        </Button>
-        <Button type="link" onClick={() => closeAndMaybeSnooze(true)}>
-          {t('hygiene.later')}
-        </Button>
-      </Space>
-      <div style={{ marginTop: 12 }}>
-        <Link to={`/patients/${current.patientId}?section=clinical`}>
-          {t('hygiene.openPatient')}
-        </Link>
-      </div>
-    </Modal>
+      {open && current && (
+        <Modal
+          open={open}
+          title={t('hygiene.loginPromptTitle')}
+          onCancel={() => closeAndMaybeSnooze(true)}
+          footer={null}
+          width={600}
+          destroyOnClose
+        >
+          <Paragraph type="secondary" style={{ marginBottom: 8 }}>
+            {t('hygiene.loginPromptBody', { count: items.length })}
+          </Paragraph>
+          <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
+            {progressLabel}
+          </Text>
+          <div
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              borderRadius: 8,
+              background: 'var(--surface-elevated, rgba(0,0,0,0.03))',
+            }}
+          >
+            <Text strong style={{ display: 'block' }}>
+              {t('hygiene.patientLabel', { name: current.patientName ?? t('hygiene.patientUnknown') })}
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {t('hygiene.entityTypeLabel', { type: entityTypeLabel })}
+            </Text>
+            {evidenceSummary && (
+              <Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0, fontSize: 13 }}>
+                {evidenceSummary}
+              </Paragraph>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+            <EntityCard label={t('hygiene.recordA')} entityType={current.entityType} entity={entityA} t={t} />
+            <EntityCard label={t('hygiene.recordB')} entityType={current.entityType} entity={entityB} t={t} />
+          </div>
+          {current.score > 0 && (
+            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 16 }}>
+              {t('hygiene.similarityHint', { score: Math.round(current.score * 100) })}
+            </Text>
+          )}
+          <Space wrap>
+            <Button type="primary" loading={resolving} onClick={() => resolve('same_entity')}>
+              {t('hygiene.sameEntity')}
+            </Button>
+            <Button loading={resolving} onClick={() => resolve('distinct')}>
+              {t('hygiene.distinct')}
+            </Button>
+            <Button loading={resolving} onClick={() => resolve('dismissed')}>
+              {t('hygiene.dismiss')}
+            </Button>
+            <Button type="link" onClick={() => closeAndMaybeSnooze(true)}>
+              {t('hygiene.later')}
+            </Button>
+          </Space>
+          <div style={{ marginTop: 12 }}>
+            <Link to={`/patients/${current.patientId}?section=clinical`}>
+              {t('hygiene.openPatient')}
+            </Link>
+          </div>
+        </Modal>
+      )}
+    </>
   )
 }
