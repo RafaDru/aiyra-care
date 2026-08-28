@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Modal, Space, Typography, App } from 'antd'
+import { MergeCellsOutlined } from '@ant-design/icons'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
@@ -186,28 +187,24 @@ export function HygieneLoginPrompt() {
   return (
     <>
       {pendingCount > 0 && !open && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 72,
-            left: 236,
-            right: 24,
-            zIndex: 999,
-            maxWidth: 520,
-          }}
-        >
-          <Alert
-            type="warning"
-            showIcon
-            message={t('hygiene.pendingBannerTitle', { count: pendingCount })}
-            description={t('hygiene.pendingBannerBody')}
-            action={
+        <Alert
+          type="warning"
+          showIcon
+          icon={<MergeCellsOutlined />}
+          style={{ marginBottom: 16 }}
+          message={t('hygiene.pendingBannerTitle', { count: pendingCount })}
+          description={t('hygiene.pendingBannerBody')}
+          action={
+            <Space size="small" wrap>
               <Button size="small" type="primary" onClick={openReview}>
                 {t('hygiene.reviewNow')}
               </Button>
-            }
-          />
-        </div>
+              <Button size="small" type="link" onClick={() => closeAndMaybeSnooze(true)}>
+                {t('hygiene.later')}
+              </Button>
+            </Space>
+          }
+        />
       )}
       {open && current && (
         <Modal

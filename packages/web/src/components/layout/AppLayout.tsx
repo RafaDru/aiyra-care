@@ -161,10 +161,10 @@ export function AppLayout() {
           </div>
         </Header>
         <Content style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }}>
+          {configured && user && <HygieneLoginPrompt />}
           <Outlet />
         </Content>
       </Layout>
-      {configured && user && <HygieneLoginPrompt />}
       <AvaGlobalDock />
     </Layout>
   )
