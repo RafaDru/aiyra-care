@@ -1730,9 +1730,9 @@
       "category": "negocio",
       "priority": "P2",
       "title": "Site institucional / landing page",
-      "summary": "Página pública de apresentação do AiyraCare: problema que resolvemos, motivadores, como funciona, planos e preços, CTAs para login/cadastro. Copy e pricing finais pendentes — v1 com textos genéricos e telemetria para não perder funil.",
+      "summary": "Página pública de apresentação do AiyraCare: dores da família, showcases com fotos Unsplash + mockups de produto, funcionalidades disponíveis vs roadmap, planos placeholder e telemetria de funil.",
       "status": "in_progress",
-      "statusLabel": "V1 placeholder + tracking",
+      "statusLabel": "V2 marketing + mocks",
       "reviewBadge": ["content", "legal"],
       "items": [
         {
@@ -1772,6 +1772,36 @@
           "detail": "POST /telemetry/public-events sem auth; sessionId browser; sem PHI."
         },
         {
+          "id": "landing-stock-photos",
+          "title": "Fotos ilustrativas (Unsplash) + crédito no footer",
+          "status": "done",
+          "detail": "Hero e showcases com fotos gratuitas curadas; alt i18n; mockups declarados no footer."
+        },
+        {
+          "id": "landing-ui-mocks",
+          "title": "Mockups de produto (dashboard, Ava, timeline, gráfico, export)",
+          "status": "done",
+          "detail": "CSS mock browser frames; não substitui screenshots reais do app (planned)."
+        },
+        {
+          "id": "landing-copy-marketing-v2",
+          "title": "Copy marketing v2 (dores família + disponível vs roadmap)",
+          "status": "done",
+          "detail": "Problemas em linguagem de negócio; grid «disponível hoje»; teaser roadmap (agentes, go-live, screenshots)."
+        },
+        {
+          "id": "landing-integration-logos",
+          "title": "Categorias de integração (sem logos de terceiros)",
+          "status": "done",
+          "detail": "Pills genéricas (operadoras, labs, rede pública, calendários) + disclaimer de não endosso — sem marcas até parecer jurídico/marketing."
+        },
+        {
+          "id": "landing-real-screenshots",
+          "title": "Screenshots e vídeo demo do app real",
+          "status": "planned",
+          "detail": "Substituir mockups por capturas autenticadas do produto; opcional vídeo curto."
+        },
+        {
           "id": "landing-public-billing-offers",
           "title": "GET /billing/offers público (preços dinâmicos)",
           "status": "planned",
@@ -1791,9 +1821,9 @@
         },
         {
           "id": "landing-social-proof",
-          "title": "Prova social e casos de uso (família pediátrica)",
+          "title": "Prova social completa (testemunhos, métricas)",
           "status": "planned",
-          "detail": "Testemunhos, logos convênios, métricas — placeholder até marketing."
+          "detail": "Testemunhos de famílias, métricas de uso — logos já na faixa de integrações."
         },
         {
           "id": "landing-content-final",

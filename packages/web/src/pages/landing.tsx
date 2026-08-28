@@ -5,14 +5,24 @@ import {
   CalendarOutlined,
   CloudSyncOutlined,
   FileProtectOutlined,
-  MedicineBoxOutlined,
+  LineChartOutlined,
   RobotOutlined,
+  SafetyOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { AppLogo } from '../components/brand/AppLogo.js'
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher.js'
 import { ThemeSwitcher } from '../components/ui/ThemeSwitcher.js'
+import {
+  MockAvaChatPreview,
+  MockDashboardPreview,
+  MockExportPreview,
+  MockGrowthChartPreview,
+  MockTimelinePreview,
+} from '../components/landing/LandingProductMocks.js'
+import { LandingShowcaseSection } from '../components/landing/LandingShowcaseSection.js'
+import { LANDING_PHOTOS } from '../lib/landing-media.js'
 import { trackLandingEvent } from '../lib/landing-events.js'
 import './landing.css'
 
@@ -23,8 +33,8 @@ const FEATURE_ICONS = [
   FileProtectOutlined,
   RobotOutlined,
   CalendarOutlined,
-  MedicineBoxOutlined,
-  TeamOutlined,
+  LineChartOutlined,
+  SafetyOutlined,
 ] as const
 
 export function LandingPage() {
@@ -44,8 +54,8 @@ export function LandingPage() {
     navigate('/login')
   }
 
-  const problems = t('landing.problems.items', { returnObjects: true }) as string[]
-  const steps = t('landing.howItWorks.steps', { returnObjects: true }) as string[]
+  const pains = t('landing.pains.items', { returnObjects: true }) as Array<{ title: string; body: string }>
+  const useCases = t('landing.useCases.steps', { returnObjects: true }) as Array<{ title: string; body: string }>
   const features = t('landing.features.items', { returnObjects: true }) as Array<{ title: string; body: string }>
   const plans = t('landing.pricing.plans', { returnObjects: true }) as Array<{
     name: string
@@ -54,6 +64,9 @@ export function LandingPage() {
     description: string
     highlight?: boolean
   }>
+  const integrationCategories = t('landing.integrations.categories', { returnObjects: true }) as string[]
+
+  const heroPhoto = LANDING_PHOTOS.heroFamily
 
   return (
     <div className="landing-page">
@@ -71,29 +84,116 @@ export function LandingPage() {
         </Space>
       </header>
 
-      <section className="landing-section landing-hero">
-        <Title level={1} className="landing-hero-title">{t('landing.heroTitle')}</Title>
-        <Paragraph className="landing-hero-subtitle" type="secondary">
-          {t('landing.heroSubtitle')}
-        </Paragraph>
-        <Space size="middle" wrap>
-          <Button type="primary" size="large" onClick={() => goLogin('signup', 'hero')}>
-            {t('landing.ctaSignup')}
-          </Button>
-          <Button size="large" onClick={() => goLogin('login', 'hero')}>
-            {t('landing.ctaLogin')}
-          </Button>
-        </Space>
-        <Text type="secondary" className="landing-hero-note">{t('landing.heroNote')}</Text>
+      <section className="landing-section landing-hero-split">
+        <Row gutter={[40, 32]} align="middle">
+          <Col xs={24} lg={12}>
+            <Title level={1} className="landing-hero-title">{t('landing.heroTitle')}</Title>
+            <Paragraph className="landing-hero-subtitle" type="secondary">
+              {t('landing.heroSubtitle')}
+            </Paragraph>
+            <Space size="middle" wrap>
+              <Button type="primary" size="large" onClick={() => goLogin('signup', 'hero')}>
+                {t('landing.ctaSignup')}
+              </Button>
+              <Button size="large" onClick={() => goLogin('login', 'hero')}>
+                {t('landing.ctaLogin')}
+              </Button>
+            </Space>
+            <Text type="secondary" className="landing-hero-note">{t('landing.heroNote')}</Text>
+          </Col>
+          <Col xs={24} lg={12}>
+            <div className="landing-hero-visual">
+              <img
+                src={heroPhoto.src}
+                alt={t(heroPhoto.altKey)}
+                className="landing-hero-photo"
+                loading="eager"
+              />
+              <div className="landing-hero-mock">
+                <MockDashboardPreview />
+              </div>
+            </div>
+          </Col>
+        </Row>
       </section>
 
       <section className="landing-section">
-        <Title level={2}>{t('landing.problems.title')}</Title>
+        <Title level={2}>{t('landing.pains.title')}</Title>
+        <Paragraph type="secondary" style={{ marginBottom: 24, maxWidth: 720 }}>
+          {t('landing.pains.subtitle')}
+        </Paragraph>
         <Row gutter={[16, 16]}>
-          {problems.map((item, i) => (
-            <Col key={i} xs={24} md={8}>
+          {pains.map((item) => (
+            <Col key={item.title} xs={24} md={8}>
+              <Card size="small" className="landing-card landing-pain-card">
+                <Text strong style={{ display: 'block', marginBottom: 8 }}>{item.title}</Text>
+                <Paragraph type="secondary" style={{ marginBottom: 0 }}>{item.body}</Paragraph>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </section>
+
+      <section className="landing-section landing-integrations">
+        <Title level={4} style={{ textAlign: 'center', marginBottom: 16 }}>
+          {t('landing.integrations.title')}
+        </Title>
+        <div className="landing-integration-categories">
+          {integrationCategories.map((label) => (
+            <span key={label} className="landing-integration-pill">{label}</span>
+          ))}
+        </div>
+        <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 12, fontSize: 13 }}>
+          {t('landing.integrations.hint')}
+        </Paragraph>
+        <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 8, fontSize: 12 }}>
+          {t('landing.integrations.disclaimer')}
+        </Paragraph>
+      </section>
+
+      <LandingShowcaseSection
+        id="export"
+        title={t('landing.showcases.export.title')}
+        body={t('landing.showcases.export.body')}
+        imageKey="consultReady"
+      >
+        <MockExportPreview />
+      </LandingShowcaseSection>
+
+      <LandingShowcaseSection
+        id="ava"
+        title={t('landing.showcases.ava.title')}
+        body={t('landing.showcases.ava.body')}
+        imageKey="organizedCare"
+        reverse
+      >
+        <MockAvaChatPreview />
+      </LandingShowcaseSection>
+
+      <section className="landing-section">
+        <Title level={2}>{t('landing.showcases.timeline.title')}</Title>
+        <Paragraph type="secondary" style={{ marginBottom: 24 }}>
+          {t('landing.showcases.timeline.body')}
+        </Paragraph>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} md={14}>
+            <MockTimelinePreview />
+          </Col>
+          <Col xs={24} md={10}>
+            <MockGrowthChartPreview />
+          </Col>
+        </Row>
+      </section>
+
+      <section className="landing-section">
+        <Title level={2}>{t('landing.useCases.title')}</Title>
+        <Row gutter={[16, 16]}>
+          {useCases.map((step, i) => (
+            <Col key={step.title} xs={24} md={8}>
               <Card size="small" className="landing-card">
-                <Paragraph>{item}</Paragraph>
+                <Text type="secondary" style={{ fontSize: 12 }}>{t('landing.useCases.stepLabel', { n: i + 1 })}</Text>
+                <Text strong style={{ display: 'block', marginTop: 4 }}>{step.title}</Text>
+                <Paragraph type="secondary" style={{ marginBottom: 0, marginTop: 8 }}>{step.body}</Paragraph>
               </Card>
             </Col>
           ))}
@@ -101,24 +201,16 @@ export function LandingPage() {
       </section>
 
       <section className="landing-section">
-        <Title level={2}>{t('landing.howItWorks.title')}</Title>
-        <ol className="landing-steps">
-          {steps.map((step, i) => (
-            <li key={i}><Text>{step}</Text></li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="landing-section">
         <Title level={2}>{t('landing.features.title')}</Title>
+        <Paragraph type="secondary" style={{ marginBottom: 24 }}>{t('landing.features.subtitle')}</Paragraph>
         <Row gutter={[16, 16]}>
           {features.map((f, i) => {
-            const Icon = FEATURE_ICONS[i] ?? CloudSyncOutlined
+            const Icon = FEATURE_ICONS[i] ?? TeamOutlined
             return (
               <Col key={f.title} xs={24} sm={12} md={8}>
                 <Card size="small" className="landing-card">
                   <Space direction="vertical" size={8}>
-                    <Icon style={{ fontSize: 22, color: 'var(--brand-primary, #0D9488)' }} />
+                    <Icon style={{ fontSize: 22, color: 'var(--brand-primary, #0d9488)' }} />
                     <Text strong>{f.title}</Text>
                     <Text type="secondary">{f.body}</Text>
                   </Space>
@@ -156,6 +248,17 @@ export function LandingPage() {
         </Button>
       </section>
 
+      <section className="landing-section">
+        <div className="landing-roadmap-teaser">
+          <Title level={4} style={{ marginTop: 0 }}>{t('landing.roadmapTeaser.title')}</Title>
+          <ul>
+            {(t('landing.roadmapTeaser.items', { returnObjects: true }) as string[]).map((item) => (
+              <li key={item}><Text type="secondary">{item}</Text></li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section className="landing-section landing-cta-final">
         <Title level={3}>{t('landing.finalCta.title')}</Title>
         <Paragraph type="secondary">{t('landing.finalCta.body')}</Paragraph>
@@ -173,6 +276,9 @@ export function LandingPage() {
         </Space>
         <Text type="secondary" style={{ fontSize: 12, marginTop: 12, display: 'block' }}>
           {t('landing.footerNote')}
+        </Text>
+        <Text type="secondary" style={{ fontSize: 11, marginTop: 8, display: 'block' }}>
+          {t('landing.photoCredit')}
         </Text>
       </footer>
     </div>

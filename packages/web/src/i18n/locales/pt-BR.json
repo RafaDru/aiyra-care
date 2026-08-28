@@ -402,52 +402,107 @@
   "landing": {
     "ctaLogin": "Entrar",
     "ctaSignup": "Criar conta grátis",
-    "heroTitle": "O prontuário da família, organizado para você",
-    "heroSubtitle": "AiyraCare centraliza vacinas, exames e consultas dos seus filhos — com sync dos convênios, export para o pediatra e Ava para organizar dúvidas sem substituir o médico.",
-    "heroNote": "Textos e preços em revisão — funcionalidades já disponíveis para famílias em uso.",
-    "problems": {
-      "title": "Problemas que conhecemos",
+    "heroTitle": "Saúde da família em um só lugar",
+    "heroSubtitle": "Vacinas, exames, consultas e medicações organizados para quem você cuida — adultos e crianças — com apoio da Ava para o dia a dia, sem substituir o médico.",
+    "heroNote": "Funcionalidades em uso por famílias reais. Textos e preços ainda em revisão.",
+    "pains": {
+      "title": "Você não está sozinho nessa",
+      "subtitle": "Cuidar da saúde da família já exige atenção. Quando o histórico está espalhado, a carga aumenta — na consulta, na emergência ou quando outro cuidador precisa de contexto.",
       "items": [
-        "Histórico espalhado em portais, PDFs e WhatsApp — difícil levar tudo na consulta.",
-        "Sincronizar convênio e laboratório manualmente consome tempo da família.",
-        "Duplicatas e nomes diferentes para a mesma vacina ou exame confundem o prontuário."
+        {
+          "title": "Consulta sem contexto",
+          "body": "PDFs no e-mail, resultado no app do laboratório, carteirinha no convênio. Na hora H, é difícil lembrar o que mudou desde a última visita."
+        },
+        {
+          "title": "Informação duplicada e confusa",
+          "body": "O mesmo exame aparece duas vezes, a vacina com nome diferente. Isso atrapalha você e o profissional na hora de montar o quadro clínico."
+        },
+        {
+          "title": "Tempo da família no retrabalho",
+          "body": "Copiar dados de portal, caçar autorização e montar pasta para o médico consome horas que poderiam ser do lazer ou do descanso."
+        }
       ]
     },
-    "howItWorks": {
-      "title": "Como funciona",
+    "integrations": {
+      "title": "Conectamos com as fontes que você já usa",
+      "categories": [
+        "Operadoras de saúde",
+        "Laboratórios",
+        "Rede pública",
+        "Calendários pessoais"
+      ],
+      "hint": "Dados chegam automaticamente quando o portal ou serviço permite — sem precisar repetir login todo dia.",
+      "disclaimer": "Categorias de integração ilustrativas. Marcas de terceiros pertencem aos respectivos proprietários; não implicam endosso ou parceria formal até divulgação oficial."
+    },
+    "showcases": {
+      "export": {
+        "title": "Leve um resumo claro na consulta",
+        "body": "Gere um export clínico com o que importa: vacinas, exames recentes, medicações e linha do tempo. Informação do prontuário — não inventada por IA — para o profissional começar com contexto."
+      },
+      "ava": {
+        "title": "Ava: companheira para organizar o cuidado",
+        "body": "Converse para preparar perguntas, entender um resultado ou revisar o que está pendente. Apoio familiar e organização — não diagnóstico nem emergência."
+      },
+      "timeline": {
+        "title": "Linha do tempo e marcos de saúde",
+        "body": "Veja consultas, exames e vacinas no tempo certo. Gráficos de medidas ajudam a acompanhar evolução junto com o profissional de saúde."
+      }
+    },
+    "useCases": {
+      "title": "Como famílias usam hoje",
+      "stepLabel": "Passo {{n}}",
       "steps": [
-        "Crie a conta e cadastre os perfis dos filhos (ou seu perfil adulto).",
-        "Conecte convênios e laboratórios — sync automático quando o portal permite.",
-        "Revise duplicatas, exporte um resumo clínico e converse com Ava para preparar a consulta."
+        {
+          "title": "Centralize em minutos",
+          "body": "Cadastre os perfis de quem você cuida — filhos, pais, você — e conecte convênio e laboratório. O prontuário começa a se montar sem planilhas."
+        },
+        {
+          "title": "Chegue preparado",
+          "body": "Revise o que mudou, exporte o resumo e use a Ava para listar dúvidas antes da consulta."
+        },
+        {
+          "title": "Cresça com a família",
+          "body": "Agenda, lembretes e histórico separado por pessoa — com controle de quem acessa e exclusão de conta quando quiser."
+        }
       ]
     },
     "features": {
-      "title": "O que você ganha",
+      "title": "O que já está disponível",
+      "subtitle": "Produto em evolução contínua. Itens abaixo refletem o que você pode usar hoje; agentes clínicos e outras novidades estão no roadmap.",
       "items": [
         {
-          "title": "Sync de convênios",
-          "body": "Unimed, Amil, Mater Dei, Hermes Pardini e mais — dados chegam sem retrabalho diário."
+          "title": "Dados do convênio e laboratório",
+          "body": "Sincronização automática quando o portal permite — menos login manual e menos retrabalho."
         },
         {
-          "title": "Export clínico",
-          "body": "Resumo determinístico para levar ao pediatra — sem inventar informação com IA."
+          "title": "Export para o profissional",
+          "body": "Resumo clínico determinístico, PDF e link temporário para compartilhar com médicos e outros profissionais."
         },
         {
-          "title": "Ava companheira",
-          "body": "Organiza contexto e ajuda a preparar perguntas — apoio familiar, não diagnóstico."
+          "title": "Ava no dia a dia",
+          "body": "Chat global com contexto do paciente para organizar dúvidas e preparar a consulta."
         },
         {
-          "title": "Agenda e lembretes",
-          "body": "Consultas, medicações e marcos de crescimento no mesmo lugar."
+          "title": "Agenda e calendário",
+          "body": "Lembretes, consultas programadas e sync com Google Calendar ou Outlook."
         },
         {
-          "title": "Higienização",
-          "body": "Unifique registros duplicados com confirmação — estilo Google Fotos."
+          "title": "Prontuário sem duplicatas",
+          "body": "Revise registros parecidos e unifique com confirmação — prontuário limpo para a família."
         },
         {
-          "title": "Multi-perfil",
-          "body": "Luís, Bruno e toda a família com histórico separado e seguro."
+          "title": "Privacidade e LGPD",
+          "body": "Termos, consentimento e exclusão de conta. Você controla integrações e dados sensíveis."
         }
+      ]
+    },
+    "roadmapTeaser": {
+      "title": "Em breve no roadmap",
+      "items": [
+        "Agentes clínicos com base em evidências (após pareceres regulatórios)",
+        "Medidas e marcos expandidos",
+        "Preços dinâmicos na página e go-live público",
+        "Screenshots e vídeo demo do app real"
       ]
     },
     "pricing": {
@@ -459,7 +514,7 @@
           "name": "Comece grátis",
           "price": "R$ 0",
           "period": "",
-          "description": "Franquia mensal de interpretação (manuscrito/OCR) e uso essencial do prontuário."
+          "description": "Franquia mensal de interpretação de manuscritos e uso essencial do prontuário."
         },
         {
           "name": "Plano família",
@@ -477,11 +532,49 @@
       ]
     },
     "finalCta": {
-      "title": "Pronto para organizar o cuidado da família?",
-      "body": "Cadastro rápido. Você controla integrações e pode excluir a conta quando quiser (LGPD)."
+      "title": "Organize o cuidado da família hoje",
+      "body": "Cadastro rápido. Você controla integrações e pode excluir a conta quando quiser."
     },
     "footerNote": "AiyraCare — apoio à família. Não substitui emergência (SAMU 192) nem consulta médica.",
-    "loginDiscover": "Conheça a plataforma"
+    "photoCredit": "Fotos ilustrativas via Unsplash (licença gratuita). Interfaces são mockups — screenshots reais do app em roadmap.",
+    "loginDiscover": "Conheça a plataforma",
+    "media": {
+      "heroFamily": "Família — cuidado e bem-estar",
+      "consultReady": "Preparação para consulta médica",
+      "organizedCare": "Organização de informações de saúde"
+    },
+    "mocks": {
+      "dashboardTitle": "AiyraCare — sua família",
+      "syncOk": "Atualizado",
+      "patients": [
+        { "name": "Maria", "age": "42 anos" },
+        { "name": "Ana", "age": "8 anos" }
+      ],
+      "avaTitle": "Ava",
+      "avaLines": [
+        "O que devo levar na consulta de Ana na semana que vem?",
+        "Vacinas em dia, hemograma de março e medicação atual. Quer que eu monte um resumo para exportar?",
+        "Sim, e me ajuda com perguntas para o médico?",
+        "Claro: sono, apetite e se a tosse noturna mudou. Lembro que não substituo o médico."
+      ],
+      "timelineTitle": "Linha do tempo",
+      "timelineItems": [
+        { "date": "12 ago", "label": "Consulta clínica — retorno" },
+        { "date": "05 ago", "label": "Hemograma completo — laboratório" },
+        { "date": "28 jul", "label": "Vacina — calendário" }
+      ],
+      "chartTitle": "Medidas",
+      "chartCaption": "Peso — últimos 12 meses (exemplo)",
+      "exportTitle": "Export clínico",
+      "exportHeading": "Resumo para consulta",
+      "exportBullets": [
+        "Vacinas e carteirinha",
+        "Exames dos últimos 90 dias",
+        "Medicações ativas",
+        "Linha do tempo resumida"
+      ],
+      "exportTag": "PDF · link 48h"
+    }
   },
   "agenda": {
     "new": "Novo lembrete",

@@ -402,34 +402,107 @@
   "landing": {
     "ctaLogin": "Sign in",
     "ctaSignup": "Create free account",
-    "heroTitle": "Your family's health record, organized",
-    "heroSubtitle": "AiyraCare centralizes vaccines, exams and visits for your children — insurance sync, export for the pediatrician, and Ava to organize questions without replacing your doctor.",
-    "heroNote": "Copy and pricing under review — core features already available for families in use.",
-    "problems": {
-      "title": "Problems we solve",
+    "heroTitle": "Family health in one place",
+    "heroSubtitle": "Vaccines, exams, visits and medications organized for everyone you care for — adults and children — with Ava for everyday support, without replacing your doctor.",
+    "heroNote": "Features in use by real families. Copy and pricing still under review.",
+    "pains": {
+      "title": "You're not alone in this",
+      "subtitle": "Family health already demands attention. When records are scattered, the load grows — at visits, in emergencies, or when another caregiver needs context.",
       "items": [
-        "History scattered across portals, PDFs and WhatsApp — hard to bring everything to the visit.",
-        "Syncing insurance and labs manually takes family time.",
-        "Duplicates and different names for the same vaccine or exam clutter the chart."
+        {
+          "title": "Visits without context",
+          "body": "PDFs in email, lab results in another app, insurance card in a portal. When it matters, it's hard to remember what changed since the last visit."
+        },
+        {
+          "title": "Duplicate, confusing records",
+          "body": "The same exam twice, vaccines with different names. That slows you and your clinician when building the clinical picture."
+        },
+        {
+          "title": "Family time lost to rework",
+          "body": "Copying portal data, hunting authorizations and building folders for the doctor eats hours that could be rest or family time."
+        }
       ]
     },
-    "howItWorks": {
-      "title": "How it works",
+    "integrations": {
+      "title": "We connect to sources you already use",
+      "categories": [
+        "Health insurers",
+        "Laboratories",
+        "Public health network",
+        "Personal calendars"
+      ],
+      "hint": "Data flows automatically when the portal or service allows — without logging in every day.",
+      "disclaimer": "Illustrative integration categories. Third-party brands belong to their owners; no endorsement or formal partnership is implied until officially announced."
+    },
+    "showcases": {
+      "export": {
+        "title": "Bring a clear summary to the visit",
+        "body": "Generate a clinical export with what matters: vaccines, recent exams, medications and timeline. Chart data — not AI invention — so your clinician starts with context."
+      },
+      "ava": {
+        "title": "Ava: companion to organize care",
+        "body": "Chat to prepare questions, understand a result or review what's pending. Family support and organization — not diagnosis or emergency care."
+      },
+      "timeline": {
+        "title": "Timeline and health milestones",
+        "body": "See visits, exams and vaccines in order. Measurement charts help track progress with your health professional."
+      }
+    },
+    "useCases": {
+      "title": "How families use it today",
+      "stepLabel": "Step {{n}}",
       "steps": [
-        "Create an account and add your children's profiles (or your adult profile).",
-        "Connect insurance and labs — automatic sync when the portal allows.",
-        "Review duplicates, export a clinical summary, and chat with Ava to prepare for visits."
+        {
+          "title": "Centralize in minutes",
+          "body": "Add profiles for everyone you care for — kids, parents, yourself — and connect insurance and lab. The chart builds without spreadsheets."
+        },
+        {
+          "title": "Arrive prepared",
+          "body": "Review what changed, export the summary and use Ava to list questions before the visit."
+        },
+        {
+          "title": "Grow with the family",
+          "body": "Agenda, reminders and separate history per person — with access control and account deletion when you want."
+        }
       ]
     },
     "features": {
-      "title": "What you get",
+      "title": "Available today",
+      "subtitle": "Product in continuous evolution. Below reflects what you can use now; clinical agents and more are on the roadmap.",
       "items": [
-        { "title": "Insurance sync", "body": "Unimed, Amil, Mater Dei, Hermes Pardini and more — less daily manual work." },
-        { "title": "Clinical export", "body": "Deterministic summary for the pediatrician — no made-up AI facts." },
-        { "title": "Ava companion", "body": "Organizes context and helps prepare questions — family support, not diagnosis." },
-        { "title": "Agenda & reminders", "body": "Appointments, medications and growth milestones in one place." },
-        { "title": "Data hygiene", "body": "Merge duplicate records with confirmation — Google Photos style." },
-        { "title": "Multi-profile", "body": "Separate, secure history for each family member." }
+        {
+          "title": "Insurance and lab data",
+          "body": "Automatic sync when the portal allows — less manual login and less rework."
+        },
+        {
+          "title": "Export for professionals",
+          "body": "Deterministic clinical summary, PDF and temporary link to share with doctors and other professionals."
+        },
+        {
+          "title": "Ava day to day",
+          "body": "Global chat with patient context to organize questions and prepare visits."
+        },
+        {
+          "title": "Agenda and calendar",
+          "body": "Reminders, planned visits and sync with Google Calendar or Outlook."
+        },
+        {
+          "title": "Chart without duplicates",
+          "body": "Review similar records and merge with confirmation — a clean chart for the family."
+        },
+        {
+          "title": "Privacy and LGPD",
+          "body": "Terms, consent and account deletion. You control integrations and sensitive data."
+        }
+      ]
+    },
+    "roadmapTeaser": {
+      "title": "Coming on the roadmap",
+      "items": [
+        "Evidence-based clinical agents (after regulatory review)",
+        "Expanded measurements and milestones",
+        "Dynamic pricing on the page and public go-live",
+        "Real app screenshots and demo video"
       ]
     },
     "pricing": {
@@ -441,7 +514,7 @@
           "name": "Start free",
           "price": "R$ 0",
           "period": "",
-          "description": "Monthly handwriting/OCR allowance and essential chart features."
+          "description": "Monthly handwriting interpretation allowance and essential chart features."
         },
         {
           "name": "Family plan",
@@ -459,11 +532,49 @@
       ]
     },
     "finalCta": {
-      "title": "Ready to organize family care?",
-      "body": "Quick signup. You control integrations and can delete your account anytime (LGPD)."
+      "title": "Organize family care today",
+      "body": "Quick signup. You control integrations and can delete your account anytime."
     },
     "footerNote": "AiyraCare — family support. Does not replace emergency (SAMU 192) or medical care.",
-    "loginDiscover": "Discover the platform"
+    "photoCredit": "Illustrative photos via Unsplash (free license). Interfaces are mockups — real app screenshots on the roadmap.",
+    "loginDiscover": "Discover the platform",
+    "media": {
+      "heroFamily": "Family — care and wellbeing",
+      "consultReady": "Preparing for a medical visit",
+      "organizedCare": "Organizing health information"
+    },
+    "mocks": {
+      "dashboardTitle": "AiyraCare — your family",
+      "syncOk": "Updated",
+      "patients": [
+        { "name": "Maria", "age": "42 years" },
+        { "name": "Ana", "age": "8 years" }
+      ],
+      "avaTitle": "Ava",
+      "avaLines": [
+        "What should I bring to Ana's visit next week?",
+        "Vaccines on track, March blood work and current meds. Want me to build an export summary?",
+        "Yes, and help with questions for the doctor?",
+        "Sure: sleep, appetite and whether night cough changed. I don't replace your doctor."
+      ],
+      "timelineTitle": "Timeline",
+      "timelineItems": [
+        { "date": "Aug 12", "label": "Clinical visit — follow-up" },
+        { "date": "Aug 5", "label": "Complete blood count — lab" },
+        { "date": "Jul 28", "label": "Vaccine — schedule" }
+      ],
+      "chartTitle": "Measurements",
+      "chartCaption": "Weight — last 12 months (example)",
+      "exportTitle": "Clinical export",
+      "exportHeading": "Visit summary",
+      "exportBullets": [
+        "Vaccines and card",
+        "Exams from last 90 days",
+        "Active medications",
+        "Summary timeline"
+      ],
+      "exportTag": "PDF · 48h link"
+    }
   },
   "agenda": {
     "new": "New reminder",
