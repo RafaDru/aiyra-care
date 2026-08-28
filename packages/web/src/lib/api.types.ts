@@ -615,6 +615,7 @@ export interface AvaActivityEvent {
 export interface HygieneCandidateItem {
   id: string
   patientId: string
+  patientName?: string
   entityType: string
   entityIdA: string
   entityIdB: string

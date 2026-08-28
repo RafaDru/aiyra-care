@@ -363,15 +363,37 @@
   "hygiene": {
     "loginPromptTitle": "Similar records in the chart",
     "loginPromptBody": "We found {{count}} possible duplicate — like Google Photos, you can merge or keep them separate.",
+    "progressLabel": "Item {{current}} of {{total}}",
+    "patientLabel": "Patient: {{name}}",
+    "patientUnknown": "name not available",
     "entityTypeLabel": "Type: {{type}}",
+    "entityTypes": {
+      "vaccine": "Vaccine",
+      "exam": "Exam",
+      "medical_record": "Clinical record",
+      "authorization": "Authorization"
+    },
     "recordA": "Record A",
     "recordB": "Record B",
+    "recordMissing": "Record not found",
+    "genericRecord": "Record",
+    "doseLabel": "Dose {{dose}}",
+    "batchLabel": "Batch {{batch}}",
+    "sourceLabel": "Source: {{source}}",
+    "detectorLabel": "Detector: {{detector}}",
+    "slotLabel": "Slot {{slot}}",
     "similarityHint": "Estimated similarity: {{score}}%",
     "sameEntity": "Same record",
     "distinct": "Distinct records",
     "dismiss": "Dismiss",
     "later": "Later",
-    "openPatient": "Open chart"
+    "openPatient": "Open chart",
+    "resolveFailed": "Could not save: {{message}}",
+    "resolveSuccess": {
+      "same_entity": "Records merged — duplicate marked in the chart.",
+      "distinct": "Marked as distinct records.",
+      "dismissed": "Suggestion dismissed."
+    }
   },
   "agenda": {
     "new": "New reminder",

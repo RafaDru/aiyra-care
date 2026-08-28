@@ -101,6 +101,7 @@ export async function avaRoutes(app: FastifyInstance) {
     hygieneRepo,
     new ExamPgRepository(pgPool),
     new VaccinePgRepository(pgPool),
+    new PatientPgRepository(pgPool),
   )
   const proposedActions = new AvaProposedActionService(
     linkRepo,

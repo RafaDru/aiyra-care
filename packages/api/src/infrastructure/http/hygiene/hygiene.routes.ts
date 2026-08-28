@@ -6,6 +6,7 @@ import { ProductEventPgRepository } from '../../persistence/product-event.pg.rep
 import { HygienePgRepository } from '../../persistence/hygiene.pg.repository.js'
 import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
 import { VaccinePgRepository } from '../../persistence/vaccine.pg.repository.js'
+import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
 
 export async function hygieneRoutes(app: FastifyInstance) {
@@ -14,6 +15,7 @@ export async function hygieneRoutes(app: FastifyInstance) {
     hygieneRepo,
     new ExamPgRepository(pgPool),
     new VaccinePgRepository(pgPool),
+    new PatientPgRepository(pgPool),
   )
   const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
   const controller = new HygieneController(service, productEvents)

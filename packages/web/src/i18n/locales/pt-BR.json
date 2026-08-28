@@ -363,15 +363,37 @@
   "hygiene": {
     "loginPromptTitle": "Registros parecidos no prontuário",
     "loginPromptBody": "Encontramos {{count}} possível duplicidade — como no Google Fotos, você pode unificar ou manter separado.",
+    "progressLabel": "Item {{current}} de {{total}}",
+    "patientLabel": "Paciente: {{name}}",
+    "patientUnknown": "nome não disponível",
     "entityTypeLabel": "Tipo: {{type}}",
+    "entityTypes": {
+      "vaccine": "Vacina",
+      "exam": "Exame",
+      "medical_record": "Registro clínico",
+      "authorization": "Autorização"
+    },
     "recordA": "Registro A",
     "recordB": "Registro B",
+    "recordMissing": "Registro não encontrado",
+    "genericRecord": "Registro",
+    "doseLabel": "Dose {{dose}}",
+    "batchLabel": "Lote {{batch}}",
+    "sourceLabel": "Fonte: {{source}}",
+    "detectorLabel": "Detector: {{detector}}",
+    "slotLabel": "Slot {{slot}}",
     "similarityHint": "Similaridade estimada: {{score}}%",
     "sameEntity": "Mesmo registro",
     "distinct": "Registros distintos",
     "dismiss": "Ignorar",
     "later": "Depois",
-    "openPatient": "Abrir prontuário"
+    "openPatient": "Abrir prontuário",
+    "resolveFailed": "Não foi possível salvar: {{message}}",
+    "resolveSuccess": {
+      "same_entity": "Registros unificados — duplicata marcada no prontuário.",
+      "distinct": "Marcado como registros distintos.",
+      "dismissed": "Sugestão ignorada."
+    }
   },
   "agenda": {
     "new": "Novo lembrete",

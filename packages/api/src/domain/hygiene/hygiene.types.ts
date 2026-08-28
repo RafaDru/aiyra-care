@@ -33,6 +33,7 @@ export interface HygieneCandidatePairInput {
 }
 
 export interface HygieneCandidateView extends HygieneCandidate {
+  patientName?: string
   entityA?: Record<string, unknown>
   entityB?: Record<string, unknown>
 }

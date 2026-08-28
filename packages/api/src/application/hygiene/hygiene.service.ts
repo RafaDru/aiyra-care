@@ -1,6 +1,7 @@
 import type { ExamRepository } from '../../domain/exam/exam.repository.js'
 import { Exam } from '../../domain/exam/exam.entity.js'
 import { buildExamNotes, parseExamNotes } from '../../domain/exam/exam-notes.js'
+import type { PatientRepository } from '../../domain/patient/patient.repository.js'
 import type { VaccineRepository } from '../../domain/vaccine/vaccine.repository.js'
 import { Vaccine } from '../../domain/vaccine/vaccine.entity.js'
 import { buildVaccineNotes, parseVaccineNotes } from '../../domain/hygiene/vaccine-notes.js'
@@ -17,6 +18,7 @@ export class HygieneService {
     private readonly hygiene: HygieneRepository,
     private readonly exams: ExamRepository,
     private readonly vaccines: VaccineRepository,
+    private readonly patients?: PatientRepository,
   ) {}
 
   async listPendingForAccount(accountId: string, patientId?: string): Promise<HygieneCandidateView[]> {
@@ -117,17 +119,24 @@ export class HygieneService {
       hygieneResolvedAt: new Date().toISOString(),
     }
     await this.vaccines.update(
-      duplicateId,
-      { notes: buildVaccineNotes(text, nextMeta) ?? undefined },
+      Vaccine.restore({
+        ...dup.toJSON(),
+        notes: buildVaccineNotes(text, nextMeta) ?? null,
+      }),
     )
   }
 
   private async enrichCandidate(row: HygieneCandidate): Promise<HygieneCandidateView> {
+    const patientName = this.patients
+      ? (await this.patients.findById(row.patientId))?.name
+      : undefined
+
     if (row.entityType === 'exam') {
       const a = await this.exams.findById(row.entityIdA)
       const b = await this.exams.findById(row.entityIdB)
       return {
         ...row,
+        patientName,
         entityA: a?.toJSON() ?? { id: row.entityIdA, missing: true },
         entityB: b?.toJSON() ?? { id: row.entityIdB, missing: true },
       }
@@ -137,10 +146,11 @@ export class HygieneService {
       const b = await this.vaccines.findById(row.entityIdB)
       return {
         ...row,
+        patientName,
         entityA: a?.toJSON() ?? { id: row.entityIdA, missing: true },
         entityB: b?.toJSON() ?? { id: row.entityIdB, missing: true },
       }
     }
-    return row
+    return { ...row, patientName }
   }
 }

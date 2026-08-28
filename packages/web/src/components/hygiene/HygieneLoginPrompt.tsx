@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Modal, Space, Typography } from 'antd'
+import { Button, Modal, Space, Typography, App } from 'antd'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
@@ -10,37 +10,68 @@ import { COMPLIANCE_ACCEPT_PATH } from '../../lib/legal-paths.js'
 
 const { Text, Paragraph } = Typography
 
-function formatEntityLine(entityType: string, entity: Record<string, unknown>): string {
-  if (entity.missing) return 'Registro não encontrado'
+function formatDate(value: unknown): string | null {
+  if (!value) return null
+  const s = String(value)
+  return s.length >= 10 ? s.slice(0, 10) : s
+}
+
+function formatEntityLine(
+  entityType: string,
+  entity: Record<string, unknown>,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string {
+  if (entity.missing) return t('hygiene.recordMissing')
+  const source = entity.source ? t('hygiene.sourceLabel', { source: String(entity.source) }) : null
   if (entityType === 'vaccine') {
     const parts = [
       entity.vaccineName,
-      entity.applicationDate ? String(entity.applicationDate).slice(0, 10) : null,
-      entity.doseNumber != null ? `Dose ${entity.doseNumber}` : null,
+      formatDate(entity.applicationDate),
+      entity.doseNumber != null ? t('hygiene.doseLabel', { dose: entity.doseNumber }) : null,
       entity.clinic,
+      entity.batchNumber ? t('hygiene.batchLabel', { batch: entity.batchNumber }) : null,
+      source,
     ]
-    return parts.filter(Boolean).join(' · ') || 'Vacina'
+    return parts.filter(Boolean).join(' · ') || t('hygiene.entityTypes.vaccine')
   }
   if (entityType === 'exam') {
     const parts = [
       entity.examType,
-      entity.examDate ? String(entity.examDate).slice(0, 10) : null,
+      formatDate(entity.examDate),
       entity.laboratory,
       entity.resultSummary,
+      source,
     ]
-    return parts.filter(Boolean).join(' · ') || 'Exame'
+    return parts.filter(Boolean).join(' · ') || t('hygiene.entityTypes.exam')
   }
-  return String(entity.id ?? 'Registro')
+  return String(entity.id ?? t('hygiene.genericRecord'))
+}
+
+function formatEvidenceSummary(
+  item: HygieneCandidateItem,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string | null {
+  const evidence = item.evidence ?? {}
+  const parts: string[] = []
+  if (item.detector) parts.push(t('hygiene.detectorLabel', { detector: item.detector }))
+  if (evidence.vaccineName) parts.push(String(evidence.vaccineName))
+  if (evidence.examType) parts.push(String(evidence.examType))
+  if (evidence.applicationDate) parts.push(formatDate(evidence.applicationDate) ?? '')
+  if (evidence.catalogSlotKey) parts.push(t('hygiene.slotLabel', { slot: String(evidence.catalogSlotKey) }))
+  const filtered = parts.filter(Boolean)
+  return filtered.length ? filtered.join(' · ') : null
 }
 
 function EntityCard({
   label,
   entityType,
   entity,
+  t,
 }: {
   label: string
   entityType: string
   entity: Record<string, unknown>
+  t: (key: string, opts?: Record<string, unknown>) => string
 }) {
   return (
     <div
@@ -54,7 +85,7 @@ function EntityCard({
       }}
     >
       <Text type="secondary" style={{ fontSize: 12 }}>{label}</Text>
-      <Paragraph style={{ marginTop: 4, marginBottom: 0 }}>{formatEntityLine(entityType, entity)}</Paragraph>
+      <Paragraph style={{ marginTop: 4, marginBottom: 0 }}>{formatEntityLine(entityType, entity, t)}</Paragraph>
     </div>
   )
 }
@@ -64,6 +95,7 @@ function EntityCard({
  */
 export function HygieneLoginPrompt() {
   const { t } = useTranslation()
+  const { message } = App.useApp()
   const { configured, user } = useAuth()
   const location = useLocation()
   const [open, setOpen] = useState(false)
@@ -72,6 +104,9 @@ export function HygieneLoginPrompt() {
   const [resolving, setResolving] = useState(false)
 
   const current = items[index]
+  const entityTypeLabel = current
+    ? t(`hygiene.entityTypes.${current.entityType}`, { defaultValue: current.entityType })
+    : ''
 
   const closeAndMaybeSnooze = useCallback((snooze: boolean) => {
     setOpen(false)
@@ -95,22 +130,29 @@ export function HygieneLoginPrompt() {
     return () => { cancelled = true }
   }, [configured, user, location.pathname])
 
-  const advanceAfterResolve = useCallback((resolvedId: string) => {
-    const remaining = items.filter((item) => item.id !== resolvedId)
-    if (remaining.length === 0) {
-      closeAndMaybeSnooze(false)
-      return
-    }
-    setItems(remaining)
-    setIndex((prev) => Math.min(prev, remaining.length - 1))
-  }, [items, closeAndMaybeSnooze])
+  const advanceAfterResolve = useCallback((resolvedId: string, decision: 'same_entity' | 'distinct' | 'dismissed') => {
+    setItems((prev) => {
+      const remaining = prev.filter((item) => item.id !== resolvedId)
+      if (remaining.length === 0) {
+        setOpen(false)
+        message.success(t(`hygiene.resolveSuccess.${decision}`))
+      } else {
+        setIndex((i) => Math.min(i, remaining.length - 1))
+        message.success(t(`hygiene.resolveSuccess.${decision}`))
+      }
+      return remaining
+    })
+  }, [message, t])
 
   const resolve = async (decision: 'same_entity' | 'distinct' | 'dismissed') => {
     if (!current || resolving) return
     setResolving(true)
     try {
       await api.hygiene.resolve(current.id, decision)
-      advanceAfterResolve(current.id)
+      advanceAfterResolve(current.id, decision)
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : String(e)
+      message.error(t('hygiene.resolveFailed', { message: errMsg }))
     } finally {
       setResolving(false)
     }
@@ -120,6 +162,11 @@ export function HygieneLoginPrompt() {
 
   const entityA = current.entityA ?? { id: current.entityIdA }
   const entityB = current.entityB ?? { id: current.entityIdB }
+  const evidenceSummary = formatEvidenceSummary(current, t)
+  const progressLabel = t('hygiene.progressLabel', {
+    current: index + 1,
+    total: items.length,
+  })
 
   return (
     <Modal
@@ -127,18 +174,38 @@ export function HygieneLoginPrompt() {
       title={t('hygiene.loginPromptTitle')}
       onCancel={() => closeAndMaybeSnooze(true)}
       footer={null}
-      width={560}
+      width={600}
       destroyOnClose
     >
-      <Paragraph type="secondary" style={{ marginBottom: 16 }}>
+      <Paragraph type="secondary" style={{ marginBottom: 8 }}>
         {t('hygiene.loginPromptBody', { count: items.length })}
       </Paragraph>
-      <Text strong style={{ display: 'block', marginBottom: 8 }}>
-        {t('hygiene.entityTypeLabel', { type: current.entityType })}
+      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
+        {progressLabel}
       </Text>
+      <div
+        style={{
+          marginBottom: 16,
+          padding: 12,
+          borderRadius: 8,
+          background: 'var(--surface-elevated, rgba(0,0,0,0.03))',
+        }}
+      >
+        <Text strong style={{ display: 'block' }}>
+          {t('hygiene.patientLabel', { name: current.patientName ?? t('hygiene.patientUnknown') })}
+        </Text>
+        <Text type="secondary" style={{ fontSize: 13 }}>
+          {t('hygiene.entityTypeLabel', { type: entityTypeLabel })}
+        </Text>
+        {evidenceSummary && (
+          <Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0, fontSize: 13 }}>
+            {evidenceSummary}
+          </Paragraph>
+        )}
+      </div>
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <EntityCard label={t('hygiene.recordA')} entityType={current.entityType} entity={entityA} />
-        <EntityCard label={t('hygiene.recordB')} entityType={current.entityType} entity={entityB} />
+        <EntityCard label={t('hygiene.recordA')} entityType={current.entityType} entity={entityA} t={t} />
+        <EntityCard label={t('hygiene.recordB')} entityType={current.entityType} entity={entityB} t={t} />
       </div>
       {current.score > 0 && (
         <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 16 }}>
