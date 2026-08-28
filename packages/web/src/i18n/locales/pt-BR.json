@@ -403,7 +403,7 @@
     "ctaLogin": "Entrar",
     "ctaSignup": "Criar conta grátis",
     "heroTitle": "Saúde da família em um só lugar",
-    "heroSubtitle": "Vacinas, exames, consultas e medicações organizados para quem você cuida — adultos e crianças — com apoio da Ava para o dia a dia, sem substituir o médico.",
+    "heroSubtitle": "Histórico atualizado, linha do tempo que acompanha a vida da família e apoio imediato nas consultas. Centraliza exames, consultas, lembretes e agenda — conectada ao Google Calendar e Outlook. Ava, nossa agente de inteligência artificial, ajuda a organizar tudo mais rápido.",
     "heroNote": "Funcionalidades em uso por famílias reais. Textos e preços ainda em revisão.",
     "pains": {
       "title": "Você não está sozinho nessa",
@@ -437,17 +437,35 @@
     "showcases": {
       "export": {
         "title": "Leve um resumo claro na consulta",
-        "body": "Gere um export clínico com o que importa: vacinas, exames recentes, medicações e linha do tempo. Informação do prontuário — não inventada por IA — para o profissional começar com contexto."
+        "body": "Export clínico com vacinas, exames recentes, medicações e linha do tempo — dados reais do prontuário para você chegar preparado ao profissional de saúde."
       },
       "ava": {
-        "title": "Ava: companheira para organizar o cuidado",
-        "body": "Converse para preparar perguntas, entender um resultado ou revisar o que está pendente. Apoio familiar e organização — não diagnóstico nem emergência."
+        "title": "Ava — sua companheira de bolso na consulta",
+        "body": "Nossa agente de inteligência artificial apoia as famílias nas principais dúvidas do cotidiano, organiza o contexto com base nas informações reais do prontuário e ajuda a preparar a conversa com mais rapidez."
       },
       "timeline": {
-        "title": "Linha do tempo e marcos de saúde",
-        "body": "Veja consultas, exames e vacinas no tempo certo. Gráficos de medidas ajudam a acompanhar evolução junto com o profissional de saúde."
+        "title": "Linha do tempo que acompanha a família",
+        "body": "Consultas, exames, vacinas e medidas no tempo certo — uma visão contínua da saúde de quem você cuida, adultos e crianças."
       }
     },
+    "gallery": {
+      "title": "Por dentro da plataforma",
+      "subtitle": "Telas reais do AiyraCare — histórico, agenda, exames e conversa com a Ava.",
+      "items": [
+        { "key": "dashboard", "title": "Família no dashboard", "altKey": "landing.screenshots.dashboard" },
+        { "key": "agenda", "title": "Agenda e lembretes", "altKey": "landing.screenshots.agenda" },
+        { "key": "avaChat", "title": "Conversa com a Ava", "altKey": "landing.screenshots.avaChat" }
+      ]
+    },
+    "screenshots": {
+      "dashboard": "Dashboard — perfis da família",
+      "patientOverview": "Perfil do paciente — visão clínica",
+      "timeline": "Linha do tempo clínica",
+      "agenda": "Agenda e calendário",
+      "exams": "Exames e marcadores",
+      "avaChat": "Ava — conversa com contexto do prontuário"
+    },
+    "avaDisclaimer": "Ava orienta com base no seu prontuário e nas dúvidas do dia a dia. Ela não realiza exames, não emite diagnósticos e não substitui avaliação médica ou emergência (SAMU 192).",
     "useCases": {
       "title": "Como famílias usam hoje",
       "stepLabel": "Passo {{n}}",
@@ -479,8 +497,8 @@
           "body": "Resumo clínico determinístico, PDF e link temporário para compartilhar com médicos e outros profissionais."
         },
         {
-          "title": "Ava no dia a dia",
-          "body": "Chat global com contexto do paciente para organizar dúvidas e preparar a consulta."
+          "title": "Ava — agente de IA",
+          "body": "Companheira de bolso na consulta: tira dúvidas, organiza contexto e acelera o que você precisa revisar antes da visita."
         },
         {
           "title": "Agenda e calendário",
@@ -501,8 +519,8 @@
       "items": [
         "Agentes clínicos com base em evidências (após pareceres regulatórios)",
         "Medidas e marcos expandidos",
-        "Preços dinâmicos na página e go-live público",
-        "Screenshots e vídeo demo do app real"
+        "Guardrails da Ava — foco em saúde e segurança",
+        "Preços dinâmicos na página e go-live público"
       ]
     },
     "pricing": {
@@ -535,8 +553,8 @@
       "title": "Organize o cuidado da família hoje",
       "body": "Cadastro rápido. Você controla integrações e pode excluir a conta quando quiser."
     },
-    "footerNote": "AiyraCare — apoio à família. Não substitui emergência (SAMU 192) nem consulta médica.",
-    "photoCredit": "Fotos ilustrativas via Unsplash (licença gratuita). Interfaces são mockups — screenshots reais do app em roadmap.",
+    "footerNote": "AiyraCare — tecnologia para famílias que querem histórico de saúde organizado.",
+    "photoCredit": "Fotos ilustrativas via Unsplash. Capturas de tela do produto real; dados de demonstração quando aplicável.",
     "loginDiscover": "Conheça a plataforma",
     "media": {
       "heroFamily": "Família — cuidado e bem-estar",
@@ -554,8 +572,8 @@
       "avaLines": [
         "O que devo levar na consulta de Ana na semana que vem?",
         "Vacinas em dia, hemograma de março e medicação atual. Quer que eu monte um resumo para exportar?",
-        "Sim, e me ajuda com perguntas para o médico?",
-        "Claro: sono, apetite e se a tosse noturna mudou. Lembro que não substituo o médico."
+        "Sim, e me ajuda com perguntas para levar na consulta?",
+        "Claro: sono, apetite e se a tosse noturna mudou. Posso montar o export também."
       ],
       "timelineTitle": "Linha do tempo",
       "timelineItems": [

@@ -1249,6 +1249,13 @@
           "title": "Documentação visão Ava + moonshot",
           "status": "done",
           "detail": "docs/AVA_VISION.md, ARCHITECTURE_DATA_LAYERS.md."
+        },
+        {
+          "id": "ava-health-guardrails",
+          "title": "Guardrails — Ava só em contexto de saúde",
+          "status": "planned",
+          "detail": "Bloquear temas fora de saúde/cuidado familiar (código, automação na plataforma, etc.); respostas dentro de limites de segurança e LGPD.",
+          "reviewBadge": ["legal", "security"]
         }
       ]
     },
@@ -1797,9 +1804,9 @@
         },
         {
           "id": "landing-real-screenshots",
-          "title": "Screenshots e vídeo demo do app real",
-          "status": "planned",
-          "detail": "Substituir mockups por capturas autenticadas do produto; opcional vídeo curto."
+          "title": "Screenshots reais do app na landing",
+          "status": "in_progress",
+          "detail": "Script capture-landing-screenshots.mjs + public/landing/*.png; fallback mock se arquivo ausente."
         },
         {
           "id": "landing-public-billing-offers",

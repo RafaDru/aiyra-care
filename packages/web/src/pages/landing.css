@@ -119,6 +119,81 @@
   background: var(--card-bg, #fff);
 }
 
+.landing-screenshot-frame {
+  background: var(--card-bg, #fff);
+}
+
+.landing-screenshot-frame-title {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.landing-screenshot-frame-body {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+}
+
+.landing-screenshot {
+  width: 100%;
+  display: block;
+  height: auto;
+}
+
+.landing-screenshot-fallback {
+  padding: 8px;
+}
+
+.landing-lead {
+  margin-bottom: 24px;
+  max-width: 720px;
+}
+
+.landing-center-title {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.landing-center-text {
+  text-align: center;
+}
+
+.landing-hint {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.landing-disclaimer {
+  margin-top: 8px;
+  font-size: 12px;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-ava-note {
+  margin-top: 24px;
+  font-size: 13px;
+  max-width: 720px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.7));
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.06));
+}
+
+.landing-footer-line {
+  font-size: 12px;
+  margin-top: 12px;
+  display: block;
+}
+
+.landing-footer-small {
+  font-size: 11px;
+  margin-top: 8px;
+}
+
 .landing-mock-browser {
   border-radius: 10px;
   border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
@@ -271,10 +346,28 @@
 }
 
 .landing-pricing {
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.landing-pricing-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 32px;
   background: var(--card-bg, rgba(255, 255, 255, 0.6));
   border-radius: 16px;
-  margin: 0 24px;
-  max-width: calc(1080px - 48px);
+  text-align: center;
+}
+
+.landing-pricing-disclaimer {
+  margin-top: 16px;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-pricing-cta {
+  margin-top: 20px;
 }
 
 @media (max-width: 640px) {
@@ -288,6 +381,10 @@
 
   .landing-pricing {
     margin: 0 16px;
+  }
+
+  .landing-pricing-inner {
+    padding: 24px 16px;
   }
 
   .landing-hero-photo {

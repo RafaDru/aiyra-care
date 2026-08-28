@@ -21,7 +21,8 @@
     "reclassify:apply": "tsx scripts/reclassify-medical-records.ts --apply",
     "reclassify:amil": "tsx scripts/reclassify-amil-medical-records.ts",
     "test:smoke:llm": "tsx scripts/llm-smoke-test.ts",
-    "test:smoke:billing": "node scripts/billing-smoke-test.mjs"
+    "test:smoke:billing": "node scripts/billing-smoke-test.mjs",
+    "capture:landing-screenshots": "node scripts/capture-landing-screenshots.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",

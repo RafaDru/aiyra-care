@@ -1,16 +1,11 @@
 /**
  * Fotos curadas via Unsplash (licença gratuita — https://unsplash.com/license).
- * Créditos exibidos no footer da landing.
+ * Screenshots do produto em /public/landing/ (captura via packages/api/scripts/capture-landing-screenshots.mjs).
  */
 export const LANDING_PHOTOS = {
   heroFamily: {
     src: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1200&q=80',
     altKey: 'landing.media.heroFamily',
-    credit: 'Unsplash',
-  },
-  consultReady: {
-    src: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?auto=format&fit=crop&w=900&q=80',
-    altKey: 'landing.media.consultReady',
     credit: 'Unsplash',
   },
   organizedCare: {
@@ -19,3 +14,15 @@ export const LANDING_PHOTOS = {
     credit: 'Unsplash',
   },
 } as const
+
+/** Screenshots reais do app — gerados pelo script de captura. */
+export const LANDING_SCREENSHOTS = {
+  dashboard: '/landing/dashboard.png',
+  patientOverview: '/landing/patient-overview.png',
+  timeline: '/landing/timeline.png',
+  agenda: '/landing/agenda.png',
+  exams: '/landing/exams.png',
+  avaChat: '/landing/ava-chat.png',
+} as const
+
+export type LandingScreenshotKey = keyof typeof LANDING_SCREENSHOTS

@@ -21,8 +21,9 @@ import {
   MockGrowthChartPreview,
   MockTimelinePreview,
 } from '../components/landing/LandingProductMocks.js'
+import { LandingScreenshot, LandingScreenshotFrame } from '../components/landing/LandingScreenshot.js'
 import { LandingShowcaseSection } from '../components/landing/LandingShowcaseSection.js'
-import { LANDING_PHOTOS } from '../lib/landing-media.js'
+import { LANDING_PHOTOS, LANDING_SCREENSHOTS } from '../lib/landing-media.js'
 import { trackLandingEvent } from '../lib/landing-events.js'
 import './landing.css'
 
@@ -65,6 +66,11 @@ export function LandingPage() {
     highlight?: boolean
   }>
   const integrationCategories = t('landing.integrations.categories', { returnObjects: true }) as string[]
+  const galleryItems = t('landing.gallery.items', { returnObjects: true }) as Array<{
+    key: string
+    title: string
+    altKey: string
+  }>
 
   const heroPhoto = LANDING_PHOTOS.heroFamily
 
@@ -109,9 +115,13 @@ export function LandingPage() {
                 className="landing-hero-photo"
                 loading="eager"
               />
-              <div className="landing-hero-mock">
-                <MockDashboardPreview />
-              </div>
+              <LandingScreenshotFrame>
+                <LandingScreenshot
+                  src={LANDING_SCREENSHOTS.dashboard}
+                  alt={t('landing.screenshots.dashboard')}
+                  fallback={<MockDashboardPreview />}
+                />
+              </LandingScreenshotFrame>
             </div>
           </Col>
         </Row>
@@ -119,7 +129,7 @@ export function LandingPage() {
 
       <section className="landing-section">
         <Title level={2}>{t('landing.pains.title')}</Title>
-        <Paragraph type="secondary" style={{ marginBottom: 24, maxWidth: 720 }}>
+        <Paragraph type="secondary" className="landing-lead">
           {t('landing.pains.subtitle')}
         </Paragraph>
         <Row gutter={[16, 16]}>
@@ -135,18 +145,16 @@ export function LandingPage() {
       </section>
 
       <section className="landing-section landing-integrations">
-        <Title level={4} style={{ textAlign: 'center', marginBottom: 16 }}>
-          {t('landing.integrations.title')}
-        </Title>
+        <Title level={4} className="landing-center-title">{t('landing.integrations.title')}</Title>
         <div className="landing-integration-categories">
           {integrationCategories.map((label) => (
             <span key={label} className="landing-integration-pill">{label}</span>
           ))}
         </div>
-        <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 12, fontSize: 13 }}>
+        <Paragraph type="secondary" className="landing-center-text landing-hint">
           {t('landing.integrations.hint')}
         </Paragraph>
-        <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 8, fontSize: 12 }}>
+        <Paragraph type="secondary" className="landing-center-text landing-disclaimer">
           {t('landing.integrations.disclaimer')}
         </Paragraph>
       </section>
@@ -155,33 +163,64 @@ export function LandingPage() {
         id="export"
         title={t('landing.showcases.export.title')}
         body={t('landing.showcases.export.body')}
-        imageKey="consultReady"
-      >
-        <MockExportPreview />
-      </LandingShowcaseSection>
+        screenshotSrc={LANDING_SCREENSHOTS.patientOverview}
+        screenshotAltKey="landing.screenshots.patientOverview"
+        screenshotFallback={<MockExportPreview />}
+      />
 
       <LandingShowcaseSection
         id="ava"
         title={t('landing.showcases.ava.title')}
         body={t('landing.showcases.ava.body')}
+        screenshotSrc={LANDING_SCREENSHOTS.avaChat}
+        screenshotAltKey="landing.screenshots.avaChat"
+        screenshotFallback={<MockAvaChatPreview />}
         imageKey="organizedCare"
         reverse
-      >
-        <MockAvaChatPreview />
-      </LandingShowcaseSection>
+      />
 
       <section className="landing-section">
         <Title level={2}>{t('landing.showcases.timeline.title')}</Title>
-        <Paragraph type="secondary" style={{ marginBottom: 24 }}>
+        <Paragraph type="secondary" className="landing-lead">
           {t('landing.showcases.timeline.body')}
         </Paragraph>
         <Row gutter={[24, 24]}>
           <Col xs={24} md={14}>
-            <MockTimelinePreview />
+            <LandingScreenshotFrame title={t('landing.screenshots.timeline')}>
+              <LandingScreenshot
+                src={LANDING_SCREENSHOTS.timeline}
+                alt={t('landing.screenshots.timeline')}
+                fallback={<MockTimelinePreview />}
+              />
+            </LandingScreenshotFrame>
           </Col>
           <Col xs={24} md={10}>
-            <MockGrowthChartPreview />
+            <LandingScreenshotFrame title={t('landing.screenshots.exams')}>
+              <LandingScreenshot
+                src={LANDING_SCREENSHOTS.exams}
+                alt={t('landing.screenshots.exams')}
+                fallback={<MockGrowthChartPreview />}
+              />
+            </LandingScreenshotFrame>
           </Col>
+        </Row>
+      </section>
+
+      <section className="landing-section" id="gallery">
+        <Title level={2}>{t('landing.gallery.title')}</Title>
+        <Paragraph type="secondary" className="landing-lead">{t('landing.gallery.subtitle')}</Paragraph>
+        <Row gutter={[16, 16]}>
+          {galleryItems.map((item) => {
+            const src = LANDING_SCREENSHOTS[item.key as keyof typeof LANDING_SCREENSHOTS]
+            if (!src) return null
+            return (
+              <Col key={item.key} xs={24} sm={12} md={8}>
+                <LandingScreenshotFrame title={item.title}>
+                  <LandingScreenshot src={src} alt={t(item.altKey)} />
+                </LandingScreenshotFrame>
+              </Col>
+            )
+          })}
         </Row>
       </section>
 
@@ -202,7 +241,7 @@ export function LandingPage() {
 
       <section className="landing-section">
         <Title level={2}>{t('landing.features.title')}</Title>
-        <Paragraph type="secondary" style={{ marginBottom: 24 }}>{t('landing.features.subtitle')}</Paragraph>
+        <Paragraph type="secondary" className="landing-lead">{t('landing.features.subtitle')}</Paragraph>
         <Row gutter={[16, 16]}>
           {features.map((f, i) => {
             const Icon = FEATURE_ICONS[i] ?? TeamOutlined
@@ -219,33 +258,38 @@ export function LandingPage() {
             )
           })}
         </Row>
+        <Paragraph type="secondary" className="landing-ava-note">{t('landing.avaDisclaimer')}</Paragraph>
       </section>
 
       <section className="landing-section landing-pricing" id="pricing">
-        <Title level={2}>{t('landing.pricing.title')}</Title>
-        <Paragraph type="secondary">{t('landing.pricing.subtitle')}</Paragraph>
-        <Row gutter={[16, 16]}>
-          {plans.map((plan) => (
-            <Col key={plan.name} xs={24} md={8}>
-              <Card
-                className={plan.highlight ? 'landing-card landing-plan-highlight' : 'landing-card'}
-                title={plan.name}
-              >
-                <Title level={3} style={{ marginTop: 0 }}>
-                  {plan.price}
-                  {plan.period && <Text type="secondary" style={{ fontSize: 14 }}> {plan.period}</Text>}
-                </Title>
-                <Paragraph type="secondary">{plan.description}</Paragraph>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Paragraph type="secondary" style={{ marginTop: 16 }}>
-          {t('landing.pricing.disclaimer')}
-        </Paragraph>
-        <Button type="primary" onClick={() => goLogin('signup', 'pricing')}>
-          {t('landing.ctaSignup')}
-        </Button>
+        <div className="landing-pricing-inner">
+          <Title level={2}>{t('landing.pricing.title')}</Title>
+          <Paragraph type="secondary">{t('landing.pricing.subtitle')}</Paragraph>
+          <Row gutter={[16, 16]} justify="center">
+            {plans.map((plan) => (
+              <Col key={plan.name} xs={24} md={8}>
+                <Card
+                  className={plan.highlight ? 'landing-card landing-plan-highlight' : 'landing-card'}
+                  title={plan.name}
+                >
+                  <Title level={3} style={{ marginTop: 0 }}>
+                    {plan.price}
+                    {plan.period && <Text type="secondary" style={{ fontSize: 14 }}> {plan.period}</Text>}
+                  </Title>
+                  <Paragraph type="secondary">{plan.description}</Paragraph>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <Paragraph type="secondary" className="landing-pricing-disclaimer">
+            {t('landing.pricing.disclaimer')}
+          </Paragraph>
+          <div className="landing-pricing-cta">
+            <Button type="primary" onClick={() => goLogin('signup', 'pricing')}>
+              {t('landing.ctaSignup')}
+            </Button>
+          </div>
+        </div>
       </section>
 
       <section className="landing-section">
@@ -274,12 +318,8 @@ export function LandingPage() {
           <Link to="/cookies" onClick={() => trackCta('cookies', 'footer')}>{t('legal.cookiePolicyLink')}</Link>
           <Link to="/login" onClick={() => trackCta('login', 'footer')}>{t('landing.ctaLogin')}</Link>
         </Space>
-        <Text type="secondary" style={{ fontSize: 12, marginTop: 12, display: 'block' }}>
-          {t('landing.footerNote')}
-        </Text>
-        <Text type="secondary" style={{ fontSize: 11, marginTop: 8, display: 'block' }}>
-          {t('landing.photoCredit')}
-        </Text>
+        <Text type="secondary" className="landing-footer-line">{t('landing.footerNote')}</Text>
+        <Text type="secondary" className="landing-footer-line landing-footer-small">{t('landing.photoCredit')}</Text>
       </footer>
     </div>
   )

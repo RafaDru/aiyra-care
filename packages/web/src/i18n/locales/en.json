@@ -403,7 +403,7 @@
     "ctaLogin": "Sign in",
     "ctaSignup": "Create free account",
     "heroTitle": "Family health in one place",
-    "heroSubtitle": "Vaccines, exams, visits and medications organized for everyone you care for — adults and children — with Ava for everyday support, without replacing your doctor.",
+    "heroSubtitle": "An updated health history, a timeline that follows family life, and immediate support at medical visits. Centralizes exams, appointments, reminders and calendar — connected to Google Calendar and Outlook. Ava, our AI agent, helps families organize faster.",
     "heroNote": "Features in use by real families. Copy and pricing still under review.",
     "pains": {
       "title": "You're not alone in this",
@@ -437,17 +437,35 @@
     "showcases": {
       "export": {
         "title": "Bring a clear summary to the visit",
-        "body": "Generate a clinical export with what matters: vaccines, recent exams, medications and timeline. Chart data — not AI invention — so your clinician starts with context."
+        "body": "Clinical export with vaccines, recent exams, medications and timeline — real chart data so you arrive prepared for your health professional."
       },
       "ava": {
-        "title": "Ava: companion to organize care",
-        "body": "Chat to prepare questions, understand a result or review what's pending. Family support and organization — not diagnosis or emergency care."
+        "title": "Ava — your pocket companion at the visit",
+        "body": "Our AI agent supports families with everyday questions, organizes context from real chart data, and helps you prepare the conversation faster."
       },
       "timeline": {
-        "title": "Timeline and health milestones",
-        "body": "See visits, exams and vaccines in order. Measurement charts help track progress with your health professional."
+        "title": "A timeline that follows the family",
+        "body": "Visits, exams, vaccines and measurements in order — a continuous view of health for everyone you care for, adults and children."
       }
     },
+    "gallery": {
+      "title": "Inside the platform",
+      "subtitle": "Real AiyraCare screens — history, agenda, exams and Ava conversation.",
+      "items": [
+        { "key": "dashboard", "title": "Family dashboard", "altKey": "landing.screenshots.dashboard" },
+        { "key": "agenda", "title": "Agenda and reminders", "altKey": "landing.screenshots.agenda" },
+        { "key": "avaChat", "title": "Chat with Ava", "altKey": "landing.screenshots.avaChat" }
+      ]
+    },
+    "screenshots": {
+      "dashboard": "Dashboard — family profiles",
+      "patientOverview": "Patient profile — clinical view",
+      "timeline": "Clinical timeline",
+      "agenda": "Agenda and calendar",
+      "exams": "Exams and markers",
+      "avaChat": "Ava — chat with chart context"
+    },
+    "avaDisclaimer": "Ava guides you using your chart and everyday questions. She does not perform exams, issue diagnoses, or replace medical evaluation or emergency care (SAMU 192).",
     "useCases": {
       "title": "How families use it today",
       "stepLabel": "Step {{n}}",
@@ -479,8 +497,8 @@
           "body": "Deterministic clinical summary, PDF and temporary link to share with doctors and other professionals."
         },
         {
-          "title": "Ava day to day",
-          "body": "Global chat with patient context to organize questions and prepare visits."
+          "title": "Ava — AI agent",
+          "body": "Pocket companion at the visit: answers questions, organizes context and speeds up what you need before the appointment."
         },
         {
           "title": "Agenda and calendar",
@@ -501,8 +519,8 @@
       "items": [
         "Evidence-based clinical agents (after regulatory review)",
         "Expanded measurements and milestones",
-        "Dynamic pricing on the page and public go-live",
-        "Real app screenshots and demo video"
+        "Ava guardrails — health focus and safety",
+        "Dynamic pricing on the page and public go-live"
       ]
     },
     "pricing": {
@@ -535,8 +553,8 @@
       "title": "Organize family care today",
       "body": "Quick signup. You control integrations and can delete your account anytime."
     },
-    "footerNote": "AiyraCare — family support. Does not replace emergency (SAMU 192) or medical care.",
-    "photoCredit": "Illustrative photos via Unsplash (free license). Interfaces are mockups — real app screenshots on the roadmap.",
+    "footerNote": "AiyraCare — technology for families who want organized health history.",
+    "photoCredit": "Illustrative photos via Unsplash. Real product screenshots; demo data when applicable.",
     "loginDiscover": "Discover the platform",
     "media": {
       "heroFamily": "Family — care and wellbeing",
@@ -554,8 +572,8 @@
       "avaLines": [
         "What should I bring to Ana's visit next week?",
         "Vaccines on track, March blood work and current meds. Want me to build an export summary?",
-        "Yes, and help with questions for the doctor?",
-        "Sure: sleep, appetite and whether night cough changed. I don't replace your doctor."
+        "Yes, and help with questions for the visit?",
+        "Sure: sleep, appetite and whether night cough changed. I can build the export too."
       ],
       "timelineTitle": "Timeline",
       "timelineItems": [
