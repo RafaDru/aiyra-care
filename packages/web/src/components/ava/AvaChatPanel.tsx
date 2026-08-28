@@ -43,6 +43,7 @@ interface ChatMessage {
   text: string
   revised?: boolean
   proposedActions?: AvaProposedAction[]
+  streaming?: boolean
 }
 
 interface Props {
@@ -218,6 +219,7 @@ export function AvaChatPanel({
 
     if (!overrideText) setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
+    setMessages((prev) => [...prev, { role: 'assistant', text: '', streaming: true }])
     setLoading(true)
     setActivityTrace([])
     touchAvaLastActivity()
@@ -237,6 +239,15 @@ export function AvaChatPanel({
             entityPin: pin,
           },
           (event) => setActivityTrace((prev) => [...prev, event]),
+          (delta) => {
+            setMessages((prev) => {
+              const next = [...prev]
+              const idx = next.findIndex((m, i) => i === next.length - 1 && m.role === 'assistant' && m.streaming)
+              if (idx < 0) return prev
+              next[idx] = { ...next[idx], text: next[idx].text + delta }
+              return next
+            })
+          },
         ))
       if (res.conversationId) onConversationIdChange?.(res.conversationId)
       loadConversationList()
@@ -245,12 +256,25 @@ export function AvaChatPanel({
       if (res.activityTrace?.length) setActivityTrace(res.activityTrace)
       setLastModel(`${res.provider} · ${res.model}`)
       setQuota(res.quota)
-      setMessages((prev) => [...prev, {
-        role: 'assistant',
-        text: res.reply,
-        revised: res.reflection.revised,
-        proposedActions: res.proposedActions ?? [],
-      }])
+      setMessages((prev) => {
+        const next = [...prev]
+        const idx = next.findIndex((m, i) => i === next.length - 1 && m.role === 'assistant' && m.streaming)
+        if (idx >= 0) {
+          next[idx] = {
+            role: 'assistant',
+            text: res.reply,
+            revised: res.reflection.revised,
+            proposedActions: res.proposedActions ?? [],
+          }
+          return next
+        }
+        return [...next, {
+          role: 'assistant',
+          text: res.reply,
+          revised: res.reflection.revised,
+          proposedActions: res.proposedActions ?? [],
+        }]
+      })
       trackProductEvent('ava_chat_completed', {
         duration_ms: Date.now() - startedAt,
         conversation_id: res.conversationId,
@@ -259,6 +283,11 @@ export function AvaChatPanel({
         tier: res.tier,
       }, { patientId })
     } catch (e) {
+      setMessages((prev) => {
+        const idx = prev.findIndex((m, i) => i === prev.length - 1 && m.role === 'assistant' && m.streaming)
+        if (idx >= 0) return prev.slice(0, idx)
+        return prev
+      })
       const errMsg = e instanceof Error ? e.message : String(e)
       if (errMsg.includes('402') || errMsg.includes('Franquia') || errMsg.includes('LLM_QUOTA')) {
         trackProductEvent('ava_quota_blocked', { error_code: 'LLM_QUOTA_EXCEEDED' }, { patientId })

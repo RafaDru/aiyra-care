@@ -232,6 +232,14 @@ Mantenha empatia, brevidade, sem diagnóstico afirmativo.`,
   ]
 }
 
+/** When true, next turn should load full prontuário even if session pins exist. */
+export function reflectionNeedsFullContext(outcome: AvaReflectionOutcome): boolean {
+  if (!outcome.satisfactory) return true
+  if (outcome.revised) return true
+  const contextHintRe = /contexto|prontu[aá]rio|n[aã]o h[aá] registro|faltou|incompleto|duplic/i
+  return outcome.issues.some((issue) => contextHintRe.test(issue))
+}
+
 export function combineReflectionOutcome(
   deterministic: { issues: string[]; severity: AvaReflectionSeverity },
   critique: AvaCritiqueResult | null,

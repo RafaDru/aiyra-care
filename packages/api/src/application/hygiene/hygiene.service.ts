@@ -25,7 +25,7 @@ export class HygieneService {
       patientId,
       limit: 100,
     })
-    return rows.map((row) => this.enrichCandidate(row))
+    return Promise.all(rows.map((row) => this.enrichCandidate(row)))
   }
 
   async pendingCount(accountId: string): Promise<number> {

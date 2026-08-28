@@ -12,7 +12,19 @@ import type { AppAccountRepository } from '../../domain/auth/app-account.reposit
 import { caregiverFirstName } from '../../domain/llm/ava-personalization.js'
 import type { AvaActivityEmitter } from '../../domain/llm/ava-activity.js'
 import { emitAvaActivity } from '../../domain/llm/ava-activity.js'
+import { reflectionNeedsFullContext } from '../../domain/llm/ava-reflection.js'
 import { runAvaContextTools } from '../../domain/llm/ava-tools.js'
+
+export type AvaChatEmitters = {
+  activity?: AvaActivityEmitter
+  replyDelta?: (chunk: string) => void
+}
+
+function resolveEmitters(emitters?: AvaActivityEmitter | AvaChatEmitters): AvaChatEmitters {
+  if (!emitters) return {}
+  if (typeof emitters === 'function') return { activity: emitters }
+  return emitters
+}
 
 export class AvaChatService {
   constructor(
@@ -42,10 +54,12 @@ export class AvaChatService {
       allowLlmDataSharing?: boolean
       entityPin?: AvaEntityPin
     },
-    activityEmitter?: AvaActivityEmitter,
+    emitters?: AvaActivityEmitter | AvaChatEmitters,
   ) {
+    const { activity: activityEmitter, replyDelta } = resolveEmitters(emitters)
     let conversationId = input.conversationId
     let serverHistory = input.history
+    let loadedMessages: Awaited<ReturnType<AvaConversationService['getMessages']>> | null = null
 
     if (input.accountId && this.conversations) {
       const conv = await this.conversations.ensureConversation(input.accountId, {
@@ -55,9 +69,9 @@ export class AvaChatService {
         firstMessage: input.message,
       })
       conversationId = conv.id
-      const loaded = await this.conversations.getMessages(input.accountId, conv.id)
-      if (loaded) {
-        serverHistory = loaded.messages
+      loadedMessages = await this.conversations.getMessages(input.accountId, conv.id)
+      if (loadedMessages) {
+        serverHistory = loadedMessages.messages
           .filter((m) => m.role === 'user' || m.role === 'assistant')
           .slice(-12)
           .map((m) => ({ role: m.role, content: m.content }))
@@ -76,6 +90,18 @@ export class AvaChatService {
     if (conversationId && this.sessionContext) {
       const activePins = await this.sessionContext.listActive(conversationId)
       compactPrompt = activePins.length > 0
+      if (compactPrompt && loadedMessages) {
+        const lastAssistant = loadedMessages.messages
+          .filter((m) => m.role === 'assistant')
+          .slice(-1)[0]
+        const reflectionMeta = lastAssistant?.metadata?.reflection as {
+          needsFullContext?: boolean
+          satisfactory?: boolean
+        } | undefined
+        if (reflectionMeta?.needsFullContext || reflectionMeta?.satisfactory === false) {
+          compactPrompt = false
+        }
+      }
     }
 
     let attachmentBlock = ''
@@ -154,6 +180,7 @@ export class AvaChatService {
       operationalBlock: gathered.operationalBlock,
       caregiverFirstName: caregiverFirst,
       quotaContext: { email: quotaEmail },
+      onReplyDelta: replyDelta,
     }, activityEmitter)
 
     if (input.accountId && conversationId && this.conversations) {
@@ -166,6 +193,7 @@ export class AvaChatService {
           revised: orchestratorResult.reflection.revised,
           satisfactory: orchestratorResult.reflection.satisfactory,
           severity: orchestratorResult.reflection.severity,
+          needsFullContext: reflectionNeedsFullContext(orchestratorResult.reflection),
         },
       })
     }

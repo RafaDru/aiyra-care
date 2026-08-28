@@ -1,11 +1,12 @@
 import type { LlmCompletionResult, LlmMessage, LlmRouterOptions, LlmTier } from '../../domain/llm/llm.types.js'
+import { chunkReplyForSse } from '../../domain/llm/ava-reply-stream.js'
 import {
   geminiFlashLiteChatModel,
   geminiProChatModel,
   opencodeGoApiKey,
   opencodeZenApiKey,
 } from '../../domain/llm/llm-policy.js'
-import { completeWithGemini, completeWithGroq } from './llm-chat.providers.js'
+import { completeWithGemini, completeWithGroq, streamWithGemini } from './llm-chat.providers.js'
 import { completeWithOpenCodeGo, completeWithOpenCodeZenFree } from './opencode-chat.provider.js'
 
 type Attempt = { provider: string; ok: boolean; error?: string }
@@ -45,6 +46,20 @@ export class LlmRouter {
     const suffix = jsonMode ? '-json' : ''
     const maxTokens = jsonMode ? 512 : undefined
     const jsonOpts = jsonMode ? { jsonMode: true, maxTokens } : { maxTokens }
+    const deltaState = { sent: false }
+    const onReplyDelta = routerOpts?.onReplyDelta
+    const emitDelta = onReplyDelta
+      ? (chunk: string) => {
+          deltaState.sent = true
+          onReplyDelta(chunk)
+        }
+      : undefined
+
+    const emitChunkedFallback = (text: string) => {
+      if (!emitDelta || deltaState.sent) return
+      for (const chunk of chunkReplyForSse(text)) emitDelta(chunk)
+      if (text) deltaState.sent = true
+    }
 
     const tryProvider = async (
       label: string,
@@ -52,6 +67,7 @@ export class LlmRouter {
     ): Promise<LlmCompletionResult | null> => {
       try {
         const result = await fn()
+        emitChunkedFallback(result.text)
         attempts.push({ provider: label, ok: true })
         return result
       } catch (err) {
@@ -77,11 +93,19 @@ export class LlmRouter {
     }
 
     if (process.env.GEMINI_API_KEY?.trim()) {
-      const flash = await tryProvider(`gemini-flash${suffix}`, () =>
-        completeWithGemini(messages, tier, {
+      const flash = await tryProvider(`gemini-flash${suffix}`, () => {
+        if (!jsonMode && emitDelta) {
+          return streamWithGemini(messages, tier, {
+            model: geminiFlashLiteChatModel(),
+            maxTokens,
+            onDelta: emitDelta,
+          })
+        }
+        return completeWithGemini(messages, tier, {
           model: geminiFlashLiteChatModel(),
           maxTokens,
-        }))
+        })
+      })
       if (flash) return flash
     }
 

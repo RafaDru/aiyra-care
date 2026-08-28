@@ -360,6 +360,19 @@
       "researching": "Pesquisando"
     }
   },
+  "hygiene": {
+    "loginPromptTitle": "Registros parecidos no prontuário",
+    "loginPromptBody": "Encontramos {{count}} possível duplicidade — como no Google Fotos, você pode unificar ou manter separado.",
+    "entityTypeLabel": "Tipo: {{type}}",
+    "recordA": "Registro A",
+    "recordB": "Registro B",
+    "similarityHint": "Similaridade estimada: {{score}}%",
+    "sameEntity": "Mesmo registro",
+    "distinct": "Registros distintos",
+    "dismiss": "Ignorar",
+    "later": "Depois",
+    "openPatient": "Abrir prontuário"
+  },
   "agenda": {
     "new": "Novo lembrete",
     "edit": "Editar entrada",

@@ -5,6 +5,7 @@ import {
   mergeTokenUsages,
   combineReflectionOutcome,
   shouldSkipLlmCritique,
+  reflectionNeedsFullContext,
 } from '../src/domain/llm/ava-reflection.js'
 import type { FamilySupportInsight } from '../src/domain/family-support/family-support.types.js'
 
@@ -69,5 +70,25 @@ describe('ava-reflection', () => {
     const ok = { issues: [] as string[], severity: 'ok' as const }
     expect(shouldSkipLlmCritique(ok, 'Resposta curta e adequada.', 'últimas vacinas?')).toBe(true)
     expect(shouldSkipLlmCritique(ok, 'x'.repeat(3000), 'últimas vacinas?')).toBe(false)
+  })
+
+  it('reflectionNeedsFullContext when unsatisfactory or revised', () => {
+    const ok = combineReflectionOutcome(
+      { issues: [], severity: 'ok' },
+      { satisfactory: true, issues: [], severity: 'ok' },
+      false,
+      1,
+      [],
+    )
+    expect(reflectionNeedsFullContext(ok)).toBe(false)
+
+    const bad = combineReflectionOutcome(
+      { issues: ['faltou contexto do prontuário'], severity: 'minor' },
+      null,
+      false,
+      1,
+      [],
+    )
+    expect(reflectionNeedsFullContext(bad)).toBe(true)
   })
 })

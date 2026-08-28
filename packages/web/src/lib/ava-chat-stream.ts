@@ -30,6 +30,7 @@ export async function avaChatWithActivityStream(
   patientId: string,
   body: AvaChatRequestBody,
   onActivity: (event: AvaActivityEvent) => void,
+  onReplyDelta?: (chunk: string) => void,
 ): Promise<AvaChatResponse> {
   const headers = await authHeaders()
   const res = await fetch(`${BASE_URL}/patients/${patientId}/ava/chat`, {
@@ -68,6 +69,10 @@ export async function avaChatWithActivityStream(
       if (!dataLine) continue
       const payload = JSON.parse(dataLine) as unknown
       if (eventName === 'activity') onActivity(payload as AvaActivityEvent)
+      if (eventName === 'reply_delta') {
+        const delta = payload as { text?: string }
+        if (delta.text && onReplyDelta) onReplyDelta(delta.text)
+      }
       if (eventName === 'complete') result = payload as AvaChatResponse
       if (eventName === 'error') {
         const err = payload as { message?: string; code?: string }

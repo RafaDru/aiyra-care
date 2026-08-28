@@ -3,6 +3,7 @@ import type { AvaChatService } from '../../../application/llm/ava-chat.service.j
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess } from '../auth/patient-access.guard.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
+import { chunkReplyForSse } from '../../../domain/llm/ava-reply-stream.js'
 import { avaChatBodySchema, avaChatParamsSchema } from './ava.schema.js'
 
 function writeSse(res: import('node:http').ServerResponse, event: string, data: unknown) {
@@ -46,9 +47,19 @@ export class AvaController {
       res.write('\n')
 
       try {
-        const result = await this.avaChat.chat(chatInput, (event) => {
-          writeSse(res, 'activity', event)
+        let replyDeltaSent = false
+        const result = await this.avaChat.chat(chatInput, {
+          activity: (event) => writeSse(res, 'activity', event),
+          replyDelta: (chunk) => {
+            replyDeltaSent = true
+            writeSse(res, 'reply_delta', { text: chunk })
+          },
         })
+        if (!replyDeltaSent && result.reply) {
+          for (const chunk of chunkReplyForSse(result.reply)) {
+            writeSse(res, 'reply_delta', { text: chunk })
+          }
+        }
         writeSse(res, 'complete', result)
         res.end()
       } catch (err) {

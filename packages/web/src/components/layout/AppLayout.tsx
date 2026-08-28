@@ -10,6 +10,7 @@ import { AppLogo } from '../brand/AppLogo.js'
 import { LanguageSwitcher } from '../ui/LanguageSwitcher.js'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
 import { AvaGlobalDock } from '../ava/AvaGlobalDock.js'
+import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -163,6 +164,7 @@ export function AppLayout() {
           <Outlet />
         </Content>
       </Layout>
+      {configured && user && <HygieneLoginPrompt />}
       <AvaGlobalDock />
     </Layout>
   )

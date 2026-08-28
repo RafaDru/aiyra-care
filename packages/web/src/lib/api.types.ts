@@ -612,6 +612,20 @@ export interface AvaActivityEvent {
   ts: number
 }
 
+export interface HygieneCandidateItem {
+  id: string
+  patientId: string
+  entityType: string
+  entityIdA: string
+  entityIdB: string
+  status: string
+  score: number
+  detector?: string
+  evidence?: Record<string, unknown>
+  entityA?: Record<string, unknown>
+  entityB?: Record<string, unknown>
+}
+
 export type AvaProposedActionType =
   | 'integration_sync'
   | 'clinical_export'

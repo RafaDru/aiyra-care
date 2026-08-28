@@ -294,7 +294,8 @@ export const api = {
       patientId: string,
       body: Omit<AvaChatRequestBody, 'streamActivity'>,
       onActivity: (event: import('./api.types.js').AvaActivityEvent) => void,
-    ) => avaChatWithActivityStream(patientId, body, onActivity),
+      onReplyDelta?: (chunk: string) => void,
+    ) => avaChatWithActivityStream(patientId, body, onActivity, onReplyDelta),
     contextSuggestions: (patientId: string) =>
       request<{ items: import('./api.types.js').AvaContextSuggestion[] }>(
         `/patients/${patientId}/ava/context-suggestions`,
@@ -420,13 +421,7 @@ export const api = {
       const qs = patientId ? `?patientId=${encodeURIComponent(patientId)}` : ''
       return request<{
         pendingCount: number
-        items: Array<{
-          id: string
-          patientId: string
-          entityType: string
-          status: string
-          score: number
-        }>
+        items: import('./api.types.js').HygieneCandidateItem[]
       }>(`/hygiene/candidates${qs}`)
     },
     resolve: (candidateId: string, decision: 'same_entity' | 'distinct' | 'dismissed') =>

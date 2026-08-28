@@ -122,3 +122,112 @@ export async function completeWithGemini(
     usage,
   }
 }
+
+export async function streamWithGemini(
+  messages: LlmMessage[],
+  tier: LlmTier,
+  opts: {
+    maxTokens?: number
+    model?: string
+    onDelta: (chunk: string) => void
+  },
+): Promise<LlmCompletionResult> {
+  const key = process.env.GEMINI_API_KEY?.trim()
+  if (!key) throw new Error('GEMINI_API_KEY não configurada')
+  const model = opts.model ?? geminiChatModel()
+
+  const systemParts = messages.filter((m) => m.role === 'system').map((m) => m.content)
+  const nonSystem = messages.filter((m) => m.role !== 'system')
+  const systemInstruction = systemParts.length ? systemParts.join('\n\n') : undefined
+
+  const contents = nonSystem.map((m) => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }))
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`
+  const body: Record<string, unknown> = {
+    contents,
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: opts.maxTokens ?? avaMaxOutputTokens(),
+    },
+  }
+  if (systemInstruction) {
+    body.system_instruction = { parts: [{ text: systemInstruction }] }
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => '')
+    throw new Error(`Gemini stream falhou (${res.status}): ${errBody.slice(0, 300)}`)
+  }
+
+  const reader = res.body?.getReader()
+  if (!reader) throw new Error('Gemini stream sem body')
+
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let fullText = ''
+  let usageMeta: {
+    promptTokenCount?: number
+    candidatesTokenCount?: number
+    totalTokenCount?: number
+  } = {}
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue
+      const raw = line.slice(5).trim()
+      if (!raw || raw === '[DONE]') continue
+      const json = JSON.parse(raw) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
+        usageMetadata?: typeof usageMeta
+      }
+      const partText = json.candidates?.[0]?.content?.parts?.[0]?.text
+      if (partText) {
+        let delta = partText
+        if (partText.startsWith(fullText)) {
+          delta = partText.slice(fullText.length)
+          fullText = partText
+        } else {
+          fullText += partText
+        }
+        if (delta) opts.onDelta(delta)
+      }
+      if (json.usageMetadata) usageMeta = json.usageMetadata
+    }
+  }
+
+  const text = fullText.trim()
+  if (!text) throw new Error('Gemini stream retornou resposta vazia')
+
+  const promptText = messages.map((m) => m.content).join('\n')
+  const usage = usageFromApiOrEstimate(
+    {
+      promptTokens: usageMeta.promptTokenCount,
+      completionTokens: usageMeta.candidatesTokenCount,
+      totalTokens: usageMeta.totalTokenCount,
+    },
+    promptText,
+    text,
+  )
+
+  return {
+    text,
+    provider: `gemini:${model}`,
+    model,
+    tier,
+    usage,
+  }
+}

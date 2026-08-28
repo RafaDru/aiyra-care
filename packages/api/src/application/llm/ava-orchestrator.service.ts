@@ -94,6 +94,7 @@ export class AvaOrchestratorService {
     conversationId?: string
     caregiverFirstName?: string | null
     quotaContext?: { email?: string | null }
+    onReplyDelta?: (chunk: string) => void
   }, activityEmitter?: AvaActivityEmitter): Promise<AvaChatResult> {
     if (!isAvaLlmEnabled()) throw new Error('AVA_LLM_DISABLED')
 
@@ -156,7 +157,11 @@ Mensagem atual do responsável: ${trimmed}`
     let model = 'n/a'
     let attempts = 0
 
-    const routerOpts = { allowLlmDataSharing: input.allowLlmDataSharing ?? false }
+    const routerOpts = {
+      allowLlmDataSharing: input.allowLlmDataSharing ?? false,
+      onReplyDelta: input.onReplyDelta,
+    }
+    const routerOptsNoStream = { allowLlmDataSharing: input.allowLlmDataSharing ?? false }
 
     attempts += 1
     steps.push('resposta inicial')
@@ -231,7 +236,7 @@ Mensagem atual do responsável: ${trimmed}`
         revised = true
         steps.push('revisão da resposta')
         emit('reflection.revision', 'reflection', 'start')
-        const revision = await this.router.completeChat(revisionMessages, tier, routerOpts)
+        const revision = await this.router.completeChat(revisionMessages, tier, routerOptsNoStream)
         emit('reflection.revision', 'reflection', 'done')
         usages.push(revision.usage)
         provider = revision.provider

@@ -33,6 +33,8 @@ export interface LlmCompletionResult {
 export interface LlmRouterOptions {
   /** Aceita Zen gratuito (DeepSeek Free) — dados podem ser usados para melhorar o modelo. */
   allowLlmDataSharing?: boolean
+  /** Emite trechos da resposta inicial (SSE reply_delta / Gemini stream). */
+  onReplyDelta?: (chunk: string) => void
 }
 
 export interface LlmUsageAccount {
