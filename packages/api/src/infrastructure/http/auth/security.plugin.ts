@@ -32,7 +32,7 @@ export async function registerSecurityPlugin(app: FastifyInstance, authService: 
 
   app.addHook('onRequest', async (request, reply: FastifyReply) => {
     const path = normalizePath(request.url)
-    if (PUBLIC_PATHS.has(path) || path.startsWith('/auth/') || path.startsWith('/clinical-export/share/') || path.startsWith('/calendar/google/oauth/callback') || path.startsWith('/calendar/microsoft/oauth/callback') || isPublicCompliancePath(path) || path === '/billing/webhook') return
+    if (PUBLIC_PATHS.has(path) || path.startsWith('/auth/') || path.startsWith('/clinical-export/share/') || path.startsWith('/calendar/google/oauth/callback') || path.startsWith('/calendar/microsoft/oauth/callback') || isPublicCompliancePath(path) || path === '/billing/webhook' || path === '/telemetry/public-events') return
 
     if (isOpsRoute(path) && isOpsKeyAuthorized(request as AuthenticatedRequest)) return
 

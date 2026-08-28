@@ -663,6 +663,8 @@ export type ProductEventName =
   | 'hygiene_prompt_shown'
   | 'hygiene_resolved'
   | 'onboarding_step'
+  | 'landing_page_view'
+  | 'landing_cta_click'
 
 export interface AvaConversation {
   id: string

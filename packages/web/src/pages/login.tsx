@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Alert, Button, Card, Checkbox, Divider, Form, Input, Space, Spin, Typography } from 'antd'
 import { GoogleOutlined, WindowsOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
@@ -116,6 +116,9 @@ export function LoginPage() {
       />
       <Card>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <div style={{ textAlign: 'center' }}>
+            <Link to="/home">{t('landing.loginDiscover')}</Link>
+          </div>
           <div>
             <Title level={3} style={{ marginBottom: 4 }}>{t('auth.title')}</Title>
             <Text type="secondary">{t('auth.subtitle')}</Text>

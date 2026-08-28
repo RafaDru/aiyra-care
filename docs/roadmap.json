@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-26",
+  "updatedAt": "2026-08-28",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -1722,6 +1722,90 @@
           "title": "Bridge dev-audit → staging metrics",
           "status": "planned",
           "detail": "Correlacionar hooks de dev com product_events em ambiente staging."
+        }
+      ]
+    },
+    {
+      "id": "institutional-landing",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Site institucional / landing page",
+      "summary": "Página pública de apresentação do AiyraCare: problema que resolvemos, motivadores, como funciona, planos e preços, CTAs para login/cadastro. Copy e pricing finais pendentes — v1 com textos genéricos e telemetria para não perder funil.",
+      "status": "in_progress",
+      "statusLabel": "V1 placeholder + tracking",
+      "reviewBadge": ["content", "legal"],
+      "items": [
+        {
+          "id": "landing-route-public",
+          "title": "Rota pública /home (sem auth)",
+          "status": "done",
+          "detail": "Landing fora do AppLayout; login com link «Conheça a plataforma»."
+        },
+        {
+          "id": "landing-hero-cta",
+          "title": "Hero + CTAs primários (cadastro / login)",
+          "status": "done",
+          "detail": "Copy placeholder; track landing_cta_click por seção."
+        },
+        {
+          "id": "landing-problems-solution",
+          "title": "Problemas que resolvemos + como funciona",
+          "status": "done",
+          "detail": "Sync convênios, prontuário centralizado, Ava apoio — textos genéricos até marketing."
+        },
+        {
+          "id": "landing-features-grid",
+          "title": "Grid de funcionalidades (sync, export, agenda, Ava, higienização)",
+          "status": "done",
+          "detail": "Ícones + bullets; revisão de conteúdo com badge Conteúdo."
+        },
+        {
+          "id": "landing-pricing-plans",
+          "title": "Planos e preços (placeholder)",
+          "status": "done",
+          "detail": "Franquia grátis, plano família, pacotes 10/30 créditos — alinhar copy com BillingSettingsCard quando marketing fechar."
+        },
+        {
+          "id": "landing-public-tracking",
+          "title": "Telemetria anônima (landing_page_view / landing_cta_click)",
+          "status": "done",
+          "detail": "POST /telemetry/public-events sem auth; sessionId browser; sem PHI."
+        },
+        {
+          "id": "landing-public-billing-offers",
+          "title": "GET /billing/offers público (preços dinâmicos)",
+          "status": "planned",
+          "detail": "Expor pacotes/plano família na landing sem login; hoje valores estáticos na UI."
+        },
+        {
+          "id": "landing-seo-meta",
+          "title": "SEO + Open Graph + sitemap",
+          "status": "planned",
+          "detail": "title/description por locale; og:image brand; /home indexável."
+        },
+        {
+          "id": "landing-root-migration",
+          "title": "Migrar / → landing para visitantes; app em área autenticada",
+          "status": "planned",
+          "detail": "Go-live B2C: visitante em /home ou /; logado redireciona ao dashboard."
+        },
+        {
+          "id": "landing-social-proof",
+          "title": "Prova social e casos de uso (família pediátrica)",
+          "status": "planned",
+          "detail": "Testemunhos, logos convênios, métricas — placeholder até marketing."
+        },
+        {
+          "id": "landing-content-final",
+          "title": "Copy final + revisão jurídica (claims de saúde)",
+          "status": "planned",
+          "detail": "Substituir textos genéricos; parecer médico/jurídico em claims de IA e sync."
+        },
+        {
+          "id": "landing-faq-contact",
+          "title": "FAQ + contato comercial / suporte",
+          "status": "planned",
+          "detail": "Link compliance/contact API; formulário lead opcional."
         }
       ]
     },

@@ -8,4 +8,5 @@ export async function telemetryRoutes(app: FastifyInstance) {
   const service = new ProductEventService(new ProductEventPgRepository(pgPool))
   const controller = new TelemetryController(service)
   app.post('/telemetry/events', controller.ingest.bind(controller))
+  app.post('/telemetry/public-events', controller.ingestPublic.bind(controller))
 }

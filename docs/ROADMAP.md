@@ -81,6 +81,7 @@ Pacote connect, orchestrator, sessões, incremental, SSE, novelty, worker, harde
 
 - Scheduler + `connect-worker` + `sync.completed` SSE
 - Context + export + share
+- **Site institucional** `/home` — épico `institutional-landing` (v1 placeholder + tracking)
 - Integrações enriquecidas (Amil utilização, Unimed PDF, Bradesco, assets)
 - Billing Stripe + export Contabilizei + GCP alerts doc
 - Legal/LGPD (código) + feature review framework

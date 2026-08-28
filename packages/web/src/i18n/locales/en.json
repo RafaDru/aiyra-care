@@ -399,6 +399,72 @@
       "dismissed": "Suggestion dismissed."
     }
   },
+  "landing": {
+    "ctaLogin": "Sign in",
+    "ctaSignup": "Create free account",
+    "heroTitle": "Your family's health record, organized",
+    "heroSubtitle": "AiyraCare centralizes vaccines, exams and visits for your children — insurance sync, export for the pediatrician, and Ava to organize questions without replacing your doctor.",
+    "heroNote": "Copy and pricing under review — core features already available for families in use.",
+    "problems": {
+      "title": "Problems we solve",
+      "items": [
+        "History scattered across portals, PDFs and WhatsApp — hard to bring everything to the visit.",
+        "Syncing insurance and labs manually takes family time.",
+        "Duplicates and different names for the same vaccine or exam clutter the chart."
+      ]
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "steps": [
+        "Create an account and add your children's profiles (or your adult profile).",
+        "Connect insurance and labs — automatic sync when the portal allows.",
+        "Review duplicates, export a clinical summary, and chat with Ava to prepare for visits."
+      ]
+    },
+    "features": {
+      "title": "What you get",
+      "items": [
+        { "title": "Insurance sync", "body": "Unimed, Amil, Mater Dei, Hermes Pardini and more — less daily manual work." },
+        { "title": "Clinical export", "body": "Deterministic summary for the pediatrician — no made-up AI facts." },
+        { "title": "Ava companion", "body": "Organizes context and helps prepare questions — family support, not diagnosis." },
+        { "title": "Agenda & reminders", "body": "Appointments, medications and growth milestones in one place." },
+        { "title": "Data hygiene", "body": "Merge duplicate records with confirmation — Google Photos style." },
+        { "title": "Multi-profile", "body": "Separate, secure history for each family member." }
+      ]
+    },
+    "pricing": {
+      "title": "Plans and pricing",
+      "subtitle": "Indicative values — check your account after signup.",
+      "disclaimer": "Final prices and family plan benefits may change before public launch. Not a binding offer.",
+      "plans": [
+        {
+          "name": "Start free",
+          "price": "R$ 0",
+          "period": "",
+          "description": "Monthly handwriting/OCR allowance and essential chart features."
+        },
+        {
+          "name": "Family plan",
+          "price": "Subscription",
+          "period": "/month",
+          "description": "More AI allowance, more patients and premium features — price to confirm.",
+          "highlight": true
+        },
+        {
+          "name": "Credit packs",
+          "price": "R$ 29 · R$ 69",
+          "period": "",
+          "description": "10 or 30 interpretation packs when you need more volume."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Ready to organize family care?",
+      "body": "Quick signup. You control integrations and can delete your account anytime (LGPD)."
+    },
+    "footerNote": "AiyraCare — family support. Does not replace emergency (SAMU 192) or medical care.",
+    "loginDiscover": "Discover the platform"
+  },
   "agenda": {
     "new": "New reminder",
     "edit": "Edit entry",

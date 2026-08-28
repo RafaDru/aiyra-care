@@ -5,6 +5,7 @@ import { RequireCompliance } from './components/auth/RequireCompliance.js'
 import { Dashboard } from './pages/dashboard.js'
 import { PatientDetail } from './pages/patient/detail.js'
 import { IntegrationsPage } from './pages/integrations.js'
+import { LandingPage } from './pages/landing.js'
 import { LoginPage } from './pages/login.js'
 import { OnboardingPage } from './pages/onboarding.js'
 import { SettingsLayout } from './layouts/SettingsLayout.js'
@@ -23,6 +24,7 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/home" element={<LandingPage />} />
         <Route path="/termos" element={<LegalDocumentPage kind="terms_of_use" />} />
         <Route path="/privacidade" element={<LegalDocumentPage kind="privacy_policy" />} />
         <Route path="/cookies" element={<LegalDocumentPage kind="cookie_policy" />} />

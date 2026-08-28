@@ -399,6 +399,90 @@
       "dismissed": "Sugestão ignorada."
     }
   },
+  "landing": {
+    "ctaLogin": "Entrar",
+    "ctaSignup": "Criar conta grátis",
+    "heroTitle": "O prontuário da família, organizado para você",
+    "heroSubtitle": "AiyraCare centraliza vacinas, exames e consultas dos seus filhos — com sync dos convênios, export para o pediatra e Ava para organizar dúvidas sem substituir o médico.",
+    "heroNote": "Textos e preços em revisão — funcionalidades já disponíveis para famílias em uso.",
+    "problems": {
+      "title": "Problemas que conhecemos",
+      "items": [
+        "Histórico espalhado em portais, PDFs e WhatsApp — difícil levar tudo na consulta.",
+        "Sincronizar convênio e laboratório manualmente consome tempo da família.",
+        "Duplicatas e nomes diferentes para a mesma vacina ou exame confundem o prontuário."
+      ]
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "steps": [
+        "Crie a conta e cadastre os perfis dos filhos (ou seu perfil adulto).",
+        "Conecte convênios e laboratórios — sync automático quando o portal permite.",
+        "Revise duplicatas, exporte um resumo clínico e converse com Ava para preparar a consulta."
+      ]
+    },
+    "features": {
+      "title": "O que você ganha",
+      "items": [
+        {
+          "title": "Sync de convênios",
+          "body": "Unimed, Amil, Mater Dei, Hermes Pardini e mais — dados chegam sem retrabalho diário."
+        },
+        {
+          "title": "Export clínico",
+          "body": "Resumo determinístico para levar ao pediatra — sem inventar informação com IA."
+        },
+        {
+          "title": "Ava companheira",
+          "body": "Organiza contexto e ajuda a preparar perguntas — apoio familiar, não diagnóstico."
+        },
+        {
+          "title": "Agenda e lembretes",
+          "body": "Consultas, medicações e marcos de crescimento no mesmo lugar."
+        },
+        {
+          "title": "Higienização",
+          "body": "Unifique registros duplicados com confirmação — estilo Google Fotos."
+        },
+        {
+          "title": "Multi-perfil",
+          "body": "Luís, Bruno e toda a família com histórico separado e seguro."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Planos e preços",
+      "subtitle": "Valores indicativos — confira na conta após o cadastro.",
+      "disclaimer": "Preços finais e benefícios do plano família podem mudar antes do go-live público. Não constitui oferta vinculante.",
+      "plans": [
+        {
+          "name": "Comece grátis",
+          "price": "R$ 0",
+          "period": "",
+          "description": "Franquia mensal de interpretação (manuscrito/OCR) e uso essencial do prontuário."
+        },
+        {
+          "name": "Plano família",
+          "price": "Assinatura",
+          "period": "/mês",
+          "description": "Mais franquia de IA, mais pacientes e recursos premium — valor a confirmar.",
+          "highlight": true
+        },
+        {
+          "name": "Pacotes de créditos",
+          "price": "R$ 29 · R$ 69",
+          "period": "",
+          "description": "Pacotes de 10 ou 30 interpretações avulsas quando precisar de mais volume."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Pronto para organizar o cuidado da família?",
+      "body": "Cadastro rápido. Você controla integrações e pode excluir a conta quando quiser (LGPD)."
+    },
+    "footerNote": "AiyraCare — apoio à família. Não substitui emergência (SAMU 192) nem consulta médica.",
+    "loginDiscover": "Conheça a plataforma"
+  },
   "agenda": {
     "new": "Novo lembrete",
     "edit": "Editar entrada",

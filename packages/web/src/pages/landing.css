@@ -1,0 +1,96 @@
+.landing-page {
+  min-height: 100vh;
+  background: var(--brand-bg, var(--body-bg, #f8fafc));
+  color: var(--text-primary, inherit);
+}
+
+.landing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.06));
+  background: var(--card-bg, #fff);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.landing-section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.landing-hero {
+  text-align: center;
+  padding-top: 56px;
+  padding-bottom: 56px;
+}
+
+.landing-hero-title {
+  max-width: 720px;
+  margin: 0 auto 16px !important;
+}
+
+.landing-hero-subtitle {
+  max-width: 640px;
+  margin: 0 auto 24px !important;
+  font-size: 17px;
+}
+
+.landing-hero-note {
+  display: block;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+.landing-card {
+  border-radius: 12px;
+  height: 100%;
+}
+
+.landing-plan-highlight {
+  border: 1px solid var(--brand-primary, #0d9488);
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.12);
+}
+
+.landing-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.8;
+}
+
+.landing-cta-final {
+  text-align: center;
+  padding-bottom: 64px;
+}
+
+.landing-footer {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 24px 48px;
+  border-top: 1px solid var(--border, rgba(0, 0, 0, 0.06));
+}
+
+.landing-pricing {
+  background: var(--card-bg, rgba(255, 255, 255, 0.6));
+  border-radius: 16px;
+  margin: 0 24px;
+  max-width: calc(960px - 48px);
+}
+
+@media (max-width: 640px) {
+  .landing-header {
+    flex-wrap: wrap;
+  }
+
+  .landing-section {
+    padding: 32px 16px;
+  }
+
+  .landing-pricing {
+    margin: 0 16px;
+  }
+}

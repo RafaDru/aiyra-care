@@ -13,9 +13,16 @@ export const PRODUCT_EVENT_NAMES = [
   'hygiene_prompt_shown',
   'hygiene_resolved',
   'onboarding_step',
+  'landing_page_view',
+  'landing_cta_click',
 ] as const
 
 export type ProductEventName = typeof PRODUCT_EVENT_NAMES[number]
+
+export const PUBLIC_LANDING_EVENT_NAMES = new Set<ProductEventName>([
+  'landing_page_view',
+  'landing_cta_click',
+])
 
 export const PRODUCT_EVENT_NAME_SET = new Set<string>(PRODUCT_EVENT_NAMES)
 
@@ -44,6 +51,8 @@ export const PRODUCT_EVENT_PROPERTY_KEYS = new Set([
   'event_count',
   'package_id',
   'checkout_kind',
+  'section',
+  'cta_target',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret/i

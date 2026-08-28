@@ -47,5 +47,6 @@ describe('PRODUCT_EVENT_NAME_SET', () => {
   it('includes ava and sync events', () => {
     expect(PRODUCT_EVENT_NAME_SET.has('ava_chat_completed')).toBe(true)
     expect(PRODUCT_EVENT_NAME_SET.has('sync_job_terminal')).toBe(true)
+    expect(PRODUCT_EVENT_NAME_SET.has('landing_page_view')).toBe(true)
   })
 })
