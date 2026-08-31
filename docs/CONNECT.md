@@ -148,6 +148,18 @@ Connect **não** decide qual filho é Luís vs Bruno para dados clínicos finais
 | Fetch | Ver [SYNC_DELTA.md](./SYNC_DELTA.md) |
 | Worker | `packages/connect-worker` — loop `CONNECT_WORKER_INTERVAL_MS`; `CONNECT_WORKER_EXTERNAL=1` na API |
 
+## Grupo Fleury / Hermes Pardini (Precision Care)
+
+Hermes Pardini **não** usa APIs isoladas — o portal de resultados é **Precision Care** do Grupo Fleury (`resultados.grupofleury.com.br`, API `api-plataforma.grupofleury.com.br/precision-care/paciente/api/v1`). Após a combinação de negócios (2023+), login unificado (OTP SMS/e-mail/WhatsApp) pode exibir exames de várias marcas na mesma conta.
+
+| Tópico | Detalhe |
+|--------|---------|
+| Código sync | `hermes_pardini` portal type → scrapers `hermes-pardini-*` |
+| Auth produção | Browser PKCE + senha protocolo; refresh HTTP |
+| Auth PoC | `npm run probe:fleury-auth` / `probe:fleury-marca` |
+| Doc | [FLEURY_PRECISION_CARE.md](./FLEURY_PRECISION_CARE.md) |
+| Roadmap | épico `fleury-precision-care` |
+
 ### Fase 3 — Deploy separado
 
 - Serviço Connect com vault dedicado.

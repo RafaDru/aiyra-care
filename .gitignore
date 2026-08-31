@@ -19,5 +19,8 @@ tmp-*.js
 tmp-chunk-*.js
 packages/api/tmp-*
 
+# Fleury Precision Care PoC — tokens locais (nunca commitar)
+packages/api/scripts/output/*.json
+
 # Local decision sandbox — contexto de exploração, não versionar
 sandbox/

@@ -5,6 +5,7 @@ import {
 } from './portal-browser-ui.helper.js'
 import {
   hermesPardiniPortalEntryUrl,
+  fleuryPrecisionUnifiedEntryUrl,
   hermesPardiniResultadosExameUrl,
 } from './hermes-pardini.portal.js'
 
@@ -168,6 +169,12 @@ export async function waitForHermesPardiniPortalOrLogin(page: Page): Promise<voi
 
 export async function openHermesPardiniPortalLogin(page: Page): Promise<void> {
   await page.goto(hermesPardiniPortalEntryUrl(), { waitUntil: 'domcontentloaded', timeout: 60_000 })
+  await waitForHermesPardiniPortalOrLogin(page)
+}
+
+/** Portal unificado Grupo Fleury (OTP SMS/e-mail/WhatsApp — sem `origin=pardini`). */
+export async function openFleuryPrecisionUnifiedPortal(page: Page): Promise<void> {
+  await page.goto(fleuryPrecisionUnifiedEntryUrl(), { waitUntil: 'domcontentloaded', timeout: 60_000 })
   await waitForHermesPardiniPortalOrLogin(page)
 }
 

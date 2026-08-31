@@ -2,6 +2,44 @@
 
 export type HermesPardiniRegion = 'mg' | 'sp'
 
+/** Marcas no ecossistema Precision Care — headers para GET /pedidos (PoC multi-marca). */
+export type FleuryPrecisionMarcaKey = 'pardini' | 'fleury' | 'a_mais' | 'labs_a' | 'none'
+
+export const FLEURY_PRECISION_MARCA_PROFILES: Record<
+  FleuryPrecisionMarcaKey,
+  Record<string, string>
+> = {
+  pardini: {
+    'marca-selecionada': 'pardini',
+    'marca-origem': 'pardini',
+    grupo: 'grupo-pardini',
+  },
+  fleury: {
+    'marca-selecionada': 'fleury',
+    'marca-origem': 'fleury',
+    grupo: 'grupo-fleury',
+  },
+  a_mais: {
+    'marca-selecionada': 'a+',
+    'marca-origem': 'a+',
+    grupo: 'grupo-fleury',
+  },
+  labs_a: {
+    'marca-selecionada': 'labs-a+',
+    'marca-origem': 'labs-a+',
+    grupo: 'grupo-fleury',
+  },
+  none: {},
+}
+
+export const FLEURY_PRECISION_MARCA_PROBE_ORDER: FleuryPrecisionMarcaKey[] = [
+  'pardini',
+  'fleury',
+  'a_mais',
+  'labs_a',
+  'none',
+]
+
 /** Loja Magento regional (agendamento/compras — não é portal de laudos). */
 export const HERMES_PARDINI_MAGENTO_ORIGINS: Record<HermesPardiniRegion, string> = {
   mg: 'https://www.hermespardini.com.br/lojavirtual',
@@ -11,6 +49,7 @@ export const HERMES_PARDINI_MAGENTO_ORIGINS: Record<HermesPardiniRegion, string>
 export const HERMES_PARDINI_PRECISION_CARE = {
   portalOrigin: 'https://resultados.grupofleury.com.br',
   portalEntryUrl: 'https://resultados.grupofleury.com.br/?origin=pardini',
+  unifiedEntryUrl: 'https://resultados.grupofleury.com.br',
   spaBase: 'https://resultados.grupofleury.com.br/precision-care',
   /** Shell BFF (produtos, config) — exames estão no microfrontend portalpaciente. */
   bffBase: 'https://api-plataforma.grupofleury.com.br/precision-care/api',
@@ -39,6 +78,11 @@ export function hermesPardiniMagentoLoginUrl(region: HermesPardiniRegion = 'mg')
 
 export function hermesPardiniPortalEntryUrl(): string {
   return HERMES_PARDINI_PRECISION_CARE.portalEntryUrl
+}
+
+/** Entrada unificada Precision Care (sem `origin=pardini`) — login OTP SMS/e-mail/WhatsApp. */
+export function fleuryPrecisionUnifiedEntryUrl(): string {
+  return HERMES_PARDINI_PRECISION_CARE.unifiedEntryUrl
 }
 
 /** Lista de exames no microfrontend portalpaciente (dispara GET /pedidos). */

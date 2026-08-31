@@ -2,6 +2,7 @@ import type { APIRequestContext } from 'playwright'
 import {
   HERMES_PARDINI_PEDIDOS_PAGE_SIZE,
   HERMES_PARDINI_PRECISION_CARE,
+  FLEURY_PRECISION_MARCA_PROFILES,
   hermesPardiniResultadosExameUrl,
 } from './hermes-pardini.portal.js'
 import { extractHermesPardiniExamSummary } from './hermes-pardini-exam-summary.js'
@@ -49,11 +50,8 @@ interface HermesPardiniExame {
 export type HermesPardiniApiHeaderProfile = Record<string, string>
 
 /** Headers de marca exigidos pela API paciente (Precision Care / Pardini). */
-export const HERMES_PARDINI_PACIENTE_API_DEFAULT_HEADERS: Record<string, string> = {
-  'marca-selecionada': 'pardini',
-  'marca-origem': 'pardini',
-  grupo: 'grupo-pardini',
-}
+export const HERMES_PARDINI_PACIENTE_API_DEFAULT_HEADERS: Record<string, string> =
+  FLEURY_PRECISION_MARCA_PROFILES.pardini
 
 function authHeaders(
   accessToken: string,
