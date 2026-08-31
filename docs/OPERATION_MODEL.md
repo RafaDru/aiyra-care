@@ -283,7 +283,7 @@ Mapa de **tudo** trazido na thread: taxonomia, POC cliente 3D, sondas, degradaç
 Fase 0  Foundation ops     [DONE]
 Fase 1  Ops sem te acordar  [parcial — crítico]
 Fase 2  Cache / freshness   [done — generations + manifest web]
-Fase 3  Cliente: ver erros  [pendente — crítico para beta]
+Fase 3  Cliente: ver erros  [done — ingest + ops 3D]
 Fase 4  Fallbacks dormentes [pendente — importante]
 Fase 5  Proativo ao usuário [pendente — opt-in / legal]
 Fase 6  Maturidade          [backlog]
