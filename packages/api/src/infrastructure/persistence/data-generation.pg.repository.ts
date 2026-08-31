@@ -1,5 +1,6 @@
 import type { Pool } from 'pg'
 import type { DomainGenerationRow } from '../../domain/data-generation/data-generation.types.js'
+import { isPgMissingTableError } from './pg-error.helper.js'
 
 export class DataGenerationPgRepository {
   constructor(private readonly pool: Pool) {}
@@ -44,16 +45,21 @@ export class DataGenerationPgRepository {
   }
 
   async listForAccount(accountId: string): Promise<DomainGenerationRow[]> {
-    const { rows } = await this.pool.query(
-      `SELECT patient_id, domain, generation
-       FROM data_domain_generations
-       WHERE account_id = $1`,
-      [accountId],
-    )
-    return rows.map((row) => ({
-      patientId: row.patient_id as string | null,
-      domain: row.domain as string,
-      generation: new Date(row.generation as string).toISOString(),
-    }))
+    try {
+      const { rows } = await this.pool.query(
+        `SELECT patient_id, domain, generation
+         FROM data_domain_generations
+         WHERE account_id = $1`,
+        [accountId],
+      )
+      return rows.map((row) => ({
+        patientId: row.patient_id as string | null,
+        domain: row.domain as string,
+        generation: new Date(row.generation as string).toISOString(),
+      }))
+    } catch (err) {
+      if (isPgMissingTableError(err)) return []
+      throw err
+    }
   }
 }
