@@ -220,4 +220,34 @@ export class OpsMetricsPgRepository {
       lastSeenAt: new Date(row.last_seen_at as string).toISOString(),
     }))
   }
+
+  async clientErrorFingerprints24h(
+    limit = 30,
+  ): Promise<import('../../domain/ops/ops-metrics.types.js').ClientErrorFingerprintRow[]> {
+    const { rows } = await this.pool.query(
+      `SELECT
+         fingerprint,
+         feature,
+         error_kind,
+         error_code,
+         COUNT(*)::int AS count,
+         COUNT(DISTINCT account_id)::int AS account_count,
+         MAX(created_at) AS last_seen_at
+       FROM client_errors
+       WHERE created_at >= NOW() - INTERVAL '24 hours'
+       GROUP BY fingerprint, feature, error_kind, error_code
+       ORDER BY count DESC
+       LIMIT $1`,
+      [limit],
+    )
+    return rows.map((row) => ({
+      fingerprint: row.fingerprint as string,
+      feature: row.feature as string,
+      errorKind: row.error_kind as string,
+      errorCode: row.error_code as string,
+      count: Number(row.count),
+      accountCount: Number(row.account_count),
+      lastSeenAt: new Date(row.last_seen_at as string).toISOString(),
+    }))
+  }
 }

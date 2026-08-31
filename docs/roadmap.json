@@ -1811,7 +1811,7 @@
         {
           "id": "run-client-error-ingest",
           "title": "Ingest erro cliente (fingerprint 3D)",
-          "status": "planned",
+          "status": "done",
           "detail": "Unhandled UI/API errors; sem stack PHI. Ver OPERATION_MODEL §5."
         },
         {

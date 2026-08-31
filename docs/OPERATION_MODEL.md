@@ -338,11 +338,11 @@ Fase 6  Maturidade          [backlog]
 
 | # | Entrega | Debate | Esforço | Status |
 |---|---------|--------|---------|--------|
-| 3.1 | React Error Boundary global | POC lib UI | baixo | pendente |
-| 3.2 | Wrapper `api.ts`: erro sem handler → ingest | POC API path | médio | pendente |
-| 3.3 | `POST /telemetry/client-errors` (fingerprint, allowlist) | backend catalogar | médio | pendente |
-| 3.4 | Agregação 3D (queries ou view interna) | usuário × feature × erro | médio | pendente |
-| 3.5 | Playbooks Nível 1: mapa feature × erro → mensagem UI | fallback interface | médio | pendente |
+| 3.1 | React Error Boundary global | POC lib UI | baixo | **done** |
+| 3.2 | Wrapper `api.ts`: erro sem handler → ingest | POC API path | médio | **done** |
+| 3.3 | `POST /telemetry/client-errors` (fingerprint, allowlist) | backend catalogar | médio | **done** |
+| 3.4 | Agregação 3D (queries ou view interna) | usuário × feature × erro | médio | **done** |
+| 3.5 | Playbooks Nível 1: mapa feature × erro → mensagem UI | fallback interface | médio | **done** |
 | 3.6 | Banner “dados podem estar desatualizados” (sync fail/stale) | alívio pressão | baixo | **done** (Carteira) |
 
 **Critério de saída Fase 3:** você vê top fingerprints sem esperar ticket; usuário vê mensagem clara em erro não tratado.

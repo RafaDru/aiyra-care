@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App as AntAppProvider } from 'antd'
 import { App } from './App.js'
+import { AppErrorBoundary } from './components/errors/AppErrorBoundary.js'
 import { AuthProvider } from './contexts/AuthContext.js'
 import { LlmActivityProvider } from './contexts/LlmActivityContext.js'
 import { ThemeProvider } from './theme/ThemeProvider.js'
@@ -15,7 +16,9 @@ createRoot(document.getElementById('root')!).render(
       <AntAppProvider>
         <AuthProvider>
           <LlmActivityProvider>
-            <App />
+            <AppErrorBoundary>
+              <App />
+            </AppErrorBoundary>
           </LlmActivityProvider>
         </AuthProvider>
       </AntAppProvider>

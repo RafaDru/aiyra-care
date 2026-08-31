@@ -33,7 +33,7 @@ export async function openAuthenticatedDownload(path: string): Promise<void> {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000)
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit & { skipErrorReport?: boolean }): Promise<T> {
   const isFormData = options?.body instanceof FormData
   const headers: Record<string, string> = options?.body && !isFormData ? { 'Content-Type': 'application/json' } : {}
   const { ensureAccessToken, supabaseConfigured } = await import('./supabase.js')
@@ -42,12 +42,24 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw new Error('Sessão não disponível — aguarde ou faça login novamente')
   }
   if (token) headers.Authorization = `Bearer ${token}`
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { ...headers, ...options?.headers },
-    ...options,
-  })
+  const skipReport = options?.skipErrorReport || path.startsWith('/telemetry/')
+  let res: Response
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      headers: { ...headers, ...options?.headers },
+      ...options,
+    })
+  } catch {
+    if (!skipReport) {
+      void import('./client-errors.js').then((m) => m.reportNetworkClientError(path)).catch(() => undefined)
+    }
+    throw new Error('Sem conexão com o servidor')
+  }
   const contentType = res.headers.get('content-type') ?? ''
   if (!res.ok) {
+    if (!skipReport) {
+      void import('./client-errors.js').then((m) => m.reportApiClientError(path, res.status)).catch(() => undefined)
+    }
     if (contentType.includes('application/json')) {
       const body = await res.json().catch(() => ({})) as { message?: string; code?: string; error?: unknown }
       const zodMsg = body.error && typeof body.error === 'object' && 'fieldErrors' in (body.error as object)
@@ -322,6 +334,24 @@ export const api = {
       request<{ accepted: number; rejected: number }>('/telemetry/events', {
         method: 'POST',
         body: JSON.stringify(body),
+        skipErrorReport: true,
+      }),
+    reportClientErrors: (body: {
+      errors: Array<{
+        fingerprint: string
+        feature: string
+        errorKind: 'ui_boundary' | 'api' | 'network'
+        errorCode: string
+        sessionId?: string
+        route?: string
+        patientId?: string
+        properties?: Record<string, unknown>
+      }>
+    }) =>
+      request<{ accepted: number; rejected: number }>('/telemetry/client-errors', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        skipErrorReport: true,
       }),
   },
   llm: {

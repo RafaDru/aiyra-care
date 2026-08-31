@@ -36,6 +36,7 @@ function emptySnapshot(): OpsMetricsSnapshot {
       last5m: { avaChatCompleted: 0, avaChatFailed: 0 },
     },
     errorFingerprints24h: [],
+    clientErrorFingerprints24h: [],
   }
 }
 

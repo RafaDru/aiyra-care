@@ -23,6 +23,7 @@ export class OpsController {
       generatedAt: result.metrics.generatedAt,
       alerts: result.alerts,
       errorFingerprints24h: result.metrics.errorFingerprints24h,
+      clientErrorFingerprints24h: result.metrics.clientErrorFingerprints24h,
     })
   }
 

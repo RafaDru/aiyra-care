@@ -54,6 +54,16 @@ export interface ErrorFingerprintRow {
   lastSeenAt: string
 }
 
+export interface ClientErrorFingerprintRow {
+  fingerprint: string
+  feature: string
+  errorKind: string
+  errorCode: string
+  count: number
+  accountCount: number
+  lastSeenAt: string
+}
+
 export interface OpsProbeSnapshot {
   checkedAt: string
   api: {
@@ -102,6 +112,7 @@ export interface OpsMetricsSnapshot {
     exhausted: boolean
   }
   errorFingerprints24h: ErrorFingerprintRow[]
+  clientErrorFingerprints24h: ClientErrorFingerprintRow[]
   probe?: OpsProbeSnapshot
 }
 

@@ -34,7 +34,7 @@ Proativo    → alerta: 100% cascade LLM falhou 5 min
 | Logs locais | `api.log`, `web.log` | Dev |
 | GCP budgets | `docs/infra/GCP_BILLING_ALERTS.md` | Infra |
 
-**Lacuna (ver `docs/OPERATION_MODEL.md`):** degradação ativa por camada, fallbacks dormentes, ingest cliente 3D. **Freshness:** `GET /account/freshness` + `data_domain_generations` (migration 050).
+**Lacuna (ver `docs/OPERATION_MODEL.md`):** degradação ativa por camada, fallbacks dormentes. **Freshness:** migration 050 + `GET /account/freshness`. **Cliente 3D:** `POST /telemetry/client-errors` + `client_errors` (051).
 
 ## Modelo operacional ampliado
 

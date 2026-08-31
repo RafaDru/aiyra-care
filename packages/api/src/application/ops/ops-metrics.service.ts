@@ -26,6 +26,7 @@ export class OpsMetricsService {
       product1h,
       product5m,
       errorFingerprints24h,
+      clientErrorFingerprints24h,
     ] = await Promise.all([
       this.repo.avaTokenPercentiles(24),
       this.repo.avaTokenPercentiles(24 * 7),
@@ -36,6 +37,7 @@ export class OpsMetricsService {
       this.repo.productEventCountsSinceHours(1),
       this.repo.productEventCountsSinceMinutes(5),
       this.repo.errorFingerprints24h(25),
+      this.repo.clientErrorFingerprints24h(30),
     ])
 
     let internalLlm: OpsMetricsSnapshot['internalLlm'] | undefined
@@ -75,6 +77,7 @@ export class OpsMetricsService {
       },
       internalLlm,
       errorFingerprints24h,
+      clientErrorFingerprints24h,
       probe: readOpsProbeArtifact(),
     }
 
