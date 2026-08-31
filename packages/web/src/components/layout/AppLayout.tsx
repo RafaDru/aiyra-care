@@ -11,6 +11,7 @@ import { LanguageSwitcher } from '../ui/LanguageSwitcher.js'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
 import { AvaGlobalDock } from '../ava/AvaGlobalDock.js'
 import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
+import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -161,6 +162,7 @@ export function AppLayout() {
           </div>
         </Header>
         <Content style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }}>
+          {configured && user && <RuntimeDegradedBanner />}
           {configured && user && <HygieneLoginPrompt />}
           <Outlet />
         </Content>

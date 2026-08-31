@@ -34,7 +34,7 @@ Proativo    → alerta: 100% cascade LLM falhou 5 min
 | Logs locais | `api.log`, `web.log` | Dev |
 | GCP budgets | `docs/infra/GCP_BILLING_ALERTS.md` | Infra |
 
-**Lacuna (ver `docs/OPERATION_MODEL.md`):** degradação ativa por camada, fallbacks dormentes. **Freshness:** migration 050 + `GET /account/freshness`. **Cliente 3D:** `POST /telemetry/client-errors` + `client_errors` (051).
+**Lacuna (ver `docs/OPERATION_MODEL.md`):** degradação p95 baseline, proativo usuário (Fase 5). **Fallbacks:** migration 052 + `runtime` em `/account/freshness`; `npm run ops:degraded-snapshot`.
 
 ## Modelo operacional ampliado
 

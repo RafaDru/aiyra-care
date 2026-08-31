@@ -18,6 +18,7 @@
     "ops:alerts-check": "tsx scripts/ops-alerts-check.ts",
     "ops:probe": "tsx scripts/ops-probe.ts",
     "ops:smoke": "tsx scripts/ops-smoke.ts",
+    "ops:degraded-snapshot": "tsx scripts/nightly-degraded-snapshot.mjs",
     "reclassify:all": "tsx scripts/reclassify-medical-records.ts",
     "reclassify:apply": "tsx scripts/reclassify-medical-records.ts --apply",
     "reclassify:amil": "tsx scripts/reclassify-amil-medical-records.ts",

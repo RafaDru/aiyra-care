@@ -284,7 +284,7 @@ Fase 0  Foundation ops     [DONE]
 Fase 1  Ops sem te acordar  [parcial — crítico]
 Fase 2  Cache / freshness   [done — generations + manifest web]
 Fase 3  Cliente: ver erros  [done — ingest + ops 3D]
-Fase 4  Fallbacks dormentes [pendente — importante]
+Fase 4  Fallbacks dormentes [done — sync pause, Ava lite, snapshot D-1]
 Fase 5  Proativo ao usuário [pendente — opt-in / legal]
 Fase 6  Maturidade          [backlog]
 ```
@@ -353,11 +353,11 @@ Fase 6  Maturidade          [backlog]
 
 | # | Entrega | Debate | Esforço | Status |
 |---|---------|--------|---------|--------|
-| 4.1 | Flag `sync_degraded_{portal}`: pausa scheduled + só manual | sync multi-caminho | médio | pendente |
-| 4.2 | UI “último sync OK” + cache leve por link | sync fallback | baixo | parcial |
-| 4.3 | Ava lite automático (`llm_cascade_fail`) | fallback LLM | baixo | pendente |
-| 4.4 | Modo `degraded_read` via manifest (L3) | snapshot D-1 | médio | pendente |
-| 4.5 | Job noturno snapshot GCS (carteira/timeline) | PG stress | médio | pendente |
+| 4.1 | Flag `sync_degraded_{portal}`: pausa scheduled + só manual | sync multi-caminho | médio | **done** |
+| 4.2 | UI “último sync OK” + cache leve por link | sync fallback | baixo | **done** |
+| 4.3 | Ava lite automático (`llm_cascade_fail`) | fallback LLM | baixo | **done** |
+| 4.4 | Modo `degraded_read` via manifest (L3) | snapshot D-1 | médio | **done** |
+| 4.5 | Job noturno snapshot GCS (carteira/timeline) | PG stress | médio | **done** |
 | 4.6 | Neo4j degrade | já existe | — | done |
 
 **Critério de saída Fase 4:** incidente PG ou portal não exige improviso; modo degradado visível na UI.

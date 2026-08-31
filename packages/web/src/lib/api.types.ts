@@ -1407,6 +1407,8 @@ export interface IntegrationLink {
   effectiveSessionExpiresAt?: string | null
   /** Sessão persistida válida — sync silencioso permitido sem abrir browser de login. */
   sessionReady?: boolean
+  /** Portal em modo degradado — scheduled/silent sync pausado. */
+  syncDegraded?: boolean
 }
 
 export interface SyncNoveltySummary {
@@ -1698,4 +1700,12 @@ export interface AccountFreshnessView {
     patientId: string
     domains: Record<string, { generation: string }>
   }>
+  runtime?: {
+    avaLite: boolean
+    avaLiteReason: string | null
+    degradedRead: boolean
+    degradedReadAsOf: string | null
+    degradedReadReason: string | null
+    syncDegradedPortals: string[]
+  }
 }

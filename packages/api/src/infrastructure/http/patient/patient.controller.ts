@@ -38,6 +38,7 @@ import {
   getCachedPatientContext,
   setCachedPatientContext,
 } from '../../cache/patient-context.cache.js'
+import { getRuntimeDegradedService } from '../runtime/runtime-degraded.routes.js'
 
 const PATIENT_SYNC_STREAM_HEARTBEAT_MS = 25_000
 
@@ -110,6 +111,19 @@ export class PatientController {
       if (cached) {
         return reply.header('ETag', etag).send(cached)
       }
+
+      const runtimeDegraded = getRuntimeDegradedService()
+      if (await runtimeDegraded.isDegradedReadActive()) {
+        const snapshot = await runtimeDegraded.findDegradedReadSnapshot(patientId)
+        if (snapshot?.payload) {
+          const body = {
+            ...snapshot.payload,
+            meta: { mode: 'degraded_read' as const, asOf: snapshot.asOf },
+          }
+          return reply.header('ETag', etag).send(body)
+        }
+      }
+
       const context = await this.contextService.build(patientId, {
         timelineMonths,
       })

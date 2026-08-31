@@ -20,6 +20,7 @@ import {
   remainingSeconds,
 } from './wallet-shared.js'
 import { buildWalletSyncBanners, walletSyncBannerMessage } from '../../../lib/wallet-sync-banner.js'
+import { saveWalletLinkCache, getWalletLinkCache } from '../../../lib/wallet-link-cache.js'
 
 const { Text, Title } = Typography
 
@@ -64,8 +65,33 @@ export function WalletCardsTab({
   const walletBanner = walletSyncBannerMessage(buildWalletSyncBanners(insuranceLinks, syncMeta))
 
   useEffect(() => {
-    api.planMemberships.list(patient.id).then(setMemberships).catch(() => setMemberships([]))
-  }, [patient.id, links.map((l) => `${l.id}:${l.cardNumber ?? ''}`).join('|')])
+    api.planMemberships.list(patient.id)
+      .then((data) => {
+        setMemberships(data)
+        for (const link of insuranceLinks) {
+          saveWalletLinkCache(link.effectiveSyncLinkId ?? link.id, {
+            membershipsJson: JSON.stringify(data),
+          })
+        }
+      })
+      .catch(() => {
+        const fallbackLink = insuranceLinks.find((l) => l.syncDegraded) ?? insuranceLinks[0]
+        if (!fallbackLink) {
+          setMemberships([])
+          return
+        }
+        const cached = getWalletLinkCache(fallbackLink.effectiveSyncLinkId ?? fallbackLink.id)
+        if (cached?.membershipsJson) {
+          try {
+            setMemberships(JSON.parse(cached.membershipsJson))
+          } catch {
+            setMemberships([])
+          }
+        } else {
+          setMemberships([])
+        }
+      })
+  }, [patient.id, links.map((l) => `${l.id}:${l.cardNumber ?? ''}`).join('|'), insuranceLinks])
 
   useEffect(() => {
     if (!highlightCard || !highlightRef.current) return

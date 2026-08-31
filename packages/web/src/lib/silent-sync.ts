@@ -35,6 +35,7 @@ export function collectSyncTargets(links: IntegrationLink[]): IntegrationLink[] 
  */
 export function shouldOfferSilentSync(link: IntegrationLink): boolean {
   if (!isSyncablePortal(link.portalType)) return false
+  if (link.syncDegraded) return false
   if (!isLinkSessionReady(link)) return false
   const when = link.effectiveLastSyncAt ?? link.lastSyncAt
   if (!when) return true

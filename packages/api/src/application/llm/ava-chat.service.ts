@@ -14,6 +14,7 @@ import type { AvaActivityEmitter } from '../../domain/llm/ava-activity.js'
 import { emitAvaActivity } from '../../domain/llm/ava-activity.js'
 import { reflectionNeedsFullContext } from '../../domain/llm/ava-reflection.js'
 import { runAvaContextTools } from '../../domain/llm/ava-tools.js'
+import { getRuntimeDegradedService } from '../../infrastructure/http/runtime/runtime-degraded.routes.js'
 
 export type AvaChatEmitters = {
   activity?: AvaActivityEmitter
@@ -87,6 +88,8 @@ export class AvaChatService {
     }
 
     let compactPrompt = false
+    const avaLite = await getRuntimeDegradedService().isAvaLiteActive()
+    if (avaLite) compactPrompt = true
     if (conversationId && this.sessionContext) {
       const activePins = await this.sessionContext.listActive(conversationId)
       compactPrompt = activePins.length > 0
@@ -181,6 +184,7 @@ export class AvaChatService {
       caregiverFirstName: caregiverFirst,
       quotaContext: { email: quotaEmail },
       onReplyDelta: replyDelta,
+      liteMode: avaLite,
     }, activityEmitter)
 
     if (input.accountId && conversationId && this.conversations) {

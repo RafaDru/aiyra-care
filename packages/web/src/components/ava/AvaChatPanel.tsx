@@ -28,6 +28,7 @@ import {
   writeAvaImageAttachWarningDismissed,
 } from '../../lib/ava-llm-preferences.js'
 import { trackProductEvent } from '../../lib/product-events.js'
+import { useAccountFreshnessSnapshot } from '../../hooks/useAccountFreshness.js'
 import { isLlmQuotaExhausted } from '../../lib/llm-quota.js'
 import type { AvaEntityPin } from '../../lib/ava-dock-bus.js'
 import { AvaChatBubble } from './AvaChatBubble.js'
@@ -119,6 +120,7 @@ export function AvaChatPanel({
     return thinkingPhrase
   }, [activityTrace, thinkingPhrase])
   const avaExpression = useAvaExpression(loading, statusLabel, { context: 'chat' })
+  const freshness = useAccountFreshnessSnapshot()
   const caregiverName = caregiverFirstName(account?.displayName, account?.email)
   const quotaBlocked = isLlmQuotaExhausted(quota)
 
@@ -415,6 +417,17 @@ export function AvaChatPanel({
     />
   ) : null
 
+  const avaLiteBanner = freshness?.runtime?.avaLite ? (
+    <DismissibleHint
+      hintId="ava.lite_mode"
+      type="warning"
+      showIcon
+      acknowledge={false}
+      style={{ marginBottom: 8 }}
+      message="Ava em modo simplificado — respostas sem revisão automática. Confirme informações importantes com o pediatra."
+    />
+  ) : null
+
   const panelClass = [
     'ava-chat-panel',
     variant === 'embedded' && 'ava-chat-panel--embedded',
@@ -479,6 +492,7 @@ export function AvaChatPanel({
       )}
 
       {quotaAlert}
+      {avaLiteBanner}
 
       {showInactivityHint && conversationId && (
         <DismissibleHint

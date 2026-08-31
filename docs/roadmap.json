@@ -1817,7 +1817,7 @@
         {
           "id": "run-wakeable-fallbacks",
           "title": "Fallbacks dormentes (snapshot D-1, Ava lite)",
-          "status": "planned",
+          "status": "done",
           "detail": "Gatilho forte; banner stale. Ver OPERATION_MODEL §6."
         }
       ]

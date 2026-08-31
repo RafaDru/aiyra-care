@@ -6,6 +6,7 @@ import { PatientMembershipPgRepository } from '../../persistence/app-account.pg.
 import { AccountFreshnessController } from './account-freshness.controller.js'
 import { getAuthService } from '../auth/auth.routes.js'
 import { createAuthHook } from '../auth/auth.middleware.js'
+import { getRuntimeDegradedService } from '../runtime/runtime-degraded.routes.js'
 
 export function getDataGenerationService(): DataGenerationService {
   return new DataGenerationService(
@@ -23,7 +24,10 @@ export async function accountFreshnessRoutes(app: FastifyInstance) {
 
   const memberships = new PatientMembershipPgRepository(pgPool)
   const requireAuth = createAuthHook(authService, true, memberships)
-  const controller = new AccountFreshnessController(getDataGenerationService())
+  const controller = new AccountFreshnessController(
+    getDataGenerationService(),
+    getRuntimeDegradedService(),
+  )
 
   app.addHook('onRequest', requireAuth)
   app.get('/account/freshness', controller.getFreshness.bind(controller))

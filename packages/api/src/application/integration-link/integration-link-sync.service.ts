@@ -27,6 +27,10 @@ import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg
 import { SyncJobPgRepository } from '../../infrastructure/persistence/sync-job.pg.repository.js'
 import { HermesPardiniSyncScraper } from '../../infrastructure/scraper/hermes-pardini-sync.scraper.js'
 import {
+  hermesPardiniSessionRejectedUserMessage,
+  isHermesPardiniOAuthSessionRejected,
+} from '../../infrastructure/scraper/hermes-pardini-auth.js'
+import {
   buildMaterDeiExamMeta,
   materDeiExamNotes,
   persistMaterDeiExamFiles,
@@ -52,6 +56,7 @@ import { AgenticScraperService } from '../scraper/agentic-scraper.service.js'
 import type { Patient } from '../../domain/patient/patient.entity.js'
 import { runExamMeasurementImport } from '../measurement/exam-measurement-import.helper.js'
 import { runHygieneScanForPatient } from '../hygiene/hygiene-scan.helper.js'
+import { getRuntimeDegradedService } from '../../infrastructure/http/runtime/runtime-degraded.routes.js'
 
 const SYNCABLE_PORTALS = new Set<string>(['unimed', 'amil', 'mater_dei', 'hermes_pardini', 'bradesco_saude'])
 const RECENT_SYNC_MS = Number(process.env.SYNC_MIN_INTERVAL_MS ?? String(30 * 60 * 1000))
@@ -63,6 +68,7 @@ export type IntegrationLinkSyncSkipReason =
   | 'lock'
   | 'recent_sync'
   | 'session_required'
+  | 'portal_degraded'
 
 export interface IntegrationLinkSyncRequest {
   silent?: boolean
@@ -150,6 +156,11 @@ export class IntegrationLinkSyncService {
 
     if (silent && !isIntegrationLinkSessionReady(link)) {
       return { jobId: null, skipped: true, reason: 'session_required' }
+    }
+
+    const portalDegraded = await getRuntimeDegradedService().isPortalSyncDegraded(link.portalType)
+    if (portalDegraded && (silent || trigger === 'scheduled')) {
+      return { jobId: null, skipped: true, reason: 'portal_degraded' }
     }
 
     this.syncLocks.add(lockKey)
@@ -748,12 +759,12 @@ export class IntegrationLinkSyncService {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro na sincronização Hermes Pardini'
       log?.error(err, 'Hermes Pardini sync failed')
-      if (/401|403|sess[aã]o|token|expirad|login|invalid_grant|rejeitado/i.test(message)) {
+      if (/401|403|sess[aã]o|token|expirad|login|invalid[_\s-]?grant|rejeitado|not active/i.test(message)) {
         link.clearSessionToken()
         await this.linkRepo.update(link).catch(() => {})
       }
-      const userMessage = /401|403|rejeitado/i.test(message)
-        ? 'Hermes Pardini: sessão expirada — abra Integrações e clique em Sincronizar (login manual)'
+      const userMessage = /401|403|rejeitado/i.test(message) || isHermesPardiniOAuthSessionRejected(message)
+        ? hermesPardiniSessionRejectedUserMessage()
         : message
       void updateJob(jobId, { step: 'error', message: userMessage, status: 'failed' })
     }

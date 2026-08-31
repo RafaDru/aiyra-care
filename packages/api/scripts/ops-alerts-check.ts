@@ -14,6 +14,7 @@ import { LlmUsagePgRepository } from '../src/infrastructure/persistence/llm-usag
 import { LlmInternalBudgetPgRepository } from '../src/infrastructure/persistence/llm-internal-budget.pg.repository.js'
 import { writeOpsMetricsArtifact } from '../src/application/ops/ops-probe-artifact.js'
 import { runOpsProbe } from '../src/application/ops/ops-probe.service.js'
+import { getRuntimeDegradedService } from '../src/infrastructure/http/runtime/runtime-degraded.routes.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 config({ path: resolve(root, '.env') })
@@ -34,6 +35,10 @@ async function main() {
   const dispatch = new OpsAlertDispatchService(metrics)
   const result = await dispatch.checkAndDispatch()
   const metricsPayload = await metrics.getMetrics()
+  await getRuntimeDegradedService().applyFromOps(
+    metricsPayload.alerts,
+    metricsPayload.metrics.probe,
+  )
   const artifactPath = writeOpsMetricsArtifact({
     generatedAt: new Date().toISOString(),
     metrics: metricsPayload.metrics,

@@ -95,6 +95,7 @@ export class AvaOrchestratorService {
     caregiverFirstName?: string | null
     quotaContext?: { email?: string | null }
     onReplyDelta?: (chunk: string) => void
+    liteMode?: boolean
   }, activityEmitter?: AvaActivityEmitter): Promise<AvaChatResult> {
     if (!isAvaLlmEnabled()) throw new Error('AVA_LLM_DISABLED')
 
@@ -177,7 +178,7 @@ Mensagem atual do responsável: ${trimmed}`
     let deterministic = validateAvaReplyDeterministic(reply, input.bundle.insights, trimmed, reflectionOpts)
     let critique = null
 
-    if (isAvaReflectionEnabled()) {
+    if (isAvaReflectionEnabled() && !input.liteMode) {
       emit('reflection.rules_check', 'reflection', 'start')
       if (deterministic.severity !== 'critical' && deterministic.issues.length === 0) {
         steps.push('verificação por regras ok')

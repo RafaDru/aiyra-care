@@ -5,6 +5,7 @@ import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg
 import { PlanMembershipPgRepository } from '../../infrastructure/persistence/plan-membership.pg.repository.js'
 import { InsurancePlanPgRepository } from '../../infrastructure/persistence/insurance-plan.pg.repository.js'
 import { isIntegrationLinkSessionReady } from './integration-link-session.js'
+import { getRuntimeDegradedService } from '../../infrastructure/http/runtime/runtime-degraded.routes.js'
 
 /** Portais em que um sync no titular atualiza dependentes do mesmo plano. */
 const TITULAR_HOUSEHOLD_PORTALS = new Set(['amil'])
@@ -17,6 +18,7 @@ export interface IntegrationLinkSyncAuthority {
   effectiveLastSyncAt: Date | null
   effectiveSessionExpiresAt: Date | null
   sessionReady: boolean
+  syncDegraded: boolean
 }
 
 export type IntegrationLinkWithSyncAuthority = ReturnType<IntegrationLink['toJSON']> &
@@ -38,6 +40,8 @@ export async function enrichIntegrationLinksWithSyncAuthority(
   )
 
   const results: IntegrationLinkWithSyncAuthority[] = []
+  const runtime = await getRuntimeDegradedService().getPublicView()
+  const degradedPortals = new Set(runtime.syncDegradedPortals)
 
   for (const link of links) {
     const json = link.toJSON()
@@ -48,6 +52,7 @@ export async function enrichIntegrationLinksWithSyncAuthority(
       effectiveLastSyncAt: link.lastSyncAt,
       effectiveSessionExpiresAt: link.sessionExpiresAt,
       sessionReady: isIntegrationLinkSessionReady(link),
+      syncDegraded: degradedPortals.has(link.portalType),
     }
 
     if (TITULAR_HOUSEHOLD_PORTALS.has(link.portalType)) {
@@ -71,6 +76,7 @@ export async function enrichIntegrationLinksWithSyncAuthority(
             effectiveLastSyncAt: holderLink.lastSyncAt,
             effectiveSessionExpiresAt: holderLink.sessionExpiresAt,
             sessionReady: isIntegrationLinkSessionReady(holderLink),
+            syncDegraded: degradedPortals.has(link.portalType),
           }
         }
       }

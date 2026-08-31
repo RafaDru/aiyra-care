@@ -34,4 +34,12 @@ export interface AccountFreshnessView {
     patientId: string
     domains: PatientFreshnessDomains
   }>
+  runtime?: {
+    avaLite: boolean
+    avaLiteReason: string | null
+    degradedRead: boolean
+    degradedReadAsOf: string | null
+    degradedReadReason: string | null
+    syncDegradedPortals: string[]
+  }
 }
