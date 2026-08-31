@@ -1,6 +1,7 @@
 import type { FastifyReply } from 'fastify'
 import type { ExamService } from '../../../application/exam/exam.service.js'
 import type { CarePlaceService } from '../../../application/care-place/care-place.service.js'
+import type { DataGenerationService } from '../../../application/data-generation/data-generation.service.js'
 import { scheduleCanonicalEntityProjection } from '../../graph/canonical-entity-graph.js'
 import { createExamSchema, updateExamSchema, examParamsSchema, examQuerySchema } from './exam.schema.js'
 import { NotFoundError } from '../../../domain/errors.js'
@@ -13,6 +14,7 @@ export class ExamController {
     private readonly service: ExamService,
     private readonly carePlaces?: CarePlaceService,
     private readonly hygieneDetector?: import('../../../application/hygiene/hygiene-detector.service.js').HygieneDetectorService,
+    private readonly dataGen?: DataGenerationService,
   ) {}
 
   async create(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -31,6 +33,13 @@ export class ExamController {
       date: json.examDate.toISOString(),
       source: json.source,
     })
+    if (this.dataGen && req.accountId) {
+      try {
+        await this.dataGen.bumpPatient(req.accountId, json.patientId, ['exams', 'timeline'])
+      } catch {
+        // freshness bump must not break create
+      }
+    }
     return reply.status(201).send(json)
   }
 

@@ -3,13 +3,27 @@ import { IntegrationLinkPgRepository } from '../../persistence/integration-link.
 import { IntegrationLinkController } from './integration-link.controller.js'
 import { bindSyncCompletionNotifier, publishSyncCompletion } from '../../sync/sync-completion.bus.js'
 import { pgPool } from '../../../db/postgres.js'
+import { getDataGenerationService } from '../account-freshness/account-freshness.routes.js'
+import { PatientAccountPgResolver } from '../../persistence/hygiene.pg.repository.js'
 
 export async function integrationLinkRoutes(app: FastifyInstance) {
   const repo = new IntegrationLinkPgRepository(pgPool)
+  const dataGen = getDataGenerationService()
+  const accountResolver = new PatientAccountPgResolver(pgPool)
   bindSyncCompletionNotifier(async (event) => {
     const link = await repo.findById(event.integrationLinkId)
     if (!link) return
     publishSyncCompletion({ ...event, patientId: link.patientId })
+    if (event.status === 'success') {
+      try {
+        const accountId = await accountResolver.resolveAccountIdForPatient(link.patientId)
+        if (accountId) {
+          await dataGen.bumpAfterSyncSuccess(accountId, link.patientId, event.novelty)
+        }
+      } catch {
+        // freshness bump must not break sync
+      }
+    }
   })
   const ctrl = new IntegrationLinkController(repo, pgPool)
   app.post('/integration-links', ctrl.create.bind(ctrl))

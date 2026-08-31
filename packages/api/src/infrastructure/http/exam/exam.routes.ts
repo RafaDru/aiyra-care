@@ -5,6 +5,7 @@ import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
 import { GcsFileStorage } from '../../storage/gcs.storage.js'
 import { pgPool } from '../../../db/postgres.js'
 import { carePlaceService } from '../care-place/care-place.routes.js'
+import { getDataGenerationService } from '../account-freshness/account-freshness.routes.js'
 import { HygieneDetectorService } from '../../../application/hygiene/hygiene-detector.service.js'
 import {
   HygienePgRepository,
@@ -26,6 +27,7 @@ export async function examRoutes(app: FastifyInstance) {
     new ExamService(examRepo, new GcsFileStorage()),
     carePlaceService,
     hygieneDetector,
+    getDataGenerationService(),
   )
   app.post('/exams', controller.create.bind(controller))
   app.get('/exams', controller.findAll.bind(controller))

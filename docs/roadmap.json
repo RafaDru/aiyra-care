@@ -1805,7 +1805,7 @@
         {
           "id": "run-data-generations",
           "title": "Freshness manifest + data_generations",
-          "status": "planned",
+          "status": "done",
           "detail": "Bump on write; GET /account/freshness; If-None-Match. Ver OPERATION_MODEL §7."
         },
         {

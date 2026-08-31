@@ -8,6 +8,7 @@ import { ExamPgRepository } from '../../persistence/exam.pg.repository.js'
 import { VaccinePgRepository } from '../../persistence/vaccine.pg.repository.js'
 import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
+import { getDataGenerationService } from '../account-freshness/account-freshness.routes.js'
 
 export async function hygieneRoutes(app: FastifyInstance) {
   const hygieneRepo = new HygienePgRepository(pgPool)
@@ -18,7 +19,7 @@ export async function hygieneRoutes(app: FastifyInstance) {
     new PatientPgRepository(pgPool),
   )
   const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
-  const controller = new HygieneController(service, productEvents)
+  const controller = new HygieneController(service, productEvents, getDataGenerationService())
 
   app.get('/hygiene/candidates', controller.listPending.bind(controller))
   app.post('/hygiene/candidates/:id/resolve', controller.resolve.bind(controller))

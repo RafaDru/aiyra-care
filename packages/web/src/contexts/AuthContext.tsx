@@ -53,6 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await api.auth.sync()
     setAccount(result.account)
     setNeedsProfile(result.needsProfile)
+    const { refreshAccountFreshness } = await import('../lib/account-freshness.js')
+    await refreshAccountFreshness().catch(() => undefined)
   }, [])
 
   const runSync = useCallback(async (accessToken: string | undefined) => {
@@ -189,6 +191,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const client = getSupabase()
       if (!client) return
       await client.auth.signOut({ scope: 'local' })
+      const { clearAccountFreshness } = await import('../lib/account-freshness.js')
+      clearAccountFreshness()
       setSession(null)
       setMemoryAccessToken(null)
       setAccount(null)

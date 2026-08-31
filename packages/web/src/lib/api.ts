@@ -725,6 +725,9 @@ export const api = {
     bradesco: (data: { cpf: string; password: string; insuranceMembershipNumber?: string }) =>
       request<import('./api.types.js').ScraperResult>('/scraper/bradesco_saude', { method: 'POST', body: JSON.stringify(data) }),
   },
+  account: {
+    freshness: () => request<import('./api.types.js').AccountFreshnessView>('/account/freshness'),
+  },
   auth: {
     me: () => request<import('./api.types.js').AuthSyncResponse>('/auth/me'),
     sync: () => request<import('./api.types.js').AuthSyncResponse>('/auth/sync', { method: 'POST' }),

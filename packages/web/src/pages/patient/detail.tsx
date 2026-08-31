@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload } from 'antd'
+import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload, Badge } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
@@ -12,6 +12,8 @@ import { MeasurementsTab } from './tabs/MeasurementsTab.js'
 import { CareReminderBanner } from '../../components/measurements/CareReminderBanner.js'
 import { FamilySupportPanel } from '../../components/family-support/FamilySupportPanel.js'
 import { useCareReminderNotifications } from '../../hooks/useCareReminderNotifications.js'
+import { usePatientDomainFresh } from '../../hooks/useAccountFreshness.js'
+import { markDomainSeen } from '../../lib/account-freshness.js'
 import type { CareReminderRow } from '../../lib/api.types.js'
 import { VaccinesTab } from './tabs/VaccinesTab.js'
 import { MedicationsTab } from './tabs/MedicationsTab.js'
@@ -58,6 +60,19 @@ const SECTION_ICONS: Record<PatientSection, ReactNode> = {
   files: <FolderOutlined />,
 }
 
+const TAB_DATA_DOMAIN: Partial<Record<PatientTabKey, string>> = {
+  agenda: 'timeline',
+  wallet: 'wallet',
+  exams: 'exams',
+  records: 'documents',
+  authorizations: 'wallet',
+  documents: 'documents',
+}
+
+function freshTabLabel(fresh: boolean, children: ReactNode): ReactNode {
+  return fresh ? <Badge dot>{children}</Badge> : children
+}
+
 export function PatientDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -89,6 +104,12 @@ export function PatientDetail() {
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
+  const walletFresh = usePatientDomainFresh(patient?.id, 'wallet')
+  const examsFresh = usePatientDomainFresh(patient?.id, 'exams')
+  const recordsFresh = usePatientDomainFresh(patient?.id, 'documents')
+  const documentsFresh = usePatientDomainFresh(patient?.id, 'documents')
+  const agendaFresh = usePatientDomainFresh(patient?.id, 'timeline')
+
   const { section: activeSection, tab: activeTab } = resolvePatientNav(
     searchParams.get('section'),
     searchParams.get('tab'),
@@ -99,6 +120,10 @@ export function PatientDetail() {
 
   const setActiveTab = useCallback((key: string) => {
     if (!isPatientTabKey(key)) return
+    if (patient?.id) {
+      const domain = TAB_DATA_DOMAIN[key]
+      if (domain) markDomainSeen(patient.id, domain)
+    }
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       const section = tabToSection(key)
@@ -113,7 +138,7 @@ export function PatientDetail() {
       if (key !== 'wallet') next.delete('card')
       return next
     }, { replace: true })
-  }, [setSearchParams])
+  }, [setSearchParams, patient?.id])
 
   const setActiveSection = useCallback((section: PatientSection) => {
     setSearchParams((prev) => {
@@ -293,20 +318,20 @@ export function PatientDetail() {
   const tabLabel = (key: PatientTabKey): ReactNode => {
     switch (key) {
       case 'basic': return <><UserOutlined /> {t('tabs.basic')}</>
-      case 'agenda': return <><CalendarOutlined /> {t('tabs.agenda')}</>
+      case 'agenda': return freshTabLabel(agendaFresh, <><CalendarOutlined /> {t('tabs.agenda')}</>)
       case 'personal-documents': return <><FileProtectOutlined /> {t('tabs.personalDocuments')}</>
-      case 'wallet': return <><IdcardOutlined /> {t('tabs.wallet')}</>
+      case 'wallet': return freshTabLabel(walletFresh, <><IdcardOutlined /> {t('tabs.wallet')}</>)
       case 'coverage': return <><SafetyCertificateOutlined /> {t('tabs.coverage')}</>
       case 'integrations': return <><ApiOutlined /> {t('tabs.integrations')}</>
       case 'growth': return t('tabs.growth')
       case 'vaccines': return t('tabs.vaccines')
       case 'medications': return t('tabs.medications')
       case 'allergies': return t('tabs.allergies')
-      case 'exams': return t('tabs.exams')
-      case 'records': return t('tabs.records')
-      case 'authorizations': return t('tabs.authorizations')
+      case 'exams': return freshTabLabel(examsFresh, t('tabs.exams'))
+      case 'records': return freshTabLabel(recordsFresh, t('tabs.records'))
+      case 'authorizations': return freshTabLabel(walletFresh, t('tabs.authorizations'))
       case 'diagnoses': return t('tabs.diagnoses')
-      case 'documents': return t('tabs.documents')
+      case 'documents': return freshTabLabel(documentsFresh, t('tabs.documents'))
     }
   }
 

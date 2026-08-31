@@ -282,7 +282,7 @@ Mapa de **tudo** trazido na thread: taxonomia, POC cliente 3D, sondas, degradaç
 ```text
 Fase 0  Foundation ops     [DONE]
 Fase 1  Ops sem te acordar  [parcial — crítico]
-Fase 2  Cache / freshness   [pendente — crítico para escala PG]
+Fase 2  Cache / freshness   [done — generations + manifest web]
 Fase 3  Cliente: ver erros  [pendente — crítico para beta]
 Fase 4  Fallbacks dormentes [pendente — importante]
 Fase 5  Proativo ao usuário [pendente — opt-in / legal]
@@ -323,12 +323,12 @@ Fase 6  Maturidade          [backlog]
 
 | # | Entrega | Debate | Esforço | Status |
 |---|---------|--------|---------|--------|
-| 2.1 | Migration `data_generations` + `bump()` helper | cache backend | médio | pendente |
-| 2.2 | Bump em writes: sync OK, exam import, higiene resolve | estímulo de dados novos | médio | pendente |
-| 2.3 | `GET /account/freshness` (manifest L1) | login + sumarizado | médio | pendente |
-| 2.4 | Web: refetch seletivo + badges por domínio | 1.2.1 + 1.2.2 | médio | pendente |
-| 2.5 | L2 in-memory + `If-None-Match` em `GET /patients/:id/context` | cache BFF/API | baixo | pendente |
-| 2.6 | SSE sync-completions → bump domains | ligar SSE ao manifest | baixo | pendente |
+| 2.1 | Migration `data_generations` + `bump()` helper | cache backend | médio | **done** |
+| 2.2 | Bump em writes: sync OK, exam import, higiene resolve | estímulo de dados novos | médio | **done** |
+| 2.3 | `GET /account/freshness` (manifest L1) | login + sumarizado | médio | **done** |
+| 2.4 | Web: refetch seletivo + badges por domínio | 1.2.1 + 1.2.2 | médio | **done** |
+| 2.5 | L2 in-memory + `If-None-Match` em `GET /patients/:id/context` | cache BFF/API | baixo | **done** |
+| 2.6 | SSE sync-completions → bump domains | ligar SSE ao manifest | baixo | **done** |
 
 **Critério de saída Fase 2:** após sync, só abas afetadas refetch; contexto paciente não repete trabalho se generation igual.
 

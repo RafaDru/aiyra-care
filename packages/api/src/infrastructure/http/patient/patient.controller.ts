@@ -2,6 +2,7 @@ import type { FastifyReply } from 'fastify'
 import type { PatientService } from '../../../application/patient/patient.service.js'
 import type { PatientContextService } from '../../../application/patient/patient-context.service.js'
 import type { LegalComplianceService } from '../../../application/legal-compliance/legal-compliance.service.js'
+import type { DataGenerationService } from '../../../application/data-generation/data-generation.service.js'
 import type { PatientMembershipRepository } from '../../../domain/auth/app-account.repository.js'
 import { isMinorBirthDate } from '../../../domain/patient/patient-age.js'
 
@@ -33,6 +34,10 @@ import {
   isAuthEnforcementEnabled,
 } from '../auth/patient-access.guard.js'
 import { subscribePatientSyncCompletions } from '../../sync/sync-completion.bus.js'
+import {
+  getCachedPatientContext,
+  setCachedPatientContext,
+} from '../../cache/patient-context.cache.js'
 
 const PATIENT_SYNC_STREAM_HEARTBEAT_MS = 25_000
 
@@ -42,6 +47,7 @@ export class PatientController {
     private readonly memberships?: PatientMembershipRepository,
     private readonly contextService?: PatientContextService,
     private readonly compliance?: LegalComplianceService,
+    private readonly dataGen?: DataGenerationService,
   ) {}
 
   async create(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -89,10 +95,26 @@ export class PatientController {
     const query = patientContextQuerySchema.safeParse(req.query)
     if (!query.success) return reply.status(400).send({ error: query.error.flatten() })
     try {
-      const context = await this.contextService.build(parsed.data.id, {
-        timelineMonths: query.data.timelineMonths,
+      const timelineMonths = query.data.timelineMonths
+      const patientId = parsed.data.id
+      const accountId = req.accountId!
+      const generation =
+        (await this.dataGen?.getPatientGeneration(accountId, patientId, 'timeline'))
+        ?? new Date(0).toISOString()
+      const etag = `"${generation}"`
+      const ifNoneMatch = req.headers['if-none-match']
+      if (ifNoneMatch === etag) {
+        return reply.header('ETag', etag).status(304).send()
+      }
+      const cached = getCachedPatientContext(patientId, generation, timelineMonths)
+      if (cached) {
+        return reply.header('ETag', etag).send(cached)
+      }
+      const context = await this.contextService.build(patientId, {
+        timelineMonths,
       })
-      return reply.send(context)
+      setCachedPatientContext(patientId, generation, timelineMonths, context)
+      return reply.header('ETag', etag).send(context)
     } catch (err) {
       if (err instanceof NotFoundError) return reply.status(404).send({ message: err.message })
       throw err

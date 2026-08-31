@@ -18,6 +18,7 @@ import { PlanMembershipPgRepository } from '../../persistence/plan-membership.pg
 import { HealthThreadPgRepository } from '../../persistence/health-thread.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
 import { getLegalComplianceService } from '../legal-compliance/legal-compliance.routes.js'
+import { getDataGenerationService } from '../account-freshness/account-freshness.routes.js'
 
 export async function patientRoutes(app: FastifyInstance) {
   const repo = new PatientPgRepository(pgPool)
@@ -41,7 +42,13 @@ export async function patientRoutes(app: FastifyInstance) {
     ),
     new HealthThreadPgRepository(pgPool),
   )
-  const controller = new PatientController(service, memberships, contextService, compliance)
+  const controller = new PatientController(
+    service,
+    memberships,
+    contextService,
+    compliance,
+    getDataGenerationService(),
+  )
 
   app.post('/patients', controller.create.bind(controller))
   app.get('/patients', controller.findAll.bind(controller))

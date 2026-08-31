@@ -155,6 +155,8 @@ async function registerRoutes() {
   await app.register(authRoutes)
   const { accountProfileRoutes } = await import('./infrastructure/http/account-profile/account-profile.routes.js')
   await app.register(accountProfileRoutes)
+  const { accountFreshnessRoutes } = await import('./infrastructure/http/account-freshness/account-freshness.routes.js')
+  await app.register(accountFreshnessRoutes)
   await app.register(carePlaceRoutes)
   await app.register(healthThreadRoutes)
   await app.register(clinicalLinkRoutes)

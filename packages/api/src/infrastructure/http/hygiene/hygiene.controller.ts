@@ -1,6 +1,7 @@
 import type { FastifyReply } from 'fastify'
 import type { HygieneService } from '../../../application/hygiene/hygiene.service.js'
 import type { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import type { DataGenerationService } from '../../../application/data-generation/data-generation.service.js'
 import { trackServerProductEvent } from '../../../application/telemetry/server-product-event.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import {
@@ -13,6 +14,7 @@ export class HygieneController {
   constructor(
     private readonly hygiene: HygieneService,
     private readonly productEvents?: ProductEventService,
+    private readonly dataGen?: DataGenerationService,
   ) {}
 
   async listPending(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -52,6 +54,17 @@ export class HygieneController {
           entity_type: item.entityType,
         },
       })
+      if (this.dataGen) {
+        try {
+          await this.dataGen.bumpAfterHygieneResolve(
+            req.accountId,
+            item.patientId,
+            item.entityType,
+          )
+        } catch {
+          // freshness bump must not break resolve
+        }
+      }
       return reply.send(item)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)

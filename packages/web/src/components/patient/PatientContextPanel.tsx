@@ -13,6 +13,10 @@ import {
 import { DismissibleHint } from '../ui/DismissibleHint.js'
 import { PatientPendenciesSection } from './PatientPendenciesSection.js'
 import { subscribeClinicalExportOpen } from '../../lib/clinical-export-bus.js'
+import {
+  hasNewDomain,
+  markDomainSeen,
+} from '../../lib/account-freshness.js'
 
 const { Paragraph, Text } = Typography
 
@@ -27,12 +31,16 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
   const [error, setError] = useState<string | null>(null)
   const [exportOpen, setExportOpen] = useState(false)
 
-  const reloadContext = useCallback(() => {
+  const reloadContext = useCallback((force = false) => {
+    if (!force && context && !hasNewDomain(patientId, 'timeline')) return
     setLoading(true)
     setError(null)
     api.patients
       .context(patientId)
-      .then(setContext)
+      .then((data) => {
+        setContext(data)
+        markDomainSeen(patientId, 'timeline')
+      })
       .catch((e) => setError(e instanceof Error ? e.message : 'Erro ao carregar contexto'))
       .finally(() => setLoading(false))
   }, [patientId])
@@ -41,7 +49,7 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
     reloadContext()
   }, [reloadContext])
 
-  usePatientSyncCompletions(patientId, reloadContext)
+  usePatientSyncCompletions(patientId, () => reloadContext(true))
 
   useEffect(() => {
     return subscribeClinicalExportOpen((req) => {

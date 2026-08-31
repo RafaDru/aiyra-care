@@ -1687,3 +1687,15 @@ export interface CadernetaFamilyImportResult {
   byPatient: Array<{ patientId: string; patientName: string; result: CadernetaImportResult }>
   totals: CadernetaImportResult
 }
+
+export interface AccountFreshnessView {
+  serverTime: string
+  account: {
+    generation: string
+    domains: Record<string, { generation: string }>
+  }
+  patients: Array<{
+    patientId: string
+    domains: Record<string, { generation: string }>
+  }>
+}

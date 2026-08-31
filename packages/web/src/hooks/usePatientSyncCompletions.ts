@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { openPatientSyncStream } from '../lib/patient-sync-stream.js'
+import { refreshAccountFreshness } from '../lib/account-freshness.js'
 import { useAuth } from '../contexts/AuthContext.js'
 import { trackProductEvent } from '../lib/product-events.js'
 
@@ -21,7 +22,10 @@ export function usePatientSyncCompletions(patientId: string | undefined, onCompl
           status: payload.status,
         }, { patientId })
       }
-      if (payload.status === 'success') onCompleted?.()
+      if (payload.status === 'success') {
+        void refreshAccountFreshness().catch(() => undefined)
+        onCompleted?.()
+      }
     })
     return close
   }, [patientId, onCompleted, authLoading, authUserId, session?.access_token, authConfigured])
