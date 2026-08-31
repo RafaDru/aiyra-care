@@ -1,6 +1,6 @@
 # Observabilidade, monitoramento e analytics de produto
 
-> **Última atualização:** 2026-08-18  
+> **Última atualização:** 2026-08-28  
 > Objetivo: operação **proativa** (antecipar falhas e travamentos), não só reagir a tickets.  
 > LGPD: sem PHI em logs agregados; conteúdo clínico/chat só com opt-in explícito.
 
@@ -34,7 +34,11 @@ Proativo    → alerta: 100% cascade LLM falhou 5 min
 | Logs locais | `api.log`, `web.log` | Dev |
 | GCP budgets | `docs/infra/GCP_BILLING_ALERTS.md` | Infra |
 
-**Lacuna:** não há **eventos de produto** unificados (cliques, abandono de fluxo, hooks Ava, tempo em tela).
+**Lacuna (ver `docs/OPERATION_MODEL.md`):** degradação ativa por camada, manifest de freshness, fallbacks dormentes, ingest cliente 3D.
+
+## Modelo operacional ampliado
+
+Decisões de desenho (observação ativa, cache por geração, fallbacks, escalação automação → LLM → humano): **`docs/OPERATION_MODEL.md`**.
 
 ## Camada `product_events` (migration 049)
 

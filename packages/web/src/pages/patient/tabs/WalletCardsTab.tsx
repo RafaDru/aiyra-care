@@ -19,6 +19,7 @@ import {
   formatCountdown,
   remainingSeconds,
 } from './wallet-shared.js'
+import { buildWalletSyncBanners, walletSyncBannerMessage } from '../../../lib/wallet-sync-banner.js'
 
 const { Text, Title } = Typography
 
@@ -60,6 +61,7 @@ export function WalletCardsTab({
   })
 
   const syncMeta = useWalletLinkSyncStatus(insuranceLinks, syncRefreshKey, false)
+  const walletBanner = walletSyncBannerMessage(buildWalletSyncBanners(insuranceLinks, syncMeta))
 
   useEffect(() => {
     api.planMemberships.list(patient.id).then(setMemberships).catch(() => setMemberships([]))
@@ -166,6 +168,14 @@ export function WalletCardsTab({
         <Text type="secondary" style={{ display: 'block', marginBottom: 10, fontSize: 12 }}>
           Carteirinhas das operadoras vinculadas. Atualização automática em segundo plano quando há sessão válida.
         </Text>
+        {walletBanner && (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginBottom: 12 }}
+            message={walletBanner}
+          />
+        )}
         {insuranceLinks.length === 0 ? (
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma carteirinha — vincule em Integrações" />
         ) : (

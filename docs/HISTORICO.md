@@ -1,5 +1,38 @@
 # Histórico do Projeto Open Health
 
+## [2026-08-31] - Grupo Fleury Precision Care — documentação + PoC auth/marca
+
+### Contexto
+Hermes Pardini integrado ao Grupo Fleury; portal unificado com login OTP (SMS/e-mail/WhatsApp) exibe exames Pardini na mesma conta. APIs já são Fleury (`resultados.grupofleury.com.br` + `paciente/api/v1`).
+
+### Realizado
+- **docs/FLEURY_PRECISION_CARE.md** — arquitetura, endpoints, headers de marca, hipóteses PoC.
+- **Scripts:** `probe:fleury-auth` (OTP interativo + password), `probe:fleury-marca` (replay `/pedidos` por perfil).
+- **Código:** `FLEURY_PRECISION_MARCA_PROFILES`, `fleuryPrecisionUnifiedEntryUrl`, `openFleuryPrecisionUnifiedPortal`.
+- **Roadmap:** épico `fleury-precision-care`; **CONNECT.md** + **AGENTS.md** atualizados.
+
+### To-Dos
+- [ ] Rodar PoC com conta real (`FLEURY_PROBE_SAVE_FULL_TOKEN=1` + `probe:fleury-marca`)
+- [ ] Sync UI OTP; connector `grupo_fleury_precision_care`
+
+## [2026-08-31] - Fase 1 ops: sondas + banner Carteira
+
+### Realizado
+- **ops:probe** — latência `/health`, PG `SELECT 1`, Neo4j opcional; artefato `scripts/output/ops-probe-last.json`.
+- **Alertas infra** — `infra_api_down`, `infra_postgres_slow`, etc. em `evaluateOpsAlerts`.
+- **connect-worker** — roda probe antes de ops-alerts; `ops-alerts-check` grava `ops-metrics-last.json`.
+- **Web** — banner stale/falha na aba Carteira (`wallet-sync-banner.ts`).
+- **Docs** — `OPERATION_MODEL.md` faseamento §13–14; `PARALLEL_WORK.md` (ops vs Fleury).
+
+## [2026-08-28] - Modelo operacional (observação, cache, resiliência)
+
+### Contexto
+Thread de desenho: operação enxuta, sondas ativas, fallbacks dormentes, cache por geração de dados (manifest freshness), escalação automação → LLM → humano. Sem implementação completa — documentação de decisão.
+
+### Realizado
+- **docs/OPERATION_MODEL.md** — taxonomia, pirâmide de escalação, sondas realistas, fallbacks, níveis L0–L3 de cache/freshness, fora de escopo, incrementos sugeridos.
+- **docs/OBSERVABILITY.md** — link ao modelo operacional; lacunas atualizadas.
+
 ## [2026-08-26d] - Ava: prompt compacto + hooks troca paciente
 
 ### Realizado

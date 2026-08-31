@@ -47,6 +47,33 @@ export interface ProductEventCounts {
   avaQuotaBlocked: number
 }
 
+export interface ErrorFingerprintRow {
+  eventName: string
+  fingerprint: string
+  count: number
+  lastSeenAt: string
+}
+
+export interface OpsProbeSnapshot {
+  checkedAt: string
+  api: {
+    ok: boolean
+    latencyMs: number
+    status?: number
+    error?: string
+  }
+  postgres: {
+    ok: boolean
+    latencyMs: number
+    error?: string
+  }
+  neo4j?: {
+    ok: boolean
+    latencyMs: number
+    error?: string
+  }
+}
+
 export interface OpsMetricsSnapshot {
   generatedAt: string
   ava: {
@@ -75,13 +102,7 @@ export interface OpsMetricsSnapshot {
     exhausted: boolean
   }
   errorFingerprints24h: ErrorFingerprintRow[]
-}
-
-export interface ErrorFingerprintRow {
-  eventName: string
-  fingerprint: string
-  count: number
-  lastSeenAt: string
+  probe?: OpsProbeSnapshot
 }
 
 export type OpsAlertSeverity = 'warning' | 'critical'
@@ -89,7 +110,7 @@ export type OpsAlertSeverity = 'warning' | 'critical'
 export interface OpsAlert {
   id: string
   severity: OpsAlertSeverity
-  category: 'sync' | 'llm' | 'product'
+  category: 'sync' | 'llm' | 'product' | 'infra'
   message: string
   details?: Record<string, unknown>
 }

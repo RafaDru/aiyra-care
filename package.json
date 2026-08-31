@@ -17,6 +17,7 @@
     "connect-worker:ops-alerts": "cd packages/connect-worker && npm run ops-alerts:once",
     "ops:metrics": "cd packages/api && npm run ops:metrics",
     "ops:alerts-check": "cd packages/api && npm run ops:alerts-check",
+    "ops:probe": "cd packages/api && npm run ops:probe",
     "ops:smoke": "cd packages/api && npm run ops:smoke",
     "setup:ops-alerts": "powershell -File scripts/setup-ops-alerts.ps1",
     "neo4j-lineage-worker": "cd packages/neo4j-lineage-worker && npm run start",

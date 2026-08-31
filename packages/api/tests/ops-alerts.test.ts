@@ -35,6 +35,7 @@ function emptySnapshot(): OpsMetricsSnapshot {
       last1h: { windowHours: 1, avaChatCompleted: 0, avaChatFailed: 0, avaQuotaBlocked: 0 },
       last5m: { avaChatCompleted: 0, avaChatFailed: 0 },
     },
+    errorFingerprints24h: [],
   }
 }
 
@@ -78,5 +79,27 @@ describe('evaluateOpsAlerts', () => {
     snapshot.productEvents.last1h.avaQuotaBlocked = 12
     const alerts = evaluateOpsAlerts(snapshot)
     expect(alerts.some((a) => a.id === 'llm_quota_spike')).toBe(true)
+  })
+
+  it('flags infra probe api down', () => {
+    const snapshot = emptySnapshot()
+    snapshot.probe = {
+      checkedAt: new Date().toISOString(),
+      api: { ok: false, latencyMs: 100, status: 503 },
+      postgres: { ok: true, latencyMs: 12 },
+    }
+    const alerts = evaluateOpsAlerts(snapshot)
+    expect(alerts.some((a) => a.id === 'infra_api_down')).toBe(true)
+  })
+
+  it('flags infra probe postgres slow', () => {
+    const snapshot = emptySnapshot()
+    snapshot.probe = {
+      checkedAt: new Date().toISOString(),
+      api: { ok: true, latencyMs: 50 },
+      postgres: { ok: true, latencyMs: 800 },
+    }
+    const alerts = evaluateOpsAlerts(snapshot)
+    expect(alerts.some((a) => a.id === 'infra_postgres_slow')).toBe(true)
   })
 })

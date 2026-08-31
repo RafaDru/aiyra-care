@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-28",
+  "updatedAt": "2026-08-31",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -241,6 +241,66 @@
           "title": "Intervenção humana só em falha recuperável",
           "status": "done",
           "detail": "useSilentWalletSync na Carteira; modal só em Integrações; toast se silent falha (login/CDP)."
+        }
+      ]
+    },
+    {
+      "id": "fleury-precision-care",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Grupo Fleury — Precision Care (OTP + multi-marca)",
+      "summary": "Hermes Pardini já usa portal/API Fleury (resultados.grupofleury.com.br). PoC: auth OTP unificada (SMS/e-mail/WhatsApp) e replay GET /pedidos por perfil de marca — caminho para connector grupo_fleury.",
+      "status": "in_progress",
+      "statusLabel": "PoC auth + marca",
+      "items": [
+        {
+          "id": "fleury-poc-docs",
+          "title": "Documentação FLEURY_PRECISION_CARE.md",
+          "status": "done",
+          "detail": "Arquitetura, endpoints, headers marca, scripts PoC, hipóteses e próximos passos."
+        },
+        {
+          "id": "fleury-poc-probe-auth",
+          "title": "Script probe:fleury-auth (OTP + password)",
+          "status": "done",
+          "detail": "Browser headed; entrada unificada ou ?origin=pardini; artefato fleury-precision-probe.json."
+        },
+        {
+          "id": "fleury-poc-probe-marca",
+          "title": "Script probe:fleury-marca (perfis marca-selecionada)",
+          "status": "done",
+          "detail": "Replay GET /pedidos com pardini/fleury/a+/labs-a+/headers capturados."
+        },
+        {
+          "id": "fleury-poc-validate",
+          "title": "Validar PoC com conta real (OTP + contagem pedidos)",
+          "status": "in_progress",
+          "detail": "Rodar scripts; confirmar token unificado cobre Pardini; registrar client_id OAuth no artefato."
+        },
+        {
+          "id": "fleury-otp-sync-ui",
+          "title": "Sync interativo OTP na UI (modal código)",
+          "status": "planned",
+          "detail": "Primeiro login SMS/WhatsApp/e-mail; persistir refresh; silent só com sessionReady."
+        },
+        {
+          "id": "fleury-unified-connector",
+          "title": "Connector grupo_fleury_precision_care (multi-marca)",
+          "status": "planned",
+          "detail": "Evoluir hermes_pardini ou novo portal_type; marca configurável; Connect registry."
+        },
+        {
+          "id": "fleury-ui-label",
+          "title": "UI «Grupo Fleury / Precision Care» (não só Hermes)",
+          "status": "planned",
+          "detail": "Integrações + landing categorias; sem logos oficiais até marketing/jurídico."
+        },
+        {
+          "id": "fleury-legal-review",
+          "title": "Revisão legal scraping portal unificado",
+          "status": "planned",
+          "detail": "Termos Precision Care; OTP como dado de autenticação; badge Jurídico.",
+          "reviewBadge": ["legal"]
         }
       ]
     },
@@ -1729,6 +1789,36 @@
           "title": "Bridge dev-audit → staging metrics",
           "status": "planned",
           "detail": "Correlacionar hooks de dev com product_events em ambiente staging."
+        },
+        {
+          "id": "run-operation-model-doc",
+          "title": "Modelo operacional (doc)",
+          "status": "done",
+          "detail": "docs/OPERATION_MODEL.md — cache generations, sondas, fallbacks dormentes."
+        },
+        {
+          "id": "run-ops-probe",
+          "title": "Sondas sintéticas (health + db latency)",
+          "status": "done",
+          "detail": "npm run ops:probe; alertas infra; connect-worker; ops-metrics-last.json."
+        },
+        {
+          "id": "run-data-generations",
+          "title": "Freshness manifest + data_generations",
+          "status": "planned",
+          "detail": "Bump on write; GET /account/freshness; If-None-Match. Ver OPERATION_MODEL §7."
+        },
+        {
+          "id": "run-client-error-ingest",
+          "title": "Ingest erro cliente (fingerprint 3D)",
+          "status": "planned",
+          "detail": "Unhandled UI/API errors; sem stack PHI. Ver OPERATION_MODEL §5."
+        },
+        {
+          "id": "run-wakeable-fallbacks",
+          "title": "Fallbacks dormentes (snapshot D-1, Ava lite)",
+          "status": "planned",
+          "detail": "Gatilho forte; banner stale. Ver OPERATION_MODEL §6."
         }
       ]
     },

@@ -80,7 +80,7 @@ There is **no top-level lint or typecheck** — root `npm run lint` is a no-op (
 | **Bradesco Saúde** | No (link + manual import only) | — | — |
 | **ConecteSUS** | Manual gov.br import | Interactive FHIR login | Vaccines, exams |
 | **Mater Dei** | Yes | Scraper + JSON session | Exams, visits, reports/images |
-| **Hermes Pardini** | Yes (PKCE session) | Browser OAuth PKCE (+ HTTP refresh) | Exams via `paciente/api/v1/pedidos` + report PDF |
+| **Hermes Pardini** | Yes (PKCE session) | Browser OAuth PKCE (+ HTTP refresh) | Exams via Fleury Precision Care `paciente/api/v1/pedidos` + PDF — ver `docs/FLEURY_PRECISION_CARE.md` |
 
 **Silent sync on Carteira:** auto-sync only fires with valid persisted session (`sessionReady`); first login always via **Sincronizar** button (may open portal/Chrome). API ignores `silent=1` without session (`skipped: session_required`).
 
@@ -173,4 +173,6 @@ Only commit or open a PR when the user explicitly asks. Follow PR template in `.
 | `docs/DATA_HYGIENE.md` | Dedup (Google Photos style) |
 | `docs/CLASSIFICATION_ENGINE.md` | Operator label classification engine |
 | `docs/OBSERVABILITY.md` | Proactive monitoring, product_events |
+| `docs/OPERATION_MODEL.md` | Operação enxuta: fases §13, P0 §14, cache, fallbacks |
+| `docs/PARALLEL_WORK.md` | Paralelizar ops vs PoC Fleury |
 | `docs/roadmap.json` | Epics `ava-*`, `observability-platform`, `data-hygiene-dedup` |

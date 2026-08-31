@@ -2,6 +2,7 @@ import type { LlmInternalCostService } from '../llm/llm-internal-cost.service.js
 import { evaluateOpsAlerts } from '../../domain/ops/ops-alerts.js'
 import type { OpsAlert, OpsMetricsSnapshot } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsMetricsPgRepository } from '../../infrastructure/persistence/ops-metrics.pg.repository.js'
+import { readOpsProbeArtifact } from './ops-probe-artifact.js'
 
 export interface OpsMetricsResponse {
   metrics: OpsMetricsSnapshot
@@ -74,6 +75,7 @@ export class OpsMetricsService {
       },
       internalLlm,
       errorFingerprints24h,
+      probe: readOpsProbeArtifact(),
     }
 
     return { metrics, alerts: evaluateOpsAlerts(metrics) }

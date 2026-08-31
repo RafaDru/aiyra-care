@@ -1,6 +1,7 @@
 import { createWorkerPool, loadMonorepoEnv } from './env.js'
 import { startConnectWorkerLoop } from '../../api/src/infrastructure/sync/connect-worker.runner.js'
 import { runOpsAlertsCheck } from './ops-alerts.js'
+import { runOpsProbeCheck } from './ops-probe.js'
 
 loadMonorepoEnv()
 
@@ -23,6 +24,9 @@ let opsAlertsTimer: ReturnType<typeof setInterval> | undefined
 
 if (Number.isFinite(opsAlertsIntervalMs) && opsAlertsIntervalMs > 0) {
   const tick = () => {
+    runOpsProbeCheck(pool)
+      .then((probe) => console.log('[connect-worker] ops-probe', JSON.stringify(probe)))
+      .catch((err) => console.error('[connect-worker] ops-probe failed', err instanceof Error ? err.message : err))
     runOpsAlertsCheck(pool)
       .then((result) => console.log('[connect-worker] ops-alerts', JSON.stringify(result)))
       .catch((err) => console.error('[connect-worker] ops-alerts failed', err instanceof Error ? err.message : err))

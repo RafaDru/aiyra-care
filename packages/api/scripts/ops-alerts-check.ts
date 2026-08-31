@@ -12,6 +12,8 @@ import { OpsMetricsPgRepository } from '../src/infrastructure/persistence/ops-me
 import { LlmInternalCostService } from '../src/application/llm/llm-internal-cost.service.js'
 import { LlmUsagePgRepository } from '../src/infrastructure/persistence/llm-usage.pg.repository.js'
 import { LlmInternalBudgetPgRepository } from '../src/infrastructure/persistence/llm-internal-budget.pg.repository.js'
+import { writeOpsMetricsArtifact } from '../src/application/ops/ops-probe-artifact.js'
+import { runOpsProbe } from '../src/application/ops/ops-probe.service.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 config({ path: resolve(root, '.env') })
@@ -28,9 +30,16 @@ async function main() {
       new LlmInternalBudgetPgRepository(pool),
     ),
   )
+  await runOpsProbe(pool)
   const dispatch = new OpsAlertDispatchService(metrics)
   const result = await dispatch.checkAndDispatch()
-  console.log(JSON.stringify(result, null, 2))
+  const metricsPayload = await metrics.getMetrics()
+  const artifactPath = writeOpsMetricsArtifact({
+    generatedAt: new Date().toISOString(),
+    metrics: metricsPayload.metrics,
+    alerts: metricsPayload.alerts,
+  })
+  console.log(JSON.stringify({ ...result, metricsArtifact: artifactPath }, null, 2))
   await pool.end()
 }
 
