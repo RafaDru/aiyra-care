@@ -46,18 +46,33 @@ if (-not $SkipKeyGeneration) {
 
 $webhook = Read-EnvValue "OPS_ALERT_WEBHOOK_URL"
 if (-not $webhook) {
-  Write-Host ""
-  Write-Host "Next step: add OPS_ALERT_WEBHOOK_URL to .env" -ForegroundColor Yellow
-  Write-Host "  Slack: Workspace > Apps > Incoming Webhooks"
-  Write-Host "  Example: OPS_ALERT_WEBHOOK_URL=https://hooks.slack.com/services/T.../B.../..."
+  Append-EnvLine "OPS_ALERT_WEBHOOK_URL=http://127.0.0.1:3012/ops-alert"
+  Write-Host "OPS_ALERT_WEBHOOK_URL set to local tray notifier (:3012)" -ForegroundColor Green
 } else {
   Write-Host "OPS_ALERT_WEBHOOK_URL is set." -ForegroundColor Green
 }
+
+$dashboard = Read-EnvValue "OPS_ALERT_DASHBOARD_URL"
+if (-not $dashboard) {
+  Append-EnvLine "OPS_ALERT_DASHBOARD_URL=http://127.0.0.1:3013"
+  Write-Host "OPS_ALERT_DASHBOARD_URL set to ops-console (:3013)" -ForegroundColor Green
+} else {
+  Write-Host "OPS_ALERT_DASHBOARD_URL is set." -ForegroundColor Green
+}
+
+Write-Host ""
+Write-Host "Local notifier (Windows tray):" -ForegroundColor Cyan
+Write-Host "  npm run ops:notifier:up"
+Write-Host "  or scripts/ops-local-notifier-tray.ps1"
+Write-Host ""
+Write-Host "Observability console:" -ForegroundColor Cyan
+Write-Host "  npm run ops:console:up   -> http://127.0.0.1:3013"
 
 Write-Host ""
 Write-Host "Local smoke (API running):" -ForegroundColor Cyan
 Write-Host "  npm run ops:smoke"
 Write-Host "  npm run ops:metrics"
+Write-Host "  npm run ops:triage"
 Write-Host "  npm run ops:alerts-check"
 
 if ($RegisterScheduledTask) {

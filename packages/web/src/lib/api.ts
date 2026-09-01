@@ -84,15 +84,6 @@ async function request<T>(path: string, options?: RequestInit & { skipErrorRepor
   return res.json()
 }
 
-function opsRequestHeaders(): Record<string, string> {
-  const key =
-    (typeof localStorage !== 'undefined' ? localStorage.getItem('opsMetricsKey') : null)
-    ?? import.meta.env.VITE_OPS_METRICS_KEY
-  const headers: Record<string, string> = {}
-  if (key) headers['x-internal-ops-key'] = key
-  return headers
-}
-
 import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream.js'
 
 export const api = {
@@ -625,6 +616,11 @@ export const api = {
     },
     virtualCard: (id: string) => request<import('./api.types.js').UnimedVirtualCard>(`/integration-links/${id}/virtual-card`, { method: 'POST' }),
     syncStatus: (id: string) => request<import('./api.types.js').IntegrationLinkSyncStatus>(`/integration-links/${id}/sync-status`),
+    submitSyncOtp: (jobId: string, code: string) =>
+      request<{ ok: boolean }>(`/integration-links/sync-progress/${jobId}/otp`, {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      }),
     syncProgress: (jobId: string) => request<{
       step: string
       message: string
@@ -766,24 +762,6 @@ export const api = {
   },
   account: {
     freshness: () => request<import('./api.types.js').AccountFreshnessView>('/account/freshness'),
-  },
-  ops: {
-    metrics: () =>
-      request<import('./ops.types.js').OpsMetricsResponse>('/ops/metrics', {
-        headers: opsRequestHeaders(),
-        skipErrorReport: true,
-      }),
-    alerts: () =>
-      request<{ generatedAt: string; alerts: import('./ops.types.js').OpsAlert[] }>('/ops/alerts', {
-        headers: opsRequestHeaders(),
-        skipErrorReport: true,
-      }),
-    dispatchCheck: () =>
-      request<import('./ops.types.js').OpsAlertsDispatchResult>('/ops/alerts/check', {
-        method: 'POST',
-        headers: opsRequestHeaders(),
-        skipErrorReport: true,
-      }),
   },
   auth: {
     me: () => request<import('./api.types.js').AuthSyncResponse>('/auth/me'),

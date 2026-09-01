@@ -1,8 +1,13 @@
 import type { LlmInternalCostService } from '../llm/llm-internal-cost.service.js'
 import { evaluateOpsAlerts } from '../../domain/ops/ops-alerts.js'
+import {
+  getOpsFeatureCatalog,
+  resolveFeatureKeyFromProductEvent,
+} from '../../domain/ops/ops-feature-catalog.js'
+import { buildFeatureHealthMatrix } from '../../domain/ops/ops-feature-health.js'
 import type { OpsAlert, OpsMetricsSnapshot } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsMetricsPgRepository } from '../../infrastructure/persistence/ops-metrics.pg.repository.js'
-import { readOpsProbeArtifact } from './ops-probe-artifact.js'
+import { readOpsProbeArtifact, writeOpsMetricsArtifact } from './ops-probe-artifact.js'
 
 export interface OpsMetricsResponse {
   metrics: OpsMetricsSnapshot
@@ -27,6 +32,8 @@ export class OpsMetricsService {
       product5m,
       errorFingerprints24h,
       clientErrorFingerprints24h,
+      productEventUsage24h,
+      clientErrorFeatureCounts24h,
     ] = await Promise.all([
       this.repo.avaTokenPercentiles(24),
       this.repo.avaTokenPercentiles(24 * 7),
@@ -38,7 +45,15 @@ export class OpsMetricsService {
       this.repo.productEventCountsSinceMinutes(5),
       this.repo.errorFingerprints24h(25),
       this.repo.clientErrorFingerprints24h(30),
+      this.repo.productEventUsage24h(),
+      this.repo.clientErrorFeatureCounts24h(),
     ])
+
+    const featureHealth24h = buildFeatureHealthMatrix(
+      productEventUsage24h,
+      clientErrorFeatureCounts24h,
+      resolveFeatureKeyFromProductEvent,
+    )
 
     let internalLlm: OpsMetricsSnapshot['internalLlm'] | undefined
     if (this.internalCost) {
@@ -78,7 +93,9 @@ export class OpsMetricsService {
       internalLlm,
       errorFingerprints24h,
       clientErrorFingerprints24h,
-      probe: readOpsProbeArtifact(),
+      featureHealth24h,
+      featureCatalog: getOpsFeatureCatalog(),
+      probe: readOpsProbeArtifact() ?? undefined,
     }
 
     return { metrics, alerts: evaluateOpsAlerts(metrics) }

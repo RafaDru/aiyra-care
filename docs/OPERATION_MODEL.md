@@ -281,7 +281,7 @@ Mapa de **tudo** trazido na thread: taxonomia, POC cliente 3D, sondas, degradaç
 
 ```text
 Fase 0  Foundation ops     [DONE]
-Fase 1  Ops sem te acordar  [parcial — crítico]
+Fase 1  Ops sem te acordar  [done — triage + dispatch filtrado; prod webhook pendente]
 Fase 2  Cache / freshness   [done — generations + manifest web]
 Fase 3  Cliente: ver erros  [done — ingest + ops 3D]
 Fase 4  Fallbacks dormentes [done — sync pause, Ava lite, snapshot D-1]
@@ -310,8 +310,8 @@ Fase 6  Maturidade          [backlog]
 | 1.1 | Canal ops (local notifier / webhook cloud) + cron/worker | alertas | config | **dev done** — prod: configurar ntfy/email |
 | 1.2 | `ops:probe` (health + db latency) no connect-worker | sondas ativas | baixo | **done** |
 | 1.3 | Regras alerta API down / PG slow em `ops-alerts.ts` | degradação infra | baixo | **done** |
-| 1.4 | Script LLM triage (snapshot → infra vs app + `human_required`) | pirâmide Nível 2 | baixo | pendente |
-| 1.5 | Slack só se `human_required` (filtrar dispatch) | menos pager | baixo | pendente |
+| 1.4 | Script triage (snapshot → tier + `human_required`) | pirâmide Nível 2 | baixo | **done** — `ops:triage`, `ops-alert-triage.ts` |
+| 1.5 | Dispatch só `human_required` (default) | menos pager | baixo | **done** — `OPS_ALERTS_DISPATCH_MODE` |
 | 1.6 | Ops snapshot JSON em cada `ops:alerts-check` | fallback ops dormente | baixo | **done** |
 | 1.7 | GCP billing budgets | ambiente | config | doc exists |
 
@@ -342,6 +342,7 @@ Fase 6  Maturidade          [backlog]
 | 3.2 | Wrapper `api.ts`: erro sem handler → ingest | POC API path | médio | **done** |
 | 3.3 | `POST /telemetry/client-errors` (fingerprint, allowlist) | backend catalogar | médio | **done** |
 | 3.4 | Agregação 3D (queries ou view interna) | usuário × feature × erro | médio | **done** |
+| 3.4b | Catálogo feature humanizado + matriz acesso×falha no console ops | ops × analytics | médio | **done** — `ops-feature-catalog.ts`, matriz em `:3013` |
 | 3.5 | Playbooks Nível 1: mapa feature × erro → mensagem UI | fallback interface | médio | **done** |
 | 3.6 | Banner “dados podem estar desatualizados” (sync fail/stale) | alívio pressão | baixo | **done** (Carteira) |
 

@@ -1,6 +1,7 @@
 import { Card, Select, Space, Switch, Typography, Button, Alert } from 'antd'
 import { MoonOutlined, SunOutlined, ProjectOutlined, LinkOutlined, RadarChartOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme/ThemeProvider.js'
 import { setLanguage } from '../../i18n/index.js'
@@ -100,7 +101,7 @@ export function SettingsGeneralPage() {
           <Button type="default" icon={<ProjectOutlined />} onClick={() => navigate('/roadmap')}>
             {t('nav.roadmap')}
           </Button>
-          <Button type="default" icon={<RadarChartOutlined />} onClick={() => navigate('/ops')}>
+          <Button type="default" icon={<RadarChartOutlined />} onClick={() => openOpsConsole()}>
             {t('nav.ops')}
           </Button>
         </Space>

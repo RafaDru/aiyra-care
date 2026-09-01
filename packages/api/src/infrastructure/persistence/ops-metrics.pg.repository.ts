@@ -221,6 +221,46 @@ export class OpsMetricsPgRepository {
     }))
   }
 
+  async productEventUsage24h(): Promise<
+    import('../../domain/ops/ops-feature-health.js').ProductEventUsageRow[]
+  > {
+    const { rows } = await this.pool.query(
+      `SELECT
+         route,
+         event_name,
+         COUNT(*)::int AS event_count,
+         COUNT(DISTINCT session_id)::int AS session_count
+       FROM product_events
+       WHERE created_at >= NOW() - INTERVAL '24 hours'
+       GROUP BY route, event_name`,
+    )
+    return rows.map((row) => ({
+      route: row.route as string | null,
+      eventName: row.event_name as string,
+      eventCount: Number(row.event_count),
+      sessionCount: Number(row.session_count),
+    }))
+  }
+
+  async clientErrorFeatureCounts24h(): Promise<
+    import('../../domain/ops/ops-feature-health.js').ClientErrorFeatureCountRow[]
+  > {
+    const { rows } = await this.pool.query(
+      `SELECT
+         feature,
+         COUNT(*)::int AS error_count,
+         COUNT(DISTINCT account_id)::int AS account_count
+       FROM client_errors
+       WHERE created_at >= NOW() - INTERVAL '24 hours'
+       GROUP BY feature`,
+    )
+    return rows.map((row) => ({
+      feature: row.feature as string,
+      errorCount: Number(row.error_count),
+      accountCount: Number(row.account_count),
+    }))
+  }
+
   async clientErrorFingerprints24h(
     limit = 30,
   ): Promise<import('../../domain/ops/ops-metrics.types.js').ClientErrorFingerprintRow[]> {

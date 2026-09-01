@@ -16,6 +16,7 @@
     "llm:internal-usage:top": "tsx scripts/report-internal-llm-usage.ts --top",
     "ops:metrics": "tsx scripts/ops-metrics-report.ts",
     "ops:alerts-check": "tsx scripts/ops-alerts-check.ts",
+    "ops:triage": "tsx scripts/ops-triage-report.ts",
     "ops:probe": "tsx scripts/ops-probe.ts",
     "ops:smoke": "tsx scripts/ops-smoke.ts",
     "ops:degraded-snapshot": "tsx scripts/nightly-degraded-snapshot.mjs",
@@ -26,7 +27,8 @@
     "test:smoke:billing": "node scripts/billing-smoke-test.mjs",
     "capture:landing-screenshots": "node scripts/capture-landing-screenshots.mjs",
     "probe:fleury-auth": "node scripts/probe-fleury-precision-auth.mjs",
-    "probe:fleury-marca": "node scripts/probe-fleury-precision-marca.mjs"
+    "probe:fleury-marca": "node scripts/probe-fleury-precision-marca.mjs",
+    "reconcile:sync-jobs": "node scripts/reconcile-sync-jobs.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",

@@ -42,6 +42,29 @@ export interface ClientErrorFingerprintRow {
   lastSeenAt: string
 }
 
+export interface FeatureHealthRow {
+  featureKey: string
+  label: string
+  area: string
+  section: 'infra' | 'product' | 'sync' | 'ava' | 'cost'
+  routeExample?: string
+  usageEvents24h: number
+  usageSessions24h: number
+  errorCount24h: number
+  accountCount24h: number
+  failRatePct: number
+  signal: 'hot' | 'errors_only' | 'ok' | 'low_signal'
+}
+
+export interface OpsFeatureCatalogEntry {
+  key: string
+  label: string
+  area: string
+  section: FeatureHealthRow['section']
+  routeExample?: string
+  description?: string
+}
+
 export interface ErrorFingerprintRow {
   eventName: string
   fingerprint: string
@@ -113,17 +136,66 @@ export interface OpsMetricsSnapshot {
   internalLlm?: OpsInternalLlmSnapshot
   errorFingerprints24h: ErrorFingerprintRow[]
   clientErrorFingerprints24h: ClientErrorFingerprintRow[]
+  featureHealth24h: FeatureHealthRow[]
+  featureCatalog: OpsFeatureCatalogEntry[]
   probe?: OpsProbeSnapshot
+}
+
+export interface RuntimeDegradedView {
+  avaLite: boolean
+  avaLiteReason: string | null
+  degradedRead: boolean
+  degradedReadAsOf: string | null
+  degradedReadReason: string | null
+  syncDegradedPortals: string[]
+}
+
+export interface OpsAlertTriageRow {
+  alertId: string
+  severity: OpsAlertSeverity
+  category: OpsAlert['category']
+  tier: 'infra' | 'app_sync' | 'llm' | 'product'
+  humanRequired: boolean
+  reason: string
 }
 
 export interface OpsMetricsResponse {
   metrics: OpsMetricsSnapshot
   alerts: OpsAlert[]
+  runtime?: RuntimeDegradedView
+  triage?: OpsAlertTriageRow[]
 }
 
 export interface OpsAlertsDispatchResult {
   checkedAt: string
   alertCount: number
+  humanRequiredCount: number
+  dispatchMode: 'all' | 'human_required'
   dispatched: boolean
   webhookConfigured: boolean
+  triage: OpsAlertTriageRow[]
+}
+
+export interface StackServiceStatus {
+  up: boolean
+  status: number | null
+  error?: string | null
+  service?: string
+  healthStatus?: string
+}
+
+export interface StackStatusSnapshot {
+  checkedAt: string
+  apiPort: number
+  webPort: number
+  api: StackServiceStatus
+  web: StackServiceStatus
+}
+
+export interface StackActionResult {
+  action: 'status' | 'start' | 'stop' | 'restart'
+  message?: string
+  status: StackStatusSnapshot
+  platform?: string
+  error?: string
 }

@@ -64,6 +64,29 @@ export interface ClientErrorFingerprintRow {
   lastSeenAt: string
 }
 
+export interface FeatureHealthRow {
+  featureKey: string
+  label: string
+  area: string
+  section: 'infra' | 'product' | 'sync' | 'ava' | 'cost'
+  routeExample?: string
+  usageEvents24h: number
+  usageSessions24h: number
+  errorCount24h: number
+  accountCount24h: number
+  failRatePct: number
+  signal: 'hot' | 'errors_only' | 'ok' | 'low_signal'
+}
+
+export interface OpsFeatureCatalogEntry {
+  key: string
+  label: string
+  area: string
+  section: FeatureHealthRow['section']
+  routeExample?: string
+  description?: string
+}
+
 export interface OpsProbeSnapshot {
   checkedAt: string
   api: {
@@ -113,6 +136,8 @@ export interface OpsMetricsSnapshot {
   }
   errorFingerprints24h: ErrorFingerprintRow[]
   clientErrorFingerprints24h: ClientErrorFingerprintRow[]
+  featureHealth24h: FeatureHealthRow[]
+  featureCatalog: OpsFeatureCatalogEntry[]
   probe?: OpsProbeSnapshot
 }
 

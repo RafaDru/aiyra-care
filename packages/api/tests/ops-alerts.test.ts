@@ -37,6 +37,8 @@ function emptySnapshot(): OpsMetricsSnapshot {
     },
     errorFingerprints24h: [],
     clientErrorFingerprints24h: [],
+    featureHealth24h: [],
+    featureCatalog: [],
   }
 }
 

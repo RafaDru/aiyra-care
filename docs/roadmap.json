@@ -280,14 +280,14 @@
         {
           "id": "fleury-otp-sync-ui",
           "title": "Sync interativo OTP na UI (modal código)",
-          "status": "planned",
-          "detail": "Primeiro login SMS/WhatsApp/e-mail; persistir refresh; silent só com sessionReady."
+          "status": "done",
+          "detail": "POST /integration-links/sync-progress/:jobId/otp; modal FleuryOtpSyncInput; browser headless com OTP in-app (FLEURY_PRECISION_OTP_IN_APP=1)."
         },
         {
           "id": "fleury-unified-connector",
           "title": "Connector grupo_fleury_precision_care (multi-marca)",
-          "status": "planned",
-          "detail": "Evoluir hermes_pardini ou novo portal_type; marca configurável; Connect registry."
+          "status": "in_progress",
+          "detail": "CONNECTOR_REGISTRY + GET /connect/connectors; subBrands; auth interactive_otp; scraper ainda em api."
         },
         {
           "id": "fleury-ui-label",
@@ -565,14 +565,49 @@
         {
           "id": "int-source-tag-brand-tint",
           "title": "Padrão de Origem com Logos e Tinting de Operadora",
-          "status": "planned",
-          "detail": "Evoluir o SourceTag nas listagens de entidades (exames, consultas, autorizações, vacinas) para adotar as logomarcas, ícones e paletas de cores no estilo de cartões/tinting da tela de Convênios."
+          "status": "done",
+          "detail": "SourceTag usa brandForPortal (Grupo Fleury para hermes_pardini), logo + faixa lateral tint."
         },
         {
           "id": "int-amil-correlacao",
           "title": "Amil — heurística correlação autorização ↔ atendimento",
           "status": "planned",
           "detail": "Desenvolver heurística para vincular medical_records/exams da Amil com authorizations por paciente, data, procedimento e prestador, dado que a API não fornece ID de correlação. (Perg. 5)."
+        }
+      ]
+    },
+    {
+      "id": "sus-public-health",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "SUS — ConecteSUS e Caderneta",
+      "summary": "Import gov.br de vacinas e exames; sem sync silencioso. Próximo: UX de reimport e lembretes.",
+      "status": "in_progress",
+      "statusLabel": "Import manual OK",
+      "items": [
+        {
+          "id": "sus-import-core",
+          "title": "Import ConecteSUS + Caderneta (gov.br)",
+          "status": "done",
+          "detail": "PublicHealthIntegrationModal; POST /scraper/conectesus; connectors government no Connect."
+        },
+        {
+          "id": "sus-docs",
+          "title": "Documentação SUS_CONECTESUS.md",
+          "status": "done",
+          "detail": "Limitações, fluxo UI, próximos passos P1–P3."
+        },
+        {
+          "id": "sus-reimport-ux",
+          "title": "UX reimport guiado (Vacinas + Integrações)",
+          "status": "planned",
+          "detail": "Último import, CTA reimportar, dedup visível."
+        },
+        {
+          "id": "sus-reminder",
+          "title": "Lembrete opcional reimport (6–12 meses)",
+          "status": "planned",
+          "detail": "Care reminder ou banner na Carteira/Vacinas."
         }
       ]
     },
@@ -1750,7 +1785,7 @@
       "category": "tecnico",
       "priority": "P2",
       "title": "Run — captura inteligente de bugs e acionamentos",
-      "summary": "Operação em produção: eventos sem PHI, alertas sync/LLM, triagem proativa. Complementa observability-platform.",
+      "summary": "Operação em produção: eventos sem PHI, alertas sync/LLM, triagem proativa, UX do console ops (mapa de features, acesso×falha). Complementa observability-platform.",
       "status": "in_progress",
       "statusLabel": "Em progresso",
       "items": [
@@ -1780,9 +1815,50 @@
         },
         {
           "id": "run-ops-dashboard-web",
-          "title": "Dashboard ops /ops",
+          "title": "Console ops independente (:3013)",
           "status": "done",
-          "detail": "Dashboard /ops: Ava p50/p95, sync, LLM interno, fingerprints, probe, runtime."
+          "detail": "packages/ops-console — PG direto, stack controls, não depende do web :5173."
+        },
+        {
+          "id": "run-ops-triage",
+          "title": "Triagem alertas + dispatch human_required",
+          "status": "done",
+          "detail": "ops-alert-triage.ts; OPS_ALERTS_DISPATCH_MODE; npm run ops:triage."
+        },
+        {
+          "id": "run-ops-console-visual-design",
+          "title": "Design console ops — hierarquia e thresholds",
+          "status": "planned",
+          "detail": "packages/ops-console (:3013): alinhar Ant Design + tokens Aiyra; sair do monocromático; faixas ok/warning/critical em cards e probes; microcopy «o que é este bloco»; ícones e densidade legível.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "run-ops-console-charts-scales",
+          "title": "Gráficos e escalas no console ops",
+          "status": "planned",
+          "detail": "Séries temporais (Ava tokens p50/p95, fail rate sync, latência probe); eixos, unidades, janelas 24h/7d; sparklines nos KPIs; comparar com threshold visual — recharts ou padrão do design system.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "run-ops-console-sections",
+          "title": "Seções por contexto de observabilidade",
+          "status": "done",
+          "detail": "Reorganizar :3013 em blocos narrativos: Infra (probe, stack), Produto/UX (erros cliente, mapa), Sync & integrações, Ava/LLM, Custo interno — título + «o que mede» + thresholds por seção.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "run-ops-feature-catalog",
+          "title": "Catálogo humanizado de features (mapa do app)",
+          "status": "done",
+          "detail": "Chave técnica (patient_detail, api:ava) → label PT, área (Carteira, Paciente, Integrações…), rota exemplo; ops-feature-catalog.ts; mapa no console :3013.",
+          "reviewBadge": ["design", "business"]
+        },
+        {
+          "id": "run-ops-feature-health-matrix",
+          "title": "Matriz acesso × fail rate (analytics × ops)",
+          "status": "done",
+          "detail": "Cruzar product_events (sessões/eventos 24h) com client_errors — taxa de falha por feature; tabela Saúde por feature no console ops.",
+          "reviewBadge": ["design"]
         },
         {
           "id": "run-ops-alert-channels-doc",

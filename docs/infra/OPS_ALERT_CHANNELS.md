@@ -22,36 +22,38 @@ connect-worker / cron / ops:alerts-check
   "text": "AiyraCare ops — 2 alerta(s)\n• [critical] sync: ...",
   "alerts": [ { "id": "...", "severity": "critical", "category": "sync", "message": "..." } ],
   "checkedAt": "2026-09-01T12:00:00.000Z",
-  "dashboardUrl": "http://localhost:5173/ops"
+  "dashboardUrl": "http://127.0.0.1:3013"
 }
 ```
 
-Sem PHI. `dashboardUrl` vem de `OPS_ALERT_DASHBOARD_URL` ou deriva de `LANDING_CAPTURE_WEB_URL` + `/ops`.
+Sem PHI. `dashboardUrl` vem de `OPS_ALERT_DASHBOARD_URL` ou default `http://127.0.0.1:3013` (console ops independente).
 
 ## Dev — sua máquina (sem Slack)
 
 | Componente | Função |
 |------------|--------|
-| `scripts/ops-local-notifier-tray.ps1` | **Windows:** ícone na bandeja + listener HTTP |
+| `packages/ops-console` | **Console observabilidade** — PG direto + sonda API; `:3013` |
+| `scripts/ops-local-notifier-tray.ps1` | **Windows:** bandeja + menu (observabilidade, app, stack) |
+| `scripts/ops-notifier-up.ps1` | Reinicia notificador (libera :3012) |
 | `scripts/ops-local-notifier.mjs` | Headless (Linux / sem tray) |
 | `scripts/ops-local-toast.ps1` | Toast auxiliar (fallback node headless) |
-| `scripts/up.ps1` | Sobe notifier + defaults de webhook/dashboard |
-| `http://localhost:5173/ops` | Dashboard web (alertas, probe, fingerprints) |
+| `scripts/up.ps1` | Sobe console ops + notifier + defaults de webhook/dashboard |
+| `http://127.0.0.1:3013` | Dashboard (não depende do web :5173 nem das rotas `/ops` da API) |
 
 `.env` recomendado (ou defaults do `up.ps1`):
 
 ```env
 OPS_ALERT_WEBHOOK_URL=http://127.0.0.1:3012/ops-alert
-OPS_ALERT_DASHBOARD_URL=http://localhost:5173/ops
-OPS_METRICS_KEY=...   # npm run setup:ops-alerts
+OPS_ALERT_DASHBOARD_URL=http://127.0.0.1:3013
+OPS_CONSOLE_PORT=3013
+OPS_METRICS_KEY=...   # npm run setup:ops-alerts (rotas /ops na API para workers/CLI)
+OPS_ALERTS_DISPATCH_MODE=human_required   # default: só pager em alertas human_required
 ```
-
-No dashboard, salve a chave em `localStorage` ou use `VITE_OPS_METRICS_KEY` só em dev.
 
 Fluxo quando algo crítico ocorre:
 
 1. `npm run ops:alerts-check` (ou loop no connect-worker)
-2. Toast na área de trabalho + browser abre `/ops`
+2. Toast na area de trabalho + browser abre o console ops (:3013)
 3. Você investiga no painel (sem depender de Slack)
 
 ## Cloud — produção
@@ -60,7 +62,7 @@ O notificador local **não roda na VM**. O elo precisa ser **alcançável fora d
 
 | Canal | Quando usar | Config |
 |-------|-------------|--------|
-| **Dashboard `/ops`** | Sempre — estado ao abrir a URL de prod | `OPS_ALERT_DASHBOARD_URL=https://app…/ops` |
+| **Console ops `:3013`** | Sempre — estado ao abrir a URL dedicada | `OPS_ALERT_DASHBOARD_URL=https://ops…` |
 | **ntfy / Gotify / Telegram** | Push no celular, sem Slack | `OPS_ALERT_WEBHOOK_URL=https://ntfy.sh/aiyracare-ops` |
 | **E-mail ops** | Simples, notificação no celular via email | Webhook → Cloud Function que envia email genérico |
 | **GCP Monitoring** | Paralelo: `/health` down, billing | `docs/infra/GCP_BILLING_ALERTS.md` |
@@ -80,7 +82,7 @@ Agendamento em cloud (escolha uma):
 | Banner in-app (`RuntimeDegradedBanner`) | Só para usuário logado; não é pager do operador |
 | GCP uptime | Infra genérica; não cobre sync fail rate / LLM cascade |
 
-Combinação saudável: **webhook push (ntfy/email)** + **dashboard `/ops`** no link do payload.
+Combinação saudável: **webhook push (ntfy/email)** + **console ops** no link do payload.
 
 ## Fase 1 — critério de saída (revisado)
 

@@ -12,6 +12,7 @@ import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
 import { AvaGlobalDock } from '../ava/AvaGlobalDock.js'
 import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
+import { openOpsConsole } from '../../lib/ops-console-url.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -43,11 +44,7 @@ export function AppLayout() {
           ? '/settings'
           : ''
 
-  const devSelectedKeys = location.pathname.startsWith('/roadmap')
-    ? ['/roadmap']
-    : location.pathname.startsWith('/ops')
-      ? ['/ops']
-      : []
+  const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
@@ -110,9 +107,15 @@ export function AppLayout() {
               selectedKeys={devSelectedKeys}
               items={[
                 { key: '/roadmap', icon: <ProjectOutlined />, label: t('nav.roadmap') },
-                { key: '/ops', icon: <RadarChartOutlined />, label: t('nav.ops') },
+                { key: 'ops-console', icon: <RadarChartOutlined />, label: t('nav.ops') },
               ]}
-              onClick={({ key }) => navigate(key)}
+              onClick={({ key }) => {
+                if (key === 'ops-console') {
+                  openOpsConsole()
+                  return
+                }
+                navigate(key)
+              }}
               style={{ borderRight: 0, background: 'transparent' }}
             />
           </div>

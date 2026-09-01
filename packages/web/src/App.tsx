@@ -14,7 +14,6 @@ import { SettingsAccountPage } from './pages/settings/account.js'
 import { SettingsPlanPage } from './pages/settings/plan.js'
 import { SettingsLegalPage } from './pages/settings/legal.js'
 import { RoadmapPage } from './pages/roadmap.js'
-import { OpsDashboardPage } from './pages/ops.js'
 import { EmergencyPage } from './pages/emergency.js'
 import { ComplianceAcceptPage } from './pages/compliance-accept.js'
 import { LegalDocumentPage } from './pages/legal-document.js'
@@ -41,7 +40,6 @@ export function App() {
               <Route path="/emergency" element={<EmergencyPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />
-              <Route path="/ops" element={<OpsDashboardPage />} />
               <Route path="/settings" element={<SettingsLayout />}>
                 <Route index element={<Navigate to="general" replace />} />
                 <Route path="general" element={<SettingsGeneralPage />} />

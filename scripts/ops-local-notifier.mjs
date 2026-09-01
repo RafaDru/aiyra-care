@@ -2,19 +2,39 @@
  * Receptor local de alertas ops (dev / operador na máquina).
  * POST JSON { text, alerts, dashboardUrl } — mesmo contrato que OpsAlertDispatchService.
  *
- * Uso: node scripts/ops-local-notifier.mjs
- * OPS_ALERT_WEBHOOK_URL=http://127.0.0.1:3012/ops-alert
+ * Preferir tray no Windows: scripts/ops-local-notifier-tray.ps1
+ * Uso headless: node scripts/ops-local-notifier.mjs
  */
 import { createServer } from 'http'
 import { execFile } from 'child_process'
 import { platform } from 'os'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
+import { config } from 'dotenv'
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+config({ path: resolve(root, '.env') })
 
 const PORT = Number(process.env.OPS_LOCAL_NOTIFIER_PORT ?? 3012)
 const PATH = process.env.OPS_LOCAL_NOTIFIER_PATH ?? '/ops-alert'
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const toastScript = resolve(root, 'scripts/ops-local-toast.ps1')
+
+function resolveObservabilityUrl() {
+  const explicit = process.env.OPS_ALERT_DASHBOARD_URL?.trim()
+  if (explicit) {
+    const url = explicit.replace(/\/$/, '')
+    if (/:5173\/ops$/.test(url)) {
+      console.warn('[ops-local-notifier] legacy OPS_ALERT_DASHBOARD_URL ignored, using ops-console')
+      const consolePort = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
+      return `http://127.0.0.1:${consolePort}`
+    }
+    return url
+  }
+  const consolePort = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
+  return `http://127.0.0.1:${consolePort}`
+}
+
+const defaultDashboardUrl = resolveObservabilityUrl()
 
 function openUrl(url) {
   if (platform() === 'win32') {
@@ -40,10 +60,10 @@ function showToast(title, body) {
 }
 
 function readBody(req) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolvePromise, reject) => {
     const chunks = []
     req.on('data', (c) => chunks.push(c))
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+    req.on('end', () => resolvePromise(Buffer.concat(chunks).toString('utf8')))
     req.on('error', reject)
   })
 }
@@ -62,11 +82,12 @@ const server = createServer(async (req, res) => {
       const json = raw ? JSON.parse(raw) : {}
       const text = String(json.text ?? 'Alerta ops')
       const line = text.split('\n').find((l) => l.trim().startsWith('•')) ?? text.split('\n')[0]
-      const dashboardUrl = json.dashboardUrl ? String(json.dashboardUrl) : null
+      const dashboardUrl = json.dashboardUrl ? String(json.dashboardUrl) : defaultDashboardUrl
       const count = Array.isArray(json.alerts) ? json.alerts.length : 0
       console.log(`[ops-local-notifier] ${count} alert(s) — ${line}`)
+      console.log(`[ops-local-notifier] dashboard -> ${dashboardUrl}`)
       showToast('AiyraCare Ops', line.slice(0, 240))
-      if (dashboardUrl) openUrl(dashboardUrl)
+      openUrl(dashboardUrl)
       res.writeHead(200, { 'Content-Type': 'text/plain' }).end('ok')
     } catch (err) {
       console.error('[ops-local-notifier] bad payload', err)
@@ -80,4 +101,5 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`ops-local-notifier listening http://127.0.0.1:${PORT}${PATH}`)
+  console.log(`ops-local-notifier dashboard default ${defaultDashboardUrl}`)
 })
