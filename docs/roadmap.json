@@ -293,7 +293,13 @@
           "id": "fleury-ui-label",
           "title": "UI «Grupo Fleury / Precision Care» (não só Hermes)",
           "status": "done",
-          "detail": "Fase 1: card integrações, busca por marca, chips/sync Grupo Fleury, logos em public/brands/fleury. Pendente: badge em exames + landing."
+          "detail": "Fase 1: card integrações, busca por marca, chips/sync Grupo Fleury, logos em public/brands/fleury."
+        },
+        {
+          "id": "fleury-ui-exam-badge",
+          "title": "Badge laboratório nos exames (fase 2)",
+          "status": "done",
+          "detail": "Coluna laboratório com marca + selo Grupo Fleury; filtro por submarca; timeline popover; fleuryLabBrand em notes no sync."
         },
         {
           "id": "fleury-legal-review",
@@ -1776,7 +1782,7 @@
           "id": "run-ops-dashboard-web",
           "title": "Dashboard ops /ops",
           "status": "done",
-          "detail": "Alertas, probe, fingerprints; menu dev; x-internal-ops-key."
+          "detail": "Dashboard /ops: Ava p50/p95, sync, LLM interno, fingerprints, probe, runtime."
         },
         {
           "id": "run-ops-alert-channels-doc",

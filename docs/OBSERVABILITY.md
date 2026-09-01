@@ -63,7 +63,7 @@ product_events (
 
 - `GET /ops/metrics` — Ava p50/p95 tokens, sync por portal, alertas derivados.
 - `GET /ops/alerts` — só alertas ativos.
-- **Web dev:** `http://localhost:5173/ops` — dashboard interno (métricas, alertas, probe); ver `docs/infra/OPS_ALERT_CHANNELS.md`.
+- **Web dev:** `http://localhost:5173/ops` — dashboard de observabilidade (Ava, sync, LLM, erros, probe, runtime); ver `docs/infra/OPS_ALERT_CHANNELS.md`.
 - Header `x-internal-ops-key` quando `OPS_METRICS_KEY` ou `LLM_INTERNAL_OBSERVABILITY_KEY` definido.
 - CLI: `npm run ops:metrics`.
 
