@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isInteractiveLoginMessage, resolveSyncStepIndex } from '../src/lib/sync-portal-profile.ts'
+import { isInteractiveLoginMessage, isFleuryOtpLoginMessage, resolveSyncStepIndex } from '../src/lib/sync-portal-profile.ts'
 
 describe('resolveSyncStepIndex', () => {
   it('infers fetch step from stepDetails when current step is unknown', () => {
@@ -23,5 +23,11 @@ describe('isInteractiveLoginMessage', () => {
     expect(isInteractiveLoginMessage('Clique em Entrar no Chrome (login manual)...')).toBe(true)
     expect(isInteractiveLoginMessage('Abrindo Chrome para login Amil...')).toBe(true)
     expect(isInteractiveLoginMessage('conclua o login manualmente no Chrome')).toBe(true)
+    expect(isInteractiveLoginMessage('Abrindo Grupo Fleury — no Chrome: CPF → código SMS')).toBe(true)
+  })
+
+  it('detects Fleury unified OTP prompts', () => {
+    expect(isFleuryOtpLoginMessage('Abrindo Grupo Fleury — no Chrome: CPF → código SMS')).toBe(true)
+    expect(isFleuryOtpLoginMessage('OTP não concluído — tentando senha do protocolo (entrada Pardini)…')).toBe(false)
   })
 })

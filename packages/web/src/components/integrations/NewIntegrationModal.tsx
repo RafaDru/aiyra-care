@@ -1,11 +1,13 @@
-import { Modal, List, Typography, Tag, Button, Space } from 'antd'
-import { CheckCircleOutlined, RightOutlined } from '@ant-design/icons'
+import { useMemo, useState } from 'react'
+import { Modal, List, Typography, Tag, Button, Space, Input } from 'antd'
+import { CheckCircleOutlined, RightOutlined, SearchOutlined } from '@ant-design/icons'
 import { BrandLogo } from '../brands/BrandLogo.js'
 import {
   groupIntegrationOptions,
   type IntegrationOption,
   type LinkablePortal,
 } from './integration-catalog.js'
+import { FleuryGroupIntegrationCard } from './FleuryGroupIntegrationCard.js'
 
 const { Text, Title } = Typography
 
@@ -66,11 +68,17 @@ export function NewIntegrationModal({
   onImportConectesus,
   onImportCaderneta,
 }: Props) {
-  const groups = groupIntegrationOptions(linkedPortals)
+  const [search, setSearch] = useState('')
+  const groups = useMemo(
+    () => groupIntegrationOptions(linkedPortals, search),
+    [linkedPortals, search],
+  )
+  const hasResults = groups.some((g) => g.options.length > 0)
 
   const handlePick = (option: IntegrationOption & { linked: boolean }) => {
     if (!option.enabled || option.linked) return
     onClose()
+    setSearch('')
     if (option.action === 'conectesus') {
       onImportConectesus()
       return
@@ -82,18 +90,39 @@ export function NewIntegrationModal({
     if (option.portalType) onLinkPortal(option.portalType)
   }
 
+  const handleClose = () => {
+    setSearch('')
+    onClose()
+  }
+
   return (
     <Modal
       title="Nova integração"
       open={open}
-      onCancel={onClose}
+      onCancel={handleClose}
       footer={null}
-      width={520}
+      width={560}
       destroyOnClose
     >
-      <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-        Escolha o tipo de convênio ou portal que deseja vincular a este paciente.
+      <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
+        Escolha o convênio ou portal. Busque por nome — ex.: Pardini, Fleury, Unimed.
       </Text>
+
+      <Input
+        allowClear
+        prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+        placeholder="Buscar integração…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ marginBottom: 16 }}
+        aria-label="Buscar integração"
+      />
+
+      {!hasResults && (
+        <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+          Nenhum resultado para &quot;{search.trim()}&quot;. Tente Pardini, Fleury ou Grupo Fleury.
+        </Text>
+      )}
 
       <Space direction="vertical" size={20} style={{ width: '100%' }}>
         {groups.map((group) => (
@@ -104,10 +133,18 @@ export function NewIntegrationModal({
             </Text>
             <List
               size="small"
-              split
+              split={false}
               dataSource={group.options}
               renderItem={(option) => (
-                <OptionRow option={option} onPick={() => handlePick(option)} />
+                option.presentation === 'fleury_group'
+                  ? (
+                    <div key={option.id} style={{ marginBottom: 8 }}>
+                      <FleuryGroupIntegrationCard option={option} onPick={() => handlePick(option)} />
+                    </div>
+                  )
+                  : (
+                    <OptionRow key={option.id} option={option} onPick={() => handlePick(option)} />
+                  )
               )}
             />
           </div>

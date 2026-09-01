@@ -234,6 +234,18 @@ export async function ensureHermesPardiniPasswordLoginForm(page: Page): Promise<
   await username.first().waitFor({ state: 'attached', timeout: 20_000 })
 }
 
+export async function fillHermesPardiniUsernameForm(page: Page, login: string): Promise<void> {
+  const username = page.locator(USERNAME_LOCATOR)
+  await username.first().waitFor({ state: 'attached', timeout: 20_000 }).catch(() => {})
+  await dismissHermesPardiniSecurityModal(page)
+  const formattedLogin = formatHermesPardiniUsername(login)
+  if (!formattedLogin) return
+  if (await username.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+    await username.first().click({ force: true, timeout: 5000 }).catch(() => {})
+    await username.first().fill(formattedLogin, { force: true })
+  }
+}
+
 export async function fillHermesPardiniPasswordForm(
   page: Page,
   login: string,
@@ -439,22 +451,47 @@ export function attachHermesPardiniTokenCapture(
 
 /**
  * Login via browser (OAuth PKCE) — navega até resultados e aguarda /pedidos 200.
+ * Entrada unificada: OTP no Chrome (SMS/e-mail/WhatsApp). Legada: `?origin=pardini` + senha protocolo.
  */
 export async function loginHermesPardiniViaBrowser(
   page: Page,
   login: string,
   password: string,
-  opts?: { tokenTimeoutMs?: number },
+  opts?: {
+    tokenTimeoutMs?: number
+    /** `true` = resultados.grupofleury.com.br sem `origin=pardini` (OTP). */
+    unifiedEntry?: boolean
+    /** Preenche senha do protocolo no formulário (default false na entrada unificada). */
+    autoFillPassword?: boolean
+    /** Pré-preenche CPF/código na entrada unificada. */
+    prefillUsername?: boolean
+  },
 ): Promise<HermesPardiniBrowserLoginResult> {
+  const unifiedEntry = opts?.unifiedEntry ?? false
+  const autoFillPassword = opts?.autoFillPassword ?? !unifiedEntry
+  const tokenTimeoutMs = opts?.tokenTimeoutMs
+    ?? (unifiedEntry ? 180_000 : 120_000)
+
   attachHermesPardiniDialogHandler(page)
   const capture = attachHermesPardiniTokenCapture(
     page,
-    login?.trim() && password ? { login, password } : undefined,
+    autoFillPassword && login?.trim() && password ? { login, password } : undefined,
   )
-  await openHermesPardiniPortalLogin(page)
 
-  const shouldLogin = await shouldHermesPardiniAutoLogin(page)
-  if (shouldLogin && login?.trim() && password) {
+  if (unifiedEntry) {
+    await openFleuryPrecisionUnifiedPortal(page)
+    if (opts?.prefillUsername && login?.trim()) {
+      await fillHermesPardiniUsernameForm(page, login).catch(() => {})
+    }
+  } else {
+    await openHermesPardiniPortalLogin(page)
+  }
+
+  const shouldLogin = autoFillPassword
+    && login?.trim()
+    && password
+    && await shouldHermesPardiniAutoLogin(page)
+  if (shouldLogin) {
     await page.locator('#_button-password, #_username, #username').first()
       .waitFor({ state: 'attached', timeout: 45_000 })
     await dismissHermesPardiniSecurityModal(page)
@@ -464,7 +501,7 @@ export async function loginHermesPardiniViaBrowser(
   }
 
   await navigateHermesPardiniResultadosExame(page)
-  return capture.waitForTokens(opts?.tokenTimeoutMs)
+  return capture.waitForTokens(tokenTimeoutMs)
 }
 
 /** Heurística: ainda na página de login Keycloak ou shell Precision Care. */

@@ -7,11 +7,13 @@ import { useSyncJobProgress } from '../../hooks/useSyncJobProgress.js'
 import {
   fetchGroupHasFailure,
   getSyncPortalProfile,
+  isFleuryOtpLoginMessage,
   isInteractiveLoginMessage,
   mainStepStatus,
   resolveSyncStepIndex,
   type SyncablePortalType,
 } from '../../lib/sync-portal-profile.js'
+import { FleuryOtpSyncHint } from './FleuryOtpSyncHint.js'
 import type { SyncJobOverallStatus, SyncStepDetail } from '../../lib/sync-job-progress.js'
 
 const { Text } = Typography
@@ -64,12 +66,18 @@ export function SyncJobCardView({
 }: SyncJobCardViewProps) {
   const profile = getSyncPortalProfile(portalType)
   const loginDetail = stepDetails.login
+  const loginMessage = loginDetail?.message || message
+  const showFleuryOtpHint = status === 'running'
+    && portalType === 'hermes_pardini'
+    && loginDetail?.status === 'running'
+    && isFleuryOtpLoginMessage(loginMessage)
   const showInteractiveLoginHint = status === 'running'
     && loginDetail?.status === 'running'
-    && isInteractiveLoginMessage(loginDetail.message || message)
+    && !showFleuryOtpHint
+    && isInteractiveLoginMessage(loginMessage)
 
   const footer = noveltyText || (status !== 'running' ? message : '')
-  const runningMessage = message && !showInteractiveLoginHint && status === 'running' ? message : ''
+  const runningMessage = message && !showInteractiveLoginHint && !showFleuryOtpHint && status === 'running' ? message : ''
 
   return (
     <Card size="small" style={CARD_MARGIN} styles={{ body: CARD_BODY_STYLE }}>
@@ -97,6 +105,8 @@ export function SyncJobCardView({
         </div>
         <StatusIcon status={status} />
       </div>
+
+      {showFleuryOtpHint && <FleuryOtpSyncHint />}
 
       {showInteractiveLoginHint && (
         <Alert

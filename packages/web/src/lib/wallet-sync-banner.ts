@@ -1,4 +1,5 @@
 import type { IntegrationLink } from '../lib/api.types.js'
+import { brandForPortal } from '../components/brands/brand-config.js'
 import { SILENT_SYNC_STALE_MS, isLinkSessionReady, isSyncablePortal } from './silent-sync.js'
 import type { WalletLinkSyncMeta } from '../hooks/useWalletLinkSyncStatus.js'
 
@@ -15,7 +16,11 @@ const PORTAL_LABELS: Record<string, string> = {
   unimed: 'Unimed',
   amil: 'Amil',
   mater_dei: 'Mater Dei',
-  hermes_pardini: 'Hermes Pardini',
+  hermes_pardini: 'Grupo Fleury',
+}
+
+function portalLabel(portalType: string): string {
+  return brandForPortal(portalType)?.shortLabel ?? PORTAL_LABELS[portalType] ?? portalType
 }
 
 function isSyncStale(link: IntegrationLink): boolean {
@@ -31,7 +36,7 @@ export function buildWalletSyncBanners(
   const items: WalletSyncBannerItem[] = []
   for (const link of links) {
     if (!isSyncablePortal(link.portalType)) continue
-    const label = PORTAL_LABELS[link.portalType] ?? link.portalType
+    const label = portalLabel(link.portalType)
     const meta = syncMeta[link.id]
     if (meta?.message && !meta.active) {
       items.push({

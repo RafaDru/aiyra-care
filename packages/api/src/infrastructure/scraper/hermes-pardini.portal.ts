@@ -97,3 +97,22 @@ export function resolveHermesPardiniRegion(): HermesPardiniRegion {
 
 /** Tamanho de página na UI; sync usa lote maior para menos round-trips. */
 export const HERMES_PARDINI_PEDIDOS_PAGE_SIZE = 50
+
+/** Sync manual: portal unificado Grupo Fleury (OTP). `0` = entrada legada `?origin=pardini`. */
+export function hermesPardiniUseUnifiedLogin(): boolean {
+  const raw = process.env.FLEURY_PRECISION_UNIFIED_LOGIN?.trim().toLowerCase()
+  if (raw === '0' || raw === 'false' || raw === 'no') return false
+  return true
+}
+
+/** Em entrada unificada, preencher senha do protocolo automaticamente (default: só OTP no Chrome). */
+export function hermesPardiniAllowPasswordOnUnified(): boolean {
+  return process.env.FLEURY_PRECISION_PASSWORD_ON_UNIFIED === '1'
+}
+
+/** Timeout do browser aguardando OTP + GET /pedidos (ms). */
+export function fleuryPrecisionOtpTimeoutMs(): number {
+  const n = Number(process.env.FLEURY_PRECISION_OTP_TIMEOUT_MS ?? '180000')
+  if (!Number.isFinite(n) || n < 60_000) return 180_000
+  return Math.min(n, 600_000)
+}

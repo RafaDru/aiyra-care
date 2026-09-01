@@ -58,9 +58,9 @@ O sync de produção usa perfil `pardini` (`HERMES_PARDINI_PACIENTE_API_DEFAULT_
 | Fluxo | Suporte AiyraCare | Notas |
 |-------|-------------------|-------|
 | ROPC CPF + senha protocolo | Diagnóstico only (`loginHermesPardiniApi`) | Token frequentemente **não** autoriza `GET /pedidos` |
-| Browser PKCE + senha protocolo | Sync manual (`HERMES_PARDINI_ALLOW_BROWSER=1`) | Força formulário senha via `trocarParaPasswordLogin` |
+| Browser PKCE + senha protocolo | Sync manual (`HERMES_PARDINI_ALLOW_BROWSER=1`) | Fallback se OTP falhar (`?origin=pardini`) |
 | CPF + data nascimento | Portal default | Não automatizado |
-| **OTP SMS / e-mail / WhatsApp** | **PoC** (`probe:fleury-auth --otp`) | Portal unificado; usuário completa no browser |
+| **OTP SMS / e-mail / WhatsApp** | **Sync manual** (`FLEURY_PRECISION_UNIFIED_LOGIN=1`, default) | Chrome abre portal unificado; UI orienta código |
 | Refresh token | Sim (`refreshHermesPardiniApi`) | Após login browser ou OTP |
 
 Sessão persistida: `encrypted_session_token` + `pacienteApiHeaders` (replay HTTP).

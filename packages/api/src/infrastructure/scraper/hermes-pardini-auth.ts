@@ -98,6 +98,15 @@ async function parseTokenError(res: { status: () => number; text: () => Promise<
   return body.slice(0, 200) || `HTTP ${res.status()}`
 }
 
+/** Keycloak / OAuth — sessão expirada, refresh revogado ou credenciais rejeitadas. */
+export function isHermesPardiniOAuthSessionRejected(detail: string): boolean {
+  return /invalid[_\s-]?grant|token is not active|invalid user credentials/i.test(detail)
+}
+
+export function hermesPardiniSessionRejectedUserMessage(): string {
+  return 'Hermes Pardini: sessão expirada — clique em Sincronizar e complete o login no portal (senha do protocolo ou código SMS/e-mail/WhatsApp)'
+}
+
 export async function loginHermesPardiniApi(
   request: APIRequestContext,
   login: string,
@@ -120,7 +129,7 @@ export async function loginHermesPardiniApi(
 
   if (!res.ok()) {
     const detail = await parseTokenError(res)
-    if (res.status() === 401 || /invalid_grant|invalid user credentials/i.test(detail)) {
+    if (res.status() === 401 || isHermesPardiniOAuthSessionRejected(detail)) {
       throw new Error('CPF/código ou senha do protocolo Hermes Pardini incorretos')
     }
     throw new Error(`Login Hermes Pardini falhou (${res.status()}): ${detail}`)

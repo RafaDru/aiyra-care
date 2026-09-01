@@ -6,7 +6,7 @@ import { PatientMembershipPgRepository } from '../../persistence/app-account.pg.
 import { AccountFreshnessController } from './account-freshness.controller.js'
 import { getAuthService } from '../auth/auth.routes.js'
 import { createAuthHook } from '../auth/auth.middleware.js'
-import { getRuntimeDegradedService } from '../runtime/runtime-degraded.routes.js'
+import { getRuntimeDegradedService } from '../../../application/ops/runtime-degraded.factory.js'
 
 export function getDataGenerationService(): DataGenerationService {
   return new DataGenerationService(

@@ -7,6 +7,7 @@ import { api } from '../../lib/api.js'
 import {
   fetchGroupHasFailure,
   getSyncPortalProfile,
+  isFleuryOtpLoginMessage,
   isInteractiveLoginMessage,
   mainStepStatus,
   resolveSubstepStatus,
@@ -23,6 +24,7 @@ import {
 } from '../../lib/sync-job-progress.js'
 import { openSyncJobStream, type SyncProgressStreamPayload } from '../../lib/sync-job-stream.js'
 import { RegisterAmilDependentModal, type UnmatchedBeneficiary } from './RegisterAmilDependentModal.js'
+import { FleuryOtpSyncHint } from './FleuryOtpSyncHint.js'
 
 const { Text, Title } = Typography
 
@@ -377,9 +379,15 @@ export function SyncProgressModal({
   const warnings = result?.warnings ?? []
   const jobDone = status !== 'running'
   const loginDetail = stepDetails.login
+  const loginMessage = loginDetail?.message || message
+  const showFleuryOtpHint = status === 'running'
+    && resolvedPortal === 'hermes_pardini'
+    && loginDetail?.status === 'running'
+    && isFleuryOtpLoginMessage(loginMessage)
   const showInteractiveLoginHint = status === 'running'
     && loginDetail?.status === 'running'
-    && isInteractiveLoginMessage(loginDetail.message || message)
+    && !showFleuryOtpHint
+    && isInteractiveLoginMessage(loginMessage)
 
   const visibleFetchSubsteps = profile.fetchSubsteps.filter((s) => stepDetails[s.key])
 
@@ -403,6 +411,12 @@ export function SyncProgressModal({
                   ? 'Sincronização parcial'
                   : 'Erro na sincronização'}
           </Title>
+
+          {showFleuryOtpHint && (
+            <div style={{ marginTop: 12, textAlign: 'left' }}>
+              <FleuryOtpSyncHint />
+            </div>
+          )}
 
           {showInteractiveLoginHint && (
             <Alert
@@ -468,14 +482,14 @@ export function SyncProgressModal({
             />
           </div>
 
-          {message && !showInteractiveLoginHint && status === 'failed' && message.length > 140 ? (
+          {message && !showInteractiveLoginHint && !showFleuryOtpHint && status === 'failed' && message.length > 140 ? (
             <SyncDiagnosticMessage
               variant="error"
               title="Erro na sincronização"
               message={message}
               collapsedMaxHeight={96}
             />
-          ) : message && !showInteractiveLoginHint ? (
+          ) : message && !showInteractiveLoginHint && !showFleuryOtpHint ? (
             <Text
               type={status === 'failed' ? 'danger' : status === 'partial' ? 'warning' : 'secondary'}
               style={{ marginTop: 12, display: 'block' }}

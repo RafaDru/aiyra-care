@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Grupo Fleury">
+  <defs>
+    <linearGradient id="gf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#003da5"/>
+      <stop offset="100%" stop-color="#0057d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="10" fill="url(#gf)"/>
+  <circle cx="16" cy="20" r="4" fill="#fff" opacity="0.95"/>
+  <circle cx="32" cy="20" r="4" fill="#fff" opacity="0.95"/>
+  <circle cx="24" cy="30" r="4" fill="#fff" opacity="0.85"/>
+  <path d="M16 20 L24 30 L32 20" stroke="#fff" stroke-width="2" fill="none" opacity="0.5"/>
+</svg>

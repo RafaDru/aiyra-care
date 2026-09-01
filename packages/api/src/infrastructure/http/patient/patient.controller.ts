@@ -38,7 +38,7 @@ import {
   getCachedPatientContext,
   setCachedPatientContext,
 } from '../../cache/patient-context.cache.js'
-import { getRuntimeDegradedService } from '../runtime/runtime-degraded.routes.js'
+import { getRuntimeDegradedService } from '../../../application/ops/runtime-degraded.factory.js'
 
 const PATIENT_SYNC_STREAM_HEARTBEAT_MS = 25_000
 

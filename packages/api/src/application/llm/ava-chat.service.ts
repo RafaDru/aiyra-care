@@ -14,7 +14,7 @@ import type { AvaActivityEmitter } from '../../domain/llm/ava-activity.js'
 import { emitAvaActivity } from '../../domain/llm/ava-activity.js'
 import { reflectionNeedsFullContext } from '../../domain/llm/ava-reflection.js'
 import { runAvaContextTools } from '../../domain/llm/ava-tools.js'
-import { getRuntimeDegradedService } from '../../infrastructure/http/runtime/runtime-degraded.routes.js'
+import { getRuntimeDegradedService } from '../ops/runtime-degraded.factory.js'
 
 export type AvaChatEmitters = {
   activity?: AvaActivityEmitter

@@ -7,6 +7,7 @@ export type BrandKey =
   | 'caderneta'
   | 'mater_dei'
   | 'hermes_pardini'
+  | 'fleury_group'
 
 export interface BrandLogoFrame {
   width: number
@@ -177,10 +178,10 @@ export const BRANDS: Record<BrandKey, BrandMeta> = {
     key: 'hermes_pardini',
     label: 'Hermes Pardini',
     shortLabel: 'Pardini',
-    subtitle: 'Laboratório',
+    subtitle: 'Grupo Fleury',
     gradient: 'linear-gradient(180deg, #525252 0%, #6b6b6b 100%)',
     accent: '#fce4ec',
-    color: '#e91e8c',
+    color: '#d21e48',
     logoSrc: '/brands/hermes-pardini.png',
     logoSquare: '/brands/hermes-pardini.png',
     logoBanner: '/brands/hermes-pardini.png',
@@ -194,14 +195,40 @@ export const BRANDS: Record<BrandKey, BrandMeta> = {
       frame: { width: 48, height: 48 },
     },
   },
+  fleury_group: {
+    key: 'fleury_group',
+    label: 'Grupo Fleury — Precision Care',
+    shortLabel: 'Grupo Fleury',
+    subtitle: 'Pardini · Fleury · a+ · Labs a+',
+    gradient: 'linear-gradient(180deg, #003da5 0%, #0057d9 100%)',
+    accent: '#dbeafe',
+    color: '#003da5',
+    logoSrc: '/brands/fleury-group.svg',
+    logoSquare: '/brands/fleury-group.svg',
+    logoBanner: '/brands/fleury-group.svg',
+    logoBg: '#003da5',
+    cardHeaderBg: '#003da5',
+    cardHeaderLogoMaxHeight: 44,
+    logoFrame: { width: 48, height: 48 },
+    integrationsAvatar: {
+      src: '/brands/fleury-group.svg',
+      bg: '#003da5',
+      fit: 'contain',
+      frame: { width: 48, height: 48 },
+    },
+  },
 }
 
+/** Vínculo técnico `hermes_pardini` → marca visual do grupo na UI. */
 export function brandForPortal(portalType: string): BrandMeta | undefined {
+  if (portalType === 'hermes_pardini') return BRANDS.fleury_group
   return BRANDS[portalType as BrandKey]
 }
 
 export function brandOrFallback(portalType: string): BrandMeta {
-  return brandForPortal(portalType) ?? {
+  const fromPortal = brandForPortal(portalType)
+  if (fromPortal) return fromPortal
+  return BRANDS[portalType as BrandKey] ?? {
     key: 'unimed',
     label: portalType,
     shortLabel: portalType,

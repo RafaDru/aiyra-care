@@ -301,7 +301,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
         key: link.id,
         kind: 'link',
         portalType: link.portalType,
-        label: meta.label,
+        label: link.portalType === 'hermes_pardini' ? meta.shortLabel : meta.label,
         link,
         syncLinkId: link.effectiveSyncLinkId ?? link.id,
         group,
@@ -346,6 +346,11 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           <BrandCoverageOperator brand={row.portalType} logoSize="default">
             {row.label}
           </BrandCoverageOperator>
+          {row.portalType === 'hermes_pardini' && (
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 2, paddingLeft: 2 }}>
+              Pardini · Fleury · a+ · Labs a+
+            </Text>
+          )}
           {row.link?.syncAuthority === 'titular' && row.link.managedByPatientName && (
             <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
               Via titular · {row.link.managedByPatientName.split(' ')[0]}

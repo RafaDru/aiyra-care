@@ -19,7 +19,7 @@ export const SYNC_CHIP_LOGO_MAX = 22
 
 export function BrandIntegrationChip({ brand, label, fullWidth = false, logoMaxSize }: Props) {
   const meta = brandOrFallback(brand)
-  const text = label ?? meta.label
+  const text = label ?? meta.shortLabel
 
   return (
     <div

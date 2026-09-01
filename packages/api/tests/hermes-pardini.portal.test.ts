@@ -3,6 +3,8 @@ import {
   hermesPardiniMagentoLoginUrl,
   hermesPardiniPortalEntryUrl,
   fleuryPrecisionUnifiedEntryUrl,
+  fleuryPrecisionOtpTimeoutMs,
+  hermesPardiniUseUnifiedLogin,
   FLEURY_PRECISION_MARCA_PROFILES,
   HERMES_PARDINI_PRECISION_CARE,
   resolveHermesPardiniRegion,
@@ -27,5 +29,22 @@ describe('hermes-pardini.portal', () => {
     expect(resolveHermesPardiniRegion()).toBe('mg')
     expect(hermesPardiniMagentoLoginUrl('mg')).toContain('/lojavirtual/customer/account/login/')
     expect(hermesPardiniMagentoLoginUrl('sp')).toContain('/lojavirtual-sp/customer/account/login/')
+  })
+
+  it('defaults unified OTP login on (opt-out with FLEURY_PRECISION_UNIFIED_LOGIN=0)', () => {
+    const prev = process.env.FLEURY_PRECISION_UNIFIED_LOGIN
+    delete process.env.FLEURY_PRECISION_UNIFIED_LOGIN
+    expect(hermesPardiniUseUnifiedLogin()).toBe(true)
+    process.env.FLEURY_PRECISION_UNIFIED_LOGIN = '0'
+    expect(hermesPardiniUseUnifiedLogin()).toBe(false)
+    if (prev !== undefined) process.env.FLEURY_PRECISION_UNIFIED_LOGIN = prev
+    else delete process.env.FLEURY_PRECISION_UNIFIED_LOGIN
+  })
+
+  it('clamps OTP timeout', () => {
+    expect(fleuryPrecisionOtpTimeoutMs()).toBe(180_000)
+    process.env.FLEURY_PRECISION_OTP_TIMEOUT_MS = '240000'
+    expect(fleuryPrecisionOtpTimeoutMs()).toBe(240_000)
+    delete process.env.FLEURY_PRECISION_OTP_TIMEOUT_MS
   })
 })

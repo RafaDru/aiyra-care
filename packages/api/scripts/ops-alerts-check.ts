@@ -14,7 +14,7 @@ import { LlmUsagePgRepository } from '../src/infrastructure/persistence/llm-usag
 import { LlmInternalBudgetPgRepository } from '../src/infrastructure/persistence/llm-internal-budget.pg.repository.js'
 import { writeOpsMetricsArtifact } from '../src/application/ops/ops-probe-artifact.js'
 import { runOpsProbe } from '../src/application/ops/ops-probe.service.js'
-import { getRuntimeDegradedService } from '../src/infrastructure/http/runtime/runtime-degraded.routes.js'
+import { getRuntimeDegradedService } from '../src/application/ops/runtime-degraded.factory.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 config({ path: resolve(root, '.env') })

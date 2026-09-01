@@ -583,7 +583,7 @@ export function PatientDetail() {
         linkPortal === 'unimed' ? 'Unimed BH'
           : linkPortal === 'amil' ? 'Amil'
             : linkPortal === 'mater_dei' ? 'Meu Mater Dei'
-              : linkPortal === 'hermes_pardini' ? 'Hermes Pardini'
+              : linkPortal === 'hermes_pardini' ? 'Grupo Fleury — Precision Care'
               : 'Bradesco Saúde'
       }`} open={linkModalOpen} confirmLoading={syncingId !== null} onOk={async () => {
         try {
@@ -640,7 +640,7 @@ export function PatientDetail() {
             }
             extra={
               linkPortal === 'hermes_pardini'
-                ? 'CPF ou código do cliente e senha do protocolo de entrega'
+                ? 'Portal unificado: CPF e código SMS/WhatsApp no Chrome. Senha do protocolo como alternativa.'
                 : CPF_LOGIN_PORTALS.has(linkPortal) && patient?.cpf
                   ? 'Pré-preenchido com o CPF do paciente'
                   : undefined

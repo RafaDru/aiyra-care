@@ -43,7 +43,31 @@ function LogoFrame({
   fit?: 'contain' | 'cover'
   objectPosition?: string
 }) {
-  if (!src) return null
+  if (!src) {
+    const initials = alt.slice(0, 2).toUpperCase()
+    return (
+      <div
+        style={{
+          width,
+          height,
+          minWidth: width,
+          flexShrink: 0,
+          background,
+          borderRadius,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxSizing: 'border-box',
+          color: '#fff',
+          fontSize: Math.max(10, Math.round(Math.min(width, height) * 0.34)),
+          fontWeight: 700,
+          lineHeight: 1,
+        }}
+      >
+        {initials}
+      </div>
+    )
+  }
 
   const isCover = fit === 'cover'
   const pad = isCover ? 0 : padding

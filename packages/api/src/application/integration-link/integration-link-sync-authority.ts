@@ -5,7 +5,7 @@ import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg
 import { PlanMembershipPgRepository } from '../../infrastructure/persistence/plan-membership.pg.repository.js'
 import { InsurancePlanPgRepository } from '../../infrastructure/persistence/insurance-plan.pg.repository.js'
 import { isIntegrationLinkSessionReady } from './integration-link-session.js'
-import { getRuntimeDegradedService } from '../../infrastructure/http/runtime/runtime-degraded.routes.js'
+import { getRuntimeDegradedService } from '../ops/runtime-degraded.factory.js'
 
 /** Portais em que um sync no titular atualiza dependentes do mesmo plano. */
 const TITULAR_HOUSEHOLD_PORTALS = new Set(['amil'])

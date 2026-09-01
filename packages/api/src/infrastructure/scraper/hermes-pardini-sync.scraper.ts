@@ -20,7 +20,12 @@ import {
   loginHermesPardiniViaBrowser,
 } from './hermes-pardini-login.helper.js'
 import { preparePortalPage } from './portal-browser-ui.helper.js'
-import { hermesPardiniPortalEntryUrl } from './hermes-pardini.portal.js'
+import {
+  fleuryPrecisionOtpTimeoutMs,
+  hermesPardiniAllowPasswordOnUnified,
+  hermesPardiniPortalEntryUrl,
+  hermesPardiniUseUnifiedLogin,
+} from './hermes-pardini.portal.js'
 
 export interface HermesPardiniSyncResult {
   session: HermesPardiniSession
@@ -61,13 +66,24 @@ async function acquireHermesPardiniSession(
       const parsed = parseHermesPardiniSessionJson(opts.sessionJson)
       let session: HermesPardiniSession = parsed
 
-      if (isHermesPardiniSessionValid(session)) {
-        if (await probeWithProfile(request, session.accessToken, session.pacienteApiHeaders)) {
-          emit({ step: 'login', message: 'Sessão Hermes Pardini salva…', status: 'success' })
-          return session
-        }
+      const jwtValid = isHermesPardiniSessionValid(session)
+      const probeOk = jwtValid
+        && await probeWithProfile(request, session.accessToken, session.pacienteApiHeaders)
+
+      if (probeOk) {
+        emit({ step: 'login', message: 'Sessão Hermes Pardini salva…', status: 'success' })
+        return session
+      }
+
+      if (jwtValid) {
         emit({ step: 'login', message: 'Sessão salva não aceita na API — renovando…', status: 'running' })
       } else if (parsed.refreshToken) {
+        emit({ step: 'login', message: 'Sessão expirada — renovando…', status: 'running' })
+      } else {
+        emit({ step: 'login', message: 'Sessão expirada — novo login…', status: 'running' })
+      }
+
+      if (parsed.refreshToken) {
         const refreshed = await refreshHermesPardiniApi(request, parsed.refreshToken)
         if (refreshed) {
           const profile = await fetchHermesPardiniUserInfo(request, refreshed.accessToken)
@@ -78,9 +94,7 @@ async function acquireHermesPardiniSession(
             return session
           }
         }
-        emit({ step: 'login', message: 'Refresh expirado — novo login…', status: 'running' })
-      } else {
-        emit({ step: 'login', message: 'Sessão expirada — novo login…', status: 'running' })
+        emit({ step: 'login', message: 'Refresh expirado — novo login no portal…', status: 'running' })
       }
     }
 
@@ -93,11 +107,18 @@ async function acquireHermesPardiniSession(
 
     const interactive = opts?.interactiveLogin ?? true
     const headless = hermesPardiniBrowserHeadless(interactive)
+    const useUnified = hermesPardiniUseUnifiedLogin()
+    const otpTimeoutMs = fleuryPrecisionOtpTimeoutMs()
+
     emit({
       step: 'login',
       message: headless
-        ? 'Login no portal Precision Care (PKCE)…'
-        : 'Abrindo portal Precision Care — aguarde o portal carregar os resultados…',
+        ? useUnified
+          ? 'Login Grupo Fleury (OTP) no browser…'
+          : 'Login no portal Precision Care (PKCE)…'
+        : useUnified
+          ? 'Abrindo Grupo Fleury — no Chrome: CPF → código SMS, e-mail ou WhatsApp'
+          : 'Abrindo portal Precision Care — aguarde o portal carregar os resultados…',
       status: 'running',
     })
 
@@ -110,7 +131,39 @@ async function acquireHermesPardiniSession(
       })
       const page = await context.newPage()
       await preparePortalPage(page)
-      const loginResult = await loginHermesPardiniViaBrowser(page, login, password)
+
+      const runBrowserLogin = async (
+        unifiedEntry: boolean,
+        autoFillPassword: boolean,
+      ) => loginHermesPardiniViaBrowser(page, login, password, {
+        unifiedEntry,
+        autoFillPassword,
+        prefillUsername: unifiedEntry,
+        tokenTimeoutMs: unifiedEntry ? otpTimeoutMs : 120_000,
+      })
+
+      let loginResult
+      try {
+        if (useUnified) {
+          loginResult = await runBrowserLogin(
+            true,
+            hermesPardiniAllowPasswordOnUnified(),
+          )
+        } else {
+          loginResult = await runBrowserLogin(false, true)
+        }
+      } catch (browserErr) {
+        if (useUnified && password?.trim()) {
+          emit({
+            step: 'login',
+            message: 'OTP não concluído — tentando senha do protocolo (entrada Pardini)…',
+            status: 'running',
+          })
+          loginResult = await runBrowserLogin(false, true)
+        } else {
+          throw browserErr
+        }
+      }
       const profile = await fetchHermesPardiniUserInfo(context.request, loginResult.tokens.accessToken)
       const session = buildHermesPardiniSession(
         login,

@@ -56,7 +56,7 @@ import { AgenticScraperService } from '../scraper/agentic-scraper.service.js'
 import type { Patient } from '../../domain/patient/patient.entity.js'
 import { runExamMeasurementImport } from '../measurement/exam-measurement-import.helper.js'
 import { runHygieneScanForPatient } from '../hygiene/hygiene-scan.helper.js'
-import { getRuntimeDegradedService } from '../../infrastructure/http/runtime/runtime-degraded.routes.js'
+import { getRuntimeDegradedService } from '../ops/runtime-degraded.factory.js'
 
 const SYNCABLE_PORTALS = new Set<string>(['unimed', 'amil', 'mater_dei', 'hermes_pardini', 'bradesco_saude'])
 const RECENT_SYNC_MS = Number(process.env.SYNC_MIN_INTERVAL_MS ?? String(30 * 60 * 1000))

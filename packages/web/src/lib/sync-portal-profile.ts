@@ -121,7 +121,7 @@ export const SYNC_PORTAL_PROFILES: Record<SyncablePortalType, SyncPortalProfile>
   },
   hermes_pardini: {
     portalType: 'hermes_pardini',
-    label: 'Hermes Pardini',
+    label: 'Grupo Fleury',
     mainSteps: [
       { key: 'login', title: 'Autenticando', aliases: ['navigate', 'pending'] },
       { key: 'fetch', title: 'Buscando exames', aliases: ['fetch-exams'] },
@@ -159,7 +159,15 @@ export function isInteractiveLoginMessage(message: string): boolean {
   ) {
     return false
   }
-  return /chrome|gov\.br|conclua o login|clique em entrar|login manual|abra o chrome|navegador automatizado/i.test(m)
+  return /chrome|gov\.br|conclua o login|clique em entrar|login manual|abra o chrome|navegador automatizado|grupo fleury|precision care|sms|whatsapp|código|codigo/i.test(m)
+}
+
+/** Sync Hermes no portal unificado Grupo Fleury (OTP no Chrome, não senha protocolo). */
+export function isFleuryOtpLoginMessage(message: string): boolean {
+  const m = message.toLowerCase()
+  if (m.includes('senha do protocolo') || m.includes('entrada pardini')) return false
+  return /grupo fleury|precision care/.test(m)
+    && (/sms|whatsapp|e-mail|email|código|codigo|otp/.test(m) || m.includes('no chrome'))
 }
 
 function stepIndexForProfile(
