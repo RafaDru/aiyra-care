@@ -127,9 +127,9 @@ npm run probe:fleury-marca
 | Portal type `hermes_pardini` | Produção |
 | Sync delta `computeHermesPardiniExamStartDate` | Produção |
 | PDF laudo por pedido | Produção |
-| Login OTP unificado | PoC |
-| Connector multi-marca Fleury | Planejado |
-| Renomear UI “Grupo Fleury” | Planejado |
+| Login OTP unificado | Sync manual (`FLEURY_PRECISION_UNIFIED_LOGIN=1`, default) | Chrome + hint UI (`FleuryOtpSyncHint`) |
+| UI «Grupo Fleury» (fase 1) | Integrações, sync, carteira | Card + busca + logos submarcas |
+| Connector multi-marca Fleury | Planejado | Connect `grupo_fleury_precision_care` |
 
 Arquivos principais:
 
@@ -139,6 +139,17 @@ Arquivos principais:
 - `hermes-pardini-bff.service.ts` — fetch exames
 - `hermes-pardini-sync.scraper.ts` — orquestração sync
 
+### UI e branding (fase 1 — 2026-09-01)
+
+| Área | Entrega |
+|------|---------|
+| Nova integração | Card **Grupo Fleury — Precision Care**, busca (Pardini, Fleury, a+, Labs a+) |
+| Vínculo técnico | Um `portal_type` `hermes_pardini` (Precision Care) |
+| Chips / sync | Label **Grupo Fleury**; `brandForPortal` mapeia `hermes_pardini` → `fleury_group` |
+| Logos | `packages/web/public/brands/fleury/` — Grupo (SVG CDN), submarcas PNG |
+
+**Fontes de logo:** Grupo Fleury e a+/Labs a+ via CDN oficial (`d3unpzxgfygi8m.cloudfront.net`); Fleury lab wordmark do kit interno; Hermes Pardini PNG até kit oficial (central de downloads Grupo Fleury). Ver `fleury-group-config.ts`.
+
 ---
 
 ## Próximos passos (produto)
@@ -146,10 +157,11 @@ Arquivos principais:
 | Prioridade | Entrega |
 |------------|---------|
 | P0 | Validar PoC OTP + perfis marca (scripts) |
-| P1 | Sync interativo OTP na UI (modal código SMS/WhatsApp) |
-| P2 | Unificar naming “Grupo Fleury / Precision Care” na UI |
+| P1 | Badge laboratório nos exames (`nomeUnidade` + selo Grupo Fleury) |
+| P2 | Sync OTP in-app (modal código SMS/WhatsApp) |
 | P3 | Connector Connect `grupo_fleury` com `marca` configurável |
-| Legal | Revisão scraping + termos do portal |
+| P2 | Landing — família Fleury (texto; logos com jurídico) |
+| Legal | Kit oficial de logos + revisão scraping/termos |
 
 ---
 

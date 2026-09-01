@@ -84,6 +84,15 @@ async function request<T>(path: string, options?: RequestInit & { skipErrorRepor
   return res.json()
 }
 
+function opsRequestHeaders(): Record<string, string> {
+  const key =
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('opsMetricsKey') : null)
+    ?? import.meta.env.VITE_OPS_METRICS_KEY
+  const headers: Record<string, string> = {}
+  if (key) headers['x-internal-ops-key'] = key
+  return headers
+}
+
 import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream.js'
 
 export const api = {
@@ -757,6 +766,24 @@ export const api = {
   },
   account: {
     freshness: () => request<import('./api.types.js').AccountFreshnessView>('/account/freshness'),
+  },
+  ops: {
+    metrics: () =>
+      request<import('./ops.types.js').OpsMetricsResponse>('/ops/metrics', {
+        headers: opsRequestHeaders(),
+        skipErrorReport: true,
+      }),
+    alerts: () =>
+      request<{ generatedAt: string; alerts: import('./ops.types.js').OpsAlert[] }>('/ops/alerts', {
+        headers: opsRequestHeaders(),
+        skipErrorReport: true,
+      }),
+    dispatchCheck: () =>
+      request<import('./ops.types.js').OpsAlertsDispatchResult>('/ops/alerts/check', {
+        method: 'POST',
+        headers: opsRequestHeaders(),
+        skipErrorReport: true,
+      }),
   },
   auth: {
     me: () => request<import('./api.types.js').AuthSyncResponse>('/auth/me'),

@@ -292,8 +292,8 @@
         {
           "id": "fleury-ui-label",
           "title": "UI «Grupo Fleury / Precision Care» (não só Hermes)",
-          "status": "planned",
-          "detail": "Integrações + landing categorias; sem logos oficiais até marketing/jurídico."
+          "status": "done",
+          "detail": "Fase 1: card integrações, busca por marca, chips/sync Grupo Fleury, logos em public/brands/fleury. Pendente: badge em exames + landing."
         },
         {
           "id": "fleury-legal-review",
@@ -1745,8 +1745,8 @@
       "priority": "P2",
       "title": "Run — captura inteligente de bugs e acionamentos",
       "summary": "Operação em produção: eventos sem PHI, alertas sync/LLM, triagem proativa. Complementa observability-platform.",
-      "status": "planned",
-      "statusLabel": "Planejado",
+      "status": "in_progress",
+      "statusLabel": "Em progresso",
       "items": [
         {
           "id": "run-product-events-ingest",
@@ -1764,7 +1764,25 @@
           "id": "run-sync-stuck-alerts",
           "title": "Alertas sync stuck / fail rate",
           "status": "done",
-          "detail": "GET /ops/alerts + webhook OPS_ALERT_WEBHOOK_URL + cron script."
+          "detail": "GET /ops/alerts + webhook plugável (local/ntfy/Slack) + cron."
+        },
+        {
+          "id": "run-ops-local-notifier",
+          "title": "Notificador local (toast + browser)",
+          "status": "done",
+          "detail": "ops-local-notifier.mjs; up.ps1; dashboardUrl no payload."
+        },
+        {
+          "id": "run-ops-dashboard-web",
+          "title": "Dashboard ops /ops",
+          "status": "done",
+          "detail": "Alertas, probe, fingerprints; menu dev; x-internal-ops-key."
+        },
+        {
+          "id": "run-ops-alert-channels-doc",
+          "title": "Doc canais ops (local vs cloud)",
+          "status": "done",
+          "detail": "docs/infra/OPS_ALERT_CHANNELS.md — sem Slack obrigatório."
         },
         {
           "id": "run-llm-cascade-alert",

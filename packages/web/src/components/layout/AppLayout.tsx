@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined } from '@ant-design/icons'
+import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -43,7 +43,11 @@ export function AppLayout() {
           ? '/settings'
           : ''
 
-  const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
+  const devSelectedKeys = location.pathname.startsWith('/roadmap')
+    ? ['/roadmap']
+    : location.pathname.startsWith('/ops')
+      ? ['/ops']
+      : []
 
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
@@ -106,6 +110,7 @@ export function AppLayout() {
               selectedKeys={devSelectedKeys}
               items={[
                 { key: '/roadmap', icon: <ProjectOutlined />, label: t('nav.roadmap') },
+                { key: '/ops', icon: <RadarChartOutlined />, label: t('nav.ops') },
               ]}
               onClick={({ key }) => navigate(key)}
               style={{ borderRight: 0, background: 'transparent' }}

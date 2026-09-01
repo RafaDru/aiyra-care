@@ -1,5 +1,17 @@
 # Histórico do Projeto Open Health
 
+## [2026-09-01] - Grupo Fleury UI fase 1 + ops dashboard local
+
+### Realizado
+- **Fleury UI:** card Grupo Fleury na Nova integração, busca por submarca, labels em Integrações/sync/carteira (`fleury_group` + `integration-catalog`).
+- **Logos:** `public/brands/fleury/` — Grupo Fleury SVG (CDN), Pardini, Fleury, a+, Labs a+; pills com imagem em `FleuryLabBrandPill`.
+- **Ops:** página `http://localhost:5173/ops`, API client `api.ops.*`, notifier local (`ops-local-notifier.mjs` + toast), `up.ps1` integrado.
+- **Dispatch:** payload com `dashboardUrl`; docs `OPS_ALERT_CHANNELS.md`, `OPS_ALERTS_PRODUCTION.md`.
+
+### To-Dos
+- [ ] Fase 2 Fleury: badge laboratório nos exames + filtro por marca
+- [ ] Kit oficial Hermes Pardini (central downloads Grupo Fleury)
+
 ## [2026-08-31] - Grupo Fleury Precision Care — documentação + PoC auth/marca
 
 ### Contexto

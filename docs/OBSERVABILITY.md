@@ -63,6 +63,7 @@ product_events (
 
 - `GET /ops/metrics` — Ava p50/p95 tokens, sync por portal, alertas derivados.
 - `GET /ops/alerts` — só alertas ativos.
+- **Web dev:** `http://localhost:5173/ops` — dashboard interno (métricas, alertas, probe); ver `docs/infra/OPS_ALERT_CHANNELS.md`.
 - Header `x-internal-ops-key` quando `OPS_METRICS_KEY` ou `LLM_INTERNAL_OBSERVABILITY_KEY` definido.
 - CLI: `npm run ops:metrics`.
 
@@ -84,9 +85,9 @@ product_events (
 | `hygiene_prompt_shown` / `resolved` | Dedup (API + futura UI) |
 | `onboarding_step` | Onde trava onboarding |
 
-**Alertas externos:** `OPS_ALERT_WEBHOOK_URL` (Slack-compatible) · `npm run ops:alerts-check` · loop `OPS_ALERTS_INTERVAL_MS` no **connect-worker** (preferido) ou cron.
+**Alertas externos:** webhook plugável (`OPS_ALERT_WEBHOOK_URL`) — local notifier, ntfy, e-mail, Slack · `npm run ops:alerts-check` · ver `docs/infra/OPS_ALERT_CHANNELS.md`.
 
-**Produção:** checklist em `docs/infra/OPS_ALERTS_PRODUCTION.md` · setup `npm run setup:ops-alerts` · smoke `npm run ops:smoke`.
+**Produção:** `docs/infra/OPS_ALERTS_PRODUCTION.md` · setup `npm run setup:ops-alerts` · smoke `npm run ops:smoke` · dashboard `http://localhost:5173/ops`.
 
 **Fingerprints:** `errorFingerprints24h` em `GET /ops/metrics` — agrupa `product_events` por erro/status (24h).
 
@@ -109,7 +110,7 @@ Distinto de:
 
 | Alerta | Condição | Canal |
 |--------|----------|-------|
-| API down | health fail 2× | e-mail / Slack (futuro) |
+| API down | health fail 2× | webhook ops / dashboard `/ops` |
 | LLM cascade total | N falhas `ava_chat` sem sucesso | log + alerta |
 | Sync stuck | job `running` > timeout PG registry | já: heartbeat sync |
 | Neo4j read fail | deep health | degradar grafo UI |

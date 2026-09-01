@@ -19,6 +19,7 @@
     "ops:alerts-check": "cd packages/api && npm run ops:alerts-check",
     "ops:probe": "cd packages/api && npm run ops:probe",
     "ops:smoke": "cd packages/api && npm run ops:smoke",
+    "ops:local-notifier": "node scripts/ops-local-notifier.mjs",
     "setup:ops-alerts": "powershell -File scripts/setup-ops-alerts.ps1",
     "neo4j-lineage-worker": "cd packages/neo4j-lineage-worker && npm run start",
     "neo4j-lineage-worker:once": "cd packages/neo4j-lineage-worker && npm run once",

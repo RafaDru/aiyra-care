@@ -14,7 +14,7 @@ const API_ROUTE_PATTERN =
   '^/(patients|documents|exams|exam-orders|vaccines|medications|medication-administrations|allergies|growth-records|medical-records|diagnoses|authorizations|sessions|roadmap|integration-links|scraper|plan-memberships|handwriting-credits|scheduled-events|billing|compliance|calendar|health-threads|health|auth|project|care-places|clinical-export|graph|measurements|measurement-types|care-reminders|monitoring-export|emergency|relation-types|ava|llm|hygiene|telemetry|ops)'
 
 /** React Router paths que colidem com prefixos da API — refresh não deve ir ao backend. */
-const SPA_DOCUMENT_EXACT = new Set(['/roadmap', '/compliance/accept'])
+const SPA_DOCUMENT_EXACT = new Set(['/roadmap', '/ops', '/compliance/accept'])
 const SPA_DOCUMENT_PREFIXES = ['/patients/']
 
 function isSpaDocumentRequest(req: { url?: string; headers: Record<string, string | string[] | undefined> }): boolean {

@@ -80,7 +80,7 @@ There is **no top-level lint or typecheck** — root `npm run lint` is a no-op (
 | **Bradesco Saúde** | No (link + manual import only) | — | — |
 | **ConecteSUS** | Manual gov.br import | Interactive FHIR login | Vaccines, exams |
 | **Mater Dei** | Yes | Scraper + JSON session | Exams, visits, reports/images |
-| **Hermes Pardini** | Yes (PKCE session) | Browser OAuth PKCE (+ HTTP refresh) | Exams via Fleury Precision Care `paciente/api/v1/pedidos` + PDF — ver `docs/FLEURY_PRECISION_CARE.md` |
+| **Hermes Pardini** | Yes (PKCE session) | Browser OAuth PKCE (+ HTTP refresh) | Exams via Grupo Fleury Precision Care — UI «Grupo Fleury»; `portal_type` `hermes_pardini` — ver `docs/FLEURY_PRECISION_CARE.md` |
 
 **Silent sync on Carteira:** auto-sync only fires with valid persisted session (`sessionReady`); first login always via **Sincronizar** button (may open portal/Chrome). API ignores `silent=1` without session (`skipped: session_required`).
 

@@ -56,6 +56,28 @@ for ($i = 0; $i -lt 12; $i++) {
   catch { Write-Host "." -NoNewline; if ($i -eq 11) { Write-Host " FAIL" -ForegroundColor Red } }
 }
 
+Write-Host "Starting Ops notifier..." -NoNewline
+$notifierPort = if ($env:OPS_LOCAL_NOTIFIER_PORT) { $env:OPS_LOCAL_NOTIFIER_PORT } else { "3012" }
+$logNotifier = Join-Path $root "ops-notifier.log"
+if (-not $env:OPS_ALERT_DASHBOARD_URL) {
+  $env:OPS_ALERT_DASHBOARD_URL = "http://localhost:5173/ops"
+}
+if (-not $env:OPS_ALERT_WEBHOOK_URL) {
+  $env:OPS_ALERT_WEBHOOK_URL = "http://127.0.0.1:$notifierPort/ops-alert"
+}
+$cmdNotifier = "cd /d $root&&node scripts/ops-local-notifier.mjs >`"$logNotifier`" 2>&1"
+cmd /c "start /B cmd /c `"$cmdNotifier`""
+
+for ($i = 0; $i -lt 8; $i++) {
+  Start-Sleep 1
+  try {
+    $code = (Invoke-WebRequest -Uri "http://127.0.0.1:$notifierPort/health" -UseBasicParsing -TimeoutSec 2).StatusCode
+    if ($code -eq 200) { Write-Host " OK" -ForegroundColor Green; break }
+    Write-Host "." -NoNewline
+  }
+  catch { Write-Host "." -NoNewline; if ($i -eq 7) { Write-Host " skip" -ForegroundColor Yellow } }
+}
+
 Write-Host "Starting Web..." -NoNewline
 $logWeb = Join-Path $root "web.log"
 $cmdWeb = "cd /d $webDir&&npx vite --host 0.0.0.0 >`"$logWeb`" 2>&1"
@@ -71,7 +93,9 @@ Write-Host @"
 `nAiyraCare running:
   API  http://127.0.0.1:$apiPort/health
   Web  http://localhost:5173
-  Logs api.log / web.log
+  Ops  http://localhost:5173/ops (dashboard)
+  Notifier http://127.0.0.1:$notifierPort/ops-alert
+  Logs api.log / web.log / ops-notifier.log
 "@
 
 Start-Process "http://localhost:5173/login"

@@ -1,6 +1,7 @@
 # Ops alertas em produção
 
 > Complementa `docs/OBSERVABILITY.md` — colocar alertas no ar sem PHI no canal.
+> **Canais (local vs cloud, sem Slack):** `docs/infra/OPS_ALERT_CHANNELS.md`
 
 ## Checklist (≈20 min)
 
@@ -18,18 +19,32 @@ Gera `OPS_METRICS_KEY` no `.env` (64 hex). Protege:
 
 Com a chave no header `x-internal-ops-key`, **não** é necessário JWT Supabase.
 
-### 2. Webhook Slack (ou compatível)
+### 2. Canal de acionamento (webhook genérico)
 
-1. Slack → **Apps** → **Incoming Webhooks** → criar para canal `#ops-aiyracare` (ou equivalente).
-2. No `.env` / secrets do deploy:
+Slack é **opcional**. O dispatch envia `{ text, alerts, dashboardUrl }` a qualquer URL HTTP.
+
+**Dev (máquina local):** `up.ps1` sobe `ops-local-notifier` e define:
+
+```env
+OPS_ALERT_WEBHOOK_URL=http://127.0.0.1:3012/ops-alert
+OPS_ALERT_DASHBOARD_URL=http://localhost:5173/ops
+```
+
+**Prod:** ntfy, e-mail via Cloud Function, ou outro webhook — ver `OPS_ALERT_CHANNELS.md`.
+
+Slack (se quiser):
+
+1. Slack → **Apps** → **Incoming Webhooks** → canal `#ops-aiyracare`.
+2. Secrets do deploy:
 
 ```env
 OPS_ALERT_WEBHOOK_URL=https://hooks.slack.com/services/...
+OPS_ALERT_DASHBOARD_URL=https://app.example.com/ops
 OPS_ALERT_COOLDOWN_MS=1800000
 OPS_ALERTS_MIN_SEVERITY=critical
 ```
 
-Payload enviado: `{ "text": "...", "alerts": [...] }` — sem PHI.
+Payload: `{ "text": "...", "alerts": [...], "dashboardUrl": "..." }` — sem PHI.
 
 ### 3. Agendamento (escolha **uma** opção)
 
@@ -74,7 +89,9 @@ Alertas de **custo infra** são separados — ver `docs/infra/GCP_BILLING_ALERTS
 | Variável | Default | Efeito |
 |----------|---------|--------|
 | `OPS_METRICS_KEY` | — | Obrigatório em prod para endpoints ops |
-| `OPS_ALERT_WEBHOOK_URL` | — | URL do webhook; sem URL, check só loga JSON |
+| `OPS_ALERT_WEBHOOK_URL` | — | URL POST JSON; local notifier, ntfy, Slack, etc. |
+| `OPS_ALERT_DASHBOARD_URL` | — | Link no payload (toast/email); default `LANDING_CAPTURE_WEB_URL/ops` |
+| `OPS_LOCAL_NOTIFIER_PORT` | `3012` | Porta do listener local (`ops-local-notifier.mjs`) |
 | `OPS_ALERT_COOLDOWN_MS` | `1800000` | Não reenvia mesmo `alert.id` antes do cooldown |
 | `OPS_ALERTS_MIN_SEVERITY` | `critical` | `warning` inclui alertas de aviso |
 | `OPS_ALERTS_INTERVAL_MS` | `0` | Loop no connect-worker (ou API se única instância) |

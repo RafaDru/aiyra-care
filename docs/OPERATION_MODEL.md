@@ -2,7 +2,7 @@
 
 > **Última atualização:** 2026-08-28  
 > **Status:** decisões de desenho (não é spec de implementação completa).  
-> Complementa `docs/OBSERVABILITY.md` (o que já medimos) e `docs/infra/OPS_ALERTS_PRODUCTION.md` (alertas Slack).
+> Complementa `docs/OBSERVABILITY.md` (o que já medimos) e `docs/infra/OPS_ALERT_CHANNELS.md` (canais local/cloud).
 
 Objetivo: operar **enxuto** — automatizar e pré-codificar o máximo; **LLM com reasoning** como segunda linha; **humano** só no indispensável.  
 LGPD: sem PHI em alertas agregados, cache público ou notificações externas genéricas.
@@ -307,7 +307,7 @@ Fase 6  Maturidade          [backlog]
 
 | # | Entrega | Debate | Esforço | Status |
 |---|---------|--------|---------|--------|
-| 1.1 | `OPS_ALERT_WEBHOOK_URL` + cron/worker em prod | alertas | config | **crítico pendente (manual)** |
+| 1.1 | Canal ops (local notifier / webhook cloud) + cron/worker | alertas | config | **dev done** — prod: configurar ntfy/email |
 | 1.2 | `ops:probe` (health + db latency) no connect-worker | sondas ativas | baixo | **done** |
 | 1.3 | Regras alerta API down / PG slow em `ops-alerts.ts` | degradação infra | baixo | **done** |
 | 1.4 | Script LLM triage (snapshot → infra vs app + `human_required`) | pirâmide Nível 2 | baixo | pendente |
@@ -395,7 +395,7 @@ Ordem sugerida para **beta com integrações frágeis** e **tempo limitado**:
 
 | Prioridade | Item | Fase | Por que é crítico |
 |------------|------|------|-------------------|
-| **P0** | Configurar webhook + cron ops em prod | 1.1 | Sem isso, Fase 0 não opera de verdade |
+| **P0** | Canal ops + cron (local notifier ou ntfy/email prod) | 1.1 | Ver `OPS_ALERT_CHANNELS.md` |
 | **P0** | `ops:probe` + alertas health/db slow | 1.2–1.3 | **done** — falta webhook em prod |
 | **P0** | Banner stale + falha sync na Carteira | 3.6 | **done** |
 | **P1** | `data_generations` + bump em sync/exam | 2.1–2.2 | Evita degradação PG quando uso cresce |
