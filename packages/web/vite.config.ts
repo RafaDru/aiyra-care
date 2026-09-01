@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -28,9 +28,18 @@ function isSpaDocumentRequest(req: { url?: string; headers: Record<string, strin
   return SPA_DOCUMENT_PREFIXES.some((prefix) => path.startsWith(prefix))
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, monorepoRoot, '')
+  const opsMetricsKey = env.VITE_OPS_METRICS_KEY?.trim() || env.OPS_METRICS_KEY?.trim() || ''
+
+  return {
   /** .env na raiz do monorepo (scripts/setup-env.ps1). */
   envDir: monorepoRoot,
+  /** Dev: reutiliza OPS_METRICS_KEY da API sem duplicar no .env */
+  define:
+    mode === 'development' && opsMetricsKey
+      ? { 'import.meta.env.VITE_OPS_METRICS_KEY': JSON.stringify(opsMetricsKey) }
+      : {},
   plugins: [react()],
   server: {
     port: 5173,
@@ -44,4 +53,5 @@ export default defineConfig({
       },
     },
   },
+  }
 })

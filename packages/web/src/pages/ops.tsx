@@ -63,6 +63,9 @@ export function OpsDashboardPage() {
       const msg = err instanceof Error ? err.message : 'Falha ao carregar métricas'
       setError(msg)
       if (msg.includes('403') || msg.toLowerCase().includes('ops key')) setKeyHint(true)
+      if (msg.includes('Sem conexão') || msg.includes('indisponível')) {
+        setError(`${msg} — confira se a API está em :3010 (scripts/up.ps1).`)
+      }
       setData(null)
       setRuntime(undefined)
     } finally {

@@ -1,5 +1,5 @@
 import { Card, Select, Space, Switch, Typography, Button, Alert } from 'antd'
-import { MoonOutlined, SunOutlined, ProjectOutlined, LinkOutlined } from '@ant-design/icons'
+import { MoonOutlined, SunOutlined, ProjectOutlined, LinkOutlined, RadarChartOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -96,9 +96,14 @@ export function SettingsGeneralPage() {
         <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
           {t('settings.devToolsHint')}
         </Text>
-        <Button type="default" icon={<ProjectOutlined />} onClick={() => navigate('/roadmap')}>
-          {t('nav.roadmap')}
-        </Button>
+        <Space wrap>
+          <Button type="default" icon={<ProjectOutlined />} onClick={() => navigate('/roadmap')}>
+            {t('nav.roadmap')}
+          </Button>
+          <Button type="default" icon={<RadarChartOutlined />} onClick={() => navigate('/ops')}>
+            {t('nav.ops')}
+          </Button>
+        </Space>
       </Card>
     </Space>
   )
