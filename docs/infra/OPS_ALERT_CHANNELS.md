@@ -32,8 +32,9 @@ Sem PHI. `dashboardUrl` vem de `OPS_ALERT_DASHBOARD_URL` ou deriva de `LANDING_C
 
 | Componente | Função |
 |------------|--------|
-| `scripts/ops-local-notifier.mjs` | Listener `127.0.0.1:3012/ops-alert` |
-| `scripts/ops-local-toast.ps1` | Toast Windows (balloon) |
+| `scripts/ops-local-notifier-tray.ps1` | **Windows:** ícone na bandeja + listener HTTP |
+| `scripts/ops-local-notifier.mjs` | Headless (Linux / sem tray) |
+| `scripts/ops-local-toast.ps1` | Toast auxiliar (fallback node headless) |
 | `scripts/up.ps1` | Sobe notifier + defaults de webhook/dashboard |
 | `http://localhost:5173/ops` | Dashboard web (alertas, probe, fingerprints) |
 

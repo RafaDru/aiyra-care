@@ -65,8 +65,10 @@ if (-not $env:OPS_ALERT_DASHBOARD_URL) {
 if (-not $env:OPS_ALERT_WEBHOOK_URL) {
   $env:OPS_ALERT_WEBHOOK_URL = "http://127.0.0.1:$notifierPort/ops-alert"
 }
-$cmdNotifier = "cd /d $root&&node scripts/ops-local-notifier.mjs >`"$logNotifier`" 2>&1"
-cmd /c "start /B cmd /c `"$cmdNotifier`""
+$trayScript = Join-Path $root "scripts\ops-local-notifier-tray.ps1"
+Start-Process powershell -ArgumentList @(
+  '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', $trayScript
+) -WindowStyle Hidden
 
 for ($i = 0; $i -lt 8; $i++) {
   Start-Sleep 1

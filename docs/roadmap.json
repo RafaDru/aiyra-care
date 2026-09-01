@@ -1770,7 +1770,7 @@
           "id": "run-ops-local-notifier",
           "title": "Notificador local (toast + browser)",
           "status": "done",
-          "detail": "ops-local-notifier.mjs; up.ps1; dashboardUrl no payload."
+          "detail": "Tray Windows (logo AiyraCare) + toast; ops-local-notifier.mjs headless."
         },
         {
           "id": "run-ops-dashboard-web",
