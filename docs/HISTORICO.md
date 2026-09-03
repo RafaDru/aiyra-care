@@ -1,5 +1,18 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-03] - GCP Preview: deploy Cloud Run no promote-preview
+
+### Realizado
+- **`gcp-preview-deploy.mjs`** — build/push Artifact Registry + deploy API/web/ops no Cloud Run.
+- **`gcp-preview-provision.mjs`** — enable APIs + criar repositório Docker.
+- **`promote-preview.yml`** — input `deploy_gcp` com auth GCP + secrets Environment preview.
+- Roadmap: `env-preview-gcp-deploy` done; `env-preview-gcp-worker` planned.
+
+### Próximo
+- [ ] Secrets `GCP_SA_KEY` + vars no GitHub Environment `preview`
+- [ ] Cloud SQL + primeiro `deploy_gcp=true`
+- [ ] connect-worker Cloud Run Job
+
 ## [2026-09-03] - Delivery + GCP Preview: dry-run, Dockerfiles, runbook beta
 
 ### Realizado
@@ -34,7 +47,8 @@ Consolidar tracking de negócio/funcionalidade para humanos e LLMs; fechar itens
 - **Bootstrap pós-compactação:** `docs/AGENT_BOOTSTRAP.md`, `.cursor/rules/agent-bootstrap.mdc`, hooks `sessionStart` / `preCompact` / `postToolUse` / doc-ritual / `stop`.
 - **API:** `GET /project/context` passa a incluir catálogo `features` do index.
 - **Família (design):** `docs/FAMILY_ACCESS_MODEL.md` + épico `family-access-model` + feature card.
-- **Família (fase 1 grants):** migration `057_patient_access_grants`, `PatientAccessService`, rotas `/patients/:id/access-grants`, `listAccessiblePatientIds` via grants.
+- **Família (fase 1 grants):** migration `057_patient_access_grants`, `PatientAccessService`, rotas `/patients/:id/access-grants`.
+- **Família (convites MVP):** migration `058_patient_access_invites`, `/family-access/invites`, UI Configurações → Conta, `/invite/accept`.
 - **Amil:** modal período/beneficiário; query params sync; sub-etapa `fetch-utilizacao`.
 - **B2B:** API `/organizations` + members (migration 055).
 - **Higienização:** `HygieneGraphProjector` DUPLICATE_CANDIDATE + testes.

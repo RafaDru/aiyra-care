@@ -30,6 +30,23 @@
 | `OPS_ALERT_WEBHOOK_URL` | ntfy `aiyracare-preview` | local `:3012` ou off | ntfy prod |
 | `OPS_ALERT_DASHBOARD_URL` | console preview | `:3013` | ops prod URL |
 
+### GCP Preview (Environment `preview`)
+
+| Secret / Variable | Uso |
+|-------------------|-----|
+| `GCP_SA_KEY` | JSON service account — Cloud Run + Artifact Registry deploy |
+| `GCP_PROJECT_ID` | Variable — ex. `openhealth-503119` |
+| `GCP_REGION` | Variable — ex. `us-central1` |
+| `GCP_ARTIFACT_REGISTRY` | Variable — ex. `aiyracare-preview` |
+| `VITE_SUPABASE_ANON_KEY` | Build imagem web no deploy GCP |
+
+Workflow `promote-preview.yml` — input `deploy_gcp=true` após configurar secrets acima.
+
+```powershell
+npm run provision:preview:gcp -- --dry-run
+npm run deploy:preview:gcp -- --dry-run --tag local
+```
+
 ## Variáveis (não secretas) — preview host
 
 Configurar no host ou como Environment variables no GitHub:

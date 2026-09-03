@@ -10,7 +10,7 @@ Após **aprovação Rafael** em `promotion-report-last.md` e `npm run promotion:
 | Alvo | Comando / workflow |
 |------|-------------------|
 | **Preview local** | `npm run up:preview` + `npm run preview:validate` |
-| **Preview GCP** | `promote-preview.yml` + [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md) |
+| **Preview GCP** | `promote-preview.yml` (`deploy_gcp=true`) + [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md) |
 | **Produção** | Futuro `deploy-prod.yml` — não promover automaticamente do preview |
 
 ## Checklist pré-deploy
@@ -62,7 +62,13 @@ npm run preview:post-deploy
 
 - `validate:migrations` — lint de arquivos SQL
 - Job `migrations` em `ci.yml` — `migrate:dry-run` em Postgres efêmero
-- `promote-preview.yml` — gates + deploy (wire GCP em `env-preview-gcp-deploy`)
+- `promote-preview.yml` — `deploy_gcp=true` após secrets GCP no Environment `preview`
+
+### Promote GCP (manual)
+
+1. GitHub → Actions → **Promote to Preview**
+2. `deploy_gcp=true`, `run_post_deploy=true` (após Cloud SQL + secrets)
+3. Verificar URLs em `API_PUBLIC_URL` / console ops
 
 ## Ver também
 

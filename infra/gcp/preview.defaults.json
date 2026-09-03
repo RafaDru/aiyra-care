@@ -1,0 +1,10 @@
+{
+  "projectId": "openhealth-503119",
+  "region": "us-central1",
+  "artifactRegistry": "aiyracare-preview",
+  "services": {
+    "api": "aiyracare-preview-api",
+    "web": "aiyracare-preview-web",
+    "ops": "aiyracare-preview-ops"
+  }
+}

@@ -1272,7 +1272,7 @@
       "title": "Família — múltiplos cuidadores e acesso por perfil",
       "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
       "status": "in_progress",
-      "statusLabel": "Fase 1 — grants",
+      "statusLabel": "Fase 1 — convites",
       "items": [
         {
           "id": "family-access-model-doc",
@@ -1284,8 +1284,8 @@
         {
           "id": "family-access-glossary-ui",
           "title": "Glossário produto — Cuidador, Família, Perfil de saúde",
-          "status": "planned",
-          "detail": "Atualizar PROJETO.md + copy UI; manter tag Você para self; evitar paciente em fluxos B2C genéricos.",
+          "status": "done",
+          "detail": "Chaves i18n family.glossary (Cuidador, Perfil de saúde, Você, Família); copy convites em settings/conta.",
           "reviewBadge": ["content"]
         },
         {
@@ -1298,8 +1298,8 @@
         {
           "id": "family-access-invite-flow",
           "title": "Convite por e-mail — co-admin com escopo de perfis",
-          "status": "planned",
-          "detail": "circle_invites + aceite; limite 2 admins por assinatura (MVP); checkbox legitimidade LGPD.",
+          "status": "done",
+          "detail": "Migration 058 `patient_access_invites`; API `/family-access/invites` + aceite `/invite/accept`; link copiável (e-mail transacional depois); checkbox LGPD; limite grants no aceite.",
           "reviewBadge": ["legal", "security"]
         },
         {
@@ -2315,15 +2315,20 @@
           "id": "env-preview-host",
           "title": "Preview Ambiente 2 no GCP",
           "status": "in_progress",
-          "statusLabel": "Runbook pronto — deploy Cloud Run pendente",
-          "detail": "Executar GCP_PREVIEW_RUNBOOK.md: Cloud SQL sintético + Cloud Run (API/web/ops) + wire promote-preview.yml; projeto openhealth-503119."
+          "statusLabel": "Deploy automatizado — primeiro promote GCP pendente",
+          "detail": "Wire completo; falta provision AR + secrets GitHub + promote deploy_gcp + worker job."
         },
         {
           "id": "env-preview-gcp-deploy",
           "title": "Deploy real promote-preview.yml (GCP)",
-          "status": "in_progress",
-          "statusLabel": "Dockerfiles prontos — wire gcloud pendente",
-          "detail": "infra/docker/Dockerfile.{api,web,ops-console}; npm run build:preview-images; substituir placeholder promote-preview.yml com gcloud run deploy."
+          "status": "done",
+          "detail": "scripts/gcp-preview-deploy.mjs + provision; promote-preview.yml input deploy_gcp; Artifact Registry + Cloud Run API/web/ops."
+        },
+        {
+          "id": "env-preview-gcp-worker",
+          "title": "connect-worker Cloud Run Job (preview GCP)",
+          "status": "planned",
+          "detail": "Job agendado OPS_ALERTS_INTERVAL_MS + scheduled sync; após primeiro deploy API estável."
         },
         {
           "id": "env-ops-dual-keys",

@@ -129,9 +129,12 @@ npm run ops:alerts-check
 
 ## Próximo passo de implementação
 
-1. Dockerfile API + web (ou script `gcloud run deploy` documentado).
-2. Substituir step `Deploy placeholder` em `.github/workflows/promote-preview.yml`.
-3. Validar `post-deploy` job contra URL GCP com secrets do Environment `preview`.
+1. ~~Dockerfile API + web~~ — `infra/docker/`
+2. ~~`gcp-preview-deploy.mjs` + `promote-preview.yml` (`deploy_gcp=true`)~~
+3. Provisionar Artifact Registry: `npm run provision:preview:gcp`
+4. Configurar secrets GitHub Environment `preview` — [`GITHUB_ENVIRONMENTS_SECRETS.md`](./GITHUB_ENVIRONMENTS_SECRETS.md)
+5. Primeiro deploy: Actions → Promote to Preview → `deploy_gcp=true` → `run_post_deploy=true`
+6. connect-worker como Cloud Run Job (backlog)
 
 ## Ver também
 
