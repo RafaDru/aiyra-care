@@ -1272,7 +1272,7 @@
       "title": "Família — múltiplos cuidadores e acesso por perfil",
       "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
       "status": "in_progress",
-      "statusLabel": "Discovery",
+      "statusLabel": "Fase 1 — grants",
       "items": [
         {
           "id": "family-access-model-doc",
@@ -1291,8 +1291,8 @@
         {
           "id": "family-access-grants-schema",
           "title": "ACL explícito — grants por conta e paciente",
-          "status": "planned",
-          "detail": "Estender patient_memberships ou patient_access_grants: access_level, granted_by, revoked_at; assertPatientAccess usa grants.",
+          "status": "done",
+          "detail": "Migration 057 `patient_access_grants`; backfill memberships + owner; API GET/POST/DELETE `/patients/:id/access-grants`; `listAccessiblePatientIds` via grants; limite 2 co-admins full.",
           "reviewBadge": ["security", "legal"]
         },
         {
@@ -1357,6 +1357,12 @@
           "title": "Hub docs/README.md",
           "status": "done",
           "detail": "Índice navegável por área; link em PROJETO.md e AGENTS.md."
+        },
+        {
+          "id": "documentation-hooks-bootstrap",
+          "title": "Hooks bootstrap pós-compactação + ritual docs",
+          "status": "done",
+          "detail": "sessionStart additional_context; preCompact+postToolUse re-inject; afterFileEdit doc-ritual; stop followup; agent-bootstrap.mdc; AGENT_BOOTSTRAP.md."
         },
         {
           "id": "documentation-github-labels",
@@ -1914,8 +1920,8 @@
       "priority": "P2",
       "title": "Run — captura inteligente de bugs e acionamentos",
       "summary": "Operação em produção: eventos sem PHI, alertas sync/LLM, triagem proativa, UX do console ops (mapa de features, acesso×falha). Complementa observability-platform.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue — validar em staging local",
       "items": [
         {
           "id": "run-product-events-ingest",
@@ -2294,10 +2300,29 @@
           "detail": ".github/workflows/promote-preview.yml — Environment preview; gates + deploy placeholder."
         },
         {
+          "id": "env-preview-local-hostnames",
+          "title": "Hostnames locais staging (.test + Caddy)",
+          "status": "done",
+          "detail": "Caddyfile, npm run hosts:register + caddy:local; LOCAL_HOSTNAMES.md; up.ps1 AIYRA_LOCAL_HOSTNAMES; ops-console-url fallback."
+        },
+        {
+          "id": "env-preview-gcp-runbook",
+          "title": "Runbook GCP Preview (Cloud SQL + Run)",
+          "status": "done",
+          "detail": "docs/infra/GCP_PREVIEW_RUNBOOK.md — checklist openhealth-503119; promote + post-deploy."
+        },
+        {
           "id": "env-preview-host",
           "title": "Preview Ambiente 2 no GCP",
+          "status": "in_progress",
+          "statusLabel": "Runbook pronto — deploy Cloud Run pendente",
+          "detail": "Executar GCP_PREVIEW_RUNBOOK.md: Cloud SQL sintético + Cloud Run (API/web/ops) + wire promote-preview.yml; projeto openhealth-503119."
+        },
+        {
+          "id": "env-preview-gcp-deploy",
+          "title": "Deploy real promote-preview.yml (GCP)",
           "status": "planned",
-          "detail": "Após ritmo local funcional: Cloud SQL sintético + compute (Cloud Run/GCE) + promote-preview.yml; projeto openhealth-503119. Ambiente 1 permanece local."
+          "detail": "Substituir placeholder; gcloud run deploy ou SSH; secrets Environment preview."
         },
         {
           "id": "env-ops-dual-keys",

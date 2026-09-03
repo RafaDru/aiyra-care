@@ -1,0 +1,28 @@
+# Hostnames locais AiyraCare — requer `npm run hosts:register` + Caddy na porta 80 (admin).
+# Ver docs/infra/LOCAL_HOSTNAMES.md
+
+# --- Ambiente 2: staging (Rafael) ---
+staging.aiyracare.test {
+	reverse_proxy 127.0.0.1:5174
+}
+
+api.staging.aiyracare.test {
+	reverse_proxy 127.0.0.1:3020
+}
+
+ops.staging.aiyracare.test {
+	reverse_proxy 127.0.0.1:3023
+}
+
+# --- Ambiente 1: dev (agentes) ---
+dev.aiyracare.test {
+	reverse_proxy 127.0.0.1:5173
+}
+
+api.dev.aiyracare.test {
+	reverse_proxy 127.0.0.1:3010
+}
+
+ops.dev.aiyracare.test {
+	reverse_proxy 127.0.0.1:3013
+}

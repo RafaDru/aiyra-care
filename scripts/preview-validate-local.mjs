@@ -13,6 +13,8 @@ config({ path: resolve(root, '.env.preview'), override: true })
 
 const previewEnv = { ...process.env }
 const apiBase = (previewEnv.API_PUBLIC_URL ?? 'http://127.0.0.1:3020').replace(/\/$/, '')
+const apiPort = previewEnv.PORT ?? '3020'
+const apiHealthFallback = `http://127.0.0.1:${apiPort}`
 const consolePort = previewEnv.OPS_CONSOLE_PORT ?? '3023'
 const notifierPort = previewEnv.OPS_LOCAL_NOTIFIER_PORT ?? '3022'
 const webPort = '5174'
@@ -53,9 +55,9 @@ console.log('')
 run('validate:ops-dual-keys', 'npm', ['run', 'validate:ops-dual-keys'])
 run('validate:env-tier (preview)', 'node', ['scripts/validate-env-tier.mjs', '--preview'])
 
-const healthApi = await fetchOk(`${apiBase}/health`)
-results.push({ label: 'API :3020 /health', ok: healthApi, optional: false, detail: '' })
-console.log(`${healthApi ? '✅' : '❌'} API :3020 /health`)
+const healthApi = (await fetchOk(`${apiBase}/health`)) || (await fetchOk(`${apiHealthFallback}/health`))
+results.push({ label: `API ${apiBase}/health`, ok: healthApi, optional: false, detail: '' })
+console.log(`${healthApi ? '✅' : '❌'} API ${apiBase}/health`)
 if (!healthApi) {
   console.error('Suba preview: npm run up:preview')
   process.exit(1)

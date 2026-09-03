@@ -99,8 +99,29 @@ try {
 Write-Host "Starting Web..." -NoNewline
 $logWeb = Join-Path $root "web$logSuffix.log"
 Stop-ListenerOnPort $webPort
-$viteApiUrl = "http://127.0.0.1:$apiPort"
-$cmdWeb = "set VITE_API_URL=$viteApiUrl&&cd /d $webDir&&npx vite --host 0.0.0.0 --port $webPort >`"$logWeb`" 2>&1"
+$useLocalDns = $env:AIYRA_LOCAL_HOSTNAMES -eq '1'
+if ($useLocalDns) {
+  if ($Preview) {
+    $viteApiUrl = 'http://api.staging.aiyracare.test'
+    $viteOpsConsoleUrl = 'http://ops.staging.aiyracare.test'
+    $webOpenUrl = 'http://staging.aiyracare.test'
+    $apiDisplayUrl = $viteApiUrl
+    $opsDisplayUrl = $viteOpsConsoleUrl
+  } else {
+    $viteApiUrl = 'http://api.dev.aiyracare.test'
+    $viteOpsConsoleUrl = 'http://ops.dev.aiyracare.test'
+    $webOpenUrl = 'http://dev.aiyracare.test'
+    $apiDisplayUrl = $viteApiUrl
+    $opsDisplayUrl = $viteOpsConsoleUrl
+  }
+} else {
+  $viteApiUrl = "http://127.0.0.1:$apiPort"
+  $viteOpsConsoleUrl = "http://127.0.0.1:$opsConsolePort"
+  $webOpenUrl = "http://localhost:$webPort"
+  $apiDisplayUrl = "http://127.0.0.1:$apiPort"
+  $opsDisplayUrl = "http://127.0.0.1:$opsConsolePort"
+}
+$cmdWeb = "set VITE_API_URL=$viteApiUrl&&set VITE_OPS_CONSOLE_URL=$viteOpsConsoleUrl&&cd /d $webDir&&npx vite --host 0.0.0.0 --port $webPort >`"$logWeb`" 2>&1"
 cmd /c "start /B cmd /c `"$cmdWeb`""
 
 for ($i = 0; $i -lt 12; $i++) {
@@ -110,14 +131,15 @@ for ($i = 0; $i -lt 12; $i++) {
 }
 
 $envLabel = if ($Preview) { "Preview (Ambiente 2)" } else { "Integração (Ambiente 1)" }
+$dnsHint = if ($useLocalDns) { " (hostnames locais — ver docs/infra/LOCAL_HOSTNAMES.md)" } else { "" }
 Write-Host @"
-`nAiyraCare $envLabel running:
-  API  http://127.0.0.1:$apiPort/health
-  Web  http://localhost:$webPort
-  Ops  http://127.0.0.1:$opsConsolePort (console independente)
+`nAiyraCare $envLabel running$dnsHint :
+  Web  $webOpenUrl
+  API  $apiDisplayUrl/health
+  Ops  $opsDisplayUrl
   Notifier http://127.0.0.1:$notifierPort/ops-alert
   PG   $env:DATABASE_URL
   Logs api$logSuffix.log / web$logSuffix.log / ops-console.log / ops-notifier.log
 "@
 
-Start-Process "http://localhost:$webPort/login"
+Start-Process "$webOpenUrl/login"

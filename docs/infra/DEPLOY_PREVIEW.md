@@ -8,10 +8,11 @@
 
 | Item | Status |
 |------|--------|
-| Promoção local | `npm run up:preview` + `npm run preview:post-deploy` |
+| Promoção local | `npm run up:preview` + `npm run preview:validate` |
+| Hostnames locais | `staging.aiyracare.test` — [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) |
 | Gates CI | `promote-preview.yml` → `run-promotion-gates.mjs` |
-| Deploy real | Placeholder no workflow — substituir por SSH/PaaS |
-| Secrets | Template em [`GITHUB_ENVIRONMENTS_SECRETS.md`](./GITHUB_ENVIRONMENTS_SECRETS.md) |
+| Runbook GCP | [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md) |
+| Deploy real | Placeholder no workflow — ver `env-preview-gcp-deploy` |
 
 ## Workflow
 
@@ -25,6 +26,8 @@ flowchart TD
 ```
 
 ## Configurar Preview no GCP (quando migrar)
+
+**Runbook completo:** [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md)
 
 1. Cloud SQL PostgreSQL **dedicado** (sintético — não compartilhar com integração local).
 2. Compute: Cloud Run (API + web) ou GCE — alinhar ao que prod usará.

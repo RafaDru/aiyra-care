@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-03] - Ops: épico Run fechado + runbook GCP Preview
+
+### Realizado
+- **`prod-run-intelligence`** marcado **done** no roadmap (validação manual staging pendente Rafael).
+- **`env-preview-host`** → **in_progress**; sub-itens `env-preview-local-hostnames` e `env-preview-gcp-runbook` done.
+- **Runbook:** `docs/infra/GCP_PREVIEW_RUNBOOK.md` (Cloud SQL + Cloud Run + promote/post-deploy).
+- **Staging local:** hostnames `.test` + Caddy; `link:demo-patients`; `preview:validate` com fallback loopback; webhook ops local no preview.
+
+### Próximo
+- [ ] `env-preview-gcp-deploy` — wire `promote-preview.yml` com Cloud Run
+- [ ] Aprovação Rafael em `promotion-report-last.md` após teste staging
+
 ## [2026-09-03] - Base de conhecimento e entregas roadmap (família, Amil, B2B, docs)
 
 ### Contexto
@@ -7,8 +19,10 @@ Consolidar tracking de negócio/funcionalidade para humanos e LLMs; fechar itens
 
 ### Realizado
 - **Documentação:** `docs/DOCUMENTATION_SYSTEM.md`, `docs/README.md`, `docs/features/` + `index.json`, `docs/help/*`.
+- **Bootstrap pós-compactação:** `docs/AGENT_BOOTSTRAP.md`, `.cursor/rules/agent-bootstrap.mdc`, hooks `sessionStart` / `preCompact` / `postToolUse` / doc-ritual / `stop`.
 - **API:** `GET /project/context` passa a incluir catálogo `features` do index.
 - **Família (design):** `docs/FAMILY_ACCESS_MODEL.md` + épico `family-access-model` + feature card.
+- **Família (fase 1 grants):** migration `057_patient_access_grants`, `PatientAccessService`, rotas `/patients/:id/access-grants`, `listAccessiblePatientIds` via grants.
 - **Amil:** modal período/beneficiário; query params sync; sub-etapa `fetch-utilizacao`.
 - **B2B:** API `/organizations` + members (migration 055).
 - **Higienização:** `HygieneGraphProjector` DUPLICATE_CANDIDATE + testes.
@@ -20,7 +34,8 @@ Consolidar tracking de negócio/funcionalidade para humanos e LLMs; fechar itens
 - **GitHub Projects** = kanban operacional com labels `roadmap:<id>`, não substitui `.md`.
 
 ### Próximo
-- [ ] Fase 1 `family-access-grants-schema` + convites
+- [ ] `family-access-invite-flow` — convites por e-mail
+- [ ] `family-access-glossary-ui` — copy Cuidador / Perfil de saúde
 - [ ] `ava-help-knowledge-base` — expor help para Ava
 - [ ] Labels `roadmap:*` no GitHub
 

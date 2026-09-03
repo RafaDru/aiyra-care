@@ -5,11 +5,13 @@
 
 ## URLs rápidas
 
+Com hostnames locais ([`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md)): **http://staging.aiyracare.test** (após `hosts:register` + `caddy:local`).
+
 | O quê | Preview (teste) | Integração (dev) |
 |-------|-----------------|------------------|
-| **Web** | http://localhost:5174 | http://localhost:5173 |
-| **API health** | http://127.0.0.1:3020/health | http://127.0.0.1:3010/health |
-| **Console ops** | http://127.0.0.1:3023 | http://127.0.0.1:3013 |
+| **Web** | http://staging.aiyracare.test ou :5174 | http://dev.aiyracare.test ou :5173 |
+| **API health** | http://api.staging.aiyracare.test/health | http://api.dev.aiyracare.test/health |
+| **Console ops** | http://ops.staging.aiyracare.test | http://ops.dev.aiyracare.test |
 | **Notificador** | http://127.0.0.1:3022/health | http://127.0.0.1:3012/health |
 | **PostgreSQL** | `aiyracare_preview` | `aiyracare` |
 
@@ -37,7 +39,17 @@ O seed cria a conta **Família Demo** (`demo-familia@aiyracare.local`) e dois pa
 | **Lucas Demo Silva** | Unimed BH (link mock), carteira, vacinas |
 | **Ana Demo** | Amil (link mock), integrações |
 
-Seu login Supabase precisa estar vinculado à conta demo **ou** use sua conta normal (dados próprios no PG preview após seed).
+Seu login Supabase precisa ver os pacientes demo no PG preview:
+
+1. **Login uma vez** em http://localhost:5174 (cria `app_accounts` no `aiyracare_preview`).
+2. Copie seu **user id** do Supabase (DevTools → Application → token JWT → `sub`).
+3. Vincule Lucas/Ana:
+
+```powershell
+$env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare_preview"
+$env:AUTH_SUBJECT = "SEU_SUPABASE_USER_ID"
+npm run link:demo-patients
+```
 
 Após login em **:5174**, confira o dashboard — deve listar pacientes se a conta tiver membership.
 

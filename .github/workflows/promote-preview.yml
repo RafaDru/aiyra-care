@@ -61,9 +61,10 @@ jobs:
         run: |
           echo "=== Promote to Preview (Ambiente 2) ==="
           echo "Ref: ${{ inputs.ref }}"
-          echo "Configure deploy real (SSH/PaaS) — ver docs/infra/DEPLOY_PREVIEW.md"
+          echo "Runbook: docs/infra/GCP_PREVIEW_RUNBOOK.md"
           echo "Secrets: docs/infra/GITHUB_ENVIRONMENTS_SECRETS.md"
-          echo "Post-deploy: npm run preview:post-deploy (job post-deploy abaixo)"
+          echo "TODO env-preview-gcp-deploy: gcloud run deploy API/web/ops + connect-worker"
+          echo "Post-deploy: re-run workflow with run_post_deploy=true"
 
   post-deploy:
     if: ${{ inputs.run_post_deploy }}

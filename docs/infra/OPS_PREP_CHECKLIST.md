@@ -61,13 +61,16 @@ Setup rápido: `npm run setup:ops-prod`
 npm run setup:ops-preview          # gera .env.preview com OPS_METRICS_KEY distinto
 npm run validate:ops-dual-keys       # confirma isolamento vs .env
 npm run validate:env-tier -- --preview
+npm run hosts:register               # admin — staging.aiyracare.test
+npm run caddy:local                  # admin — proxy :80 (opcional)
 npm run up:preview
-$env:API_PUBLIC_URL = "http://127.0.0.1:3020"
-npm run staging:probe-gate
-npm run ops:alerts-check
 npm run preview:validate
 npm run promotion:gates
 ```
+
+**URLs staging:** http://staging.aiyracare.test · Ops http://ops.staging.aiyracare.test — ver [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md).
+
+**GCP:** após aprovação local → [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md).
 
 **Isolamento:** integração usa `.env`; preview usa `.env` + `.env.preview` (override). Chaves ops **nunca** compartilhadas — ver `env-ops-dual-keys`.
 

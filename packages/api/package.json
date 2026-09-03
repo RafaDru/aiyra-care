@@ -36,6 +36,7 @@
     "seed:demo": "node scripts/seed-demo-data.mjs",
     "seed:staging-volume": "node scripts/seed-staging-volume.mjs",
     "seed:staging-refresh": "node scripts/refresh-staging-demo.mjs",
+    "link:demo-patients": "node scripts/link-demo-patients.mjs",
     "migrate:all": "node scripts/apply-all-migrations.mjs",
     "staging:probe-gate": "node scripts/staging-probe-gate.mjs",
     "validate:migrations": "node scripts/validate-migrations.mjs"
