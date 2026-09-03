@@ -25,6 +25,7 @@ import {
 } from '../../../lib/silent-sync.js'
 import type { WalletDockJob } from '../../../components/scraper/WalletSyncDock.js'
 import { IntegrationsSyncSidebar } from '../../../components/integrations/IntegrationsSyncSidebar.js'
+import { AmilSyncOptionsModal, type AmilSyncOptions } from '../../../components/integrations/AmilSyncOptionsModal.js'
 import { GroupedAlignedTables } from '../../../components/layout/GroupedAlignedTables.js'
 import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
 import { SessionStatusTag } from '../../../components/ui/StatusTag.js'
@@ -159,6 +160,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const [publicHealthPortal, setPublicHealthPortal] = useState<PublicHealthPortal | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   const [govbrSession, setGovbrSession] = useState<GovBrSessionView | null>(null)
+  const [amilSyncTarget, setAmilSyncTarget] = useState<{ linkId: string; portalType: string } | null>(null)
 
   useEffect(() => {
     if (authConfigured && authLoading) return
@@ -187,7 +189,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const startManualSync = useCallback(async (
     linkId: string,
     portalType: string,
-    opts?: { force?: boolean },
+    opts?: { force?: boolean; amil?: AmilSyncOptions },
   ) => {
     if (!isSyncablePortal(portalType)) return
     if (
@@ -198,7 +200,12 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     }
     setStartingLinkIds((prev) => new Set(prev).add(linkId))
     try {
-      const r = await api.integrationLinks.sync(linkId, { force: opts?.force })
+      const r = await api.integrationLinks.sync(linkId, {
+        force: opts?.force,
+        amilMarcaOtica: opts?.amil?.amilMarcaOtica,
+        amilUtilizationStart: opts?.amil?.amilUtilizationStart,
+        amilUtilizationEnd: opts?.amil?.amilUtilizationEnd,
+      })
       if (r.skipped) {
         if (r.reason === 'session_required') {
           message.info('Primeira conexão ou sessão expirada — Sincronizar pode abrir o portal')
@@ -221,6 +228,21 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       })
     }
   }, [message])
+
+  const requestManualSync = useCallback((linkId: string, portalType: string) => {
+    if (portalType === 'amil') {
+      setAmilSyncTarget({ linkId, portalType })
+      return
+    }
+    void startManualSync(linkId, portalType, { force: true })
+  }, [startManualSync])
+
+  const confirmAmilSync = useCallback((amil: AmilSyncOptions) => {
+    if (!amilSyncTarget) return
+    const { linkId, portalType } = amilSyncTarget
+    setAmilSyncTarget(null)
+    void startManualSync(linkId, portalType, { force: true, amil })
+  }, [amilSyncTarget, startManualSync])
 
   const syncAll = useCallback(async () => {
     if (syncTargets.length === 0) {
@@ -471,7 +493,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
               icon={<SyncOutlined />}
               loading={isLinkSyncing(syncLinkId)}
               disabled={!isSyncablePortal(link.portalType)}
-              onClick={() => startManualSync(syncLinkId, link.portalType, { force: true })}
+              onClick={() => requestManualSync(syncLinkId, link.portalType)}
             >
               {managedByTitular ? `Via ${titularName}` : 'Sincronizar'}
             </Button>
@@ -603,6 +625,12 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
             </Form.Item>
           </Form>
         </Modal>
+
+        <AmilSyncOptionsModal
+          open={amilSyncTarget != null}
+          onCancel={() => setAmilSyncTarget(null)}
+          onConfirm={confirmAmilSync}
+        />
       </div>
 
       <IntegrationsSyncSidebar

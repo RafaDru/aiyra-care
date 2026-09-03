@@ -57,4 +57,4 @@ Invocar no chat antes de merge (tier ≥ 2):
 - `beforeSubmitPrompt` — detecção de secrets no prompt (opcional)
 - Hook `subagentStart` — limitar subagents em paths sensíveis
 - CI: E2E smoke + migration dry-run
-- Integrar `docs/dev-audit/` com `product_events` em staging (sem PHI)
+- Integrar `docs/dev-audit/` com `product_events` em staging (sem PHI) — **done** · `npm run dev-audit:bridge` · `GET /ops/dev-audit-bridge`

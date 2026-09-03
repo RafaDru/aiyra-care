@@ -82,7 +82,7 @@ Diferença vs **adesão (§4):** adesão = saúde/continuidade; marketplace = **
 |-----------|-----------|--------|
 | `organizations` + `organization_members` | Migration **055** — clínica, lab, farmácia, plano | ✅ schema |
 | `Organization` entity | `packages/api/src/domain/organization/` | ✅ domínio |
-| RBAC + API parceiro | Roles admin/clinician/read_only | backlog |
+| RBAC + API parceiro | `GET/POST/PATCH/DELETE /organizations` + members (admin/clinician/read_only) | ✅ API mínima |
 | Console parceiro | Dashboard imports | backlog |
 
 ---

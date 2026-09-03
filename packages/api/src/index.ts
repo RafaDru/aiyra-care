@@ -180,6 +180,8 @@ async function registerRoutes() {
   await app.register(projectContextRoutes)
   const { connectRoutes } = await import('./infrastructure/http/connect/connect.routes.js')
   await app.register(connectRoutes)
+  const { organizationRoutes } = await import('./infrastructure/http/organization/organization.routes.js')
+  await app.register(organizationRoutes)
 }
 
 const start = async () => {

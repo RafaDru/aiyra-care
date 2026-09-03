@@ -611,10 +611,19 @@ export const api = {
     create: (data: object) => request<import('./api.types.js').IntegrationLink>('/integration-links', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: object) => request<import('./api.types.js').IntegrationLink>(`/integration-links/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: string) => request<void>(`/integration-links/${id}`, { method: 'DELETE' }),
-    sync: (id: string, opts?: { silent?: boolean; force?: boolean }) => {
+    sync: (id: string, opts?: {
+      silent?: boolean
+      force?: boolean
+      amilMarcaOtica?: string
+      amilUtilizationStart?: string
+      amilUtilizationEnd?: string
+    }) => {
       const params = new URLSearchParams()
       if (opts?.silent) params.set('silent', '1')
       if (opts?.force) params.set('force', '1')
+      if (opts?.amilMarcaOtica) params.set('amilMarcaOtica', opts.amilMarcaOtica)
+      if (opts?.amilUtilizationStart) params.set('amilUtilizationStart', opts.amilUtilizationStart)
+      if (opts?.amilUtilizationEnd) params.set('amilUtilizationEnd', opts.amilUtilizationEnd)
       const q = params.toString()
       return request<{ jobId: string | null; silent?: boolean; skipped?: boolean; reason?: string }>(
         `/integration-links/${id}/sync${q ? `?${q}` : ''}`,

@@ -70,7 +70,7 @@ export const SYNC_PORTAL_PROFILES: Record<SyncablePortalType, SyncPortalProfile>
       {
         key: 'fetch',
         title: 'Buscando dados',
-        aliases: ['fetch-beneficiarios', 'fetch-plano', 'fetch-autorizacoes', 'fetch-guias'],
+        aliases: ['fetch-beneficiarios', 'fetch-plano', 'fetch-autorizacoes', 'fetch-guias', 'fetch-utilizacao'],
       },
       ...COMMON_TAIL,
     ],
@@ -79,6 +79,7 @@ export const SYNC_PORTAL_PROFILES: Record<SyncablePortalType, SyncPortalProfile>
       { key: 'fetch-plano', label: 'Plano e carteirinhas' },
       { key: 'fetch-autorizacoes', label: 'Autorizações' },
       { key: 'fetch-guias', label: 'Guias' },
+      { key: 'fetch-utilizacao', label: 'Atendimentos (utilização)' },
     ],
     summary: {
       showExams: true,

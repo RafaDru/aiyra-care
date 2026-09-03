@@ -16,6 +16,17 @@ Fechar itens `run-ops-console-visual-design` e `run-ops-console-charts-scales` d
 - [ ] `run-dev-audit-bridge` — correlacionar dev-audit com product_events
 - [ ] Validar `promotion:gates` no Preview local
 
+## [2026-09-03] - run-dev-audit-bridge: hooks Cursor × product_events
+
+### Realizado
+- **CLI** `npm run dev-audit:bridge` — lê `docs/dev-audit/**/*.jsonl` + `product_events` no PG.
+- **API** `GET /ops/dev-audit-bridge` — relatório JSON (ops key).
+- **Correlação:** buckets horários agente vs uso app; hints operacionais; output `dev-audit-bridge-last.json`.
+- **Testes:** `dev-audit-bridge.test.ts` no `test:ops`.
+
+### Próximo
+- [ ] `env-preview-host` — Preview no GCP
+
 ## [2026-09-03] - run-user-escalation: aviso família em sync crítico (opt-in)
 
 ### Realizado

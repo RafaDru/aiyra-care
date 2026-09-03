@@ -48,6 +48,7 @@
     "preview:post-deploy": "node scripts/preview-post-deploy.mjs",
     "validate:env-tier": "node scripts/validate-env-tier.mjs",
     "validate:ops-dual-keys": "node scripts/validate-ops-dual-keys.mjs",
+    "dev-audit:bridge": "cd packages/api && npm run dev-audit:bridge",
     "migrate:pg-names": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/migrate-pg-names-to-aiyracare.ps1",
     "migrate:session": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/migrate-session-to-aiyra-care.ps1",
     "fix:workspace": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fix-aiyra-care-workspace.ps1"

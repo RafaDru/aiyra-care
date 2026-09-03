@@ -34,6 +34,7 @@ $env:OPS_SMOKE_SKIP_HTTP='0'; npm run ops:smoke   # com API no ar
 ```powershell
 npm run ops:probe
 npm run ops:metrics
+npm run dev-audit:bridge
 npm run ops:triage
 npm run ops:alerts-check
 npm run ops:notifier:simulate -- --scenario=llm_cascade
@@ -82,5 +83,5 @@ npm run promotion:gates
 | ID | Tema |
 |----|------|
 | `run-user-escalation` | Notificar família em sync crítico (opt-in, sem PHI) — **done** |
-| `run-dev-audit-bridge` | Correlacionar `docs/dev-audit/` com `product_events` em staging |
+| `run-dev-audit-bridge` | Correlacionar `docs/dev-audit/` com `product_events` — **done** (`dev-audit:bridge`) |
 | `env-preview-host` | Preview no GCP |

@@ -1266,6 +1266,66 @@
       ]
     },
     {
+      "id": "family-access-model",
+      "category": "negocio",
+      "priority": "P1",
+      "title": "Família — múltiplos cuidadores e acesso por perfil",
+      "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
+      "status": "in_progress",
+      "statusLabel": "Discovery",
+      "items": [
+        {
+          "id": "family-access-model-doc",
+          "title": "Modelo conceitual conta × círculo × perfil",
+          "status": "done",
+          "detail": "docs/FAMILY_ACCESS_MODEL.md — matriz João/Maria/Francisco/Vitória; FHIR/Novix; fases 0–3.",
+          "reviewBadge": ["legal", "medical"]
+        },
+        {
+          "id": "family-access-glossary-ui",
+          "title": "Glossário produto — Cuidador, Família, Perfil de saúde",
+          "status": "planned",
+          "detail": "Atualizar PROJETO.md + copy UI; manter tag Você para self; evitar paciente em fluxos B2C genéricos.",
+          "reviewBadge": ["content"]
+        },
+        {
+          "id": "family-access-grants-schema",
+          "title": "ACL explícito — grants por conta e paciente",
+          "status": "planned",
+          "detail": "Estender patient_memberships ou patient_access_grants: access_level, granted_by, revoked_at; assertPatientAccess usa grants.",
+          "reviewBadge": ["security", "legal"]
+        },
+        {
+          "id": "family-access-invite-flow",
+          "title": "Convite por e-mail — co-admin com escopo de perfis",
+          "status": "planned",
+          "detail": "circle_invites + aceite; limite 2 admins por assinatura (MVP); checkbox legitimidade LGPD.",
+          "reviewBadge": ["legal", "security"]
+        },
+        {
+          "id": "family-access-care-circles",
+          "title": "Care circles — agrupamento Família A / B",
+          "status": "planned",
+          "detail": "care_circles + members + patient_circle_links; billing_owner no círculo; UI Gerenciar família.",
+          "reviewBadge": ["legal"]
+        },
+        {
+          "id": "family-access-blended-patient",
+          "title": "Mesmo perfil em dois círculos (custódia compartilhada)",
+          "status": "planned",
+          "detail": "patient_id com grants independentes por conta/círculo — caso Mariana; auditoria de acesso.",
+          "reviewBadge": ["legal", "medical"]
+        },
+        {
+          "id": "family-access-audit-log",
+          "title": "Trilha de auditoria — grant/revoke e acesso sensível",
+          "status": "planned",
+          "detail": "product_events ou tabela dedicada; sem PHI no payload; DPO review.",
+          "reviewBadge": ["legal", "security"]
+        }
+      ]
+    },
+    {
       "id": "settings-area-structure",
       "category": "negocio",
       "priority": "P2",
@@ -1479,8 +1539,8 @@
         {
           "id": "hygiene-neo4j-candidate",
           "title": "Arestas DUPLICATE_CANDIDATE no grafo",
-          "status": "planned",
-          "detail": "Opcional; PG authoritative."
+          "status": "done",
+          "detail": "HygieneGraphProjector — DUPLICATE_CANDIDATE + CANONICAL_SAME_AS; PG authoritative."
         }
       ]
     },
@@ -1729,8 +1789,8 @@
         {
           "id": "beneficiary-view-filter",
           "title": "Seletor de período/beneficiário na tela Atendimentos Amil",
-          "status": "planned",
-          "detail": "Fetch todas as faixas; comparar raw para dedup antes do destino."
+          "status": "done",
+          "detail": "Modal AmilSyncOptionsModal + query params amilMarcaOtica/amilUtilization*; sub-etapa fetch-utilizacao."
         }
       ]
     },
@@ -1900,8 +1960,8 @@
         {
           "id": "run-dev-audit-bridge",
           "title": "Bridge dev-audit → staging metrics",
-          "status": "planned",
-          "detail": "Correlacionar hooks de dev com product_events em ambiente staging."
+          "status": "done",
+          "detail": "npm run dev-audit:bridge; GET /ops/dev-audit-bridge; correlaciona hooks Cursor com product_events por hora (sem PHI)."
         },
         {
           "id": "run-operation-model-doc",
@@ -2020,8 +2080,8 @@
         {
           "id": "landing-real-screenshots",
           "title": "Screenshots reais do app na landing",
-          "status": "in_progress",
-          "detail": "Script capture-landing-screenshots.mjs + public/landing/*.png; fallback mock se arquivo ausente."
+          "status": "done",
+          "detail": "capture-landing-screenshots.mjs — dashboard, patient-overview, agenda, exams, ava-chat em public/landing/."
         },
         {
           "id": "landing-public-billing-offers",
@@ -2265,8 +2325,8 @@
         {
           "id": "b2b-platform-orgs",
           "title": "Primitives — organizações e multi-tenant",
-          "status": "in_progress",
-          "detail": "Migration 055 organizations + organization_members; domain Organization entity; API/RBAC backlog."
+          "status": "done",
+          "detail": "Migration 055 + OrganizationService + GET/POST/PATCH/DELETE /organizations + members RBAC admin."
         },
         {
           "id": "b2b-platform-rbac",

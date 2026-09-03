@@ -8,6 +8,9 @@ import {
   UNIMED_EXTRATO_MONTHS_FULL,
   UNIMED_EXTRATO_MONTHS_INCREMENTAL,
   computeAmilGuidesPeriodStart,
+  computeAmilUtilizationPeriod,
+  AMIL_UTILIZACAO_MONTHS_FULL,
+  AMIL_UTILIZACAO_MONTHS_INCREMENTAL,
 } from '../src/application/connect/sync-delta.helper.js'
 import { IntegrationLink } from '../src/domain/integration-link/integration-link.entity.js'
 
@@ -85,6 +88,27 @@ describe('sync-delta.helper', () => {
       lastSyncAt: new Date('2026-06-01T12:00:00Z'),
     })
     const start = computeAmilGuidesPeriodStart(link, true)
+    expect(start.toISOString().slice(0, 10)).toBe('2026-05-18')
+  })
+
+  it('computeAmilUtilizationPeriod uses 24 months full vs short window incremental', () => {
+    const link = IntegrationLink.create({ patientId: 'p1', portalType: 'amil' })
+    const full = computeAmilUtilizationPeriod(link, false)
+    const inc = computeAmilUtilizationPeriod(link, true)
+    const monthsFull = (full.end.getTime() - full.start.getTime()) / (30 * 24 * 60 * 60 * 1000)
+    const monthsInc = (inc.end.getTime() - inc.start.getTime()) / (30 * 24 * 60 * 60 * 1000)
+    expect(monthsFull).toBeGreaterThan(AMIL_UTILIZACAO_MONTHS_FULL - 2)
+    expect(monthsInc).toBeLessThan(AMIL_UTILIZACAO_MONTHS_INCREMENTAL + 1)
+    expect(monthsInc).toBeGreaterThan(1)
+  })
+
+  it('computeAmilUtilizationPeriod incremental uses lastSync lookback', () => {
+    const link = IntegrationLink.create({
+      patientId: 'p1',
+      portalType: 'amil',
+      lastSyncAt: new Date('2026-06-01T12:00:00Z'),
+    })
+    const { start } = computeAmilUtilizationPeriod(link, true)
     expect(start.toISOString().slice(0, 10)).toBe('2026-05-18')
   })
 })
