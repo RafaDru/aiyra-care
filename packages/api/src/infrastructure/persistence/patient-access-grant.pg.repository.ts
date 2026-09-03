@@ -17,6 +17,8 @@ function mapRow(row: Record<string, unknown>): PatientAccessGrantData {
     revokedAt: row.revoked_at ? new Date(row.revoked_at as string) : null,
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
+    email: row.email ? String(row.email) : null,
+    displayName: row.display_name ? String(row.display_name) : null,
   }
 }
 
@@ -25,9 +27,11 @@ export class PatientAccessGrantPgRepository implements PatientAccessGrantReposit
 
   async listActiveForPatient(patientId: string) {
     const { rows } = await this.pool.query(
-      `SELECT * FROM patient_access_grants
-       WHERE patient_id = $1 AND revoked_at IS NULL
-       ORDER BY created_at`,
+      `SELECT g.*, a.email, a.display_name
+       FROM patient_access_grants g
+       JOIN app_accounts a ON a.id = g.account_id
+       WHERE g.patient_id = $1 AND g.revoked_at IS NULL
+       ORDER BY g.created_at`,
       [patientId],
     )
     return rows.map((r) => mapRow(r as Record<string, unknown>))

@@ -11,4 +11,6 @@ export interface PatientAccessGrantData {
   revokedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  email?: string | null
+  displayName?: string | null
 }

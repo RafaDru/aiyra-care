@@ -37,6 +37,8 @@ function serializeGrant(g: PatientAccessGrantData) {
     accessLevel: g.accessLevel,
     membershipRole: g.membershipRole,
     grantedBy: g.grantedBy,
+    email: g.email ?? null,
+    displayName: g.displayName ?? null,
     createdAt: g.createdAt.toISOString(),
     updatedAt: g.updatedAt.toISOString(),
   }

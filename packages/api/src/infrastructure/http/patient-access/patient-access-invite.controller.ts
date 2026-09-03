@@ -23,6 +23,9 @@ function mapInviteError(err: unknown, reply: FastifyReply) {
     PATIENT_ACCESS_INVITE_INVALID_EMAIL: [400, 'E-mail inválido'],
     PATIENT_ACCESS_INVITE_NO_PATIENTS: [400, 'Selecione ao menos um perfil de saúde'],
     PATIENT_ACCESS_ADMIN_LIMIT: [409, 'Limite de cuidadores com acesso total atingido'],
+    CARE_CIRCLE_FORBIDDEN: [403, 'Sem permissão nesta família'],
+    CARE_CIRCLE_PATIENT_NOT_FOUND: [400, 'Perfil não pertence à família selecionada'],
+    CARE_CIRCLE_ADMIN_LIMIT: [409, 'Limite de administradores da família atingido'],
   }
   const hit = map[code]
   if (hit) return reply.status(hit[0]).send({ message: hit[1] })
