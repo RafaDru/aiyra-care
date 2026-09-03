@@ -21,10 +21,16 @@ O modelo **interpreta** skills; hooks e CI **executam** independentemente do mod
 
 | Evento | Script | Comportamento |
 |--------|--------|---------------|
-| `sessionStart` | `session-start.mjs` | Log em `docs/dev-audit/sessions/` |
+| `sessionStart` | `session-start.mjs` | Log + **`additional_context`** com `docs/AGENT_BOOTSTRAP.md` |
+| `preCompact` | `pre-compact.mjs` | Log compactação; flag para re-injetar bootstrap |
+| `postToolUse` | `post-tool-bootstrap.mjs` | Após compact, re-injeta bootstrap na próxima ferramenta |
 | `beforeShellExecution` | `before-shell.mjs` | Audita; bloqueia destrutivos; pede confirmação em commit/push |
 | `afterFileEdit` | `after-file-edit.mjs` | Log path + ferramenta |
+| `afterFileEdit` | `after-file-edit-doc-ritual.mjs` | Marca ritual docs se produto sem `docs/features` |
 | `preToolUse` | `pre-tool-guard.mjs` | Bloqueia Write/Delete em `.env` e credenciais |
+| `stop` | `stop-doc-ritual.mjs` | `followup_message` se ritual docs pendente (`loop_limit: 2`) |
+
+Regra always-on: `.cursor/rules/agent-bootstrap.mdc` — índice curto que sobrevive à compactação.
 
 Configuração: `.cursor/hooks.json`. Debug: aba **Hooks** no Cursor.
 

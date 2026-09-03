@@ -9,6 +9,7 @@ openhealth-*.json
 aiyracare-*.json
 aiyra-care-*.json
 *.log
+.caddy-local.pid
 .DS_Store
 coverage/
 packages/web/src/**/*.js
@@ -21,6 +22,9 @@ packages/api/tmp_screenshots/
 tmp-*.js
 tmp-chunk-*.js
 packages/api/tmp-*
+
+# Cursor hook ephemeral state (post-compact flags, doc-ritual pending)
+.cursor/state/
 
 # Fleury Precision Care PoC — tokens locais (nunca commitar)
 packages/api/scripts/output/*.json

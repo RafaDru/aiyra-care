@@ -48,6 +48,8 @@
 - [`DELIVERY_PIPELINE.md`](./DELIVERY_PIPELINE.md)
 - [`TESTING_VERTICALS.md`](./TESTING_VERTICALS.md)
 - [`infra/ENVIRONMENTS.md`](./infra/ENVIRONMENTS.md)
+- [`infra/ENV_PREVIEW.md`](./infra/ENV_PREVIEW.md) · [`infra/PREVIEW_LOCAL_TEST_GUIDE.md`](./infra/PREVIEW_LOCAL_TEST_GUIDE.md)
+- [`infra/LOCAL_HOSTNAMES.md`](./infra/LOCAL_HOSTNAMES.md) · [`infra/GCP_PREVIEW_RUNBOOK.md`](./infra/GCP_PREVIEW_RUNBOOK.md)
 - [`OBSERVABILITY.md`](./OBSERVABILITY.md)
 
 ### Regulatório

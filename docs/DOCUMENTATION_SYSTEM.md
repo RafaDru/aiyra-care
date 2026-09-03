@@ -65,6 +65,21 @@ Copie [`docs/features/_TEMPLATE.md`](./features/_TEMPLATE.md) e registre em [`do
 
 ---
 
+## Sobrevivência à compactação de contexto
+
+A compactação **apaga** instruções que existiam só no chat. O ritual permanece via:
+
+| Mecanismo | Quando | Efeito |
+|-----------|--------|--------|
+| `.cursor/rules/agent-bootstrap.mdc` | Sempre (`alwaysApply`) | Regra curta no contexto do agente |
+| `docs/AGENT_BOOTSTRAP.md` | Fonte canônica do índice | Lido por hooks e humanos |
+| Hook `sessionStart` | Nova sessão Composer | `additional_context` com bootstrap completo |
+| Hook `preCompact` + `postToolUse` | Após compactação | Flag → re-injeta bootstrap na **próxima** ferramenta |
+| Hook `afterFileEdit` (doc-ritual) | Edição em `packages/` produto | Marca ritual pendente se docs não tocados |
+| Hook `stop` | Fim do turno agente | `followup_message` se ritual pendente |
+
+Estado efêmero (não commitar): `.cursor/state/*.json`
+
 ## GitHub Projects (uso recomendado)
 
 | Campo no Project | Mapeia para |

@@ -11,7 +11,7 @@ const API_TARGET = `http://127.0.0.1:${API_PORT}`
 
 /** Rotas da API — proxy em dev (porta 3010). Manter alinhado com `packages/api/src/infrastructure/http`. */
 const API_ROUTE_PATTERN =
-  '^/(patients|documents|exams|exam-orders|vaccines|medications|medication-administrations|allergies|growth-records|medical-records|diagnoses|authorizations|sessions|roadmap|integration-links|scraper|plan-memberships|handwriting-credits|scheduled-events|billing|compliance|calendar|health-threads|health|auth|project|care-places|clinical-export|graph|measurements|measurement-types|care-reminders|monitoring-export|emergency|relation-types|ava|llm|hygiene|telemetry|ops)'
+  '^/(patients|documents|exams|exam-orders|vaccines|medications|medication-administrations|allergies|growth-records|medical-records|diagnoses|authorizations|sessions|roadmap|integration-links|scraper|plan-memberships|handwriting-credits|scheduled-events|billing|compliance|calendar|health-threads|health|auth|project|care-places|clinical-export|graph|measurements|measurement-types|care-reminders|monitoring-export|emergency|relation-types|ava|llm|hygiene|telemetry|ops|family-access|organizations|care-circles)'
 
 /** React Router paths que colidem com prefixos da API — refresh não deve ir ao backend. */
 const SPA_DOCUMENT_EXACT = new Set(['/roadmap', '/compliance/accept'])
@@ -34,6 +34,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    host: true,
+    allowedHosts: ['.aiyracare.test', 'localhost', '127.0.0.1'],
     proxy: {
       [API_ROUTE_PATTERN]: {
         target: API_TARGET,

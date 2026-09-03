@@ -12,8 +12,17 @@
       "priority": "P1",
       "doc": "docs/features/family-access-model.md",
       "domainDoc": "docs/FAMILY_ACCESS_MODEL.md",
-      "routes": ["/", "/patients/:id", "/settings/account"],
-      "api": [],
+      "routes": ["/", "/patients/:id", "/settings/family", "/settings/account", "/invite/accept"],
+      "api": [
+        "GET /patients/:id/access-grants",
+        "POST /patients/:id/access-grants",
+        "DELETE /patients/:id/access-grants/:grantId",
+        "GET/POST/DELETE /family-access/invites",
+        "POST /family-access/invites/accept",
+        "GET/POST/PATCH /care-circles",
+        "GET/POST/DELETE /care-circles/:id/members",
+        "GET/POST/DELETE /care-circles/:id/patients"
+      ],
       "helpTopics": ["familia-multiplos-cuidadores", "quem-pode-ver-perfil-saude"],
       "tags": ["conta", "lgpd", "família", "acl"]
     },

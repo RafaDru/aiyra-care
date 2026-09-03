@@ -171,7 +171,7 @@
     { "path": "docs/SUS_CONECTESUS.md", "role": "SUS gov.br, govbr_sessions, fluxo guiado" },
     { "path": "docs/CONNECT.md", "role": "Boundary Connect vs Core; vault e sessões" },
     { "path": "docs/features/index.json", "role": "Catálogo de capacidades (features)" },
-    { "path": "docs/DOCUMENTATION_SYSTEM.md", "role": "Modelo de documentação e tracking" },
+    { "path": "docs/AGENT_BOOTSTRAP.md", "role": "Índice obrigatório pós-compactação (hooks)" },
     { "path": "docs/help/", "role": "FAQ usuário + base Ava" },
     { "path": "docs/FAMILY_ACCESS_MODEL.md", "role": "Discovery conta × família × perfil" },
     { "path": "AGENTS.md", "role": "Instruções agentes Cursor" }

@@ -811,6 +811,82 @@ export const api = {
         { method: 'PATCH', body: JSON.stringify({ syncEscalationEmail }) },
       ),
   },
+  careCircles: {
+    list: () =>
+      request<Array<{ id: string; name: string }>>('/care-circles'),
+    get: (id: string) =>
+      request<{
+        id: string
+        name: string
+        memberRole: string
+        members: Array<{
+          id: string
+          accountId: string
+          role: string
+          email?: string | null
+          displayName?: string | null
+        }>
+        patients: Array<{ patientId: string; patientName: string }>
+      }>(`/care-circles/${id}`),
+    create: (name: string) =>
+      request<{ id: string; name: string }>('/care-circles', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      }),
+    update: (id: string, name: string) =>
+      request<{ id: string; name: string }>(`/care-circles/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+      }),
+    listLinkablePatients: (id: string) =>
+      request<Array<{ id: string; name: string }>>(`/care-circles/${id}/linkable-patients`),
+    linkPatient: (circleId: string, patientId: string) =>
+      request<void>(`/care-circles/${circleId}/patients`, {
+        method: 'POST',
+        body: JSON.stringify({ patientId }),
+      }),
+    unlinkPatient: (circleId: string, patientId: string) =>
+      request<void>(`/care-circles/${circleId}/patients/${patientId}`, { method: 'DELETE' }),
+  },
+  familyAccess: {
+    listInvites: () =>
+      request<Array<{
+        id: string
+        inviteeEmail: string
+        patientIds: string[]
+        accessLevel: string
+        status: string
+        expiresAt: string
+      }>>('/family-access/invites'),
+    listOwnedPatients: () =>
+      request<Array<{ id: string; name: string }>>('/family-access/owned-patients'),
+    createInvite: (data: {
+      inviteeEmail: string
+      patientIds: string[]
+      accessLevel?: string
+      legitimacyAck: true
+    }) =>
+      request<{ acceptUrl: string; id: string }>('/family-access/invites', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    revokeInvite: (id: string) =>
+      request<void>(`/family-access/invites/${id}`, { method: 'DELETE' }),
+    previewInvite: (token: string) =>
+      request<{
+        inviteeEmail: string
+        patientNames: string[]
+        inviterDisplayName: string | null
+        accessLevel: string
+        status: string
+        expiresAt: string
+      }>(`/family-access/invites/preview/${token}`),
+    acceptInvite: (token: string) =>
+      request('/family-access/invites/accept', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+      }),
+  },
   project: {
     context: () => request<import('./api.types.js').ProjectContext>('/project/context'),
   },

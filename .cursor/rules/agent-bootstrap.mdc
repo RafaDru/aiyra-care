@@ -1,0 +1,18 @@
+---
+description: Índice obrigatório de documentação — sobrevive à compactação de contexto
+alwaysApply: true
+---
+
+# AiyraCare — bootstrap do agente
+
+Antes de alterar produto ou inferir "para quê" pelo código, siga **nesta ordem**:
+
+1. `docs/AGENT_BOOTSTRAP.md` (índice completo)
+2. `GET /project/context` ou `docs/project-context.json`
+3. `docs/features/index.json` → `docs/features/<id>.md`
+4. `docs/roadmap.json` (item relevante)
+5. `docs/DOCUMENTATION_SYSTEM.md` (ritual ao entregar)
+
+**Ao entregar:** roadmap + feature card + `HISTORICO.md` se houver decisão.
+
+Hooks re-injetam `AGENT_BOOTSTRAP` em `sessionStart` e após `preCompact` (via `postToolUse`).

@@ -2,6 +2,7 @@ import type { Pool } from 'pg'
 import type { AppAccountRepository, PatientMembershipRepository } from '../../domain/auth/app-account.repository.js'
 import { AppAccount } from '../../domain/auth/app-account.entity.js'
 import type { AppAccountData } from '../../domain/auth/app-account.entity.js'
+import { PatientAccessGrantPgRepository } from './patient-access-grant.pg.repository.js'
 
 const COLUMNS = 'id, auth_provider, auth_subject, email, display_name, avatar_url, created_at, updated_at'
 
@@ -77,16 +78,8 @@ export class PatientMembershipPgRepository implements PatientMembershipRepositor
   }
 
   async listAccessiblePatientIds(accountId: string): Promise<string[]> {
-    const { rows } = await this.pool.query(
-      `SELECT DISTINCT patient_id::text AS patient_id
-       FROM (
-         SELECT patient_id FROM patient_memberships WHERE account_id = $1
-         UNION ALL
-         SELECT id AS patient_id FROM patients WHERE owner_account_id = $1
-       ) accessible`,
-      [accountId],
-    )
-    return rows.map((r) => r.patient_id as string)
+    const grants = new PatientAccessGrantPgRepository(this.pool)
+    return grants.listAccessiblePatientIds(accountId)
   }
 
   async listPatientIdsForAccount(accountId: string): Promise<string[]> {
@@ -100,6 +93,7 @@ export class PatientMembershipPgRepository implements PatientMembershipRepositor
        ON CONFLICT (account_id, patient_id) DO NOTHING`,
       [accountId, patientId, role],
     )
+    await this.mirrorAccessGrant(patientId, accountId, role, accountId)
   }
 
   async listRolesForAccount(accountId: string): Promise<Record<string, string>> {
@@ -128,12 +122,47 @@ export class PatientMembershipPgRepository implements PatientMembershipRepositor
          ON CONFLICT (account_id, patient_id) DO UPDATE SET role = 'self'`,
         [accountId, patientId],
       )
+      try {
+        await client.query(
+          `INSERT INTO patient_access_grants (patient_id, account_id, membership_role, access_level, granted_by)
+           VALUES ($1, $2, 'self', 'full', $3)
+           ON CONFLICT (patient_id, account_id)
+           DO UPDATE SET membership_role = 'self', access_level = 'full', revoked_at = NULL, updated_at = NOW()`,
+          [patientId, accountId, accountId],
+        )
+      } catch (err) {
+        const code = (err as { code?: string }).code
+        if (code !== '42P01') throw err
+      }
       await client.query('COMMIT')
     } catch (err) {
       await client.query('ROLLBACK')
       throw err
     } finally {
       client.release()
+    }
+  }
+
+  private async mirrorAccessGrant(
+    patientId: string,
+    accountId: string,
+    role: string,
+    grantedBy: string,
+  ) {
+    try {
+      await this.pool.query(
+        `INSERT INTO patient_access_grants (patient_id, account_id, membership_role, access_level, granted_by)
+         VALUES ($1, $2, $3, 'full', $4)
+         ON CONFLICT (patient_id, account_id)
+         DO UPDATE SET
+           membership_role = EXCLUDED.membership_role,
+           revoked_at = NULL,
+           updated_at = NOW()`,
+        [patientId, accountId, role, grantedBy],
+      )
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      if (code !== '42P01') throw err
     }
   }
 }

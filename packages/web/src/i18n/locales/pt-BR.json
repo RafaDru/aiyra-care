@@ -190,11 +190,83 @@
     "nav": {
       "general": "Geral",
       "account": "Conta",
+      "family": "Família e cuidadores",
       "plan": "Plano e assinatura",
       "legal": "Legal e privacidade"
     },
     "legalAcceptTitle": "Aceite dos documentos",
     "legalAcceptSubtitle": "Versões vigentes dos termos e políticas vinculadas à sua conta."
+  },
+  "family": {
+    "glossary": {
+      "caregiver": "Cuidador",
+      "healthProfile": "Perfil de saúde",
+      "you": "Você",
+      "familyCircle": "Família"
+    },
+    "invite": {
+      "title": "Convidar cuidador",
+      "subtitle": "Compartilhe perfis de saúde com outra conta — cada pessoa entra com login próprio.",
+      "action": "Novo convite",
+      "modalTitle": "Convite de cuidador",
+      "emailLabel": "E-mail do cuidador",
+      "profilesLabel": "Perfis de saúde incluídos",
+      "profilesPlaceholder": "Selecione os perfis",
+      "profilesRequired": "Selecione ao menos um perfil",
+      "accessLabel": "Nível de acesso",
+      "accessFull": "Completo",
+      "accessReadOnly": "Somente leitura",
+      "legitimacyLabel": "Confirmo que tenho legitimidade para compartilhar estes dados (LGPD)",
+      "legitimacyRequired": "Confirme a legitimidade do convite",
+      "send": "Gerar convite",
+      "created": "Convite criado — envie o link ao cuidador",
+      "createError": "Não foi possível criar o convite",
+      "loadError": "Não foi possível carregar convites",
+      "revoke": "Revogar",
+      "revoked": "Convite revogado",
+      "revokeError": "Não foi possível revogar",
+      "empty": "Nenhum convite enviado",
+      "noOwnedPatients": "Você só pode convidar para perfis de saúde dos quais é titular.",
+      "linkReady": "Link de aceite (copie e envie por e-mail ou mensagem)",
+      "colEmail": "E-mail",
+      "colProfiles": "Perfis",
+      "colStatus": "Status"
+    },
+    "accept": {
+      "title": "Convite para cuidar de perfis de saúde",
+      "subtitle": "Aceite com a mesma conta de e-mail indicada no convite.",
+      "from": "Convidado por",
+      "unknownInviter": "Titular da conta",
+      "profiles": "Perfis de saúde",
+      "email": "E-mail convidado",
+      "action": "Aceitar convite",
+      "success": "Convite aceito — perfis disponíveis no início",
+      "error": "Não foi possível aceitar o convite",
+      "notFound": "Convite inválido ou expirado",
+      "missingToken": "Link de convite incompleto",
+      "notPending": "Este convite já está {{status}}"
+    },
+    "circles": {
+      "title": "Famílias",
+      "subtitle": "Agrupe perfis de saúde e cuidadores — útil quando você cuida de mais de um núcleo familiar.",
+      "create": "Nova família",
+      "modalTitle": "Criar família",
+      "nameLabel": "Nome da família",
+      "namePlaceholder": "Ex.: Família Silva",
+      "nameRequired": "Informe um nome",
+      "created": "Família criada",
+      "createError": "Não foi possível criar a família",
+      "loadError": "Não foi possível carregar famílias",
+      "empty": "Nenhuma família ainda — crie uma ou aceite um convite de cuidador.",
+      "profiles": "Perfis de saúde",
+      "noProfiles": "Nenhum perfil vinculado",
+      "members": "Membros",
+      "roleOwner": "Titular",
+      "roleAdmin": "Administrador",
+      "roleMember": "Membro",
+      "yourRole": "Seu papel: {{role}}",
+      "loadingDetail": "Carregando…"
+    }
   },
   "sync": {
     "diagnostics": {

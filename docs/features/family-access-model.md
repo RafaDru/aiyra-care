@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `family-access-model` |
 | **Épico** | `family-access-model` |
-| **Status** | `in_progress` (discovery / design) |
+| **Status** | `in_progress` (fase 2 — care circles + convites entregues; audit log pendente) |
 | **Categoria** | negócio |
 | **Prioridade** | P1 |
 
@@ -29,14 +29,18 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 
 | Hoje | Alvo |
 |------|------|
-| `patient_memberships` (guardian/self) | + `access_level`, `granted_by` ou `patient_access_grants` |
-| Acesso = união plana de memberships | Matriz conta × paciente |
-| Sem `care_circles` | `care_circles` + members + links |
+| `patient_access_grants` (057) + backfill | Convites (058) + care circles (059) |
+| `patient_memberships` (espelho guardian/self) | UI **Família e cuidadores** (`/settings/family`) |
+| Acesso via grants ativos | Matriz conta × paciente completa |
+| `care_circles` + backfill «Minha família» | Vincular convites a `care_circle_id` |
 
 | Tipo | Referência |
 |------|------------|
 | Design completo | [`docs/FAMILY_ACCESS_MODEL.md`](../FAMILY_ACCESS_MODEL.md) |
-| Auth atual | `patient-access.guard.ts`, `018_app_accounts.sql` |
+| Auth / ACL | `patient-access-grant.pg.repository.ts`, `patient-access.service.ts`, `patient-access.guard.ts` |
+| Migration | `057_patient_access_grants.sql`, `058_patient_access_invites.sql`, `059_care_circles.sql` |
+| API | `GET/POST /care-circles`, membros e vínculos de perfil |
+| UI | Configurações → Família e cuidadores (`/settings/family`) |
 | Billing | `account_entitlements` (1 pagador por conta) |
 
 ## Fora de escopo (fase 1)

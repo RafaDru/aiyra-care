@@ -156,7 +156,7 @@ npm run ops:alerts-check
 3. Provisionar Artifact Registry: `npm run provision:preview:gcp`
 4. Configurar secrets GitHub Environment `preview` — [`GITHUB_ENVIRONMENTS_SECRETS.md`](./GITHUB_ENVIRONMENTS_SECRETS.md)
 5. Primeiro deploy: Actions → Promote to Preview → `deploy_gcp=true` → `run_post_deploy=true`
-6. connect-worker como Cloud Run Job (backlog)
+6. connect-worker como Cloud Run Job — ver §6 (deploy_worker no workflow).
 
 ## Ver também
 

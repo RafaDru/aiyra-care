@@ -137,15 +137,18 @@ Revisão jurídica obrigatória antes de go-live multi-guardião (`reviewBadge: 
 - Matriz de casos de teste (João/Maria/Francisco/Vitória/Mariana)
 
 ### Fase 1 — ACL explícito sem novo agrupamento
-- Estender `patient_memberships` com `access_level` + `granted_by`
-- API: convite por e-mail, aceite, revogação
-- Limite 2 admins por conta pagadora (configurável)
-- UI: “Quem tem acesso a este perfil?”
+- ✅ Tabela `patient_access_grants` (migration 057) + backfill + API `/patients/:id/access-grants`
+- ✅ `listAccessiblePatientIds` via grants; limite 2 co-admins `full` (titular excluído da contagem)
+- ✅ Convites MVP (058): `POST /family-access/invites`, aceite em `/invite/accept`, link copiável + checkbox LGPD
+- [ ] UI lista “Quem tem acesso” por perfil (drawer)
+- [ ] Envio de e-mail transacional do convite
 
 ### Fase 2 — Care circles
-- Tabelas `care_circles`, `care_circle_members`, `patient_circle_links`
-- Dashboard agrupado por família
-- Migrar `parent_ids` sync household para opcionalmente derivar do círculo
+- ✅ Tabelas `care_circles`, `care_circle_members`, `patient_circle_links` (059) + backfill «Minha família»
+- ✅ API `/care-circles` + UI Configurações → Família e cuidadores
+- [ ] Dashboard agrupado por família
+- [ ] Migrar `parent_ids` sync household para opcionalmente derivar do círculo
+- [ ] Vincular convites (058) a `care_circle_id`
 
 ### Fase 3 — Cenários avançados
 - Mesmo paciente em múltiplos círculos (Mariana)

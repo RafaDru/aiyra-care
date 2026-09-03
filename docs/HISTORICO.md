@@ -30,12 +30,11 @@ Promote GCP = **staging/preview (Ambiente 2)**, não produção. Primeiro deploy
 - **`gcp-preview-deploy.mjs`** — build/push Artifact Registry + deploy API/web/ops no Cloud Run.
 - **`gcp-preview-provision.mjs`** — enable APIs + criar repositório Docker.
 - **`promote-preview.yml`** — input `deploy_gcp` com auth GCP + secrets Environment preview.
-- Roadmap: `env-preview-gcp-deploy` done; `env-preview-gcp-worker` planned.
+- Roadmap: `env-preview-gcp-deploy` e `env-preview-gcp-worker` **done** (código); primeiro deploy cloud pendente secrets + Cloud SQL.
 
-### Próximo
+### Próximo (infra)
 - [ ] Secrets `GCP_SA_KEY` + vars no GitHub Environment `preview`
-- [ ] Cloud SQL + primeiro `deploy_gcp=true`
-- [ ] connect-worker Cloud Run Job
+- [ ] Cloud SQL + primeiro `deploy_gcp=true` + `deploy_worker=true`
 
 ## [2026-09-03] - Delivery + GCP Preview: dry-run, Dockerfiles, runbook beta
 
@@ -84,7 +83,6 @@ Consolidar tracking de negócio/funcionalidade para humanos e LLMs; fechar itens
 - **GitHub Projects** = kanban operacional com labels `roadmap:<id>`, não substitui `.md`.
 
 ### Próximo
-- [ ] `family-access-invite-flow` — convites por e-mail
 - [ ] `family-access-glossary-ui` — copy Cuidador / Perfil de saúde
 - [ ] `ava-help-knowledge-base` — expor help para Ava
 - [ ] Labels `roadmap:*` no GitHub

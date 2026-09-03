@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Modal, Form, Input, Steps, Button, Select, Space } from 'antd'
+import { Modal, Form, Input, Steps, Button, Select, Space, message } from 'antd'
 import { api } from '../../lib/api.js'
 import type { HealthThread } from '../../lib/api.types.js'
 
@@ -25,8 +25,31 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
     onClose()
   }
 
+  const stepFieldNames = [
+    ['title'] as const,
+    ['reason', 'symptoms'] as const,
+    ['workingHypothesis'] as const,
+    ['plannedSteps'] as const,
+  ]
+
+  const nextStep = async () => {
+    try {
+      await form.validateFields(stepFieldNames[step])
+      setStep((s) => s + 1)
+    } catch {
+      message.warning('Preencha os campos obrigatórios desta etapa')
+    }
+  }
+
   const submit = async () => {
-    const values = await form.validateFields()
+    let values
+    try {
+      values = await form.validateFields()
+    } catch {
+      message.warning('Informe o título da investigação na primeira etapa')
+      setStep(0)
+      return
+    }
     setLoading(true)
     try {
       const planned = (values.plannedSteps as string | undefined)
@@ -48,6 +71,8 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
       })
       onCreated(thread)
       handleClose()
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : 'Não foi possível abrir a investigação')
     } finally {
       setLoading(false)
     }
@@ -108,7 +133,7 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
           <Button onClick={handleClose}>Cancelar</Button>
           {step > 0 && <Button onClick={() => setStep((s) => s - 1)}>Voltar</Button>}
           {step < steps.length - 1 ? (
-            <Button type="primary" onClick={() => setStep((s) => s + 1)}>Continuar</Button>
+            <Button type="primary" onClick={() => void nextStep()}>Continuar</Button>
           ) : (
             <Button type="primary" loading={loading} onClick={() => submit()}>Abrir investigação</Button>
           )}
@@ -117,7 +142,7 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
       destroyOnClose
     >
       <Steps current={step} size="small" items={steps.map((s) => ({ title: s.title }))} style={{ marginBottom: 24 }} />
-      <Form form={form} layout="vertical" preserve={false}>
+      <Form form={form} layout="vertical">
         {steps[step].content}
       </Form>
     </Modal>

@@ -1272,7 +1272,7 @@
       "title": "Família — múltiplos cuidadores e acesso por perfil",
       "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
       "status": "in_progress",
-      "statusLabel": "Fase 1 — convites",
+      "statusLabel": "Fase 2 — care circles entregue",
       "items": [
         {
           "id": "family-access-model-doc",

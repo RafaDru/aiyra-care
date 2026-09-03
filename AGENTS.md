@@ -4,7 +4,7 @@
 
 **AiyraCare** — monorepo `aiyra-care` (`@aiyra-care/*`). Workspace: `%USERPROFILE%\workspace\aiyra-care` — ver `docs/CURSOR_WORKSPACE.md`. Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: `docs/PROJETO.md`; decision log: `docs/HISTORICO.md`.
 
-**Context for LLMs/agents:** `GET http://127.0.0.1:3010/project/context` — structured app snapshot + decisions + parsed `HISTORICO.md` + migrations list + **features catalog** (`docs/features/index.json`). Curated source: `docs/project-context.json` (update on architecture/roadmap changes). **Documentation model:** `docs/DOCUMENTATION_SYSTEM.md`. **Prioritized roadmap:** `docs/roadmap.json` + UI menu (`GET /roadmap`).
+**Context for LLMs/agents:** `GET http://127.0.0.1:3010/project/context` — structured app snapshot + decisions + parsed `HISTORICO.md` + migrations list + **features catalog** (`docs/features/index.json`). Curated source: `docs/project-context.json` (update on architecture/roadmap changes). **Documentation model:** `docs/DOCUMENTATION_SYSTEM.md`. **Bootstrap (pós-compactação):** `docs/AGENT_BOOTSTRAP.md` — re-injetado via hooks `sessionStart` + `postToolUse`. **Prioritized roadmap:** `docs/roadmap.json` + UI menu (`GET /roadmap`).
 
 ## Monorepo structure
 
@@ -124,13 +124,14 @@ Entities and attributes live in **Postgres**; Neo4j stores **associations** betw
 - Silent wallet: `useSilentWalletSync.ts`, `useWalletLinkSyncStatus.ts`, `silent-sync.ts`
 - Sync modal: `packages/web/src/components/scraper/SyncProgressModal.tsx`
 - Link plan: modal in `detail.tsx` + `ImportInsuranceModal.tsx`
+- **Família:** `packages/web/src/pages/settings/family.tsx`, `/invite/accept`, `packages/web/src/components/family/`
 - API client: `packages/web/src/lib/api.ts`
 
 **UI grouped lists rule:** new screens with **card/row groups** must keep horizontal alignment between groups. Use `GroupedAlignedTables`, `ALIGNED_COL` (`aligned-table-columns.ts`), `AlignedFieldGrid`. Logos: `packages/web/public/brands/`.
 
 ## Migrations
 
-SQL in `database/relational/`. Scripts: `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Orçamento LLM interno (cliente vs interno + teto R$100): **043** — ver `docs/LLM_USAGE.md#custo-cliente-vs-interno-migration-043`. Catálogo semântico dinâmico: **044**. Marcadores de exame (`exam_result_items`): **045**; idempotência + `source_document_id`: **046**. Ava conversas: **047**; pins sessão: **048** — ver `docs/AVA_VISION.md`. Telemetria produto: **049**; gerações domínio: **050**; client errors: **051**; runtime degraded: **052**. **gov.br sessão SUS + auth_attention:** **053** — ver `docs/SUS_CONECTESUS.md`, `docs/CONNECT.md`.
+SQL in `database/relational/`. Scripts: `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Orçamento LLM interno (cliente vs interno + teto R$100): **043** — ver `docs/LLM_USAGE.md#custo-cliente-vs-interno-migration-043`. Catálogo semântico dinâmico: **044**. Marcadores de exame (`exam_result_items`): **045**; idempotência + `source_document_id`: **046**. Ava conversas: **047**; pins sessão: **048** — ver `docs/AVA_VISION.md`. Telemetria produto: **049**; gerações domínio: **050**; client errors: **051**; runtime degraded: **052**. **gov.br sessão SUS + auth_attention:** **053** — ver `docs/SUS_CONECTESUS.md`, `docs/CONNECT.md`. **Família / acesso:** grants **057**, convites **058**, care circles **059** — ver `docs/FAMILY_ACCESS_MODEL.md`, UI `/settings/family`.
 
 ## Legal / LGPD
 
@@ -148,7 +149,11 @@ For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/F
 - Hooks: `.cursor/hooks.json` — auditoria em `docs/dev-audit/`; ver `docs/CURSOR_AGENT_OPS.md`.
 - **Ambientes não prod:** [`docs/infra/TWO_ENV_MODEL.md`](docs/infra/TWO_ENV_MODEL.md) — Ambiente 1 **local**; Ambiente 2 **local** (`up:preview`) até ritmo funcional, depois **GCP**; matriz [`docs/infra/ENVIRONMENTS.md`](docs/infra/ENVIRONMENTS.md).
 - Antes de pedir aprovação Preview: `npm run promotion:gates` + [`docs/TESTING_VERTICALS.md`](docs/TESTING_VERTICALS.md).
-- Preview local (após aprovação): `npm run up:preview` — PG `aiyracare_preview`, API `:3020`, web `:5174`.
+- Preview local (após aprovação): `npm run up:preview` — PG `aiyracare_preview`, API `:3020`, web `:5174`, ops `:3023`.
+- Ritual staging: `npm run preview:validate` · guia [`docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md`](docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md).
+- Hostnames locais: `npm run hosts:register` + `npm run caddy:local` — [`docs/infra/LOCAL_HOSTNAMES.md`](docs/infra/LOCAL_HOSTNAMES.md).
+- Status stack: `npm run env:status` · pacientes demo: `$env:AUTH_SUBJECT="<sub>"; npm run link:demo-patients`.
+- GCP preview (quando secrets prontos): `provision:preview:gcp`, `deploy:preview:gcp`, `deploy:preview:worker` — [`docs/infra/GCP_PREVIEW_RUNBOOK.md`](docs/infra/GCP_PREVIEW_RUNBOOK.md).
 - Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → CI (build API + critical + web).
 - Roadmap entrega: épicos `dev-delivery-pipeline`, `prod-run-intelligence`, `platform-environments`.
 

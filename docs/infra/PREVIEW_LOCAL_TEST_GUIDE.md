@@ -71,12 +71,14 @@ Após login em **:5174**, confira o dashboard — deve listar pacientes se a con
 - [ ] Sync manual (pode falhar em portal real — OK no preview; observe modal de progresso)
 - [ ] Ícones de status sync + texto (acessibilidade)
 
-### 4. Configurações e opt-in ops (5 min)
+### 4. Configurações, família e opt-in ops (10 min)
 - [ ] **Configurações → Geral** → toggle **“Avisar falhas repetidas de sincronização”**
-- [ ] Salvar e recarregar — preferência persiste
+- [ ] **Configurações → Família e cuidadores** — círculo «Minha família», convites (migrations 057–059)
+- [ ] Salvar e recarregar — preferências persistem
 
 ### 5. Console ops preview (10 min)
-- [ ] Abrir http://127.0.0.1:3023
+- [ ] Abrir http://ops.staging.aiyracare.test ou `:3023`
+- [ ] Tag **Ambiente Staging** (âmbar) no topo do console
 - [ ] Aba **Infra** — probe API/PG, latências ok/warning/critical
 - [ ] Aba **Produto** — mapa de features, erros cliente (se houver)
 - [ ] Aba **Sync** — fail rate, jobs 24h
@@ -110,6 +112,15 @@ npm run ops:notifier:simulate -- --scenario=llm_cascade
 
 # Bridge dev × produto
 npm run dev-audit:bridge
+
+# connect-worker (sync agendado + ops alerts no staging)
+$env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare_preview"
+$env:DEPLOYMENT_TIER = "preview"
+$env:OPS_ALERTS_INTERVAL_MS = "900000"
+npm run connect-worker
+
+# Status de todos os serviços
+npm run env:status
 ```
 
 ## O que é “sucesso”

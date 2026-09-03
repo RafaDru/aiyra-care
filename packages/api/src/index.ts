@@ -184,6 +184,10 @@ async function registerRoutes() {
   await app.register(connectRoutes)
   const { organizationRoutes } = await import('./infrastructure/http/organization/organization.routes.js')
   await app.register(organizationRoutes)
+  const { patientAccessRoutes } = await import('./infrastructure/http/patient-access/patient-access.routes.js')
+  await app.register(patientAccessRoutes)
+  const { careCircleRoutes } = await import('./infrastructure/http/care-circle/care-circle.routes.js')
+  await app.register(careCircleRoutes)
 }
 
 const start = async () => {

@@ -12,7 +12,9 @@ Hooks em `.cursor/hooks.json` (pré/pós) — ver `docs/DELIVERY_PIPELINE.md` e 
 
 | Pasta | Evento | Conteúdo |
 |-------|--------|----------|
-| `sessions/` | `sessionStart` | Início de sessão agente |
+| `sessions/` | `sessionStart` | Início de sessão agente (+ bootstrap injetado) |
+| `compaction/` | `preCompact` | Compactação de contexto (uso %, trigger) |
+| `doc-ritual/` | `afterFileEdit` / `stop` | Ritual de docs pendente ou follow-up |
 | `edits/` | `afterFileEdit` | Arquivo editado + ferramenta |
 | `shell/` | `beforeShellExecution` | Comando terminal (antes de executar) |
 | `tools/` | `preToolUse` | Ferramentas Write/StrReplace/Delete |

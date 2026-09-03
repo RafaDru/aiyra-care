@@ -1,6 +1,6 @@
 # Deploy Preview — Ambiente 2 (GCP)
 
-> **Última atualização:** 2026-09-02  
+> **Última atualização:** 2026-09-03  
 > **Hoje:** Preview **local** (`npm run up:preview`).  
 > **Alvo:** GCP após ritmo de trabalho funcional com promoção local estável.
 
@@ -12,7 +12,8 @@
 | Hostnames locais | `staging.aiyracare.test` — [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) |
 | Gates CI | `promote-preview.yml` → `run-promotion-gates.mjs` |
 | Runbook GCP | [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md) |
-| Deploy real | Placeholder no workflow — ver `env-preview-gcp-deploy` |
+| Deploy GCP | `promote-preview.yml` — inputs `deploy_gcp`, `deploy_worker` — [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md) |
+| Código deploy | `npm run deploy:preview:gcp` · `npm run deploy:preview:worker` |
 
 ## Workflow
 

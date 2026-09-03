@@ -1,6 +1,6 @@
 # Ambiente 2 — Preview estável
 
-> **Última atualização:** 2026-09-02  
+> **Última atualização:** 2026-09-03  
 > Onde Rafael testa continuamente, pede POCs e ajustes — **sem surpresas técnicas**.
 
 ## Fase atual: local → GCP
@@ -16,6 +16,8 @@
 | PG | `aiyracare_preview` |
 
 Integração (Ambiente 1) segue em 3010/5173 + `aiyracare` — **podem rodar ao mesmo tempo**.
+
+**Hostnames locais (opcional):** [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) — `staging.aiyracare.test` sem lembrar portas.
 
 ## Ritual automatizado
 
@@ -67,31 +69,36 @@ Web: smoke manual — login → paciente demo → vacinas / carteira / integraç
 
 | Item | Config |
 |------|--------|
-| Ops console | `:3023` (PG `aiyracare_preview`) |
-| Setup opcional | `npm run setup:ops-preview` — **não** misturar com `.env` de integração sem querer |
-| Worker | `CONNECT_WORKER_EXTERNAL=1` na API preview se testar sync agendado |
-| Métricas | `OPS_METRICS_KEY` distinto se usar notifier preview (`:3022`) |
+| Ops console | `:3023` ou `ops.staging.aiyracare.test` — tag **Ambiente Staging** no header |
+| Status stack | `npm run env:status` |
+| Hostnames | `npm run hosts:register` + `npm run caddy:local` — [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) |
+| Setup opcional | `npm run setup:ops-preview` |
+| Worker local | `DEPLOYMENT_TIER=preview` + `npm run connect-worker` (sync + ops alerts) |
+| Ritual | `npm run preview:validate` |
 
-Ver [`OPS_TWO_ENV_SETUP.md`](./OPS_TWO_ENV_SETUP.md).
+Ver [`OPS_TWO_ENV_SETUP.md`](./OPS_TWO_ENV_SETUP.md) · [`PREVIEW_LOCAL_TEST_GUIDE.md`](./PREVIEW_LOCAL_TEST_GUIDE.md).
+
+## Futuro: Preview no GCP
+
+Código pronto — aguarda Cloud SQL + secrets GitHub:
+
+```powershell
+npm run provision:preview:gcp -- --dry-run
+npm run deploy:preview:gcp -- --dry-run --build-only --tag=test
+npm run deploy:preview:worker -- --dry-run --jobs-only --tag=test
+```
+
+Workflow: `promote-preview.yml` com `deploy_gcp` + `deploy_worker`. Ver [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md).
 
 ## Refresh programado
 
 | Frequência | Ação |
 |------------|------|
-| Após cada promote local | `staging:probe-gate` na API `:3020` |
+| Após cada promote local | `npm run preview:validate` |
 | Semanal (opcional) | `seed:staging-refresh` no PG preview |
 | Antes de demo importante | `npm run up:preview` (re-seed + restart) |
 
-## Futuro: Preview no GCP
-
-Quando o fluxo local estiver redondo:
-
-- PG dedicado (Cloud SQL) + dados sintéticos (`seed:staging-refresh`).
-- API/web/worker no GCP — ver [`DEPLOY_PREVIEW.md`](./DEPLOY_PREVIEW.md).
-- GitHub Environment `preview` + `promote-preview.yml`.
-- Ops: keys e webhook distintos do Ambiente 1 local.
-
-Projeto GCP: `openhealth-503119` — [`GCP_BILLING_ALERTS.md`](./GCP_BILLING_ALERTS.md). **Ambiente 1 permanece local.**
+Projeto GCP (quando for a hora): `openhealth-503119` — [`GCP_BILLING_ALERTS.md`](./GCP_BILLING_ALERTS.md). **Ambiente 1 permanece local.**
 
 ## O que você deve encontrar aqui
 

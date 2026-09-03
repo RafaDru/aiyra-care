@@ -6,6 +6,16 @@
         "command": "node .cursor/hooks/session-start.mjs"
       }
     ],
+    "preCompact": [
+      {
+        "command": "node .cursor/hooks/pre-compact.mjs"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "node .cursor/hooks/post-tool-bootstrap.mjs"
+      }
+    ],
     "beforeShellExecution": [
       {
         "command": "node .cursor/hooks/before-shell.mjs"
@@ -14,6 +24,9 @@
     "afterFileEdit": [
       {
         "command": "node .cursor/hooks/after-file-edit.mjs"
+      },
+      {
+        "command": "node .cursor/hooks/after-file-edit-doc-ritual.mjs"
       }
     ],
     "preToolUse": [
@@ -21,6 +34,12 @@
         "command": "node .cursor/hooks/pre-tool-guard.mjs",
         "matcher": "Write|StrReplace|Delete",
         "failClosed": false
+      }
+    ],
+    "stop": [
+      {
+        "command": "node .cursor/hooks/stop-doc-ritual.mjs",
+        "loop_limit": 2
       }
     ]
   }
