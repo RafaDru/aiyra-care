@@ -65,6 +65,7 @@ npm run up:preview
 $env:API_PUBLIC_URL = "http://127.0.0.1:3020"
 npm run staging:probe-gate
 npm run ops:alerts-check
+npm run preview:validate
 npm run promotion:gates
 ```
 

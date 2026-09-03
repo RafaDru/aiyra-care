@@ -784,17 +784,19 @@ Para aplicar migrations manualmente (sem psql no PATH), executar o SQL via clien
 | Recurso | Uso |
 |---------|-----|
 | `docs/project-context.json` | Foto **curada** — camadas, decisões, roadmap, integrações (atualizar ao evoluir arquitetura) |
-| `GET /project/context` | Agrega JSON + `HISTORICO.md` parseado + lista de migrations em runtime |
+| `docs/features/index.json` | Catálogo de capacidades — também em `GET /project/context` |
+| `docs/DOCUMENTATION_SYSTEM.md` | Como documentar entregas, features e ajuda |
+| `GET /project/context` | Agrega JSON + `HISTORICO.md` parseado + lista de migrations + features |
 | `GET /sessions` | Só sessões do histórico (subset do context) |
 | `docs/PROJETO.md` / `AGENTS.md` | Narrativa longa e instruções operacionais |
 
-Agentes devem preferir `/project/context` para estado atual; markdown para detalhe profundo.
+Agentes devem preferir `/project/context` para estado atual; **feature card** (`docs/features/<id>.md`) para o “para quê”; markdown de domínio para detalhe profundo.
 
 ---
 
 ## Roadmap
 
-Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: `roadmap.json`). A UI do app lê via `GET /roadmap`.
+Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: `roadmap.json`). A UI do app lê via `GET /roadmap`. **Tracking:** [`DOCUMENTATION_SYSTEM.md`](./DOCUMENTATION_SYSTEM.md).
 
 ---
 

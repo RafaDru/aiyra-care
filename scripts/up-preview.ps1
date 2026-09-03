@@ -10,6 +10,15 @@ Write-Host 'Integração (Ambiente 1) pode rodar em paralelo nas portas 3010/517
 
 & (Join-Path $PSScriptRoot 'create-preview-db.ps1')
 
+Write-Host 'Applying migrations on aiyracare_preview...' -ForegroundColor Cyan
+$env:DATABASE_URL = 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare_preview'
+Push-Location (Join-Path $root 'packages\api')
+node scripts/apply-all-migrations.mjs --continue-on-error
+if ($LASTEXITCODE -ne 0) {
+  Write-Warning 'Some migrations failed — check output above'
+}
+Pop-Location
+
 if (-not $SkipSeed) {
   Write-Host 'Seeding preview PG (staging-refresh)...' -ForegroundColor Cyan
   $env:DATABASE_URL = 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare_preview'

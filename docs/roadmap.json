@@ -1326,6 +1326,61 @@
       ]
     },
     {
+      "id": "documentation-knowledge-base",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Base de conhecimento — tracking negócio + agentes",
+      "summary": "Sistema em camadas: roadmap.json (entrega) + feature cards + help/FAQ + project/context; GitHub Projects como espelho operacional.",
+      "status": "in_progress",
+      "statusLabel": "Em andamento",
+      "items": [
+        {
+          "id": "documentation-system-spec",
+          "title": "Especificação DOCUMENTATION_SYSTEM.md",
+          "status": "done",
+          "detail": "Tiers 0–3; GitHub Projects complementar; fluxo ao entregar; ordem de leitura Ava/LLM."
+        },
+        {
+          "id": "documentation-features-index",
+          "title": "Feature cards + index.json",
+          "status": "done",
+          "detail": "docs/features/* + index.json; GET /project/context inclui features; template _TEMPLATE.md."
+        },
+        {
+          "id": "documentation-help-topics",
+          "title": "Tópicos de ajuda (FAQ)",
+          "status": "done",
+          "detail": "docs/help/* — Amil, duplicatas, múltiplos cuidadores, acesso LGPD."
+        },
+        {
+          "id": "documentation-hub-readme",
+          "title": "Hub docs/README.md",
+          "status": "done",
+          "detail": "Índice navegável por área; link em PROJETO.md e AGENTS.md."
+        },
+        {
+          "id": "documentation-github-labels",
+          "title": "Labels roadmap:* em issues/PRs",
+          "status": "planned",
+          "detail": "Convenção label roadmap:<item-id>; opcional sync GitHub Project ↔ roadmap.json."
+        },
+        {
+          "id": "ava-help-knowledge-base",
+          "title": "API ajuda para Ava (RAG leve)",
+          "status": "planned",
+          "detail": "GET /help/topics + citação docs/help; aceleradores com helpTopic id.",
+          "reviewBadge": ["medical"]
+        },
+        {
+          "id": "documentation-in-app-help",
+          "title": "UI Ajuda / Dúvidas no app",
+          "status": "planned",
+          "detail": "Drawer ou /help consumindo API; busca por tópico; i18n en.",
+          "reviewBadge": ["content"]
+        }
+      ]
+    },
+    {
       "id": "settings-area-structure",
       "category": "negocio",
       "priority": "P2",

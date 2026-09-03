@@ -172,6 +172,11 @@ Por enquanto **não** é obrigatório um agente novo. Usar:
 
 Se o épico crescer (migração + UI + billing), considerar skill `aiyracare-family-access` com checklist de casos (self, guardian, blended, revoke, invite).
 
+## Feature card
+
+- [`docs/features/family-access-model.md`](./features/family-access-model.md)
+- Índice: [`docs/features/index.json`](./features/index.json)
+
 ---
 
 ## Referências

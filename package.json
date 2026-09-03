@@ -46,6 +46,7 @@
     "migrate:cursor": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/migrate-cursor-workspace.ps1",
     "finalize:consolidation": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/finalize-consolidation.ps1",
     "preview:post-deploy": "node scripts/preview-post-deploy.mjs",
+    "preview:validate": "node scripts/preview-validate-local.mjs",
     "validate:env-tier": "node scripts/validate-env-tier.mjs",
     "validate:ops-dual-keys": "node scripts/validate-ops-dual-keys.mjs",
     "dev-audit:bridge": "cd packages/api && npm run dev-audit:bridge",

@@ -1,5 +1,29 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-03] - Base de conhecimento e entregas roadmap (família, Amil, B2B, docs)
+
+### Contexto
+Consolidar tracking de negócio/funcionalidade para humanos e LLMs; fechar itens alinhados do roadmap (higienização Neo4j, Amil filtro, orgs B2B, screenshots landing, preview).
+
+### Realizado
+- **Documentação:** `docs/DOCUMENTATION_SYSTEM.md`, `docs/README.md`, `docs/features/` + `index.json`, `docs/help/*`.
+- **API:** `GET /project/context` passa a incluir catálogo `features` do index.
+- **Família (design):** `docs/FAMILY_ACCESS_MODEL.md` + épico `family-access-model` + feature card.
+- **Amil:** modal período/beneficiário; query params sync; sub-etapa `fetch-utilizacao`.
+- **B2B:** API `/organizations` + members (migration 055).
+- **Higienização:** `HygieneGraphProjector` DUPLICATE_CANDIDATE + testes.
+- **Preview:** `up-preview.ps1` aplica migrations antes do seed.
+- **Landing:** screenshots reais em `packages/web/public/landing/`.
+
+### Decisão
+- **Fonte de verdade semântica** permanece no repo (`roadmap.json` + feature cards + domain docs).
+- **GitHub Projects** = kanban operacional com labels `roadmap:<id>`, não substitui `.md`.
+
+### Próximo
+- [ ] Fase 1 `family-access-grants-schema` + convites
+- [ ] `ava-help-knowledge-base` — expor help para Ava
+- [ ] Labels `roadmap:*` no GitHub
+
 ## [2026-09-03] - Ops Run: console visual, gráficos e checklist preparação
 
 ### Contexto
@@ -15,6 +39,18 @@ Fechar itens `run-ops-console-visual-design` e `run-ops-console-charts-scales` d
 ### Próximo
 - [ ] `run-dev-audit-bridge` — correlacionar dev-audit com product_events
 - [ ] Validar `promotion:gates` no Preview local
+
+### Próximo
+- [ ] `env-preview-host` — Preview no GCP
+
+## [2026-09-03] - Validação local preview + ritual `preview:validate`
+
+### Realizado
+- **`npm run preview:validate`** — ritual único (dual-keys, health, post-deploy, smoke preview, dev-audit bridge).
+- **Fix `.env.preview`** — API/console carregam override quando `PORT=3020` / `DEPLOYMENT_TIER=preview`.
+- **PG preview** — `seed:staging-refresh` em `aiyracare_preview` (Lucas/Ana demo + volume sintético).
+- **Guia manual:** `docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md` (~45 min de roteiro).
+- **Validado:** `preview:validate` OK · integração `ops:smoke` FULL OK · notificadores `:3012` + `:3022`.
 
 ## [2026-09-03] - run-dev-audit-bridge: hooks Cursor × product_events
 

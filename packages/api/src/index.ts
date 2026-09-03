@@ -4,9 +4,11 @@ import { config } from 'dotenv'
 import { resolve, dirname, isAbsolute } from 'path'
 import { existsSync } from 'fs'
 import { fileURLToPath } from 'url'
+import { loadMonorepoEnv } from './infrastructure/load-monorepo-env.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-config({ path: resolve(__dirname, '../../../.env') })
+const monorepoRoot = resolve(__dirname, '../../..')
+loadMonorepoEnv(monorepoRoot)
 
 if (process.env.LLM_QUOTA_UNLIMITED?.trim() === '1') {
   console.info('[llm] LLM_QUOTA_UNLIMITED=1 — franquia de IA desativada para todas as contas')

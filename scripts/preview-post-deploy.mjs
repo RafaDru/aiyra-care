@@ -11,7 +11,17 @@ import { fileURLToPath } from 'url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const apiDir = resolve(root, 'packages/api')
 config({ path: resolve(root, '.env') })
-config({ path: resolve(root, '.env.preview') })
+config({ path: resolve(root, '.env.preview'), override: true })
+
+const previewEnv = {
+  DATABASE_URL: process.env.DATABASE_URL,
+  API_PUBLIC_URL: process.env.API_PUBLIC_URL,
+  OPS_METRICS_KEY: process.env.OPS_METRICS_KEY,
+  OPS_CONSOLE_PORT: process.env.OPS_CONSOLE_PORT,
+  OPS_LOCAL_NOTIFIER_PORT: process.env.OPS_LOCAL_NOTIFIER_PORT,
+  OPS_ALERT_DASHBOARD_URL: process.env.OPS_ALERT_DASHBOARD_URL,
+  DEPLOYMENT_TIER: process.env.DEPLOYMENT_TIER,
+}
 
 const skipSeed = process.env.SKIP_SEED === '1' || process.env.SKIP_SEED === 'true'
 const apiBase = (process.env.API_PUBLIC_URL ?? 'http://127.0.0.1:3020').replace(/\/$/, '')
@@ -22,7 +32,7 @@ function run(label, command, args, extraEnv = {}) {
     cwd: apiDir,
     shell: true,
     encoding: 'utf8',
-    env: { ...process.env, API_PUBLIC_URL: apiBase, ...extraEnv },
+    env: { ...process.env, ...previewEnv, API_PUBLIC_URL: apiBase, ...extraEnv },
   })
   if (r.status !== 0) {
     console.error(r.stderr || r.stdout || `${label} failed`)

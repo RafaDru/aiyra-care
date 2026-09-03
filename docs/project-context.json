@@ -59,7 +59,8 @@
     { "name": "LlmInternalBudget", "table": "llm_internal_budget", "description": "Orçamento mensal interno em centavos de R$ (043), teto default R$100" },
     { "name": "Medication", "table": "medications", "description": "Medicamentos; genericName + brandName; roadmap: catálogo dinâmico (épico medication-catalog)" },
     { "name": "SemanticCatalogCache", "table": "semantic_catalog_cache", "description": "Catálogo dinâmico aprendido por vetor/LLM (044)" },
-    { "name": "ExamResultItem", "table": "exam_result_items", "description": "Marcadores laboratoriais estruturados (045); idempotência + source_document_id (046)" }
+    { "name": "ExamResultItem", "table": "exam_result_items", "description": "Marcadores laboratoriais estruturados (045); idempotência + source_document_id (046)" },
+    { "name": "Organization", "tables": ["organizations", "organization_members"], "description": "B2B primitives — clínica/lab; API /organizations" }
   ],
   "apiRoutes": [
     { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },
@@ -91,7 +92,9 @@
     { "method": "GET", "path": "/exam-result-items", "description": "Marcadores estruturados CRUD/list" },
     { "method": "POST", "path": "/patients/:id/ava/chat", "description": "Chat Ava (entityPin, streamActivity SSE, activityTrace, reflexão)" },
     { "method": "GET", "path": "/llm/usage/internal", "description": "Indicadores do LLM interno (cost_bucket=internal) — ops key" },
-    { "method": "GET", "path": "/emergency/directory", "description": "Guia de emergência por paciente" }
+    { "method": "GET", "path": "/emergency/directory", "description": "Guia de emergência por paciente" },
+    { "method": "GET", "path": "/organizations", "description": "Listar/criar organizações B2B (auth)" },
+    { "method": "POST", "path": "/organizations", "description": "Criar organização B2B" }
   ],
   "integrations": [
     { "portal": "unimed", "syncAutomatic": true, "imports": ["extrato", "autorizações", "cartão virtual", "carências PDF", "guia PDF"] },
@@ -133,6 +136,8 @@
     { "id": "pre-cnpj-platform", "date": "2026-09-02", "title": "Estruturação pré-CNPJ", "decision": "Ambiente 1 local; Ambiente 2 local até ritmo funcional, depois Preview GCP (openhealth-503119); Cursor Cloud fora de escopo", "status": "active" }
   ],
   "plannedWork": [
+    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "in_progress", "priority": "P1" },
+    { "id": "documentation-knowledge-base", "title": "Base de conhecimento features + help", "status": "in_progress", "priority": "P2" },
     { "id": "platform-environments", "title": "Ambientes dev/staging/prod + massas + esteiras", "status": "done", "priority": "P2" },
     { "id": "b2b-partner-platform", "title": "Discovery e primitives B2B", "status": "planned", "priority": "P3" },
     { "id": "agent-rag", "title": "packages/agents + runtime citações", "status": "planned", "priority": "P3" },
@@ -165,6 +170,10 @@
     { "path": "docs/EXAM_ARTIFACT_PIPELINE.md", "role": "Artefatos de exame → modelo canônico" },
     { "path": "docs/SUS_CONECTESUS.md", "role": "SUS gov.br, govbr_sessions, fluxo guiado" },
     { "path": "docs/CONNECT.md", "role": "Boundary Connect vs Core; vault e sessões" },
+    { "path": "docs/features/index.json", "role": "Catálogo de capacidades (features)" },
+    { "path": "docs/DOCUMENTATION_SYSTEM.md", "role": "Modelo de documentação e tracking" },
+    { "path": "docs/help/", "role": "FAQ usuário + base Ava" },
+    { "path": "docs/FAMILY_ACCESS_MODEL.md", "role": "Discovery conta × família × perfil" },
     { "path": "AGENTS.md", "role": "Instruções agentes Cursor" }
   ]
 }

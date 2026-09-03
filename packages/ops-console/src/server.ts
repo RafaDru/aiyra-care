@@ -2,7 +2,7 @@
  * Console de observabilidade independente do app Aiyra (API :3010 / web :5173).
  * Lê Postgres diretamente, sonda a API como target monitorado, serve UI em :3013.
  */
-import { config } from 'dotenv'
+import { loadMonorepoEnv } from '../../api/src/infrastructure/load-monorepo-env.js'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { existsSync, readFileSync } from 'fs'
@@ -32,7 +32,7 @@ const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
 const clientRoot = resolve(pkgRoot, 'src/client')
 const clientIndex = resolve(clientRoot, 'index.html')
-config({ path: resolve(monorepoRoot, '.env') })
+loadMonorepoEnv(monorepoRoot)
 
 const port = Number(process.env.OPS_CONSOLE_PORT ?? '3013')
 const host = process.env.OPS_CONSOLE_HOST?.trim() || '127.0.0.1'

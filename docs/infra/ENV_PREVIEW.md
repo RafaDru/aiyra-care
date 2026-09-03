@@ -17,6 +17,14 @@
 
 Integração (Ambiente 1) segue em 3010/5173 + `aiyracare` — **podem rodar ao mesmo tempo**.
 
+## Ritual automatizado
+
+```powershell
+npm run preview:validate
+```
+
+Roda dual-keys, health checks, post-deploy no PG preview, smoke ops e dev-audit bridge.
+
 ## Subir Preview local
 
 Após **aprovação** do relatório do Ambiente 1:

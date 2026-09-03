@@ -11,6 +11,14 @@ Documento vivo para acompanhar épicos, pendências e debates. A página **Roadm
 
 Categorias no JSON: **Experiência da família** (`negocio`) vs **Por dentro do sistema** (`tecnico`) vs **Regulatório** (`regulacao`).
 
+## Documentação e tracking
+
+- **Modelo completo:** [`DOCUMENTATION_SYSTEM.md`](./DOCUMENTATION_SYSTEM.md)
+- **Hub:** [`README.md`](./README.md)
+- **Feature cards:** [`features/`](./features/) — uma ficha por capacidade (não por componente)
+- **Ajuda / FAQ:** [`help/`](./help/) — base para UI e Ava
+- **GitHub Projects:** kanban complementar; issues com label `roadmap:<item-id>`
+
 ## Revisão humana / profissional (paralela)
 
 Itens com `reviewBadge` no JSON aparecem com **tags coloridas** no Roadmap e na seção **Revisão humana pendente** (tecnologia pronta; falta parecer externo).

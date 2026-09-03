@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-03",
+  "description": "Índice de capacidades de produto — ver docs/DOCUMENTATION_SYSTEM.md",
+  "features": [
+    {
+      "id": "family-access-model",
+      "epicId": "family-access-model",
+      "title": "Família — múltiplos cuidadores e acesso por perfil",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/family-access-model.md",
+      "domainDoc": "docs/FAMILY_ACCESS_MODEL.md",
+      "routes": ["/", "/patients/:id", "/settings/account"],
+      "api": [],
+      "helpTopics": ["familia-multiplos-cuidadores", "quem-pode-ver-perfil-saude"],
+      "tags": ["conta", "lgpd", "família", "acl"]
+    },
+    {
+      "id": "beneficiary-view-filter",
+      "epicId": "amil-routing-classifier",
+      "title": "Sincronizar Amil — filtro período e beneficiário",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/amil-sync-options.md",
+      "domainDoc": "docs/SYNC_DELTA.md",
+      "routes": ["/patients/:id"],
+      "api": ["POST /integration-links/:id/sync?amilMarcaOtica&amilUtilizationStart&amilUtilizationEnd"],
+      "helpTopics": ["sincronizar-amil", "atendimentos-amil-periodo"],
+      "tags": ["amil", "integrações", "sync"]
+    },
+    {
+      "id": "hygiene-neo4j-candidate",
+      "epicId": "data-hygiene-dedup",
+      "title": "Higienização — arestas DUPLICATE_CANDIDATE no Neo4j",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P2",
+      "doc": "docs/features/hygiene-neo4j-candidates.md",
+      "domainDoc": "docs/DATA_HYGIENE.md",
+      "routes": ["/patients/:id"],
+      "api": ["GET /hygiene/candidates", "POST /hygiene/candidates/:id/resolve"],
+      "helpTopics": ["duplicatas-exames-vacinas"],
+      "tags": ["higienização", "neo4j", "dedup"]
+    },
+    {
+      "id": "b2b-platform-orgs",
+      "epicId": "b2b-partner-platform",
+      "title": "Organizações B2B — API primitives",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P3",
+      "doc": "docs/features/b2b-organizations-api.md",
+      "domainDoc": "docs/B2B_PARTNERS.md",
+      "routes": [],
+      "api": ["GET/POST/PATCH/DELETE /organizations", "GET/POST/PATCH/DELETE /organizations/:id/members"],
+      "helpTopics": [],
+      "tags": ["b2b", "organizations", "api"]
+    },
+    {
+      "id": "documentation-knowledge-base",
+      "epicId": "documentation-knowledge-base",
+      "title": "Base de conhecimento — features, ajuda e tracking",
+      "status": "in_progress",
+      "category": "tecnico",
+      "priority": "P2",
+      "doc": "docs/DOCUMENTATION_SYSTEM.md",
+      "domainDoc": "docs/DOCUMENTATION_SYSTEM.md",
+      "routes": ["/roadmap"],
+      "api": ["GET /project/context", "GET /roadmap"],
+      "helpTopics": [],
+      "tags": ["documentação", "agentes", "ava"]
+    }
+  ]
+}

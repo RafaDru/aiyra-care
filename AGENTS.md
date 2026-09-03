@@ -4,7 +4,7 @@
 
 **AiyraCare** — monorepo `aiyra-care` (`@aiyra-care/*`). Workspace: `%USERPROFILE%\workspace\aiyra-care` — ver `docs/CURSOR_WORKSPACE.md`. Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: `docs/PROJETO.md`; decision log: `docs/HISTORICO.md`.
 
-**Context for LLMs/agents:** `GET http://127.0.0.1:3010/project/context` — structured app snapshot + decisions + parsed `HISTORICO.md` + migrations list. Curated source: `docs/project-context.json` (update on architecture/roadmap changes). **Prioritized roadmap:** `docs/roadmap.json` + UI menu (`GET /roadmap`).
+**Context for LLMs/agents:** `GET http://127.0.0.1:3010/project/context` — structured app snapshot + decisions + parsed `HISTORICO.md` + migrations list + **features catalog** (`docs/features/index.json`). Curated source: `docs/project-context.json` (update on architecture/roadmap changes). **Documentation model:** `docs/DOCUMENTATION_SYSTEM.md`. **Prioritized roadmap:** `docs/roadmap.json` + UI menu (`GET /roadmap`).
 
 ## Monorepo structure
 
@@ -174,6 +174,11 @@ Only commit or open a PR when the user explicitly asks. Follow PR template in `.
 
 | Doc | Content |
 |-----|---------|
+| `docs/DOCUMENTATION_SYSTEM.md` | Tiers de docs, feature cards, help, GitHub Projects |
+| `docs/README.md` | Hub de navegação da documentação |
+| `docs/features/` | Ficha por capacidade + `index.json` |
+| `docs/help/` | FAQ para usuário e base Ava |
+| `docs/FAMILY_ACCESS_MODEL.md` | Conta × família × perfil de saúde (discovery) |
 | `docs/AVA_VISION.md` | Global companion, sessions, pins, moonshot |
 | `docs/AVA_OPERATIONAL.md` | Fases G1–G4 Ava operacional (aceleradores, ações) |
 | `docs/AVA_EXPRESSIONS.md` | Expressões visuais + linha narrativa (nome do cuidador) |

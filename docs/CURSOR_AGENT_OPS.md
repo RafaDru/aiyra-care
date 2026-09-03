@@ -8,6 +8,7 @@
 | Camada | Artefato | Função |
 |--------|----------|--------|
 | Contexto fixo | `AGENTS.md`, `docs/PROJETO.md`, `docs/project-context.json` | Stack, comandos, arquitetura |
+| Documentação | `docs/DOCUMENTATION_SYSTEM.md`, `docs/features/` | Tracking negócio + feature cards |
 | Skills | `.cursor/skills/aiyracare-*` | Procedimentos de revisão tiered |
 | Hooks | `.cursor/hooks.json` + scripts Node | Auditoria + bloqueio determinístico |
 | Rules | `AGENTS.md` (workspace rules) | Políticas de commit, PR, serviços |
