@@ -14,8 +14,19 @@ Fechar itens `run-ops-console-visual-design` e `run-ops-console-charts-scales` d
 
 ### Próximo
 - [ ] `run-user-escalation` — acionamento família em sync crítico
-- [ ] `env-ops-dual-keys` — chaves distintas Integração vs Preview
+- [ ] `run-dev-audit-bridge` — correlacionar dev-audit com product_events
 - [ ] Validar `promotion:gates` no Preview local
+
+## [2026-09-03] - Ops dual keys: `.env.preview` isolado
+
+### Realizado
+- **Arquivo `.env.preview`** — chaves ops e PG preview separados de `.env` (integração).
+- **Scripts:** `setup:ops-preview` escreve em `.env.preview`; `validate:ops-dual-keys` bloqueia chaves iguais.
+- **`up.ps1 -Preview`** — carrega `.env` + override `.env.preview`.
+- **Gates:** `promotion:gates` inclui validação opcional de dual keys.
+
+### Próximo
+- [ ] `env-preview-host` — Preview no GCP
 
 ## [2026-09-03] - Workspace canônico `aiyra-care`
 

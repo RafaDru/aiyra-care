@@ -1,7 +1,7 @@
 /**
  * Post-deploy Preview (Ambiente 2) — local ou host cloud.
  * Uso: npm run preview:post-deploy
- * Env: API_PUBLIC_URL, DATABASE_URL (dotenv .env); SKIP_SEED=1 pula refresh.
+ * Env: API_PUBLIC_URL, DATABASE_URL (.env + .env.preview); SKIP_SEED=1 pula refresh.
  */
 import { spawnSync } from 'child_process'
 import { config } from 'dotenv'
@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const apiDir = resolve(root, 'packages/api')
 config({ path: resolve(root, '.env') })
+config({ path: resolve(root, '.env.preview') })
 
 const skipSeed = process.env.SKIP_SEED === '1' || process.env.SKIP_SEED === 'true'
 const apiBase = (process.env.API_PUBLIC_URL ?? 'http://127.0.0.1:3020').replace(/\/$/, '')

@@ -69,6 +69,7 @@ runGate('test:ops', 'performance', 'npm', ['run', 'test:ops'], apiDir)
 runGate('ops smoke (no HTTP)', 'performance', 'npm', ['run', 'ops:smoke'], apiDir, true, {
   OPS_SMOKE_SKIP_HTTP: '1',
 })
+runGate('validate ops dual keys', 'segurança', 'npm', ['run', 'validate:ops-dual-keys'], root, true)
 
 const failed = results.filter((r) => r.status === 'fail')
 const passed = results.filter((r) => r.status === 'pass')

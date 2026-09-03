@@ -1,13 +1,15 @@
 /**
  * Valida alinhamento DEPLOYMENT_TIER ↔ flags ops/worker no .env.
- * Uso: npm run validate:env-tier
+ * Uso: npm run validate:env-tier [-- --preview]
  */
 import { readFileSync, existsSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
+const args = process.argv.slice(2)
+const previewMode = args.includes('--preview')
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const envPath = resolve(root, '.env')
+const envPath = previewMode ? resolve(root, '.env.preview') : resolve(root, '.env')
 
 function parseEnvFile(path) {
   const out = {}
@@ -17,6 +19,11 @@ function parseEnvFile(path) {
     if (m) out[m[1]] = m[2].trim()
   }
   return out
+}
+
+if (!existsSync(envPath) && previewMode) {
+  console.error('❌ .env.preview não encontrado — npm run setup:ops-preview')
+  process.exit(1)
 }
 
 const fileEnv = parseEnvFile(envPath)
@@ -80,4 +87,4 @@ if (errors.length) {
   process.exit(1)
 }
 
-console.log(`validate-env-tier OK (tier=${tier || 'unset'})`)
+console.log(`validate-env-tier OK (tier=${tier || 'unset'}${previewMode ? ', .env.preview' : ''})`)

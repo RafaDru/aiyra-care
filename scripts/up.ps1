@@ -3,17 +3,12 @@ param([switch]$Cloud, [switch]$Preview)
 $root = Split-Path $PSScriptRoot -Parent
 $apiDir = Join-Path $root "packages\api"
 $webDir = Join-Path $root "packages\web"
-$envFile = Join-Path $root ".env"
-if (Test-Path $envFile) {
-  Get-Content $envFile | ForEach-Object {
-    if ($_ -match '^([^#=]+)=(.*)$') {
-      $k = $matches[1].Trim()
-      $v = $matches[2].Trim()
-      if ($k -and $v -and -not [Environment]::GetEnvironmentVariable($k, 'Process')) {
-        Set-Item -Path "env:$k" -Value $v -ErrorAction SilentlyContinue
-      }
-    }
-  }
+$importDotenv = Join-Path $PSScriptRoot 'import-dotenv.ps1'
+$envFile = Join-Path $root '.env'
+$envPreviewFile = Join-Path $root '.env.preview'
+& $importDotenv -Path $envFile
+if ($Preview -and (Test-Path $envPreviewFile)) {
+  & $importDotenv -Path $envPreviewFile -Override
 }
 
 function Import-MachineEnvIfMissing {

@@ -2187,8 +2187,8 @@
         {
           "id": "env-ops-dual-keys",
           "title": "OPS keys + webhooks distintos Integração vs Preview",
-          "status": "planned",
-          "detail": "GitHub Environments integration/preview; OPS_METRICS_KEY e OPS_ALERT_WEBHOOK_URL por ambiente."
+          "status": "done",
+          "detail": ".env.preview local + validate:ops-dual-keys; setup:ops-preview; up.ps1 -Preview override; GitHub Environments integration/preview."
         }
       ]
     },

@@ -1,8 +1,8 @@
 # GitHub Environments — secrets e variáveis
 
-> **Última atualização:** 2026-09-02  
+> **Última atualização:** 2026-09-03  
 > Matriz para configurar **Settings → Environments** quando houver hosts cloud.  
-> Local hoje: copiar blocos de `.env.integration.example` / `.env.preview.example`.
+> Local hoje: `.env` (integração) + `.env.preview` (preview paralelo) — ver `npm run setup:ops-preview`.
 
 ## Environments
 
@@ -60,7 +60,7 @@ npm run setup:ops-prod
 # DEPLOYMENT_TIER=production
 ```
 
-Validar alinhamento: `npm run validate:env-tier`
+Validar alinhamento: `npm run validate:env-tier` (integração) · `npm run validate:env-tier -- --preview` · `npm run validate:ops-dual-keys`
 
 ## Post-deploy preview
 

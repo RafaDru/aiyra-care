@@ -3,6 +3,7 @@ dist/
 build/
 .env
 .env.local
+.env.preview
 gcp-key.json
 openhealth-*.json
 aiyracare-*.json

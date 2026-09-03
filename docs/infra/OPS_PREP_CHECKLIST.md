@@ -57,6 +57,9 @@ Setup rápido: `npm run setup:ops-prod`
 ## 5. Preview (Ambiente 2)
 
 ```powershell
+npm run setup:ops-preview          # gera .env.preview com OPS_METRICS_KEY distinto
+npm run validate:ops-dual-keys       # confirma isolamento vs .env
+npm run validate:env-tier -- --preview
 npm run up:preview
 $env:API_PUBLIC_URL = "http://127.0.0.1:3020"
 npm run staging:probe-gate
@@ -64,14 +67,14 @@ npm run ops:alerts-check
 npm run promotion:gates
 ```
 
-Chaves **distintas** de integração: `env-ops-dual-keys` no roadmap.
+**Isolamento:** integração usa `.env`; preview usa `.env` + `.env.preview` (override). Chaves ops **nunca** compartilhadas — ver `env-ops-dual-keys`.
 
 ## 6. Critérios de saída
 
 - [ ] `test:ops` verde (56+ testes)
 - [ ] `ops:smoke` verde (HTTP se API up)
 - [ ] Console `:3013` com séries 24h e percentis 7d
-- [ ] Runbook revisado para famílias de alerta ativas
+- [ ] `validate:ops-dual-keys` verde (após `setup:ops-preview`)
 - [ ] `promotion:gates` verde antes de merge/promote
 
 ## Próximos itens roadmap (`planned`)
@@ -81,4 +84,3 @@ Chaves **distintas** de integração: `env-ops-dual-keys` no roadmap.
 | `run-user-escalation` | Notificar família em sync crítico (opt-in, sem PHI) |
 | `run-dev-audit-bridge` | Correlacionar `docs/dev-audit/` com `product_events` em staging |
 | `env-preview-host` | Preview no GCP |
-| `env-ops-dual-keys` | Webhooks/keys por ambiente GitHub |
