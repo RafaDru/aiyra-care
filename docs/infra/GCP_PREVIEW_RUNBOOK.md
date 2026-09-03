@@ -36,6 +36,15 @@ flowchart LR
 
 ## Checklist — provisionar (uma vez)
 
+### 0. Imagens Docker
+
+```powershell
+npm run build:preview-images -- --check-only   # CI / sem Docker
+npm run build:preview-images                   # build local (API, web, ops-console)
+```
+
+Arquivos: `infra/docker/Dockerfile.api`, `Dockerfile.web`, `Dockerfile.ops-console`.
+
 ### 1. Cloud SQL
 
 - [ ] Criar instância PostgreSQL 15+ (tier dev: `db-f1-micro` ou `db-g1-small`)

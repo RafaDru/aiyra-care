@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-03] - Delivery + GCP Preview: dry-run, Dockerfiles, runbook beta
+
+### Realizado
+- **`del-migration-dry-run`** — `npm run migrate:dry-run`; job `migrations` no CI (Postgres efêmero).
+- **`del-deploy-runbook`** — `docs/infra/DEPLOY_BETA_RUNBOOK.md`.
+- **`env-preview-gcp-deploy`** in_progress — Dockerfiles em `infra/docker/`; `npm run build:preview-images`.
+- **Ops console** — tag grande de ambiente (Desenvolvimento / Staging / Produtivo) no header.
+
+### Próximo
+- [ ] Wire `gcloud run deploy` em `promote-preview.yml`
+- [ ] Aprovação Rafael staging → promote GCP
+
 ## [2026-09-03] - Ops: épico Run fechado + runbook GCP Preview
 
 ### Realizado

@@ -1,0 +1,20 @@
+# Build artifacts
+node_modules
+**/node_modules
+**/dist
+**/.vite
+packages/web/test-results
+packages/api/scripts/output
+docs/dev-audit
+.git
+.cursor
+*.log
+.env
+.env.*
+!.env.example
+!.env.preview.example
+promotion-report-last.md
+api-preview.log
+api.log
+web.log
+web-preview.log

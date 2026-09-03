@@ -1861,8 +1861,8 @@
       "priority": "P2",
       "title": "Pipeline de entrega dev → beta",
       "summary": "Ciclo mínimo para merges seguros: contexto, hooks, tier review, CI. docs/DELIVERY_PIPELINE.md.",
-      "status": "in_progress",
-      "statusLabel": "Hooks + CI endurecido",
+      "status": "done",
+      "statusLabel": "Gates + dry-run + runbook beta",
       "items": [
         {
           "id": "del-hooks-audit",
@@ -1903,14 +1903,14 @@
         {
           "id": "del-migration-dry-run",
           "title": "Migration dry-run em PR",
-          "status": "planned",
-          "detail": "Script apply-migration contra PG ephemeral ou validação SQL."
+          "status": "done",
+          "detail": "npm run migrate:dry-run; job migrations em ci.yml (Postgres 16 efêmero + apply-all-migrations)."
         },
         {
           "id": "del-deploy-runbook",
           "title": "Deploy beta + runbook",
-          "status": "planned",
-          "detail": "API+web+worker+PG; rollback; secrets; checklist MVP beta."
+          "status": "done",
+          "detail": "docs/infra/DEPLOY_BETA_RUNBOOK.md — API+web+ops+worker+PG; rollback; secrets; checklist MVP beta."
         }
       ]
     },
@@ -2321,8 +2321,9 @@
         {
           "id": "env-preview-gcp-deploy",
           "title": "Deploy real promote-preview.yml (GCP)",
-          "status": "planned",
-          "detail": "Substituir placeholder; gcloud run deploy ou SSH; secrets Environment preview."
+          "status": "in_progress",
+          "statusLabel": "Dockerfiles prontos — wire gcloud pendente",
+          "detail": "infra/docker/Dockerfile.{api,web,ops-console}; npm run build:preview-images; substituir placeholder promote-preview.yml com gcloud run deploy."
         },
         {
           "id": "env-ops-dual-keys",

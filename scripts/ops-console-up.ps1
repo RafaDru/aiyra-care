@@ -8,7 +8,14 @@ $opsConsoleDir = Join-Path $root "packages\ops-console"
 $opsConsolePort = if ($env:OPS_CONSOLE_PORT) { [int]$env:OPS_CONSOLE_PORT } else { 3013 }
 
 $envFile = Join-Path $root ".env"
-if (Test-Path $envFile) {
+$envPreviewFile = Join-Path $root ".env.preview"
+$importDotenv = Join-Path $PSScriptRoot 'import-dotenv.ps1'
+if (Test-Path $importDotenv) {
+  & $importDotenv -Path $envFile
+  if ($opsConsolePort -eq 3023 -and (Test-Path $envPreviewFile)) {
+    & $importDotenv -Path $envPreviewFile -Override
+  }
+} elseif (Test-Path $envFile) {
   Get-Content $envFile | ForEach-Object {
     if ($_ -match '^([^#=]+)=(.*)$') {
       $k = $matches[1].Trim()

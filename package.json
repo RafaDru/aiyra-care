@@ -48,6 +48,8 @@
     "finalize:consolidation": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/finalize-consolidation.ps1",
     "preview:post-deploy": "node scripts/preview-post-deploy.mjs",
     "preview:validate": "node scripts/preview-validate-local.mjs",
+    "migrate:dry-run": "node scripts/migration-dry-run.mjs",
+    "build:preview-images": "node scripts/build-preview-images.mjs",
     "hosts:register": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-local-hosts.ps1",
     "caddy:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1",
     "caddy:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1 -Stop",

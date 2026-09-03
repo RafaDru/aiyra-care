@@ -1,4 +1,12 @@
 import type { OpsAlertsDispatchResult, OpsMetricsResponse, StackActionResult } from './ops.types.js'
+import type { OpsDeploymentTier } from './theme/ops-environment.js'
+
+export type OpsConsoleHealth = {
+  service: string
+  status: string
+  port: number
+  deploymentTier: OpsDeploymentTier
+}
 
 function stackHeaders(): Record<string, string> {
   const key =
@@ -28,6 +36,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const opsApi = {
+  health: () => request<OpsConsoleHealth>('/health'),
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
   dispatchCheck: () =>
     request<OpsAlertsDispatchResult>('/api/alerts/check', { method: 'POST' }),

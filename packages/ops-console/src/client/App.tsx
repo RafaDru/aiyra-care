@@ -8,19 +8,29 @@ import { OpsPanel } from './components/OpsPanel.js'
 import { StackControlCard } from './StackControlCard.js'
 import { opsApi } from './api.js'
 import { countInfraIssues } from './ops-panels.js'
+import type { OpsDeploymentTier } from './theme/ops-environment.js'
+import { normalizeOpsDeploymentTier } from './theme/ops-environment.js'
 
 const AUTO_REFRESH_MS = 60_000
+
+const OPS_SUBTITLES: Record<OpsDeploymentTier, string> = {
+  integration: 'Console AiyraCare · Postgres direto · dev :3010 / :5173',
+  preview: 'Console AiyraCare · Postgres direto · staging :3020 / :5174',
+  production: 'Console AiyraCare · Postgres direto · produção',
+}
 
 export function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<OpsMetricsResponse | null>(null)
   const [dispatching, setDispatching] = useState(false)
+  const [deploymentTier, setDeploymentTier] = useState<OpsDeploymentTier>('integration')
 
   const load = useCallback(async () => {
     setError(null)
     try {
-      const result = await opsApi.metrics()
+      const [health, result] = await Promise.all([opsApi.health(), opsApi.metrics()])
+      setDeploymentTier(normalizeOpsDeploymentTier(health.deploymentTier, health.port))
       setData(result)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Falha ao carregar métricas'
@@ -74,7 +84,8 @@ export function App() {
   return (
     <OpsShell
       title="Observabilidade"
-      subtitle="Console AiyraCare · Postgres direto · target API :3010"
+      subtitle={OPS_SUBTITLES[deploymentTier]}
+      deploymentTier={deploymentTier}
       actions={
         <>
           <Button icon={<ReloadOutlined />} onClick={refresh} loading={loading}>
