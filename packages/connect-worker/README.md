@@ -37,4 +37,13 @@ CONNECT_WORKER_EXTERNAL=1
 
 E rode `npm run start` neste pacote.
 
-Equivalente legado: `packages/api/scripts/run-scheduled-syncs.mjs`.
+## Cloud Run Job (GCP preview)
+
+Quando o host for GCP, o loop contínuo vira **jobs agendados**:
+
+```bash
+CONNECT_WORKER_JOB_MODE=sync|ops npm run job
+npm run deploy:preview:worker   # raiz do monorepo
+```
+
+Ver `docs/infra/GCP_PREVIEW_RUNBOOK.md` § connect-worker.

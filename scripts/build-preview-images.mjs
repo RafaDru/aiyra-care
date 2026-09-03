@@ -22,7 +22,16 @@ const images = [
       '--build-arg', 'VITE_OPS_CONSOLE_URL=http://127.0.0.1:3023',
     ],
   },
-  { name: 'aiyracare-ops-console', file: 'infra/docker/Dockerfile.ops-console', args: [] },
+  {
+    name: 'aiyracare-ops-console',
+    file: 'infra/docker/Dockerfile.ops-console',
+    args: [],
+  },
+  {
+    name: 'aiyracare-connect-worker',
+    file: 'infra/docker/Dockerfile.connect-worker',
+    args: [],
+  },
 ]
 
 for (const img of images) {

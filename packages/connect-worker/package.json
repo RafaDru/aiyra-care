@@ -7,6 +7,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "once": "tsx src/run-once.ts",
+    "job": "tsx src/job.ts",
     "ops-alerts:once": "tsx src/ops-alerts-once.ts"
   },
   "dependencies": {

@@ -40,7 +40,9 @@
 | `GCP_ARTIFACT_REGISTRY` | Variable — ex. `aiyracare-preview` |
 | `VITE_SUPABASE_ANON_KEY` | Build imagem web no deploy GCP |
 
-Workflow `promote-preview.yml` — input `deploy_gcp=true` após configurar secrets acima.
+| `GCP_SCHEDULER_SA_EMAIL` | Variable — SA para Cloud Scheduler invocar Run Jobs |
+
+Workflow `promote-preview.yml` — `deploy_gcp=true` (API/web/ops) · `deploy_worker=true` (jobs).
 
 ```powershell
 npm run provision:preview:gcp -- --dry-run

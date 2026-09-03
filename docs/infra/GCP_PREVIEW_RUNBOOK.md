@@ -87,10 +87,32 @@ Rodar local: `npm run setup:ops-preview` gera `.env.preview` — **não** copiar
 - [ ] `DATABASE_URL` mesmo PG preview
 - [ ] Não expor publicamente sem auth de rede ou IAP (fase 1: URL obscura + ops key)
 
-### 6. connect-worker
+### 6. connect-worker (Cloud Run Jobs)
 
-- [ ] Deploy `packages/connect-worker` com `DATABASE_URL`, `API_PUBLIC_URL`, ops keys
-- [ ] `OPS_ALERTS_INTERVAL_MS=900000`
+Dois jobs no GCP Preview (substituem o loop local):
+
+| Job | Modo | Schedule default |
+|-----|------|------------------|
+| `aiyracare-preview-worker-sync` | `CONNECT_WORKER_JOB_MODE=sync` | `*/30 * * * *` |
+| `aiyracare-preview-worker-ops` | probe + alerts | `*/15 * * * *` |
+
+```powershell
+npm run deploy:preview:worker -- --dry-run --tag=test
+npm run deploy:preview:worker -- --tag=main   # após API no ar
+```
+
+Workflow `promote-preview.yml` — input `deploy_worker=true` (use `--jobs-only` no CI até `GCP_SCHEDULER_SA_EMAIL` configurado).
+
+**Local staging (agora):** com preview no ar:
+
+```powershell
+$env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare_preview"
+$env:DEPLOYMENT_TIER = "preview"
+$env:OPS_ALERTS_INTERVAL_MS = "900000"
+npm run connect-worker
+```
+
+Na API preview: `CONNECT_WORKER_EXTERNAL=1` (sem loop embutido).
 
 ## Checklist — cada promote
 

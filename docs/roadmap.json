@@ -1305,8 +1305,8 @@
         {
           "id": "family-access-care-circles",
           "title": "Care circles — agrupamento Família A / B",
-          "status": "planned",
-          "detail": "care_circles + members + patient_circle_links; billing_owner no círculo; UI Gerenciar família.",
+          "status": "done",
+          "detail": "care_circles + members + patient_circle_links (059); API /care-circles; UI Configurações → Família e cuidadores; backfill «Minha família».",
           "reviewBadge": ["legal"]
         },
         {
@@ -2315,8 +2315,8 @@
           "id": "env-preview-host",
           "title": "Preview Ambiente 2 no GCP",
           "status": "in_progress",
-          "statusLabel": "Deploy automatizado — primeiro promote GCP pendente",
-          "detail": "Wire completo; falta provision AR + secrets GitHub + promote deploy_gcp + worker job."
+          "statusLabel": "Código pronto — primeiro promote GCP quando secrets/host",
+          "detail": "API/web/ops/worker automatizados; falta Cloud SQL + secrets GitHub + promote manual."
         },
         {
           "id": "env-preview-gcp-deploy",
@@ -2327,8 +2327,8 @@
         {
           "id": "env-preview-gcp-worker",
           "title": "connect-worker Cloud Run Job (preview GCP)",
-          "status": "planned",
-          "detail": "Job agendado OPS_ALERTS_INTERVAL_MS + scheduled sync; após primeiro deploy API estável."
+          "status": "done",
+          "detail": "Dockerfile.connect-worker; job.ts (sync|ops); gcp-preview-worker.mjs; promote deploy_worker; scheduler opcional."
         },
         {
           "id": "env-ops-dual-keys",

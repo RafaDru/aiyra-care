@@ -15,6 +15,10 @@ on:
         description: 'Build + deploy Cloud Run (requer GCP_SA_KEY no Environment preview)'
         type: boolean
         default: false
+      deploy_worker:
+        description: 'Deploy connect-worker Cloud Run Jobs (+ scheduler se GCP_SCHEDULER_SA_EMAIL)'
+        type: boolean
+        default: false
       skip_seed:
         description: 'Post-deploy sem seed:staging-refresh'
         type: boolean
@@ -108,6 +112,21 @@ jobs:
           OPS_ALERTS_DISPATCH_MODE: human_required
           OPS_ALERTS_MIN_SEVERITY: critical
           COMPLIANCE_GATE_ENABLED: '0'
+
+      - name: Deploy preview worker jobs
+        if: ${{ inputs.deploy_worker }}
+        run: node scripts/gcp-preview-worker.mjs --tag=${{ github.sha }} --jobs-only
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          GCP_ARTIFACT_REGISTRY: ${{ vars.GCP_ARTIFACT_REGISTRY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CRYPTO_KEY: ${{ secrets.CRYPTO_KEY }}
+          API_PUBLIC_URL: ${{ secrets.API_PUBLIC_URL }}
+          OPS_METRICS_KEY: ${{ secrets.OPS_METRICS_KEY }}
+          OPS_ALERT_WEBHOOK_URL: ${{ secrets.OPS_ALERT_WEBHOOK_URL }}
+          OPS_ALERT_DASHBOARD_URL: ${{ secrets.OPS_ALERT_DASHBOARD_URL }}
+          GCP_SCHEDULER_SA_EMAIL: ${{ vars.GCP_SCHEDULER_SA_EMAIL }}
 
   post-deploy:
     if: ${{ inputs.run_post_deploy }}

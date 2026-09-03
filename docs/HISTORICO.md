@@ -1,5 +1,29 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-03] - Família: Care Circles (059) + UI Configurações
+
+### Realizado
+- **Migration 059** — `care_circles`, `care_circle_members`, `patient_circle_links`; backfill «Minha família» por titular.
+- **API** — `GET/POST/PATCH /care-circles`, membros e vínculos de perfil; limite 2 admins por círculo.
+- **Web** — Configurações → **Família e cuidadores** (`/settings/family`): painel de círculos + convites (movidos da aba Conta).
+- **Testes** — `care-circle.service.test.ts` (criação + limite admin).
+
+### Próximo
+- [ ] Vincular convites (058) a `care_circle_id`
+- [ ] Dashboard agrupado por família
+- [ ] Audit log de concessões (`family-access-audit-log`)
+
+## [2026-09-03] - connect-worker Cloud Run Job (preview GCP)
+
+### Realizado
+- **`job.ts`** — modos `sync` e `ops` para Cloud Run Job.
+- **`Dockerfile.connect-worker`** + `gcp-preview-worker.mjs` (jobs + scheduler opcional).
+- **`promote-preview.yml`** — input `deploy_worker`.
+- Preview local: `connect-worker` carrega `.env.preview`.
+
+### Nota
+Promote GCP = **staging/preview (Ambiente 2)**, não produção. Primeiro deploy cloud aguarda Cloud SQL + secrets.
+
 ## [2026-09-03] - GCP Preview: deploy Cloud Run no promote-preview
 
 ### Realizado

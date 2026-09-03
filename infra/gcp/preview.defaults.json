@@ -6,5 +6,13 @@
     "api": "aiyracare-preview-api",
     "web": "aiyracare-preview-web",
     "ops": "aiyracare-preview-ops"
+  },
+  "jobs": {
+    "workerSync": "aiyracare-preview-worker-sync",
+    "workerOps": "aiyracare-preview-worker-ops"
+  },
+  "schedules": {
+    "workerSync": "*/30 * * * *",
+    "workerOps": "*/15 * * * *"
   }
 }

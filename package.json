@@ -52,6 +52,7 @@
     "build:preview-images": "node scripts/build-preview-images.mjs",
     "provision:preview:gcp": "node scripts/gcp-preview-provision.mjs",
     "deploy:preview:gcp": "node scripts/gcp-preview-deploy.mjs",
+    "deploy:preview:worker": "node scripts/gcp-preview-worker.mjs",
     "hosts:register": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-local-hosts.ps1",
     "caddy:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1",
     "caddy:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1 -Stop",
