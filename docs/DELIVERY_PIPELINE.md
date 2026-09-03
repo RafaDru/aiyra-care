@@ -1,11 +1,33 @@
 # Pipeline de entrega — dev → beta → run
 
-> **Última atualização:** 2026-08-24  
-> Roadmap: épicos `dev-delivery-pipeline`, `prod-run-intelligence` em `docs/roadmap.json`.
+> **Última atualização:** 2026-09-02  
+> Roadmap: épicos `dev-delivery-pipeline`, `prod-run-intelligence`, `platform-environments` em `docs/roadmap.json`.  
+> **Dois ambientes não prod:** [`infra/TWO_ENV_MODEL.md`](./infra/TWO_ENV_MODEL.md).
 
 ## Princípio
 
 Operar com o **mínimo necessário**: cada gate tem custo; só endurecer onde o risco justifica (saúde + LGPD + dados sensíveis).
+
+## Ciclo com Ambiente 1 → Preview
+
+```mermaid
+flowchart LR
+  A[Task / feature] --> B[Implementação Ambiente 1]
+  B --> C[npm run promotion:gates]
+  C --> D[Relatório + chat Rafael]
+  D -->|aprovação| E[Promote Preview workflow]
+  E --> F[Rafael testa Ambiente 2]
+  F -->|go-live gates| G[Produção]
+```
+
+| Etapa | Ferramenta | Obrigatório |
+|-------|------------|-------------|
+| Contexto | `AGENTS.md`, `docs/project-context.json` | Sim |
+| Verticais | [`TESTING_VERTICALS.md`](./TESTING_VERTICALS.md) | Antes de pedir aprovação Preview |
+| Gates agregados | `npm run promotion:gates` | Ambiente 1 → Preview |
+| Classificação | Skill `aiyracare-feature-release` (tier 0–3) | Tier ≥ 2 |
+| CI | `.github/workflows/ci.yml` | Automático em PR/main |
+| Promoção Preview | `.github/workflows/promote-preview.yml` | Manual, após aprovação Rafael |
 
 ## Ciclo mínimo (Build)
 

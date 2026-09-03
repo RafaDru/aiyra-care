@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-31",
+  "updatedAt": "2026-09-03",
   "title": "Roadmap AiyraCare",
-  "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
+  "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Fase atual (pré-CNPJ):** estruturar ambientes dev/staging/prod, massas e esteiras enquanto a regularização fiscal permite cobrança live; paralelo: discovery B2B (médicos, planos, labs, farmácias). **Go-live B2C:** código pronto no essencial; pendências com badge 🧑‍⚖️ dependem de revisão humana (advogado, contador, consultor, médico).",
   "reviewBadges": [
     {
       "id": "legal",
@@ -104,7 +104,8 @@
     "Entidades e atributos no PG; relações de negócio no PG; Neo4j para caminhos, pins de sessão Ava e candidatos de higienização.",
     "Os portais (Unimed, Amil, etc.) trazem pedaços soltos — o app organiza e liga o que importa para o cuidado.",
     "O resumo clínico é montado de forma determinística (sem “inventar” com IA) para você confiar no que leva ao pediatra.",
-    "Sync silencioso quando possível; browser ou login manual só quando o portal exige."
+    "Sync silencioso quando possível; browser ou login manual só quando o portal exige.",
+    "Prioridades P0–P4 e numeração de itens **organizam temas** — a ordem de execução pode divergir (ex.: ambientes antes de B2B marketplace)."
   ],
   "epics": [
     {
@@ -178,7 +179,7 @@
       "items": [
         {
           "id": "connect-contract",
-          "title": "Pacote @open-health/connect (registry + payload canônico)",
+          "title": "Pacote @aiyra-care/connect (registry + payload canônico)",
           "status": "done",
           "detail": "Fase 1: tipos, CONNECTOR_REGISTRY, CanonicalSyncBatch; scrapers ainda em packages/api."
         },
@@ -241,6 +242,12 @@
           "title": "Intervenção humana só em falha recuperável",
           "status": "done",
           "detail": "useSilentWalletSync na Carteira; modal só em Integrações; toast se silent falha (login/CDP)."
+        },
+        {
+          "id": "connect-portal-auth",
+          "title": "Classificação genérica falha de auth (credenciais vs sessão)",
+          "status": "done",
+          "detail": "portal-auth-failure.ts; auth_attention em integration_links; failure_kind em sync_jobs; avisos UI Integrações."
         }
       ]
     },
@@ -581,9 +588,9 @@
       "category": "tecnico",
       "priority": "P2",
       "title": "SUS — ConecteSUS e Caderneta",
-      "summary": "Import gov.br de vacinas e exames; sem sync silencioso. Próximo: UX de reimport e lembretes.",
+      "summary": "Import guiado gov.br; sessão persistida (reimport sem browser). Próximo: Carteira silenciosa + Vacinas.",
       "status": "in_progress",
-      "statusLabel": "Import manual OK",
+      "statusLabel": "Sessão gov.br OK",
       "items": [
         {
           "id": "sus-import-core",
@@ -592,22 +599,28 @@
           "detail": "PublicHealthIntegrationModal; POST /scraper/conectesus; connectors government no Connect."
         },
         {
+          "id": "sus-govbr-session",
+          "title": "Sessão gov.br persistida (migration 053)",
+          "status": "done",
+          "detail": "govbr_sessions por conta; GET /account/govbr-session; reimport HTTP sem browser; PublicHealthScrapeService."
+        },
+        {
           "id": "sus-docs",
           "title": "Documentação SUS_CONECTESUS.md",
           "status": "done",
-          "detail": "Limitações, fluxo UI, próximos passos P1–P3."
+          "detail": "Arquitetura hexagonal, fluxo primeira/reimport, referências código."
         },
         {
           "id": "sus-reimport-ux",
           "title": "UX reimport guiado (Vacinas + Integrações)",
-          "status": "planned",
-          "detail": "Último import, CTA reimportar, dedup visível."
+          "status": "done",
+          "detail": "SusPublicHealthBanner em Vacinas; POST /patients/:id/conectesus/sync; silent Carteira via useSilentConecteSUSSync."
         },
         {
           "id": "sus-reminder",
           "title": "Lembrete opcional reimport (6–12 meses)",
-          "status": "planned",
-          "detail": "Care reminder ou banner na Carteira/Vacinas."
+          "status": "done",
+          "detail": "care_reminders sus_reimport (054); schedule após sync SUS; CareReminderBanner; SUS_REIMPORT_REMINDER_DAYS default 180."
         }
       ]
     },
@@ -1366,8 +1379,8 @@
       "priority": "P2",
       "title": "Ava — contexto visível (pins + hooks)",
       "summary": "Painel lateral: pacientes, exames, acompanhamentos no contexto; troca de paciente com hooks; compactação gerenciada.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "ava-session-pins",
@@ -1454,14 +1467,14 @@
         {
           "id": "hygiene-weekly-job",
           "title": "Varredura semanal por conta",
-          "status": "planned",
-          "detail": "npm run scan:hygiene; agendar em connect-worker."
+          "status": "done",
+          "detail": "HYGIENE_SCAN_INTERVAL_MS no connect-worker (default 0); npm run scan:hygiene manual."
         },
         {
           "id": "hygiene-login-ui",
           "title": "Modal proativo no login",
-          "status": "planned",
-          "detail": "Photos-style; dismiss = not duplicate."
+          "status": "done",
+          "detail": "HygieneLoginPrompt em AppLayout; snooze local; dismiss = not duplicate."
         },
         {
           "id": "hygiene-neo4j-candidate",
@@ -1704,8 +1717,8 @@
         {
           "id": "classifier-llm-fallback",
           "title": "Hook fallback LLM (llm-router) para rótulos ambíguos",
-          "status": "in_progress",
-          "detail": "LlmBackedLabelClassifier + testes; integração completa no fluxo Amil sync pendente de tuning."
+          "status": "done",
+          "detail": "LlmBackedLabelClassifier via buildClassificationClassifier no PortalSyncOrchestrator (Amil sync)."
         },
         {
           "id": "classifier-embedding-engine",
@@ -1763,8 +1776,8 @@
         {
           "id": "del-e2e-smoke",
           "title": "Smoke E2E web mínimo",
-          "status": "planned",
-          "detail": "Login → paciente → exames; Playwright em CI opcional."
+          "status": "done",
+          "detail": "Playwright packages/web/e2e/smoke.spec.ts — login + landing; CI web job."
         },
         {
           "id": "del-migration-dry-run",
@@ -1828,15 +1841,15 @@
         {
           "id": "run-ops-console-visual-design",
           "title": "Design console ops — hierarquia e thresholds",
-          "status": "planned",
-          "detail": "packages/ops-console (:3013): alinhar Ant Design + tokens Aiyra; sair do monocromático; faixas ok/warning/critical em cards e probes; microcopy «o que é este bloco»; ícones e densidade legível.",
+          "status": "done",
+          "detail": "ops-theme + tokens Aiyra; KPI alert; probe ok/warning/critical; microcopy por OpsPanel; ops-console.css.",
           "reviewBadge": ["design"]
         },
         {
           "id": "run-ops-console-charts-scales",
           "title": "Gráficos e escalas no console ops",
-          "status": "planned",
-          "detail": "Séries temporais (Ava tokens p50/p95, fail rate sync, latência probe); eixos, unidades, janelas 24h/7d; sparklines nos KPIs; comparar com threshold visual — recharts ou padrão do design system.",
+          "status": "done",
+          "detail": "Recharts: séries 24h, fail rate portal, percentis 24h/7d, sparklines KPI; timeSeries24h na API.",
           "reviewBadge": ["design"]
         },
         {
@@ -1919,6 +1932,18 @@
           "title": "Fallbacks dormentes (snapshot D-1, Ava lite)",
           "status": "done",
           "detail": "Gatilho forte; banner stale. Ver OPERATION_MODEL §6."
+        },
+        {
+          "id": "run-ops-automated-tests",
+          "title": "Testes automatizados ops + smoke HTTP",
+          "status": "done",
+          "detail": "npm run test:ops (pipeline, triagem, fallbacks); ops:smoke + OPS_SMOKE_FULL; docs/OPS_FALLBACKS_AND_ALERTS.md."
+        },
+        {
+          "id": "run-ops-prod-channel",
+          "title": "Canal ops produção + worker heartbeat + Stripe alert",
+          "status": "done",
+          "detail": "setup:ops-prod; worker_stale + stripe_webhook_failures; test:ops + ops:smoke no CI; docs/ops/RUNBOOK_ALERTS.md."
         }
       ]
     },
@@ -2033,6 +2058,253 @@
           "title": "FAQ + contato comercial / suporte",
           "status": "planned",
           "detail": "Link compliance/contact API; formulário lead opcional."
+        }
+      ]
+    },
+    {
+      "id": "platform-environments",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Ambientes — dev, staging e produção",
+      "summary": "Três camadas com paridade operacional: local (massas + scrapers), staging (shape produtivo com dados sintéticos, sem PHI real) e prod (live após CNPJ). Complementa dev-delivery-pipeline e prod-run-intelligence. Ver docs/infra/ENVIRONMENTS.md (a criar).",
+      "status": "done",
+      "statusLabel": "Completo",
+      "items": [
+        {
+          "id": "env-topology-doc",
+          "title": "Matriz de ambientes (local / staging / prod)",
+          "status": "done",
+          "detail": "docs/infra/ENVIRONMENTS.md — URLs, PG, worker, Neo4j, Stripe test vs live, OPS keys, COMPLIANCE_GATE; o que roda em cada camada."
+        },
+        {
+          "id": "env-mass-generator",
+          "title": "Gerador de massas (seed CLI)",
+          "status": "done",
+          "detail": "npm run seed:demo — scripts/seed-demo-data.mjs; conta demo, 2 pacientes, convênios mock sessionReady, timeline sintética; --reset."
+        },
+        {
+          "id": "env-faker-rules",
+          "title": "Regras de dados sintéticos (LGPD-safe)",
+          "status": "done",
+          "detail": "CPF/CNS fake no seed; ENVIRONMENTS.md proíbe restore prod→dev; CRYPTO_KEY por ambiente documentado."
+        },
+        {
+          "id": "env-staging-synthetic-prod",
+          "title": "Staging «shape produtivo» (post-prod representativo)",
+          "status": "done",
+          "detail": "seed-staging-volume.mjs — sync_jobs, product_events, llm_usage com marker staging-volume-seed; vars STAGING_SEED_*."
+        },
+        {
+          "id": "env-staging-refresh",
+          "title": "Job refresh staging (reset + re-seed)",
+          "status": "done",
+          "detail": "npm run seed:staging-refresh — reset demo + volume; migrate:all para PG vazio."
+        },
+        {
+          "id": "env-ci-deploy-staging",
+          "title": "Esteira CI → deploy staging automático",
+          "status": "done",
+          "detail": ".github/workflows/staging.yml — build + database-smoke; deploy placeholder + docs/infra/DEPLOY_STAGING.md."
+        },
+        {
+          "id": "env-ci-deploy-prod",
+          "title": "Esteira deploy produção (manual + gates)",
+          "status": "done",
+          "detail": ".github/workflows/deploy-prod.yml workflow_dispatch + checklist; deploy real quando host prod."
+        },
+        {
+          "id": "env-migration-gates",
+          "title": "Gates de migration em PR e pré-deploy",
+          "status": "done",
+          "detail": "validate-migrations.mjs no CI; alinha del-migration-dry-run (apply em PG ephemeral — backlog)."
+        },
+        {
+          "id": "env-secrets-parity",
+          "title": "Templates .env e secrets por ambiente",
+          "status": "done",
+          "detail": ".env.example + tabela em ENVIRONMENTS.md; sem valores reais no repo."
+        },
+        {
+          "id": "env-backup-restore",
+          "title": "Backup PG + drill de restore",
+          "status": "done",
+          "detail": "docs/infra/BACKUP.md — política, pg_dump local, proibição restore prod→staging."
+        },
+        {
+          "id": "env-synthetic-monitoring",
+          "title": "Sondas em staging (pré-promote)",
+          "status": "done",
+          "detail": "staging-probe-gate.mjs + npm run staging:probe-gate."
+        },
+        {
+          "id": "env-worker-parity",
+          "title": "Paridade connect-worker + ops alerts",
+          "status": "done",
+          "detail": "ENVIRONMENTS.md § Connect worker; CONNECT_WORKER_EXTERNAL."
+        },
+        {
+          "id": "env-feature-flags",
+          "title": "Flags de runtime / degrade por ambiente",
+          "status": "done",
+          "detail": "Tabela flags em ENVIRONMENTS.md."
+        },
+        {
+          "id": "env-deploy-runbook",
+          "title": "Runbook deploy beta → prod",
+          "status": "done",
+          "detail": "Seção promote/rollback em ENVIRONMENTS.md; alinha del-deploy-runbook."
+        },
+        {
+          "id": "env-two-model-doc",
+          "title": "Modelo dois ambientes não prod (Integração + Preview)",
+          "status": "done",
+          "detail": "docs/infra/TWO_ENV_MODEL.md, ENV_INTEGRATION.md, ENV_PREVIEW.md — fluxo aprovação Rafael."
+        },
+        {
+          "id": "env-testing-verticals",
+          "title": "Matriz verticais de teste (funcional / integrado / segurança / performance)",
+          "status": "done",
+          "detail": "docs/TESTING_VERTICALS.md — quando rodar cada vertical; template PROMOTION_REPORT.md."
+        },
+        {
+          "id": "env-promotion-gates-cli",
+          "title": "CLI promotion:gates + relatório automático",
+          "status": "done",
+          "detail": "scripts/run-promotion-gates.mjs → promotion-report-last.md; root npm run promotion:gates."
+        },
+        {
+          "id": "env-promote-preview-workflow",
+          "title": "Workflow GitHub promote-preview (manual)",
+          "status": "done",
+          "detail": ".github/workflows/promote-preview.yml — Environment preview; gates + deploy placeholder."
+        },
+        {
+          "id": "env-preview-host",
+          "title": "Preview Ambiente 2 no GCP",
+          "status": "planned",
+          "detail": "Após ritmo local funcional: Cloud SQL sintético + compute (Cloud Run/GCE) + promote-preview.yml; projeto openhealth-503119. Ambiente 1 permanece local."
+        },
+        {
+          "id": "env-ops-dual-keys",
+          "title": "OPS keys + webhooks distintos Integração vs Preview",
+          "status": "planned",
+          "detail": "GitHub Environments integration/preview; OPS_METRICS_KEY e OPS_ALERT_WEBHOOK_URL por ambiente."
+        }
+      ]
+    },
+    {
+      "id": "business-ecosystem",
+      "category": "negocio",
+      "priority": "P3",
+      "title": "Ecossistema Aiyra — personas e plano de negócio",
+      "summary": "Mapa visual de personas (família núcleo; parceiros B2B; marketplace farmácias horizonte sem patrocínio inicial). docs/ECOSYSTEM.md + B2B_PARTNERS.md.",
+      "status": "in_progress",
+      "statusLabel": "Mapa v1 entregue",
+      "items": [
+        {
+          "id": "eco-visual-doc",
+          "title": "Documentação visual do ecossistema",
+          "status": "done",
+          "detail": "docs/ECOSYSTEM.md — mermaid personas, camadas de valor, modelo de negócio, fluxos família e farmácia."
+        },
+        {
+          "id": "eco-marketplace-pharmacy",
+          "title": "Horizonte — marketplace farmácias/drogarias",
+          "status": "planned",
+          "detail": "Persona adicional; monetização transação/rede; lista neutra sem patrocínio editorial; regulatório ANVISA; ver B2B_PARTNERS §5."
+        },
+        {
+          "id": "eco-validation-interviews",
+          "title": "Validação com 2–3 conversas (pediatra / família beta)",
+          "status": "planned",
+          "detail": "Ajustar mapa após feedback; não bloqueia desenvolvimento técnico."
+        }
+      ]
+    },
+    {
+      "id": "b2b-partner-platform",
+      "category": "negocio",
+      "priority": "P3",
+      "title": "B2B — parceiros (médicos, planos, labs, farmácias)",
+      "summary": "Discovery e estruturação de ofertas para o lado profissional/institucional — sem comprometer o núcleo família (B2C). Ver docs/B2B_PARTNERS.md.",
+      "status": "in_progress",
+      "statusLabel": "Discovery doc v1",
+      "items": [
+        {
+          "id": "b2b-discovery-doc",
+          "title": "Landscape + jobs-to-be-done por segmento",
+          "status": "done",
+          "detail": "docs/B2B_PARTNERS.md — médicos, operadoras, laboratórios, farmácias, marketplace horizonte."
+        },
+        {
+          "id": "b2b-segment-clinicians",
+          "title": "Pacote clínico — export, share, contexto consulta",
+          "status": "planned",
+          "detail": "Evoluir share token 48h, export PDF, resumo determinístico, timeline sequência; portal leve «visualizar compartilhamento» sem conta Aiyra (opcional)."
+        },
+        {
+          "id": "b2b-segment-labs",
+          "title": "Pacote laboratórios — entrega de resultados (Connect inbound)",
+          "status": "planned",
+          "detail": "API/webhook para lab enviar laudo estruturado → Exam pipeline; alinha exam-artifact + Connect Fase 2; marca Fleury/Hermes como referência outbound."
+        },
+        {
+          "id": "b2b-segment-plans",
+          "title": "Pacote operadoras — visão beneficiário (futuro regulado)",
+          "status": "planned",
+          "detail": "Não é vender dados agregados sem contrato; foco: autorização/eligibility já no sync família; B2B = ferramenta para gestor de beneficiários ou API white-label — discovery legal primeiro.",
+          "reviewBadge": ["legal", "regulatory"]
+        },
+        {
+          "id": "b2b-segment-pharma",
+          "title": "Pacote farmácias — adesão e medicação",
+          "status": "planned",
+          "detail": "Catálogo medicação + lembretes + histórico uso; parceria adesão terapêutica; sem recomendação clínica automática sem gate médico.",
+          "reviewBadge": ["medical", "legal"]
+        },
+        {
+          "id": "b2b-platform-orgs",
+          "title": "Primitives — organizações e multi-tenant",
+          "status": "in_progress",
+          "detail": "Migration 055 organizations + organization_members; domain Organization entity; API/RBAC backlog."
+        },
+        {
+          "id": "b2b-platform-rbac",
+          "title": "RBAC profissional (médico, admin clínica, parceiro read-only)",
+          "status": "planned",
+          "detail": "Roles em Supabase ou PG; scopes por paciente/org; auditoria de acesso (LGPD)."
+        },
+        {
+          "id": "b2b-partner-api",
+          "title": "API parceiro (keys, rate limit, webhook)",
+          "status": "planned",
+          "detail": "POST laudo, GET status import; sandbox keys em staging; documentação OpenAPI segmentada B2B."
+        },
+        {
+          "id": "b2b-partner-portal",
+          "title": "Console parceiro (UI mínima)",
+          "status": "planned",
+          "detail": "Dashboard: imports, erros sync inbound, uso API; separado do ops-console interno."
+        },
+        {
+          "id": "b2b-pricing-model",
+          "title": "Modelo de preço B2B vs família",
+          "status": "planned",
+          "detail": "Stripe Billing produtos B2B (per seat, per org, usage API); não bloquear B2C; alinha BILLING.md.",
+          "reviewBadge": ["fiscal", "legal"]
+        },
+        {
+          "id": "b2b-legal-contracts",
+          "title": "Contratos B2B + evidência (DocuSign path)",
+          "status": "planned",
+          "detail": "LEGAL_COMPLIANCE §11 — B2C click-wrap; B2B contrato clínica/lab via DocuSign adapter futuro.",
+          "reviewBadge": ["legal"]
+        },
+        {
+          "id": "b2b-pilot-criteria",
+          "title": "Critérios de piloto (1 clínica + 1 lab)",
+          "status": "planned",
+          "detail": "Métricas sucesso piloto: tempo export consulta, laudos importados, zero PHI em logs parceiro, SLA suporte."
         }
       ]
     },

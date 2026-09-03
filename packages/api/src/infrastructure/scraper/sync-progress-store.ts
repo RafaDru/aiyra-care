@@ -1,6 +1,8 @@
 import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
 import { allKnownSyncStepKeys, type SyncablePortalType } from '../../domain/scraper/sync-portal-profile.js'
 import { SyncJob as SyncJobEntity, type SyncJobStatus, type SyncJobTrigger, type SyncNoveltySummary } from '../../domain/sync-job/sync-job.entity.js'
+import type { PortalAuthFailureKind } from '../../domain/portal-auth/portal-auth-failure.js'
+import { classifyPortalAuthFailure } from '../../domain/portal-auth/portal-auth-failure.js'
 import type { SyncJobPgRepository } from '../persistence/sync-job.pg.repository.js'
 import { publishSyncJobEvent } from './sync-job-stream.js'
 import { notifySyncJobTerminal } from '../sync/sync-completion.bus.js'
@@ -93,6 +95,12 @@ function trackStep(
       status: progress.status === 'failed' ? 'failed' : progress.status === 'success' ? 'success' : 'running',
       message: progress.message,
     },
+  }
+  if (progress.step === 'login') {
+    next.login = {
+      status: progress.status === 'failed' ? 'failed' : progress.status === 'success' ? 'success' : 'running',
+      message: progress.message,
+    }
   }
   const login = next.login
   if (
@@ -214,6 +222,7 @@ export async function updateJob(
   progress: ScraperProgress,
   result?: SyncResult,
   novelty?: SyncNoveltySummary,
+  failureKind?: PortalAuthFailureKind | null,
 ): Promise<void> {
   const repo = requireRepo()
   const prevEntity = await repo.findById(id)
@@ -227,6 +236,9 @@ export async function updateJob(
 
   const status = mapPersistedStatus(progress)
   const finishedAt = status === 'success' || status === 'failed' ? new Date() : undefined
+  const resolvedFailureKind = status === 'failed'
+    ? (failureKind ?? classifyPortalAuthFailure(progress.message))
+    : null
 
   await repo.updateProgress({
     id,
@@ -237,6 +249,7 @@ export async function updateJob(
     result: mergedResult,
     novelty: noveltyToPersist,
     error: status === 'failed' ? progress.message : undefined,
+    failureKind: resolvedFailureKind,
     finishedAt,
   })
 

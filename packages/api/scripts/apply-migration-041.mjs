@@ -14,7 +14,7 @@ function buildExamOrderExternalKey(source, portalOrderId) {
 }
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const sql = readFileSync(resolve(root, 'database/relational/041_exam_orders.sql'), 'utf8')

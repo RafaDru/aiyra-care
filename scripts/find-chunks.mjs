@@ -1,6 +1,8 @@
 import fs from 'fs'
+import { join } from 'path'
+import { REPO_ROOT } from './repo-root.mjs'
 
-const runtime = fs.readFileSync('C:/Users/rafae/Documents/Filhos/tmp-runtime.js', 'utf8')
+const runtime = fs.readFileSync(join(REPO_ROOT, 'tmp-runtime.js'), 'utf8')
 // webpack chunk mapping: e.u = chunkId => import chunk
 const match = runtime.match(/\{(\d+:"[^"]+",?)+/)
 if (match) {

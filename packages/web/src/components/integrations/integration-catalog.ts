@@ -137,7 +137,7 @@ export const INTEGRATION_OPTIONS: IntegrationOption[] = [
     groupId: 'public',
     brand: 'conectesus',
     title: 'ConecteSUS',
-    description: 'Importar vacinas e exames do SUS (login gov.br)',
+    description: 'Reimportar vacinas e exames do SUS (gov.br — sessão salva após primeiro login)',
     action: 'conectesus',
     enabled: true,
     searchAliases: ['conectesus', 'sus', 'gov.br', 'vacina'],

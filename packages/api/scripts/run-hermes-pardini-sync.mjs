@@ -9,7 +9,7 @@ import pg from 'pg'
 import { HermesPardiniSyncScraper } from '../src/infrastructure/scraper/hermes-pardini-sync.scraper.js'
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const patientId = 'f3cc72fd-f11c-419e-ac82-3ae45bd313ce'

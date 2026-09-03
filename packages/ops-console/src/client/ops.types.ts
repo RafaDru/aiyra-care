@@ -65,6 +65,38 @@ export interface OpsFeatureCatalogEntry {
   description?: string
 }
 
+export interface OpsHourlyBucket {
+  hour: string
+  label: string
+}
+
+export interface OpsHourlySyncBucket extends OpsHourlyBucket {
+  success: number
+  failed: number
+}
+
+export interface OpsHourlyAvaEventBucket extends OpsHourlyBucket {
+  completed: number
+  failed: number
+  quotaBlocked: number
+}
+
+export interface OpsHourlyCountBucket extends OpsHourlyBucket {
+  count: number
+}
+
+export interface OpsHourlyAvaTokensBucket extends OpsHourlyBucket {
+  turns: number
+  tokens: number
+}
+
+export interface OpsTimeSeries24h {
+  syncJobs: OpsHourlySyncBucket[]
+  avaEvents: OpsHourlyAvaEventBucket[]
+  clientErrors: OpsHourlyCountBucket[]
+  avaTokens: OpsHourlyAvaTokensBucket[]
+}
+
 export interface ErrorFingerprintRow {
   eventName: string
   fingerprint: string
@@ -138,6 +170,7 @@ export interface OpsMetricsSnapshot {
   clientErrorFingerprints24h: ClientErrorFingerprintRow[]
   featureHealth24h: FeatureHealthRow[]
   featureCatalog: OpsFeatureCatalogEntry[]
+  timeSeries24h: OpsTimeSeries24h
   probe?: OpsProbeSnapshot
 }
 

@@ -1,12 +1,14 @@
 """Generate SVG from detected Gemini heart dots + line tracing."""
+from pathlib import Path
 from PIL import Image
 import math
 import json
 import os
 
-IMG = r"C:\Users\rafae\Downloads\Gemini_Generated_Image_j1sn5fj1sn5fj1sn.png"
-JSON = r"C:\Users\rafae\Documents\Filhos\packages\web\scripts\gemini-heart-dots.json"
-OUT = r"C:\Users\rafae\Documents\Filhos\packages\web\public\brand\proposals\heart-gemini-replica.svg"
+WEB_ROOT = Path(__file__).resolve().parent.parent
+IMG = Path(os.environ.get('GEMINI_HEART_IMG', Path.home() / 'Downloads' / 'Gemini_Generated_Image_j1sn5fj1sn5fj1sn.png'))
+JSON = WEB_ROOT / 'scripts' / 'gemini-heart-dots.json'
+OUT = WEB_ROOT / 'public' / 'brand' / 'proposals' / 'heart-gemini-replica.svg'
 
 img = Image.open(IMG).convert("RGB")
 w, h = img.size

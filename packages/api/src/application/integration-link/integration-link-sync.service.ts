@@ -27,10 +27,6 @@ import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg
 import { SyncJobPgRepository } from '../../infrastructure/persistence/sync-job.pg.repository.js'
 import { HermesPardiniSyncScraper } from '../../infrastructure/scraper/hermes-pardini-sync.scraper.js'
 import {
-  hermesPardiniSessionRejectedUserMessage,
-  isHermesPardiniOAuthSessionRejected,
-} from '../../infrastructure/scraper/hermes-pardini-auth.js'
-import {
   buildMaterDeiExamMeta,
   materDeiExamNotes,
   persistMaterDeiExamFiles,
@@ -56,6 +52,10 @@ import { AgenticScraperService } from '../scraper/agentic-scraper.service.js'
 import type { Patient } from '../../domain/patient/patient.entity.js'
 import { runExamMeasurementImport } from '../measurement/exam-measurement-import.helper.js'
 import { runHygieneScanForPatient } from '../hygiene/hygiene-scan.helper.js'
+import {
+  applyPortalSyncAuthFailure,
+  classifyPortalSyncFailure,
+} from './portal-sync-auth.helper.js'
 import { getRuntimeDegradedService } from '../ops/runtime-degraded.factory.js'
 
 const SYNCABLE_PORTALS = new Set<string>(['unimed', 'amil', 'mater_dei', 'hermes_pardini', 'bradesco_saude'])
@@ -271,10 +271,10 @@ export class IntegrationLinkSyncService {
               beneficiaryDetails,
               unmatchedBeneficiaries,
             }, novelty)
-            void updateJob(jobId, { step: 'done', message: 'Sincronização Amil concluída', status: 'success' }, syncResult, novelty)
+            await updateJob(jobId, { step: 'done', message: 'Sincronização Amil concluída', status: 'success' }, syncResult, novelty)
           } catch (err) {
             const message = await this.portalSync.handleAmilSyncFailure(link, err, opts.log)
-            void updateJob(jobId, { step: 'error', message, status: 'failed' })
+            await updateJob(jobId, { step: 'error', message, status: 'failed' })
           }
           return
         }
@@ -314,21 +314,19 @@ export class IntegrationLinkSyncService {
               total: importOutcome.imported + importOutcome.updated,
               authorizationDetails,
             }, novelty)
-            void updateJob(jobId, { step: 'done', message: 'Sincronização concluída', status: 'success' }, syncResult, novelty)
+            await updateJob(jobId, { step: 'done', message: 'Sincronização concluída', status: 'success' }, syncResult, novelty)
           } catch (err) {
             const message = await this.portalSync.handleUnimedSyncFailure(link, err, opts.log)
-            void updateJob(jobId, { step: 'error', message, status: 'failed' })
+            await updateJob(jobId, { step: 'error', message, status: 'failed' })
           }
         }
       })
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro na sincronização'
+      const raw = err instanceof Error ? err.message : 'Erro na sincronização'
       opts.log?.error(err, 'Sync failed')
-      if (/login|autentic|acesso\.unimed|sess[aã]o|portal do cliente/i.test(message)) {
-        link.clearSessionToken()
-        await this.linkRepo.update(link).catch(() => {})
-      }
-      void updateJob(jobId, { step: 'error', message, status: 'failed' })
+      const message = await applyPortalSyncAuthFailure(link, this.linkRepo, link.portalType, raw)
+      const kind = classifyPortalSyncFailure(link.portalType, raw)
+      await updateJob(jobId, { step: 'error', message, status: 'failed' }, undefined, undefined, kind)
     }
   }
 
@@ -515,6 +513,7 @@ export class IntegrationLinkSyncService {
         encrypt(JSON.stringify(result.session)),
         result.session.sessionExpiresAt,
       )
+      link.clearAuthAttention()
       link.markSynced()
       await this.linkRepo.update(link)
 
@@ -528,7 +527,7 @@ export class IntegrationLinkSyncService {
       }
 
       const warnings = [...(result.warnings ?? []), ...materDeiWarnings]
-      void updateJob(jobId, {
+      await updateJob(jobId, {
         step: 'done',
         message: warnings.length > 0
           ? `Sincronização concluída: ${importedExams} exame(s), ${downloadedFiles} arquivo(s) (${warnings.length} aviso(s))`
@@ -546,13 +545,11 @@ export class IntegrationLinkSyncService {
         novelty,
       }, novelty)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro na sincronização Mater Dei'
+      const raw = err instanceof Error ? err.message : 'Erro na sincronização Mater Dei'
       log?.error(err, 'Mater Dei sync failed')
-      if (/401|403|sess[aã]o|token|expirad|login/i.test(message)) {
-        link.clearSessionToken()
-        await this.linkRepo.update(link).catch(() => {})
-      }
-      void updateJob(jobId, { step: 'error', message, status: 'failed' })
+      const message = await applyPortalSyncAuthFailure(link, this.linkRepo, 'mater_dei', raw)
+      const kind = classifyPortalSyncFailure('mater_dei', raw)
+      void updateJob(jobId, { step: 'error', message, status: 'failed' }, undefined, undefined, kind)
     }
   }
 
@@ -586,6 +583,7 @@ export class IntegrationLinkSyncService {
           sessionJson: storedSession,
           interactiveLogin: interactiveLogin ?? true,
           examStartDate,
+          jobId,
         },
       )
 
@@ -664,7 +662,7 @@ export class IntegrationLinkSyncService {
           laboratory: exam.laboratory ?? 'Hermes Pardini',
           resultSummary: exam.resultSummary ?? undefined,
           source: 'hermes_pardini',
-          notes: hermesPardiniExamNotes(dedup, { pedidoId: exam.pedidoId }),
+          notes: hermesPardiniExamNotes(dedup, { pedidoId: exam.pedidoId }, exam.laboratory),
         }))
         scheduleImportLineageProjection({
           patientId: link.patientId,
@@ -718,6 +716,7 @@ export class IntegrationLinkSyncService {
         encrypt(JSON.stringify(result.session)),
         result.session.sessionExpiresAt,
       )
+      link.clearAuthAttention()
       link.markSynced()
       await this.linkRepo.update(link)
 
@@ -737,7 +736,7 @@ export class IntegrationLinkSyncService {
         filesSkipped: skippedFiles > 0 ? skippedFiles : undefined,
       }
 
-      void updateJob(jobId, {
+      await updateJob(jobId, {
         step: 'done',
         message: importedExams > 0
           ? `Hermes Pardini: ${importedExams} exame(s) importado(s)`
@@ -757,16 +756,11 @@ export class IntegrationLinkSyncService {
         novelty,
       }, novelty)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro na sincronização Hermes Pardini'
+      const raw = err instanceof Error ? err.message : 'Erro na sincronização Hermes Pardini'
       log?.error(err, 'Hermes Pardini sync failed')
-      if (/401|403|sess[aã]o|token|expirad|login|invalid[_\s-]?grant|rejeitado|not active/i.test(message)) {
-        link.clearSessionToken()
-        await this.linkRepo.update(link).catch(() => {})
-      }
-      const userMessage = /401|403|rejeitado/i.test(message) || isHermesPardiniOAuthSessionRejected(message)
-        ? hermesPardiniSessionRejectedUserMessage()
-        : message
-      void updateJob(jobId, { step: 'error', message: userMessage, status: 'failed' })
+      const message = await applyPortalSyncAuthFailure(link, this.linkRepo, 'hermes_pardini', raw)
+      const kind = classifyPortalSyncFailure('hermes_pardini', raw)
+      void updateJob(jobId, { step: 'error', message, status: 'failed' }, undefined, undefined, kind)
     }
   }
 

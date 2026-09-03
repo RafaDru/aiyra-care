@@ -792,7 +792,7 @@ export interface CareReminderRow {
   id: string
   patientId: string
   healthThreadId: string | null
-  reminderKind: 'measurement' | 'medication'
+  reminderKind: 'measurement' | 'medication' | 'sus_reimport'
   targetCode: string | null
   medicationName: string | null
   title: string
@@ -1409,6 +1409,8 @@ export interface IntegrationLink {
   sessionReady?: boolean
   /** Portal em modo degradado — scheduled/silent sync pausado. */
   syncDegraded?: boolean
+  /** Credenciais ou sessão precisam de atenção após falha de sync. */
+  authAttention?: 'none' | 'credentials' | 'session'
 }
 
 export interface SyncNoveltySummary {
@@ -1688,6 +1690,21 @@ export interface CadernetaFamilyImportResult {
   plan: CadernetaFamilyImportPlan
   byPatient: Array<{ patientId: string; patientName: string; result: CadernetaImportResult }>
   totals: CadernetaImportResult
+}
+
+export interface GovBrSessionView {
+  sessionReady: boolean
+  expiresAt: string | null
+  conectesusLastFetchAt: string | null
+}
+
+export interface ConecteSUSSyncResult {
+  skipped?: string
+  importedVaccines?: number
+  importedExams?: number
+  skippedDuplicates?: number
+  fetchedVaccines?: number
+  fetchedExams?: number
 }
 
 export interface AccountFreshnessView {

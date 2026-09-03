@@ -106,6 +106,7 @@ async function registerRoutes() {
   const { authorizationRoutes } = await import('./infrastructure/http/authorization/authorization.routes.js')
   const { insurancePlanRoutes } = await import('./infrastructure/http/insurance-plan/insurance-plan.routes.js')
   const { cadernetaImportRoutes } = await import('./infrastructure/http/caderneta/caderneta-import.routes.js')
+  const { conectesusRoutes } = await import('./infrastructure/http/conectesus/conectesus.routes.js')
   const { authRoutes } = await import('./infrastructure/http/auth/auth.routes.js')
   const { carePlaceRoutes } = await import('./infrastructure/http/care-place/care-place.routes.js')
   const { healthThreadRoutes } = await import('./infrastructure/http/health-thread/health-thread.routes.js')
@@ -152,11 +153,14 @@ async function registerRoutes() {
   await app.register(authorizationRoutes)
   await app.register(insurancePlanRoutes)
   await app.register(cadernetaImportRoutes)
+  await app.register(conectesusRoutes)
   await app.register(authRoutes)
   const { accountProfileRoutes } = await import('./infrastructure/http/account-profile/account-profile.routes.js')
   await app.register(accountProfileRoutes)
   const { accountFreshnessRoutes } = await import('./infrastructure/http/account-freshness/account-freshness.routes.js')
   await app.register(accountFreshnessRoutes)
+  const { govBrSessionRoutes } = await import('./infrastructure/http/govbr/govbr-session.routes.js')
+  await app.register(govBrSessionRoutes)
   await app.register(carePlaceRoutes)
   await app.register(healthThreadRoutes)
   await app.register(clinicalLinkRoutes)
@@ -172,6 +176,8 @@ async function registerRoutes() {
   await app.register(examResultItemRoutes)
   await app.register(roadmapRoutes)
   await app.register(projectContextRoutes)
+  const { connectRoutes } = await import('./infrastructure/http/connect/connect.routes.js')
+  await app.register(connectRoutes)
 }
 
 const start = async () => {
@@ -218,6 +224,17 @@ const start = async () => {
     }
 
     await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' })
+
+    try {
+      const { pgPool } = await import('./db/postgres.js')
+      const { SyncJobPgRepository } = await import('./infrastructure/persistence/sync-job.pg.repository.js')
+      const report = await new SyncJobPgRepository(pgPool).reconcileEnvironment()
+      if (report.timedOut + report.inconsistent + report.promoted + report.clearedSuccessErrors > 0) {
+        app.log.info(report, 'sync_jobs reconciled on startup')
+      }
+    } catch (err) {
+      app.log.warn({ err: err instanceof Error ? err.message : String(err) }, 'sync_jobs reconcile on startup failed')
+    }
   } catch (err) {
     app.log.error(err)
     process.exit(1)

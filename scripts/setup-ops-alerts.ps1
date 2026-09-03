@@ -60,6 +60,18 @@ if (-not $dashboard) {
   Write-Host "OPS_ALERT_DASHBOARD_URL is set." -ForegroundColor Green
 }
 
+$tier = Read-EnvValue "DEPLOYMENT_TIER"
+if (-not $tier) {
+  Append-EnvLine "DEPLOYMENT_TIER=integration"
+  Write-Host "DEPLOYMENT_TIER=integration" -ForegroundColor Green
+}
+
+$workerMon = Read-EnvValue "OPS_WORKER_MONITOR"
+if (-not $workerMon) {
+  Append-EnvLine "OPS_WORKER_MONITOR=0"
+  Write-Host "OPS_WORKER_MONITOR=0 (integração — sem worker_stale sem worker)" -ForegroundColor Green
+}
+
 Write-Host ""
 Write-Host "Local notifier (Windows tray):" -ForegroundColor Cyan
 Write-Host "  npm run ops:notifier:up"
@@ -74,6 +86,7 @@ Write-Host "  npm run ops:smoke"
 Write-Host "  npm run ops:metrics"
 Write-Host "  npm run ops:triage"
 Write-Host "  npm run ops:alerts-check"
+Write-Host "  npm run validate:env-tier"
 
 if ($RegisterScheduledTask) {
   $taskName = "AiyraCare-OpsAlerts"

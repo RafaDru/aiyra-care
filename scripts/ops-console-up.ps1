@@ -13,7 +13,9 @@ if (Test-Path $envFile) {
     if ($_ -match '^([^#=]+)=(.*)$') {
       $k = $matches[1].Trim()
       $v = $matches[2].Trim()
-      if ($k -and $v) { Set-Item -Path "env:$k" -Value $v -ErrorAction SilentlyContinue }
+      if ($k -and $v -and -not [Environment]::GetEnvironmentVariable($k, 'Process')) {
+        Set-Item -Path "env:$k" -Value $v -ErrorAction SilentlyContinue
+      }
     }
   }
 }

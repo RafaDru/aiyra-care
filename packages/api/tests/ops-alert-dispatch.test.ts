@@ -23,7 +23,9 @@ describe('ops alert dispatch payload', () => {
       '2026-01-01T00:00:00.000Z',
     )
     expect(payload.dashboardUrl).toBe('http://127.0.0.1:3013')
-    expect(payload.text).toContain('AiyraCare ops')
+    expect(payload.text).toContain('AiyraCare Ops')
+    expect(payload.toast?.title).toContain('CRITICO')
+    expect(payload.toast?.icon).toBe('error')
   })
 
   it('defaults dashboard to ops-console when unset', () => {
@@ -71,6 +73,7 @@ describe('OpsAlertDispatchService', () => {
     expect(body.dashboardUrl).toBe('http://127.0.0.1:3013')
     expect(body.alerts.length).toBe(1)
     expect(body.triage).toBeDefined()
+    expect(body.toast?.icon).toBe('error')
   })
 
   it('human_required mode skips non-human warnings', async () => {

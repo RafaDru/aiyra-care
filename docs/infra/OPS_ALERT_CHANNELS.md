@@ -56,7 +56,19 @@ Fluxo quando algo crítico ocorre:
 2. Toast na area de trabalho + browser abre o console ops (:3013)
 3. Você investiga no painel (sem depender de Slack)
 
-## Cloud — produção
+### Simular toasts (bateria de testes)
+
+```powershell
+npm run ops:notifier:simulate              # 6 cenários críticos (como produção)
+npm run ops:notifier:simulate -- --all     # + 4 warnings (10 toasts)
+npm run ops:notifier:simulate -- --scenario=llm_cascade
+npm run test:ops:notifier                  # valida triagem sem POST
+```
+
+`OPS_LOCAL_NOTIFIER_OPEN=0` no processo do notificador evita abrir o browser em cada toast (só balloon).
+
+Toasts usam UTF-8 via arquivo temporário; ícone/cor: **Error** (crítico), **Warning** (sync/infra aviso), **Info** (produto/Neo4j). Payload inclui `toast: { title, body, icon }`.
+
 
 O notificador local **não roda na VM**. O elo precisa ser **alcançável fora do servidor**:
 

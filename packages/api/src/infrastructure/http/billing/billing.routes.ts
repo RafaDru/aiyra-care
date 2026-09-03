@@ -19,7 +19,7 @@ import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
 import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
 import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
-import { trackServerProductEvent } from '../../../application/telemetry/server-product-event.js'
+import { trackServerProductEvent, trackOpsProductEvent } from '../../../application/telemetry/server-product-event.js'
 import { z } from 'zod'
 
 const checkoutSchema = z.object({
@@ -250,16 +250,36 @@ export async function billingRoutes(app: FastifyInstance) {
 
     const sig = req.headers['stripe-signature']
     if (!sig || typeof sig !== 'string') {
+      await trackOpsProductEvent(productEvents, {
+        eventName: 'stripe_webhook_rejected',
+        route: 'api:billing/webhook',
+        properties: { error_code: 'missing_signature', kind: 'signature' },
+      })
       return reply.status(400).send({ message: 'stripe-signature ausente' })
     }
 
     const raw = (req as FastifyRequest & { rawBody?: Buffer }).rawBody
-    if (!raw) return reply.status(400).send({ message: 'raw body ausente' })
+    if (!raw) {
+      await trackOpsProductEvent(productEvents, {
+        eventName: 'stripe_webhook_rejected',
+        route: 'api:billing/webhook',
+        properties: { error_code: 'missing_raw_body', kind: 'payload' },
+      })
+      return reply.status(400).send({ message: 'raw body ausente' })
+    }
 
     let event: Stripe.Event
     try {
       event = stripe.webhooks.constructEvent(raw, sig, secret)
     } catch (err) {
+      await trackOpsProductEvent(productEvents, {
+        eventName: 'stripe_webhook_rejected',
+        route: 'api:billing/webhook',
+        properties: {
+          error_code: 'invalid_signature',
+          kind: 'signature',
+        },
+      })
       return reply.status(400).send({
         message: err instanceof Error ? err.message : 'Webhook inválido',
       })

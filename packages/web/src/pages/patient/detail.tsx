@@ -533,6 +533,27 @@ export function PatientDetail() {
           setMonitoringAction({ kind: 'medication', reminderId: r.id, healthThreadId: r.healthThreadId })
           setActiveTab('growth')
         }}
+        onSusReimport={async (r: CareReminderRow) => {
+          try {
+            const result = await api.patients.conectesusSync(patient.id)
+            await api.careReminders.complete(r.id)
+            const parts = [
+              result.importedVaccines ? `${result.importedVaccines} vacinas` : null,
+              result.importedExams ? `${result.importedExams} exames` : null,
+            ].filter(Boolean)
+            if (result.skipped === 'session_required') {
+              message.warning('Faça login gov.br em Integrações antes de reimportar')
+              setActiveTab('integrations')
+            } else if (parts.length) {
+              message.success(`SUS: importados ${parts.join(' e ')}`)
+            } else {
+              message.info('SUS: nenhum dado novo')
+            }
+            load()
+          } catch (e) {
+            message.error(e instanceof Error ? e.message : 'Erro ao reimportar SUS')
+          }
+        }}
       />
 
       <FamilySupportPanel patientId={patient.id} />

@@ -261,6 +261,83 @@ export class OpsMetricsPgRepository {
     }))
   }
 
+  async syncJobsHourly24h(): Promise<Array<{ hour: Date; success: number; failed: number }>> {
+    const { rows } = await this.pool.query(
+      `SELECT
+         date_trunc('hour', COALESCE(finished_at, started_at)) AS hour,
+         COUNT(*) FILTER (WHERE status = 'success')::int AS success,
+         COUNT(*) FILTER (WHERE status = 'failed')::int AS failed
+       FROM sync_jobs
+       WHERE status IN ('success', 'failed')
+         AND COALESCE(finished_at, started_at) >= NOW() - INTERVAL '24 hours'
+       GROUP BY 1
+       ORDER BY 1`,
+    )
+    return rows.map((row) => ({
+      hour: new Date(row.hour as string),
+      success: Number(row.success),
+      failed: Number(row.failed),
+    }))
+  }
+
+  async avaEventsHourly24h(): Promise<
+    Array<{ hour: Date; completed: number; failed: number; quotaBlocked: number }>
+  > {
+    const { rows } = await this.pool.query(
+      `SELECT
+         date_trunc('hour', created_at) AS hour,
+         COUNT(*) FILTER (WHERE event_name = 'ava_chat_completed')::int AS completed,
+         COUNT(*) FILTER (WHERE event_name = 'ava_chat_failed')::int AS failed,
+         COUNT(*) FILTER (WHERE event_name = 'ava_quota_blocked')::int AS quota_blocked
+       FROM product_events
+       WHERE created_at >= NOW() - INTERVAL '24 hours'
+         AND event_name IN ('ava_chat_completed', 'ava_chat_failed', 'ava_quota_blocked')
+       GROUP BY 1
+       ORDER BY 1`,
+    )
+    return rows.map((row) => ({
+      hour: new Date(row.hour as string),
+      completed: Number(row.completed),
+      failed: Number(row.failed),
+      quotaBlocked: Number(row.quota_blocked),
+    }))
+  }
+
+  async clientErrorsHourly24h(): Promise<Array<{ hour: Date; count: number }>> {
+    const { rows } = await this.pool.query(
+      `SELECT
+         date_trunc('hour', created_at) AS hour,
+         COUNT(*)::int AS count
+       FROM client_errors
+       WHERE created_at >= NOW() - INTERVAL '24 hours'
+       GROUP BY 1
+       ORDER BY 1`,
+    )
+    return rows.map((row) => ({
+      hour: new Date(row.hour as string),
+      count: Number(row.count),
+    }))
+  }
+
+  async avaTokensHourly24h(): Promise<Array<{ hour: Date; turns: number; tokens: number }>> {
+    const { rows } = await this.pool.query(
+      `SELECT
+         date_trunc('hour', created_at) AS hour,
+         COUNT(*)::int AS turns,
+         COALESCE(SUM(tokens_total), 0)::bigint AS tokens
+       FROM llm_usage_events
+       WHERE feature = 'ava_chat'
+         AND created_at >= NOW() - INTERVAL '24 hours'
+       GROUP BY 1
+       ORDER BY 1`,
+    )
+    return rows.map((row) => ({
+      hour: new Date(row.hour as string),
+      turns: Number(row.turns),
+      tokens: Number(row.tokens),
+    }))
+  }
+
   async clientErrorFingerprints24h(
     limit = 30,
   ): Promise<import('../../domain/ops/ops-metrics.types.js').ClientErrorFingerprintRow[]> {
@@ -289,5 +366,26 @@ export class OpsMetricsPgRepository {
       accountCount: Number(row.account_count),
       lastSeenAt: new Date(row.last_seen_at as string).toISOString(),
     }))
+  }
+
+  async opsWorkerLastTickAt(): Promise<string | null> {
+    const { rows } = await this.pool.query(
+      `SELECT MAX(created_at) AS last_at
+       FROM product_events
+       WHERE event_name = 'ops_worker_tick'`,
+    )
+    const raw = rows[0]?.last_at
+    if (!raw) return null
+    return new Date(raw as string).toISOString()
+  }
+
+  async stripeWebhookRejectedCount1h(): Promise<number> {
+    const { rows } = await this.pool.query(
+      `SELECT COUNT(*)::int AS count
+       FROM product_events
+       WHERE event_name = 'stripe_webhook_rejected'
+         AND created_at >= NOW() - INTERVAL '1 hour'`,
+    )
+    return Number(rows[0]?.count ?? 0)
   }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Button, Form, Input, Tag, Space, message, Table, Typography, Segmented } from 'antd'
+import { Button, Form, Input, Tag, Space, message, Table, Typography, Segmented, Select } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { QuickClinicalUploadButton } from '../../../components/document/QuickClinicalUploadButton.js'
 import { ExamMarkersDashboard } from '../../../components/patient/ExamMarkersDashboard.js'
@@ -22,6 +22,13 @@ import { useClinicalLinkCounts } from '../../../hooks/useClinicalLinkCounts.js'
 import { clinicalEntityRowProps, useClinicalEntityHighlight } from '../../../hooks/useClinicalEntityHighlight.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import { SourceTag } from '../../../components/ui/SourceTag.js'
+import { FleuryLaboratoryCell } from '../../../components/brands/FleuryLaboratoryCell.js'
+import {
+  isFleuryPrecisionSource,
+  resolveFleuryLabBrand,
+  type FleuryLabBrandId,
+} from '../../../lib/fleury-laboratory.js'
+import { FLEURY_LAB_BRANDS } from '../../../components/brands/fleury-group-config.js'
 import { EntityClinicalLinksCell } from '../../../components/patient/EntityClinicalLinksCell.js'
 import { EntityClinicalLinksExpandedPanel } from '../../../components/patient/EntityClinicalLinksExpandedPanel.js'
 import { ClinicalIndentPanel } from '../../../components/patient/ClinicalIndentPanel.js'
@@ -235,7 +242,13 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
     {
       title: t('exam.laboratory'),
       dataIndex: 'laboratory',
-      render: (v: string | null) => v ?? '-',
+      render: (_: string | null, row: Exam) => (
+        <FleuryLaboratoryCell
+          source={row.source}
+          laboratory={row.laboratory}
+          notes={row.notes}
+        />
+      ),
     },
     {
       title: t('exam.result'),
@@ -350,9 +363,20 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
       key: 'laboratory',
       render: (_: unknown, row: ExamListRow) => {
         if (row.type === 'order') {
-          return row.order.laboratory ?? row.exams[0].laboratory ?? '-'
+          const lab = row.order.laboratory ?? row.exams[0]?.laboratory
+          const source = row.order.source
+          const notes = row.exams[0]?.notes
+          return (
+            <FleuryLaboratoryCell source={source} laboratory={lab} notes={notes} />
+          )
         }
-        return row.exam.laboratory ?? '-'
+        return (
+          <FleuryLaboratoryCell
+            source={row.exam.source}
+            laboratory={row.exam.laboratory}
+            notes={row.exam.notes}
+          />
+        )
       },
     },
     {
@@ -482,6 +506,32 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
     row.type === 'order' || true
 
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'markers'>('list')
+  const [fleuryBrandFilter, setFleuryBrandFilter] = useState<FleuryLabBrandId | 'all'>('all')
+
+  const hasFleuryExams = useMemo(
+    () => data.some((e) => isFleuryPrecisionSource(e.source)),
+    [data],
+  )
+
+  const matchesFleuryBrandFilter = (exam: Exam): boolean => {
+    if (fleuryBrandFilter === 'all') return true
+    const brand = resolveFleuryLabBrand(exam.source, exam.laboratory, exam.notes)
+    return brand?.id === fleuryBrandFilter
+  }
+
+  const displayRows = useMemo(() => {
+    if (fleuryBrandFilter === 'all') return listRows
+    return listRows
+      .map((row): ExamListRow | null => {
+        if (row.type === 'exam') {
+          return matchesFleuryBrandFilter(row.exam) ? row : null
+        }
+        const exams = row.exams.filter(matchesFleuryBrandFilter)
+        if (exams.length === 0) return null
+        return { ...row, exams }
+      })
+      .filter((row): row is ExamListRow => row != null)
+  }, [listRows, fleuryBrandFilter])
 
   return (
     <>
@@ -502,11 +552,26 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
         />
       </div>
 
+      {activeSubTab === 'list' && hasFleuryExams && (
+        <div style={{ marginBottom: 12 }}>
+          <Select
+            size="small"
+            value={fleuryBrandFilter}
+            onChange={(v) => setFleuryBrandFilter(v)}
+            style={{ minWidth: 200 }}
+            options={[
+              { value: 'all', label: 'Todos os laboratórios (Grupo Fleury)' },
+              ...FLEURY_LAB_BRANDS.map((b) => ({ value: b.id, label: b.label })),
+            ]}
+          />
+        </div>
+      )}
+
       {activeSubTab === 'markers' ? (
         <ExamMarkersDashboard patientId={patientId} />
       ) : (
         <Table<ExamListRow>
-          dataSource={listRows}
+          dataSource={displayRows}
           columns={topLevelColumns}
           rowKey="key"
           loading={loading}

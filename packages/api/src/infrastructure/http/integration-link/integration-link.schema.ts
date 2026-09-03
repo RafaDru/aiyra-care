@@ -25,3 +25,9 @@ export const syncLinkQuerySchema = z.object({
   silent: z.coerce.boolean().optional(),
   force: z.coerce.boolean().optional(),
 })
+
+export const syncJobParamsSchema = z.object({ jobId: z.string().uuid() })
+
+export const syncOtpBodySchema = z.object({
+  code: z.string().min(4).max(16),
+})

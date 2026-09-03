@@ -1,10 +1,11 @@
 {
-  "name": "@open-health/web",
+  "name": "@aiyra-care/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "test:e2e": "playwright test",
     "clean:stale-js": "node -e \"const fs=require('fs');const p=require('path');function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.js'))fs.unlinkSync(f);}}walk('src');\""
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",

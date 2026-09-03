@@ -8,7 +8,7 @@ const root = join(__dirname, '../../..')
 const brandDir = join(root, 'packages/web/public/brand')
 const odRoot = join(
   process.env.APPDATA || '',
-  'Open Design/namespaces/release-stable-win/data/design-systems/open-health-platform-for-users-and-patients',
+  'Open Design/namespaces/release-stable-win/data/design-systems/aiyra-care-platform-for-users-and-patients',
 )
 
 const PALETTE_LIGHT = {
@@ -137,7 +137,7 @@ function syncOpenDesign() {
     brand = JSON.parse(readFileSync(brandPath, 'utf8'))
   }
   brand.name = 'Aiyra Care'
-  brand.tagline = 'Open Health Platform'
+  brand.tagline = 'AiyraCare Platform'
   brand.description =
     'Plataforma de saúde pediátrica e familiar. Paleta viva: roxo #9333EA, rosa #FF3DA8, rede amarela #FFE566.'
   brand.palettes = { aiyra: PALETTE_LIGHT }

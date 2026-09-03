@@ -10,6 +10,8 @@ Add-Type -AssemblyName System.Drawing
 $root = Split-Path $PSScriptRoot -Parent
 $iconPath = Join-Path $root 'packages\web\public\brand\logo-icon.png'
 $logFile = Join-Path $root 'ops-notifier.log'
+$toastResolveScript = Join-Path $PSScriptRoot 'ops-toast-resolve.ps1'
+. $toastResolveScript
 $port = if ($env:OPS_LOCAL_NOTIFIER_PORT) { $env:OPS_LOCAL_NOTIFIER_PORT.Trim() } else { '3012' }
 $alertPath = if ($env:OPS_LOCAL_NOTIFIER_PATH) { $env:OPS_LOCAL_NOTIFIER_PATH.Trim() } else { '/ops-alert' }
 if (-not $alertPath.StartsWith('/')) { $alertPath = "/$alertPath" }
@@ -59,6 +61,10 @@ function Resolve-AiyraAppUrl {
 
 $observabilityUrl = Resolve-ObservabilityUrl
 $aiyraAppUrl = Resolve-AiyraAppUrl
+$openBrowser = $true
+if ($env:OPS_LOCAL_NOTIFIER_OPEN -and $env:OPS_LOCAL_NOTIFIER_OPEN.Trim() -eq '0') {
+  $openBrowser = $false
+}
 $opsConsoleUpScript = Join-Path $root 'scripts\ops-console-up.ps1'
 $stackScript = Join-Path $root 'scripts\aiyracare-stack.ps1'
 
@@ -109,7 +115,7 @@ $listenerScript = {
         $res.OutputStream.Write($bytes, 0, $bytes.Length)
       }
       elseif ($req.HttpMethod -eq 'POST' -and $path -eq $AlertPath) {
-        $reader = New-Object System.IO.StreamReader($req.InputStream, $req.ContentEncoding)
+        $reader = New-Object System.IO.StreamReader($req.InputStream, [System.Text.UTF8Encoding]::new($false))
         $body = $reader.ReadToEnd()
         $reader.Close()
         $Queue.Enqueue($body)
@@ -213,17 +219,17 @@ $timer.Add_Tick({
   while ($queue.TryDequeue([ref]$payload)) {
     try {
       $json = $payload | ConvertFrom-Json
-      $text = [string]$json.text
-      $line = ($text -split "`n" | Where-Object { $_.Trim().StartsWith('•') } | Select-Object -First 1)
-      if (-not $line) { $line = ($text -split "`n" | Select-Object -First 1) }
-      $line = $line.Trim()
-      if ($line.Length -gt 240) { $line = $line.Substring(0, 240) }
-      $icon.ShowBalloonTip(12000, 'AiyraCare Ops', $line, [System.Windows.Forms.ToolTipIcon]::Warning)
+      $toast = Resolve-OpsToastFromPayload -Json $json
+      $icon.ShowBalloonTip(12000, $toast.Title, $toast.Body, [System.Windows.Forms.ToolTipIcon]::$($toast.IconType))
       $url = [string]$json.dashboardUrl
-      if ($url) {
-        Start-Process $url
+      if ($openBrowser) {
+        if ($url) {
+          Start-Process $url
+        } else {
+          Open-Observability
+        }
       } else {
-        Open-Observability
+        Write-NotifierLog "browser open skipped (OPS_LOCAL_NOTIFIER_OPEN=0)"
       }
     } catch {
       Write-NotifierLog "bad alert payload: $($_.Exception.Message)"

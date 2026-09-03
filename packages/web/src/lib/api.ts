@@ -141,6 +141,13 @@ export const api = {
       request<import('./api.types.js').VaccineScheduleItem[]>(`/patients/${patientId}/vaccine-schedule`),
     developmentMilestones: (patientId: string) =>
       request<import('./api.types.js').DevelopmentMilestone[]>(`/patients/${patientId}/development-milestones`),
+    conectesusSync: (patientId: string, opts?: { silent?: boolean }) => {
+      const qs = opts?.silent ? '?silent=1' : ''
+      return request<import('./api.types.js').ConecteSUSSyncResult>(
+        `/patients/${patientId}/conectesus/sync${qs}`,
+        { method: 'POST' },
+      )
+    },
   },
   growthRecords: {
     list: (patientId?: string) => request<import('./api.types.js').GrowthRecord[]>(`/growth-records${patientId ? `?patientId=${patientId}` : ''}`),
@@ -762,6 +769,7 @@ export const api = {
   },
   account: {
     freshness: () => request<import('./api.types.js').AccountFreshnessView>('/account/freshness'),
+    govbrSession: () => request<import('./api.types.js').GovBrSessionView>('/account/govbr-session'),
   },
   auth: {
     me: () => request<import('./api.types.js').AuthSyncResponse>('/auth/me'),

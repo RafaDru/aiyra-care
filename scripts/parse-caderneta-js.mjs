@@ -1,6 +1,8 @@
 import fs from 'fs'
+import { join } from 'path'
+import { REPO_ROOT } from './repo-root.mjs'
 
-const t = fs.readFileSync('C:/Users/rafae/Documents/Filhos/tmp-caderneta-main.js', 'utf8')
+const t = fs.readFileSync(join(REPO_ROOT, 'tmp-caderneta-main.js'), 'utf8')
 
 const apiPaths = [...t.matchAll(/['"`](\/api\/[^'"`]+)['"`]/g)].map((x) => x[1])
 console.log('API paths:', [...new Set(apiPaths)].join('\n'))

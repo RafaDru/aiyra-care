@@ -1,4 +1,106 @@
-# Histórico do Projeto Open Health
+# Histórico do Projeto AiyraCare
+
+## [2026-09-03] - Ops Run: console visual, gráficos e checklist preparação
+
+### Contexto
+Fechar itens `run-ops-console-visual-design` e `run-ops-console-charts-scales` do épico `prod-run-intelligence`; consolidar workspace canônico `aiyra-care`.
+
+### Realizado
+- **Console `:3013`:** tema AiyraCare (`ops-theme.tsx`), KPIs com sparklines, gráficos Recharts (sync, Ava, probe, fail rate, orçamento).
+- **Thresholds:** `ops-thresholds.ts` — latência probe ok/warning/critical alinhada à API (`OPS_PROBE_*`).
+- **Séries:** `timeSeries24h` na API + percentis Ava 24h vs 7d no painel Ava.
+- **Docs:** `docs/infra/OPS_PREP_CHECKLIST.md` — ritual local, preview, gates.
+- **Workspace:** canônico `%USERPROFILE%\workspace\aiyra-care` (repo `RafaDru/aiyra-care`); pasta `aiyra-cara` removida.
+
+### Próximo
+- [ ] `run-user-escalation` — acionamento família em sync crítico
+- [ ] `env-ops-dual-keys` — chaves distintas Integração vs Preview
+- [ ] Validar `promotion:gates` no Preview local
+
+## [2026-09-03] - Workspace canônico `aiyra-care`
+
+### Decisão
+- Repositório e workspace: `%USERPROFILE%\workspace\aiyra-care` (`https://github.com/RafaDru/aiyra-care.git`).
+- Nome `aiyra-cara` descontinuado; ver `docs/CURSOR_WORKSPACE.md` e `scripts/migrate-cursor-workspace.ps1`.
+
+## [2026-09-02] - Política ambientes: local → GCP Preview
+
+### Decisão
+- **Ambiente 1 (Integração):** permanece **local** (+ CI GitHub).
+- **Ambiente 2 (Preview):** **local** (`up:preview`, `3020/5174`) até ritmo de promoção + testes estável; depois **GCP** (projeto `openhealth-503119`).
+- **Cursor Cloud:** fora de escopo por hora.
+- Docs: `TWO_ENV_MODEL.md`, `ENV_PREVIEW.md`, `DEPLOY_PREVIEW.md`.
+
+## [2026-09-02] - SUS lembrete reimport + B2B org schema
+
+### Realizado
+- **Migration 054** — `sus_reimport` em `care_reminders`; lembrete 6 meses após sync ConecteSUS.
+- **Migration 055** — `organizations` + `organization_members` (B2B primitives).
+- **UI:** `CareReminderBanner` — ação «Reimportar SUS» no perfil do paciente.
+- Domain `Organization` entity; roadmap `sus-reminder` done.
+
+## [2026-09-02] - SUS sync silencioso + reimport UX + E2E smoke
+
+### Realizado
+- **API:** `POST /patients/:id/conectesus/sync?silent=1` — fetch HTTP gov.br + import com dedup.
+- **Web:** `useSilentConecteSUSSync` na Carteira; `SusPublicHealthBanner` na aba Vacinas.
+- **E2E:** Playwright `e2e/smoke.spec.ts` no CI web job.
+- Roadmap: `sus-reimport-ux`, `del-e2e-smoke` done.
+
+## [2026-09-02] - Ambientes: volume staging + CI staging + probe gate
+
+### Realizado
+- **seed-staging-volume.mjs** — sync_jobs, product_events, llm_usage sintéticos.
+- **refresh-staging-demo.mjs**, **apply-all-migrations.mjs**, **staging-probe-gate.mjs**.
+- **CI:** `.github/workflows/staging.yml` (database-smoke), `deploy-prod.yml` (manual).
+- Docs: `BACKUP.md`, `DEPLOY_STAGING.md`; épico `platform-environments` **done**.
+
+## [2026-09-02] - Ecossistema visual + ambientes + seed demo
+
+### Contexto
+CNPJ em regularização; priorizar estruturação técnica e mapa de negócio (personas B2B + marketplace farmácias horizonte).
+
+### Realizado
+- **docs/ECOSYSTEM.md** — mapas mermaid (personas, valor, monetização, marketplace sem patrocínio).
+- **docs/B2B_PARTNERS.md** — segmentos + marketplace farmácias.
+- **docs/infra/ENVIRONMENTS.md** — matriz local/staging/prod.
+- **seed-demo-data.mjs** + `npm run seed:demo`; **validate-migrations.mjs** no CI.
+- Roadmap: `business-ecosystem`, itens `platform-environments` parciais done.
+
+## [2026-09-02] - Roadmap: ambientes dev/staging/prod + discovery B2B
+
+### Contexto
+Regularização de CNPJ em andamento — cobrança live adiada; foco em estruturar aplicação (massas, staging sintético, esteiras) e planejar oferta B2B.
+
+### Realizado
+- **Roadmap** — épicos `platform-environments` (P2) e `b2b-partner-platform` (P3) em `docs/roadmap.json`.
+- **Ambientes:** gerador de massas, staging «shape produtivo» com dados fake, CI staging/prod, gates migration, backup, sondas, worker parity.
+- **B2B:** discovery por segmento (médicos, planos, labs, farmácias), primitives org/RBAC/API, pricing e contratos.
+
+### Decisões
+- **Staging** não restaura dump de prod com PHI; massas sintéticas LGPD-safe.
+- **B2B** em discovery separado do go-live B2C; export/share médico evolui dentro do pacote clínico.
+- Docs detalhados: `docs/infra/ENVIRONMENTS.md` e `docs/B2B_PARTNERS.md` (backlog nos épicos).
+
+## [2026-09-01] - Sessão gov.br persistida + auth genérico nos portais
+
+### Contexto
+ConecteSUS/Caderneta abriam Chrome em cada “Buscar”; falhas de sync em convênios não orientavam o usuário a atualizar senha vs reconectar sessão.
+
+### Realizado
+- **Migration 053** — `govbr_sessions` (token FHIR por `account_id`); `integration_links.auth_attention`; `sync_jobs.failure_kind`.
+- **SUS:** `GovBrTokenSession` + `PublicHealthScrapeService`; reimport ConecteSUS/Caderneta **sem browser** enquanto token válido; `GET /account/govbr-session`.
+- **Auth portais:** `domain/portal-auth/portal-auth-failure.ts` + `portal-sync-auth.helper.ts`; UI Integrações com avisos credentials/session.
+- **Docs:** `SUS_CONECTESUS.md`, `CONNECT.md`, `project-context.json`, roadmap `sus-govbr-session` + `connect-portal-auth`.
+
+### Decisões
+- Sessão **gov.br** na **conta** (`govbr_sessions`), espelhando `calendar_connections` — não em `integration_links` (que é vínculo paciente×portal com senha).
+- Sessão **convênio/hospital/lab** continua em `integration_links.encrypted_session_token`.
+- Scrapers gov.br ainda em `packages/api` (Connect Fase 2); contrato canônico government pendente.
+
+### To-Dos
+- [ ] ConecteSUS no sync silenciente da Carteira quando `govbr_session.sessionReady`
+- [ ] UX reimport SUS em Vacinas (`sus-reimport-ux`)
 
 ## [2026-09-01] - Grupo Fleury UI fase 1 + ops dashboard local
 
@@ -700,7 +802,7 @@ Ant Design. O Open Design mantém as paletas de cores, tokens e descrições
 visuais, enquanto o frontend consome esses tokens via bridge.
 
 ### Realizado
-- [x] Design system "open-health" atualizado no Open Design com 3 paletas
+- [x] Design system "aiyra-care" atualizado no Open Design com 3 paletas
 - [x] DESIGN.md com descrição completa de componentes e estilos
 - [x] brand.json com paletas, tipografia, layout e voice & tone
 - [x] tokens.palettes.json (indigo #4F46E5, teal #0D9488, rose #E11D48)
@@ -720,7 +822,7 @@ Open Design (tokens) → sync-opendesign.ps1 → ThemeProvider → Ant Design Co
 
 ### Realizado
 - [x] .env gerado a partir de variáveis de ambiente da máquina
-- [x] PostgreSQL local: database openhealth + schema relacional aplicado
+- [x] PostgreSQL local: database aiyracare + schema relacional aplicado
 - [x] Neo4J local (porta 7687) + schema de grafos aplicado
 - [x] API Fastify: rotas /health e /health/db (PG ok, Neo4J ok)
 - [x] GitHub Secrets: GROQ_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE, NEO4J_*
@@ -737,7 +839,7 @@ Open Design (tokens) → sync-opendesign.ps1 → ThemeProvider → Ant Design Co
 ## [2026-07-21] - Fundação do Projeto
 
 ### Contexto
-Criação do Open Health, sistema para centralizar histórico médico infantil.
+Criação do AiyraCare, sistema para centralizar histórico médico infantil.
 
 ### Crianças Cadastradas
 - **Luís Drummond Freitas Reis** - Nasc: 23/01/2020 - 20kg
@@ -746,7 +848,7 @@ Criação do Open Health, sistema para centralizar histórico médico infantil.
 ### Decisões Arquiteturais Iniciais
 | Decisão | Opção | Motivo |
 |---------|-------|--------|
-| Repositório | open-health (GitHub) | Novo repositório dedicado |
+| Repositório | aiyra-care (GitHub) | Novo repositório dedicado |
 | Banco Relacional | PostgreSQL (Supabase) | Free Tier gerenciado |
 | Banco de Grafos | Neo4J AuraDB Free | Free Tier gerenciado |
 | Mobile | React Native + Expo | Multiplataforma |
@@ -756,7 +858,7 @@ Criação do Open Health, sistema para centralizar histórico médico infantil.
 
 ### Estrutura Inicial do Projeto
 ```
-open-health/
+aiyra-care/
 ├── .github/workflows/   # CI/CD
 ├── docs/                 # Documentação viva e histórico
 ├── packages/
@@ -777,7 +879,7 @@ open-health/
 ```
 
 ### Realizado na Fundação
-- [x] Repositório GitHub criado (RafaDru/open-health) e push realizado
+- [x] Repositório GitHub criado (RafaDru/aiyra-care) e push realizado
 - [x] Estrutura monorepo montada (packages/web, mobile, api, agents)
 - [x] Schemas PostgreSQL (8 tabelas)
 - [x] Modelo Neo4J (nós e relacionamentos)
@@ -1176,7 +1278,7 @@ Precisamos levar o histórico ao consultório de forma útil — não só dump c
 ## [2026-07-28] - Backlog: Rede credenciada agregada (“Decolar” da saúde)
 
 ### Contexto
-Hoje cada operadora/SUS tem sua própria busca de rede. A ideia é um módulo de descoberta unificada no Open Health: o usuário/paciente busca uma vez e o sistema compõe resultados de vários provedores vinculados (e do SUS), melhorando o ranking com o tempo — análogo à Decolar para voos/hotéis, mas para rede credenciada.
+Hoje cada operadora/SUS tem sua própria busca de rede. A ideia é um módulo de descoberta unificada no AiyraCare: o usuário/paciente busca uma vez e o sistema compõe resultados de vários provedores vinculados (e do SUS), melhorando o ranking com o tempo — análogo à Decolar para voos/hotéis, mas para rede credenciada.
 
 ### Backlog (não implementar agora)
 - [ ] **Módulo Rede Credenciada** — busca (especialidade, local, nome, urgência etc.)

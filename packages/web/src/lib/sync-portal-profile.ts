@@ -156,16 +156,26 @@ export function isInteractiveLoginMessage(message: string): boolean {
     || m.includes('reutilizada')
     || m.includes('autenticado via api')
     || m.includes('sessão amil salva')
+    || m.includes('enviando código de verificação')
   ) {
     return false
   }
   return /chrome|gov\.br|conclua o login|clique em entrar|login manual|abra o chrome|navegador automatizado|grupo fleury|precision care|sms|whatsapp|código|codigo/i.test(m)
 }
 
+/** Marcador na mensagem de progresso quando OTP deve ser digitado no app. */
+export const FLEURY_OTP_IN_APP_MARKER = '[[fleury_otp_in_app]]'
+
+export function isFleuryOtpInAppMessage(message: string): boolean {
+  return message.includes(FLEURY_OTP_IN_APP_MARKER)
+}
+
 /** Sync Hermes no portal unificado Grupo Fleury (OTP no Chrome, não senha protocolo). */
 export function isFleuryOtpLoginMessage(message: string): boolean {
+  if (isFleuryOtpInAppMessage(message)) return false
   const m = message.toLowerCase()
   if (m.includes('senha do protocolo') || m.includes('entrada pardini')) return false
+  if (m.includes('enviando código de verificação')) return false
   return /grupo fleury|precision care/.test(m)
     && (/sms|whatsapp|e-mail|email|código|codigo|otp/.test(m) || m.includes('no chrome'))
 }

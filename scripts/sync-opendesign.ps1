@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 
-$odPath = "$env:APPDATA\Open Design\namespaces\release-stable-win\data\design-systems\open-health-platform-for-users-and-patients"
+$odPath = "$env:APPDATA\Open Design\namespaces\release-stable-win\data\design-systems\aiyra-care-platform-for-users-and-patients"
 $colorsFile = Join-Path $root "packages\web\src\theme\colors.ts"
 $bridgeFile = Join-Path $root "packages\web\src\theme\open-design-bridge.ts"
 
@@ -16,7 +16,7 @@ function Sync-Tokens {
   Write-Host "Syncing Open Design tokens..." -ForegroundColor Cyan
 
   if (-not (Test-Path "$odPath\system\tokens.palettes.json")) {
-    Write-Host "WARN: Open Health design system not found in Open Design" -ForegroundColor Yellow
+    Write-Host "WARN: AiyraCare design system not found in Open Design" -ForegroundColor Yellow
     return
   }
 

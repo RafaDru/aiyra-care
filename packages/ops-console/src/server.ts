@@ -41,7 +41,7 @@ const probeIntervalMs = Number(process.env.OPS_PROBE_INTERVAL_MS ?? '60000')
 
 const pool = new pg.Pool({
   connectionString:
-    process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+    process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const metricsService = new OpsMetricsService(

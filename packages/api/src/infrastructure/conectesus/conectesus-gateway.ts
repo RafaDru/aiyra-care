@@ -1,73 +1,29 @@
-import { chromium } from 'playwright'
 import type { ScrapedVaccine, ScrapedExam, ScraperResult } from '../../domain/scraper/scraper-types.js'
 import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
-import type { FhirBundle, FhirPatient, FhirList, FhirComposition, FhirIdentifier } from './fhir-types.js'
+import type { FhirBundle, FhirPatient, FhirList, FhirComposition } from './fhir-types.js'
+import type { GovBrTokenSession } from '../govbr/govbr-token-session.js'
 
-const TOKEN_URL = '**/govbr-proxy.saude.gov.br/api/token/gerar*'
 const FHIR_GATEWAY = 'https://ehr-search-gateway.saude.gov.br/api/fhir/r4'
 const COMPOSITION_BASE = 'https://mg-ehr-services.saude.gov.br/1.15/api/fhir/r4'
-const LOGIN_TIMEOUT = 5 * 60 * 1000
-const EXPIRY_MARGIN_MS = 60_000
 
 export class ConecteSUSGateway {
-  private accessToken = ''
-  private tokenExpiresAt = 0
-
-  private isExpired(): boolean {
-    return Date.now() + EXPIRY_MARGIN_MS >= this.tokenExpiresAt
-  }
+  constructor(private readonly tokenSession: GovBrTokenSession) {}
 
   async loginViaBrowser(onProgress?: (p: ScraperProgress) => void): Promise<string> {
-    const emit = (step: string, message: string, status: ScraperProgress['status']) => onProgress?.({ step, message, status })
-
-    const browser = await chromium.launch({
-      headless: false,
-      channel: 'chrome',
-      args: ['--disable-blink-features=AutomationControlled'],
+    await this.tokenSession.ensureToken(onProgress, {
+      startUrl: 'https://meususdigital.saude.gov.br/login',
+      navigateMessage: 'Abrindo Meu SUS Digital...',
+      waitForGovBrButton: true,
     })
-    const context = await browser.newContext({
-      locale: 'pt-BR',
-      timezoneId: 'America/Sao_Paulo',
-    })
-    await context.addInitScript(() => {
-      Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false })
-    })
-    const page = await context.newPage()
-
-    try {
-      const tokenPromise = page.waitForResponse(r => r.url().includes('govbr-proxy.saude.gov.br/api/token/gerar') && r.status() === 200, { timeout: LOGIN_TIMEOUT })
-
-      emit('navigate', 'Abrindo Meu SUS Digital...', 'running')
-      await page.goto('https://meususdigital.saude.gov.br/login', { waitUntil: 'networkidle' })
-
-      const isGovBr = page.url().includes('sso.acesso.gov.br')
-      if (!isGovBr) {
-        emit('login', 'Clique em "Entrar com Gov.br" no navegador', 'running')
-        const btn = await page.waitForSelector('text=Entrar com Gov.br', { timeout: 15000 }).catch(() => null)
-        if (btn) {
-          await btn.click()
-          await page.waitForTimeout(3000)
-        }
-      }
-
-      emit('login', 'Faça login no gov.br na janela aberta. Aguardando...', 'running')
-
-      const response = await tokenPromise
-      const body = await response.json()
-      this.accessToken = body.access_token
-      this.tokenExpiresAt = Date.now() + (body.expires_in || 3600) * 1000
-
-      emit('login', 'Login detectado! Coletando dados...', 'success')
-      return this.accessToken
-    } finally {
-      await browser.close()
-    }
+    return this.tokenSession.getAccessToken()
   }
 
   private async ensureToken(onProgress?: (p: ScraperProgress) => void): Promise<void> {
-    if (!this.accessToken || this.isExpired()) {
-      await this.loginViaBrowser(onProgress)
-    }
+    await this.tokenSession.ensureToken(onProgress, {
+      startUrl: 'https://meususdigital.saude.gov.br/login',
+      navigateMessage: 'Abrindo Meu SUS Digital...',
+      waitForGovBrButton: true,
+    })
   }
 
   private async fhirGet<T>(path: string, onProgress?: (p: ScraperProgress) => void): Promise<T> {
@@ -75,16 +31,15 @@ export class ConecteSUSGateway {
     const url = `${FHIR_GATEWAY}${path}`
     const res = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.tokenSession.getAccessToken()}`,
         Accept: 'application/json',
       },
     })
     if (res.status === 401) {
-      this.accessToken = ''
-      this.tokenExpiresAt = 0
+      this.tokenSession.clear()
       await this.ensureToken(onProgress)
       const retry = await fetch(url, {
-        headers: { Authorization: `Bearer ${this.accessToken}`, Accept: 'application/json' },
+        headers: { Authorization: `Bearer ${this.tokenSession.getAccessToken()}`, Accept: 'application/json' },
       })
       if (!retry.ok) throw new Error(`FHIR ${retry.status} (após reautenticação): ${await retry.text().catch(() => '')}`)
       return retry.json()
@@ -98,16 +53,15 @@ export class ConecteSUSGateway {
     const url = `${COMPOSITION_BASE}${path}`
     const res = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.tokenSession.getAccessToken()}`,
         Accept: 'application/json',
       },
     })
     if (res.status === 401) {
-      this.accessToken = ''
-      this.tokenExpiresAt = 0
+      this.tokenSession.clear()
       await this.ensureToken(onProgress)
       const retry = await fetch(url, {
-        headers: { Authorization: `Bearer ${this.accessToken}`, Accept: 'application/json' },
+        headers: { Authorization: `Bearer ${this.tokenSession.getAccessToken()}`, Accept: 'application/json' },
       })
       if (!retry.ok) throw new Error(`FHIR Composition ${retry.status} (após reautenticação): ${await retry.text().catch(() => '')}`)
       return retry.json()
@@ -213,6 +167,15 @@ export class ConecteSUSGateway {
     const exams = await this.getExams(patient.id, onProgress)
     emit('fetch-exams', `${exams.length} exames encontrados`, 'success')
 
-    return { patientName: patient.name, patientBirthDate: patient.birthDate, patientCpf: patient.cpf, patientCns: patient.cns, vaccines, exams, prescriptions: [], rawPages: [] }
+    return {
+      patientName: patient.name,
+      patientBirthDate: patient.birthDate,
+      patientCpf: patient.cpf,
+      patientCns: patient.cns,
+      vaccines,
+      exams,
+      prescriptions: [],
+      rawPages: [],
+    }
   }
 }

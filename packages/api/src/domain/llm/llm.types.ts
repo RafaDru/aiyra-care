@@ -35,6 +35,8 @@ export interface LlmRouterOptions {
   allowLlmDataSharing?: boolean
   /** Emite trechos da resposta inicial (SSE reply_delta / Gemini stream). */
   onReplyDelta?: (chunk: string) => void
+  /** Id estável por conversa/tarefa — enviado como `x-opencode-session` a OpenCode Zen/Go. */
+  opencodeSessionId?: string
 }
 
 export interface LlmUsageAccount {

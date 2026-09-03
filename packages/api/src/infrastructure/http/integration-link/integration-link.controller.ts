@@ -2,7 +2,7 @@ import type { FastifyReply } from 'fastify'
 import type { Pool } from 'pg'
 import type { IntegrationLinkRepository } from '../../../domain/integration-link/integration-link.repository.js'
 import { IntegrationLink } from '../../../domain/integration-link/integration-link.entity.js'
-import { createIntegrationLinkSchema, updateIntegrationLinkSchema, integrationLinkParamsSchema, integrationLinkQuerySchema, syncLinkQuerySchema } from './integration-link.schema.js'
+import { createIntegrationLinkSchema, updateIntegrationLinkSchema, integrationLinkParamsSchema, integrationLinkQuerySchema, syncLinkQuerySchema, syncJobParamsSchema, syncOtpBodySchema } from './integration-link.schema.js'
 import { UnimedBhCartaoVirtualScraper } from '../../scraper/unimedbh-cartao-virtual.scraper.js'
 import { entityToSyncProgressPayload, type SyncProgressPayload } from '../../scraper/sync-progress-store.js'
 import { subscribeSyncJob } from '../../scraper/sync-job-stream.js'
@@ -18,6 +18,10 @@ import { guardPatientEntity } from '../auth/patient-entity.guard.js'
 import { enrichIntegrationLinksWithSyncAuthority } from '../../../application/integration-link/integration-link-sync-authority.js'
 import { IntegrationLinkSyncService } from '../../../application/integration-link/integration-link-sync.service.js'
 import { isIntegrationLinkSessionReady } from '../../../application/integration-link/integration-link-session.js'
+import {
+  isAwaitingHermesPardiniOtp,
+  submitHermesPardiniOtpCode,
+} from '../../scraper/hermes-pardini-otp-session.js'
 
 const syncLocks = new Set<string>()
 
@@ -100,6 +104,7 @@ export class IntegrationLinkController {
       encryptedPassword: body.data.password ? encrypt(body.data.password) : data.encryptedPassword,
       cardNumber: body.data.cardNumber ?? data.cardNumber,
       active: body.data.active ?? data.active,
+      authAttention: body.data.password ? 'none' : data.authAttention,
       updatedAt: new Date(),
     })
     const saved = await this.repo.update(updated)
@@ -259,6 +264,41 @@ export class IntegrationLinkController {
     if (!guarded) return
 
     return reply.send(entityToSyncProgressPayload(dbJob, 'snapshot'))
+  }
+
+  async syncSubmitOtp(req: AuthenticatedRequest, reply: FastifyReply) {
+    const params = syncJobParamsSchema.safeParse(req.params)
+    if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    const body = syncOtpBodySchema.safeParse(req.body)
+    if (!body.success) return reply.status(400).send({ error: body.error.flatten() })
+
+    const { jobId } = params.data
+    const dbJob = await this.syncJobRepo.findById(jobId)
+    if (!dbJob) return reply.status(404).send({ message: 'Job not found' })
+
+    const guarded = await guardPatientEntity(
+      req,
+      reply,
+      await this.repo.findById(dbJob.integrationLinkId),
+      'Integration link not found',
+    )
+    if (!guarded) return
+
+    const jobData = dbJob.toJSON()
+    if (jobData.status !== 'running' || jobData.portalType !== 'hermes_pardini') {
+      return reply.status(409).send({ message: 'Este job não está aguardando código OTP' })
+    }
+
+    if (!isAwaitingHermesPardiniOtp(jobId)) {
+      return reply.status(409).send({ message: 'Login Grupo Fleury não está aguardando código neste momento' })
+    }
+
+    const ok = submitHermesPardiniOtpCode(jobId, body.data.code)
+    if (!ok) {
+      return reply.status(400).send({ message: 'Código OTP inválido — use 4 a 8 dígitos' })
+    }
+
+    return reply.send({ ok: true })
   }
 
   async syncProgressStream(req: AuthenticatedRequest, reply: FastifyReply) {

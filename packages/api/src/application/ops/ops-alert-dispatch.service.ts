@@ -6,6 +6,11 @@ import {
   triageOpsAlerts,
   type OpsAlertTriageRow,
 } from '../../domain/ops/ops-alert-triage.js'
+import {
+  buildOpsAlertToast,
+  sanitizeOpsToastText,
+  type OpsAlertToast,
+} from '../../domain/ops/ops-alert-toast.js'
 
 const DEFAULT_COOLDOWN_MS = 30 * 60 * 1000
 
@@ -17,9 +22,22 @@ function severityRank(s: OpsAlert['severity']): number {
   return s === 'critical' ? 2 : 1
 }
 
+function categoryLabel(category: OpsAlert['category']): string {
+  switch (category) {
+    case 'infra': return 'Infra'
+    case 'sync': return 'Sync'
+    case 'llm': return 'Ava'
+    case 'product': return 'Produto'
+    default: return category
+  }
+}
+
 function formatAlertText(alerts: OpsAlert[]): string {
-  const lines = alerts.map((a) => `• [${a.severity}] ${a.category}: ${a.message}`)
-  return `AiyraCare ops — ${alerts.length} alerta(s)\n${lines.join('\n')}`
+  const lines = alerts.map((a) => {
+    const msg = sanitizeOpsToastText(a.message)
+    return `- [${a.severity}] ${categoryLabel(a.category)}: ${msg}`
+  })
+  return `AiyraCare Ops - ${alerts.length} alerta(s)\n${lines.join('\n')}`
 }
 
 export function resolveOpsAlertDashboardUrl(): string | undefined {
@@ -49,15 +67,18 @@ export function buildOpsAlertDispatchPayload(
   dashboardUrl?: string
   triage?: OpsAlertTriageRow[]
   humanRequiredCount?: number
+  toast?: OpsAlertToast
 } {
   const dashboardUrl = resolveOpsAlertDashboardUrl()
   const humanRequiredCount = triage?.filter((t) => t.humanRequired).length
+  const toast = alerts.length > 0 ? buildOpsAlertToast(alerts) : undefined
   return {
     text: formatAlertText(alerts),
     alerts,
     checkedAt,
     ...(dashboardUrl ? { dashboardUrl } : {}),
     ...(triage ? { triage, humanRequiredCount } : {}),
+    ...(toast ? { toast } : {}),
   }
 }
 

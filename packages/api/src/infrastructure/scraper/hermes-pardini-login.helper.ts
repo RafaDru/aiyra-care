@@ -7,7 +7,13 @@ import {
   hermesPardiniPortalEntryUrl,
   fleuryPrecisionUnifiedEntryUrl,
   hermesPardiniResultadosExameUrl,
+  fleuryPrecisionOtpInApp,
 } from './hermes-pardini.portal.js'
+import {
+  registerHermesPardiniOtpSession,
+  unregisterHermesPardiniOtpSession,
+  waitHermesPardiniOtpCode,
+} from './hermes-pardini-otp-session.js'
 
 import { formatHermesPardiniUsername } from './hermes-pardini-auth.js'
 
@@ -26,6 +32,16 @@ export interface HermesPardiniBrowserLoginResult {
 
 const USERNAME_LOCATOR = '#username, #_username, input[name="username"]'
 const PASSWORD_LOCATOR = '#password, #_password, input[name="password"]'
+const OTP_LOCATOR = [
+  '#otp',
+  '#_otp',
+  'input[name="otp"]',
+  'input[name="code"]',
+  '#code',
+  '#_code',
+  'input[autocomplete="one-time-code"]',
+  'input[inputmode="numeric"]',
+].join(', ')
 
 /** Funções `page.evaluate` como string — evita `__name is not defined` com tsx. */
 const EVAL_TROCAR_PASSWORD_LOGIN = `() => {
@@ -243,6 +259,81 @@ export async function fillHermesPardiniUsernameForm(page: Page, login: string): 
   if (await username.first().isVisible({ timeout: 2000 }).catch(() => false)) {
     await username.first().click({ force: true, timeout: 5000 }).catch(() => {})
     await username.first().fill(formattedLogin, { force: true })
+  }
+}
+
+export async function submitHermesPardiniUsernameForm(page: Page): Promise<void> {
+  await dismissHermesPardiniSecurityModal(page)
+  const proceed = page.locator(
+    'button#_prosseguir-button:not(#_prosseguir-button-password):not(#_prosseguir-button-birthdate), button[id="_prosseguir-button-username"]',
+  ).first()
+  const kcSubmit = page.locator(
+    '#kc-form-login button[type="submit"], button[name="login"]',
+  ).first()
+
+  if (await proceed.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await proceed.click({ force: true, timeout: 10_000 })
+    return
+  }
+  if (await proceed.count() > 0) {
+    await proceed.click({ force: true, timeout: 10_000 }).catch(() => {})
+    return
+  }
+  if (await kcSubmit.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await kcSubmit.click({ force: true, timeout: 10_000 })
+  }
+}
+
+/** Seleciona canal OTP (SMS, WhatsApp ou e-mail) quando o portal exige escolha. */
+export async function trySelectFleuryOtpChannel(page: Page): Promise<boolean> {
+  const channelPatterns = [/sms/i, /whatsapp/i, /e-?mail/i]
+  for (const pattern of channelPatterns) {
+    const btn = page.getByRole('button', { name: pattern }).first()
+    if (await btn.isVisible({ timeout: 800 }).catch(() => false)) {
+      await btn.click({ force: true, timeout: 5000 }).catch(() => {})
+      return true
+    }
+  }
+  return false
+}
+
+export async function isHermesPardiniOtpFieldVisible(page: Page): Promise<boolean> {
+  const otp = page.locator(OTP_LOCATOR).first()
+  return await otp.isVisible({ timeout: 500 }).catch(() => false)
+}
+
+export async function waitForHermesPardiniOtpField(page: Page, timeoutMs = 45_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    await dismissHermesPardiniSecurityModal(page).catch(() => {})
+    await trySelectFleuryOtpChannel(page).catch(() => {})
+    if (await isHermesPardiniOtpFieldVisible(page)) return
+    await page.waitForTimeout(400)
+  }
+  throw new Error('Campo de código OTP não apareceu no portal Grupo Fleury')
+}
+
+export async function fillHermesPardiniOtpForm(page: Page, code: string): Promise<void> {
+  const digits = code.replace(/\D/g, '')
+  const otp = page.locator(OTP_LOCATOR).first()
+  await otp.waitFor({ state: 'visible', timeout: 15_000 })
+  await otp.click({ force: true, timeout: 5000 }).catch(() => {})
+  await otp.fill(digits, { force: true })
+}
+
+export async function submitHermesPardiniOtpForm(page: Page): Promise<void> {
+  await dismissHermesPardiniSecurityModal(page)
+  const otpSubmit = page.locator(
+    'button[id*="otp"], button[id*="_prosseguir"], button[type="submit"]',
+  ).first()
+  const entrarBtn = page.getByRole('button', { name: /^entrar$|^confirmar$|^validar$/i }).first()
+
+  if (await otpSubmit.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await otpSubmit.click({ force: true, timeout: 10_000 })
+    return
+  }
+  if (await entrarBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await entrarBtn.click({ force: true, timeout: 10_000 })
   }
 }
 
@@ -465,18 +556,47 @@ export async function loginHermesPardiniViaBrowser(
     autoFillPassword?: boolean
     /** Pré-preenche CPF/código na entrada unificada. */
     prefillUsername?: boolean
+    /** OTP digitado no app — jobId + callback ao aguardar código. */
+    otpInApp?: { jobId: string; onAwaitingOtp?: () => void }
   },
 ): Promise<HermesPardiniBrowserLoginResult> {
   const unifiedEntry = opts?.unifiedEntry ?? false
   const autoFillPassword = opts?.autoFillPassword ?? !unifiedEntry
   const tokenTimeoutMs = opts?.tokenTimeoutMs
     ?? (unifiedEntry ? 180_000 : 120_000)
+  const useOtpInApp = unifiedEntry
+    && opts?.otpInApp?.jobId
+    && fleuryPrecisionOtpInApp()
 
   attachHermesPardiniDialogHandler(page)
   const capture = attachHermesPardiniTokenCapture(
     page,
-    autoFillPassword && login?.trim() && password ? { login, password } : undefined,
+    autoFillPassword && !useOtpInApp && login?.trim() && password
+      ? { login, password }
+      : undefined,
   )
+
+  if (useOtpInApp && opts?.otpInApp) {
+    const { jobId, onAwaitingOtp } = opts.otpInApp
+    registerHermesPardiniOtpSession(jobId, page)
+    try {
+      await openFleuryPrecisionUnifiedPortal(page)
+      if (opts.prefillUsername && login?.trim()) {
+        await fillHermesPardiniUsernameForm(page, login)
+      }
+      await submitHermesPardiniUsernameForm(page)
+      await waitForHermesPardiniOtpField(page, 60_000)
+      const codePromise = waitHermesPardiniOtpCode(jobId, tokenTimeoutMs)
+      onAwaitingOtp?.()
+      const code = await codePromise
+      await fillHermesPardiniOtpForm(page, code)
+      await submitHermesPardiniOtpForm(page)
+      await navigateHermesPardiniResultadosExame(page)
+      return capture.waitForTokens(tokenTimeoutMs)
+    } finally {
+      unregisterHermesPardiniOtpSession(jobId)
+    }
+  }
 
   if (unifiedEntry) {
     await openFleuryPrecisionUnifiedPortal(page)

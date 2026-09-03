@@ -1,5 +1,5 @@
 {
-  "name": "@open-health/neo4j-lineage-worker",
+  "name": "@aiyra-care/neo4j-lineage-worker",
   "version": "0.1.0",
   "private": true,
   "description": "Backfill Neo4j projection from import_raw_records (import lineage)",

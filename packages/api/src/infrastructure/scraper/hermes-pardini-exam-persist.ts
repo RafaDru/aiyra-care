@@ -9,6 +9,7 @@ import { GcsFileStorage, isGcsStorageConfigured } from '../storage/gcs.storage.j
 import { ExamOrderService } from '../../application/exam-order/exam-order.service.js'
 import { buildExamOrderExternalKey } from '../../domain/exam-order/exam-order-keys.js'
 import type { HermesPardiniApiHeaderProfile, HermesPardiniExamItem } from './hermes-pardini-bff.service.js'
+import { inferFleuryLabBrandId } from './fleury-lab-brand-infer.js'
 import { downloadHermesPardiniPedidoPdf } from './hermes-pardini-bff.service.js'
 import { clipExamSummary, extractReportPdfText } from './exam-pdf-text.helper.js'
 
@@ -27,8 +28,14 @@ function buildExamNotes(dedup: string, meta: Record<string, unknown>): string {
   return `${dedup}\n${JSON.stringify(meta)}`
 }
 
-export function hermesPardiniExamNotes(dedup: string, meta: Record<string, unknown>): string {
-  return buildExamNotes(dedup, meta)
+export function hermesPardiniExamNotes(
+  dedup: string,
+  meta: Record<string, unknown>,
+  laboratory?: string | null,
+): string {
+  const brand = inferFleuryLabBrandId(laboratory)
+  const merged = brand ? { ...meta, fleuryLabBrand: brand } : meta
+  return buildExamNotes(dedup, merged)
 }
 
 export async function persistHermesPardiniLaudos(args: {

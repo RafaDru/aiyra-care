@@ -1,7 +1,7 @@
 # Roadmap AiyraCare
 
 > **Fonte estruturada (UI + API):** [`roadmap.json`](./roadmap.json)  
-> **Última revisão de prioridades:** 2026-08-13
+> **Última revisão de prioridades:** 2026-09-02
 
 Documento vivo para acompanhar épicos, pendências e debates. A página **Roadmap** no app lê o JSON via API e organiza os épicos em três filas:
 
@@ -39,8 +39,8 @@ Itens com `reviewBadge` no JSON aparecem com **tags coloridas** no Roadmap e na 
 |------------|------|---------------------|
 | **P0** | Sync silencioso (Connect) | ✅ Entregue |
 | **P1** | Sequência do cuidado + Neo4j | ✅ Entregue |
-| **P2** | Scheduler, export, integrações, billing, legal tech, settings | ✅ Código entregue; gates humanos paralelos |
-| **P3** | OCR/LLM ✅ · Agenda + calendários ✅ · **Agentes RAG** 🔜 | Próximo épico de produto |
+| **P2** | Scheduler, export, integrações, billing, legal tech, settings, **ambientes** | Código entregue em parte; gates humanos + **platform-environments** em estruturação |
+| **P3** | OCR/LLM ✅ · Agenda ✅ · **Agentes RAG** · **B2B discovery** | Próximo épico produto + parceiros |
 | **P4** | Rede credenciada, mobile, microserviços | Horizonte |
 
 ## O que está disponível hoje (produto)
@@ -94,6 +94,16 @@ Pacote connect, orchestrator, sessões, incremental, SSE, novelty, worker, harde
 ### ✅ P3 — Documentos OCR/LLM (código)
 
 Cascade OCR, manuscrito, métricas OCR — revisão médica disclaimers = human gate.
+
+### 🔜 P2 — Ambientes (pré-CNPJ)
+
+Épico `platform-environments` — **completo** (ENVIRONMENTS, seeds, staging CI, probe gate, BACKUP, DEPLOY_STAGING).
+
+### 🔜 P3 — Ecossistema e B2B
+
+`business-ecosystem` — [`ECOSYSTEM.md`](./ECOSYSTEM.md) (personas, marketplace farmácias horizonte). `b2b-partner-platform` — [`B2B_PARTNERS.md`](./B2B_PARTNERS.md).
+
+### 🔜 P3 — B2B parceiros (discovery)
 
 ### 🔜 P3 — Agentes RAG (próximo)
 

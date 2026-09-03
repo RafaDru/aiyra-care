@@ -7,6 +7,8 @@ import { api } from '../../../lib/api.js'
 import type { Patient, IntegrationLink, UnimedVirtualCard, PlanMembershipWithPlan } from '../../../lib/api.types.js'
 import { BrandTag } from '../../../components/brands/BrandLogo.js'
 import { useSilentWalletSync } from '../../../hooks/useSilentWalletSync.js'
+import { useSilentConecteSUSSync } from '../../../hooks/useSilentConecteSUSSync.js'
+import type { GovBrSessionView } from '../../../lib/api.types.js'
 import { useWalletLinkSyncStatus } from '../../../hooks/useWalletLinkSyncStatus.js'
 import { usePatientSyncCompletions } from '../../../hooks/usePatientSyncCompletions.js'
 import {
@@ -47,14 +49,32 @@ export function WalletCardsTab({
   const [tokenError, setTokenError] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(0)
   const [syncRefreshKey, setSyncRefreshKey] = useState(0)
+  const [govbrSession, setGovbrSession] = useState<GovBrSessionView | null>(null)
   const highlightRef = useRef<HTMLDivElement | null>(null)
 
   const insuranceLinks = links.filter((l) => INSURANCE_PORTALS.has(l.portalType))
+
+  useEffect(() => {
+    api.account.govbrSession()
+      .then(setGovbrSession)
+      .catch(() => setGovbrSession(null))
+  }, [patient.id])
 
   useSilentWalletSync(links, () => {
     onCardUpdated()
     setSyncRefreshKey((k) => k + 1)
   })
+
+  useSilentConecteSUSSync(
+    patient.id,
+    patient.cpf,
+    govbrSession?.sessionReady ?? false,
+    govbrSession?.conectesusLastFetchAt,
+    () => {
+      onCardUpdated()
+      api.account.govbrSession().then(setGovbrSession).catch(() => null)
+    },
+  )
 
   usePatientSyncCompletions(patient.id, () => {
     onCardUpdated()

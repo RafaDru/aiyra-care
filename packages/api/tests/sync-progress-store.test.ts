@@ -26,6 +26,10 @@ class FakeSyncJobRepo implements Pick<SyncJobPgRepository, 'save' | 'updateProgr
   }): Promise<void> {
     const prev = this.rows.get(args.id)
     if (!prev) return
+    const terminalIncoming = args.status === 'success' || args.status === 'failed'
+    if (!terminalIncoming && (prev.status === 'success' || prev.status === 'failed')) {
+      return
+    }
     this.rows.set(args.id, {
       ...prev,
       step: args.step,
@@ -34,8 +38,8 @@ class FakeSyncJobRepo implements Pick<SyncJobPgRepository, 'save' | 'updateProgr
       stepDetails: args.stepDetails,
       result: args.result ?? prev.result,
       novelty: args.novelty ?? prev.novelty,
-      error: args.error ?? prev.error,
-      finishedAt: args.finishedAt ?? prev.finishedAt,
+      error: args.status === 'failed' ? (args.error ?? args.message) : terminalIncoming ? null : prev.error,
+      finishedAt: terminalIncoming ? (args.finishedAt ?? new Date()) : prev.finishedAt,
       updatedAt: new Date(),
     })
   }
@@ -122,6 +126,32 @@ describe('sync-progress-store', () => {
     const job = await getJob(id)
     expect(job?.stepDetails.login?.status).toBe('success')
     expect(job?.stepDetails['fetch-exams']?.status).toBe('running')
+  })
+
+  it('keeps final login message when login succeeds before fetch', async () => {
+    const id = await createJob('hermes_pardini', 'link-1')
+    await updateJob(id, { step: 'login', message: 'Autenticando no Hermes Pardini…', status: 'running' })
+    await updateJob(id, {
+      step: 'login',
+      message: '[[fleury_otp_in_app]] Digite o código recebido',
+      status: 'success',
+    })
+    await updateJob(id, { step: 'fetch-exams', message: 'Buscando...', status: 'running' })
+    const job = await getJob(id)
+    expect(job?.stepDetails.login?.message).toContain('fleury_otp_in_app')
+    expect(job?.stepDetails.login?.status).toBe('success')
+  })
+
+  it('does not downgrade terminal job when late progress arrives', async () => {
+    const id = await createJob('amil', 'link-1')
+    await updateJob(id, { step: 'done', message: 'Sincronização Amil concluída', status: 'success' }, {
+      exams: 0, medicalRecords: 0, authorizations: 0, authorizationItems: 0,
+      updatedAuthorizations: 0, total: 0, authorizationDetails: [],
+    })
+    await updateJob(id, { step: 'fetch-autorizacoes', message: 'Guias...', status: 'running' })
+    const job = await getJob(id)
+    expect(job?.progress.step).toBe('done')
+    expect(job?.progress.status).toBe('success')
   })
 
   it('returns undefined for unknown job', async () => {

@@ -38,7 +38,7 @@ $apiPort = 3000
 $webPort = 5173
 $env:PORT = "$apiPort"
 if (-not $Cloud) {
-  $env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/openhealth"
+  $env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare"
   $env:NEO4J_URI = "bolt://localhost:7687"
   $env:NEO4J_USER = "neo4j"
 }
@@ -84,7 +84,7 @@ if (-not $NoWeb) {
 Write-Host @"
 
 ╔══════════════════════════════════════════════╗
-║            Open Health - Dev Mode            ║
+║            AiyraCare - Dev Mode            ║
 ╠══════════════════════════════════════════════╣
 ║  Frontend  http://localhost:$webPort         ║
 ║  API       http://localhost:$apiPort/health  ║

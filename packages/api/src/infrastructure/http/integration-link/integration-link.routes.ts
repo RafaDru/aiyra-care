@@ -34,5 +34,6 @@ export async function integrationLinkRoutes(app: FastifyInstance) {
   app.post('/integration-links/:id/virtual-card', ctrl.virtualCard.bind(ctrl))
   app.get('/integration-links/:id/sync-status', ctrl.syncStatus.bind(ctrl))
   app.get('/integration-links/sync-progress/:jobId', ctrl.syncProgress.bind(ctrl))
+  app.post('/integration-links/sync-progress/:jobId/otp', ctrl.syncSubmitOtp.bind(ctrl))
   app.get('/integration-links/sync-progress/:jobId/stream', ctrl.syncProgressStream.bind(ctrl))
 }

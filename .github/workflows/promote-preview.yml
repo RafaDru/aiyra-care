@@ -1,0 +1,90 @@
+name: Promote to Preview (Ambiente 2)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch ou tag a promover'
+        required: true
+        default: 'main'
+      skip_gates:
+        description: 'Pular re-run gates (só se já aprovado manualmente)'
+        type: boolean
+        default: false
+      skip_seed:
+        description: 'Post-deploy sem seed:staging-refresh'
+        type: boolean
+        default: true
+      run_post_deploy:
+        description: 'Rodar probe + alerts-check no host (requer secrets preview + API up)'
+        type: boolean
+        default: false
+
+jobs:
+  gates:
+    if: ${{ !inputs.skip_gates }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install API
+        working-directory: packages/api
+        run: npm ci
+      - name: Install Web
+        working-directory: packages/web
+        run: npm ci
+      - name: Promotion gates
+        run: node scripts/run-promotion-gates.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aiyracare
+          OPS_SMOKE_SKIP_HTTP: '1'
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: promotion-report
+          path: promotion-report-last.md
+
+  promote:
+    needs: gates
+    if: ${{ always() && (inputs.skip_gates || needs.gates.result == 'success') }}
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Deploy placeholder
+        run: |
+          echo "=== Promote to Preview (Ambiente 2) ==="
+          echo "Ref: ${{ inputs.ref }}"
+          echo "Configure deploy real (SSH/PaaS) — ver docs/infra/DEPLOY_PREVIEW.md"
+          echo "Secrets: docs/infra/GITHUB_ENVIRONMENTS_SECRETS.md"
+          echo "Post-deploy: npm run preview:post-deploy (job post-deploy abaixo)"
+
+  post-deploy:
+    if: ${{ inputs.run_post_deploy }}
+    needs: promote
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install API
+        working-directory: packages/api
+        run: npm ci
+      - name: Preview post-deploy checks
+        run: node scripts/preview-post-deploy.mjs
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          API_PUBLIC_URL: ${{ secrets.API_PUBLIC_URL }}
+          OPS_METRICS_KEY: ${{ secrets.OPS_METRICS_KEY }}
+          SKIP_SEED: ${{ inputs.skip_seed && '1' || '0' }}
+          CRYPTO_KEY: ${{ secrets.CRYPTO_KEY }}

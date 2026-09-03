@@ -1,4 +1,4 @@
-export type CareReminderKind = 'measurement' | 'medication'
+export type CareReminderKind = 'measurement' | 'medication' | 'sus_reimport'
 
 export interface CareReminderProps {
   patientId: string

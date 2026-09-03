@@ -5,6 +5,7 @@ import {
   resolveFeatureKeyFromProductEvent,
 } from '../../domain/ops/ops-feature-catalog.js'
 import { buildFeatureHealthMatrix } from '../../domain/ops/ops-feature-health.js'
+import { buildTimeSeries24h } from '../../domain/ops/ops-time-series.js'
 import type { OpsAlert, OpsMetricsSnapshot } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsMetricsPgRepository } from '../../infrastructure/persistence/ops-metrics.pg.repository.js'
 import { readOpsProbeArtifact, writeOpsMetricsArtifact } from './ops-probe-artifact.js'
@@ -34,6 +35,12 @@ export class OpsMetricsService {
       clientErrorFingerprints24h,
       productEventUsage24h,
       clientErrorFeatureCounts24h,
+      syncJobsHourly24h,
+      avaEventsHourly24h,
+      clientErrorsHourly24h,
+      avaTokensHourly24h,
+      workerLastTickAt,
+      stripeWebhookRejected1h,
     ] = await Promise.all([
       this.repo.avaTokenPercentiles(24),
       this.repo.avaTokenPercentiles(24 * 7),
@@ -47,6 +54,12 @@ export class OpsMetricsService {
       this.repo.clientErrorFingerprints24h(30),
       this.repo.productEventUsage24h(),
       this.repo.clientErrorFeatureCounts24h(),
+      this.repo.syncJobsHourly24h(),
+      this.repo.avaEventsHourly24h(),
+      this.repo.clientErrorsHourly24h(),
+      this.repo.avaTokensHourly24h(),
+      this.repo.opsWorkerLastTickAt(),
+      this.repo.stripeWebhookRejectedCount1h(),
     ])
 
     const featureHealth24h = buildFeatureHealthMatrix(
@@ -70,6 +83,10 @@ export class OpsMetricsService {
         exhausted: indicators.exhausted,
       }
     }
+
+    const workerStaleMinutes = workerLastTickAt
+      ? Math.max(0, (Date.now() - new Date(workerLastTickAt).getTime()) / 60_000)
+      : null
 
     const metrics: OpsMetricsSnapshot = {
       generatedAt: new Date().toISOString(),
@@ -95,7 +112,18 @@ export class OpsMetricsService {
       clientErrorFingerprints24h,
       featureHealth24h,
       featureCatalog: getOpsFeatureCatalog(),
+      timeSeries24h: buildTimeSeries24h(
+        syncJobsHourly24h,
+        avaEventsHourly24h,
+        clientErrorsHourly24h,
+        avaTokensHourly24h,
+      ),
       probe: readOpsProbeArtifact() ?? undefined,
+      ops: {
+        workerLastTickAt,
+        workerStaleMinutes,
+        stripeWebhookRejected1h,
+      },
     }
 
     return { metrics, alerts: evaluateOpsAlerts(metrics) }

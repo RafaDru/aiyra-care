@@ -1,4 +1,4 @@
-// Open Health - Neo4J Schema
+// AiyraCare - Neo4J Schema
 
 CREATE CONSTRAINT patient_id IF NOT EXISTS FOR (p:Patient) REQUIRE p.id IS UNIQUE;
 CREATE CONSTRAINT doctor_crm IF NOT EXISTS FOR (d:Doctor) REQUIRE d.crm IS UNIQUE;

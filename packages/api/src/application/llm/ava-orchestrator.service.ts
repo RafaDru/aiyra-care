@@ -26,6 +26,7 @@ import {
   EXAM_INTENT_RE,
   VACCINE_INTENT_RE,
 } from '../../domain/llm/ava-context-aggregate.js'
+import { buildAvaOpenCodeSessionId } from '../../domain/llm/opencode-session.js'
 
 const AVA_SYSTEM_BASE = `Você é Ava, agente virtual de apoio familiar do AiyraCare.
 Regras obrigatórias:
@@ -158,11 +159,21 @@ Mensagem atual do responsável: ${trimmed}`
     let model = 'n/a'
     let attempts = 0
 
+    const opencodeSessionId = buildAvaOpenCodeSessionId({
+      conversationId: input.conversationId,
+      scopeId: input.scopeId,
+      patientId: input.patientId,
+      healthThreadId: input.healthThreadId,
+    })
     const routerOpts = {
       allowLlmDataSharing: input.allowLlmDataSharing ?? false,
       onReplyDelta: input.onReplyDelta,
+      opencodeSessionId,
     }
-    const routerOptsNoStream = { allowLlmDataSharing: input.allowLlmDataSharing ?? false }
+    const routerOptsNoStream = {
+      allowLlmDataSharing: input.allowLlmDataSharing ?? false,
+      opencodeSessionId,
+    }
 
     attempts += 1
     steps.push('resposta inicial')

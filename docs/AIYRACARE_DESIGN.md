@@ -22,7 +22,7 @@ Assets em `packages/web/public/brand/` — SVG light/dark para horizontal, quadr
 
 - **Símbolo:** coração em rede `#FFE566` sobre gradiente rosa→roxo
 - **Wordmark:** Aiyra `#FF3DA8` / Care `#9333EA` (dark: `#FF5BC4` / `#A855F7`)
-- **Tagline:** Open Health Platform `#64748B` (dark: `#94a3b8`)
+- **Tagline:** AiyraCare Platform `#64748B` (dark: `#94a3b8`)
 
 Regenerar: `node packages/web/scripts/gen-heart-grid.mjs`
 

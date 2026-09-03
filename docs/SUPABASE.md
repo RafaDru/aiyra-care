@@ -1,4 +1,4 @@
-# Supabase — Open Health
+# Supabase — AiyraCare
 
 Projeto cloud existente: **lyljosprzmtapkocmxxa**
 

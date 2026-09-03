@@ -67,6 +67,22 @@ product_events (
 - Header `x-internal-ops-key` quando `OPS_METRICS_KEY` ou `LLM_INTERNAL_OBSERVABILITY_KEY` definido.
 - CLI: `npm run ops:metrics`.
 
+### Ops nos dois ambientes não prod
+
+Paridade de **capacidades** (health, métricas, alertas, `product_events`), com **isolamento** de keys, URLs e webhooks:
+
+| Capacidade | Ambiente 1 — Integração | Ambiente 2 — Preview |
+|------------|-------------------------|----------------------|
+| Health | `GET /health`, `/health/db` (local `3010`) | URL preview + probe gate |
+| Métricas / alertas | `OPS_METRICS_KEY` integration | `OPS_METRICS_KEY` preview (distinto) |
+| Webhook alertas | Opcional / canal `#dev` | Recomendado — canal preview |
+| Connect worker | Opcional local | **Obrigatório** (`CONNECT_WORKER_EXTERNAL=1` na API) |
+| Ops console | `localhost:3013` → PG local | Instância apontando PG preview |
+| Probe pré-uso | `staging:probe-gate` após mudança relevante | Obrigatório post-deploy |
+| `product_events` | Sim | Sim — cohorts separados |
+
+Processo: [`infra/TWO_ENV_MODEL.md`](./infra/TWO_ENV_MODEL.md) · deploy Preview: [`infra/ENV_PREVIEW.md`](./infra/ENV_PREVIEW.md).
+
 **Regras de `properties`:**
 
 - ✅ duração, contagem, feature flags, error codes, `conversation_id`
@@ -169,7 +185,7 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 3. **Produto** — funil plano, higienização pendente, retenção conversas.
 4. **Custo** — tokens × provedor × tier (estimado).
 
-**Console ops (`packages/ops-console`, :3013)** — roadmap `run-ops-console-visual-design` + `run-ops-console-charts-scales`: design system Aiyra + Ant Design, thresholds visuais (ok/warning/critical), gráficos com escalas e legendas, microcopy por bloco para leitura rápida sem ser monocromático.
+**Console ops (`packages/ops-console`, :3013)** — layout com abas, tokens AiyraCare, gráficos Recharts (`timeSeries24h`: sync, Ava, erros cliente) e uso da largura total da tela.
 
 ### Contextos de observabilidade (layout do console)
 
@@ -195,5 +211,8 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 - Agendamento: connect-worker, Task Scheduler (`setup-ops-alerts.ps1`), ou cron Linux.
 - Logs sanitizados (Pino redact).
 - GCP billing budgets: `docs/infra/GCP_BILLING_ALERTS.md`.
-- Smoke: `npm run ops:smoke`, `test:smoke:llm`, `test:smoke:billing`, `test:critical`.
+- Smoke: `npm run ops:smoke`, `OPS_SMOKE_FULL=1` (console + notificador), `npm run test:ops`, `test:smoke:llm`, `test:smoke:billing`, `test:critical`.
+- Diagramas alertas/fallbacks: `docs/OPS_FALLBACKS_AND_ALERTS.md`.
+- Runbook operacional: `docs/ops/RUNBOOK_ALERTS.md`.
+- Checklist preparação: `docs/infra/OPS_PREP_CHECKLIST.md`.
 - Console ops `:3013`: seções por contexto, mapa de features, matriz acesso×falha (`run-ops-console-sections`, `run-ops-feature-catalog`, `run-ops-feature-health-matrix` done).

@@ -5,6 +5,8 @@ build/
 .env.local
 gcp-key.json
 openhealth-*.json
+aiyracare-*.json
+aiyra-care-*.json
 *.log
 .DS_Store
 coverage/

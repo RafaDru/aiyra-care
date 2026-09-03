@@ -6,7 +6,7 @@ const env = Object.fromEntries(
     .filter((l) => l && !l.startsWith('#') && l.includes('='))
     .map((l) => { const i = l.indexOf('='); return [l.slice(0, i), l.slice(i + 1).replace(/^"|"$/g, '')] }),
 )
-const pool = new pg.Pool({ connectionString: env.DATABASE_URL || 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth' })
+const pool = new pg.Pool({ connectionString: env.DATABASE_URL || 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare' })
 
 const bruno = await pool.query(`SELECT id, name FROM patients WHERE name ILIKE '%bruno%'`)
 console.log('Bruno:', bruno.rows[0])

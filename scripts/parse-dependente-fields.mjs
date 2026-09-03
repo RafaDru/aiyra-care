@@ -1,6 +1,8 @@
 import fs from 'fs'
+import { join } from 'path'
+import { REPO_ROOT } from './repo-root.mjs'
 
-const t = fs.readFileSync('C:/Users/rafae/Documents/Filhos/tmp-chunk-1129.js', 'utf8')
+const t = fs.readFileSync(join(REPO_ROOT, 'tmp-chunk-1129.js'), 'utf8')
 const fields = ['nome', 'cpf', 'cns', 'dataNascimento', 'genero', 'idDependente', 'idade']
 for (const f of fields) {
   let c = 0

@@ -1,5 +1,5 @@
 {
-  "name": "@open-health/connect",
+  "name": "@aiyra-care/connect",
   "version": "0.1.0",
   "private": true,
   "description": "Contrato canônico e registry de connectors — motor de integração Aiyra Connect",

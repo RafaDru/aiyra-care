@@ -1,6 +1,6 @@
 /**
  * Portas do Core para o motor Connect.
- * Tipos canônicos vivem em @open-health/connect.
+ * Tipos canônicos vivem em @aiyra-care/connect.
  */
 export type {
   ConnectPort,
@@ -10,4 +10,4 @@ export type {
   ConnectorDefinition,
   CreateConnectionInput,
   ConnectionSummary,
-} from '@open-health/connect'
+} from '@aiyra-care/connect'

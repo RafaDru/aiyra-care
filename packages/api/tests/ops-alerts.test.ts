@@ -39,6 +39,12 @@ function emptySnapshot(): OpsMetricsSnapshot {
     clientErrorFingerprints24h: [],
     featureHealth24h: [],
     featureCatalog: [],
+    timeSeries24h: {
+      syncJobs: [],
+      avaEvents: [],
+      clientErrors: [],
+      avaTokens: [],
+    },
   }
 }
 
@@ -104,5 +110,27 @@ describe('evaluateOpsAlerts', () => {
     }
     const alerts = evaluateOpsAlerts(snapshot)
     expect(alerts.some((a) => a.id === 'infra_postgres_slow')).toBe(true)
+  })
+
+  it('flags worker stale when heartbeat older than threshold', () => {
+    const snapshot = emptySnapshot()
+    snapshot.ops = {
+      workerLastTickAt: new Date(Date.now() - 60 * 60_000).toISOString(),
+      workerStaleMinutes: 60,
+      stripeWebhookRejected1h: 0,
+    }
+    const alerts = evaluateOpsAlerts(snapshot)
+    expect(alerts.some((a) => a.id === 'worker_stale')).toBe(true)
+  })
+
+  it('flags stripe webhook rejection spike', () => {
+    const snapshot = emptySnapshot()
+    snapshot.ops = {
+      workerLastTickAt: null,
+      workerStaleMinutes: null,
+      stripeWebhookRejected1h: 5,
+    }
+    const alerts = evaluateOpsAlerts(snapshot)
+    expect(alerts.some((a) => a.id === 'stripe_webhook_failures')).toBe(true)
   })
 })

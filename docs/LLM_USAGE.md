@@ -97,6 +97,7 @@ Respostas `402 LLM_QUOTA_EXCEEDED` quando franquia esgotada.
 | `OPENCODE_GO_API_KEY` | — | Go ($10/mês — `/go/v1`) |
 | `OPENCODE_GO_CHAT_MODEL` | `deepseek-v4-flash` | DeepSeek no Go (0d retenção) |
 | `OPENCODE_GO_BASE_URL` | `https://opencode.ai/zen/go/v1` | Base Go |
+| `x-opencode-session` | — | Header obrigatório OpenCode Go/Zen — `conversationId` na Ava; ver `opencode-session.ts` |
 
 ### Cascata Ava (chat + reflexão)
 

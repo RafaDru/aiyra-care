@@ -9,7 +9,7 @@ import { PatientMembershipPgRepository } from '../src/infrastructure/persistence
 config()
 
 const pgPool = new Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const patientId = process.argv[2]

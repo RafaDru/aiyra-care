@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { CanonicalSyncBatch, CanonicalRecord } from '@open-health/connect'
+import type { CanonicalSyncBatch, CanonicalRecord } from '@aiyra-care/connect'
 import type { UnimedBhSyncResult } from '../../../infrastructure/scraper/unimedbh-sync.scraper.js'
 import type { UnimedBhUsageItem } from '../../../infrastructure/scraper/unimedbh-extrato.scraper.js'
 import type { UnimedBhAuthorizationItem } from '../../../infrastructure/scraper/unimedbh-autorizacoes.scraper.js'

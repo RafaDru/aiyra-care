@@ -7,6 +7,8 @@ import { api } from '../../../lib/api.js'
 import { usePatientEntity } from '../../../hooks/use-patient-entity.js'
 import { EntityFormModal } from '../../../components/ui/EntityFormModal.js'
 import { VaccineDashboard } from '../../../components/vaccine/VaccineDashboard.js'
+import { SusPublicHealthBanner } from '../../../components/integrations/SusPublicHealthBanner.js'
+import { PublicHealthIntegrationModal } from '../../../components/integrations/PublicHealthIntegrationModal.js'
 import { QuickClinicalUploadButton } from '../../../components/document/QuickClinicalUploadButton.js'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { CarePlaceAutocomplete } from '../../../components/ui/CarePlaceAutocomplete.js'
@@ -70,6 +72,8 @@ export function VaccinesTab({ patientId }: Props) {
   const [schedule, setSchedule] = useState<VaccineScheduleItem[]>([])
   const [scheduleLoading, setScheduleLoading] = useState(false)
   const [birthDate, setBirthDate] = useState<string | null>(null)
+  const [susModalOpen, setSusModalOpen] = useState(false)
+  const [patientCpf, setPatientCpf] = useState<string | null>(null)
 
   const editInitial = useMemo(
     () => (editing ? vaccineFormValues(editing) : undefined),
@@ -78,7 +82,13 @@ export function VaccinesTab({ patientId }: Props) {
 
   useEffect(() => {
     if (!patientId) return
-    api.patients.get(patientId).then((p) => setBirthDate(p.birthDate)).catch(() => setBirthDate(null))
+    api.patients.get(patientId).then((p) => {
+      setBirthDate(p.birthDate)
+      setPatientCpf(p.cpf ?? null)
+    }).catch(() => {
+      setBirthDate(null)
+      setPatientCpf(null)
+    })
   }, [patientId])
 
   useEffect(() => {
@@ -96,6 +106,13 @@ export function VaccinesTab({ patientId }: Props) {
 
   return (
     <>
+      <SusPublicHealthBanner
+        patientId={patientId}
+        patientCpf={patientCpf}
+        onReimport={() => setSusModalOpen(true)}
+        onImported={reload}
+      />
+
       <div style={{ marginBottom: 16 }}>
         <Space wrap>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>
@@ -140,6 +157,14 @@ export function VaccinesTab({ patientId }: Props) {
       >
         <VaccineFormFields />
       </EntityFormModal>
+
+      <PublicHealthIntegrationModal
+        open={susModalOpen}
+        portal="conectesus"
+        patientId={patientId}
+        onClose={() => setSusModalOpen(false)}
+        onImported={reload}
+      />
     </>
   )
 }

@@ -1,10 +1,13 @@
 """Detect yellow node blobs (not lines) in Gemini heart image."""
+from pathlib import Path
 from PIL import Image
 import math
 import json
+import os
 
-IMG = r"C:\Users\rafae\Downloads\Gemini_Generated_Image_j1sn5fj1sn5fj1sn.png"
-OUT = r"C:\Users\rafae\Documents\Filhos\packages\web\scripts\gemini-heart-dots.json"
+WEB_ROOT = Path(__file__).resolve().parent.parent
+IMG = Path(os.environ.get('GEMINI_HEART_IMG', Path.home() / 'Downloads' / 'Gemini_Generated_Image_j1sn5fj1sn5fj1sn.png'))
+OUT = WEB_ROOT / 'scripts' / 'gemini-heart-dots.json'
 
 img = Image.open(IMG).convert("RGB")
 w, h = img.size

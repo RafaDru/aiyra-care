@@ -2,7 +2,7 @@ import pg from 'pg'
 import { conferVaccineRecord } from '../src/application/vaccine/vaccine-conference.service.ts'
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const PARTICULAR_NOTE = 'Particular (fora do calendário SUS)'

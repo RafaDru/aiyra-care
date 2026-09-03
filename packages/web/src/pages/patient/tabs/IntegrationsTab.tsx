@@ -8,7 +8,7 @@ import {
   PlusOutlined, MoreOutlined, QrcodeOutlined,
 } from '@ant-design/icons'
 import { api } from '../../../lib/api.js'
-import type { Patient, IntegrationLink } from '../../../lib/api.types.js'
+import type { Patient, IntegrationLink, GovBrSessionView } from '../../../lib/api.types.js'
 import type { IntegrationLinkSyncStatus } from '../../../lib/api.types.js'
 import { BrandCoverageOperator } from '../../../components/brands/BrandCoverageOperator.js'
 import { brandOrFallback } from '../../../components/brands/brand-config.js'
@@ -34,8 +34,6 @@ import { useIntegrationSyncHistory } from '../../../hooks/useIntegrationSyncHist
 import type { SyncablePortalType } from '../../../lib/sync-portal-profile.js'
 import type { SyncJobOverallStatus } from '../../../lib/sync-job-progress.js'
 import { useAuth } from '../../../contexts/AuthContext.js'
-import { GoogleCalendarConnectCard } from '../../../components/calendar/GoogleCalendarConnectCard.js'
-import { OutlookCalendarConnectCard } from '../../../components/calendar/OutlookCalendarConnectCard.js'
 import {
   INSURANCE_PORTALS,
   HOSPITAL_PORTALS,
@@ -160,6 +158,14 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const [pickerOpen, setPickerOpen] = useState(false)
   const [publicHealthPortal, setPublicHealthPortal] = useState<PublicHealthPortal | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  const [govbrSession, setGovbrSession] = useState<GovBrSessionView | null>(null)
+
+  useEffect(() => {
+    if (authConfigured && authLoading) return
+    api.account.govbrSession()
+      .then(setGovbrSession)
+      .catch(() => setGovbrSession(null))
+  }, [authConfigured, authLoading, historyRefreshKey])
 
   const dockLinkIds = new Set(dockJobs.map((j) => j.linkId))
   const syncTargets = collectSyncTargets(links)
@@ -351,9 +357,14 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
               Pardini · Fleury · a+ · Labs a+
             </Text>
           )}
-          {row.link?.syncAuthority === 'titular' && row.link.managedByPatientName && (
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
-              Via titular · {row.link.managedByPatientName.split(' ')[0]}
+          {row.link?.authAttention === 'credentials' && (
+            <Text type="danger" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
+              Atualize a senha em Editar credenciais
+            </Text>
+          )}
+          {row.link?.authAttention === 'session' && (
+            <Text type="warning" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
+              Sincronize novamente para reconectar
             </Text>
           )}
         </div>
@@ -365,8 +376,13 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       width: ALIGNED_COL.session,
       render: (_, row) => {
         if (row.kind === 'public') {
-          return row.publicPortal === 'conectesus'
-            ? (patient.cns ? <Tag color="success">CNS no perfil</Tag> : <Tag>Pendente</Tag>)
+          if (row.publicPortal === 'conectesus') {
+            return govbrSession?.sessionReady
+              ? <SessionStatusTag ready />
+              : <Tag>gov.br pendente</Tag>
+          }
+          return govbrSession?.sessionReady
+            ? <SessionStatusTag ready />
             : <Tag>gov.br</Tag>
         }
         const link = row.link!
@@ -383,7 +399,13 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       key: 'lastSync',
       width: ALIGNED_COL.lastSync,
       render: (_, row) => {
-        if (row.kind === 'public') return <Text type="secondary">Importação manual</Text>
+        if (row.kind === 'public') {
+          if (govbrSession?.conectesusLastFetchAt) {
+            const d = new Date(govbrSession.conectesusLastFetchAt)
+            return <Text type="secondary">Última busca {d.toLocaleDateString('pt-BR')}</Text>
+          }
+          return <Text type="secondary">Importação guiada (gov.br)</Text>
+        }
         const syncId = row.syncLinkId!
         return (
           <LinkSyncStatusCell
@@ -523,9 +545,6 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           </Space>
         </div>
 
-        <GoogleCalendarConnectCard patientId={patient.id} />
-        <OutlookCalendarConnectCard patientId={patient.id} />
-
         {rows.length === 0 ? (
           isHintDismissed('integrations.empty') ? (
             <Typography.Text type="secondary">Nenhuma integração — use Nova integração para vincular um portal.</Typography.Text>
@@ -563,7 +582,10 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           patientId={patient.id}
           linkedChildrenCount={linkedChildrenCount}
           onClose={() => setPublicHealthPortal(null)}
-          onImported={onCardUpdated}
+          onImported={() => {
+            onCardUpdated()
+            setHistoryRefreshKey((k) => k + 1)
+          }}
         />
 
         <Modal

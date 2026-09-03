@@ -8,6 +8,7 @@ import {
   fetchGroupHasFailure,
   getSyncPortalProfile,
   isFleuryOtpLoginMessage,
+  isFleuryOtpInAppMessage,
   isInteractiveLoginMessage,
   mainStepStatus,
   resolveSubstepStatus,
@@ -25,6 +26,7 @@ import {
 import { openSyncJobStream, type SyncProgressStreamPayload } from '../../lib/sync-job-stream.js'
 import { RegisterAmilDependentModal, type UnmatchedBeneficiary } from './RegisterAmilDependentModal.js'
 import { FleuryOtpSyncHint } from './FleuryOtpSyncHint.js'
+import { FleuryOtpSyncInput } from './FleuryOtpSyncInput.js'
 
 const { Text, Title } = Typography
 
@@ -380,13 +382,20 @@ export function SyncProgressModal({
   const jobDone = status !== 'running'
   const loginDetail = stepDetails.login
   const loginMessage = loginDetail?.message || message
+  const showFleuryOtpInApp = status === 'running'
+    && jobId
+    && resolvedPortal === 'hermes_pardini'
+    && loginDetail?.status === 'running'
+    && isFleuryOtpInAppMessage(loginMessage)
   const showFleuryOtpHint = status === 'running'
     && resolvedPortal === 'hermes_pardini'
     && loginDetail?.status === 'running'
+    && !showFleuryOtpInApp
     && isFleuryOtpLoginMessage(loginMessage)
   const showInteractiveLoginHint = status === 'running'
     && loginDetail?.status === 'running'
     && !showFleuryOtpHint
+    && !showFleuryOtpInApp
     && isInteractiveLoginMessage(loginMessage)
 
   const visibleFetchSubsteps = profile.fetchSubsteps.filter((s) => stepDetails[s.key])
@@ -411,6 +420,12 @@ export function SyncProgressModal({
                   ? 'Sincronização parcial'
                   : 'Erro na sincronização'}
           </Title>
+
+          {showFleuryOtpInApp && jobId && (
+            <div style={{ marginTop: 12, textAlign: 'left' }}>
+              <FleuryOtpSyncInput jobId={jobId} />
+            </div>
+          )}
 
           {showFleuryOtpHint && (
             <div style={{ marginTop: 12, textAlign: 'left' }}>
@@ -482,14 +497,14 @@ export function SyncProgressModal({
             />
           </div>
 
-          {message && !showInteractiveLoginHint && !showFleuryOtpHint && status === 'failed' && message.length > 140 ? (
+          {message && !showInteractiveLoginHint && !showFleuryOtpHint && !showFleuryOtpInApp && status === 'failed' && message.length > 140 ? (
             <SyncDiagnosticMessage
               variant="error"
               title="Erro na sincronização"
               message={message}
               collapsedMaxHeight={96}
             />
-          ) : message && !showInteractiveLoginHint && !showFleuryOtpHint ? (
+          ) : message && !showInteractiveLoginHint && !showFleuryOtpHint && !showFleuryOtpInApp ? (
             <Text
               type={status === 'failed' ? 'danger' : status === 'partial' ? 'warning' : 'secondary'}
               style={{ marginTop: 12, display: 'block' }}

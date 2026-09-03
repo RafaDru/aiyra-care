@@ -1,6 +1,6 @@
 param(
   [switch]$Vault,
-  [string]$VaultPath = "$env:USERPROFILE\.config\opencode\vault\openhealth.json",
+  [string]$VaultPath = "$env:USERPROFILE\.config\opencode\vault\aiyracare.json",
   [switch]$Cloud
 )
 
@@ -27,7 +27,7 @@ if ($Cloud) {
   }
 } else {
   $vars = @{
-    DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/openhealth"
+    DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare"
     NEO4J_URI = "bolt://localhost:7687"
     NEO4J_USER = "neo4j"
     GROQ_API_KEY = $env:GROQ_API_KEY
@@ -52,7 +52,7 @@ if ($Vault) {
   Write-Host "Vault saved to: $VaultPath" -ForegroundColor Green
 } else {
   $lines = [System.Collections.Generic.List[string]]::new()
-  $lines.Add("# Open Health - Environment Variables")
+  $lines.Add("# AiyraCare - Environment Variables")
   $lines.Add("# Generated $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
   $lines.Add("")
   foreach ($key in ($vars.Keys | Sort-Object)) {

@@ -9,6 +9,7 @@ import {
   opencodeZenFreeChatModel,
   usageFromApiOrEstimate,
 } from '../../domain/llm/llm-policy.js'
+import { normalizeOpenCodeSessionId } from '../../domain/llm/opencode-session.js'
 
 async function completeWithOpenCodeChatCompletions(
   messages: LlmMessage[],
@@ -20,15 +21,18 @@ async function completeWithOpenCodeChatCompletions(
     model: string
     jsonMode?: boolean
     maxTokens?: number
+    sessionId: string
   },
 ): Promise<LlmCompletionResult> {
   const base = opts.baseUrl.replace(/\/$/, '')
+  const sessionId = normalizeOpenCodeSessionId(opts.sessionId)
 
   const res = await fetch(`${base}/chat/completions`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${opts.apiKey}`,
       'Content-Type': 'application/json',
+      'x-opencode-session': sessionId,
     },
     body: JSON.stringify({
       model: opts.model,
@@ -76,10 +80,11 @@ async function completeWithOpenCodeChatCompletions(
 export async function completeWithOpenCodeZenFree(
   messages: LlmMessage[],
   tier: LlmTier,
-  opts?: { jsonMode?: boolean; maxTokens?: number },
+  opts?: { jsonMode?: boolean; maxTokens?: number; sessionId: string },
 ): Promise<LlmCompletionResult> {
   const key = opencodeZenApiKey()
   if (!key) throw new Error('OPENCODE_ZEN_API_KEY não configurada')
+  if (!opts?.sessionId?.trim()) throw new Error('x-opencode-session obrigatório para OpenCode Zen')
   const model = opencodeZenFreeChatModel()
   return completeWithOpenCodeChatCompletions(messages, tier, {
     providerPrefix: 'opencode-zen',
@@ -88,6 +93,7 @@ export async function completeWithOpenCodeZenFree(
     model,
     jsonMode: opts?.jsonMode,
     maxTokens: opts?.maxTokens,
+    sessionId: opts.sessionId,
   })
 }
 
@@ -95,10 +101,11 @@ export async function completeWithOpenCodeZenFree(
 export async function completeWithOpenCodeGo(
   messages: LlmMessage[],
   tier: LlmTier,
-  opts?: { jsonMode?: boolean; maxTokens?: number },
+  opts?: { jsonMode?: boolean; maxTokens?: number; sessionId: string },
 ): Promise<LlmCompletionResult> {
   const key = opencodeGoApiKey()
   if (!key) throw new Error('OPENCODE_GO_API_KEY não configurada')
+  if (!opts?.sessionId?.trim()) throw new Error('x-opencode-session obrigatório para OpenCode Go')
   const model = opencodeGoChatModel()
   return completeWithOpenCodeChatCompletions(messages, tier, {
     providerPrefix: 'opencode-go',
@@ -107,5 +114,6 @@ export async function completeWithOpenCodeGo(
     model,
     jsonMode: opts?.jsonMode,
     maxTokens: opts?.maxTokens,
+    sessionId: opts.sessionId,
   })
 }
