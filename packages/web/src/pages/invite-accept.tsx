@@ -10,6 +10,7 @@ interface InvitePreview {
   inviteeEmail: string
   patientNames: string[]
   inviterDisplayName: string | null
+  circleName?: string | null
   accessLevel: string
   status: string
   expiresAt: string
@@ -73,6 +74,12 @@ export function InviteAcceptPage() {
           <Text type="secondary">{t('family.accept.from')}</Text>
           <div><Text strong>{preview.inviterDisplayName ?? t('family.accept.unknownInviter')}</Text></div>
         </div>
+        {preview.circleName && (
+          <div>
+            <Text type="secondary">{t('family.accept.circle')}</Text>
+            <div><Text strong>{preview.circleName}</Text></div>
+          </div>
+        )}
         <div>
           <Text type="secondary">{t('family.accept.profiles')}</Text>
           <div><Text>{preview.patientNames.join(', ')}</Text></div>

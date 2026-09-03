@@ -10,7 +10,7 @@
 
 ## Resumo
 
-CRUD de **organizações** (clínica, lab, farmácia, plano) e **membros** com RBAC (`admin`, `clinician`, `read_only`). Separação explícita do modelo **família B2C** (`care_circles` futuro).
+CRUD de **organizações** (clínica, lab, farmácia, plano) e **membros** com RBAC (`admin`, `clinician`, `read_only`). Separação explícita do modelo **família B2C** (`care_circles` — ver `family-access-model`).
 
 ## Objetivo de negócio
 

@@ -1,5 +1,19 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-03] - Família: convites ↔ círculos, dashboard agrupado, ACL drawer
+
+### Realizado
+- **Migration 060** — `care_circle_id` + `circle_role` em convites; aceite adiciona membro ao círculo.
+- **Convites** — seletor de família na UI; perfis filtrados por círculo; inferência automática do círculo padrão.
+- **Care circles UI** — renomear, vincular/desvincular perfis (owner/admin).
+- **Dashboard** — agrupamento por família quando há múltiplos círculos ou perfis «outros».
+- **Perfil** — drawer «Quem tem acesso» com revogação (titular).
+- **API** — `GET /care-circles/dashboard`; grants com e-mail/displayName.
+
+### Próximo
+- [ ] Audit log de concessões (`family-access-audit-log`)
+- [ ] E-mail transacional do convite
+
 ## [2026-09-03] - Família: Care Circles (059) + UI Configurações
 
 ### Realizado
@@ -9,8 +23,8 @@
 - **Testes** — `care-circle.service.test.ts` (criação + limite admin).
 
 ### Próximo
-- [ ] Vincular convites (058) a `care_circle_id`
-- [ ] Dashboard agrupado por família
+- [x] Vincular convites (058) a `care_circle_id` — entregue em 060 (entrada acima)
+- [x] Dashboard agrupado por família — entregue (entrada acima)
 - [ ] Audit log de concessões (`family-access-audit-log`)
 
 ## [2026-09-03] - connect-worker Cloud Run Job (preview GCP)

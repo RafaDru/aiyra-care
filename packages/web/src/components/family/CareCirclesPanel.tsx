@@ -7,12 +7,13 @@ import {
   Input,
   List,
   Modal,
+  Select,
   Space,
   Tag,
   Typography,
   message,
 } from 'antd'
-import { PlusOutlined, TeamOutlined } from '@ant-design/icons'
+import { EditOutlined, LinkOutlined, PlusOutlined, TeamOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 
@@ -21,6 +22,7 @@ const { Text, Paragraph } = Typography
 interface CircleSummary {
   id: string
   name: string
+  memberRole?: string
 }
 
 interface CircleDetail extends CircleSummary {
@@ -35,7 +37,12 @@ export function CareCirclesPanel() {
   const [details, setDetails] = useState<Record<string, CircleDetail>>({})
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
+  const [renameOpen, setRenameOpen] = useState<string | null>(null)
+  const [linkOpen, setLinkOpen] = useState<string | null>(null)
+  const [linkable, setLinkable] = useState<Array<{ id: string; name: string }>>([])
   const [form] = Form.useForm()
+  const [renameForm] = Form.useForm()
+  const [linkForm] = Form.useForm()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -53,10 +60,19 @@ export function CareCirclesPanel() {
     void load()
   }, [load])
 
-  const loadDetail = async (id: string) => {
-    if (details[id]) return
+  const refreshDetail = async (id: string) => {
     const detail = await api.careCircles.get(id)
     setDetails((d) => ({ ...d, [id]: detail }))
+    return detail
+  }
+
+  const loadDetail = async (id: string) => {
+    if (details[id]) return
+    try {
+      await refreshDetail(id)
+    } catch {
+      message.error(t('family.circles.loadError'))
+    }
   }
 
   const createCircle = async () => {
@@ -72,11 +88,63 @@ export function CareCirclesPanel() {
     }
   }
 
+  const renameCircle = async () => {
+    if (!renameOpen) return
+    const values = await renameForm.validateFields()
+    try {
+      await api.careCircles.update(renameOpen, values.name)
+      message.success(t('family.circles.renamed'))
+      setRenameOpen(null)
+      renameForm.resetFields()
+      void load()
+      void refreshDetail(renameOpen)
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : t('family.circles.renameError'))
+    }
+  }
+
+  const openLinkModal = async (circleId: string) => {
+    setLinkOpen(circleId)
+    linkForm.resetFields()
+    try {
+      const rows = await api.careCircles.listLinkablePatients(circleId)
+      setLinkable(rows)
+    } catch {
+      message.error(t('family.circles.loadError'))
+      setLinkable([])
+    }
+  }
+
+  const linkPatient = async () => {
+    if (!linkOpen) return
+    const values = await linkForm.validateFields()
+    try {
+      await api.careCircles.linkPatient(linkOpen, values.patientId)
+      message.success(t('family.circles.linked'))
+      setLinkOpen(null)
+      void refreshDetail(linkOpen)
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : t('family.circles.linkError'))
+    }
+  }
+
+  const unlinkPatient = async (circleId: string, patientId: string) => {
+    try {
+      await api.careCircles.unlinkPatient(circleId, patientId)
+      message.success(t('family.circles.unlinked'))
+      void refreshDetail(circleId)
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : t('family.circles.unlinkError'))
+    }
+  }
+
   const roleLabel = (role: string) => {
     if (role === 'owner') return t('family.circles.roleOwner')
     if (role === 'admin') return t('family.circles.roleAdmin')
     return t('family.circles.roleMember')
   }
+
+  const canManage = (role: string) => role === 'owner' || role === 'admin'
 
   return (
     <Card loading={loading}>
@@ -109,13 +177,50 @@ export function CareCirclesPanel() {
               label: c.name,
               children: details[c.id] ? (
                 <Space direction="vertical" style={{ width: '100%' }}>
+                  {canManage(details[c.id].memberRole) && (
+                    <Space wrap>
+                      <Button
+                        size="small"
+                        icon={<EditOutlined />}
+                        onClick={() => {
+                          setRenameOpen(c.id)
+                          renameForm.setFieldsValue({ name: details[c.id].name })
+                        }}
+                      >
+                        {t('family.circles.rename')}
+                      </Button>
+                      <Button size="small" icon={<LinkOutlined />} onClick={() => void openLinkModal(c.id)}>
+                        {t('family.circles.linkProfile')}
+                      </Button>
+                    </Space>
+                  )}
                   <div>
                     <Text strong>{t('family.circles.profiles')}</Text>
                     <List
                       size="small"
                       dataSource={details[c.id].patients}
                       locale={{ emptyText: t('family.circles.noProfiles') }}
-                      renderItem={(p) => <List.Item>{p.patientName}</List.Item>}
+                      renderItem={(p) => (
+                        <List.Item
+                          actions={
+                            canManage(details[c.id].memberRole)
+                              ? [
+                                  <Button
+                                    key="unlink"
+                                    type="link"
+                                    danger
+                                    size="small"
+                                    onClick={() => void unlinkPatient(c.id, p.patientId)}
+                                  >
+                                    {t('family.circles.unlink')}
+                                  </Button>,
+                                ]
+                              : undefined
+                          }
+                        >
+                          {p.patientName}
+                        </List.Item>
+                      )}
                     />
                   </div>
                   <div>
@@ -159,6 +264,50 @@ export function CareCirclesPanel() {
             <Input placeholder={t('family.circles.namePlaceholder')} maxLength={120} />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        open={renameOpen !== null}
+        title={t('family.circles.renameTitle')}
+        onCancel={() => setRenameOpen(null)}
+        onOk={() => void renameCircle()}
+        okText={t('common.save')}
+      >
+        <Form form={renameForm} layout="vertical">
+          <Form.Item
+            name="name"
+            label={t('family.circles.nameLabel')}
+            rules={[{ required: true, message: t('family.circles.nameRequired') }]}
+          >
+            <Input maxLength={120} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={linkOpen !== null}
+        title={t('family.circles.linkTitle')}
+        onCancel={() => setLinkOpen(null)}
+        onOk={() => void linkPatient()}
+        okText={t('family.circles.linkProfile')}
+        okButtonProps={{ disabled: linkable.length === 0 }}
+      >
+        {linkable.length === 0 ? (
+          <Text type="secondary">{t('family.circles.noLinkable')}</Text>
+        ) : (
+          <Form form={linkForm} layout="vertical">
+            <Form.Item
+              name="patientId"
+              label={t('family.circles.profiles')}
+              rules={[{ required: true, message: t('family.circles.linkRequired') }]}
+            >
+              <Select
+                options={linkable.map((p) => ({ value: p.id, label: p.name }))}
+                placeholder={t('family.invite.profilesPlaceholder')}
+              />
+            </Form.Item>
+          </Form>
+        )}
       </Modal>
     </Card>
   )

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-02",
+  "generatedAt": "2026-09-03",
   "application": {
     "name": "AiyraCare",
     "repository": "https://github.com/RafaDru/aiyra-care",
@@ -60,7 +60,10 @@
     { "name": "Medication", "table": "medications", "description": "Medicamentos; genericName + brandName; roadmap: catálogo dinâmico (épico medication-catalog)" },
     { "name": "SemanticCatalogCache", "table": "semantic_catalog_cache", "description": "Catálogo dinâmico aprendido por vetor/LLM (044)" },
     { "name": "ExamResultItem", "table": "exam_result_items", "description": "Marcadores laboratoriais estruturados (045); idempotência + source_document_id (046)" },
-    { "name": "Organization", "tables": ["organizations", "organization_members"], "description": "B2B primitives — clínica/lab; API /organizations" }
+    { "name": "Organization", "tables": ["organizations", "organization_members"], "description": "B2B primitives — clínica/lab; API /organizations" },
+    { "name": "CareCircle", "tables": ["care_circles", "care_circle_members", "patient_circle_links"], "description": "Agrupamento familiar B2C; billing_owner; UI /settings/family" },
+    { "name": "PatientAccessGrant", "table": "patient_access_grants", "description": "ACL explícito conta × perfil (057)" },
+    { "name": "PatientAccessInvite", "table": "patient_access_invites", "description": "Convites B2C com care_circle_id (058–060)" }
   ],
   "apiRoutes": [
     { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },
@@ -94,7 +97,12 @@
     { "method": "GET", "path": "/llm/usage/internal", "description": "Indicadores do LLM interno (cost_bucket=internal) — ops key" },
     { "method": "GET", "path": "/emergency/directory", "description": "Guia de emergência por paciente" },
     { "method": "GET", "path": "/organizations", "description": "Listar/criar organizações B2B (auth)" },
-    { "method": "POST", "path": "/organizations", "description": "Criar organização B2B" }
+    { "method": "POST", "path": "/organizations", "description": "Criar organização B2B" },
+    { "method": "GET", "path": "/care-circles", "description": "Listar famílias da conta" },
+    { "method": "GET", "path": "/care-circles/dashboard", "description": "Agrupamento família → patientIds (dashboard)" },
+    { "method": "GET", "path": "/family-access/invites", "description": "Convites enviados (titular)" },
+    { "method": "POST", "path": "/family-access/invites/accept", "description": "Aceitar convite de cuidador" },
+    { "method": "GET", "path": "/patients/:id/access-grants", "description": "Listar concessões de acesso ao perfil" }
   ],
   "integrations": [
     { "portal": "unimed", "syncAutomatic": true, "imports": ["extrato", "autorizações", "cartão virtual", "carências PDF", "guia PDF"] },
@@ -136,7 +144,7 @@
     { "id": "pre-cnpj-platform", "date": "2026-09-02", "title": "Estruturação pré-CNPJ", "decision": "Ambiente 1 local; Ambiente 2 local até ritmo funcional, depois Preview GCP (openhealth-503119); Cursor Cloud fora de escopo", "status": "active" }
   ],
   "plannedWork": [
-    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "in_progress", "priority": "P1" },
+    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "in_progress", "priority": "P1", "note": "Fase 2 entregue (057–060, /settings/family); audit log pendente" },
     { "id": "documentation-knowledge-base", "title": "Base de conhecimento features + help", "status": "in_progress", "priority": "P2" },
     { "id": "platform-environments", "title": "Ambientes dev/staging/prod + massas + esteiras", "status": "done", "priority": "P2" },
     { "id": "b2b-partner-platform", "title": "Discovery e primitives B2B", "status": "planned", "priority": "P3" },

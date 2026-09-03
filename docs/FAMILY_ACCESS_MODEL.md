@@ -1,12 +1,12 @@
 # Modelo de acesso familiar — conta, cuidadores e pacientes
 
 > **Última atualização:** 2026-09-03  
-> **Status:** discovery / design — ver épico `family-access-model` no roadmap.  
+> **Status:** fase 2 em produção local (grants 057, convites 058, care circles 059–060, UI `/settings/family`) — ver [`features/family-access-model.md`](./features/family-access-model.md).  
 > **Relacionado:** [`ECOSYSTEM.md`](./ECOSYSTEM.md), [`SUPABASE.md`](./SUPABASE.md), [`LEGAL_COMPLIANCE.md`](./LEGAL_COMPLIANCE.md), [`B2B_PARTNERS.md`](./B2B_PARTNERS.md) (organizações B2B ≠ família B2C).
 
 ## Resposta curta
 
-**Sim, faz sentido.** O cenário que você descreveu (múltiplos responsáveis, visibilidade diferente por pessoa, famílias reconstituídas, mesmo filho em dois núcleos) é real e comum. O produto **já tem peças** (`app_accounts`, `patients`, `patient_memberships`, `owner_account_id`, `parent_ids`), mas **não modela ainda** o grafo fino de “quem vê o quê” nem o agrupamento explícito “Família A / Família B”. Hoje o acesso é, na prática, **união plana**: tudo que a conta tem membership ou ownership enxerga.
+**Sim, faz sentido.** O cenário que você descreveu (múltiplos responsáveis, visibilidade diferente por pessoa, famílias reconstituídas, mesmo filho em dois núcleos) é real e comum. O produto **implementa MVP** com `patient_access_grants` (057), convites (058), `care_circles` (059–060) e UI em **Configurações → Família e cuidadores**. Casos avançados (mesmo filho em dois círculos com visibilidades independentes — Mariana) permanecem na fase 3.
 
 ---
 
@@ -140,15 +140,16 @@ Revisão jurídica obrigatória antes de go-live multi-guardião (`reviewBadge: 
 - ✅ Tabela `patient_access_grants` (migration 057) + backfill + API `/patients/:id/access-grants`
 - ✅ `listAccessiblePatientIds` via grants; limite 2 co-admins `full` (titular excluído da contagem)
 - ✅ Convites MVP (058): `POST /family-access/invites`, aceite em `/invite/accept`, link copiável + checkbox LGPD
-- [ ] UI lista “Quem tem acesso” por perfil (drawer)
+- ✅ UI lista “Quem tem acesso” por perfil (drawer no header do perfil)
 - [ ] Envio de e-mail transacional do convite
 
 ### Fase 2 — Care circles
 - ✅ Tabelas `care_circles`, `care_circle_members`, `patient_circle_links` (059) + backfill «Minha família»
 - ✅ API `/care-circles` + UI Configurações → Família e cuidadores
-- [ ] Dashboard agrupado por família
+- ✅ Dashboard agrupado por família (quando 2+ círculos ou perfis compartilhados)
+- ✅ Convites vinculados a `care_circle_id` (060) — membro adicionado ao aceitar
+- ✅ Drawer «Quem tem acesso» no perfil de saúde
 - [ ] Migrar `parent_ids` sync household para opcionalmente derivar do círculo
-- [ ] Vincular convites (058) a `care_circle_id`
 
 ### Fase 3 — Cenários avançados
 - Mesmo paciente em múltiplos círculos (Mariana)

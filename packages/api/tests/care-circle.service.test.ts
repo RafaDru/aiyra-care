@@ -34,7 +34,22 @@ class InMemoryCareCircleRepo implements CareCircleRepository {
 
   async listForAccount(accountId: string) {
     const ids = new Set(this.members.filter((m) => m.accountId === accountId).map((m) => m.circleId))
-    return this.circles.filter((c) => ids.has(c.id))
+    return this.circles
+      .filter((c) => ids.has(c.id))
+      .map((c) => ({
+        ...c,
+        memberRole: this.members.find((m) => m.circleId === c.id && m.accountId === accountId)?.role ?? 'member',
+      }))
+  }
+
+  async listDashboardGroups(accountId: string) {
+    const circles = await this.listForAccount(accountId)
+    return circles.map((c) => ({
+      id: c.id,
+      name: c.name,
+      memberRole: c.memberRole,
+      patientIds: this.links.filter((l) => l.circleId === c.id).map((l) => l.patientId),
+    }))
   }
 
   async findMember(circleId: string, accountId: string) {

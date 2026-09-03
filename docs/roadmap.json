@@ -1272,7 +1272,7 @@
       "title": "Família — múltiplos cuidadores e acesso por perfil",
       "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
       "status": "in_progress",
-      "statusLabel": "Fase 2 — care circles entregue",
+      "statusLabel": "Fase 2 entregue — audit log pendente",
       "items": [
         {
           "id": "family-access-model-doc",
@@ -1285,28 +1285,28 @@
           "id": "family-access-glossary-ui",
           "title": "Glossário produto — Cuidador, Família, Perfil de saúde",
           "status": "done",
-          "detail": "Chaves i18n family.glossary (Cuidador, Perfil de saúde, Você, Família); copy convites em settings/conta.",
+          "detail": "Chaves i18n family.glossary; copy convites e círculos em /settings/family.",
           "reviewBadge": ["content"]
         },
         {
           "id": "family-access-grants-schema",
           "title": "ACL explícito — grants por conta e paciente",
           "status": "done",
-          "detail": "Migration 057 `patient_access_grants`; backfill memberships + owner; API GET/POST/DELETE `/patients/:id/access-grants`; `listAccessiblePatientIds` via grants; limite 2 co-admins full.",
+          "detail": "Migration 057 `patient_access_grants`; backfill; API GET/POST/DELETE `/patients/:id/access-grants`; drawer «Quem tem acesso» no perfil; limite 2 co-admins full.",
           "reviewBadge": ["security", "legal"]
         },
         {
           "id": "family-access-invite-flow",
           "title": "Convite por e-mail — co-admin com escopo de perfis",
           "status": "done",
-          "detail": "Migration 058 `patient_access_invites`; API `/family-access/invites` + aceite `/invite/accept`; link copiável (e-mail transacional depois); checkbox LGPD; limite grants no aceite.",
+          "detail": "058 `patient_access_invites`; 060 `care_circle_id` no convite; API `/family-access/invites` + `/invite/accept`; seletor de família na UI; link copiável; checkbox LGPD.",
           "reviewBadge": ["legal", "security"]
         },
         {
           "id": "family-access-care-circles",
           "title": "Care circles — agrupamento Família A / B",
           "status": "done",
-          "detail": "care_circles + members + patient_circle_links (059); API /care-circles; UI Configurações → Família e cuidadores; backfill «Minha família».",
+          "detail": "059 care_circles + members + patient_circle_links; API /care-circles + /dashboard; UI /settings/family (criar, renomear, vincular perfis); backfill «Minha família»; dashboard agrupado por família.",
           "reviewBadge": ["legal"]
         },
         {

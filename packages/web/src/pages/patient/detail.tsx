@@ -30,6 +30,7 @@ import { IntegrationsTab, type IntegrationsTabHandle } from './tabs/Integrations
 import { AgendaTab } from './tabs/AgendaTab.js'
 import { PatientContextPanel } from '../../components/patient/PatientContextPanel.js'
 import { HealthThreadsPanel } from '../../components/patient/HealthThreadsPanel.js'
+import { PatientAccessGrantsDrawer } from '../../components/family/PatientAccessGrantsDrawer.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import {
   SECTION_TABS,
@@ -506,6 +507,7 @@ export function PatientDetail() {
                 {t('nav.emergency')}
               </Button>
               <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
+              <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
               <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); message.success('OK'); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : 'Erro ao excluir') } }}>
                 <Button size="small" danger icon={<DeleteOutlined />} />
               </Popconfirm>

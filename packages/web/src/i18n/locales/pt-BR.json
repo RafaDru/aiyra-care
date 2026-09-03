@@ -230,7 +230,18 @@
       "linkReady": "Link de aceite (copie e envie por e-mail ou mensagem)",
       "colEmail": "E-mail",
       "colProfiles": "Perfis",
-      "colStatus": "Status"
+      "colStatus": "Status",
+      "circleLabel": "Família"
+    },
+    "access": {
+      "action": "Quem tem acesso",
+      "title": "Acesso — {{name}}",
+      "empty": "Somente o titular tem acesso a este perfil.",
+      "revoke": "Revogar",
+      "revoked": "Acesso revogado",
+      "revokeError": "Não foi possível revogar",
+      "loadError": "Não foi possível carregar acessos",
+      "viewOnly": "Apenas o titular pode revogar convites de acesso."
     },
     "accept": {
       "title": "Convite para cuidar de perfis de saúde",
@@ -239,6 +250,7 @@
       "unknownInviter": "Titular da conta",
       "profiles": "Perfis de saúde",
       "email": "E-mail convidado",
+      "circle": "Família",
       "action": "Aceitar convite",
       "success": "Convite aceito — perfis disponíveis no início",
       "error": "Não foi possível aceitar o convite",
@@ -265,7 +277,21 @@
       "roleAdmin": "Administrador",
       "roleMember": "Membro",
       "yourRole": "Seu papel: {{role}}",
-      "loadingDetail": "Carregando…"
+      "loadingDetail": "Carregando…",
+      "rename": "Renomear",
+      "renameTitle": "Renomear família",
+      "renamed": "Família renomeada",
+      "renameError": "Não foi possível renomear",
+      "linkProfile": "Vincular perfil",
+      "linkTitle": "Vincular perfil à família",
+      "linked": "Perfil vinculado",
+      "linkError": "Não foi possível vincular",
+      "linkRequired": "Selecione um perfil",
+      "unlink": "Desvincular",
+      "unlinked": "Perfil desvinculado",
+      "unlinkError": "Não foi possível desvincular",
+      "noLinkable": "Todos os seus perfis já estão nesta família.",
+      "otherProfiles": "Outros perfis"
     }
   },
   "sync": {

@@ -29,15 +29,24 @@ interface FamilyInvite {
   id: string
   inviteeEmail: string
   patientIds: string[]
+  careCircleId?: string | null
   accessLevel: string
   status: string
   expiresAt: string
 }
 
+interface InviteCircle {
+  id: string
+  name: string
+  memberRole?: string
+}
+
 export function FamilyInviteCard() {
   const { t } = useTranslation()
   const [invites, setInvites] = useState<FamilyInvite[]>([])
+  const [circles, setCircles] = useState<InviteCircle[]>([])
   const [ownedPatients, setOwnedPatients] = useState<OwnedPatient[]>([])
+  const [selectedCircleId, setSelectedCircleId] = useState<string | undefined>()
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -47,18 +56,39 @@ export function FamilyInviteCard() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [inv, owned] = await Promise.all([
+      const [inv, circleRows] = await Promise.all([
         api.familyAccess.listInvites(),
-        api.familyAccess.listOwnedPatients(),
+        api.careCircles.list(),
       ])
       setInvites(inv)
-      setOwnedPatients(owned)
+      const manageable = circleRows.filter(
+        (c) => c.memberRole === 'owner' || c.memberRole === 'admin',
+      )
+      setCircles(manageable)
+      const defaultCircle = manageable[0]?.id
+      setSelectedCircleId((prev) => prev ?? defaultCircle)
+      if (defaultCircle) {
+        const owned = await api.familyAccess.listOwnedPatients(defaultCircle)
+        setOwnedPatients(owned)
+      } else {
+        const owned = await api.familyAccess.listOwnedPatients()
+        setOwnedPatients(owned)
+      }
     } catch {
       message.error(t('family.invite.loadError'))
     } finally {
       setLoading(false)
     }
   }, [t])
+
+  const loadPatientsForCircle = async (circleId?: string) => {
+    try {
+      const owned = await api.familyAccess.listOwnedPatients(circleId)
+      setOwnedPatients(owned)
+    } catch {
+      message.error(t('family.invite.loadError'))
+    }
+  }
 
   useEffect(() => {
     void load()
@@ -72,6 +102,7 @@ export function FamilyInviteCard() {
         inviteeEmail: values.email,
         patientIds: values.patientIds,
         accessLevel: values.accessLevel ?? 'full',
+        careCircleId: values.careCircleId ?? selectedCircleId,
         legitimacyAck: true,
       })
       setLastAcceptUrl(result.acceptUrl)
@@ -181,6 +212,18 @@ export function FamilyInviteCard() {
         okText={t('family.invite.send')}
       >
         <Form form={form} layout="vertical" initialValues={{ accessLevel: 'full' }}>
+          {circles.length > 0 && (
+            <Form.Item name="careCircleId" label={t('family.invite.circleLabel')} initialValue={selectedCircleId}>
+              <Select
+                options={circles.map((c) => ({ value: c.id, label: c.name }))}
+                onChange={(id: string) => {
+                  setSelectedCircleId(id)
+                  form.setFieldValue('patientIds', [])
+                  void loadPatientsForCircle(id)
+                }}
+              />
+            </Form.Item>
+          )}
           <Form.Item
             name="email"
             label={t('family.invite.emailLabel')}

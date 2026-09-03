@@ -813,7 +813,11 @@ export const api = {
   },
   careCircles: {
     list: () =>
-      request<Array<{ id: string; name: string }>>('/care-circles'),
+      request<Array<{ id: string; name: string; memberRole?: string }>>('/care-circles'),
+    dashboard: () =>
+      request<Array<{ id: string; name: string; memberRole: string; patientIds: string[] }>>(
+        '/care-circles/dashboard',
+      ),
     get: (id: string) =>
       request<{
         id: string
@@ -848,6 +852,19 @@ export const api = {
     unlinkPatient: (circleId: string, patientId: string) =>
       request<void>(`/care-circles/${circleId}/patients/${patientId}`, { method: 'DELETE' }),
   },
+  patientAccess: {
+    listGrants: (patientId: string) =>
+      request<Array<{
+        id: string
+        accountId: string
+        accessLevel: string
+        membershipRole: string
+        email?: string | null
+        displayName?: string | null
+      }>>(`/patients/${patientId}/access-grants`),
+    revokeGrant: (patientId: string, grantId: string) =>
+      request<void>(`/patients/${patientId}/access-grants/${grantId}`, { method: 'DELETE' }),
+  },
   familyAccess: {
     listInvites: () =>
       request<Array<{
@@ -858,12 +875,17 @@ export const api = {
         status: string
         expiresAt: string
       }>>('/family-access/invites'),
-    listOwnedPatients: () =>
-      request<Array<{ id: string; name: string }>>('/family-access/owned-patients'),
+    listOwnedPatients: (careCircleId?: string) =>
+      request<Array<{ id: string; name: string }>>(
+        careCircleId
+          ? `/family-access/owned-patients?careCircleId=${encodeURIComponent(careCircleId)}`
+          : '/family-access/owned-patients',
+      ),
     createInvite: (data: {
       inviteeEmail: string
       patientIds: string[]
       accessLevel?: string
+      careCircleId?: string
       legitimacyAck: true
     }) =>
       request<{ acceptUrl: string; id: string }>('/family-access/invites', {
@@ -877,6 +899,7 @@ export const api = {
         inviteeEmail: string
         patientNames: string[]
         inviterDisplayName: string | null
+        circleName?: string | null
         accessLevel: string
         status: string
         expiresAt: string
