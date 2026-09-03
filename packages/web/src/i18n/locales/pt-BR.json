@@ -166,6 +166,14 @@
     },
     "devTools": "Desenvolvimento",
     "devToolsHint": "Roadmap do produto e histórico de sessões de desenvolvimento (HISTORICO.md).",
+    "notifications": {
+      "title": "Notificações",
+      "syncEscalation": "Avisar falhas repetidas de sincronização",
+      "syncEscalationHint": "E-mail ou canal configurado pela equipe, sem dados clínicos. Você pode desativar quando quiser.",
+      "syncEscalationLegal": "Opt-in conforme política de privacidade — mensagens genéricas, sem PHI.",
+      "saved": "Preferência salva",
+      "saveError": "Não foi possível salvar"
+    },
     "accessibility": {
       "title": "Acessibilidade",
       "hint": "Ajustes visuais para melhor leitura. Ícones e texto acompanham as cores — não dependemos só de verde/vermelho.",

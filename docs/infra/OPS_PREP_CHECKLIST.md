@@ -81,6 +81,6 @@ npm run promotion:gates
 
 | ID | Tema |
 |----|------|
-| `run-user-escalation` | Notificar família em sync crítico (opt-in, sem PHI) |
+| `run-user-escalation` | Notificar família em sync crítico (opt-in, sem PHI) — **done** |
 | `run-dev-audit-bridge` | Correlacionar `docs/dev-audit/` com `product_events` em staging |
 | `env-preview-host` | Preview no GCP |

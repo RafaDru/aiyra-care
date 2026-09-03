@@ -150,7 +150,7 @@ flowchart TB
 |--------------|-----------------|
 | Baseline p95 | alerta **degradação** antes de falha total |
 | `incident_id` | mesmo ID em alerta ops + `client_errors` + modo degradado |
-| `run-user-escalation` | e-mail/push família (sem PHI), opt-in legal |
+| `run-user-escalation` | e-mail/webhook família (sem PHI), opt-in em Configurações |
 | `run-dev-audit-bridge` | correlacionar hooks Cursor com eventos staging |
 
 ## Testes automatizados

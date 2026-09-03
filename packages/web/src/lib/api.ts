@@ -791,6 +791,17 @@ export const api = {
         body: JSON.stringify(data),
       }),
   },
+  notifications: {
+    getPreferences: () =>
+      request<{ syncEscalationEmail: boolean; syncEscalationOptedInAt: string | null }>(
+        '/account/notification-preferences',
+      ),
+    updatePreferences: (syncEscalationEmail: boolean) =>
+      request<{ syncEscalationEmail: boolean; syncEscalationOptedInAt: string | null }>(
+        '/account/notification-preferences',
+        { method: 'PATCH', body: JSON.stringify({ syncEscalationEmail }) },
+      ),
+  },
   project: {
     context: () => request<import('./api.types.js').ProjectContext>('/project/context'),
   },

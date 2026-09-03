@@ -157,6 +157,8 @@ async function registerRoutes() {
   await app.register(authRoutes)
   const { accountProfileRoutes } = await import('./infrastructure/http/account-profile/account-profile.routes.js')
   await app.register(accountProfileRoutes)
+  const { userEscalationRoutes } = await import('./infrastructure/http/user-escalation/user-escalation.routes.js')
+  await app.register(userEscalationRoutes)
   const { accountFreshnessRoutes } = await import('./infrastructure/http/account-freshness/account-freshness.routes.js')
   await app.register(accountFreshnessRoutes)
   const { govBrSessionRoutes } = await import('./infrastructure/http/govbr/govbr-session.routes.js')

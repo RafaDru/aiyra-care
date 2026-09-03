@@ -19,6 +19,7 @@ import {
   computeUnimedAuthorizationSince,
   computeUnimedExtratoMonths,
   computeAmilGuidesPeriodStart,
+  computeAmilUtilizationPeriod,
 } from './sync-delta.helper.js'
 import { normalizeName } from './connect-sync.helpers.js'
 import {
@@ -66,6 +67,11 @@ export interface AmilSyncParams {
   interactiveLogin?: boolean
   /** Sync silencioso — janela menor em guias/tokens. */
   incremental?: boolean
+  /** Filtra atendimentos a uma marca ótica (beneficiário). */
+  amilMarcaOtica?: string
+  /** Sobrescreve janela de utilização (sync manual). */
+  amilUtilizationStart?: Date
+  amilUtilizationEnd?: Date
 }
 
 export interface AmilSyncResult {
@@ -172,9 +178,12 @@ export class PortalSyncOrchestrator {
   }
 
   async runAmilSync(params: AmilSyncParams): Promise<AmilSyncResult> {
-    const { link, decryptedPassword, jobId, onProgress, patientName, log, interactiveLogin, incremental = false } = params
+    const { link, decryptedPassword, jobId, onProgress, patientName, log, interactiveLogin, incremental = false, amilMarcaOtica, amilUtilizationStart, amilUtilizationEnd } = params
 
     const guidesPeriodStart = computeAmilGuidesPeriodStart(link, incremental)
+    const defaultUtilization = computeAmilUtilizationPeriod(link, incremental)
+    const utilizationPeriodStart = amilUtilizationStart ?? defaultUtilization.start
+    const utilizationPeriodEnd = amilUtilizationEnd ?? defaultUtilization.end
     if (incremental) {
       log?.info(
         { linkId: link.id, guidesPeriodStart: guidesPeriodStart.toISOString() },
@@ -208,6 +217,9 @@ export class PortalSyncOrchestrator {
         sessionToken: storedToken,
         interactiveLogin,
         guidesPeriodStart,
+        utilizationPeriodStart,
+        utilizationPeriodEnd,
+        marcaOticaFilter: amilMarcaOtica,
         incremental,
       },
     )

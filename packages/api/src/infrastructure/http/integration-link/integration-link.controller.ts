@@ -147,6 +147,13 @@ export class IntegrationLinkController {
       trigger: 'manual',
       background: true,
       log: req.log,
+      amilMarcaOtica: query.data.amilMarcaOtica,
+      amilUtilizationStart: query.data.amilUtilizationStart
+        ? new Date(`${query.data.amilUtilizationStart}T00:00:00`)
+        : undefined,
+      amilUtilizationEnd: query.data.amilUtilizationEnd
+        ? new Date(`${query.data.amilUtilizationEnd}T23:59:59`)
+        : undefined,
     })
 
     if (result.skipped && result.reason === 'unsupported_portal') {

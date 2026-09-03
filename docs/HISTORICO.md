@@ -13,9 +13,22 @@ Fechar itens `run-ops-console-visual-design` e `run-ops-console-charts-scales` d
 - **Workspace:** canônico `%USERPROFILE%\workspace\aiyra-care` (repo `RafaDru/aiyra-care`); pasta `aiyra-cara` removida.
 
 ### Próximo
-- [ ] `run-user-escalation` — acionamento família em sync crítico
 - [ ] `run-dev-audit-bridge` — correlacionar dev-audit com product_events
 - [ ] Validar `promotion:gates` no Preview local
+
+## [2026-09-03] - run-user-escalation: aviso família em sync crítico (opt-in)
+
+### Realizado
+- **Migration 056** — `account_notification_preferences` + `sync_escalation_incidents` (open → resolved).
+- **API:** `GET/PATCH /account/notification-preferences`, `GET /account/sync-escalations`.
+- **Gatilho:** 3+ falhas em 24h no mesmo `integration_link`; cooldown 6h; resolve ao sync OK.
+- **Canal:** webhook genérico (`USER_ESCALATION_WEBHOOK_URL` ou `OPS_ALERT_WEBHOOK_URL`) — sem PHI.
+- **UI:** Configurações → Geral → toggle opt-in.
+- **Telemetria:** `sync_escalation_opened` / `sync_escalation_resolved`.
+
+### Próximo
+- [ ] `run-dev-audit-bridge` — correlacionar dev-audit com product_events
+- [ ] `env-preview-host` — Preview no GCP
 
 ## [2026-09-03] - Ops dual keys: `.env.preview` isolado
 

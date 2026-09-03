@@ -77,6 +77,9 @@ export interface IntegrationLinkSyncRequest {
   /** Fire-and-forget no processo da API (default true). */
   background?: boolean
   log?: FastifyBaseLogger
+  amilMarcaOtica?: string
+  amilUtilizationStart?: Date
+  amilUtilizationEnd?: Date
 }
 
 export interface IntegrationLinkSyncResult {
@@ -166,7 +169,14 @@ export class IntegrationLinkSyncService {
     this.syncLocks.add(lockKey)
     const decryptedPassword = decrypt(link.encryptedPassword)
     const jobId = await createJob(link.portalType as SyncablePortalType, link.id, { trigger })
-    const run = () => this.executeSync(link, decryptedPassword, jobId, { silent, force, log: opts.log })
+    const run = () => this.executeSync(link, decryptedPassword, jobId, {
+      silent,
+      force,
+      log: opts.log,
+      amilMarcaOtica: opts.amilMarcaOtica,
+      amilUtilizationStart: opts.amilUtilizationStart,
+      amilUtilizationEnd: opts.amilUtilizationEnd,
+    })
 
     if (opts.background ?? true) {
       dispatchBackgroundTask(async () => {
@@ -235,7 +245,14 @@ export class IntegrationLinkSyncService {
     link: IntegrationLink,
     decryptedPassword: string,
     jobId: string,
-    opts: { silent: boolean; force: boolean; log?: FastifyBaseLogger },
+    opts: {
+      silent: boolean
+      force: boolean
+      log?: FastifyBaseLogger
+      amilMarcaOtica?: string
+      amilUtilizationStart?: Date
+      amilUtilizationEnd?: Date
+    },
   ): Promise<void> {
     const emit = (step: string, message: string, status: 'running' | 'success' | 'failed') => {
       void updateJob(jobId, { step, message, status })
@@ -258,6 +275,9 @@ export class IntegrationLinkSyncService {
                 log: opts.log,
                 interactiveLogin: !opts.silent,
                 incremental: opts.silent && !opts.force,
+                amilMarcaOtica: opts.amilMarcaOtica,
+                amilUtilizationStart: opts.amilUtilizationStart,
+                amilUtilizationEnd: opts.amilUtilizationEnd,
               })
             const novelty = noveltyFromImportOutcome(importOutcome)
             const syncResult = attachNoveltyToSyncResult({

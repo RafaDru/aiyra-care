@@ -1894,8 +1894,8 @@
         {
           "id": "run-user-escalation",
           "title": "Acionamento proativo (opt-in)",
-          "status": "planned",
-          "detail": "Notificar família em sync crítico falho persistente; sem PHI no canal."
+          "status": "done",
+          "detail": "Migration 056; opt-in settings; incidentes open/resolved; webhook genérico sem PHI; 3 falhas/24h; product_events sync_escalation_*."
         },
         {
           "id": "run-dev-audit-bridge",

@@ -369,9 +369,9 @@ Fase 6  Maturidade          [backlog]
 
 | # | Entrega | Debate | Esforço | Status |
 |---|---------|--------|---------|--------|
-| 5.1 | Incident state: open → resolved (server) | avisar quando regularizar | médio | pendente |
-| 5.2 | Push/e-mail in-app genérico (sem PHI) | notificação | médio | pendente |
-| 5.3 | `run-user-escalation` sync crítico persistente | POC WhatsApp | alto | pendente |
+| 5.1 | Incident state: open → resolved (server) | avisar quando regularizar | médio | **done** — `sync_escalation_incidents` |
+| 5.2 | Push/e-mail in-app genérico (sem PHI) | notificação | médio | **done** — webhook + opt-in settings |
+| 5.3 | `run-user-escalation` sync crítico persistente | POC WhatsApp | alto | **done** — 3 falhas/24h; WhatsApp fora de escopo |
 | 5.4 | Canal alternativo (WhatsApp bot) | POC transacional | alto | **fora de escopo curto** |
 | 5.5 | Revisão legal LGPD notificações | segurança | — | pendente |
 
