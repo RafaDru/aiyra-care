@@ -1272,7 +1272,7 @@
       "title": "Família — múltiplos cuidadores e acesso por perfil",
       "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
       "status": "in_progress",
-      "statusLabel": "Fase 2 entregue — audit log pendente",
+      "statusLabel": "Audit log entregue — blended patient pendente",
       "items": [
         {
           "id": "family-access-model-doc",
@@ -1319,8 +1319,8 @@
         {
           "id": "family-access-audit-log",
           "title": "Trilha de auditoria — grant/revoke e acesso sensível",
-          "status": "planned",
-          "detail": "product_events ou tabela dedicada; sem PHI no payload; DPO review.",
+          "status": "done",
+          "detail": "Migration 062 patient_access_audit_events; GET /patients/:id/access-audit; eventos em grant/convite; product_events patient_access_granted; UI histórico no drawer.",
           "reviewBadge": ["legal", "security"]
         }
       ]

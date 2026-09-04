@@ -145,4 +145,4 @@ Runbook: [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md).
 - [x] Aba **Suporte** — fila `support_reports` status `open`
 - [ ] Link «Docs ops» no header → este diretório (path no tooltip)
 - [ ] Sparkline de `support_report_submitted` / 24h
-- [ ] Webhook `SUPPORT_REPORT_WEBHOOK_URL`
+- [x] Webhook `SUPPORT_REPORT_WEBHOOK_URL`

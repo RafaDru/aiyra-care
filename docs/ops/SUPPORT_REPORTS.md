@@ -18,17 +18,17 @@ Telemetria paralela: `product_events.support_report_submitted` com `properties.k
 
 ---
 
-## Fluxo ops (hoje — MVP)
+## Fluxo ops (hoje)
 
 ```text
 Usuário → POST /support/reports → PG support_reports (open)
                 ↓
         support_report_submitted (product_events)
                 ↓
-        [manual] SELECT no PG ou futura fila no console :3013
+        POST SUPPORT_REPORT_WEBHOOK_URL (payload sem PHI)
+                ↓
+        Console :3013/:3023 → aba Suporte (fila open + triagem)
 ```
-
-**Ainda não há:** webhook, painel no console, status `triaged` automático.
 
 ---
 
@@ -114,9 +114,36 @@ Conteúdo esperado com `consent_technical`:
 
 Atualizar [`DATA_PROCESSING_MAP.md`](../legal/DATA_PROCESSING_MAP.md) se mudar retenção ou finalidade.
 
+## Webhook (`SUPPORT_REPORT_WEBHOOK_URL`)
+
+Disparado em background após `POST /support/reports` (falha do webhook **não** bloqueia o usuário).
+
+| Env | Efeito |
+|-----|--------|
+| `SUPPORT_REPORT_WEBHOOK_URL` | URL dedicada (Slack, etc.) |
+| *(fallback)* `OPS_ALERT_WEBHOOK_URL` | Mesmo canal de alertas ops |
+| `OPS_ALERT_DASHBOARD_URL` / `OPS_CONSOLE_PORT` | Link no payload para o console |
+
+Payload (sem PHI):
+
+```json
+{
+  "type": "support_report",
+  "reportId": "<uuid>",
+  "category": "technical_bug",
+  "route": "/patients/...",
+  "consentTechnical": true,
+  "consentProfileAccess": false,
+  "topFingerprint": "abc123…",
+  "dashboardUrl": "http://127.0.0.1:3023",
+  "submittedAt": "2026-09-04T12:00:00.000Z"
+}
+```
+
+Implementação: `packages/api/src/application/support-report/support-report-dispatch.ts`.
+
 ---
 
-## API (referência)
 
 | Método | Rota | Quem |
 |--------|------|------|
@@ -135,8 +162,8 @@ Atualizar [`DATA_PROCESSING_MAP.md`](../legal/DATA_PROCESSING_MAP.md) se mudar r
 
 ## Backlog (sessão Aiyra: Ops)
 
-- [ ] Painel **Suporte** no `packages/ops-console` (lista open + link bundle)
-- [ ] `SUPPORT_REPORT_WEBHOOK_URL` — payload sem PHI (id, category, route, fingerprint top)
+- [x] Painel **Suporte** no `packages/ops-console` (lista open + triagem)
+- [x] `SUPPORT_REPORT_WEBHOOK_URL` — payload sem PHI (id, category, route, fingerprint top)
 - [ ] Job purge `expires_at < NOW()`
 - [ ] Agrupamento automático por fingerprint + `app_version`
 - [ ] Agente investigador (Tier 0–1) — ver hub [`README.md`](./README.md)

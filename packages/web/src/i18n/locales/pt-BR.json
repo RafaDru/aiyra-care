@@ -241,7 +241,14 @@
       "revoked": "Acesso revogado",
       "revokeError": "Não foi possível revogar",
       "loadError": "Não foi possível carregar acessos",
-      "viewOnly": "Apenas o titular pode revogar convites de acesso."
+      "viewOnly": "Apenas o titular pode revogar convites de acesso.",
+      "auditTitle": "Histórico de acesso",
+      "unknownUser": "Usuário",
+      "audit.grant_created": "Acesso concedido",
+      "audit.grant_revoked": "Acesso revogado",
+      "audit.invite_sent": "Convite enviado",
+      "audit.invite_accepted": "Convite aceito",
+      "audit.invite_revoked": "Convite cancelado"
     },
     "accept": {
       "title": "Convite para cuidar de perfis de saúde",

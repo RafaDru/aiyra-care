@@ -93,4 +93,38 @@ export class PatientAccessController {
       return mapGrantError(err, reply)
     }
   }
+
+  async listAudit(req: AuthenticatedRequest, reply: FastifyReply) {
+    if (!req.accountId) return reply.status(401).send({ message: 'Não autenticado' })
+    const params = patientAccessParamsSchema.safeParse(req.params)
+    if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    if (!assertPatientAccess(req, reply, params.data.id)) return
+    try {
+      const rows = await this.service.listAudit(params.data.id, req.accountId)
+      return reply.send(rows.map((row) => ({
+        id: row.id,
+        patientId: row.patientId,
+        action: row.action,
+        accessLevel: row.accessLevel,
+        membershipRole: row.membershipRole,
+        careCircleId: row.careCircleId,
+        inviteId: row.inviteId,
+        grantId: row.grantId,
+        patientCount: row.patientCount,
+        createdAt: row.createdAt.toISOString(),
+        actor: {
+          accountId: row.actorAccountId,
+          displayName: row.actorDisplayName,
+          email: row.actorEmail,
+        },
+        target: row.targetAccountId ? {
+          accountId: row.targetAccountId,
+          displayName: row.targetDisplayName,
+          email: row.targetEmail,
+        } : null,
+      })))
+    } catch (err) {
+      return mapGrantError(err, reply)
+    }
+  }
 }

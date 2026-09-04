@@ -123,10 +123,16 @@ describe('PatientAccessInviteService', () => {
     } satisfies PatientMembershipRepository
 
     const access = new PatientAccessService(grants, memberships, pool as never)
+    const circles = {
+      listForAccount: vi.fn().mockResolvedValue([]),
+      getDetail: vi.fn(),
+      addMember: vi.fn().mockResolvedValue(undefined),
+    }
     const service = new PatientAccessInviteService(
       invites,
       grants,
       access,
+      circles as never,
       pool as never,
       'http://localhost:5173',
     )

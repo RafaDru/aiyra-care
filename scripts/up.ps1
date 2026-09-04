@@ -132,7 +132,7 @@ for ($i = 0; $i -lt 12; $i++) {
 }
 
 $envLabel = if ($Preview) { "Preview (Ambiente 2)" } else { "Integração (Ambiente 1)" }
-$dnsHint = if ($useLocalDns) { " (hostnames locais — ver docs/infra/LOCAL_HOSTNAMES.md)" } else { "" }
+$dnsHint = if ($useLocalDns) { ' (hostnames locais - ver docs/infra/LOCAL_HOSTNAMES.md)' } else { '' }
 Write-Host @"
 `nAiyraCare $envLabel running$dnsHint :
   Web  $webOpenUrl

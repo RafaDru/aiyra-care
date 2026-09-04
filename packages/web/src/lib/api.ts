@@ -887,6 +887,16 @@ export const api = {
       }>>(`/patients/${patientId}/access-grants`),
     revokeGrant: (patientId: string, grantId: string) =>
       request<void>(`/patients/${patientId}/access-grants/${grantId}`, { method: 'DELETE' }),
+    listAccessAudit: (patientId: string) =>
+      request<Array<{
+        id: string
+        action: string
+        accessLevel: string | null
+        membershipRole: string | null
+        createdAt: string
+        actor: { accountId: string; displayName: string | null; email: string | null }
+        target: { accountId: string; displayName: string | null; email: string | null } | null
+      }>>(`/patients/${patientId}/access-audit`),
   },
   familyAccess: {
     listInvites: () =>

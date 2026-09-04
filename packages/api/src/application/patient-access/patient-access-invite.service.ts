@@ -9,6 +9,7 @@ import { PatientAccessService } from './patient-access.service.js'
 import { generateInviteToken } from '../../infrastructure/persistence/patient-access-invite.pg.repository.js'
 import type { PatientAccessLevel, PatientMembershipRole } from '../../domain/patient-access/patient-access.types.js'
 import type { CareCircleService } from '../care-circle/care-circle.service.js'
+import type { PatientAccessAuditService } from './patient-access-audit.service.js'
 
 const INVITE_TTL_DAYS = 7
 
@@ -24,6 +25,7 @@ export class PatientAccessInviteService {
     private readonly circles: CareCircleService,
     private readonly pool: Pool,
     private readonly webBaseUrl: string,
+    private readonly audit?: PatientAccessAuditService,
   ) {}
 
   async createInvite(input: {
@@ -78,6 +80,20 @@ export class PatientAccessInviteService {
     })
 
     const acceptUrl = `${this.webBaseUrl.replace(/\/$/, '')}/invite/accept?token=${token}`
+
+    for (const patientId of input.patientIds) {
+      await this.audit?.record({
+        patientId,
+        actorAccountId: input.inviterAccountId,
+        action: 'invite_sent',
+        accessLevel,
+        membershipRole,
+        careCircleId,
+        inviteId: invite.id,
+        patientCount: input.patientIds.length,
+      })
+    }
+
     return { invite, acceptUrl }
   }
 
@@ -105,6 +121,15 @@ export class PatientAccessInviteService {
     }
     if (invite.status !== 'pending') throw new Error('PATIENT_ACCESS_INVITE_NOT_PENDING')
     await this.invites.updateStatus(inviteId, 'revoked')
+    for (const patientId of invite.patientIds) {
+      await this.audit?.record({
+        patientId,
+        actorAccountId: inviterAccountId,
+        action: 'invite_revoked',
+        inviteId: invite.id,
+        patientCount: invite.patientIds.length,
+      })
+    }
   }
 
   getPreview(token: string) {
@@ -150,6 +175,21 @@ export class PatientAccessInviteService {
     }
 
     const updated = await this.invites.updateStatus(invite.id, 'accepted', input.accountId)
+
+    for (const patientId of invite.patientIds) {
+      await this.audit?.record({
+        patientId,
+        actorAccountId: invite.inviterAccountId,
+        targetAccountId: input.accountId,
+        action: 'invite_accepted',
+        accessLevel: invite.accessLevel,
+        membershipRole: invite.membershipRole,
+        careCircleId: invite.careCircleId,
+        inviteId: invite.id,
+        patientCount: invite.patientIds.length,
+      })
+    }
+
     return updated!
   }
 

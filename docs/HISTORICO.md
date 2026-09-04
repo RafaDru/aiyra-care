@@ -1,5 +1,25 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-04] - Suporte: webhook `SUPPORT_REPORT_WEBHOOK_URL`
+
+### Realizado
+- **`support-report-dispatch.ts`** — POST assíncrono após criar chamado; payload sem PHI (id, category, route, fingerprint top).
+- Fallback para `OPS_ALERT_WEBHOOK_URL`; link do console via `OPS_ALERT_DASHBOARD_URL` / `OPS_CONSOLE_PORT`.
+- Testes: `support-report-dispatch.test.ts`.
+- Docs: `SUPPORT_REPORTS.md`, hub `docs/ops/README.md`.
+
+### Próximo
+- [ ] Sparkline `support_report_submitted` na aba Suporte
+- [ ] Agente investigador (Tier 0–1)
+
+## [2026-09-04] - Família: audit log de acesso (062)
+
+### Realizado
+- **Migration 062** — `patient_access_audit_events` (grant/convite sem PHI na linha).
+- **API** — `GET /patients/:id/access-audit` (titular); gravação em grant, revoke, invite sent/accept/revoke.
+- **Telemetria** — `patient_access_granted` + eventos família existentes via server.
+- **UI** — histórico no drawer «Quem tem acesso».
+
 ## [2026-09-04] - Suporte: Reportar problema (061) + consentimento LGPD
 
 ### Realizado
@@ -13,7 +33,7 @@
 ### Próximo
 - [x] Fila no ops console — aba **Suporte** (`GET/PATCH /api/support-reports` no `:3013`/`:3023`)
 - [ ] Captura de screenshot (UI)
-- [ ] Webhook `SUPPORT_REPORT_WEBHOOK_URL` / agente investigador
+- [x] Webhook `SUPPORT_REPORT_WEBHOOK_URL` / agente investigador (webhook feito)
 
 ## [2026-09-04] - Ops console: aba Suporte (fila support_reports)
 
@@ -23,7 +43,7 @@
 - **Métricas** — `supportReports.openCount` e `submitted24h` no snapshot.
 
 ### Próximo
-- [ ] Webhook `SUPPORT_REPORT_WEBHOOK_URL`
+- [x] Webhook `SUPPORT_REPORT_WEBHOOK_URL`
 - [ ] Sparkline `support_report_submitted` na aba Suporte
 
 ## [2026-09-04] - Ops: instrumentação web (sync, família, telas)

@@ -7,6 +7,9 @@ import { CareCircleService } from '../../../application/care-circle/care-circle.
 import { CareCirclePgRepository } from '../../persistence/care-circle.pg.repository.js'
 import { PatientAccessInvitePgRepository } from '../../persistence/patient-access-invite.pg.repository.js'
 import { PatientMembershipPgRepository } from '../../persistence/app-account.pg.repository.js'
+import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
+import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import { PatientAccessAuditService } from '../../../application/patient-access/patient-access-audit.service.js'
 import { getAuthService } from '../auth/auth.routes.js'
 import { createAuthHook } from '../auth/auth.middleware.js'
 import { PatientAccessController } from './patient-access.controller.js'
@@ -23,7 +26,9 @@ export async function patientAccessRoutes(app: FastifyInstance) {
   const requireAuth = createAuthHook(authService, true, memberships)
   const grants = new PatientAccessGrantPgRepository(pgPool)
   const invites = new PatientAccessInvitePgRepository(pgPool)
-  const accessService = new PatientAccessService(grants, memberships, pgPool)
+  const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
+  const auditService = new PatientAccessAuditService(pgPool, productEvents)
+  const accessService = new PatientAccessService(grants, memberships, pgPool, auditService)
   const circleService = new CareCircleService(new CareCirclePgRepository(pgPool), pgPool)
   const webBaseUrl = process.env.WEB_PUBLIC_URL ?? process.env.VITE_WEB_URL ?? 'http://localhost:5173'
   const inviteService = new PatientAccessInviteService(
@@ -33,6 +38,7 @@ export async function patientAccessRoutes(app: FastifyInstance) {
     circleService,
     pgPool,
     webBaseUrl,
+    auditService,
   )
 
   const grantController = new PatientAccessController(accessService)
@@ -50,6 +56,7 @@ export async function patientAccessRoutes(app: FastifyInstance) {
     scoped.post('/family-access/invites/accept', inviteController.accept.bind(inviteController))
 
     scoped.get('/patients/:id/access-grants', grantController.list.bind(grantController))
+    scoped.get('/patients/:id/access-audit', grantController.listAudit.bind(grantController))
     scoped.post('/patients/:id/access-grants', grantController.create.bind(grantController))
     scoped.delete('/patients/:id/access-grants/:grantId', grantController.revoke.bind(grantController))
   })

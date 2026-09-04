@@ -25,6 +25,7 @@ export const PRODUCT_EVENT_NAMES = [
   'family_invite_revoked',
   'family_invite_failed',
   'patient_access_revoked',
+  'patient_access_granted',
   'compliance_accepted',
   'compliance_gate_redirect',
   'notification_optin_changed',

@@ -3,6 +3,7 @@ import type { PatientAccessGrantRepository } from '../../domain/patient-access/p
 import type { PatientMembershipRepository } from '../../domain/auth/app-account.repository.js'
 import type { PatientAccessLevel, PatientMembershipRole } from '../../domain/patient-access/patient-access.types.js'
 import type { PatientAccessGrantData } from '../../domain/patient-access/patient-access.types.js'
+import type { PatientAccessAuditService } from './patient-access-audit.service.js'
 
 /** Co-admins com acesso total além do titular (MVP assinatura familiar). */
 export const MAX_FULL_GUARDIAN_GRANTS = 2
@@ -12,6 +13,7 @@ export class PatientAccessService {
     private readonly grants: PatientAccessGrantRepository,
     private readonly memberships: PatientMembershipRepository,
     private readonly pool: Pool,
+    private readonly audit?: PatientAccessAuditService,
   ) {}
 
   async listGrants(patientId: string, actorAccountId: string): Promise<PatientAccessGrantData[]> {
@@ -50,13 +52,30 @@ export class PatientAccessService {
 
     await this.memberships.ensureMembership(input.targetAccountId, input.patientId, membershipRole)
 
-    return this.grants.upsertActive({
+    const grant = await this.grants.upsertActive({
       patientId: input.patientId,
       accountId: input.targetAccountId,
       accessLevel,
       membershipRole,
       grantedBy: input.actorAccountId,
     })
+
+    await this.audit?.record({
+      patientId: input.patientId,
+      actorAccountId: input.actorAccountId,
+      targetAccountId: input.targetAccountId,
+      action: 'grant_created',
+      accessLevel,
+      membershipRole,
+      grantId: grant.id,
+    })
+
+    return grant
+  }
+
+  async listAudit(patientId: string, actorAccountId: string) {
+    if (!this.audit) return []
+    return this.audit.listForPatientOwner(patientId, actorAccountId)
   }
 
   async revokeGrant(patientId: string, grantId: string, actorAccountId: string): Promise<void> {
@@ -78,6 +97,16 @@ export class PatientAccessService {
 
     const revoked = await this.grants.revoke(grantId)
     if (!revoked) throw new Error('PATIENT_ACCESS_GRANT_NOT_FOUND')
+
+    await this.audit?.record({
+      patientId,
+      actorAccountId,
+      targetAccountId: grant.accountId,
+      action: 'grant_revoked',
+      accessLevel: grant.accessLevel,
+      membershipRole: grant.membershipRole,
+      grantId,
+    })
 
     await this.pool.query(
       `DELETE FROM patient_memberships WHERE account_id = $1 AND patient_id = $2`,

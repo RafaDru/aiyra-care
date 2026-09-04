@@ -117,7 +117,7 @@ Detalhe: [`CONSOLE.md`](./CONSOLE.md).
 | `run-dev-audit-bridge` | Bridge dev-audit | done |
 | `run-user-escalation` | Sync crítico opt-in | done |
 | — | Painel **Suporte** no console (`support_reports` open) | **done** (aba Suporte :3023) |
-| — | Webhook `SUPPORT_REPORT_WEBHOOK_URL` | planned |
+| — | Webhook `SUPPORT_REPORT_WEBHOOK_URL` | **done** (`support-report-dispatch.ts`) |
 | — | Agente investigador → draft PR (Tier 0–1) | planned |
 | `product-analytics-optin` | Analytics semântico opt-in | P3 — fora do ops imediato |
 
