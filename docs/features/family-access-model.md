@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `family-access-model` |
 | **Épico** | `family-access-model` |
-| **Status** | `in_progress` (blended patient entregue; e-mail transacional pendente) |
+| **Status** | `done` (MVP família; e-mail via Resend quando configurado) |
 | **Categoria** | negócio |
 | **Prioridade** | P1 |
 
@@ -36,6 +36,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 | Migrations | `057_patient_access_grants`, `058_patient_access_invites`, `059_care_circles`, `060_invite_care_circle`, `063_patient_profile_shares` |
 | ACL | `patient-access.service.ts`, `patient-access-grant.pg.repository.ts`, `patient-access.guard.ts` |
 | Convites | `patient-access-invite.service.ts`, `/family-access/invites`, `/invite/accept` |
+| E-mail transacional | `family-access-email.service.ts`, Resend (`RESEND_API_KEY`) |
 | Compartilhamento cross-família | `patient-profile-share.service.ts`, `/family-access/profile-shares` |
 | Círculos | `care-circle.service.ts`, `/care-circles`, `/care-circles/dashboard` |
 | UI | `/settings/family`, dashboard agrupado, `PatientAccessGrantsDrawer` no perfil |
@@ -52,7 +53,6 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 
 ## Pendente (fase 3+)
 
-- E-mail transacional do convite e do compartilhamento entre famílias.
 - `parent_ids` derivado opcionalmente do círculo.
 
 ## Métricas / sucesso

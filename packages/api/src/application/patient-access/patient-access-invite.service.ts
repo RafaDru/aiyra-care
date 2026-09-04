@@ -10,6 +10,10 @@ import { generateInviteToken } from '../../infrastructure/persistence/patient-ac
 import type { PatientAccessLevel, PatientMembershipRole } from '../../domain/patient-access/patient-access.types.js'
 import type { CareCircleService } from '../care-circle/care-circle.service.js'
 import type { PatientAccessAuditService } from './patient-access-audit.service.js'
+import {
+  dispatchFamilyAccessEmail,
+  FamilyAccessEmailService,
+} from '../notifications/family-access-email.service.js'
 
 const INVITE_TTL_DAYS = 7
 
@@ -26,6 +30,7 @@ export class PatientAccessInviteService {
     private readonly pool: Pool,
     private readonly webBaseUrl: string,
     private readonly audit?: PatientAccessAuditService,
+    private readonly emails?: FamilyAccessEmailService,
   ) {}
 
   async createInvite(input: {
@@ -94,7 +99,45 @@ export class PatientAccessInviteService {
       })
     }
 
+    if (this.emails) {
+      dispatchFamilyAccessEmail(async () => {
+        const meta = await this.loadInviteEmailMeta(input.inviterAccountId, input.patientIds, careCircleId)
+        await this.emails!.sendCaregiverInvite({
+          inviteeEmail: email,
+          inviterDisplayName: meta.inviterDisplayName,
+          patientNames: meta.patientNames,
+          circleName: meta.circleName,
+          acceptUrl,
+        })
+      })
+    }
+
     return { invite, acceptUrl }
+  }
+
+  private async loadInviteEmailMeta(
+    inviterAccountId: string,
+    patientIds: string[],
+    careCircleId: string | null,
+  ) {
+    const { rows: accountRows } = await this.pool.query(
+      `SELECT display_name FROM app_accounts WHERE id = $1`,
+      [inviterAccountId],
+    )
+    const { rows: patientRows } = await this.pool.query(
+      `SELECT name FROM patients WHERE id = ANY($1::uuid[]) ORDER BY name`,
+      [patientIds],
+    )
+    let circleName: string | null = null
+    if (careCircleId) {
+      const { rows } = await this.pool.query(`SELECT name FROM care_circles WHERE id = $1`, [careCircleId])
+      circleName = rows[0]?.name ? String(rows[0].name) : null
+    }
+    return {
+      inviterDisplayName: accountRows[0]?.display_name ? String(accountRows[0].display_name) : null,
+      patientNames: patientRows.map((r) => String(r.name)),
+      circleName,
+    }
   }
 
   listSent(inviterAccountId: string) {

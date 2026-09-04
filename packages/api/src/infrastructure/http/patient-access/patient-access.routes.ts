@@ -15,6 +15,7 @@ import { createAuthHook } from '../auth/auth.middleware.js'
 import { PatientAccessController } from './patient-access.controller.js'
 import { PatientAccessInviteController } from './patient-access-invite.controller.js'
 import { PatientProfileShareService } from '../../../application/patient-access/patient-profile-share.service.js'
+import { FamilyAccessEmailService } from '../../../application/notifications/family-access-email.service.js'
 import { PatientProfileShareController } from './patient-profile-share.controller.js'
 
 export async function patientAccessRoutes(app: FastifyInstance) {
@@ -30,6 +31,7 @@ export async function patientAccessRoutes(app: FastifyInstance) {
   const invites = new PatientAccessInvitePgRepository(pgPool)
   const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
   const auditService = new PatientAccessAuditService(pgPool, productEvents)
+  const familyEmails = new FamilyAccessEmailService()
   const accessService = new PatientAccessService(grants, memberships, pgPool, auditService)
   const circleService = new CareCircleService(new CareCirclePgRepository(pgPool), pgPool)
   const webBaseUrl = process.env.WEB_PUBLIC_URL ?? process.env.VITE_WEB_URL ?? 'http://localhost:5173'
@@ -41,9 +43,10 @@ export async function patientAccessRoutes(app: FastifyInstance) {
     pgPool,
     webBaseUrl,
     auditService,
+    familyEmails,
   )
 
-  const shareService = new PatientProfileShareService(pgPool, auditService)
+  const shareService = new PatientProfileShareService(pgPool, webBaseUrl, auditService, familyEmails)
 
   const grantController = new PatientAccessController(accessService)
   const inviteController = new PatientAccessInviteController(inviteService, pgPool)

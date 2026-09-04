@@ -1271,8 +1271,8 @@
       "priority": "P1",
       "title": "Família — múltiplos cuidadores e acesso por perfil",
       "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
-      "status": "in_progress",
-      "statusLabel": "Audit log entregue — blended patient pendente",
+      "status": "done",
+      "statusLabel": "MVP família completo — e-mail transacional opcional via Resend",
       "items": [
         {
           "id": "family-access-model-doc",
@@ -1322,6 +1322,13 @@
           "status": "done",
           "detail": "Migration 062 patient_access_audit_events; GET /patients/:id/access-audit; eventos em grant/convite; product_events patient_access_granted; UI histórico no drawer.",
           "reviewBadge": ["legal", "security"]
+        },
+        {
+          "id": "family-access-transactional-email",
+          "title": "E-mail transacional — convite cuidador e compartilhamento entre famílias",
+          "status": "done",
+          "detail": "FamilyAccessEmailService + adapter Resend (RESEND_API_KEY); envio assíncrono em createInvite e profile share; noop sem chave; templates pt-BR.",
+          "reviewBadge": ["legal", "content"]
         }
       ]
     },

@@ -141,7 +141,7 @@ Revisão jurídica obrigatória antes de go-live multi-guardião (`reviewBadge: 
 - ✅ `listAccessiblePatientIds` via grants; limite 2 co-admins `full` (titular excluído da contagem)
 - ✅ Convites MVP (058): `POST /family-access/invites`, aceite em `/invite/accept`, link copiável + checkbox LGPD
 - ✅ UI lista “Quem tem acesso” por perfil (drawer no header do perfil)
-- [ ] Envio de e-mail transacional do convite
+- [x] Envio de e-mail transacional do convite (Resend; noop sem `RESEND_API_KEY`)
 
 ### Fase 2 — Care circles
 - ✅ Tabelas `care_circles`, `care_circle_members`, `patient_circle_links` (059) + backfill «Minha família»

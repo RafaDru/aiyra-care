@@ -7,6 +7,10 @@ import {
   type PatientProfileShareInvite,
 } from '../../domain/patient-access/patient-profile-share.types.js'
 import type { PatientAccessAuditService } from './patient-access-audit.service.js'
+import {
+  dispatchFamilyAccessEmail,
+  FamilyAccessEmailService,
+} from '../notifications/family-access-email.service.js'
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase()
@@ -51,7 +55,9 @@ const INVITE_SELECT = `
 export class PatientProfileShareService {
   constructor(
     private readonly pool: Pool,
+    private readonly webBaseUrl: string,
     private readonly audit?: PatientAccessAuditService,
+    private readonly emails?: FamilyAccessEmailService,
   ) {}
 
   async create(input: CreateProfileShareInput): Promise<PatientProfileShareInvite> {
@@ -92,6 +98,19 @@ export class PatientProfileShareService {
 
     const invite = await this.findById(rows[0].id as string)
     if (!invite) throw new Error('PROFILE_SHARE_NOT_FOUND')
+
+    if (this.emails) {
+      const settingsUrl = `${this.webBaseUrl.replace(/\/$/, '')}/settings/family`
+      dispatchFamilyAccessEmail(async () => {
+        await this.emails!.sendProfileShareInvite({
+          targetEmail: email,
+          ownerDisplayName: invite.ownerDisplayName,
+          patientName: invite.patientName,
+          settingsUrl,
+        })
+      })
+    }
+
     return invite
   }
 

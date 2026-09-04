@@ -1,5 +1,16 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-04] - Família: e-mail transacional (convite + compartilhamento)
+
+### Realizado
+- **FamilyAccessEmailService** — templates pt-BR para convite de cuidador e compartilhamento entre famílias.
+- **Adapter Resend** — `RESEND_API_KEY` + `TRANSACTIONAL_EMAIL_FROM`; modo noop em dev.
+- Disparo assíncrono após `createInvite` e `create` profile share (não bloqueia API).
+
+### Configurar em produção
+- `TRANSACTIONAL_EMAIL_PROVIDER=resend`
+- Domínio verificado no Resend + `TRANSACTIONAL_EMAIL_FROM`
+
 ## [2026-09-04] - Família: perfil compartilhado entre círculos (063 — caso Mariana)
 
 ### Realizado

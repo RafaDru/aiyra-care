@@ -7,7 +7,7 @@
       "id": "family-access-model",
       "epicId": "family-access-model",
       "title": "Família — múltiplos cuidadores e acesso por perfil",
-      "status": "in_progress",
+      "status": "done",
       "category": "negocio",
       "priority": "P1",
       "doc": "docs/features/family-access-model.md",

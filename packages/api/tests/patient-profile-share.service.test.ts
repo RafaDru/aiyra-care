@@ -32,7 +32,7 @@ describe('PatientProfileShareService', () => {
   })
 
   it('exige legitimidade ao criar compartilhamento', async () => {
-    const svc = new PatientProfileShareService(pool as never)
+    const svc = new PatientProfileShareService(pool as never, 'http://localhost:5173')
     await expect(
       svc.create({
         patientId,
@@ -94,7 +94,7 @@ describe('PatientProfileShareService', () => {
       return { rows: [] }
     })
 
-    const svc = new PatientProfileShareService(pool as never)
+    const svc = new PatientProfileShareService(pool as never, 'http://localhost:5173')
     const result = await svc.accept({
       token,
       accountId: franciscoId,
