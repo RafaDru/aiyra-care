@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `family-access-model` |
 | **Épico** | `family-access-model` |
-| **Status** | `in_progress` (fase 2 entregue; audit log e blended patient pendentes) |
+| **Status** | `in_progress` (fase 2 + audit log; blended patient pendente) |
 | **Categoria** | negócio |
 | **Prioridade** | P1 |
 
@@ -16,7 +16,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 
 - Refletir a realidade de guardiões múltiplos (pai, mãe, padrasto) sem forçar um login compartilhado.
 - Convites por e-mail com escopo de perfis e família (`care_circle_id`).
-- Manter LGPD: trilha de quem concedeu acesso e revogação (audit log — planejado).
+- Manter LGPD: trilha de quem concedeu acesso e revogação — **audit log (062)** entregue.
 
 ## Comportamento (usuário) — entregue (MVP)
 
@@ -42,6 +42,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 ### Rotas API
 
 - `GET/POST/DELETE /patients/:id/access-grants`
+- `GET /patients/:id/access-audit`
 - `GET/POST/DELETE /family-access/invites`, `POST /family-access/invites/accept`
 - `GET/POST/PATCH /care-circles`, membros, vínculos de perfil
 - `GET /care-circles/dashboard`
@@ -49,7 +50,6 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 ## Pendente (fase 3+)
 
 - Mesmo paciente em dois círculos com grants independentes (caso Mariana).
-- Audit log de grant/revoke (`family-access-audit-log`).
 - E-mail transacional do convite.
 - `parent_ids` derivado opcionalmente do círculo.
 
