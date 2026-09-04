@@ -32,6 +32,8 @@ import { SessionStatusTag } from '../../../components/ui/StatusTag.js'
 import { isHintDismissed } from '../../../lib/dismissed-hints.js'
 import { ALIGNED_COL } from '../../../components/layout/aligned-table-columns.js'
 import { useIntegrationSyncHistory } from '../../../hooks/useIntegrationSyncHistory.js'
+import { trackSyncJobSkipped, trackSyncJobStarted } from '../../../lib/telemetry/sync-telemetry.js'
+import { reportApiClientError } from '../../../lib/client-errors.js'
 import type { SyncablePortalType } from '../../../lib/sync-portal-profile.js'
 import type { SyncJobOverallStatus } from '../../../lib/sync-job-progress.js'
 import { useAuth } from '../../../contexts/AuthContext.js'
@@ -207,19 +209,27 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
         amilUtilizationEnd: opts?.amil?.amilUtilizationEnd,
       })
       if (r.skipped) {
+        trackSyncJobSkipped(portalType, r.reason ?? 'skipped', 'manual', patient.id)
         if (r.reason === 'session_required') {
           message.info('Primeira conexão ou sessão expirada — Sincronizar pode abrir o portal')
         }
         return
       }
       if (r.jobId) {
+        trackSyncJobStarted(portalType, 'manual', patient.id)
         setDockJobs((prev) => [
           ...prev,
           { jobId: r.jobId!, linkId, portalType: portalType as SyncablePortalType },
         ])
       }
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro na sincronização')
+      const msg = err instanceof Error ? err.message : 'Erro na sincronização'
+      reportApiClientError(`/integration-links/${linkId}/sync`, 0, {
+        patientId: patient.id,
+        route: `/patients/${patient.id}`,
+        message: msg,
+      })
+      message.error(msg)
     } finally {
       setStartingLinkIds((prev) => {
         const next = new Set(prev)
@@ -227,7 +237,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
         return next
       })
     }
-  }, [message])
+  }, [message, patient.id])
 
   const requestManualSync = useCallback((linkId: string, portalType: string) => {
     if (portalType === 'amil') {

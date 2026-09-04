@@ -11,11 +11,15 @@ describe('ops-feature-catalog', () => {
     expect(deriveFeatureKeyFromRoute('/')).toBe('dashboard')
     expect(deriveFeatureKeyFromRoute('/patients/abc')).toBe('patient_detail')
     expect(deriveFeatureKeyFromRoute('/settings/plan')).toBe('billing')
+    expect(deriveFeatureKeyFromRoute('/settings/family')).toBe('settings_family')
+    expect(deriveFeatureKeyFromRoute('/invite/accept')).toBe('family_invite')
   })
 
   it('maps product events to features', () => {
     expect(resolveFeatureKeyFromProductEvent('ava_chat_failed')).toBe('api:ava')
     expect(resolveFeatureKeyFromProductEvent('sync_job_terminal')).toBe('api:integration_links')
+    expect(resolveFeatureKeyFromProductEvent('sync_job_started')).toBe('api:integration_links')
+    expect(resolveFeatureKeyFromProductEvent('app_screen_viewed', '/settings/family')).toBe('settings_family')
     expect(resolveFeatureKeyFromProductEvent('landing_page_view', '/')).toBe('app')
   })
 

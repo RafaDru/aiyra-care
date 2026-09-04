@@ -4,6 +4,7 @@ import { api } from '../lib/api.js'
 import type { IntegrationLink } from '../lib/api.types.js'
 import { shouldOfferSilentSync } from '../lib/silent-sync.js'
 import { collectSyncTargets } from '../lib/silent-sync.js'
+import { trackSyncJobSkipped, trackSyncJobStarted } from '../lib/telemetry/sync-telemetry.js'
 import { useAuth } from '../contexts/AuthContext.js'
 
 /** Evita re-disparar silent sync ao trocar abas no mesmo paciente. */
@@ -41,7 +42,11 @@ export function useSilentWalletSync(links: IntegrationLink[], onUpdated?: () => 
         silentStartedForLink.add(syncLinkId)
         try {
           const r = await api.integrationLinks.sync(syncLinkId, { silent: true })
-          if (r.skipped) continue
+          if (r.skipped) {
+            trackSyncJobSkipped(link.portalType, r.reason ?? 'skipped', 'silent')
+            continue
+          }
+          if (r.jobId) trackSyncJobStarted(link.portalType, 'silent')
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e)
           if (SILENT_FAIL_RE.test(msg)) {

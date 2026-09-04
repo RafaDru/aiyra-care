@@ -3,6 +3,7 @@ import { Alert, Card, Space, Switch, Typography, message } from 'antd'
 import { BellOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
+import { trackProductEvent } from '../../lib/product-events.js'
 
 const { Text, Title } = Typography
 
@@ -31,6 +32,10 @@ export function NotificationPreferencesCard() {
     setSyncEscalationEmail(checked)
     try {
       await api.notifications.updatePreferences(checked)
+      trackProductEvent('notification_optin_changed', {
+        kind: 'sync_escalation',
+        enabled: checked,
+      })
       void message.success(t('settings.notifications.saved'))
     } catch {
       setSyncEscalationEmail(prev)

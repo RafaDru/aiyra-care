@@ -1,0 +1,34 @@
+---
+description: Sessão Cursor «Aiyra: Ops» — observabilidade, console :3013, alertas, telemetria, support_reports
+alwaysApply: false
+---
+
+# Sessão Aiyra: Ops
+
+Use este chat para temas de **observabilidade, alertas, console ops e suporte técnico**.
+
+## Antes de alterar código ops
+
+1. Ler **`docs/ops/README.md`** (hub da sessão)
+2. Console → **`docs/ops/CONSOLE.md`**
+3. Tabelas/queries → **`docs/ops/TELEMETRY.md`**
+4. Chamados usuário → **`docs/ops/SUPPORT_REPORTS.md`**
+5. Alertas → **`docs/ops/RUNBOOK_ALERTS.md`**
+
+Arquitetura ampla: `docs/OBSERVABILITY.md` · `docs/OPERATION_MODEL.md`.
+
+## Pacotes principais
+
+| Pacote | Papel |
+|--------|--------|
+| `packages/ops-console` | UI `:3013` / `:3023` |
+| `packages/api/src/application/ops` | Métricas, alertas, triagem |
+| `packages/api/src/application/telemetry` | `product_events`, `client_errors` |
+| `packages/api/src/application/support-report` | Migration 061 |
+
+## Regras
+
+- Sem PHI em webhooks, logs ops ou payloads de alerta.
+- `npm run test:ops` após mudanças em ops/alertas.
+- Dois ambientes: chaves e PG **separados** (integração vs preview).
+- Ao entregar: atualizar `docs/ops/` + roadmap `prod-run-intelligence`.

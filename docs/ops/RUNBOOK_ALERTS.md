@@ -2,7 +2,8 @@
 
 > Um bloco por família de alerta. Sem PHI em notificações.  
 > Console: `http://127.0.0.1:3013` (prod: URL em `OPS_ALERT_DASHBOARD_URL`).  
-> Diagramas: `docs/OPS_FALLBACKS_AND_ALERTS.md`.
+> Diagramas: `docs/OPS_FALLBACKS_AND_ALERTS.md`.  
+> **Hub sessão Ops:** [`README.md`](./README.md)
 
 ## Primeiros 5 minutos (qualquer alerta)
 

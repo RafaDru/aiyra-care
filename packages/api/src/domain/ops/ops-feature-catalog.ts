@@ -53,6 +53,27 @@ const ROUTE_FEATURES: OpsFeatureCatalogEntry[] = [
     routeExample: '/settings/plan',
   },
   {
+    key: 'settings_family',
+    label: 'Família e cuidadores',
+    area: 'Conta',
+    section: 'product',
+    routeExample: '/settings/family',
+  },
+  {
+    key: 'family_invite',
+    label: 'Aceitar convite',
+    area: 'Conta',
+    section: 'product',
+    routeExample: '/invite/accept',
+  },
+  {
+    key: 'compliance',
+    label: 'Aceite legal',
+    area: 'Conta',
+    section: 'product',
+    routeExample: '/compliance/accept',
+  },
+  {
     key: 'settings',
     label: 'Configurações',
     area: 'Conta',
@@ -176,8 +197,11 @@ export function deriveFeatureKeyFromRoute(route: string): string {
   if (path.startsWith('/patients/') && path.includes('/context')) return 'patient_context'
   if (path.startsWith('/patients/')) return 'patient_detail'
   if (path.startsWith('/integrations')) return 'integrations'
+  if (path.startsWith('/settings/family')) return 'settings_family'
   if (path.startsWith('/settings/plan')) return 'billing'
   if (path.startsWith('/settings')) return 'settings'
+  if (path.startsWith('/invite/accept')) return 'family_invite'
+  if (path.startsWith('/compliance')) return 'compliance'
   if (path.startsWith('/onboarding')) return 'onboarding'
   if (path.startsWith('/emergency')) return 'emergency'
   if (path.startsWith('/roadmap')) return 'roadmap'
@@ -210,6 +234,7 @@ const EVENT_FEATURE_OVERRIDES: Record<string, string> = {
   ava_patient_switch_hook: 'api:ava',
   ava_proposed_action_executed: 'api:ava',
   sync_job_terminal: 'api:integration_links',
+  sync_job_started: 'api:integration_links',
   billing_checkout_started: 'billing',
   billing_checkout_completed: 'billing',
   hygiene_prompt_shown: 'patient_detail',
@@ -217,6 +242,17 @@ const EVENT_FEATURE_OVERRIDES: Record<string, string> = {
   onboarding_step: 'onboarding',
   landing_page_view: 'app',
   landing_cta_click: 'app',
+  family_invite_created: 'settings_family',
+  family_invite_accepted: 'family_invite',
+  family_invite_revoked: 'settings_family',
+  family_invite_failed: 'family_invite',
+  patient_access_revoked: 'patient_detail',
+  compliance_accepted: 'compliance',
+  compliance_gate_redirect: 'compliance',
+  notification_optin_changed: 'settings',
+  sync_escalation_opened: 'settings',
+  sync_escalation_resolved: 'settings',
+  support_report_submitted: 'settings',
 }
 
 /** Atribui feature para agregar product_events. */
@@ -224,6 +260,9 @@ export function resolveFeatureKeyFromProductEvent(
   eventName: string,
   route?: string | null,
 ): string {
+  if (eventName === 'app_screen_viewed' && route?.trim()) {
+    return deriveFeatureKeyFromRoute(route.trim())
+  }
   const override = EVENT_FEATURE_OVERRIDES[eventName]
   if (override) return override
   if (route?.trim()) return deriveFeatureKeyFromRoute(route.trim())

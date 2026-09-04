@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-03",
+  "updatedAt": "2026-09-04",
   "description": "Índice de capacidades de produto — ver docs/DOCUMENTATION_SYSTEM.md",
   "features": [
     {
@@ -68,6 +68,20 @@
       "api": ["GET/POST/PATCH/DELETE /organizations", "GET/POST/PATCH/DELETE /organizations/:id/members"],
       "helpTopics": [],
       "tags": ["b2b", "organizations", "api"]
+    },
+    {
+      "id": "support-user-reports",
+      "epicId": "prod-run-intelligence",
+      "title": "Reportar problema — suporte com consentimento",
+      "status": "in_progress",
+      "category": "tecnico",
+      "priority": "P1",
+      "doc": "docs/features/support-user-reports.md",
+      "domainDoc": "docs/OBSERVABILITY.md",
+      "routes": ["*"],
+      "api": ["POST /support/reports", "GET /support/reports", "GET /support/reports/:id"],
+      "helpTopics": [],
+      "tags": ["suporte", "lgpd", "observabilidade", "bugs"]
     },
     {
       "id": "documentation-knowledge-base",

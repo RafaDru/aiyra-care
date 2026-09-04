@@ -17,6 +17,8 @@ import {
 import { PlusOutlined, UserAddOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
+import { trackProductEvent } from '../../lib/product-events.js'
+import { reportApiClientError } from '../../lib/client-errors.js'
 
 const { Text, Paragraph } = Typography
 
@@ -106,12 +108,19 @@ export function FamilyInviteCard() {
         legitimacyAck: true,
       })
       setLastAcceptUrl(result.acceptUrl)
+      trackProductEvent('family_invite_created', {
+        patient_count: values.patientIds.length,
+        access_level: values.accessLevel ?? 'full',
+      })
       message.success(t('family.invite.created'))
       setModalOpen(false)
       form.resetFields()
       void load()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : t('family.invite.createError'))
+      const msg = e instanceof Error ? e.message : t('family.invite.createError')
+      trackProductEvent('family_invite_failed', { error_code: 'create_failed', step: 'create' })
+      reportApiClientError('/family-access/invites', 0, { message: msg })
+      message.error(msg)
     } finally {
       setSubmitting(false)
     }
@@ -120,6 +129,7 @@ export function FamilyInviteCard() {
   const handleRevoke = async (id: string) => {
     try {
       await api.familyAccess.revokeInvite(id)
+      trackProductEvent('family_invite_revoked', {})
       message.success(t('family.invite.revoked'))
       void load()
     } catch {

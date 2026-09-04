@@ -658,6 +658,7 @@ export type ProductEventName =
   | 'ava_patient_switch_hook'
   | 'ava_proposed_action_executed'
   | 'sync_job_terminal'
+  | 'sync_job_started'
   | 'billing_checkout_started'
   | 'billing_checkout_completed'
   | 'hygiene_prompt_shown'
@@ -665,6 +666,38 @@ export type ProductEventName =
   | 'onboarding_step'
   | 'landing_page_view'
   | 'landing_cta_click'
+  | 'family_invite_created'
+  | 'family_invite_accepted'
+  | 'family_invite_revoked'
+  | 'family_invite_failed'
+  | 'patient_access_revoked'
+  | 'compliance_accepted'
+  | 'compliance_gate_redirect'
+  | 'notification_optin_changed'
+  | 'app_screen_viewed'
+  | 'support_report_submitted'
+
+export type SupportReportCategory =
+  | 'technical_bug'
+  | 'incorrect_data'
+  | 'ux_confusion'
+  | 'other'
+
+export interface SupportReportSummary {
+  id: string
+  status: 'open' | 'triaged' | 'resolved' | 'closed'
+  category: SupportReportCategory
+  description: string | null
+  route: string | null
+  patientId: string | null
+  consentTechnical: boolean
+  consentScreenshot: boolean
+  consentProfileAccess: boolean
+  profileAccessUntil: string | null
+  hasScreenshot: boolean
+  expiresAt: string
+  createdAt: string
+}
 
 export interface AvaConversation {
   id: string

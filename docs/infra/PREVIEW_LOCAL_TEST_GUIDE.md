@@ -74,6 +74,7 @@ Após login em **:5174**, confira o dashboard — deve listar pacientes se a con
 ### 4. Configurações, família e opt-in ops (10 min)
 - [ ] **Configurações → Geral** → toggle **“Avisar falhas repetidas de sincronização”**
 - [ ] **Configurações → Família e cuidadores** — círculo «Minha família», convites, vincular perfis (migrations 057–060)
+- [ ] **Reportar problema** (header) — enviar chamado com contexto técnico; conferir linha em `support_reports` (migration 061)
 - [ ] **Dashboard** — agrupamento por família (se 2+ círculos)
 - [ ] **Perfil** — botão «Quem tem acesso»
 - [ ] Salvar e recarregar — preferências persistem
@@ -81,6 +82,7 @@ Após login em **:5174**, confira o dashboard — deve listar pacientes se a con
 ### 5. Console ops preview (10 min)
 - [ ] Abrir http://ops.staging.aiyracare.test ou `:3023`
 - [ ] Tag **Ambiente Staging** (âmbar) no topo do console
+- [ ] Após o roteiro acima, aba **Produto** → **Saúde por feature** deve mostrar sessões (`app_screen_viewed`) nas telas visitadas
 - [ ] Aba **Infra** — probe API/PG, latências ok/warning/critical
 - [ ] Aba **Produto** — mapa de features, erros cliente (se houver)
 - [ ] Aba **Sync** — fail rate, jobs 24h

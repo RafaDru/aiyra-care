@@ -3,6 +3,7 @@ import { Button, Drawer, List, Space, Tag, Typography, message } from 'antd'
 import { TeamOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
+import { trackProductEvent } from '../../lib/product-events.js'
 
 const { Text } = Typography
 
@@ -53,6 +54,7 @@ export function PatientAccessGrantsDrawer({ patientId, patientName }: PatientAcc
   const revoke = async (grantId: string) => {
     try {
       await api.patientAccess.revokeGrant(patientId, grantId)
+      trackProductEvent('patient_access_revoked', {}, { patientId })
       message.success(t('family.access.revoked'))
       void load()
     } catch (e) {

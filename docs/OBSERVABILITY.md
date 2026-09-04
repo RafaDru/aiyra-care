@@ -1,6 +1,6 @@
 # Observabilidade, monitoramento e analytics de produto
 
-> **Última atualização:** 2026-09-01  
+> **Última atualização:** 2026-09-04  
 > Objetivo: operação **proativa** (antecipar falhas e travamentos), não só reagir a tickets.  
 > LGPD: sem PHI em logs agregados; conteúdo clínico/chat só com opt-in explícito.
 
@@ -97,6 +97,12 @@ Processo: [`infra/TWO_ENV_MODEL.md`](./infra/TWO_ENV_MODEL.md) · deploy Preview
 | `ava_context_pin` / `unpin` | Uso do painel |
 | `ava_patient_switch_hook` | UX multi-filho |
 | `sync_job_terminal` | success/fail por portal |
+| `sync_job_started` | Início manual/silent; `skipped` + `reason` quando API ignora |
+| `app_screen_viewed` | Uma vez por sessão/tela — alimenta matriz acesso × fail rate |
+| `family_invite_*` | Criar, aceitar, revogar, falha (sem e-mail no payload) |
+| `patient_access_revoked` | Titular revoga grant no perfil |
+| `compliance_gate_redirect` / `compliance_accepted` | Gate legal |
+| `notification_optin_changed` | Opt-in escalação sync (settings) |
 | `billing_checkout_started` / `completed` | Conversão |
 | `hygiene_prompt_shown` / `resolved` | Dedup (API + futura UI) |
 | `onboarding_step` | Onde trava onboarding |
@@ -104,6 +110,8 @@ Processo: [`infra/TWO_ENV_MODEL.md`](./infra/TWO_ENV_MODEL.md) · deploy Preview
 **Alertas externos:** webhook plugável (`OPS_ALERT_WEBHOOK_URL`) — local notifier, ntfy, e-mail, Slack · `npm run ops:alerts-check` · ver `docs/infra/OPS_ALERT_CHANNELS.md`.
 
 **Produção:** `docs/infra/OPS_ALERTS_PRODUCTION.md` · setup `npm run setup:ops-alerts` · smoke `npm run ops:smoke` · console ops (URL dedicada, não `/ops` no app).
+
+**Hub operacional (sessão Cursor «Aiyra: Ops»):** [`docs/ops/README.md`](./ops/README.md) · console [`docs/ops/CONSOLE.md`](./ops/CONSOLE.md) · telemetria [`docs/ops/TELEMETRY.md`](./ops/TELEMETRY.md) · suporte [`docs/ops/SUPPORT_REPORTS.md`](./ops/SUPPORT_REPORTS.md).
 
 **Fingerprints:** `errorFingerprints24h` em `GET /ops/metrics` — agrupa `product_events` por erro/status (24h).
 

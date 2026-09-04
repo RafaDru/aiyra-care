@@ -134,6 +134,8 @@ async function registerRoutes() {
   await app.register(avaRoutes)
   const { telemetryRoutes } = await import('./infrastructure/http/telemetry/telemetry.routes.js')
   await app.register(telemetryRoutes)
+  const { supportReportRoutes } = await import('./infrastructure/http/support-report/support-report.routes.js')
+  await app.register(supportReportRoutes)
   const { opsRoutes } = await import('./infrastructure/http/ops/ops.routes.js')
   await app.register(opsRoutes)
   const { emergencyRoutes } = await import('./infrastructure/http/emergency/emergency.routes.js')

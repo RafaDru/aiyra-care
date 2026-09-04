@@ -84,7 +84,7 @@ export function App() {
   return (
     <OpsShell
       title="Observabilidade"
-      subtitle={OPS_SUBTITLES[deploymentTier]}
+      subtitle={`${OPS_SUBTITLES[deploymentTier]} · docs/ops/README.md`}
       deploymentTier={deploymentTier}
       actions={
         <>

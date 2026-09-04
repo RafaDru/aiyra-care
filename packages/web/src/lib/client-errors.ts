@@ -78,13 +78,17 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
 export function reportApiClientError(
   apiPath: string,
   status: number,
-  patientId?: string,
+  options?: { patientId?: string; route?: string; message?: string },
 ): void {
+  const errorCode = status > 0
+    ? `HTTP_${status}`
+    : sanitizeErrorCode(options?.message ?? 'api_error')
   void reportClientError({
     errorKind: 'api',
-    errorCode: `HTTP_${status}`,
+    errorCode,
     apiPath,
-    patientId,
+    patientId: options?.patientId,
+    route: options?.route,
   }).catch(() => undefined)
 }
 

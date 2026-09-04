@@ -1,5 +1,28 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-04] - Suporte: Reportar problema (061) + consentimento LGPD
+
+### Realizado
+- **Migration 061** — `support_reports` (chamado, bundle diagnóstico JSON, TTL 30d, opt-in acesso perfil 7d).
+- **API** — `POST/GET /support/reports`; enriquecimento com `product_events` + `client_errors` se `consentTechnical`.
+- **Web** — botão global no header + modal com categorias e checkboxes de consentimento.
+- **Telemetria** — `support_report_submitted`.
+- **Docs** — `docs/features/support-user-reports.md`, `DATA_PROCESSING_MAP`.
+- **Hub sessão Ops** — `docs/ops/README.md` (+ `CONSOLE`, `TELEMETRY`, `SUPPORT_REPORTS`); regra `.cursor/rules/aiyra-ops-session.mdc`.
+
+### Próximo
+- [ ] Fila no ops console `:3013` — doc [`docs/ops/SUPPORT_REPORTS.md`](docs/ops/SUPPORT_REPORTS.md)
+- [ ] Captura de screenshot (UI)
+- [ ] Webhook / triagem automática / agente investigador
+
+## [2026-09-04] - Ops: instrumentação web (sync, família, telas)
+
+### Realizado
+- **Eventos** — `sync_job_started`, `app_screen_viewed`, família (`family_invite_*`), `patient_access_revoked`, compliance, `notification_optin_changed`.
+- **Web** — `useScreenTelemetry` no `AppLayout`; helpers `sync-telemetry`; `reportClientError` em falhas de sync/convite.
+- **Catálogo ops** — features `settings_family`, `family_invite`, `compliance`; `app_screen_viewed` resolve pela rota.
+- **Docs** — `OBSERVABILITY.md`, passo no `PREVIEW_LOCAL_TEST_GUIDE`.
+
 ## [2026-09-03] - Família: convites ↔ círculos, dashboard agrupado, ACL drawer
 
 ### Realizado

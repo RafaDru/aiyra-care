@@ -1,10 +1,11 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Spin } from 'antd'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { api } from '../../lib/api.js'
 
 import { COMPLIANCE_ACCEPT_PATH } from '../../lib/legal-paths.js'
+import { trackProductEvent } from '../../lib/product-events.js'
 
 /**
  * Redireciona para /compliance/accept quando há pendência legal.
@@ -19,6 +20,7 @@ export function RequireCompliance() {
   const location = useLocation()
   const [checking, setChecking] = useState(true)
   const [compliant, setCompliant] = useState(true)
+  const gateTrackedRef = useRef(false)
 
   useEffect(() => {
     if (!configured || !authUserId) {
@@ -43,6 +45,13 @@ export function RequireCompliance() {
       window.removeEventListener('aiyracare:compliance-accepted', onAccepted)
     }
   }, [configured, authUserId])
+
+  useEffect(() => {
+    if (checking || compliant || location.pathname === COMPLIANCE_ACCEPT_PATH) return
+    if (gateTrackedRef.current) return
+    gateTrackedRef.current = true
+    trackProductEvent('compliance_gate_redirect', { step: location.pathname.slice(0, 64) })
+  }, [checking, compliant, location.pathname])
 
   if (!configured) return <Outlet />
 

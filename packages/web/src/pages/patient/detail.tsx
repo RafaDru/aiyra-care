@@ -31,6 +31,8 @@ import { AgendaTab } from './tabs/AgendaTab.js'
 import { PatientContextPanel } from '../../components/patient/PatientContextPanel.js'
 import { HealthThreadsPanel } from '../../components/patient/HealthThreadsPanel.js'
 import { PatientAccessGrantsDrawer } from '../../components/family/PatientAccessGrantsDrawer.js'
+import { trackSyncJobSkipped, trackSyncJobStarted } from '../../lib/telemetry/sync-telemetry.js'
+import { reportApiClientError } from '../../lib/client-errors.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import {
   SECTION_TABS,
@@ -245,11 +247,16 @@ export function PatientDetail() {
     }
     try {
       const r = await api.integrationLinks.sync(linkId, { silent: opts?.silent, force: opts?.force })
+      const mode = opts?.silent ? 'silent' : 'manual'
       if (r.skipped) {
+        trackSyncJobSkipped(portalType, r.reason ?? 'skipped', mode, id)
         if (!opts?.silent && r.reason === 'session_required') {
           message.info('Conecte ao portal com Sincronizar (primeira vez ou sessão expirada)')
         }
         return
+      }
+      if (r.jobId) {
+        trackSyncJobStarted(portalType, mode, id)
       }
       if (!opts?.silent) {
         setSyncJobId(r.jobId!)
@@ -262,7 +269,9 @@ export function PatientDetail() {
         }
         console.warn('Silent sync failed', e)
       } else {
-        message.error(e instanceof Error ? e.message : 'Erro na sincronização')
+        const msg = e instanceof Error ? e.message : 'Erro na sincronização'
+        reportApiClientError(`/integration-links/${linkId}/sync`, 0, { patientId: id, message: msg })
+        message.error(msg)
         setSyncPortalType(null)
       }
     } finally {

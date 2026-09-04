@@ -65,3 +65,16 @@ Invocar no chat antes de merge (tier ≥ 2):
 - Hook `subagentStart` — limitar subagents em paths sensíveis
 - CI: E2E smoke + migration dry-run
 - Integrar `docs/dev-audit/` com `product_events` em staging (sem PHI) — **done** · `npm run dev-audit:bridge` · `GET /ops/dev-audit-bridge`
+
+## Sessão Cursor «Aiyra: Ops»
+
+Trabalho de observabilidade, console `:3013`, alertas e `support_reports` concentra-se no hub:
+
+| Doc | Conteúdo |
+|-----|----------|
+| [`docs/ops/README.md`](./ops/README.md) | Índice da sessão — **ler primeiro** |
+| [`docs/ops/CONSOLE.md`](./ops/CONSOLE.md) | Abas do console |
+| [`docs/ops/TELEMETRY.md`](./ops/TELEMETRY.md) | Queries PG, LGPD |
+| [`docs/ops/SUPPORT_REPORTS.md`](./ops/SUPPORT_REPORTS.md) | Chamados «Reportar problema» |
+
+Regra Cursor opcional: `.cursor/rules/aiyra-ops-session.mdc` (ativar neste chat).

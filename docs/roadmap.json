@@ -2025,6 +2025,13 @@
           "detail": "npm run dev-audit:bridge; GET /ops/dev-audit-bridge; correlaciona hooks Cursor com product_events por hora (sem PHI)."
         },
         {
+          "id": "run-support-user-reports",
+          "title": "Reportar problema — chamado + bundle LGPD",
+          "status": "in_progress",
+          "detail": "Migration 061; POST/GET /support/reports; botão global AppLayout; consentimento técnico/perfil; product_events support_report_submitted. Runbook ops: docs/ops/SUPPORT_REPORTS.md. Fase 2: fila console, screenshot, webhook.",
+          "reviewBadge": ["legal"]
+        },
+        {
           "id": "run-operation-model-doc",
           "title": "Modelo operacional (doc)",
           "status": "done",

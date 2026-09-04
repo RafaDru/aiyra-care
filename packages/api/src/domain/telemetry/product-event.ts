@@ -8,6 +8,7 @@ export const PRODUCT_EVENT_NAMES = [
   'ava_patient_switch_hook',
   'ava_proposed_action_executed',
   'sync_job_terminal',
+  'sync_job_started',
   'billing_checkout_started',
   'billing_checkout_completed',
   'hygiene_prompt_shown',
@@ -19,6 +20,16 @@ export const PRODUCT_EVENT_NAMES = [
   'stripe_webhook_rejected',
   'sync_escalation_opened',
   'sync_escalation_resolved',
+  'family_invite_created',
+  'family_invite_accepted',
+  'family_invite_revoked',
+  'family_invite_failed',
+  'patient_access_revoked',
+  'compliance_accepted',
+  'compliance_gate_redirect',
+  'notification_optin_changed',
+  'app_screen_viewed',
+  'support_report_submitted',
 ] as const
 
 export type ProductEventName = typeof PRODUCT_EVENT_NAMES[number]
@@ -60,6 +71,10 @@ export const PRODUCT_EVENT_PROPERTY_KEYS = new Set([
   'kind',
   'stripe_event_type',
   'incident_id',
+  'feature_key',
+  'enabled',
+  'patient_count',
+  'access_level',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret/i

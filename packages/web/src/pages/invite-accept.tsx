@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Alert, Button, Card, Space, Typography, message } from 'antd'
 import { api } from '../lib/api.js'
 import { useTranslation } from 'react-i18next'
+import { trackProductEvent } from '../lib/product-events.js'
+import { reportApiClientError } from '../lib/client-errors.js'
 
 const { Title, Paragraph, Text } = Typography
 
@@ -35,7 +37,10 @@ export function InviteAcceptPage() {
     api.familyAccess
       .previewInvite(token)
       .then(setPreview)
-      .catch(() => setError(t('family.accept.notFound')))
+      .catch(() => {
+        trackProductEvent('family_invite_failed', { error_code: 'preview_not_found', step: 'preview' })
+        setError(t('family.accept.notFound'))
+      })
       .finally(() => setLoading(false))
   }, [token, t])
 
@@ -44,10 +49,14 @@ export function InviteAcceptPage() {
     setAccepting(true)
     try {
       await api.familyAccess.acceptInvite(token)
+      trackProductEvent('family_invite_accepted', {})
       message.success(t('family.accept.success'))
       navigate('/')
     } catch (e) {
-      message.error(e instanceof Error ? e.message : t('family.accept.error'))
+      const msg = e instanceof Error ? e.message : t('family.accept.error')
+      trackProductEvent('family_invite_failed', { error_code: 'accept_failed', step: 'accept' })
+      reportApiClientError('/family-access/invites/accept', 0, { message: msg })
+      message.error(msg)
     } finally {
       setAccepting(false)
     }

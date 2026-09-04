@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined } from '@ant-design/icons'
+import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined, CustomerServiceOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -12,18 +12,22 @@ import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
 import { AvaGlobalDock } from '../ava/AvaGlobalDock.js'
 import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
+import { SupportReportModal } from '../support/SupportReportModal.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
+import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation()
   const { configured, user, signOut } = useAuth()
   const { darkMode } = useTheme()
+  useScreenTelemetry()
 
   const userMenuItems: MenuProps['items'] = [
     {
@@ -159,6 +163,15 @@ export function AppLayout() {
           {collapsed && <AppLogo variant="wordmark" height={38} />}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {configured && user && (
+              <Button
+                type="text"
+                icon={<CustomerServiceOutlined />}
+                onClick={() => setSupportOpen(true)}
+              >
+                {t('support.reportButton')}
+              </Button>
+            )}
+            {configured && user && (
               <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
                 <Button type="text" icon={<UserOutlined />}>
                   {user.email ?? t('auth.account')}
@@ -176,6 +189,7 @@ export function AppLayout() {
         </Content>
       </Layout>
       <AvaGlobalDock />
+      <SupportReportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
     </Layout>
   )
 }

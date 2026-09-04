@@ -36,6 +36,17 @@
 - Contexto LLM: `GET /project/context` (inclui catálogo `features`)
 - Hub docs: `docs/README.md`
 
+## Sessão «Aiyra: Ops» (observabilidade)
+
+| Doc | Uso |
+|-----|-----|
+| `docs/ops/README.md` | Hub — ler antes de ops |
+| `docs/ops/CONSOLE.md` | Console `:3013` |
+| `docs/ops/TELEMETRY.md` | Queries / LGPD |
+| `docs/ops/SUPPORT_REPORTS.md` | Migration 061 |
+
+Regra: `.cursor/rules/aiyra-ops-session.mdc`
+
 ## Não fazer
 
 - Inferir “para quê” só pelo código — ler feature card primeiro.

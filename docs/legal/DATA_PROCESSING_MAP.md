@@ -24,6 +24,7 @@
 | Pagamento (customer id Stripe) | Conta | Assinatura e pacotes | Contrato | Conforme fiscal | Stripe |
 | OCR / interpretação manuscrito | Conta | Funcionalidade sob demanda | Contrato / consentimento | Eventos de crédito + logs | Groq, OpenAI, Google Vision |
 | Sync jobs, logs de API | Conta / sistema | Operação, segurança | Legítimo interesse | Política de retenção de logs | Postgres |
+| Relatórios de problema (`support_reports`) | Conta | Suporte e correção de falhas | Consentimento (escopo) + contrato | 30 dias (`expires_at`); acesso perfil 7 dias se opt-in | Postgres |
 | Export / share links | Paciente | Compartilhar com médico | Ação do titular/responsável | TTL do link (ex. 48h) | Postgres |
 
 ## Transferência internacional

@@ -1136,6 +1136,24 @@
     "cpf_card": "Cartão / Comprovante CPF",
     "cnh": "CNH"
   },
+  "support": {
+    "reportButton": "Reportar problema",
+    "reportTitle": "Reportar um problema",
+    "reportSubmit": "Enviar relatório",
+    "reportSuccess": "Relatório enviado (#{{id}}). Obrigado — vamos investigar.",
+    "reportError": "Não foi possível enviar o relatório. Tente de novo.",
+    "reportPrivacyHint": "Por padrão não enviamos exames nem mensagens da Ava. Você escolhe o que compartilhar para investigação.",
+    "categoryLabel": "Tipo de problema",
+    "categoryTechnical": "Erro técnico (tela travou, não carrega)",
+    "categoryIncorrectData": "Dado incorreto ou duplicado",
+    "categoryUx": "Confuso ou difícil de usar",
+    "categoryOther": "Outro",
+    "descriptionLabel": "O que aconteceu? (opcional)",
+    "descriptionPlaceholder": "Descreva o que você esperava e o que viu na tela…",
+    "consentTechnical": "Incluir contexto técnico (recomendado): rota, erros recentes e versão do app",
+    "consentProfileAccess": "Permitir acesso temporário ao meu perfil (7 dias, só para este chamado)",
+    "privacyFooter": "Saiba como tratamos seus dados na"
+  },
   "common": {
     "loading": "Carregando...",
     "empty": "Nenhum registro encontrado",

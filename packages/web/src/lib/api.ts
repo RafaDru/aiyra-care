@@ -361,6 +361,29 @@ export const api = {
         skipErrorReport: true,
       }),
   },
+  support: {
+    createReport: (body: {
+      category: import('./api.types.js').SupportReportCategory
+      description?: string
+      route?: string
+      sessionId?: string
+      patientId?: string
+      consentTechnical: boolean
+      consentScreenshot: boolean
+      consentProfileAccess: boolean
+      screenshotData?: string
+      appVersion?: string
+      userAgent?: string
+      clientContext?: Record<string, unknown>
+    }) =>
+      request<import('./api.types.js').SupportReportSummary>('/support/reports', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        skipErrorReport: true,
+      }),
+    listReports: () =>
+      request<import('./api.types.js').SupportReportSummary[]>('/support/reports'),
+  },
   llm: {
     quota: () => request<import('./api.types.js').LlmUsageQuota>('/llm/usage/quota'),
   },
