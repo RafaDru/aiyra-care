@@ -118,7 +118,7 @@ Detalhe: [`CONSOLE.md`](./CONSOLE.md).
 | `run-user-escalation` | Sync crítico opt-in | done |
 | — | Painel **Suporte** no console (`support_reports` open) | **done** (aba Suporte :3023) |
 | — | Webhook `SUPPORT_REPORT_WEBHOOK_URL` | **done** (`support-report-dispatch.ts`) |
-| — | Agente investigador → draft PR (Tier 0–1) | planned |
+| — | Agente investigador → draft PR (Tier 0–1) | **Tier 0** — Cursor Automation + `CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL` · ver [`SUPPORT_INVESTIGATOR_AUTOMATION.md`](./SUPPORT_INVESTIGATOR_AUTOMATION.md) |
 | `product-analytics-optin` | Analytics semântico opt-in | P3 — fora do ops imediato |
 
 Atualizar esta tabela ao fechar itens em `docs/roadmap.json` → `prod-run-intelligence`.

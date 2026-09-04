@@ -1,0 +1,24 @@
+{
+  "name": "AiyraCare — Investigador suporte (Tier 0)",
+  "description": "Webhook support_report → análise no monorepo sem PHI. Rascunho em docs/ops/investigations/.",
+  "workflow": {
+    "triggers": [
+      {
+        "webhook": {}
+      }
+    ],
+    "gitConfig": {
+      "repo": "RafaDru/aiyra-care",
+      "branch": "main"
+    },
+    "prompts": [
+      "Um chamado de suporte chegou via webhook HTTP (tipo support_report).\n\n1. Leia o corpo JSON do webhook (reportId, category, route, topFingerprint, consentTechnical, dashboardUrl).\n2. Siga o playbook em docs/ops/automations/support-report-investigator.prompt.md.\n3. Escreva o rascunho em docs/ops/investigations/ com data de hoje e prefixo do reportId.\n4. Não abra PR nem altere código de produto (Tier 0).\n5. Não use descrição do usuário nem dados clínicos — só metadados do webhook.\n\nAo terminar, resuma em 5 linhas: hipótese principal + arquivo de investigação criado."
+    ],
+    "model": "composer-2.5",
+    "agentOptions": {
+      "skipInstall": false
+    },
+    "memoryEnabled": true,
+    "actions": []
+  }
+}

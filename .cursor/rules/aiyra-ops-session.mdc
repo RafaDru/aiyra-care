@@ -13,7 +13,8 @@ Use este chat para temas de **observabilidade, alertas, console ops e suporte t�
 2. Console → **`docs/ops/CONSOLE.md`**
 3. Tabelas/queries → **`docs/ops/TELEMETRY.md`**
 4. Chamados usuário → **`docs/ops/SUPPORT_REPORTS.md`**
-5. Alertas → **`docs/ops/RUNBOOK_ALERTS.md`**
+5. Agente investigador → **`docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md`**
+6. Alertas → **`docs/ops/RUNBOOK_ALERTS.md`**
 
 Arquitetura ampla: `docs/OBSERVABILITY.md` · `docs/OPERATION_MODEL.md`.
 

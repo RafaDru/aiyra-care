@@ -69,8 +69,8 @@ export class SupportReportService {
       })
     }
 
-    void import('./support-report-dispatch.js').then(({ dispatchSupportReport }) =>
-      dispatchSupportReport(record).catch(() => undefined),
+    void import('./support-report-dispatch.js').then(({ dispatchSupportReportNotifications }) =>
+      dispatchSupportReportNotifications(record).catch(() => undefined),
     )
 
     return record

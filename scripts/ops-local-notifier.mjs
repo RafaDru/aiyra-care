@@ -58,6 +58,24 @@ function mapIconType(icon) {
 }
 
 function resolveToast(json) {
+  if (json.type === 'support_report') {
+    if (json.toast?.title && json.toast?.body) {
+      return {
+        title: String(json.toast.title),
+        body: String(json.toast.body),
+        iconType: mapIconType(json.toast.icon ?? 'info'),
+      }
+    }
+    const cat = String(json.category ?? 'other')
+    const route = json.route ? `\n${json.route}` : ''
+    const fp = json.topFingerprint ? `\nErro: ${json.topFingerprint}` : ''
+    return {
+      title: 'AiyraCare | Novo chamado',
+      body: `${cat}${route}${fp}`,
+      iconType: 'Info',
+    }
+  }
+
   if (json.toast?.title && json.toast?.body) {
     return {
       title: String(json.toast.title),

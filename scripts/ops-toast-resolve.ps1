@@ -5,6 +5,31 @@ function Resolve-OpsToastFromPayload {
     [psobject]$Json
   )
 
+  if ($Json.type -eq 'support_report') {
+    if ($Json.toast -and $Json.toast.title -and $Json.toast.body) {
+      $icon = [string]$Json.toast.icon
+      $iconType = switch ($icon.ToLower()) {
+        'error' { 'Error' }
+        'info' { 'Info' }
+        'warning' { 'Warning' }
+        default { 'Info' }
+      }
+      return @{
+        Title = [string]$Json.toast.title
+        Body = [string]$Json.toast.body
+        IconType = $iconType
+      }
+    }
+    $body = [string]$Json.category
+    if ($Json.route) { $body += "`n$($Json.route)" }
+    if ($Json.topFingerprint) { $body += "`nErro: $($Json.topFingerprint)" }
+    return @{
+      Title = 'AiyraCare | Novo chamado'
+      Body = $body
+      IconType = 'Info'
+    }
+  }
+
   if ($Json.toast -and $Json.toast.title -and $Json.toast.body) {
     $icon = [string]$Json.toast.icon
     $iconType = switch ($icon.ToLower()) {

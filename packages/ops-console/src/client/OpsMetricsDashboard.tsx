@@ -39,6 +39,13 @@ export function OpsMetricsDashboard({
 }) {
   const metrics = data.metrics
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('tab')
+    if (
+      fromUrl === 'overview' || fromUrl === 'product' || fromUrl === 'support' || fromUrl === 'sync'
+      || fromUrl === 'ava' || fromUrl === 'infra' || fromUrl === 'cost'
+    ) {
+      return fromUrl
+    }
     const saved = localStorage.getItem(TAB_STORAGE_KEY)
     if (
       saved === 'overview' || saved === 'product' || saved === 'support' || saved === 'sync'

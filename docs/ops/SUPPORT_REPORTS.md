@@ -121,7 +121,25 @@ Disparado em background após `POST /support/reports` (falha do webhook **não**
 | Env | Efeito |
 |-----|--------|
 | `SUPPORT_REPORT_WEBHOOK_URL` | URL dedicada (Slack, etc.) |
-| *(fallback)* `OPS_ALERT_WEBHOOK_URL` | Mesmo canal de alertas ops |
+| *(fallback)* `OPS_ALERT_WEBHOOK_URL` | Mesmo canal de alertas ops (notificador local `:3012`/`:3022`) |
+
+### Notificação na sua máquina (dev)
+
+O webhook usa o **mesmo notificador** dos alertas ops — toast Windows + abre o console na aba **Suporte**:
+
+```powershell
+npm run ops:notifier:up          # dev :3012
+# preview: OPS_LOCAL_NOTIFIER_PORT=3022 npm run ops:notifier:up
+```
+
+`.env` (já configurado pelo `setup:ops-alerts`):
+
+```env
+OPS_ALERT_WEBHOOK_URL=http://127.0.0.1:3012/ops-alert
+OPS_ALERT_DASHBOARD_URL=http://127.0.0.1:3013
+```
+
+Não precisa de `SUPPORT_REPORT_WEBHOOK_URL` separado — o fallback acima basta. Opcional: URL dedicada se quiser canal distinto.
 | `OPS_ALERT_DASHBOARD_URL` / `OPS_CONSOLE_PORT` | Link no payload para o console |
 
 Payload (sem PHI):
@@ -166,7 +184,7 @@ Implementação: `packages/api/src/application/support-report/support-report-dis
 - [x] `SUPPORT_REPORT_WEBHOOK_URL` — payload sem PHI (id, category, route, fingerprint top)
 - [ ] Job purge `expires_at < NOW()`
 - [ ] Agrupamento automático por fingerprint + `app_version`
-- [ ] Agente investigador (Tier 0–1) — ver hub [`README.md`](./README.md)
+- [x] Agente investigador (Tier 0) — Cursor Automation · [`SUPPORT_INVESTIGATOR_AUTOMATION.md`](./SUPPORT_INVESTIGATOR_AUTOMATION.md)
 
 ---
 
