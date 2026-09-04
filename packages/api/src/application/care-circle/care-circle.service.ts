@@ -45,6 +45,10 @@ export class CareCircleService {
   async addMember(circleId: string, actorId: string, targetAccountId: string, role: CareCircleMemberRole) {
     await this.requireOwnerOrAdmin(circleId, actorId)
     if (role === 'owner') throw new Error('CARE_CIRCLE_INVALID_ROLE')
+    const existingTarget = await this.repo.findMember(circleId, targetAccountId)
+    if (existingTarget?.role === 'owner') {
+      throw new Error('CARE_CIRCLE_CANNOT_REMOVE_OWNER')
+    }
     const circle = await this.repo.findById(circleId)
     if (!circle) throw new Error('CARE_CIRCLE_NOT_FOUND')
     if (role === 'admin' && (await this.repo.countAdmins(circleId)) >= MAX_CIRCLE_ADMINS) {

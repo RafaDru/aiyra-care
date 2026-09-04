@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-04] - Titular-only: exclusão de perfil e owner_account_id
+
+### Realizado
+- **DELETE /patients/:id** — apenas `owner_account_id` pode excluir (cuidador convidado recebia 204 e o CASCADE apagava o histórico).
+- **POST /patients** — grava `owner_account_id` (antes só `completeProfile` gravava; filhos criados no dashboard ficavam sem titular).
+- **Migration 061** — backfill de `owner_account_id` a partir de grants/memberships.
+- **Care circles** — `addMember` não rebaixa o titular (`ON CONFLICT` upsert de role).
+- **UI** — botão excluir só para o titular (`isOwner`).
+
 ## [2026-09-03] - Família: convites ↔ círculos, dashboard agrupado, ACL drawer
 
 ### Realizado

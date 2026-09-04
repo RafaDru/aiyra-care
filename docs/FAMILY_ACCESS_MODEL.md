@@ -149,6 +149,7 @@ Revisão jurídica obrigatória antes de go-live multi-guardião (`reviewBadge: 
 - ✅ Dashboard agrupado por família (quando 2+ círculos ou perfis compartilhados)
 - ✅ Convites vinculados a `care_circle_id` (060) — membro adicionado ao aceitar
 - ✅ Drawer «Quem tem acesso» no perfil de saúde
+- ✅ Exclusão de perfil só pelo titular (`owner_account_id`; migration 061 backfill)
 - [ ] Migrar `parent_ids` sync household para opcionalmente derivar do círculo
 
 ### Fase 3 — Cenários avançados

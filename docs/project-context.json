@@ -144,7 +144,7 @@
     { "id": "pre-cnpj-platform", "date": "2026-09-02", "title": "Estruturação pré-CNPJ", "decision": "Ambiente 1 local; Ambiente 2 local até ritmo funcional, depois Preview GCP (openhealth-503119); Cursor Cloud fora de escopo", "status": "active" }
   ],
   "plannedWork": [
-    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "in_progress", "priority": "P1", "note": "Fase 2 entregue (057–060, /settings/family); audit log pendente" },
+    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "in_progress", "priority": "P1", "note": "Fase 2 entregue (057–061, /settings/family); exclusão só pelo titular; audit log pendente" },
     { "id": "documentation-knowledge-base", "title": "Base de conhecimento features + help", "status": "in_progress", "priority": "P2" },
     { "id": "platform-environments", "title": "Ambientes dev/staging/prod + massas + esteiras", "status": "done", "priority": "P2" },
     { "id": "b2b-partner-platform", "title": "Discovery e primitives B2B", "status": "planned", "priority": "P3" },
