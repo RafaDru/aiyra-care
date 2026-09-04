@@ -164,7 +164,7 @@ export class CareCirclePgRepository implements CareCircleRepository {
 
   async listPatients(circleId: string) {
     const { rows } = await this.pool.query(
-      `SELECT p.id AS patient_id, p.name AS patient_name, l.circle_id
+      `SELECT p.id AS patient_id, p.name AS patient_name, l.circle_id, l.link_kind
        FROM patient_circle_links l
        JOIN patients p ON p.id = l.patient_id
        WHERE l.circle_id = $1
@@ -177,6 +177,7 @@ export class CareCirclePgRepository implements CareCircleRepository {
           patientId: String(r.patient_id),
           patientName: String(r.patient_name),
           circleId: String(r.circle_id),
+          linkKind: (r.link_kind as 'primary' | 'shared' | undefined) ?? 'primary',
         }) satisfies CareCirclePatientLink,
     )
   }

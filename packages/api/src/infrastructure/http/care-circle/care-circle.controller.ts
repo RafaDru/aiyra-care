@@ -56,6 +56,7 @@ function serializeDetail(d: CareCircleDetail) {
     patients: d.patients.map((p) => ({
       patientId: p.patientId,
       patientName: p.patientName,
+      linkKind: p.linkKind ?? 'primary',
     })),
   }
 }

@@ -1,6 +1,31 @@
 # Histórico do Projeto AiyraCare
 
-## [2026-09-04] - Suporte: webhook `SUPPORT_REPORT_WEBHOOK_URL`
+## [2026-09-04] - Família: perfil compartilhado entre círculos (063 — caso Mariana)
+
+### Realizado
+- **Migration 063** — `patient_profile_share_invites`; `patient_circle_links.link_kind` (`primary` | `shared`).
+- **API** — titular envia convite cross-família; receptor (owner/admin) aceita escolhendo círculo; revogação remove vínculo `shared`.
+- **Dashboard** — grupos por família filtram perfis sem grant do usuário.
+- **UI** — `ProfileShareCard` em `/settings/family`; tag «Compartilhado» no painel de famílias.
+
+### Decisão
+- Compartilhamento é **iniciado pelo titular do perfil** (não pelo círculo receptor) — alinhado LGPD e `FAMILY_ACCESS_MODEL.md`.
+- **Grants** continuam independentes: aparecer no círculo ≠ ver dados clínicos (ex.: Maria sem grant em Mariana).
+
+### Próximo
+- [ ] E-mail transacional do convite de compartilhamento
+- [ ] Teste E2E matriz João/Maria/Francisco/Vitória
+
+## [2026-09-04] - Investigador suporte — Cursor Automation (Tier 0)
+
+### Realizado
+- Fan-out `CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL` em `dispatchSupportReportNotifications`.
+- Playbook `docs/ops/automations/support-report-investigator.prompt.md` + prefill workflow JSON.
+- Simulação `npm run ops:support-investigator:simulate`.
+- Runbook `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md`.
+
+### Validar
+- Salvar Automation no Cursor → copiar webhook URL para `.env` → simular ou Reportar problema no app.
 
 ### Realizado
 - **`support-report-dispatch.ts`** — POST assíncrono após criar chamado; payload sem PHI (id, category, route, fingerprint top).

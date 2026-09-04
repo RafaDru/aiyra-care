@@ -4,6 +4,9 @@ export const PATIENT_ACCESS_AUDIT_ACTIONS = [
   'invite_sent',
   'invite_accepted',
   'invite_revoked',
+  'profile_share_sent',
+  'profile_share_accepted',
+  'profile_share_revoked',
 ] as const
 
 export type PatientAccessAuditAction = typeof PATIENT_ACCESS_AUDIT_ACTIONS[number]

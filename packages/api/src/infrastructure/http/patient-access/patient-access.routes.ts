@@ -14,6 +14,8 @@ import { getAuthService } from '../auth/auth.routes.js'
 import { createAuthHook } from '../auth/auth.middleware.js'
 import { PatientAccessController } from './patient-access.controller.js'
 import { PatientAccessInviteController } from './patient-access-invite.controller.js'
+import { PatientProfileShareService } from '../../../application/patient-access/patient-profile-share.service.js'
+import { PatientProfileShareController } from './patient-profile-share.controller.js'
 
 export async function patientAccessRoutes(app: FastifyInstance) {
   const authService = getAuthService()
@@ -41,10 +43,14 @@ export async function patientAccessRoutes(app: FastifyInstance) {
     auditService,
   )
 
+  const shareService = new PatientProfileShareService(pgPool, auditService)
+
   const grantController = new PatientAccessController(accessService)
   const inviteController = new PatientAccessInviteController(inviteService, pgPool)
+  const shareController = new PatientProfileShareController(shareService, pgPool)
 
   app.get('/family-access/invites/preview/:token', inviteController.preview.bind(inviteController))
+  app.get('/family-access/profile-shares/preview/:token', shareController.preview.bind(shareController))
 
   app.register(async (scoped) => {
     scoped.addHook('onRequest', requireAuth)
@@ -54,6 +60,14 @@ export async function patientAccessRoutes(app: FastifyInstance) {
     scoped.post('/family-access/invites', inviteController.create.bind(inviteController))
     scoped.delete('/family-access/invites/:id', inviteController.revoke.bind(inviteController))
     scoped.post('/family-access/invites/accept', inviteController.accept.bind(inviteController))
+
+    scoped.get('/family-access/profile-shares/sent', shareController.listSent.bind(shareController))
+    scoped.get('/family-access/profile-shares/incoming', shareController.listIncoming.bind(shareController))
+    scoped.post('/family-access/profile-shares', shareController.create.bind(shareController))
+    scoped.post('/family-access/profile-shares/accept', shareController.accept.bind(shareController))
+    scoped.post('/family-access/profile-shares/:id/accept', shareController.acceptById.bind(shareController))
+    scoped.post('/family-access/profile-shares/:id/decline', shareController.decline.bind(shareController))
+    scoped.delete('/family-access/profile-shares/:id', shareController.revoke.bind(shareController))
 
     scoped.get('/patients/:id/access-grants', grantController.list.bind(grantController))
     scoped.get('/patients/:id/access-audit', grantController.listAudit.bind(grantController))

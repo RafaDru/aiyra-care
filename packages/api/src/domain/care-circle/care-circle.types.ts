@@ -22,6 +22,7 @@ export interface CareCirclePatientLink {
   patientId: string
   patientName: string
   circleId: string
+  linkKind?: 'primary' | 'shared'
 }
 
 export interface CareCircleListItem extends CareCircleData {

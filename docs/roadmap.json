@@ -1312,8 +1312,8 @@
         {
           "id": "family-access-blended-patient",
           "title": "Mesmo perfil em dois círculos (custódia compartilhada)",
-          "status": "planned",
-          "detail": "patient_id com grants independentes por conta/círculo — caso Mariana; auditoria de acesso.",
+          "status": "done",
+          "detail": "Migration 063 patient_profile_share_invites + link_kind shared em patient_circle_links; titular convida outra família; aceite vincula perfil ao círculo receptor; dashboard filtra por grants; UI ProfileShareCard em /settings/family.",
           "reviewBadge": ["legal", "medical"]
         },
         {

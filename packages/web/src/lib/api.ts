@@ -942,6 +942,44 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ token }),
       }),
+    listProfileSharesSent: () =>
+      request<Array<{
+        id: string
+        patientId: string
+        patientName: string
+        targetAccountEmail: string
+        targetCircleId: string | null
+        targetCircleName: string | null
+        status: string
+        expiresAt: string
+      }>>('/family-access/profile-shares/sent'),
+    listProfileSharesIncoming: () =>
+      request<Array<{
+        id: string
+        patientId: string
+        patientName: string
+        targetAccountEmail: string
+        status: string
+        expiresAt: string
+      }>>('/family-access/profile-shares/incoming'),
+    createProfileShare: (data: {
+      patientId: string
+      targetAccountEmail: string
+      legitimacyAck: true
+    }) =>
+      request('/family-access/profile-shares', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    acceptProfileShare: (data: { inviteId: string; circleId: string }) =>
+      request(`/family-access/profile-shares/${data.inviteId}/accept`, {
+        method: 'POST',
+        body: JSON.stringify({ circleId: data.circleId }),
+      }),
+    declineProfileShare: (id: string) =>
+      request<void>(`/family-access/profile-shares/${id}/decline`, { method: 'POST' }),
+    revokeProfileShare: (id: string) =>
+      request<void>(`/family-access/profile-shares/${id}`, { method: 'DELETE' }),
   },
   project: {
     context: () => request<import('./api.types.js').ProjectContext>('/project/context'),

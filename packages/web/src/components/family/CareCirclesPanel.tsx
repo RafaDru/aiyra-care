@@ -28,7 +28,7 @@ interface CircleSummary {
 interface CircleDetail extends CircleSummary {
   memberRole: string
   members: Array<{ id: string; accountId: string; role: string; email?: string | null; displayName?: string | null }>
-  patients: Array<{ patientId: string; patientName: string }>
+  patients: Array<{ patientId: string; patientName: string; linkKind?: string }>
 }
 
 export function CareCirclesPanel() {
@@ -219,6 +219,11 @@ export function CareCirclesPanel() {
                           }
                         >
                           {p.patientName}
+                          {p.linkKind === 'shared' && (
+                            <Tag color="purple" style={{ marginLeft: 8 }}>
+                              {t('family.circles.sharedProfile')}
+                            </Tag>
+                          )}
                         </List.Item>
                       )}
                     />

@@ -15,7 +15,13 @@ export class CareCircleService {
   }
 
   dashboardGroups(accountId: string) {
-    return this.repo.listDashboardGroups(accountId)
+    return this.repo.listDashboardGroups(accountId).then(async (groups) => {
+      const accessible = new Set(await this.listAccessiblePatientIds(accountId))
+      return groups.map((g) => ({
+        ...g,
+        patientIds: g.patientIds.filter((id) => accessible.has(id)),
+      }))
+    })
   }
 
   create(accountId: string, name: string) {
@@ -84,6 +90,26 @@ export class CareCircleService {
 
   async unlinkPatient(circleId: string, actorId: string, patientId: string) {
     await this.requireOwnerOrAdmin(circleId, actorId)
+    const { rows } = await this.pool.query(
+      `SELECT link_kind FROM patient_circle_links WHERE circle_id = $1 AND patient_id = $2`,
+      [circleId, patientId],
+    )
+    const linkKind = rows[0]?.link_kind as string | undefined
+    if (!linkKind) throw new Error('CARE_CIRCLE_PATIENT_NOT_FOUND')
+
+    if (linkKind !== 'shared') {
+      const circle = await this.repo.findById(circleId)
+      if (!circle) throw new Error('CARE_CIRCLE_NOT_FOUND')
+      const ownerRows = await this.pool.query(
+        `SELECT owner_account_id::text AS owner FROM patients WHERE id = $1`,
+        [patientId],
+      )
+      const owner = ownerRows.rows[0]?.owner as string | null
+      if (!owner || owner !== circle.billingOwnerAccountId) {
+        throw new Error('CARE_CIRCLE_PATIENT_NOT_OWNED')
+      }
+    }
+
     const ok = await this.repo.unlinkPatient(circleId, patientId)
     if (!ok) throw new Error('CARE_CIRCLE_PATIENT_NOT_FOUND')
   }
@@ -116,5 +142,18 @@ export class CareCircleService {
     const m = await this.requireMember(circleId, accountId)
     if (m.role !== 'owner' && m.role !== 'admin') throw new Error('CARE_CIRCLE_FORBIDDEN')
     return m
+  }
+
+  private async listAccessiblePatientIds(accountId: string): Promise<string[]> {
+    const { rows } = await this.pool.query(
+      `SELECT DISTINCT patient_id::text AS id FROM (
+         SELECT id AS patient_id FROM patients WHERE owner_account_id = $1
+         UNION
+         SELECT patient_id FROM patient_access_grants
+         WHERE account_id = $1 AND revoked_at IS NULL
+       ) accessible`,
+      [accountId],
+    )
+    return rows.map((r) => String(r.id))
   }
 }
