@@ -1495,8 +1495,8 @@
         {
           "id": "ava-health-guardrails",
           "title": "Guardrails — Ava só em contexto de saúde",
-          "status": "planned",
-          "detail": "Bloquear temas fora de saúde/cuidado familiar (código, automação na plataforma, etc.); respostas dentro de limites de segurança e LGPD.",
+          "status": "done",
+          "detail": "classifyAvaUserMessage + resposta fixa sem LLM para off-topic óbvio; AVA_HEALTH_GUARDRAIL=0 desliga; heurística pt-BR (código, finanças, etc.).",
           "reviewBadge": ["legal", "security"]
         }
       ]

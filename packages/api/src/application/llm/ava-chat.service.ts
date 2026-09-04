@@ -15,6 +15,11 @@ import { emitAvaActivity } from '../../domain/llm/ava-activity.js'
 import { reflectionNeedsFullContext } from '../../domain/llm/ava-reflection.js'
 import { runAvaContextTools } from '../../domain/llm/ava-tools.js'
 import { getRuntimeDegradedService } from '../ops/runtime-degraded.factory.js'
+import {
+  AVA_OFF_TOPIC_REPLY_PT,
+  classifyAvaUserMessage,
+  isAvaHealthGuardrailEnabled,
+} from '../../domain/llm/ava-health-guardrail.js'
 
 export type AvaChatEmitters = {
   activity?: AvaActivityEmitter
@@ -85,6 +90,44 @@ export class AvaChatService {
         patientId: input.patientId,
         source: 'accelerator',
       })
+    }
+
+    if (isAvaHealthGuardrailEnabled() && classifyAvaUserMessage(input.message) === 'off_topic') {
+      const reply = AVA_OFF_TOPIC_REPLY_PT
+      if (input.accountId && conversationId && this.conversations) {
+        await this.conversations.persistTurn(input.accountId, {
+          conversationId,
+          userMessage: input.message,
+          assistantMessage: reply,
+          attachmentDocumentId: input.attachmentDocumentId,
+          reflection: {
+            revised: false,
+            satisfactory: true,
+            severity: 'info',
+            needsFullContext: false,
+          },
+        })
+      }
+      return {
+        reply,
+        provider: 'guardrail',
+        model: 'off_topic',
+        tier: input.tier ?? 'standard',
+        usage: null,
+        quota: null,
+        disclaimer: true,
+        insightsIncluded: 0,
+        reflection: {
+          revised: false,
+          satisfactory: true,
+          severity: 'info',
+          issues: ['off_topic_guardrail'],
+          attempts: 0,
+        },
+        activityTrace: [],
+        conversationId,
+        proposedActions: [],
+      }
     }
 
     let compactPrompt = false
