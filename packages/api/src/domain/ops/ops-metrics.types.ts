@@ -177,6 +177,10 @@ export interface OpsMetricsSnapshot {
     workerStaleMinutes: number | null
     stripeWebhookRejected1h: number
   }
+  supportReports?: {
+    openCount: number
+    submitted24h: number
+  }
 }
 
 export type OpsAlertSeverity = 'warning' | 'critical'

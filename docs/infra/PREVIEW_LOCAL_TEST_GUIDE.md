@@ -83,6 +83,7 @@ Após login em **:5174**, confira o dashboard — deve listar pacientes se a con
 - [ ] Abrir http://ops.staging.aiyracare.test ou `:3023`
 - [ ] Tag **Ambiente Staging** (âmbar) no topo do console
 - [ ] Após o roteiro acima, aba **Produto** → **Saúde por feature** deve mostrar sessões (`app_screen_viewed`) nas telas visitadas
+- [ ] Aba **Suporte** — fila `support_reports` open (se testou «Reportar problema»)
 - [ ] Aba **Infra** — probe API/PG, latências ok/warning/critical
 - [ ] Aba **Produto** — mapa de features, erros cliente (se houver)
 - [ ] Aba **Sync** — fail rate, jobs 24h

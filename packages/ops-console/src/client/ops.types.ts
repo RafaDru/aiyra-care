@@ -172,6 +172,26 @@ export interface OpsMetricsSnapshot {
   featureCatalog: OpsFeatureCatalogEntry[]
   timeSeries24h: OpsTimeSeries24h
   probe?: OpsProbeSnapshot
+  supportReports?: {
+    openCount: number
+    submitted24h: number
+  }
+}
+
+export interface SupportReportOpsRow {
+  id: string
+  accountId: string
+  status: string
+  category: string
+  route: string | null
+  descriptionPreview: string | null
+  consentTechnical: boolean
+  consentProfileAccess: boolean
+  hasScreenshot: boolean
+  appVersion: string | null
+  createdAt: string
+  expiresAt: string
+  diagnosticContext: Record<string, unknown>
 }
 
 export interface RuntimeDegradedView {

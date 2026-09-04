@@ -41,6 +41,8 @@ export class OpsMetricsService {
       avaTokensHourly24h,
       workerLastTickAt,
       stripeWebhookRejected1h,
+      supportOpenCount,
+      supportSubmitted24h,
     ] = await Promise.all([
       this.repo.avaTokenPercentiles(24),
       this.repo.avaTokenPercentiles(24 * 7),
@@ -60,6 +62,8 @@ export class OpsMetricsService {
       this.repo.avaTokensHourly24h(),
       this.repo.opsWorkerLastTickAt(),
       this.repo.stripeWebhookRejectedCount1h(),
+      this.repo.supportReportsOpenCount(),
+      this.repo.supportReportsSubmitted24h(),
     ])
 
     const featureHealth24h = buildFeatureHealthMatrix(
@@ -123,6 +127,10 @@ export class OpsMetricsService {
         workerLastTickAt,
         workerStaleMinutes,
         stripeWebhookRejected1h,
+      },
+      supportReports: {
+        openCount: supportOpenCount,
+        submitted24h: supportSubmitted24h,
       },
     }
 

@@ -19,6 +19,8 @@ import { LlmUsagePgRepository } from '../../api/src/infrastructure/persistence/l
 import { LlmInternalBudgetPgRepository } from '../../api/src/infrastructure/persistence/llm-internal-budget.pg.repository.js'
 import { RuntimeDegradedService } from '../../api/src/application/ops/runtime-degraded.service.js'
 import { RuntimeDegradedPgRepository } from '../../api/src/infrastructure/persistence/runtime-degraded.pg.repository.js'
+import { SupportReportPgRepository } from '../../api/src/infrastructure/persistence/support-report.pg.repository.js'
+import { OpsSupportReportService } from '../../api/src/application/ops/ops-support-report.service.js'
 import { runOpsProbe } from '../../api/src/application/ops/ops-probe.service.js'
 import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe-artifact.js'
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
@@ -63,6 +65,7 @@ const metricsService = new OpsMetricsService(
 )
 const runtimeService = new RuntimeDegradedService(new RuntimeDegradedPgRepository(pool))
 const dispatchService = new OpsAlertDispatchService(metricsService)
+const supportReportService = new OpsSupportReportService(new SupportReportPgRepository(pool))
 
 async function runProbeCycle(): Promise<void> {
   try {
@@ -165,6 +168,25 @@ async function main() {
     stackControl: isStackControlEnabled(),
     platform: process.platform,
   }))
+
+  fastify.get<{ Querystring: { status?: string } }>('/api/support-reports', async (req) => {
+    const status = (req.query.status ?? 'open') as 'open' | 'triaged' | 'resolved' | 'closed'
+    const rows = await supportReportService.list(status, 50)
+    return { reports: rows }
+  })
+
+  fastify.patch<{ Params: { id: string }; Body: { status?: string } }>(
+    '/api/support-reports/:id',
+    async (req, reply) => {
+      const status = req.body?.status
+      if (status !== 'triaged' && status !== 'resolved' && status !== 'closed') {
+        return reply.status(400).send({ error: 'invalid_status' })
+      }
+      const ok = await supportReportService.updateStatus(req.params.id, status)
+      if (!ok) return reply.status(404).send({ error: 'not_found' })
+      return { ok: true }
+    },
+  )
 
   const vite = isDev
     ? await createViteServer({

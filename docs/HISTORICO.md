@@ -11,9 +11,20 @@
 - **Hub sessão Ops** — `docs/ops/README.md` (+ `CONSOLE`, `TELEMETRY`, `SUPPORT_REPORTS`); regra `.cursor/rules/aiyra-ops-session.mdc`.
 
 ### Próximo
-- [ ] Fila no ops console `:3013` — doc [`docs/ops/SUPPORT_REPORTS.md`](docs/ops/SUPPORT_REPORTS.md)
+- [x] Fila no ops console — aba **Suporte** (`GET/PATCH /api/support-reports` no `:3013`/`:3023`)
 - [ ] Captura de screenshot (UI)
-- [ ] Webhook / triagem automática / agente investigador
+- [ ] Webhook `SUPPORT_REPORT_WEBHOOK_URL` / agente investigador
+
+## [2026-09-04] - Ops console: aba Suporte (fila support_reports)
+
+### Realizado
+- **`OpsSupportReportService`** — lista open + PATCH triaged/resolved via PG.
+- **Console** — aba Suporte com KPIs, tabela expandível (bundle técnico), ações Triar/Resolver.
+- **Métricas** — `supportReports.openCount` e `submitted24h` no snapshot.
+
+### Próximo
+- [ ] Webhook `SUPPORT_REPORT_WEBHOOK_URL`
+- [ ] Sparkline `support_report_submitted` na aba Suporte
 
 ## [2026-09-04] - Ops: instrumentação web (sync, família, telas)
 

@@ -126,8 +126,23 @@ CLI: `npm run llm:internal-usage`
 
 ---
 
+## Aba: Suporte
+
+**Objetivo:** fila de chamados «Reportar problema» (migration 061).
+
+| Bloco | Fonte |
+|-------|--------|
+| KPIs abertos / 24h | `support_reports` + `support_report_submitted` |
+| Fila | `GET /api/support-reports?status=open` (console) |
+| Triagem | `PATCH /api/support-reports/:id` → `triaged` / `resolved` |
+
+Runbook: [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md).
+
+---
+
 ## Próximas melhorias (sessão Ops)
 
-- [ ] Aba ou seção **Suporte** — fila `support_reports` status `open`
+- [x] Aba **Suporte** — fila `support_reports` status `open`
 - [ ] Link «Docs ops» no header → este diretório (path no tooltip)
 - [ ] Sparkline de `support_report_submitted` / 24h
+- [ ] Webhook `SUPPORT_REPORT_WEBHOOK_URL`

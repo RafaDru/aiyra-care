@@ -189,4 +189,41 @@ export class SupportReportPgRepository implements SupportReportRepository {
       updatedAt: row.updated_at,
     }
   }
+
+  async listForOps(
+    status: SupportReportRecord['status'],
+    limit: number,
+  ): Promise<SupportReportRecord[]> {
+    const { rows } = await this.pool.query(
+      `SELECT id, account_id, status, category, description, route, session_id, patient_id,
+              consent_technical, consent_screenshot, consent_profile_access,
+              profile_access_until, diagnostic_context,
+              (screenshot_data IS NOT NULL) AS screenshot_data,
+              app_version, user_agent, expires_at, resolved_at, created_at, updated_at
+       FROM support_reports
+       WHERE status = $1
+       ORDER BY created_at DESC
+       LIMIT $2`,
+      [status, limit],
+    )
+    return rows.map((row) => mapRow({
+      ...row,
+      screenshot_data: row.screenshot_data ? '1' : null,
+    }))
+  }
+
+  async updateStatusForOps(
+    id: string,
+    status: SupportReportRecord['status'],
+  ): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `UPDATE support_reports
+       SET status = $2,
+           resolved_at = CASE WHEN $2 IN ('resolved', 'closed') THEN NOW() ELSE resolved_at END,
+           updated_at = NOW()
+       WHERE id = $1`,
+      [id, status],
+    )
+    return (rowCount ?? 0) > 0
+  }
 }

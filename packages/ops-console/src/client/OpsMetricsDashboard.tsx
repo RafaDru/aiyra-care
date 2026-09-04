@@ -11,10 +11,11 @@ import {
   ProductPanel,
   SyncPanel,
 } from './ops-panels.js'
+import { SupportPanel } from './SupportPanel.js'
 
 const TAB_STORAGE_KEY = 'ops-console-active-tab'
 
-type TabKey = 'overview' | 'product' | 'sync' | 'ava' | 'infra' | 'cost'
+type TabKey = 'overview' | 'product' | 'support' | 'sync' | 'ava' | 'infra' | 'cost'
 
 function TabLabel({ text, count, alert }: { text: string; count?: number; alert?: boolean }) {
   return (
@@ -40,7 +41,7 @@ export function OpsMetricsDashboard({
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const saved = localStorage.getItem(TAB_STORAGE_KEY)
     if (
-      saved === 'overview' || saved === 'product' || saved === 'sync'
+      saved === 'overview' || saved === 'product' || saved === 'support' || saved === 'sync'
       || saved === 'ava' || saved === 'infra' || saved === 'cost'
     ) {
       return saved
@@ -51,6 +52,7 @@ export function OpsMetricsDashboard({
   const badges = useMemo(() => ({
     overview: data.alerts.filter((a) => a.severity === 'critical').length,
     product: countHotFeatures(metrics),
+    support: metrics.supportReports?.openCount ?? 0,
     sync: metrics.sync.stuckJobs.length,
     ava: metrics.productEvents.last5m.avaChatFailed,
     infra: countInfraIssues(metrics),
@@ -79,6 +81,18 @@ export function OpsMetricsDashboard({
       children: (
         <div className="ops-tab-panel">
           <ProductPanel data={data} />
+        </div>
+      ),
+    },
+    {
+      key: 'support',
+      label: <TabLabel text="Suporte" count={badges.support} alert={badges.support > 0} />,
+      children: (
+        <div className="ops-tab-panel">
+          <SupportPanel
+            openCount={metrics.supportReports?.openCount ?? 0}
+            submitted24h={metrics.supportReports?.submitted24h ?? 0}
+          />
         </div>
       ),
     },

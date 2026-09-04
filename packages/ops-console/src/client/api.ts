@@ -43,4 +43,14 @@ export const opsApi = {
   stackStatus: () => request<StackActionResult>('/api/stack/status'),
   stackAction: (action: 'start' | 'stop' | 'restart') =>
     request<StackActionResult>(`/api/stack/${action}`, { method: 'POST' }),
+  supportReports: (status = 'open') =>
+    request<{ reports: import('./ops.types.js').SupportReportOpsRow[] }>(
+      `/api/support-reports?status=${encodeURIComponent(status)}`,
+    ),
+  updateSupportReport: (id: string, status: 'triaged' | 'resolved' | 'closed') =>
+    request<{ ok: boolean }>(`/api/support-reports/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    }),
 }

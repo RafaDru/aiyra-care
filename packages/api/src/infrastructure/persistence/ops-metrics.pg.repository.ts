@@ -388,4 +388,21 @@ export class OpsMetricsPgRepository {
     )
     return Number(rows[0]?.count ?? 0)
   }
+
+  async supportReportsOpenCount(): Promise<number> {
+    const { rows } = await this.pool.query(
+      `SELECT COUNT(*)::int AS count FROM support_reports WHERE status = 'open'`,
+    )
+    return Number(rows[0]?.count ?? 0)
+  }
+
+  async supportReportsSubmitted24h(): Promise<number> {
+    const { rows } = await this.pool.query(
+      `SELECT COUNT(*)::int AS count
+       FROM product_events
+       WHERE event_name = 'support_report_submitted'
+         AND created_at >= NOW() - INTERVAL '24 hours'`,
+    )
+    return Number(rows[0]?.count ?? 0)
+  }
 }
