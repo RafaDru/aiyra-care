@@ -508,9 +508,11 @@ export function PatientDetail() {
               </Button>
               <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
               <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
+              {patient.isOwner !== false && (
               <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); message.success('OK'); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : 'Erro ao excluir') } }}>
                 <Button size="small" danger icon={<DeleteOutlined />} />
               </Popconfirm>
+              )}
             </div>
             <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <Tag>{age}</Tag>

@@ -15,6 +15,7 @@ export interface Patient {
   updatedAt: string
   membershipRole?: string
   isSelf?: boolean
+  isOwner?: boolean
 }
 
 export type PatientContextAlertSeverity = 'info' | 'warning' | 'critical'

@@ -26,13 +26,14 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 4. **Dashboard** agrupa por família quando há 2+ círculos ou perfis compartilhados de outra conta.
 5. No perfil de saúde: **Quem tem acesso** — lista cuidadores; titular pode revogar.
 6. Limite: **2 co-admins** com acesso `full` por perfil (titular excluído da contagem).
+7. **Excluir perfil** — só o titular (`owner_account_id`). Cuidadores convidados veem o perfil, mas não o botão de exclusão.
 
 ## Superfície técnica
 
 | Camada | Referência |
 |--------|------------|
 | Design | [`docs/FAMILY_ACCESS_MODEL.md`](../FAMILY_ACCESS_MODEL.md) |
-| Migrations | `057_patient_access_grants`, `058_patient_access_invites`, `059_care_circles`, `060_invite_care_circle` |
+| Migrations | `057_patient_access_grants`, `058_patient_access_invites`, `059_care_circles`, `060_invite_care_circle`, `061_patient_owner_backfill` |
 | ACL | `patient-access.service.ts`, `patient-access-grant.pg.repository.ts`, `patient-access.guard.ts` |
 | Convites | `patient-access-invite.service.ts`, `/family-access/invites`, `/invite/accept` |
 | Círculos | `care-circle.service.ts`, `/care-circles`, `/care-circles/dashboard` |

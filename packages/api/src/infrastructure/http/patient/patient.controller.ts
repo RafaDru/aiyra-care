@@ -9,6 +9,7 @@ import { isMinorBirthDate } from '../../../domain/patient/patient-age.js'
 function enrichPatientJson(
   patient: { toJSON: () => Record<string, unknown> },
   roleMap: Record<string, string>,
+  isOwner = false,
 ) {
   const json = patient.toJSON() as Record<string, unknown>
   const id = String(json.id)
@@ -17,6 +18,7 @@ function enrichPatientJson(
     ...json,
     membershipRole,
     isSelf: membershipRole === 'self',
+    isOwner,
   }
 }
 import {
@@ -71,19 +73,22 @@ export class PatientController {
       }
     }
     const patient = await this.service.create(parsed.data)
-    if (req.accountId && this.memberships) {
-      const wantsSelf = Boolean(parsed.data.markAsSelf) && !isMinorBirthDate(parsed.data.birthDate)
-      if (wantsSelf) {
-        await this.memberships.setSelfPatient(req.accountId, patient.id)
-      } else {
-        await this.memberships.ensureMembership(req.accountId, patient.id, 'guardian')
+    if (req.accountId) {
+      await this.service.setOwnerAccountId(patient.id, req.accountId)
+      if (this.memberships) {
+        const wantsSelf = Boolean(parsed.data.markAsSelf) && !isMinorBirthDate(parsed.data.birthDate)
+        if (wantsSelf) {
+          await this.memberships.setSelfPatient(req.accountId, patient.id)
+        } else {
+          await this.memberships.ensureMembership(req.accountId, patient.id, 'guardian')
+        }
       }
     }
     const roleMap =
       req.accountId && this.memberships
         ? await this.memberships.listRolesForAccount(req.accountId)
         : {}
-    return reply.status(201).send(enrichPatientJson(patient, roleMap))
+    return reply.status(201).send(enrichPatientJson(patient, roleMap, Boolean(req.accountId)))
   }
 
   async getContext(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -205,7 +210,8 @@ export class PatientController {
         req.accountId && this.memberships
           ? await this.memberships.listRolesForAccount(req.accountId)
           : {}
-      return reply.send(enrichPatientJson(patient, roleMap))
+      const isOwner = await this.resolveIsOwner(req.accountId, parsed.data.id)
+      return reply.send(enrichPatientJson(patient, roleMap, isOwner))
     } catch (err) {
       if (err instanceof NotFoundError) return reply.status(404).send({ message: err.message })
       throw err
@@ -220,10 +226,15 @@ export class PatientController {
     if (isAuthEnforcementEnabled()) {
       const ids = [...getAllowedPatientIds(req)]
       const patients = await this.service.findByIds(ids)
-      return reply.send(patients.map((p) => enrichPatientJson(p, roleMap)))
+      const ownerFlags = await this.resolveIsOwnerMap(req.accountId, ids)
+      return reply.send(patients.map((p) => enrichPatientJson(p, roleMap, ownerFlags.get(p.id) === true)))
     }
     const patients = await this.service.findAll()
-    return reply.send(patients.map((p) => enrichPatientJson(p, roleMap)))
+    const ownerFlags = await this.resolveIsOwnerMap(
+      req.accountId,
+      patients.map((p) => p.id),
+    )
+    return reply.send(patients.map((p) => enrichPatientJson(p, roleMap, ownerFlags.get(p.id) === true)))
   }
 
   async update(req: AuthenticatedRequest, reply: FastifyReply) {
@@ -246,11 +257,47 @@ export class PatientController {
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     if (!assertPatientAccess(req, reply, parsed.data.id)) return
     try {
-      await this.service.delete(parsed.data.id)
+      if (isAuthEnforcementEnabled()) {
+        if (!req.accountId) return reply.status(401).send({ message: 'Não autenticado' })
+        await this.service.delete(parsed.data.id, req.accountId)
+      } else {
+        await this.service.delete(parsed.data.id)
+      }
       return reply.status(204).send()
     } catch (err) {
+      const code = err instanceof Error ? err.message : ''
+      if (code === 'PATIENT_DELETE_FORBIDDEN') {
+        return reply.status(403).send({ message: 'Apenas o titular pode excluir este perfil' })
+      }
       if (err instanceof NotFoundError) return reply.status(404).send({ message: err.message })
       throw err
     }
+  }
+
+  private async resolveIsOwner(accountId: string | undefined, patientId: string): Promise<boolean> {
+    if (!isAuthEnforcementEnabled()) return true
+    if (!accountId) return false
+    const ownerId = await this.service.getOwnerAccountId(patientId)
+    return ownerId === accountId
+  }
+
+  private async resolveIsOwnerMap(
+    accountId: string | undefined,
+    patientIds: readonly string[],
+  ): Promise<Map<string, boolean>> {
+    const flags = new Map<string, boolean>()
+    if (!isAuthEnforcementEnabled()) {
+      for (const id of patientIds) flags.set(id, true)
+      return flags
+    }
+    if (!accountId) {
+      for (const id of patientIds) flags.set(id, false)
+      return flags
+    }
+    const owners = await this.service.listOwnerAccountIds(patientIds)
+    for (const id of patientIds) {
+      flags.set(id, owners.get(id) === accountId)
+    }
+    return flags
   }
 }
