@@ -1922,6 +1922,53 @@
       ]
     },
     {
+      "id": "qa-e2e-platform",
+      "category": "tecnico",
+      "priority": "P1",
+      "title": "QA integrado — suites manuais + E2E CI",
+      "summary": "Processo QA como analista: suite por feature, regressão main, execução paralela com massas isoladas. docs/testing/QA_PROCESS.md.",
+      "status": "in_progress",
+      "statusLabel": "Docs + CLI manual — automação CI em andamento",
+      "items": [
+        {
+          "id": "qa-process-docs",
+          "title": "Documentação processo QA + catálogo suites",
+          "status": "done",
+          "detail": "docs/testing/*; suites/index.json; npm run qa:list|qa:run|qa:run-all."
+        },
+        {
+          "id": "qa-hooks-enforcement",
+          "title": "Hooks Cursor — ritual QA em stop + push",
+          "status": "done",
+          "detail": "qa-ritual.mjs; after-file-edit-qa-ritual; qa-delivery.mdc; before-shell aviso regressão."
+        },
+        {
+          "id": "qa-seed-family-matrix",
+          "title": "Seed QA matriz família (João/Maria/Francisco/Vitória)",
+          "status": "planned",
+          "detail": "packages/api/scripts/seed-qa-family-matrix.mjs + fixture family-matrix.json."
+        },
+        {
+          "id": "qa-e2e-core-auth",
+          "title": "Playwright core-auth-dashboard",
+          "status": "planned",
+          "detail": "packages/web/e2e/suites/core-auth-dashboard.spec.ts + auth helper Supabase test."
+        },
+        {
+          "id": "qa-ci-regression",
+          "title": "CI job e2e-regression (PG + API + Playwright)",
+          "status": "planned",
+          "detail": "Bloquear main quando lane regression falhar; ver AUTOMATION_ROADMAP.md."
+        },
+        {
+          "id": "qa-e2e-family-matrix",
+          "title": "Playwright family-access-matrix",
+          "status": "planned",
+          "detail": "Paralelo no CI; depende seed-qa-family-matrix."
+        }
+      ]
+    },
+    {
       "id": "prod-run-intelligence",
       "category": "tecnico",
       "priority": "P2",

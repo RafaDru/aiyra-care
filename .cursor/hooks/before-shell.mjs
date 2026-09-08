@@ -1,4 +1,5 @@
 import { auditWrite, readStdinJson } from './lib/audit.mjs'
+import { isQaRitualBlocking, recordQaExecution } from './lib/qa-ritual.mjs'
 
 const input = readStdinJson()
 const command = String(input.command ?? '')
@@ -7,6 +8,11 @@ auditWrite('shell', {
   event: 'beforeShellExecution',
   command,
 })
+
+if (/\bqa:run\b/i.test(command) || /\bqa:run-all\b/i.test(command) || /qa-suite\.mjs/i.test(command)) {
+  recordQaExecution(command)
+  auditWrite('qa-ritual', { event: 'executed', command: command.slice(0, 200) })
+}
 
 const DENY = [
   /git\s+push\s+.*--force/i,
@@ -39,10 +45,16 @@ for (const re of DENY) {
 
 for (const re of ASK) {
   if (re.test(command)) {
+    const qaWarn =
+      /git\s+push/i.test(command) && isQaRitualBlocking()
+        ? ' QA: há edição de produto sem npm run qa:run — rode regressão (npm run qa:run-all -- --lane regression) ou suite da feature antes do push.'
+        : /git\s+push/i.test(command)
+          ? ' Antes de push main: npm run qa:run-all -- --lane regression (docs/testing/QA_PROCESS.md).'
+          : ''
     process.stdout.write(
       JSON.stringify({
         permission: 'ask',
-        user_message: 'Confirme commit/push/publicação — o hook registrou o comando em docs/dev-audit/shell/.',
+        user_message: `Confirme commit/push/publicação — o hook registrou o comando em docs/dev-audit/shell/.${qaWarn}`,
         agent_message: 'Shell command requires explicit user approval per project hooks.',
       }),
     )

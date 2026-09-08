@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-08",
+  "description": "Catálogo de suites QA — manual + automação. Ver docs/testing/README.md",
+  "suites": [
+    {
+      "id": "regression-smoke",
+      "title": "Smoke — páginas públicas",
+      "featureId": null,
+      "lane": "regression",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "requiredForMain": true,
+      "order": 1,
+      "doc": "docs/testing/suites/regression-smoke.md",
+      "automation": {
+        "status": "partial",
+        "spec": "packages/web/e2e/smoke.spec.ts"
+      },
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "core-auth-dashboard",
+      "title": "Core — login, dashboard, abrir paciente",
+      "featureId": null,
+      "lane": "regression",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "requiredForMain": true,
+      "order": 2,
+      "doc": "docs/testing/suites/core-auth-dashboard.md",
+      "automation": {
+        "status": "planned",
+        "spec": "packages/web/e2e/suites/core-auth-dashboard.spec.ts"
+      },
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "family-access-matrix",
+      "title": "Família — matriz João/Maria/Francisco/Vitória/Mariana",
+      "featureId": "family-access-model",
+      "lane": "feature",
+      "parallelSafe": true,
+      "fixtureId": "family-matrix",
+      "requiredForMain": true,
+      "order": 3,
+      "doc": "docs/testing/suites/family-access-matrix.md",
+      "automation": {
+        "status": "planned",
+        "spec": "packages/web/e2e/suites/family-access-matrix.spec.ts"
+      },
+      "estimatedMinutes": 45,
+      "blockedBy": ["seed-qa-family-matrix.mjs"]
+    },
+    {
+      "id": "amil-sync-options",
+      "title": "Amil — filtro período e beneficiário na sync",
+      "featureId": "beneficiary-view-filter",
+      "lane": "integration-portal",
+      "parallelSafe": true,
+      "fixtureId": "portal-amil-qa",
+      "requiredForMain": false,
+      "doc": "docs/testing/suites/amil-sync-options.md",
+      "automation": {
+        "status": "blocked",
+        "spec": null,
+        "reason": "WAF / sessão portal — mock em CI futuro"
+      },
+      "estimatedMinutes": 30
+    },
+    {
+      "id": "hygiene-dedup-ui",
+      "title": "Higienização — candidatos DUPLICATE no perfil",
+      "featureId": "hygiene-neo4j-candidate",
+      "lane": "feature",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "requiredForMain": false,
+      "doc": "docs/testing/suites/hygiene-dedup-ui.md",
+      "automation": {
+        "status": "planned",
+        "spec": "packages/web/e2e/suites/hygiene-dedup-ui.spec.ts"
+      },
+      "estimatedMinutes": 20
+    },
+    {
+      "id": "support-user-report",
+      "title": "Suporte — reportar problema com consentimento",
+      "featureId": "support-user-reports",
+      "lane": "feature",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "requiredForMain": false,
+      "doc": "docs/testing/suites/support-user-report.md",
+      "automation": {
+        "status": "planned",
+        "spec": "packages/web/e2e/suites/support-user-report.spec.ts"
+      },
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "ops-health",
+      "title": "Ops — health API e métricas protegidas",
+      "featureId": null,
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "ops-local",
+      "requiredForMain": false,
+      "doc": "docs/testing/suites/ops-health.md",
+      "automation": {
+        "status": "partial",
+        "spec": "packages/api/scripts/ops-smoke.ts"
+      },
+      "estimatedMinutes": 10
+    }
+  ],
+  "lanes": {
+    "regression": {
+      "title": "Regressão pré-main",
+      "description": "Sequencial — compartilha core-demo",
+      "suiteIds": ["regression-smoke", "core-auth-dashboard", "family-access-matrix"]
+    },
+    "feature": {
+      "title": "Validação por feature entregue",
+      "parallelSafeDefault": true
+    },
+    "integration-portal": {
+      "title": "Portais externos",
+      "parallelSafeDefault": true,
+      "optionalForMain": true
+    },
+    "ops": {
+      "title": "Observabilidade e suporte",
+      "parallelSafeDefault": true
+    }
+  }
+}

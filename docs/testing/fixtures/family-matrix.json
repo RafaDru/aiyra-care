@@ -1,0 +1,51 @@
+{
+  "id": "family-matrix",
+  "title": "Matriz família — João, Maria, Francisco, Vitória, Mariana (custódia compartilhada)",
+  "database": "aiyracare ou aiyracare_preview",
+  "seedScript": "node packages/api/scripts/seed-qa-family-matrix.mjs",
+  "status": "planned",
+  "accounts": [
+    {
+      "label": "João",
+      "role": "billing_owner familia A",
+      "authSubject": "qa-joao — definir ao criar seed",
+      "seesPatients": ["Pedro", "Lucas", "Mariana"]
+    },
+    {
+      "label": "Maria",
+      "role": "admin familia A",
+      "authSubject": "qa-maria",
+      "seesPatients": ["Pedro", "Lucas"],
+      "mustNotSee": ["Mariana"]
+    },
+    {
+      "label": "Francisco",
+      "role": "billing_owner familia B",
+      "authSubject": "qa-francisco",
+      "seesPatients": ["Henrique"]
+    },
+    {
+      "label": "Vitória",
+      "role": "admin familia B",
+      "authSubject": "qa-vitoria",
+      "seesPatients": ["Mariana"]
+    }
+  ],
+  "patients": [
+    { "label": "Pedro", "circle": "A" },
+    { "label": "Lucas", "circle": "A" },
+    { "label": "Mariana", "circle": "A+B", "profileShare": true },
+    { "label": "Henrique", "circle": "B" }
+  ],
+  "scenarios": [
+    "Convite cuidador → aceite → grant visível",
+    "Revogar grant → paciente some do dashboard",
+    "Profile share Mariana entre círculos A e B",
+    "Audit log 062 em ações sensíveis"
+  ],
+  "notes": [
+    "Cenário documentado em docs/FAMILY_ACCESS_MODEL.md",
+    "Seed dedicado evita conflito com core-demo",
+    "parallelSafe: true quando seed existir"
+  ]
+}

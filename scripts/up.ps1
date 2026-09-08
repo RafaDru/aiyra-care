@@ -89,7 +89,9 @@ try {
 Write-Host "Starting Ops notifier..." -NoNewline
 if ($Preview -and -not $env:OPS_LOCAL_NOTIFIER_PORT) { $env:OPS_LOCAL_NOTIFIER_PORT = $defaultNotifier }
 $notifierPort = if ($env:OPS_LOCAL_NOTIFIER_PORT) { $env:OPS_LOCAL_NOTIFIER_PORT } else { $defaultNotifier }
-& (Join-Path $PSScriptRoot "ops-notifier-up.ps1") | Out-Null
+$notifierUpArgs = @()
+if ($Preview) { $notifierUpArgs += '-Preview' }
+& (Join-Path $PSScriptRoot "ops-notifier-up.ps1") @notifierUpArgs | Out-Null
 try {
   $code = (Invoke-WebRequest -Uri "http://127.0.0.1:$notifierPort/health" -UseBasicParsing -TimeoutSec 2).StatusCode
   if ($code -eq 200) { Write-Host " OK" -ForegroundColor Green }

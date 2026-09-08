@@ -46,7 +46,19 @@ O que é, para quem, qual problema resolve.
 
 - [`docs/help/…`](../help/…)
 
+## QA (obrigatório ao entregar)
+
+| Campo | Valor |
+|-------|--------|
+| **Suite** | `docs/testing/suites/<suite-id>.md` |
+| **Fixture** | `docs/testing/fixtures/<fixture-id>.json` |
+| **Comando manual** | `npm run qa:run -- --suite <suite-id>` |
+| **Automação** | `planned` → `packages/web/e2e/suites/<suite-id>.spec.ts` |
+
+Critérios de aceite devem mapear 1:1 aos passos numerados da suite.
+
 ## Ver também
 
 - Doc de domínio profundo
 - `docs/roadmap.json` item `<id>`
+- [`docs/testing/QA_PROCESS.md`](../testing/QA_PROCESS.md)

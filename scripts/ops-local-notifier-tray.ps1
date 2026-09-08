@@ -1,13 +1,13 @@
 # AiyraCare ops — ícone na bandeja + receptor HTTP local (:3012/ops-alert).
 # Dashboard de observabilidade: console independente :3013 (não o app :5173/ops).
-param()
+param(
+  [int]$NotifierPort = 0
+)
 
 $ErrorActionPreference = 'Stop'
 
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
 $root = Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'ops-notifier-instance.ps1')
 $iconPath = Join-Path $root 'packages\web\public\brand\logo-icon.png'
 $logSuffix = if ($env:OPS_NOTIFIER_LOG_SUFFIX) { $env:OPS_NOTIFIER_LOG_SUFFIX } else { '' }
 $logFile = Join-Path $root "ops-notifier$logSuffix.log"
@@ -18,8 +18,30 @@ $importDotenv = Join-Path $PSScriptRoot 'import-dotenv.ps1'
 if ($env:OPS_LOCAL_NOTIFIER_PORT -eq '3022' -or $env:DEPLOYMENT_TIER -eq 'preview') {
   & $importDotenv -Path (Join-Path $root '.env.preview') -Override
 }
+if ($NotifierPort -gt 0) {
+  $env:OPS_LOCAL_NOTIFIER_PORT = [string]$NotifierPort
+}
 $port = if ($env:OPS_LOCAL_NOTIFIER_PORT) { $env:OPS_LOCAL_NOTIFIER_PORT.Trim() } else { '3012' }
+$portInt = [int]$port
 $tierLabel = if ($env:AIYRA_NOTIFIER_TIER) { $env:AIYRA_NOTIFIER_TIER.Trim() } elseif ($port -eq '3022') { 'Staging' } else { 'Dev' }
+
+$mutexName = Get-OpsNotifierMutexName -Port $portInt
+$instanceMutex = New-Object System.Threading.Mutex($false, $mutexName)
+$mutexAcquired = $false
+try {
+  $mutexAcquired = $instanceMutex.WaitOne(0, $false)
+} catch {
+  $mutexAcquired = $false
+}
+if (-not $mutexAcquired) {
+  exit 0
+}
+
+$pidFile = Get-OpsNotifierPidFile -Root $root -Port $portInt
+Set-Content -Path $pidFile -Value $PID -NoNewline
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
 $opsConsolePort = if ($env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT.Trim() } else { if ($port -eq '3022') { '3023' } else { '3013' } }
 $webPort = if ($port -eq '3022') { '5174' } else { '5173' }
 $alertPath = if ($env:OPS_LOCAL_NOTIFIER_PATH) { $env:OPS_LOCAL_NOTIFIER_PATH.Trim() } else { '/ops-alert' }
@@ -220,6 +242,11 @@ function Stop-Notifier {
   try { $runspace.Close() } catch { }
   $icon.Visible = $false
   $icon.Dispose()
+  Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
+  try {
+    if ($mutexAcquired) { $instanceMutex.ReleaseMutex() }
+  } catch { }
+  try { $instanceMutex.Dispose() } catch { }
   [System.Windows.Forms.Application]::Exit()
 }
 

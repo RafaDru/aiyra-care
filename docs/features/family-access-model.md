@@ -61,6 +61,15 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 - Zero vazamento IDOR em testes de escopo.
 - Parecer jurídico antes de go-live multi-guardião.
 
+## QA
+
+| Campo | Valor |
+|-------|--------|
+| **Suite** | [`docs/testing/suites/family-access-matrix.md`](../testing/suites/family-access-matrix.md) |
+| **Fixture** | [`docs/testing/fixtures/family-matrix.json`](../testing/fixtures/family-matrix.json) |
+| **Comando** | `npm run qa:run -- --suite family-access-matrix` |
+| **Automação** | `planned` — aguarda `seed-qa-family-matrix.mjs` |
+
 ## Ajuda relacionada
 
 - [`docs/help/familia-multiplos-cuidadores.md`](../help/familia-multiplos-cuidadores.md)

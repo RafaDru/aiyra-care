@@ -1,7 +1,8 @@
 # Verticais de teste — Ambiente 1 (Integração)
 
-> **Última atualização:** 2026-09-02  
-> Modelo: [`infra/TWO_ENV_MODEL.md`](./infra/TWO_ENV_MODEL.md) · Relatório: `npm run promotion:gates` → `promotion-report-last.md`
+> **Última atualização:** 2026-09-08  
+> Modelo: [`infra/TWO_ENV_MODEL.md`](./infra/TWO_ENV_MODEL.md) · Relatório: `npm run promotion:gates` → `promotion-report-last.md`  
+> **QA funcional (manual + E2E):** [`testing/QA_PROCESS.md`](./testing/QA_PROCESS.md)
 
 ## Objetivo
 
@@ -15,6 +16,7 @@ Antes de pedir aprovação para o **Ambiente 2 (Preview)**, o agente valida cada
 |----------|-------------|----------------------|-------------------|
 | **Funcional** | Lógica de domínio, handlers, UI build | **Sempre** antes de promoção | `cd packages/api && npm run test:critical`; `cd packages/web && npm run build` |
 | **Funcional (E2E)** | Fluxo mínimo web (landing/login) | PR que toca web/auth; promoção se E2E instalado | `cd packages/web && npm run test:e2e` |
+| **Funcional (QA manual)** | Suite completa por feature — cada ação | Feature entregue; **push `main`** | `npm run qa:run -- --suite <id>` · regressão: `npm run qa:run-all -- --lane regression` |
 | Integrado (migrations) | **Sempre** | `validate:migrations` obrigatório |
 | Integrado (DB apply/seed) | PG ephemeral (CI) ou refresh Preview | `migrate:all`, `seed:staging-refresh` — opcional em PG dev já migrado |
 | **Segurança** | Crypto, compliance gate, sanitização, ops-auth | **Sempre** (subset em critical) | Incluído em `test:critical`; tier ≥ 2 → skills `aiyracare-review-security` |
@@ -50,6 +52,7 @@ Gera `promotion-report-last.md`. Falha com exit code 1 se algum gate **não opci
 | validate:migrations | Não |
 | migrate:all + seed:staging-refresh | Sim (PG dev já migrado ou sem `DATABASE_URL`) |
 | test:e2e | Sim (Playwright / browser) |
+| qa:run-all --lane regression | Não (manual pré-main; meta: CI) |
 | staging:probe-gate | Sim (API down) |
 
 ---

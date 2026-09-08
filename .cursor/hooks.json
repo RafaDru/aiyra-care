@@ -27,6 +27,9 @@
       },
       {
         "command": "node .cursor/hooks/after-file-edit-doc-ritual.mjs"
+      },
+      {
+        "command": "node .cursor/hooks/after-file-edit-qa-ritual.mjs"
       }
     ],
     "preToolUse": [
@@ -39,7 +42,7 @@
     "stop": [
       {
         "command": "node .cursor/hooks/stop-doc-ritual.mjs",
-        "loop_limit": 2
+        "loop_limit": 3
       }
     ]
   }

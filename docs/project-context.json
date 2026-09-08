@@ -152,6 +152,7 @@
   ],
   "plannedWork": [
     { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "done", "priority": "P1", "note": "MVP completo — ver family-access-model.md" },
+    { "id": "qa-e2e-platform", "title": "QA integrado — suites + E2E CI", "status": "in_progress", "priority": "P1", "note": "docs/testing/ — manual operacional; automação Fase 1–2" },
     { "id": "documentation-knowledge-base", "title": "Base de conhecimento features + help", "status": "in_progress", "priority": "P2" },
     { "id": "platform-environments", "title": "Ambientes dev/staging/prod + massas + esteiras", "status": "done", "priority": "P2" },
     { "id": "b2b-partner-platform", "title": "Discovery e primitives B2B", "status": "planned", "priority": "P3" },

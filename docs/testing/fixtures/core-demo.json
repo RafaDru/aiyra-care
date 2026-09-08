@@ -1,0 +1,35 @@
+{
+  "id": "core-demo",
+  "title": "Massa demo — Lucas (Unimed) e Ana (Amil)",
+  "database": "aiyracare ou aiyracare_preview",
+  "seedScript": "npm run seed:staging-refresh",
+  "linkScript": "AUTH_SUBJECT=<sua-conta-supabase> npm run link:demo-patients",
+  "accounts": [
+    {
+      "label": "Conta logada (qualquer usuário Supabase com link)",
+      "authSubject": "definido em runtime via link:demo-patients",
+      "notes": "Script vincula memberships da conta autenticada aos pacientes demo"
+    }
+  ],
+  "patients": [
+    {
+      "label": "Lucas",
+      "id": "a0000000-0000-4000-8000-000000000011",
+      "integration": "unimed_bh"
+    },
+    {
+      "label": "Ana",
+      "id": "a0000000-0000-4000-8000-000000000012",
+      "integration": "amil"
+    }
+  ],
+  "expectedAfterSeed": [
+    "Pacientes Lucas e Ana existem no PG",
+    "Integration links demo com IDs fixos em seed-demo-ids.mjs",
+    "Dashboard lista pacientes após link:demo-patients"
+  ],
+  "notes": [
+    "IDs fixos em packages/api/scripts/seed-demo-ids.mjs",
+    "Não usar em paralelo com family-matrix até isolamento por conta"
+  ]
+}

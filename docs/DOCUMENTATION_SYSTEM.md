@@ -59,9 +59,10 @@ Copie [`docs/features/_TEMPLATE.md`](./features/_TEMPLATE.md) e registre em [`do
 2. Criar ou atualizar **`docs/features/<id>.md`**.
 3. Entrada em **`docs/features/index.json`**.
 4. Se decisão arquitetural: linha em **`docs/HISTORICO.md`**.
-5. Se domínio amplo mudou: doc de domínio + **`docs/project-context.json`**.
-6. Se afeta usuário: tópico em **`docs/help/`** (opcional no MVP).
-7. PR/issue: label `roadmap:<item-id>`.
+5. **Suite QA** em **`docs/testing/suites/`** + **`docs/testing/suites/index.json`** (+ fixture se nova massa).
+6. Se domínio amplo mudou: doc de domínio + **`docs/project-context.json`**.
+7. Se afeta usuário: tópico em **`docs/help/`** (opcional no MVP).
+8. PR/issue: label `roadmap:<item-id>`.
 
 ---
 
@@ -72,11 +73,13 @@ A compactação **apaga** instruções que existiam só no chat. O ritual perman
 | Mecanismo | Quando | Efeito |
 |-----------|--------|--------|
 | `.cursor/rules/agent-bootstrap.mdc` | Sempre (`alwaysApply`) | Regra curta no contexto do agente |
+| `.cursor/rules/qa-delivery.mdc` | Sempre (`alwaysApply`) | QA obrigatório ao entregar produto |
 | `docs/AGENT_BOOTSTRAP.md` | Fonte canônica do índice | Lido por hooks e humanos |
 | Hook `sessionStart` | Nova sessão Composer | `additional_context` com bootstrap completo |
 | Hook `preCompact` + `postToolUse` | Após compactação | Flag → re-injeta bootstrap na **próxima** ferramenta |
 | Hook `afterFileEdit` (doc-ritual) | Edição em `packages/` produto | Marca ritual pendente se docs não tocados |
-| Hook `stop` | Fim do turno agente | `followup_message` se ritual pendente |
+| Hook `afterFileEdit` (qa-ritual) | Edição em `packages/` produto | Marca QA pendente até `npm run qa:run` |
+| Hook `stop` | Fim do turno agente | `followup_message` se ritual docs **ou QA** pendente |
 
 Estado efêmero (não commitar): `.cursor/state/*.json`
 

@@ -24,6 +24,7 @@ flowchart LR
 |-------|------------|-------------|
 | Contexto | `AGENTS.md`, `docs/project-context.json` | Sim |
 | Verticais | [`TESTING_VERTICALS.md`](./TESTING_VERTICALS.md) | Antes de pedir aprovação Preview |
+| **QA funcional** | [`testing/QA_PROCESS.md`](./testing/QA_PROCESS.md) | Feature entregue + push `main` |
 | Gates agregados | `npm run promotion:gates` | Ambiente 1 → Preview |
 | Classificação | Skill `aiyracare-feature-release` (tier 0–3) | Tier ≥ 2 |
 | CI | `.github/workflows/ci.yml` | Automático em PR/main |
@@ -39,7 +40,8 @@ flowchart LR
   D --> E[Testes locais]
   E --> F[Tier review skill]
   F --> G[CI GitHub]
-  G --> H[Commit + push]
+  G --> H[qa:run-all regression]
+  H --> I[Commit + push]
 ```
 
 | Etapa | Ferramenta | Obrigatório |
@@ -48,6 +50,7 @@ flowchart LR
 | Classificação | Skill `aiyracare-feature-release` (tier 0–3) | Tier ≥ 2 |
 | Guard-rails IDE | `.cursor/hooks.json` (auditoria + bloqueios) | Sim |
 | Testes API | `npm run test:critical` + `vitest run` para área tocada | Sim |
+| Regressão QA manual | `npm run qa:run-all -- --lane regression` | Antes de push `main` |
 | Build web | `cd packages/web && npm run build` | Se web |
 | CI | `.github/workflows/ci.yml` | Automático em PR/main |
 | Revisão humana | `human-review-gates` (legal, fiscal, médico) | Go-live público |
@@ -67,7 +70,8 @@ Ver `docs/FEATURE_REVIEW_FRAMEWORK.md`.
 
 **Hoje:** API `tsc`, agents Python import, **vitest critical**, web `tsc + vite build`.
 
-**Backlog P2:** smoke E2E mínimo (login → paciente → exames); migration dry-run em PR.
+**Backlog P2:** smoke E2E mínimo (login → paciente → exames); migration dry-run em PR.  
+**QA operacional (2026-09-08):** suites manuais em `docs/testing/` + `npm run qa:run`; automação em [`testing/AUTOMATION_ROADMAP.md`](./testing/AUTOMATION_ROADMAP.md).
 
 ## Auditoria de desenvolvimento
 

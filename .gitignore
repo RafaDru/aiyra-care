@@ -9,6 +9,7 @@ openhealth-*.json
 aiyracare-*.json
 aiyra-care-*.json
 *.log
+.run/
 .caddy-local.pid
 .DS_Store
 coverage/

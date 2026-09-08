@@ -1,5 +1,38 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-08] - Hooks QA endurecidos — entrega sem pedir teste
+
+### Decisão
+- Rafael **não** precisa pedir «teste completo» a cada feature — é DoD + hook `stop`.
+- Edição em `packages/*` produto → pendente até `npm run qa:run` ou `qa:run-all`.
+- `git push` → aviso de regressão no hook shell.
+
+### Realizado
+- `.cursor/hooks/lib/qa-ritual.mjs`, `after-file-edit-qa-ritual.mjs`
+- `stop-doc-ritual.mjs` — docs + QA (`loop_limit: 3`)
+- `before-shell.mjs` — detecta `qa:run` e alerta push
+- Regra always-on `.cursor/rules/qa-delivery.mdc`
+
+## [2026-09-08] - Processo QA operacional — suites manuais + paralelo
+
+### Decisão
+- Feature **não está entregue** sem suite QA executável (`docs/testing/suites/<id>.md`).
+- Push em **`main`**: regressão manual `npm run qa:run-all -- --lane regression` (até CI absorver).
+- Suites **paralelas** com fixtures isoladas — metáfora de vários QAs simultâneos (`PARALLEL_QA_MODEL.md`).
+- Suite manual = especificação; Playwright converge para o mesmo `suite-id` (`AUTOMATION_ROADMAP.md`).
+
+### Realizado (épico qa-e2e-platform)
+- Hub **`docs/testing/`** — `QA_PROCESS`, `MANUAL_TEST_RUNBOOK`, catálogo `suites/index.json`, fixtures.
+- CLI **`npm run qa:list`**, **`qa:run`**, **`qa:run-all`** (`scripts/qa-suite.mjs`).
+- Suites iniciais: smoke, core-auth-dashboard, family-access-matrix, amil, hygiene, support, ops.
+- Ritual de entrega atualizado: `DOCUMENTATION_SYSTEM`, `DELIVERY_PIPELINE`, `TESTING_VERTICALS`, `AGENT_BOOTSTRAP`.
+- **Hooks endurecidos** — `.cursor/rules/qa-delivery.mdc` + `qa-ritual` em `stop` / `before-shell`.
+
+### Próximo (épico `qa-e2e-platform`)
+- [ ] `seed-qa-family-matrix.mjs`
+- [ ] `e2e/suites/core-auth-dashboard.spec.ts`
+- [ ] CI job regressão integrada (PG + API + Playwright)
+
 ## [2026-09-08] - DNS local `.test` pausado — localhost canônico
 
 ### Decisão
@@ -19,7 +52,7 @@
   `$env:DATABASE_URL="postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare"; node packages/api/scripts/apply-migration-NNN.mjs`
 
 ### Próximo (semana)
-- [ ] Teste E2E matriz família João/Maria/Francisco/Vitória (caso Mariana)
+- [ ] Executar suite `family-access-matrix` (após seed) — `npm run qa:run -- --suite family-access-matrix`
 - [ ] `fleury-unified-connector` ou validação PoC Fleury com conta real
 - [ ] Configurar `RESEND_API_KEY` em preview quando testar e-mails transacionais
 

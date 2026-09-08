@@ -149,12 +149,14 @@ For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/F
 - Hooks: `.cursor/hooks.json` — auditoria em `docs/dev-audit/`; ver `docs/CURSOR_AGENT_OPS.md`.
 - **Ambientes não prod:** [`docs/infra/TWO_ENV_MODEL.md`](docs/infra/TWO_ENV_MODEL.md) — Ambiente 1 **local**; Ambiente 2 **local** (`up:preview`) até ritmo funcional, depois **GCP**; matriz [`docs/infra/ENVIRONMENTS.md`](docs/infra/ENVIRONMENTS.md).
 - Antes de pedir aprovação Preview: `npm run promotion:gates` + [`docs/TESTING_VERTICALS.md`](docs/TESTING_VERTICALS.md).
+- Antes de push `main`: `npm run qa:run-all -- --lane regression` — ver [`docs/testing/QA_PROCESS.md`](docs/testing/QA_PROCESS.md).
+- QA por feature: `npm run qa:run -- --suite <id>` · catálogo: `npm run qa:list`.
 - Preview local (após aprovação): `npm run up:preview` — PG `aiyracare_preview`, API `:3020`, web `:5174`, ops `:3023`.
 - Ritual staging: `npm run preview:validate` · guia [`docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md`](docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md).
 - Hostnames locais (pausado): [`docs/infra/LOCAL_HOSTNAMES.md`](docs/infra/LOCAL_HOSTNAMES.md) — hoje use `localhost:5173` / `:5174`.
 - Status stack: `npm run env:status` · pacientes demo: `$env:AUTH_SUBJECT="<sub>"; npm run link:demo-patients`.
 - GCP preview (quando secrets prontos): `provision:preview:gcp`, `deploy:preview:gcp`, `deploy:preview:worker` — [`docs/infra/GCP_PREVIEW_RUNBOOK.md`](docs/infra/GCP_PREVIEW_RUNBOOK.md).
-- Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → CI (build API + critical + web).
+- Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → QA regressão → CI.
 - Roadmap entrega: épicos `dev-delivery-pipeline`, `prod-run-intelligence`, `platform-environments`.
 
 ## Tests API

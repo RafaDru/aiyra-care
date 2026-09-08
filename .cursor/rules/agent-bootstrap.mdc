@@ -13,6 +13,6 @@ Antes de alterar produto ou inferir "para quê" pelo código, siga **nesta ordem
 4. `docs/roadmap.json` (item relevante)
 5. `docs/DOCUMENTATION_SYSTEM.md` (ritual ao entregar)
 
-**Ao entregar:** roadmap + feature card + `HISTORICO.md` se houver decisão.
+**Ao entregar:** roadmap + feature card + suite QA (`docs/testing/`) + `npm run qa:run` + relatório PASS/FAIL + `HISTORICO.md` se decisão.
 
-Hooks re-injetam `AGENT_BOOTSTRAP` em `sessionStart` e após `preCompact` (via `postToolUse`).
+Hooks: ritual docs + **ritual QA** em `stop` se produto alterado sem teste executado.

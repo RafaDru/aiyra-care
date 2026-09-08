@@ -1,9 +1,13 @@
-param([switch]$Preview)
+param(
+  [switch]$Preview,
+  [switch]$Force
+)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $root = Split-Path $PSScriptRoot -Parent
 $importDotenv = Join-Path $PSScriptRoot 'import-dotenv.ps1'
 $trayScript = Join-Path $PSScriptRoot 'ops-local-notifier-tray.ps1'
+. (Join-Path $PSScriptRoot 'ops-notifier-instance.ps1')
 
 & $importDotenv -Path (Join-Path $root '.env')
 if ($Preview) {
@@ -22,26 +26,21 @@ if ($Preview) {
 
 $notifierPort = [int]$env:OPS_LOCAL_NOTIFIER_PORT
 
-function Stop-ListenerOnPort {
-  param([int]$Port)
-  try {
-    Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
-      ForEach-Object {
-        if ($_.OwningProcess -gt 0) {
-          Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue
-        }
-      }
-  } catch { }
+$trayForPort = @(Get-OpsNotifierTrayProcessesForPort -Port $notifierPort)
+if (-not $Force -and (Test-OpsNotifierHealthy -Port $notifierPort) -and $trayForPort.Count -le 1) {
+  Write-Host "Ops notifier $tierLabel already running http://127.0.0.1:$notifierPort/ops-alert" -ForegroundColor Green
+  exit 0
 }
 
-Stop-ListenerOnPort $notifierPort
+Stop-OpsNotifierInstance -Root $root -Port $notifierPort
 Start-Sleep -Seconds 1
 
 $env:AIYRA_NOTIFIER_TIER = $tierLabel
 $env:OPS_NOTIFIER_LOG_SUFFIX = if ($Preview) { '-preview' } else { '' }
 
 Start-Process powershell -ArgumentList @(
-  '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', $trayScript
+  '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', $trayScript,
+  '-NotifierPort', $notifierPort
 ) -WindowStyle Hidden
 
 for ($i = 0; $i -lt 12; $i++) {
