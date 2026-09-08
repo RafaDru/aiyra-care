@@ -169,8 +169,8 @@ export class HygieneService {
       return {
         ...row,
         patientName,
-        entityA: a?.toJSON() ?? { id: row.entityIdA, missing: true },
-        entityB: b?.toJSON() ?? { id: row.entityIdB, missing: true },
+        entityA: (a?.toJSON() ?? { id: row.entityIdA, missing: true }) as Record<string, unknown>,
+        entityB: (b?.toJSON() ?? { id: row.entityIdB, missing: true }) as Record<string, unknown>,
       }
     }
     if (row.entityType === 'vaccine') {
@@ -179,8 +179,8 @@ export class HygieneService {
       return {
         ...row,
         patientName,
-        entityA: a?.toJSON() ?? { id: row.entityIdA, missing: true },
-        entityB: b?.toJSON() ?? { id: row.entityIdB, missing: true },
+        entityA: (a?.toJSON() ?? { id: row.entityIdA, missing: true }) as Record<string, unknown>,
+        entityB: (b?.toJSON() ?? { id: row.entityIdB, missing: true }) as Record<string, unknown>,
       }
     }
     return { ...row, patientName }

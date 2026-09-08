@@ -33,7 +33,6 @@ import { AvaContextSuggestionsService } from '../../../application/llm/ava-conte
 import { HygieneService } from '../../../application/hygiene/hygiene.service.js'
 import { IntegrationLinkSyncService } from '../../../application/integration-link/integration-link-sync.service.js'
 import { HygienePgRepository } from '../../persistence/hygiene.pg.repository.js'
-import { VaccinePgRepository } from '../../persistence/vaccine.pg.repository.js'
 import { AppAccountPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { IntegrationLinkPgRepository } from '../../persistence/integration-link.pg.repository.js'
 import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repository.js'

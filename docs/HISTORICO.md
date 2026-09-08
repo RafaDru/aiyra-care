@@ -1,5 +1,15 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-08] - CI: build API desbloqueado (51 erros tsc)
+
+### Decisão
+- **`npm run build` em `packages/api` é gate real** — `npm run dev` (tsx) não substitui CI.
+- Dívida de tipos acumulada bloqueava E2E regression antes dos testes Playwright.
+
+### Realizado
+- Correção de ~51 erros TypeScript (Connect, Ava, support-report, scrapers, Fastify logger).
+- Aprendizados: `docs/testing/CI_LEARNINGS.md` (incl. nota sobre compactação de contexto e split de agentes).
+
 ## [2026-09-08] - Hooks QA endurecidos — entrega sem pedir teste
 
 ### Decisão

@@ -5,9 +5,10 @@ import type {
   PatientAccessInviteData,
   PatientAccessInvitePreview,
   PatientAccessInviteStatus,
+  PatientAccessInviteCircleRole,
 } from '../../domain/patient-access/patient-access-invite.types.js'
 import type { PatientAccessLevel } from '../../domain/patient-access/patient-access.types.js'
-import type { PatientAccessInviteCircleRole } from '../../domain/patient-access/patient-access-invite.types.js'
+import type { PatientMembershipRole } from '../../domain/patient-access/patient-access.types.js'
 
 function mapRow(row: Record<string, unknown>): PatientAccessInviteData {
   return {

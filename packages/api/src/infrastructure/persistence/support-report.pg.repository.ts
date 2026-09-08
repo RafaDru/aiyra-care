@@ -1,7 +1,7 @@
 import type { Pool } from 'pg'
-import type { SupportReportRepository } from '../../domain/support-report/support-report.repository.js'
+import type { SupportReportRepository, SupportReportInsertRow } from '../../domain/support-report/support-report.repository.js'
 import type {
-  CreateSupportReportInput,
+  SupportReportAnalysisStatus,
   SupportReportRecord,
 } from '../../domain/support-report/support-report.types.js'
 
@@ -27,6 +27,17 @@ function mapRow(row: Record<string, unknown>): SupportReportRecord {
     userAgent: row.user_agent as string | null,
     expiresAt: new Date(row.expires_at as string),
     resolvedAt: row.resolved_at ? new Date(row.resolved_at as string) : null,
+    analysisStatus: (row.analysis_status as SupportReportAnalysisStatus) ?? 'none',
+    operatorNotes: row.operator_notes as string | null,
+    analysisSummary: row.analysis_summary as string | null,
+    analysisArtifactPath: row.analysis_artifact_path as string | null,
+    analysisRequestedAt: row.analysis_requested_at
+      ? new Date(row.analysis_requested_at as string)
+      : null,
+    analysisCompletedAt: row.analysis_completed_at
+      ? new Date(row.analysis_completed_at as string)
+      : null,
+    analysisLastError: row.analysis_last_error as string | null,
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
   }
@@ -35,23 +46,7 @@ function mapRow(row: Record<string, unknown>): SupportReportRecord {
 export class SupportReportPgRepository implements SupportReportRepository {
   constructor(private readonly pool: Pool) {}
 
-  async insert(row: {
-    accountId: string
-    category: CreateSupportReportInput['category']
-    description: string | null
-    route?: string
-    sessionId?: string
-    patientId?: string
-    consentTechnical: boolean
-    consentScreenshot: boolean
-    consentProfileAccess: boolean
-    screenshotData?: string
-    appVersion?: string
-    userAgent?: string
-    diagnosticContext: Record<string, unknown>
-    profileAccessUntil: Date | null
-    expiresAt: Date
-  }): Promise<SupportReportRecord> {
+  async insert(row: SupportReportInsertRow): Promise<SupportReportRecord> {
     const { rows } = await this.pool.query(
       `INSERT INTO support_reports (
          account_id, category, description, route, session_id, patient_id,
@@ -68,7 +63,7 @@ export class SupportReportPgRepository implements SupportReportRepository {
       [
         row.accountId,
         row.category,
-        row.description,
+        row.description ?? null,
         row.route?.slice(0, 256) ?? null,
         row.sessionId?.slice(0, 64) ?? null,
         row.patientId ?? null,
@@ -92,7 +87,10 @@ export class SupportReportPgRepository implements SupportReportRepository {
               consent_technical, consent_screenshot, consent_profile_access,
               profile_access_until, diagnostic_context,
               (screenshot_data IS NOT NULL) AS screenshot_data,
-              app_version, user_agent, expires_at, resolved_at, created_at, updated_at
+              app_version, user_agent, expires_at, resolved_at,
+              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
+              analysis_requested_at, analysis_completed_at, analysis_last_error,
+              created_at, updated_at
        FROM support_reports
        WHERE account_id = $1
        ORDER BY created_at DESC
@@ -111,7 +109,10 @@ export class SupportReportPgRepository implements SupportReportRepository {
               consent_technical, consent_screenshot, consent_profile_access,
               profile_access_until, diagnostic_context,
               (screenshot_data IS NOT NULL) AS screenshot_data,
-              app_version, user_agent, expires_at, resolved_at, created_at, updated_at
+              app_version, user_agent, expires_at, resolved_at,
+              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
+              analysis_requested_at, analysis_completed_at, analysis_last_error,
+              created_at, updated_at
        FROM support_reports
        WHERE id = $1 AND account_id = $2`,
       [id, accountId],
@@ -199,7 +200,10 @@ export class SupportReportPgRepository implements SupportReportRepository {
               consent_technical, consent_screenshot, consent_profile_access,
               profile_access_until, diagnostic_context,
               (screenshot_data IS NOT NULL) AS screenshot_data,
-              app_version, user_agent, expires_at, resolved_at, created_at, updated_at
+              app_version, user_agent, expires_at, resolved_at,
+              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
+              analysis_requested_at, analysis_completed_at, analysis_last_error,
+              created_at, updated_at
        FROM support_reports
        WHERE status = $1
        ORDER BY created_at DESC
@@ -226,6 +230,75 @@ export class SupportReportPgRepository implements SupportReportRepository {
            updated_at = NOW()
        WHERE id = $1::uuid`,
       [id, status],
+    )
+    return (rowCount ?? 0) > 0
+  }
+
+  async findByIdForOps(id: string): Promise<SupportReportRecord | null> {
+    const { rows } = await this.pool.query(
+      `SELECT id, account_id, status, category, description, route, session_id, patient_id,
+              consent_technical, consent_screenshot, consent_profile_access,
+              profile_access_until, diagnostic_context,
+              (screenshot_data IS NOT NULL) AS screenshot_data,
+              app_version, user_agent, expires_at, resolved_at,
+              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
+              analysis_requested_at, analysis_completed_at, analysis_last_error,
+              created_at, updated_at
+       FROM support_reports
+       WHERE id = $1::uuid`,
+      [id],
+    )
+    if (!rows[0]) return null
+    return mapRow({
+      ...rows[0],
+      screenshot_data: rows[0].screenshot_data ? '1' : null,
+    })
+  }
+
+  async updateOperatorNotesForOps(id: string, operatorNotes: string | null): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `UPDATE support_reports
+       SET operator_notes = $2,
+           updated_at = NOW()
+       WHERE id = $1::uuid`,
+      [id, operatorNotes],
+    )
+    return (rowCount ?? 0) > 0
+  }
+
+  async updateAnalysisStateForOps(
+    id: string,
+    patch: {
+      analysisStatus: SupportReportAnalysisStatus
+      analysisLastError?: string | null
+      analysisRequestedAt?: Date | null
+      analysisCompletedAt?: Date | null
+      analysisSummary?: string | null
+      analysisArtifactPath?: string | null
+      operatorNotes?: string | null
+    },
+  ): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `UPDATE support_reports
+       SET analysis_status = $2::varchar,
+           analysis_last_error = $3,
+           analysis_requested_at = COALESCE($4, analysis_requested_at),
+           analysis_completed_at = $5,
+           analysis_summary = COALESCE($6, analysis_summary),
+           analysis_artifact_path = COALESCE($7, analysis_artifact_path),
+           operator_notes = COALESCE($8, operator_notes),
+           updated_at = NOW()
+       WHERE id = $1::uuid`,
+      [
+        id,
+        patch.analysisStatus,
+        patch.analysisLastError ?? null,
+        patch.analysisRequestedAt ?? null,
+        patch.analysisCompletedAt ?? null,
+        patch.analysisSummary ?? null,
+        patch.analysisArtifactPath ?? null,
+        patch.operatorNotes ?? null,
+      ],
     )
     return (rowCount ?? 0) > 0
   }

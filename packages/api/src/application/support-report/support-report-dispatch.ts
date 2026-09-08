@@ -19,8 +19,14 @@ export interface SupportReportDispatchPayload {
   submittedAt: string
   text: string
   toast: { title: string; body: string; icon: 'info' | 'warning' }
-  investigation?: { tier: 0 | 1; playbook: string }
+  investigation?: { tier: 0 | 1; playbook: string; trigger: 'auto' | 'manual' }
+  operatorNotes?: string | null
 }
+
+export type SupportInvestigatorDispatchResult =
+  | { outcome: 'sent' }
+  | { outcome: 'skipped'; reason: 'webhook_not_configured' | 'webhook_key_missing' }
+  | { outcome: 'failed'; error: string }
 
 export function resolveSupportInvestigatorWebhookUrl(): string | undefined {
   return process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL?.trim() || undefined
@@ -86,6 +92,7 @@ function extractTopFingerprint(diagnosticContext: Record<string, unknown>): stri
 
 export function buildSupportReportDispatchPayload(
   record: SupportReportRecord,
+  options?: { operatorNotes?: string | null; trigger?: 'auto' | 'manual' },
 ): SupportReportDispatchPayload {
   const topFingerprint = record.consentTechnical
     ? extractTopFingerprint(record.diagnosticContext)
@@ -111,6 +118,9 @@ export function buildSupportReportDispatchPayload(
       body: `[?] Reporte manual\n${toastBody}`,
       icon: 'info',
     },
+    ...(options?.operatorNotes
+      ? { operatorNotes: options.operatorNotes.slice(0, 2000) }
+      : {}),
   }
 }
 
@@ -145,30 +155,64 @@ export async function dispatchSupportReport(
 
 export async function dispatchSupportReportInvestigator(
   record: SupportReportRecord,
-): Promise<boolean> {
+  options?: { operatorNotes?: string | null; trigger?: 'auto' | 'manual' },
+): Promise<SupportInvestigatorDispatchResult> {
   const webhook = resolveSupportInvestigatorWebhookUrl()
-  if (!webhook) return false
+  if (!webhook) {
+    return { outcome: 'skipped', reason: 'webhook_not_configured' }
+  }
   const bearerKey = resolveSupportInvestigatorWebhookKey()
   if (!bearerKey) {
-    throw new Error('CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY required for Cursor Automation webhook')
+    return { outcome: 'skipped', reason: 'webhook_key_missing' }
   }
+  const trigger = options?.trigger ?? 'auto'
   const payload: SupportReportDispatchPayload = {
-    ...buildSupportReportDispatchPayload(record),
-    investigation: { tier: 0, playbook: 'support-report-tier0' },
+    ...buildSupportReportDispatchPayload(record, {
+      operatorNotes: options?.operatorNotes ?? record.operatorNotes,
+      trigger,
+    }),
+    investigation: { tier: 0, playbook: 'support-report-tier0', trigger },
   }
-  await postSupportReportWebhook(webhook, payload, { bearerKey })
-  return true
+  try {
+    await postSupportReportWebhook(webhook, payload, { bearerKey })
+    return { outcome: 'sent' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'investigator_dispatch_failed'
+    return { outcome: 'failed', error: message }
+  }
+}
+
+export function analysisStatusFromInvestigatorResult(
+  result: SupportInvestigatorDispatchResult,
+): 'none' | 'pending' | 'in_progress' | 'failed' {
+  if (result.outcome === 'sent') return 'in_progress'
+  if (result.outcome === 'skipped') return 'none'
+  return 'failed'
+}
+
+export function analysisErrorFromInvestigatorResult(
+  result: SupportInvestigatorDispatchResult,
+): string | null {
+  if (result.outcome === 'failed') return result.error
+  if (result.outcome === 'skipped') {
+    return result.reason === 'webhook_not_configured'
+      ? 'CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL não configurado'
+      : 'CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
+  }
+  return null
 }
 
 export async function dispatchSupportReportNotifications(
   record: SupportReportRecord,
-): Promise<{ notifier: boolean; investigator: boolean }> {
+): Promise<{ notifier: boolean; investigator: SupportInvestigatorDispatchResult }> {
   const [notifier, investigator] = await Promise.allSettled([
     dispatchSupportReport(record),
-    dispatchSupportReportInvestigator(record),
+    dispatchSupportReportInvestigator(record, { trigger: 'auto' }),
   ])
   return {
     notifier: notifier.status === 'fulfilled' && notifier.value,
-    investigator: investigator.status === 'fulfilled' && investigator.value,
+    investigator: investigator.status === 'fulfilled'
+      ? investigator.value
+      : { outcome: 'failed', error: 'investigator_dispatch_failed' },
   }
 }

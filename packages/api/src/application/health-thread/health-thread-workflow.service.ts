@@ -746,6 +746,7 @@ export class HealthThreadWorkflowService {
       laboratory: rows[0].laboratory as string | null,
       notes: rows[0].notes as string | null,
       source: rows[0].source as string,
+      examOrderId: null,
       createdAt: rows[0].created_at as Date,
     })
   }

@@ -359,7 +359,7 @@ export async function fillHermesPardiniPasswordForm(
   const filled = await page.evaluate(EVAL_FILL_HERMES_CREDENTIALS, {
     login: formattedLogin,
     password,
-  }).catch(() => null)
+  }).catch(() => null) as { user?: string } | null
   const domUser = await username.first().inputValue({ timeout: 1000 }).catch(() => '')
   if (!domUser) {
     await page.evaluate(EVAL_FILL_HERMES_CREDENTIALS, { login: formattedLogin, password })

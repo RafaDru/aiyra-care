@@ -41,7 +41,7 @@ export class SupportReportService {
     const record = await this.repo.insert({
       accountId,
       category: input.category,
-      description: sanitizeSupportDescription(input.description),
+      description: sanitizeSupportDescription(input.description) ?? undefined,
       route: input.route,
       sessionId: input.sessionId,
       patientId: input.patientId,
@@ -69,9 +69,23 @@ export class SupportReportService {
       })
     }
 
-    void import('./support-report-dispatch.js').then(({ dispatchSupportReportNotifications }) =>
-      dispatchSupportReportNotifications(record).catch(() => undefined),
-    )
+    void import('./support-report-dispatch.js').then(async ({
+      dispatchSupportReportNotifications,
+      analysisStatusFromInvestigatorResult,
+      analysisErrorFromInvestigatorResult,
+    }) => {
+      const result = await dispatchSupportReportNotifications(record).catch(() => ({
+        notifier: false,
+        investigator: { outcome: 'failed' as const, error: 'dispatch_failed' },
+      }))
+      const analysisStatus = analysisStatusFromInvestigatorResult(result.investigator)
+      const analysisError = analysisErrorFromInvestigatorResult(result.investigator)
+      await this.repo.updateAnalysisStateForOps(record.id, {
+        analysisStatus,
+        analysisLastError: analysisError,
+        analysisRequestedAt: result.investigator.outcome === 'sent' ? new Date() : null,
+      }).catch(() => undefined)
+    })
 
     return record
   }

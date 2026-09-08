@@ -29,7 +29,7 @@ export class GlucoseExamImportService {
 
     const existing = await this.measurements.findObservations({ patientId, typeCodes: ['glucose'] })
     const existingRefs = new Set(
-      existing.map((o) => o.sourceRef).filter((r): r is string => r?.startsWith('exam:')),
+      existing.map((o) => o.sourceRef).filter((r): r is string => typeof r === 'string' && r.startsWith('exam:')),
     )
 
     let imported = 0

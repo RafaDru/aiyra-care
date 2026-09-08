@@ -15,6 +15,7 @@ import { isVaccineHygieneDuplicate } from '../../domain/hygiene/vaccine-notes.js
 import { ageInYears } from '../../domain/patient/age-rules.js'
 import { enrichIntegrationLinksWithSyncAuthority } from '../integration-link/integration-link-sync-authority.js'
 import { isOcrPending } from '../../domain/document/ocr-policy.js'
+import { NotFoundError } from '../../domain/errors.js'
 import { groupTimelineEvents } from './timeline-grouping.js'
 import type {
   PatientContext,

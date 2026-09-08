@@ -11,6 +11,19 @@ export const SUPPORT_REPORT_STATUSES = ['open', 'triaged', 'resolved', 'closed']
 
 export type SupportReportStatus = typeof SUPPORT_REPORT_STATUSES[number]
 
+export const SUPPORT_REPORT_ANALYSIS_STATUSES = [
+  'none',
+  'pending',
+  'in_progress',
+  'completed',
+  'failed',
+] as const
+
+export type SupportReportAnalysisStatus = typeof SUPPORT_REPORT_ANALYSIS_STATUSES[number]
+
+export const MAX_OPERATOR_NOTES_LENGTH = 2000
+export const MAX_ANALYSIS_SUMMARY_LENGTH = 4000
+
 export const SUPPORT_REPORT_CATEGORY_SET = new Set<string>(SUPPORT_REPORT_CATEGORIES)
 
 export const PROFILE_ACCESS_DAYS = 7
@@ -52,8 +65,27 @@ export interface SupportReportRecord {
   userAgent: string | null
   expiresAt: Date
   resolvedAt: Date | null
+  analysisStatus: SupportReportAnalysisStatus
+  operatorNotes: string | null
+  analysisSummary: string | null
+  analysisArtifactPath: string | null
+  analysisRequestedAt: Date | null
+  analysisCompletedAt: Date | null
+  analysisLastError: string | null
   createdAt: Date
   updatedAt: Date
+}
+
+export function sanitizeOperatorNotes(value: string | undefined): string | null {
+  if (!value) return null
+  const trimmed = value.trim().slice(0, MAX_OPERATOR_NOTES_LENGTH)
+  return trimmed.length ? trimmed : null
+}
+
+export function sanitizeAnalysisSummary(value: string | undefined): string | null {
+  if (!value) return null
+  const trimmed = value.trim().slice(0, MAX_ANALYSIS_SUMMARY_LENGTH)
+  return trimmed.length ? trimmed : null
 }
 
 export function sanitizeSupportDescription(value: string | undefined): string | null {

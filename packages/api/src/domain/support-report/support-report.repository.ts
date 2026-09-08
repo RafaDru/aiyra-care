@@ -1,5 +1,6 @@
 import type {
   CreateSupportReportInput,
+  SupportReportAnalysisStatus,
   SupportReportRecord,
 } from './support-report.types.js'
 
@@ -17,4 +18,16 @@ export interface SupportReportRepository {
   fetchRecentProductEvents(accountId: string, sessionId: string | undefined, limit: number): Promise<unknown[]>
   fetchRecentClientErrors(accountId: string, limit: number): Promise<unknown[]>
   fetchLastSyncFailure(patientId: string): Promise<unknown | null>
+  updateAnalysisStateForOps(
+    id: string,
+    patch: {
+      analysisStatus: SupportReportAnalysisStatus
+      analysisLastError?: string | null
+      analysisRequestedAt?: Date | null
+      analysisCompletedAt?: Date | null
+      analysisSummary?: string | null
+      analysisArtifactPath?: string | null
+      operatorNotes?: string | null
+    },
+  ): Promise<boolean>
 }

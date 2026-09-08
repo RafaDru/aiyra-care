@@ -27,10 +27,11 @@ if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GCP_SERVICE_ACCOU
     if (existsSync(fromRoot)) process.env.GOOGLE_APPLICATION_CREDENTIALS = fromRoot
   }
 }
+import type { FastifyServerOptions } from 'fastify'
 import { createApiLoggerConfig } from './infrastructure/http/log-sanitization.js'
 
 const app = Fastify({
-  logger: createApiLoggerConfig(),
+  logger: createApiLoggerConfig() as unknown as FastifyServerOptions['logger'],
   rewriteUrl: (req) => req.url ?? '/',
 })
 

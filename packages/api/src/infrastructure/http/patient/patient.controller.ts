@@ -7,7 +7,7 @@ import type { PatientMembershipRepository } from '../../../domain/auth/app-accou
 import { isMinorBirthDate } from '../../../domain/patient/patient-age.js'
 
 function enrichPatientJson(
-  patient: { toJSON: () => Record<string, unknown> },
+  patient: { toJSON: () => object },
   roleMap: Record<string, string>,
 ) {
   const json = patient.toJSON() as Record<string, unknown>

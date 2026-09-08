@@ -126,10 +126,10 @@ describe('support-report-dispatch', () => {
     const { dispatchSupportReportInvestigator } = await import(
       '../src/application/support-report/support-report-dispatch.js'
     )
-    const ok = await dispatchSupportReportInvestigator(record)
-    expect(ok).toBe(true)
+    const result = await dispatchSupportReportInvestigator(record)
+    expect(result).toEqual({ outcome: 'sent' })
     const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))
-    expect(body.investigation).toEqual({ tier: 0, playbook: 'support-report-tier0' })
+    expect(body.investigation).toEqual({ tier: 0, playbook: 'support-report-tier0', trigger: 'auto' })
     expect(body.reportId).toBe('rep-inv-1')
     const headers = fetchMock.mock.calls[0]?.[1]?.headers as Record<string, string>
     expect(headers.Authorization).toBe('Bearer crsr_test_key')
@@ -170,6 +170,6 @@ describe('support-report-dispatch', () => {
     )
     const result = await dispatchSupportReportNotifications(record)
     expect(result.notifier).toBe(true)
-    expect(result.investigator).toBe(false)
+    expect(result.investigator).toEqual({ outcome: 'skipped', reason: 'webhook_not_configured' })
   })
 })

@@ -11,7 +11,7 @@ const defaultClassifier: LabelClassifierEngine = new AmilLabelClassifier({
 })
 
 function procDescOf(usage: AmilSyncResult['beneficiaryData'][number]['usageItems'][number]): string {
-  return usage.procedureDescription || usage.kind || ''
+  return usage.procedureDescription || ''
 }
 
 export function amilResultToCanonicalBatch(

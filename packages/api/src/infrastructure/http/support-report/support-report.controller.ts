@@ -1,4 +1,4 @@
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply } from 'fastify'
 import type { SupportReportService } from '../../../application/support-report/support-report.service.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess } from '../auth/patient-access.guard.js'
@@ -51,9 +51,11 @@ export class SupportReportController {
     return reply.send(records.map(toPublicJson))
   }
 
-  async getById(req: AuthenticatedRequest & FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+  async getById(req: AuthenticatedRequest, reply: FastifyReply) {
     if (!req.accountId) return reply.status(401).send({ message: 'Não autenticado' })
-    const record = await this.service.getForAccount(req.accountId, req.params.id)
+    const id = (req.params as { id?: string }).id
+    if (!id) return reply.status(400).send({ message: 'ID obrigatório' })
+    const record = await this.service.getForAccount(req.accountId, id)
     if (!record) return reply.status(404).send({ message: 'Chamado não encontrado' })
     return reply.send(toPublicJson(record))
   }

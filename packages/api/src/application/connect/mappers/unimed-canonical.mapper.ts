@@ -3,7 +3,7 @@ import type { CanonicalSyncBatch, CanonicalRecord } from '@aiyra-care/connect'
 import type { UnimedBhSyncResult } from '../../../infrastructure/scraper/unimedbh-sync.scraper.js'
 import type { UnimedBhUsageItem } from '../../../infrastructure/scraper/unimedbh-extrato.scraper.js'
 import type { UnimedBhAuthorizationItem } from '../../../infrastructure/scraper/unimedbh-autorizacoes.scraper.js'
-import type { PatientMatcher } from '../../domain/patient/patient-matcher.js'
+import type { PatientMatcher } from '../../../domain/patient/patient-matcher.js'
 
 export async function unimedResultToCanonicalBatch(
   result: UnimedBhSyncResult,
@@ -40,7 +40,6 @@ export async function unimedResultToCanonicalBatch(
             : `${item.procedureDate}|${item.doctorName || ''}|${item.procedureDescription || ''}`,
         beneficiaryName: item.patientName,
         beneficiaryKey: item.cardNumber,
-        patientId,
         recordType: item.kind === 'consulta' ? 'consulta' : 'outro',
         date: item.procedureDate,
         providerName: 'Unimed BH',
@@ -54,7 +53,6 @@ export async function unimedResultToCanonicalBatch(
         externalKey: `${item.procedureDescription}|${item.procedureDate}`,
         beneficiaryName: item.patientName,
         beneficiaryKey: item.cardNumber,
-        patientId,
         name: item.procedureDescription,
         performedAt: item.procedureDate,
         laboratory: item.doctorName || undefined,
@@ -80,7 +78,6 @@ export async function unimedResultToCanonicalBatch(
       type: 'authorization',
       externalKey: solicitationNumber || `${item.procedureCode || ''}|${item.guideNumber || ''}`,
       beneficiaryName: item.patientName,
-      patientId,
       solicitationNumber: solicitationNumber || undefined,
       status: item.status || undefined,
       classification: item.classification || item.procedureDescription || undefined,
@@ -103,14 +100,14 @@ export async function unimedResultToCanonicalBatch(
   if (result.planCard) {
     const patientId = (possibleIds.length && ctx.patientMatcher)
       ? (await ctx.patientMatcher.findMatchingPatientId(
-          result.planCard.patientName,
+          result.planCard.holderName,
           possibleIds,
         )) ?? ctx.connectionId
       : ctx.connectionId
     records.push({
       type: 'coverage',
       externalKey: result.planCard.externalKey,
-      patientId,
+      beneficiaryName: result.planCard.holderName,
       planName: result.planCard.planName,
       operatorName: result.planCard.operatorName,
       productCode: result.planCard.productCode,
@@ -122,7 +119,7 @@ export async function unimedResultToCanonicalBatch(
       records.push({
         type: 'coverage_membership',
         externalKey: result.planCard.cardNumber,
-        patientId,
+        beneficiaryName: result.planCard.holderName,
         memberNumber: result.planCard.cardNumber,
         role: 'holder',
         status: 'active',
