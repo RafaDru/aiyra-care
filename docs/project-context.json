@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-03",
+  "generatedAt": "2026-09-08",
   "application": {
     "name": "AiyraCare",
     "repository": "https://github.com/RafaDru/aiyra-care",
@@ -9,11 +9,13 @@
     "stack": ["Fastify API", "React/Vite", "PostgreSQL", "Neo4j (projeção)", "Supabase Auth", "Stripe"],
     "localUrls": {
       "api": "http://127.0.0.1:3010",
-      "web": "http://localhost:5173"
+      "web": "http://localhost:5173",
+      "previewApi": "http://127.0.0.1:3020",
+      "previewWeb": "http://localhost:5174"
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Sync silencioso convênios; SUS gov.br por conta (053). Fase pré-CNPJ: estruturar ambientes (platform-environments) e discovery B2B (b2b-partner-platform). Connect Fase 1; billing Stripe; compliance LGPD.",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Épico família (ACL, círculos, caso Mariana, e-mail Resend) entregue. URLs locais canônicas: localhost:5173/5174. Connect Fase 1; billing Stripe; compliance LGPD.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
     "postgresRole": "Fonte da verdade — entidades clínicas, conversas Ava (planejado), billing, legal, telemetria llm_usage + product_events (planejado)",
@@ -63,7 +65,8 @@
     { "name": "Organization", "tables": ["organizations", "organization_members"], "description": "B2B primitives — clínica/lab; API /organizations" },
     { "name": "CareCircle", "tables": ["care_circles", "care_circle_members", "patient_circle_links"], "description": "Agrupamento familiar B2C; billing_owner; UI /settings/family" },
     { "name": "PatientAccessGrant", "table": "patient_access_grants", "description": "ACL explícito conta × perfil (057)" },
-    { "name": "PatientAccessInvite", "table": "patient_access_invites", "description": "Convites B2C com care_circle_id (058–060)" }
+    { "name": "PatientAccessInvite", "table": "patient_access_invites", "description": "Convites B2C com care_circle_id (058–060)" },
+    { "name": "PatientProfileShareInvite", "table": "patient_profile_share_invites", "description": "Compartilhamento cross-família (063); link_kind shared em patient_circle_links" }
   ],
   "apiRoutes": [
     { "method": "GET", "path": "/project/context", "description": "Contexto estruturado para LLMs" },
@@ -102,7 +105,9 @@
     { "method": "GET", "path": "/care-circles/dashboard", "description": "Agrupamento família → patientIds (dashboard)" },
     { "method": "GET", "path": "/family-access/invites", "description": "Convites enviados (titular)" },
     { "method": "POST", "path": "/family-access/invites/accept", "description": "Aceitar convite de cuidador" },
-    { "method": "GET", "path": "/patients/:id/access-grants", "description": "Listar concessões de acesso ao perfil" }
+    { "method": "GET", "path": "/patients/:id/access-grants", "description": "Listar concessões de acesso ao perfil" },
+    { "method": "GET", "path": "/family-access/profile-shares/sent", "description": "Compartilhamentos de perfil enviados (titular)" },
+    { "method": "POST", "path": "/family-access/profile-shares/:id/accept", "description": "Aceitar perfil compartilhado em círculo receptor" }
   ],
   "integrations": [
     { "portal": "unimed", "syncAutomatic": true, "imports": ["extrato", "autorizações", "cartão virtual", "carências PDF", "guia PDF"] },
@@ -141,10 +146,12 @@
     { "id": "ava-session-pins-048", "date": "2026-08-26", "title": "Pins de sessão Ava", "decision": "ava_session_context migration 048; GET/PATCH context; chips UI; LGPD export/delete/archive conversas", "status": "active" },
     { "id": "govbr-session-053", "date": "2026-09-01", "title": "Sessão gov.br por conta", "decision": "govbr_sessions (053); token FHIR cifrado; reimport SUS sem browser; separado de integration_links", "status": "active" },
     { "id": "portal-auth-failure", "date": "2026-09-01", "title": "Classificação genérica de falha de auth", "decision": "portal-auth-failure.ts + auth_attention + failure_kind; UI Integrações orienta senha vs reconectar", "status": "active" },
-    { "id": "pre-cnpj-platform", "date": "2026-09-02", "title": "Estruturação pré-CNPJ", "decision": "Ambiente 1 local; Ambiente 2 local até ritmo funcional, depois Preview GCP (openhealth-503119); Cursor Cloud fora de escopo", "status": "active" }
+    { "id": "pre-cnpj-platform", "date": "2026-09-02", "title": "Estruturação pré-CNPJ", "decision": "Ambiente 1 local; Ambiente 2 local até ritmo funcional, depois Preview GCP (openhealth-503119); Cursor Cloud fora de escopo", "status": "active" },
+    { "id": "localhost-canonical", "date": "2026-09-08", "title": "URLs locais = localhost + portas", "decision": "DNS .test + Caddy pausados; up.ps1 sempre 127.0.0.1; ver LOCAL_HOSTNAMES.md", "status": "active" },
+    { "id": "family-access-model-done", "date": "2026-09-04", "title": "Épico família MVP completo", "decision": "057–063, audit 062, e-mail Resend opcional, caso Mariana (profile share)", "status": "active" }
   ],
   "plannedWork": [
-    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "in_progress", "priority": "P1", "note": "Fase 2 entregue (057–060, /settings/family); audit log pendente" },
+    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "done", "priority": "P1", "note": "MVP completo — ver family-access-model.md" },
     { "id": "documentation-knowledge-base", "title": "Base de conhecimento features + help", "status": "in_progress", "priority": "P2" },
     { "id": "platform-environments", "title": "Ambientes dev/staging/prod + massas + esteiras", "status": "done", "priority": "P2" },
     { "id": "b2b-partner-platform", "title": "Discovery e primitives B2B", "status": "planned", "priority": "P3" },

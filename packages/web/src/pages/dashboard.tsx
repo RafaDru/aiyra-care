@@ -40,10 +40,15 @@ export function Dashboard() {
 
   const load = () => {
     setLoadError(null)
-    return Promise.all([api.patients.list(), api.careCircles.dashboard()])
-      .then(([patientRows, groups]) => {
-        setPatients(patientRows)
-        setCircleGroups(groups)
+    return Promise.allSettled([api.patients.list(), api.careCircles.dashboard()])
+      .then(([patientsResult, circlesResult]) => {
+        if (patientsResult.status === 'rejected') {
+          setPatients([])
+          setCircleGroups([])
+          throw patientsResult.reason
+        }
+        setPatients(patientsResult.value)
+        setCircleGroups(circlesResult.status === 'fulfilled' ? circlesResult.value : [])
       })
       .catch((err) => {
         setPatients([])

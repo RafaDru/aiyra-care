@@ -40,21 +40,18 @@ function Stop-ListenerOnPort {
 }
 
 function Stop-OpsConsoleProcesses {
+  param([int]$Port)
   try {
-    Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
-      Where-Object {
-        $_.Name -eq 'node.exe' -and $_.CommandLine -match 'ops-console'
-      } |
-      ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-    Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
-      Where-Object {
-        $_.Name -eq 'cmd.exe' -and $_.CommandLine -match 'ops-console'
-      } |
-      ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+      ForEach-Object {
+        if ($_.OwningProcess -gt 0) {
+          Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue
+        }
+      }
   } catch { }
 }
 
-Stop-OpsConsoleProcesses
+Stop-OpsConsoleProcesses -Port $opsConsolePort
 Stop-ListenerOnPort $opsConsolePort
 Start-Sleep -Milliseconds 800
 

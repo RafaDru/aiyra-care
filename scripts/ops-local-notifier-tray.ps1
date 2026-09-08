@@ -9,16 +9,37 @@ Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path $PSScriptRoot -Parent
 $iconPath = Join-Path $root 'packages\web\public\brand\logo-icon.png'
-$logFile = Join-Path $root 'ops-notifier.log'
+$logSuffix = if ($env:OPS_NOTIFIER_LOG_SUFFIX) { $env:OPS_NOTIFIER_LOG_SUFFIX } else { '' }
+$logFile = Join-Path $root "ops-notifier$logSuffix.log"
 $toastResolveScript = Join-Path $PSScriptRoot 'ops-toast-resolve.ps1'
 . $toastResolveScript
+$importDotenv = Join-Path $PSScriptRoot 'import-dotenv.ps1'
+& $importDotenv -Path (Join-Path $root '.env')
+if ($env:OPS_LOCAL_NOTIFIER_PORT -eq '3022' -or $env:DEPLOYMENT_TIER -eq 'preview') {
+  & $importDotenv -Path (Join-Path $root '.env.preview') -Override
+}
 $port = if ($env:OPS_LOCAL_NOTIFIER_PORT) { $env:OPS_LOCAL_NOTIFIER_PORT.Trim() } else { '3012' }
+$tierLabel = if ($env:AIYRA_NOTIFIER_TIER) { $env:AIYRA_NOTIFIER_TIER.Trim() } elseif ($port -eq '3022') { 'Staging' } else { 'Dev' }
+$opsConsolePort = if ($env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT.Trim() } else { if ($port -eq '3022') { '3023' } else { '3013' } }
+$webPort = if ($port -eq '3022') { '5174' } else { '5173' }
 $alertPath = if ($env:OPS_LOCAL_NOTIFIER_PATH) { $env:OPS_LOCAL_NOTIFIER_PATH.Trim() } else { '/ops-alert' }
 if (-not $alertPath.StartsWith('/')) { $alertPath = "/$alertPath" }
 
 $envFile = Join-Path $root '.env'
 if (Test-Path $envFile) {
   Get-Content $envFile | ForEach-Object {
+    if ($_ -match '^([^#=]+)=(.*)$') {
+      $k = $matches[1].Trim()
+      $v = $matches[2].Trim()
+      if ($k -and $v -and -not [Environment]::GetEnvironmentVariable($k, 'Process')) {
+        Set-Item -Path "env:$k" -Value $v -ErrorAction SilentlyContinue
+      }
+    }
+  }
+}
+$envPreviewFile = Join-Path $root '.env.preview'
+if ($port -eq '3022' -and (Test-Path $envPreviewFile)) {
+  Get-Content $envPreviewFile | ForEach-Object {
     if ($_ -match '^([^#=]+)=(.*)$') {
       $k = $matches[1].Trim()
       $v = $matches[2].Trim()
@@ -147,7 +168,7 @@ $bitmap = [System.Drawing.Bitmap]::FromFile($iconPath)
 $iconHandle = $bitmap.GetHicon()
 $icon = New-Object System.Windows.Forms.NotifyIcon
 $icon.Icon = [System.Drawing.Icon]::FromHandle($iconHandle)
-$icon.Text = 'AiyraCare Ops - observabilidade'
+$icon.Text = "AiyraCare Ops ($tierLabel)"
 $icon.Visible = $true
 
 function Open-Observability {
@@ -178,7 +199,7 @@ function Restart-OpsConsole {
   Start-Process powershell -ArgumentList @(
     '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', $opsConsoleUpScript
   ) -WindowStyle Hidden
-  $icon.ShowBalloonTip(6000, 'AiyraCare Ops', 'Console observabilidade reiniciando (:3013)', [System.Windows.Forms.ToolTipIcon]::Info)
+  $icon.ShowBalloonTip(6000, 'AiyraCare Ops', "Console $tierLabel reiniciando (:$opsConsolePort)", [System.Windows.Forms.ToolTipIcon]::Info)
   Write-NotifierLog 'ops-console restart requested'
 }
 
@@ -203,8 +224,8 @@ function Stop-Notifier {
 }
 
 $menu = New-Object System.Windows.Forms.ContextMenuStrip
-$menu.Items.Add('Observabilidade (:3013)', $null, { Open-Observability }).Name = 'observability'
-$menu.Items.Add('App Aiyra (:5173)', $null, { Open-AiyraApp }).Name = 'app'
+$menu.Items.Add("Observabilidade (:$opsConsolePort)", $null, { Open-Observability }).Name = 'observability'
+$menu.Items.Add("App Aiyra (:$webPort)", $null, { Open-AiyraApp }).Name = 'app'
 $menu.Items.Add('Verificar alertas agora', $null, { Run-AlertsCheck }).Name = 'check'
 $menu.Items.Add('Reiniciar console ops', $null, { Restart-OpsConsole }).Name = 'restart-console'
 $menu.Items.Add('Status stack API/Web', $null, { Show-StackStatus }).Name = 'stack'

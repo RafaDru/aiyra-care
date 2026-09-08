@@ -1,5 +1,28 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-08] - DNS local `.test` pausado — localhost canônico
+
+### Decisão
+- Hostnames `*.aiyracare.test` + Caddy **pausados** (setup hosts/admin não concluído).
+- URLs canônicas: `localhost:5173/5174`, API/Ops em `127.0.0.1` com portas.
+- `up.ps1` sempre loopback; `.env.preview` sem `AIYRA_LOCAL_HOSTNAMES`.
+
+### Realizado
+- **`npm run up:both`** — dev + staging local em sequência (`scripts/up-both.ps1`).
+- **`npm run startup:*`** — tarefas agendadas Windows (bandeja ops + stacks no logon).
+- **Dashboard** — `Promise.allSettled`: falha em `/care-circles/dashboard` não bloqueia lista de pacientes.
+- **Ops scripts** — `env-status`, notifier e console alinhados às portas dev/preview.
+
+### Armadilha migrations (dev)
+- `up.ps1` força `DATABASE_URL=…/aiyracare`; scripts `apply-migration-NNN` leem `.env` (muitas vezes `aiyracare_preview`).
+- Ao aplicar migration manualmente no **Ambiente 1**, use:  
+  `$env:DATABASE_URL="postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare"; node packages/api/scripts/apply-migration-NNN.mjs`
+
+### Próximo (semana)
+- [ ] Teste E2E matriz família João/Maria/Francisco/Vitória (caso Mariana)
+- [ ] `fleury-unified-connector` ou validação PoC Fleury com conta real
+- [ ] Configurar `RESEND_API_KEY` em preview quando testar e-mails transacionais
+
 ## [2026-09-04] - Família: e-mail transacional (convite + compartilhamento)
 
 ### Realizado
@@ -24,7 +47,6 @@
 - **Grants** continuam independentes: aparecer no círculo ≠ ver dados clínicos (ex.: Maria sem grant em Mariana).
 
 ### Próximo
-- [ ] E-mail transacional do convite de compartilhamento
 - [ ] Teste E2E matriz João/Maria/Francisco/Vitória
 
 ## [2026-09-04] - Investigador suporte — Cursor Automation (Tier 0)

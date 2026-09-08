@@ -1,4 +1,4 @@
-# Proxy local :80 → portas dev/staging. Requer Caddy + hosts registrados.
+# Proxy local :80 → portas dev/staging. PAUSADO — usar localhost. Ver LOCAL_HOSTNAMES.md
 param([switch]$Stop)
 
 $root = Split-Path $PSScriptRoot -Parent

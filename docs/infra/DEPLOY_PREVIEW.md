@@ -9,7 +9,7 @@
 | Item | Status |
 |------|--------|
 | Promoção local | `npm run up:preview` + `npm run preview:validate` |
-| Hostnames locais | `staging.aiyracare.test` — [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) |
+| Hostnames locais | **Pausado** — usar localhost; futuro: [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) |
 | Gates CI | `promote-preview.yml` → `run-promotion-gates.mjs` |
 | Runbook GCP | [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md) |
 | Deploy GCP | `promote-preview.yml` — inputs `deploy_gcp`, `deploy_worker` — [`GCP_PREVIEW_RUNBOOK.md`](./GCP_PREVIEW_RUNBOOK.md) |

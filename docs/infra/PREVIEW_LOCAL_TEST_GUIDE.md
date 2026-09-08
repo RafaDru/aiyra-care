@@ -5,15 +5,15 @@
 
 ## URLs rápidas
 
-Com hostnames locais ([`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md)): **http://staging.aiyracare.test** (após `hosts:register` + `caddy:local`).
-
-| O quê | Preview (teste) | Integração (dev) |
-|-------|-----------------|------------------|
-| **Web** | http://staging.aiyracare.test ou :5174 | http://dev.aiyracare.test ou :5173 |
-| **API health** | http://api.staging.aiyracare.test/health | http://api.dev.aiyracare.test/health |
-| **Console ops** | http://ops.staging.aiyracare.test | http://ops.dev.aiyracare.test |
+| O quê | Preview (staging) | Integração (dev) |
+|-------|-------------------|------------------|
+| **Web** | http://localhost:5174 | http://localhost:5173 |
+| **API health** | http://127.0.0.1:3020/health | http://127.0.0.1:3010/health |
+| **Console ops** | http://127.0.0.1:3023 | http://127.0.0.1:3013 |
 | **Notificador** | http://127.0.0.1:3022/health | http://127.0.0.1:3012/health |
 | **PostgreSQL** | `aiyracare_preview` | `aiyracare` |
+
+> Hostnames `.test` + Caddy: **pausado** — ver [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) quando retomar.
 
 ## Antes de abrir o browser
 
@@ -80,7 +80,7 @@ Após login em **:5174**, confira o dashboard — deve listar pacientes se a con
 - [ ] Salvar e recarregar — preferências persistem
 
 ### 5. Console ops preview (10 min)
-- [ ] Abrir http://ops.staging.aiyracare.test ou `:3023`
+- [ ] Abrir http://127.0.0.1:3023 (console ops staging)
 - [ ] Tag **Ambiente Staging** (âmbar) no topo do console
 - [ ] Após o roteiro acima, aba **Produto** → **Saúde por feature** deve mostrar sessões (`app_screen_viewed`) nas telas visitadas
 - [ ] Aba **Suporte** — fila `support_reports` open (se testou «Reportar problema»)

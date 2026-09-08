@@ -1,5 +1,4 @@
-# Hostnames locais AiyraCare — requer `npm run hosts:register` + Caddy na porta 80 (admin).
-# Ver docs/infra/LOCAL_HOSTNAMES.md
+# Hostnames locais AiyraCare — PAUSADO (usar localhost). Ver docs/infra/LOCAL_HOSTNAMES.md
 
 # --- Ambiente 2: staging (Rafael) ---
 staging.aiyracare.test {

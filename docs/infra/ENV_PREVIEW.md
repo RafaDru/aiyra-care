@@ -17,7 +17,7 @@
 
 Integração (Ambiente 1) segue em 3010/5173 + `aiyracare` — **podem rodar ao mesmo tempo**.
 
-**Hostnames locais (opcional):** [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) — `staging.aiyracare.test` sem lembrar portas.
+Hostnames `.test` + Caddy: **pausado** — ver [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) (futuro).
 
 ## Ritual automatizado
 
@@ -69,7 +69,7 @@ Web: smoke manual — login → paciente demo → vacinas / carteira / integraç
 
 | Item | Config |
 |------|--------|
-| Ops console | `:3023` ou `ops.staging.aiyracare.test` — tag **Ambiente Staging** no header |
+| Ops console | `:3023` — tag **Ambiente Staging** no header |
 | Status stack | `npm run env:status` |
 | Hostnames | `npm run hosts:register` + `npm run caddy:local` — [`LOCAL_HOSTNAMES.md`](./LOCAL_HOSTNAMES.md) |
 | Setup opcional | `npm run setup:ops-preview` |

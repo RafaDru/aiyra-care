@@ -151,7 +151,7 @@ For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/F
 - Antes de pedir aprovação Preview: `npm run promotion:gates` + [`docs/TESTING_VERTICALS.md`](docs/TESTING_VERTICALS.md).
 - Preview local (após aprovação): `npm run up:preview` — PG `aiyracare_preview`, API `:3020`, web `:5174`, ops `:3023`.
 - Ritual staging: `npm run preview:validate` · guia [`docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md`](docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md).
-- Hostnames locais: `npm run hosts:register` + `npm run caddy:local` — [`docs/infra/LOCAL_HOSTNAMES.md`](docs/infra/LOCAL_HOSTNAMES.md).
+- Hostnames locais (pausado): [`docs/infra/LOCAL_HOSTNAMES.md`](docs/infra/LOCAL_HOSTNAMES.md) — hoje use `localhost:5173` / `:5174`.
 - Status stack: `npm run env:status` · pacientes demo: `$env:AUTH_SUBJECT="<sub>"; npm run link:demo-patients`.
 - GCP preview (quando secrets prontos): `provision:preview:gcp`, `deploy:preview:gcp`, `deploy:preview:worker` — [`docs/infra/GCP_PREVIEW_RUNBOOK.md`](docs/infra/GCP_PREVIEW_RUNBOOK.md).
 - Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → CI (build API + critical + web).

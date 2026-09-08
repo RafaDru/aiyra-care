@@ -1,6 +1,6 @@
 # Sistema de documentação e tracking — AiyraCare
 
-> **Última atualização:** 2026-09-03  
+> **Última atualização:** 2026-09-08  
 > **Objetivo:** qualquer pessoa (ou LLM/Ava) entender **para quê** existe cada parte do produto **sem ler código**, com rastreio de negócio e entrega alinhados.
 
 ## Resposta direta: GitHub Projects vs `.md`?

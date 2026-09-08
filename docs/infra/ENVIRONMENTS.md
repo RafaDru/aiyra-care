@@ -1,6 +1,6 @@
 # Ambientes — integração, preview e produção
 
-> **Última atualização:** 2026-09-02  
+> **Última atualização:** 2026-09-08  
 > **Modelo principal:** [`TWO_ENV_MODEL.md`](./TWO_ENV_MODEL.md) — Ambiente 1 (integração/agentes) → Ambiente 2 (preview estável).  
 > Épico roadmap: `platform-environments`. Complementa [`DELIVERY_PIPELINE.md`](../DELIVERY_PIPELINE.md).
 
@@ -25,6 +25,26 @@ Três camadas com **paridade de topologia** (API + web + worker + PG + ops), mas
 | **Produção** | Dados reais de clientes | Go-live após CNPJ + gates fiscais |
 
 **Regra LGPD:** nunca restaurar dump de produção em local/staging sem processo de anonimização formal.
+
+### Migrations por banco (armadilha comum)
+
+| Ambiente | PG | Como o `DATABASE_URL` é definido |
+|----------|-----|----------------------------------|
+| Dev (`up.ps1`) | `aiyracare` | **Forçado** no script — ignora `.env` |
+| Preview (`up:preview`) | `aiyracare_preview` | `up-preview.ps1` + `.env` |
+| Scripts `apply-migration-NNN.mjs` | Depende do `.env` | Pode aplicar só no preview se `.env` apontar para `aiyracare_preview` |
+
+Após migration nova, aplicar nos **dois** bancos locais quando ambos estiverem em uso:
+
+```powershell
+$env:DATABASE_URL="postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare"
+node packages/api/scripts/apply-migration-063.mjs
+
+$env:DATABASE_URL="postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare_preview"
+node packages/api/scripts/apply-migration-063.mjs
+```
+
+Ou use `npm run up:preview` (roda `apply-all-migrations` no preview) + migration explícita no `aiyracare` para dev.
 
 ---
 

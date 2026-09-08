@@ -1,9 +1,22 @@
 # Hostnames locais (sem registrar domínio)
 
-> **Última atualização:** 2026-09-03  
-> Enquanto `aiyracare.com.br` não estiver no ar, use o sufixo **`.test`** na máquina local.
+> **Status: PAUSADO (2026-09-08)** — usar **localhost** e portas (`:5173` / `:5174`). Este doc permanece para quando retomarmos `hosts:register` + Caddy.
 
-## URLs amigáveis
+> **Última atualização:** 2026-09-08  
+> Enquanto `aiyracare.com.br` não estiver no ar, o plano era o sufixo **`.test`** na máquina local.
+
+## URLs canônicas hoje (localhost)
+
+| Papel | URL |
+|-------|-----|
+| **Staging web** | http://localhost:5174 |
+| **Staging API** | http://127.0.0.1:3020 |
+| **Staging ops** | http://127.0.0.1:3023 |
+| Dev web | http://localhost:5173 |
+| Dev API | http://127.0.0.1:3010 |
+| Dev ops | http://127.0.0.1:3013 |
+
+## URLs amigáveis (futuro — `.test` + Caddy)
 
 | Papel | Hostname | Porta real (fallback) |
 |-------|----------|---------------------|

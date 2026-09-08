@@ -1,8 +1,8 @@
 # Relatório de promoção — Ambiente 1 (Integração)
 
-**Data:** 2026-09-03T18:04:59.349Z
+**Data:** 2026-09-03T18:23:41.159Z
 **Branch:** main
-**Commit:** 65e89a1
+**Commit:** f66e0ca
 
 ## Resumo
 

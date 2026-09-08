@@ -1,4 +1,5 @@
 # Registra hostnames locais em C:\Windows\System32\drivers\etc\hosts
+# PAUSADO — projeto usa localhost por hora. Ver docs/infra/LOCAL_HOSTNAMES.md
 # Requer PowerShell como Administrador: npm run hosts:register
 
 $ErrorActionPreference = 'Stop'

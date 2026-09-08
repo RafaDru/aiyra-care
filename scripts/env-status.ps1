@@ -32,23 +32,8 @@ foreach ($s in $services) {
 }
 
 Write-Host ''
-Write-Host '=== Hostnames locais ===' -ForegroundColor Cyan
-$hostsPath = "$env:Windir\System32\drivers\etc\hosts"
-$hosts = Get-Content $hostsPath -Raw
-$hasHosts = $hosts -match 'staging\.aiyracare\.test'
-Write-Host "  hosts file: $(if ($hasHosts) { 'OK' } else { 'NAO REGISTRADO - npm run hosts:register (admin)' })" -ForegroundColor $(if ($hasHosts) { 'Green' } else { 'Yellow' })
-
-$pidFile = Join-Path (Split-Path $PSScriptRoot -Parent) '.caddy-local.pid'
-$caddyOk = $false
-if (Test-Path $pidFile) {
-  $caddyPid = Get-Content $pidFile
-  $caddyOk = $null -ne (Get-Process -Id $caddyPid -ErrorAction SilentlyContinue)
-}
-Write-Host "  Caddy :80: $(if ($caddyOk) { 'OK' } else { 'parado - npm run caddy:local (admin)' })" -ForegroundColor $(if ($caddyOk) { 'Green' } else { 'Yellow' })
-
-if ($hasHosts -and $caddyOk) {
-  $staging = Test-UrlGet 'http://staging.aiyracare.test'
-  Write-Host "  staging.aiyracare.test: $($staging.msg)" -ForegroundColor $(if ($staging.ok) { 'Green' } else { 'Red' })
-} elseif (-not $hasHosts) {
-  Write-Host '  Use agora: http://localhost:5174 (preview) ou :5173 (dev)' -ForegroundColor DarkGray
-}
+Write-Host '=== URLs (localhost) ===' -ForegroundColor Cyan
+Write-Host '  Dev web:      http://localhost:5173' -ForegroundColor DarkGray
+Write-Host '  Staging web:  http://localhost:5174' -ForegroundColor DarkGray
+Write-Host '  Dev ops:      http://127.0.0.1:3013' -ForegroundColor DarkGray
+Write-Host '  Staging ops:  http://127.0.0.1:3023' -ForegroundColor DarkGray
