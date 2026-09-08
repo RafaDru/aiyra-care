@@ -97,8 +97,13 @@ jobs:
             fi
             sleep 2
           done
-          echo "--- api.log ---"
-          cat /tmp/api.log || true
+          echo "--- api.log (últimas 80 linhas) ---"
+          tail -n 80 /tmp/api.log 2>/dev/null || true
+          if [ -f /tmp/api.pid ]; then
+            echo "--- api pid ---"
+            cat /tmp/api.pid
+            ps -p "$(cat /tmp/api.pid)" -o pid,cmd 2>/dev/null || true
+          fi
           exit 1
 
       - name: Install Playwright Chromium
