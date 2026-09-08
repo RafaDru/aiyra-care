@@ -95,10 +95,14 @@ jobs:
             if curl -sf http://127.0.0.1:3010/health; then
               exit 0
             fi
+            if [ -f /tmp/api.pid ] && ! kill -0 "$(cat /tmp/api.pid)" 2>/dev/null; then
+              echo "API process exited before /health responded"
+              break
+            fi
             sleep 2
           done
-          echo "--- api.log (últimas 80 linhas) ---"
-          tail -n 80 /tmp/api.log 2>/dev/null || true
+          echo "--- api.log (completo) ---"
+          cat /tmp/api.log 2>/dev/null || true
           if [ -f /tmp/api.pid ]; then
             echo "--- api pid ---"
             cat /tmp/api.pid

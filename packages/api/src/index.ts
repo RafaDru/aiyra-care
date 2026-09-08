@@ -249,7 +249,13 @@ const start = async () => {
       app.log.warn({ err: err instanceof Error ? err.message : String(err) }, 'sync_jobs reconcile on startup failed')
     }
   } catch (err) {
-    app.log.error(err)
+    const e = err instanceof Error ? err : new Error(String(err))
+    console.error('[api] startup failed:', e.message)
+    if (e.stack) console.error(e.stack)
+    app.log.error(
+      { err: { type: e.name, message: e.message, code: (e as NodeJS.ErrnoException).code } },
+      'startup failed',
+    )
     process.exit(1)
   }
 }
