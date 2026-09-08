@@ -107,8 +107,8 @@ export function buildSupportReportDispatchPayload(
     submittedAt: record.createdAt.toISOString(),
     text: `Novo chamado: ${label}${routeSuffix}`,
     toast: {
-      title: 'AiyraCare | Novo chamado',
-      body: toastBody,
+      title: '[Suporte] Novo chamado',
+      body: `[?] Reporte manual\n${toastBody}`,
       icon: 'info',
     },
   }

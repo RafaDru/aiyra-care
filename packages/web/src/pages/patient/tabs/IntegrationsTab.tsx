@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react'
 import {
   Typography, Button, Space, Tag, Modal, Form, Input, App, Alert, Table, Dropdown, Tooltip,
 } from 'antd'
@@ -172,8 +172,11 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   }, [authConfigured, authLoading, historyRefreshKey])
 
   const dockLinkIds = new Set(dockJobs.map((j) => j.linkId))
-  const syncTargets = collectSyncTargets(links)
-  const linkedPortals = new Set(links.map((l) => l.portalType))
+  const syncTargets = useMemo(() => collectSyncTargets(links ?? []), [links])
+  const linkedPortals = useMemo(
+    () => new Set((links ?? []).map((l) => l.portalType)),
+    [links],
+  )
   const { groupedByDate, activeEntries } = useIntegrationSyncHistory(
     syncTargets,
     historyRefreshKey,
@@ -329,7 +332,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
 
   const buildRows = (): TableRow[] => {
     const rows: TableRow[] = []
-    for (const link of links) {
+    for (const link of links ?? []) {
       const meta = brandOrFallback(link.portalType)
       const group = INSURANCE_PORTALS.has(link.portalType) ? 'health' as const
         : HOSPITAL_PORTALS.has(link.portalType) ? 'hospital' as const

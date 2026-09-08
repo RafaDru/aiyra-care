@@ -17,7 +17,8 @@ describe('ops-alert-toast', () => {
       category: 'sync',
       message: 'Sync travado (amil) há 45 min',
     }])
-    expect(toast.title).toBe('AiyraCare Ops | CRITICO')
+    expect(toast.title).toBe('[Ambiente] CRITICO')
+    expect(toast.body).toContain('[!]')
     expect(toast.body).toContain('Sync: Sync travado')
     expect(toast.icon).toBe('error')
     expect(toast.body).not.toContain('•')
@@ -31,7 +32,7 @@ describe('ops-alert-toast', () => {
       category: 'product',
       message: '12 bloqueios de franquia Ava (1h)',
     }])
-    expect(toast.title).toBe('AiyraCare Ops | AVISO')
+    expect(toast.title).toBe('[Ambiente] AVISO')
     expect(resolveOpsToastIcon([{
       id: 'llm_quota_spike',
       severity: 'warning',

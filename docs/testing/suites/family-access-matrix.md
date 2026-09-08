@@ -7,13 +7,14 @@
 | **Lane** | `regression` (obrigatória) + `feature` |
 | **Fixture** | `family-matrix` |
 | **parallelSafe** | `true` (após seed dedicado) |
-| **Automação** | `planned` — **bloqueada** até `seed-qa-family-matrix.mjs` |
+| **Automação** | `planned` |
 
 ## Pré-requisitos
 
 - [ ] Migrations 057–063 + 062 audit aplicadas no banco ativo
-- [ ] `node packages/api/scripts/seed-qa-family-matrix.mjs` **(quando existir)**
-- [ ] 4 contas Supabase de teste (João, Maria, Francisco, Vitória) — ver [`fixtures/family-matrix.json`](../fixtures/family-matrix.json)
+- [ ] `npm run seed:qa-family-matrix`
+- [ ] `npm run qa:verify-family-matrix` → 4× OK
+- [ ] `npm run qa:link-persona -- --persona=joao --sub=<seu-supabase-uuid>` (repetir persona por login)
 - [ ] `RESEND_API_KEY` opcional — testar e-mail em preview
 
 ## Matriz de visibilidade (referência)

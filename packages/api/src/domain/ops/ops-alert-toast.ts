@@ -3,10 +3,13 @@ import type { OpsAlert } from './ops-metrics.types.js'
 /** Icone nativo do balloon Windows (ToolTipIcon). */
 export type OpsToastIcon = 'error' | 'warning' | 'info'
 
+export type OpsToastKind = 'environment' | 'support' | 'farol' | 'system'
+
 export interface OpsAlertToast {
   title: string
   body: string
   icon: OpsToastIcon
+  kind: OpsToastKind
   severity: OpsAlert['severity']
   category: OpsAlert['category']
 }
@@ -49,9 +52,10 @@ export function resolveOpsToastIcon(alerts: OpsAlert[]): OpsToastIcon {
 export function buildOpsAlertToast(alerts: OpsAlert[]): OpsAlertToast {
   if (alerts.length === 0) {
     return {
-      title: 'AiyraCare Ops',
-      body: 'Alerta operacional',
+      title: '[Ambiente] Alerta',
+      body: '[!] Sem detalhes',
       icon: 'info',
+      kind: 'environment',
       severity: 'warning',
       category: 'product',
     }
@@ -63,7 +67,7 @@ export function buildOpsAlertToast(alerts: OpsAlert[]): OpsAlertToast {
     : 'warning'
   const icon = resolveOpsToastIcon(alerts)
   const severityWord = severity === 'critical' ? 'CRITICO' : 'AVISO'
-  const title = `AiyraCare Ops | ${severityWord}`
+  const title = `[Ambiente] ${severityWord}`
 
   const lines = alerts.slice(0, 3).map((a) => {
     const msg = sanitizeOpsToastText(a.message)
@@ -75,8 +79,9 @@ export function buildOpsAlertToast(alerts: OpsAlert[]): OpsAlertToast {
 
   return {
     title,
-    body: lines.join('\n'),
+    body: `[!] Threshold automatico\n${lines.join('\n')}`,
     icon,
+    kind: 'environment',
     severity,
     category: primary.category,
   }

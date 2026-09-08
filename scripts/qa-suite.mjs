@@ -59,9 +59,11 @@ async function preflight(preview) {
 function printSuite(s) {
   const auto = s.automation?.status ?? 'manual'
   const spec = s.automation?.spec ?? '—'
+  const domain = s.domain ?? '—'
+  const cov = s.coverage ?? '—'
   console.log(`  ${s.id}`)
   console.log(`    ${s.title}`)
-  console.log(`    lane=${s.lane} fixture=${s.fixtureId} parallelSafe=${s.parallelSafe} automation=${auto}`)
+  console.log(`    domain=${domain} lane=${s.lane} coverage=${cov} automation=${auto}`)
   console.log(`    doc: ${s.doc}`)
   if (spec !== '—') console.log(`    spec: ${spec}`)
   if (s.blockedBy?.length) console.log(`    blockedBy: ${s.blockedBy.join(', ')}`)
@@ -70,21 +72,28 @@ function printSuite(s) {
 
 function cmdList() {
   const cat = loadCatalog()
-  console.log(`\nQA Suites (${cat.suites.length}) — atualizado ${cat.updatedAt}\n`)
-  for (const s of cat.suites) printSuite(s)
+  console.log(`\nQA Suites (${cat.suites.length}) — atualizado ${cat.updatedAt}`)
+  console.log(`Matriz: docs/testing/BUSINESS_ACTION_MATRIX.md\n`)
+  for (const s of cat.suites) {
+    printSuite(s)
+  }
   console.log('Lanes:')
   for (const [id, lane] of Object.entries(cat.lanes)) {
     const ids = lane.suiteIds?.join(', ') ?? '(por suite.lane)'
     console.log(`  ${id}: ${lane.title} — ${ids}`)
   }
   console.log('\nComandos:')
-  console.log('  npm run qa:run -- --suite <id>')
   console.log('  npm run qa:run-all -- --lane regression')
+  console.log('  npm run qa:run-all -- --lane business-full   # CRUD completo via UI')
+  console.log('  npm run qa:run-all -- --lane ava')
 }
 
 async function cmdRun(suiteId, preview) {
   const cat = loadCatalog()
-  const suite = cat.suites.find((s) => s.id === suiteId)
+  let suite = cat.suites.find((s) => s.id === suiteId)
+  if (!suite) {
+    suite = cat.suites.find((s) => s.aliases?.includes(suiteId))
+  }
   if (!suite) {
     console.error(`Suite não encontrada: ${suiteId}`)
     console.error('Use: npm run qa:list')
@@ -139,8 +148,9 @@ async function cmdRunAll(laneId, preview) {
       .filter(Boolean)
   }
 
+  const parallel = laneId === 'business-full' || laneId === 'ava'
   console.log(`\n╔══════════════════════════════════════════════════════════╗`)
-  console.log(`║  QA RUN-ALL: lane=${laneId} (${suites.length} suites, SEQUENCIAL)`)
+  console.log(`║  QA RUN-ALL: lane=${laneId} (${suites.length} suites${parallel ? ', PARALELO por domínio' : ', SEQUENCIAL'})`)
   console.log(`╚══════════════════════════════════════════════════════════╝`)
   console.log(lane.description ?? '')
 

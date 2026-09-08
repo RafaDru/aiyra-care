@@ -150,7 +150,8 @@ For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/F
 - **Ambientes não prod:** [`docs/infra/TWO_ENV_MODEL.md`](docs/infra/TWO_ENV_MODEL.md) — Ambiente 1 **local**; Ambiente 2 **local** (`up:preview`) até ritmo funcional, depois **GCP**; matriz [`docs/infra/ENVIRONMENTS.md`](docs/infra/ENVIRONMENTS.md).
 - Antes de pedir aprovação Preview: `npm run promotion:gates` + [`docs/TESTING_VERTICALS.md`](docs/TESTING_VERTICALS.md).
 - Antes de push `main`: `npm run qa:run-all -- --lane regression` — ver [`docs/testing/QA_PROCESS.md`](docs/testing/QA_PROCESS.md).
-- QA por feature: `npm run qa:run -- --suite <id>` · catálogo: `npm run qa:list`.
+- QA por feature: `npm run qa:run -- --suite <id>` · catálogo: `npm run qa:list`
+- Teste completo UI: `npm run qa:run-all -- --lane business-full` · Ava: `--lane ava`.
 - Preview local (após aprovação): `npm run up:preview` — PG `aiyracare_preview`, API `:3020`, web `:5174`, ops `:3023`.
 - Ritual staging: `npm run preview:validate` · guia [`docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md`](docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md).
 - Hostnames locais (pausado): [`docs/infra/LOCAL_HOSTNAMES.md`](docs/infra/LOCAL_HOSTNAMES.md) — hoje use `localhost:5173` / `:5174`.

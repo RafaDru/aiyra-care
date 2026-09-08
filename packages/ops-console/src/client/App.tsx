@@ -134,6 +134,7 @@ export function App() {
         <OpsMetricsDashboard
           data={data}
           runtime={data.runtime}
+          onRefresh={refresh}
           stackSlot={
             <OpsPanel title="Stack Aiyra" description="API :3010 e web :5173 — app monitorado.">
               <StackControlCard onStackChange={refresh} />

@@ -2,8 +2,10 @@
   "id": "family-matrix",
   "title": "Matriz família — João, Maria, Francisco, Vitória, Mariana (custódia compartilhada)",
   "database": "aiyracare ou aiyracare_preview",
-  "seedScript": "node packages/api/scripts/seed-qa-family-matrix.mjs",
-  "status": "planned",
+  "seedScript": "npm run seed:qa-family-matrix",
+  "linkScript": "npm run qa:link-persona -- --persona=joao --sub=<supabase-uuid>",
+  "verifyScript": "npm run qa:verify-family-matrix",
+  "status": "ready",
   "accounts": [
     {
       "label": "João",

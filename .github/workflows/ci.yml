@@ -67,7 +67,10 @@ jobs:
       - run: npm run build
       - name: Install Playwright Chromium
         run: npx playwright install chromium --with-deps
-      - run: npm run test:e2e
+      - name: Playwright smoke (sem API)
+        run: npx playwright test smoke.spec.ts
+        env:
+          E2E_SMOKE_ONLY: 1
 
   agents:
     runs-on: ubuntu-latest

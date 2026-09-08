@@ -1,0 +1,27 @@
+{
+  "id": "qa-onboarding",
+  "title": "Conta QA — fluxo onboarding repetível",
+  "authMethod": "email_password",
+  "email": "qa.onboarding@aiyracare.local",
+  "password": "packages/web/.env.e2e.local — QA_ONBOARDING_PASSWORD",
+  "authSubject": "packages/web/.env.e2e.local — QA_ONBOARDING_AUTH_SUBJECT (opcional)",
+  "profile": {
+    "name": "QA Onboarding Titular",
+    "birthDate": "15/03/1990",
+    "gender": "male",
+    "cpf": "gerado por uniqueQaCpf() no Playwright"
+  },
+  "setupSteps": [
+    "npm run qa:create-onboarding-user",
+    "npm run qa:reset-onboarding-user (antes de cada run do cenário A)"
+  ],
+  "playwright": {
+    "spec": "packages/web/e2e/onboarding.spec.ts",
+    "envFile": "packages/web/.env.e2e.local"
+  },
+  "notes": [
+    "Cenário signup (B) usa e-mail único por execução — não precisa reset",
+    "Requer API :3010 para /auth/sync e /auth/complete-profile",
+    "Ver docs/testing/suites/onboarding-flow.md"
+  ]
+}

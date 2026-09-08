@@ -9,10 +9,11 @@ Ao **entregar** ou alterar comportamento de produto (`packages/api` domínio/app
 
 ## Checklist de encerramento
 
-1. **Suite QA** — criar/atualizar `docs/testing/suites/<suite-id>.md` + `docs/testing/suites/index.json` (+ fixture se massa nova).
-2. **Feature card** — seção **QA** com link da suite (`docs/features/_TEMPLATE.md`).
-3. **Executar** — `npm run qa:run -- --suite <id>` (feature) ou `npm run qa:run-all -- --lane regression` (antes de push `main`).
-4. **Relatório** — PASS/FAIL no chat (formato em `docs/testing/QA_PROCESS.md`).
+1. **Suite QA** — cada **ação de negócio** na UI (CRUD ou ciclo equivalente) em `docs/testing/suites/<id>.md`; ver [`BUSINESS_ACTION_MATRIX.md`](docs/testing/BUSINESS_ACTION_MATRIX.md).
+2. **Feature card** — seção **QA** com link da suite.
+3. **Executar** — `npm run qa:run -- --suite <id>`; regressão feature grande: `qa:run-all -- --lane business-full`.
+4. **Ava** — suites na lane `ava`; **não** exigir qualidade LLM — ver `docs/testing/AVA_QA_SCOPE.md`.
+5. **Relatório** — PASS/FAIL no chat.
 
 ## Não precisa repetir no chat
 

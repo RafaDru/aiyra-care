@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { OpsSupportReportService } from '../src/application/ops/ops-support-report.service.js'
+import { SupportReportPgRepository } from '../src/infrastructure/persistence/support-report.pg.repository.js'
 
 describe('OpsSupportReportService', () => {
   it('maps list rows without diagnostic when consent off', async () => {
@@ -32,5 +33,18 @@ describe('OpsSupportReportService', () => {
     const rows = await svc.list('open')
     expect(rows[0]?.diagnosticContext).toEqual({})
     expect(rows[0]?.descriptionPreview).toBe('Algo quebrou')
+  })
+})
+
+describe('SupportReportPgRepository.updateStatusForOps', () => {
+  it('casts status param to varchar for Postgres CASE', async () => {
+    const query = vi.fn(async () => ({ rowCount: 1 }))
+    const repo = new SupportReportPgRepository({ query } as never)
+    const ok = await repo.updateStatusForOps('11111111-1111-1111-1111-111111111111', 'triaged')
+    expect(ok).toBe(true)
+    expect(query).toHaveBeenCalledOnce()
+    const sql = String(query.mock.calls[0][0])
+    expect(sql).toContain('$2::varchar')
+    expect(sql).toContain('$1::uuid')
   })
 })

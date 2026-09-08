@@ -218,10 +218,13 @@ export class SupportReportPgRepository implements SupportReportRepository {
   ): Promise<boolean> {
     const { rowCount } = await this.pool.query(
       `UPDATE support_reports
-       SET status = $2,
-           resolved_at = CASE WHEN $2 IN ('resolved', 'closed') THEN NOW() ELSE resolved_at END,
+       SET status = $2::varchar,
+           resolved_at = CASE
+             WHEN $2::varchar IN ('resolved', 'closed') THEN NOW()
+             ELSE resolved_at
+           END,
            updated_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1::uuid`,
       [id, status],
     )
     return (rowCount ?? 0) > 0

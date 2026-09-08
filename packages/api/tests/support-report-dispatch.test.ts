@@ -51,7 +51,7 @@ describe('support-report-dispatch', () => {
       category: 'technical_bug',
       route: '/patients/x',
       topFingerprint: 'abc123def456',
-      toast: { title: 'AiyraCare | Novo chamado', icon: 'info' },
+      toast: { title: '[Suporte] Novo chamado', icon: 'info' },
       text: 'Novo chamado: Bug técnico — /patients/x',
     })
     expect(payload.dashboardUrl).toContain('tab=support')

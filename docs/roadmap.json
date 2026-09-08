@@ -1957,8 +1957,14 @@
         {
           "id": "qa-ci-regression",
           "title": "CI job e2e-regression (PG + API + Playwright)",
+          "status": "done",
+          "detail": ".github/workflows/ci-e2e-regression.yml — lane Onda 1; ver AUTOMATION_ROADMAP.md."
+        },
+        {
+          "id": "qa-ci-business-full",
+          "title": "CI nightly business-full (Onda 2 Playwright)",
           "status": "planned",
-          "detail": "Bloquear main quando lane regression falhar; ver AUTOMATION_ROADMAP.md."
+          "detail": "ci-e2e-business-full.yml — 11 specs; nightly + artifacts; ver AUTOMATION_ROADMAP.md Fase 3."
         },
         {
           "id": "qa-e2e-family-matrix",

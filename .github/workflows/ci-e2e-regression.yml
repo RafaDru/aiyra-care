@@ -1,0 +1,118 @@
+# Fase 2 — lane regression (Onda 1 Playwright): PG + API + smoke/onboarding/core-patient-crud
+# Requer secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE, VITE_SUPABASE_ANON_KEY
+# Ver docs/testing/AUTOMATION_ROADMAP.md
+
+name: E2E regression
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  secrets-gate:
+    runs-on: ubuntu-latest
+    outputs:
+      has_supabase: ${{ steps.check.outputs.has_supabase }}
+    steps:
+      - id: check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        run: |
+          if [ -n "$SUPABASE_URL" ]; then
+            echo "has_supabase=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_supabase=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Secrets Supabase ausentes — e2e-regression ignorado. Configure SUPABASE_URL no repositório."
+          fi
+
+  e2e-regression:
+    needs: secrets-gate
+    if: needs.secrets-gate.outputs.has_supabase == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: aiyracare_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CI: true
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aiyracare_e2e
+      CRYPTO_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      VITE_API_URL: http://127.0.0.1:3010
+      PORT: 3010
+      CONNECT_WORKER_EXTERNAL: 1
+      SYNC_SCHEDULED_INTERVAL_MS: 0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare database and QA users
+        run: |
+          npm run migrate:dry-run
+          node packages/api/scripts/seed-legal-documents.mjs
+          npm run qa:create-test-user
+          npm run qa:create-onboarding-user
+
+      - name: Build API
+        working-directory: packages/api
+        run: npm run build
+
+      - name: Start API
+        working-directory: packages/api
+        run: |
+          nohup node dist/index.js > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 45); do
+            if curl -sf http://127.0.0.1:3010/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "--- api.log ---"
+          cat /tmp/api.log || true
+          exit 1
+
+      - name: Install Playwright Chromium
+        working-directory: packages/web
+        run: npx playwright install chromium --with-deps
+
+      - name: Playwright regression (Onda 1)
+        run: npm run test:e2e:regression
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-regression
+          path: packages/web/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore

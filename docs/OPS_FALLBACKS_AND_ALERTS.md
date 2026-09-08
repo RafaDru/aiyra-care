@@ -71,6 +71,8 @@ Variáveis: `OPS_PROBE_API_SLOW_MS`, `OPS_PROBE_PG_SLOW_MS`.
 
 ## Triagem e toast (`human_required`)
 
+Visual das familias de balloon (Ambiente / Suporte / Farol): [`docs/ops/NOTIFIER_TOAST_VISUAL.md`](ops/NOTIFIER_TOAST_VISUAL.md).
+
 Modo padrão `OPS_ALERTS_DISPATCH_MODE=human_required`:
 
 - **Critical** → `humanRequired` → webhook (se passou severidade + cooldown).

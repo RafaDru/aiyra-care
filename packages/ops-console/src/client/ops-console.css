@@ -321,6 +321,78 @@ body {
   }
 }
 
+.ops-kpi-card--clickable {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.ops-kpi-card--clickable:hover,
+.ops-kpi-card--clickable:focus-visible {
+  border-color: #c4b5fd;
+  box-shadow: 0 4px 16px rgba(147, 51, 234, 0.12);
+  outline: none;
+}
+
+.ops-kpi-card--clickable:active {
+  transform: translateY(1px);
+}
+
+.ops-chart-frame--clickable {
+  cursor: pointer;
+}
+
+.ops-chart-frame--clickable:hover {
+  border-color: #c4b5fd;
+  box-shadow: 0 4px 16px rgba(147, 51, 234, 0.08);
+}
+
+.ops-chart-frame__hint {
+  font-size: 11px;
+  color: #9333ea;
+  margin-top: 4px;
+}
+
+.ops-row-clickable {
+  cursor: pointer;
+}
+
+.ops-row-clickable:hover td {
+  background: #faf5ff !important;
+}
+
+.ops-panel-click-target {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.ops-panel-click-target:hover {
+  background: #faf5ff;
+}
+
+.ops-probe-target {
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 4px;
+  transition: background 0.15s ease;
+}
+
+.ops-probe-target:hover {
+  background: #faf5ff;
+}
+
+.ops-drill-json {
+  margin: 0;
+  padding: 12px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 8px;
+  font-size: 11px;
+  max-height: 320px;
+  overflow: auto;
+}
+
 @media (max-width: 768px) {
   .ops-header,
   .ops-status-strip,

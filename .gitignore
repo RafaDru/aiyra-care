@@ -4,6 +4,8 @@ build/
 .env
 .env.local
 .env.preview
+.env.e2e.local
+packages/web/.env.e2e.local
 gcp-key.json
 openhealth-*.json
 aiyracare-*.json

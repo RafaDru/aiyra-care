@@ -40,6 +40,30 @@ flowchart TB
 
 **Regra:** a suite manual é a **especificação**; o E2E automatizado é a **implementação** da mesma suite — não dois checklists divergentes.
 
+### Teste completo (expectativa Rafael)
+
+**Toda ação de negócio acionável na UI** deve ser exercitada na suite da feature — em geral **CRUD** (criar → ver → editar → excluir) ou ciclo equivalente (convite → aceite → revogar).
+
+| Camada | Documento |
+|--------|-----------|
+| Matriz mestra (todas as ações) | [`BUSINESS_ACTION_MATRIX.md`](./BUSINESS_ACTION_MATRIX.md) |
+| Paciente CRUD | [`core-patient-crud`](./suites/core-patient-crud.md) |
+| Exames, docs, meds… | suites `patient-*-crud` |
+| Ava (smoke, sem qualidade LLM) | [`AVA_QA_SCOPE.md`](./AVA_QA_SCOPE.md) + lane `ava` |
+
+**Fora do “completo” agora:** qualidade de resposta LLM / OCR de documentos; portais com WAF (lane `integration-portal`).
+
+```powershell
+# Gate rápido main
+npm run qa:run-all -- --lane regression
+
+# Teste completo de negócio (horas — paralelizar por domínio)
+npm run qa:run-all -- --lane business-full
+
+# Só Ava
+npm run qa:run-all -- --lane ava
+```
+
 ---
 
 ## Definition of Done (feature)
@@ -49,7 +73,7 @@ Uma capacidade só vai para `done` no roadmap quando:
 | # | Critério | Artefato |
 |---|----------|----------|
 | 1 | Critérios de aceite acionáveis | `docs/features/<id>.md` |
-| 2 | Suite QA com **cada ação** do escopo | `docs/testing/suites/<suite-id>.md` |
+| 2 | Suite QA com **cada ação de negócio** na UI (CRUD) | `docs/testing/suites/<suite-id>.md` + linha em [`BUSINESS_ACTION_MATRIX.md`](./BUSINESS_ACTION_MATRIX.md) |
 | 3 | Massa de teste documentada | `docs/testing/fixtures/<fixture-id>.json` |
 | 4 | Entrada no catálogo | `docs/testing/suites/index.json` |
 | 5 | Suite executada manualmente **pelo menos uma vez** após entrega | Relatório no PR ou `HISTORICO` |

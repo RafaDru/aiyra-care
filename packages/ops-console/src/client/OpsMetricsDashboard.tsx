@@ -12,6 +12,7 @@ import {
   SyncPanel,
 } from './ops-panels.js'
 import { SupportPanel } from './SupportPanel.js'
+import { OpsDrillDownProvider } from './ops-drill-down.js'
 
 const TAB_STORAGE_KEY = 'ops-console-active-tab'
 
@@ -32,10 +33,12 @@ export function OpsMetricsDashboard({
   data,
   runtime,
   stackSlot,
+  onRefresh,
 }: {
   data: OpsMetricsResponse
   runtime?: RuntimeDegradedView
   stackSlot?: ReactNode
+  onRefresh?: () => void
 }) {
   const metrics = data.metrics
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
@@ -99,6 +102,7 @@ export function OpsMetricsDashboard({
           <SupportPanel
             openCount={metrics.supportReports?.openCount ?? 0}
             submitted24h={metrics.supportReports?.submitted24h ?? 0}
+            onQueueChange={onRefresh}
           />
         </div>
       ),
@@ -142,15 +146,17 @@ export function OpsMetricsDashboard({
   ]
 
   return (
-    <div className="ops-tabs-card">
-      <Tabs
-        activeKey={activeTab}
-        onChange={onTabChange}
-        items={items}
-        destroyOnHidden={false}
-        tabBarGutter={0}
-        size="middle"
-      />
-    </div>
+    <OpsDrillDownProvider data={data}>
+      <div className="ops-tabs-card">
+        <Tabs
+          activeKey={activeTab}
+          onChange={onTabChange}
+          items={items}
+          destroyOnHidden={false}
+          tabBarGutter={0}
+          size="middle"
+        />
+      </div>
+    </OpsDrillDownProvider>
   )
 }

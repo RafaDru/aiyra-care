@@ -1,4 +1,6 @@
 # Resolve titulo, corpo e icone do payload JSON de alertas ops.
+. (Join-Path $PSScriptRoot 'ops-notifier-toast-design.ps1')
+
 function Resolve-OpsToastFromPayload {
   param(
     [Parameter(Mandatory = $true)]
@@ -7,41 +9,37 @@ function Resolve-OpsToastFromPayload {
 
   if ($Json.type -eq 'support_report') {
     if ($Json.toast -and $Json.toast.title -and $Json.toast.body) {
-      $icon = [string]$Json.toast.icon
-      $iconType = switch ($icon.ToLower()) {
-        'error' { 'Error' }
-        'info' { 'Info' }
-        'warning' { 'Warning' }
-        default { 'Info' }
-      }
       return @{
-        Title = [string]$Json.toast.title
+        Kind = 'support'
+        Headline = ($Json.toast.title -replace '^\[?Suporte\]?\s*\|?\s*', '').Trim()
         Body = [string]$Json.toast.body
-        IconType = $iconType
+        ContextLine = 'Novo chamado de usuario'
+        IconName = [string]$Json.toast.icon
+        Tier = ''
       }
     }
     $body = [string]$Json.category
     if ($Json.route) { $body += "`n$($Json.route)" }
     if ($Json.topFingerprint) { $body += "`nErro: $($Json.topFingerprint)" }
     return @{
-      Title = 'AiyraCare | Novo chamado'
+      Kind = 'support'
+      Headline = 'Novo chamado'
       Body = $body
-      IconType = 'Info'
+      ContextLine = 'Reportar problema'
+      IconName = 'info'
+      Tier = ''
     }
   }
 
   if ($Json.toast -and $Json.toast.title -and $Json.toast.body) {
-    $icon = [string]$Json.toast.icon
-    $iconType = switch ($icon.ToLower()) {
-      'error' { 'Error' }
-      'info' { 'Info' }
-      'warning' { 'Warning' }
-      default { 'Warning' }
-    }
+    $headline = ($Json.toast.title -replace '^\[?Ambiente\]?\s*\|?\s*', '').Trim()
     return @{
-      Title = [string]$Json.toast.title
+      Kind = 'environment'
+      Headline = $headline
       Body = [string]$Json.toast.body
-      IconType = $iconType
+      ContextLine = 'Alerta automatico'
+      IconName = [string]$Json.toast.icon
+      Tier = ''
     }
   }
 
@@ -50,9 +48,12 @@ function Resolve-OpsToastFromPayload {
     $text = [string]$Json.text
     $body = ($text -split "`n" | Select-Object -First 3) -join "`n"
     return @{
-      Title = 'AiyraCare Ops'
+      Kind = 'environment'
+      Headline = 'Alerta'
       Body = $body
-      IconType = 'Warning'
+      ContextLine = 'Webhook generico'
+      IconName = 'warning'
+      Tier = ''
     }
   }
 
@@ -65,12 +66,12 @@ function Resolve-OpsToastFromPayload {
   if (-not $primary) { $primary = $alerts[0] }
 
   $category = [string]$primary.category
-  $iconType = 'Warning'
+  $iconName = 'warning'
   if ($hasCritical) {
-    $iconType = 'Error'
+    $iconName = 'error'
   }
   elseif ($category -eq 'product' -or [string]$primary.id -eq 'infra_neo4j_down') {
-    $iconType = 'Info'
+    $iconName = 'info'
   }
 
   $catLabel = switch ($category) {
@@ -82,7 +83,6 @@ function Resolve-OpsToastFromPayload {
   }
 
   $severityWord = if ($hasCritical) { 'CRITICO' } else { 'AVISO' }
-  $title = "AiyraCare Ops | $severityWord"
 
   $lines = @()
   $max = [Math]::Min(3, $alerts.Count)
@@ -105,9 +105,12 @@ function Resolve-OpsToastFromPayload {
   }
 
   return @{
-    Title = $title
+    Kind = 'environment'
+    Headline = $severityWord
     Body = ($lines -join "`n")
-    IconType = $iconType
+    ContextLine = "$catLabel - threshold"
+    IconName = $iconName
+    Tier = ''
   }
 }
 

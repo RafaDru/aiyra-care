@@ -33,15 +33,29 @@ export function OpsKpiCard({
   hint,
   alert,
   sparkline,
+  onClick,
 }: {
   label: string
   value: number | string
   hint?: string
   alert?: boolean
   sparkline?: number[]
+  onClick?: () => void
 }) {
+  const clickable = Boolean(onClick)
   return (
-    <div className={`ops-kpi-card${alert ? ' ops-kpi-card--alert' : ''}`}>
+    <div
+      className={`ops-kpi-card${alert ? ' ops-kpi-card--alert' : ''}${clickable ? ' ops-kpi-card--clickable' : ''}`}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={clickable ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick?.()
+        }
+      } : undefined}
+    >
       <div className="ops-kpi-label">{label}</div>
       <div
         className="ops-kpi-value"

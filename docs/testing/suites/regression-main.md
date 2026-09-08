@@ -1,28 +1,20 @@
-# Suite — Regressão `main` (agregado)
+# Suite — Regressão e teste completo
 
-| Campo | Valor |
-|-------|--------|
-| **ID** | `regression-main` (meta — não é suite isolada) |
-| **Lane** | `regression` |
-| **Comando** | `npm run qa:run-all -- --lane regression` |
+| Lane | Comando | Quando |
+|------|---------|--------|
+| **`regression`** | `npm run qa:run-all -- --lane regression` | Push `main` — smoke + paciente CRUD |
+| **`business-full`** | `npm run qa:run-all -- --lane business-full` | Preview / release — **todo CRUD de negócio via UI** |
+| **`ava`** | `npm run qa:run-all -- --lane ava` | Validar companion (sem qualidade LLM) |
 
-## Ordem de execução (sequencial)
+Matriz completa: [`BUSINESS_ACTION_MATRIX.md`](../BUSINESS_ACTION_MATRIX.md).
 
-| Ordem | Suite | Obrigatória |
-|-------|-------|-------------|
-| 1 | [`regression-smoke`](./regression-smoke.md) | Sim |
-| 2 | [`core-auth-dashboard`](./core-auth-dashboard.md) | Sim |
-| 3 | [`family-access-matrix`](./family-access-matrix.md) | Sim *(BLOCKED até seed)* |
+## `regression` (sequencial)
 
-## Quando rodar
+1. `regression-smoke`
+2. `core-patient-crud`
 
-- Antes de **todo** `git push origin main`
-- Após mudanças em dashboard, auth, família, ou migrations 057–063
+## `business-full` (paralelo por domínio)
 
-## Paralelo
+Ver `suites/index.json` → lane `business-full`. Inclui exames, documentos, medicamentos, integrações UI, família, Ava, suporte.
 
-**Não** paralelizar dentro desta lane. Para testar features em paralelo, use suites individuais com `parallelSafe: true` — ver [`PARALLEL_QA_MODEL.md`](../PARALLEL_QA_MODEL.md).
-
-## Automação futura
-
-CI job `e2e-regression` executará as mesmas suites — ver [`AUTOMATION_ROADMAP.md`](../AUTOMATION_ROADMAP.md).
+**Não inclui** portais WAF (`integration-portal`) — rodar à parte se necessário.

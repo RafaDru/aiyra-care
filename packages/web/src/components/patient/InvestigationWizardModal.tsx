@@ -34,7 +34,7 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
 
   const nextStep = async () => {
     try {
-      await form.validateFields(stepFieldNames[step])
+      await form.validateFields([...stepFieldNames[step]])
       setStep((s) => s + 1)
     } catch {
       message.warning('Preencha os campos obrigatórios desta etapa')

@@ -34,7 +34,11 @@ import {
 } from './components/OpsCharts.js'
 import { OpsKpiCard, OpsKpiGrid } from './components/OpsKpiCard.js'
 import { resolveClientFeatureArea, resolveClientFeatureLabel } from './ops-feature-catalog.js'
+import { formatBrl, formatUsdCents } from './ops-format.js'
+import { useOpsDrillDown } from './ops-drill-down.js'
 import { AIYRACARE_TOKENS } from './theme/ops-theme.js'
+
+export { formatBrl, formatUsdCents } from './ops-format.js'
 
 const { Text } = Typography
 
@@ -48,39 +52,6 @@ const HEALTH_SIGNAL: Record<FeatureHealthRow['signal'], { color: string; label: 
   errors_only: { color: 'warning', label: 'Só erros' },
   ok: { color: 'success', label: 'Ok' },
   low_signal: { color: 'default', label: 'Baixo sinal' },
-}
-
-export function formatBrl(cents: number): string {
-  return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
-
-export function formatUsdCents(cents: number): string {
-  return (cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-}
-
-function ProbeStatus({
-  label,
-  ok,
-  latencyMs,
-  error,
-}: {
-  label: string
-  ok: boolean
-  latencyMs: number
-  error?: string
-}) {
-  return (
-    <Descriptions.Item label={label}>
-      <Tag color={ok ? 'success' : 'error'}>
-        {ok ? 'ok' : 'down'} ({latencyMs} ms)
-      </Tag>
-      {error && (
-        <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-          {error}
-        </Text>
-      )}
-    </Descriptions.Item>
-  )
 }
 
 function AvaWindowCard({ title, window }: { title: string; window: OpsMetricsSnapshot['ava']['last24h'] }) {
@@ -146,6 +117,7 @@ function FeatureCatalogMap({
 }
 
 export function OverviewPanel({ data }: { data: OpsMetricsResponse }) {
+  const { open } = useOpsDrillDown()
   const metrics = data.metrics
   const alerts = data.alerts
   const criticalCount = alerts.filter((a) => a.severity === 'critical').length
@@ -153,19 +125,39 @@ export function OverviewPanel({ data }: { data: OpsMetricsResponse }) {
   return (
     <div className="ops-panel-stack">
       <OpsKpiGrid>
-        <OpsKpiCard label="Alertas critical" value={criticalCount} hint={`${alerts.length} total`} alert={criticalCount > 0} />
+        <OpsKpiCard
+          label="Alertas critical"
+          value={criticalCount}
+          hint={`${alerts.length} total`}
+          alert={criticalCount > 0}
+          onClick={() => open({
+            kind: 'alerts',
+            title: 'Alertas critical',
+            filter: { severity: 'critical' },
+          })}
+        />
         <OpsKpiCard
           label="Ava falhou (5 min)"
           value={metrics.productEvents.last5m.avaChatFailed}
           hint={`ok ${metrics.productEvents.last5m.avaChatCompleted}`}
           alert={metrics.productEvents.last5m.avaChatFailed > 0}
           sparkline={metrics.timeSeries24h.avaEvents.map((r) => r.failed)}
+          onClick={() => open({
+            kind: 'alerts',
+            title: 'Alertas Ava / produto',
+            filter: { category: 'product' },
+          })}
         />
         <OpsKpiCard
           label="Quota bloqueada (1h)"
           value={metrics.productEvents.last1h.avaQuotaBlocked}
           hint={`Ava 1h: ${metrics.productEvents.last1h.avaChatCompleted} ok / ${metrics.productEvents.last1h.avaChatFailed} fail`}
           sparkline={metrics.timeSeries24h.avaEvents.map((r) => r.quotaBlocked)}
+          onClick={() => open({
+            kind: 'alerts',
+            title: 'Alertas LLM / quota',
+            filter: { category: 'llm' },
+          })}
         />
         <OpsKpiCard
           label="Sync stuck"
@@ -173,25 +165,57 @@ export function OverviewPanel({ data }: { data: OpsMetricsResponse }) {
           hint="jobs > 30 min"
           alert={metrics.sync.stuckJobs.length > 0}
           sparkline={metrics.timeSeries24h.syncJobs.map((r) => r.failed)}
+          onClick={() => open({ kind: 'sync_stuck' })}
         />
       </OpsKpiGrid>
 
       <div className="ops-chart-grid">
         <div className="ops-chart-span-4">
-          <AlertCategoryPie alerts={alerts} />
+          <AlertCategoryPie
+            alerts={alerts}
+            onCategoryClick={(category, name) => open({
+              kind: 'alerts',
+              title: `Alertas · ${name}`,
+              filter: { category },
+            })}
+          />
         </div>
         <div className="ops-chart-span-8">
-          <ClientErrorsTimeline rows={metrics.timeSeries24h.clientErrors} />
+          <ClientErrorsTimeline
+            rows={metrics.timeSeries24h.clientErrors}
+            onHourClick={(row) => open({
+              kind: 'client_errors_hour',
+              label: row.label,
+              count: row.count,
+            })}
+          />
         </div>
         <div className="ops-chart-span-6">
-          <SyncJobsTimeline rows={metrics.timeSeries24h.syncJobs} />
+          <SyncJobsTimeline
+            rows={metrics.timeSeries24h.syncJobs}
+            onHourClick={(row) => open({
+              kind: 'sync_hour',
+              label: row.label,
+              success: row.success,
+              failed: row.failed,
+            })}
+          />
         </div>
         <div className="ops-chart-span-6">
-          <AvaEventsTimeline rows={metrics.timeSeries24h.avaEvents} />
+          <AvaEventsTimeline
+            rows={metrics.timeSeries24h.avaEvents}
+            onHourClick={(row) => open({
+              kind: 'ava_events',
+              label: row.label,
+              completed: row.completed,
+              failed: row.failed,
+              quotaBlocked: row.quotaBlocked,
+            })}
+          />
         </div>
       </div>
 
-      <OpsPanel title="Alertas derivados" description="Triagem pager: humano vs automático.">
+      <OpsPanel title="Alertas derivados" description="Triagem pager: humano vs automático. Clique na linha para detalhes.">
         {alerts.length === 0 ? (
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum alerta no momento" />
         ) : (
@@ -200,6 +224,14 @@ export function OverviewPanel({ data }: { data: OpsMetricsResponse }) {
             rowKey="id"
             pagination={false}
             dataSource={alerts}
+            onRow={(row) => ({
+              className: 'ops-row-clickable',
+              onClick: () => open({
+                kind: 'alert',
+                alert: row,
+                triage: data.triage?.find((x) => x.alertId === row.id),
+              }),
+            })}
             columns={[
               {
                 title: 'Pager',
@@ -233,22 +265,33 @@ export function OverviewPanel({ data }: { data: OpsMetricsResponse }) {
 }
 
 export function ProductPanel({ data }: { data: OpsMetricsResponse }) {
+  const { open } = useOpsDrillDown()
   const metrics = data.metrics
 
   return (
     <div className="ops-panel-stack">
       <div className="ops-chart-grid">
         <div className="ops-chart-span-6">
-          <FeatureFailRateChart rows={metrics.featureHealth24h} />
+          <FeatureFailRateChart
+            rows={metrics.featureHealth24h}
+            onFeatureClick={(row) => open({ kind: 'feature', row })}
+          />
         </div>
         <div className="ops-chart-span-6">
-          <ClientErrorsTimeline rows={metrics.timeSeries24h.clientErrors} />
+          <ClientErrorsTimeline
+            rows={metrics.timeSeries24h.clientErrors}
+            onHourClick={(row) => open({
+              kind: 'client_errors_hour',
+              label: row.label,
+              count: row.count,
+            })}
+          />
         </div>
       </div>
 
       <OpsPanel
         title="Saúde por feature"
-        description="Cruzamento product_events × client_errors — acesso vs fail rate (24h)."
+        description="Cruzamento product_events × client_errors — clique na linha para detalhes."
       >
         <Table<FeatureHealthRow>
           size="small"
@@ -256,6 +299,10 @@ export function ProductPanel({ data }: { data: OpsMetricsResponse }) {
           pagination={{ pageSize: 12 }}
           dataSource={metrics.featureHealth24h}
           locale={{ emptyText: 'Sem eventos nem erros na janela' }}
+          onRow={(row) => ({
+            className: 'ops-row-clickable',
+            onClick: () => open({ kind: 'feature', row }),
+          })}
           columns={[
             {
               title: 'Feature',
@@ -310,6 +357,10 @@ export function ProductPanel({ data }: { data: OpsMetricsResponse }) {
           pagination={{ pageSize: 8 }}
           dataSource={metrics.clientErrorFingerprints24h}
           locale={{ emptyText: 'Sem fingerprints' }}
+          onRow={(row) => ({
+            className: 'ops-row-clickable',
+            onClick: () => open({ kind: 'client_error_fp', row }),
+          })}
           columns={[
             {
               title: 'Feature',
@@ -345,6 +396,10 @@ export function ProductPanel({ data }: { data: OpsMetricsResponse }) {
           pagination={{ pageSize: 8 }}
           dataSource={metrics.errorFingerprints24h}
           locale={{ emptyText: 'Sem fingerprints' }}
+          onRow={(row) => ({
+            className: 'ops-row-clickable',
+            onClick: () => open({ kind: 'error_fp', row }),
+          })}
           columns={[
             { title: 'Evento', dataIndex: 'eventName' },
             { title: 'Count', dataIndex: 'count', width: 64 },
@@ -368,27 +423,43 @@ export function ProductPanel({ data }: { data: OpsMetricsResponse }) {
 }
 
 export function SyncPanel({ data }: { data: OpsMetricsResponse }) {
+  const { open } = useOpsDrillDown()
   const metrics = data.metrics
 
   return (
     <div className="ops-panel-stack">
       <div className="ops-chart-grid">
         <div className="ops-chart-span-8">
-          <SyncJobsTimeline rows={metrics.timeSeries24h.syncJobs} />
+          <SyncJobsTimeline
+            rows={metrics.timeSeries24h.syncJobs}
+            onHourClick={(row) => open({
+              kind: 'sync_hour',
+              label: row.label,
+              success: row.success,
+              failed: row.failed,
+            })}
+          />
         </div>
         <div className="ops-chart-span-4">
-          <PortalFailRateChart rows={metrics.sync.portalStats24h} />
+          <PortalFailRateChart
+            rows={metrics.sync.portalStats24h}
+            onPortalClick={(portalType) => open({ kind: 'sync_portal', portalType })}
+          />
         </div>
       </div>
 
       <div className="ops-panel-split">
-        <OpsPanel title="Portais (24h)" description="Jobs terminados por portal e taxa de falha.">
+        <OpsPanel title="Portais (24h)" description="Clique na linha para falhas recentes do portal.">
         <Table
           size="small"
           rowKey="portalType"
           pagination={false}
           dataSource={metrics.sync.portalStats24h}
           locale={{ emptyText: 'Sem jobs na janela' }}
+          onRow={(row) => ({
+            className: 'ops-row-clickable',
+            onClick: () => open({ kind: 'sync_portal', portalType: row.portalType }),
+          })}
           columns={[
             { title: 'Portal', dataIndex: 'portalType' },
             { title: 'Total', dataIndex: 'total' },
@@ -416,6 +487,10 @@ export function SyncPanel({ data }: { data: OpsMetricsResponse }) {
           pagination={false}
           dataSource={metrics.sync.stuckJobs}
           locale={{ emptyText: 'Nenhum job preso' }}
+          onRow={() => ({
+            className: 'ops-row-clickable',
+            onClick: () => open({ kind: 'sync_stuck' }),
+          })}
           columns={[
             { title: 'Portal', dataIndex: 'portalType' },
             { title: 'Status', dataIndex: 'status' },
@@ -426,13 +501,17 @@ export function SyncPanel({ data }: { data: OpsMetricsResponse }) {
       </OpsPanel>
       </div>
 
-      <OpsPanel title="Falhas recentes" description="Últimas 48h.">
+      <OpsPanel title="Falhas recentes" description="Últimas 48h — clique para ver portal completo.">
         <Table
           size="small"
           rowKey="jobId"
           pagination={{ pageSize: 8 }}
           dataSource={metrics.sync.recentFailures}
           locale={{ emptyText: 'Sem falhas recentes' }}
+          onRow={(row) => ({
+            className: 'ops-row-clickable',
+            onClick: () => open({ kind: 'sync_portal', portalType: row.portalType }),
+          })}
           columns={[
             { title: 'Portal', dataIndex: 'portalType', width: 100 },
             { title: 'Erro', dataIndex: 'error', render: (e: string | null) => e ?? '—' },
@@ -450,6 +529,7 @@ export function SyncPanel({ data }: { data: OpsMetricsResponse }) {
 }
 
 export function AvaPanel({ data }: { data: OpsMetricsResponse }) {
+  const { open } = useOpsDrillDown()
   const metrics = data.metrics
 
   return (
@@ -459,36 +539,78 @@ export function AvaPanel({ data }: { data: OpsMetricsResponse }) {
           label="Turnos Ava (24h)"
           value={metrics.ava.last24h.turns}
           hint={`p95 ${metrics.ava.last24h.p95Tokens ?? '—'} tokens`}
+          onClick={() => open({ kind: 'ava_window', window: '24h' })}
         />
         <OpsKpiCard
           label="Tokens soma (24h)"
           value={metrics.ava.last24h.tokensTotalSum}
           hint={`in ${metrics.ava.last24h.tokensInSum} · out ${metrics.ava.last24h.tokensOutSum}`}
+          onClick={() => open({ kind: 'ava_window', window: '24h' })}
         />
         <OpsKpiCard
           label="Ava ok (1h)"
           value={metrics.productEvents.last1h.avaChatCompleted}
           hint={`fail ${metrics.productEvents.last1h.avaChatFailed}`}
+          onClick={() => open({
+            kind: 'alerts',
+            title: 'Alertas produto / Ava',
+            filter: { category: 'product' },
+          })}
         />
         <OpsKpiCard
           label="Quota bloqueada (1h)"
           value={metrics.productEvents.last1h.avaQuotaBlocked}
           alert={metrics.productEvents.last1h.avaQuotaBlocked > 0}
+          onClick={() => open({
+            kind: 'alerts',
+            title: 'Alertas LLM / quota',
+            filter: { category: 'llm' },
+          })}
         />
       </OpsKpiGrid>
 
       <div className="ops-chart-grid">
         <div className="ops-chart-span-6">
-          <AvaEventsTimeline rows={metrics.timeSeries24h.avaEvents} />
+          <AvaEventsTimeline
+            rows={metrics.timeSeries24h.avaEvents}
+            onHourClick={(row) => open({
+              kind: 'ava_events',
+              label: row.label,
+              completed: row.completed,
+              failed: row.failed,
+              quotaBlocked: row.quotaBlocked,
+            })}
+          />
         </div>
         <div className="ops-chart-span-6">
-          <AvaTokensTimeline rows={metrics.timeSeries24h.avaTokens} />
+          <AvaTokensTimeline
+            rows={metrics.timeSeries24h.avaTokens}
+            onHourClick={(row) => open({
+              kind: 'ava_tokens',
+              label: row.label,
+              turns: row.turns,
+              tokens: row.tokens,
+            })}
+          />
         </div>
         <div className="ops-chart-span-4">
-          <ProviderMixChart rows={metrics.ava.providerMix24h} />
+          <ProviderMixChart
+            rows={metrics.ava.providerMix24h}
+            onProviderClick={(row) => open({
+              kind: 'ava_provider',
+              provider: row.provider,
+              model: row.model,
+              turns: row.turns,
+              tokensTotal: row.tokensTotal,
+            })}
+          />
         </div>
         <div className="ops-chart-span-4">
-          <AvaPercentilesCompareChart last24h={metrics.ava.last24h} last7d={metrics.ava.last7d} />
+          <AvaPercentilesCompareChart
+            last24h={metrics.ava.last24h}
+            last7d={metrics.ava.last7d}
+            onWindowClick={(window) => open({ kind: 'ava_window', window })}
+          />
         </div>
         <div className="ops-chart-span-4">
           <Row gutter={[16, 16]}>
@@ -514,6 +636,7 @@ export function InfraPanel({
   runtime?: RuntimeDegradedView
   stackSlot?: ReactNode
 }) {
+  const { open } = useOpsDrillDown()
   const metrics = data.metrics
   const probe = metrics.probe
 
@@ -523,11 +646,29 @@ export function InfraPanel({
 
       <div className="ops-chart-grid">
         <div className="ops-chart-span-6">
-          <ProbeLatencyChart probe={probe} />
+          <ProbeLatencyChart
+            probe={probe}
+            onTargetClick={(target) => open({ kind: 'probe', target })}
+          />
         </div>
         <div className="ops-chart-span-6">
           {runtime && (
-            <OpsPanel title="Runtime degradado" description="Contingência ativa no app monitorado.">
+            <OpsPanel
+              title="Runtime degradado"
+              description="Contingência ativa — clique para detalhes."
+            >
+          <div
+            className="ops-panel-click-target"
+            role="button"
+            tabIndex={0}
+            onClick={() => open({ kind: 'runtime' })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                open({ kind: 'runtime' })
+              }
+            }}
+          >
           <Descriptions size="small" column={2}>
             <Descriptions.Item label="Ava lite">
               <Tag color={runtime.avaLite ? 'warning' : 'default'}>
@@ -547,33 +688,54 @@ export function InfraPanel({
                 : '—'}
             </Descriptions.Item>
           </Descriptions>
+          </div>
         </OpsPanel>
           )}
         </div>
       </div>
 
       {probe && (
-        <OpsPanel title="Sonda sintética" description="Target monitorado — API Aiyra, Postgres, Neo4j.">
-          <Descriptions size="small" column={1} bordered>
-            <ProbeStatus
-              label="API Aiyra"
-              ok={probe.api.ok}
-              latencyMs={probe.api.latencyMs}
-              error={probe.api.error}
-            />
-            <ProbeStatus
-              label="Postgres"
-              ok={probe.postgres.ok}
-              latencyMs={probe.postgres.latencyMs}
-              error={probe.postgres.error}
-            />
+        <OpsPanel title="Sonda sintética" description="Clique em um target para detalhes.">
+          <Descriptions
+            size="small"
+            column={1}
+            bordered
+            className="ops-probe-descriptions"
+          >
+            <Descriptions.Item label="API Aiyra">
+              <span
+                className="ops-probe-target"
+                role="button"
+                tabIndex={0}
+                onClick={() => open({ kind: 'probe', target: 'api' })}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') open({ kind: 'probe', target: 'api' }) }}
+              >
+                <ProbeStatusInline ok={probe.api.ok} latencyMs={probe.api.latencyMs} error={probe.api.error} />
+              </span>
+            </Descriptions.Item>
+            <Descriptions.Item label="Postgres">
+              <span
+                className="ops-probe-target"
+                role="button"
+                tabIndex={0}
+                onClick={() => open({ kind: 'probe', target: 'postgres' })}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') open({ kind: 'probe', target: 'postgres' }) }}
+              >
+                <ProbeStatusInline ok={probe.postgres.ok} latencyMs={probe.postgres.latencyMs} error={probe.postgres.error} />
+              </span>
+            </Descriptions.Item>
             {probe.neo4j && (
-              <ProbeStatus
-                label="Neo4j"
-                ok={probe.neo4j.ok}
-                latencyMs={probe.neo4j.latencyMs}
-                error={probe.neo4j.error}
-              />
+              <Descriptions.Item label="Neo4j">
+                <span
+                  className="ops-probe-target"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => open({ kind: 'probe', target: 'neo4j' })}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') open({ kind: 'probe', target: 'neo4j' }) }}
+                >
+                  <ProbeStatusInline ok={probe.neo4j.ok} latencyMs={probe.neo4j.latencyMs} error={probe.neo4j.error} />
+                </span>
+              </Descriptions.Item>
             )}
           </Descriptions>
         </OpsPanel>
@@ -582,7 +744,31 @@ export function InfraPanel({
   )
 }
 
+function ProbeStatusInline({
+  ok,
+  latencyMs,
+  error,
+}: {
+  ok: boolean
+  latencyMs: number
+  error?: string
+}) {
+  return (
+    <>
+      <Tag color={ok ? 'success' : 'error'}>
+        {ok ? 'ok' : 'down'} ({latencyMs} ms)
+      </Tag>
+      {error && (
+        <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+          {error}
+        </Text>
+      )}
+    </>
+  )
+}
+
 export function CostPanel({ data }: { data: OpsMetricsResponse }) {
+  const { open } = useOpsDrillDown()
   const internal = data.metrics.internalLlm
   if (!internal) {
     return (
@@ -593,13 +779,14 @@ export function CostPanel({ data }: { data: OpsMetricsResponse }) {
   return (
     <div className="ops-panel-stack">
       <OpsKpiGrid>
-        <OpsKpiCard label="Chamadas" value={internal.calls} />
-        <OpsKpiCard label="LLM ok" value={internal.llmResolved} />
-        <OpsKpiCard label="Fallback local" value={internal.localFallback} />
+        <OpsKpiCard label="Chamadas" value={internal.calls} onClick={() => open({ kind: 'internal_llm' })} />
+        <OpsKpiCard label="LLM ok" value={internal.llmResolved} onClick={() => open({ kind: 'internal_llm', outcome: 'llm' })} />
+        <OpsKpiCard label="Fallback local" value={internal.localFallback} onClick={() => open({ kind: 'internal_llm', outcome: 'fallback' })} />
         <OpsKpiCard
           label="Budget esgotado"
           value={internal.budgetExhausted}
           alert={internal.budgetExhausted > 0}
+          onClick={() => open({ kind: 'internal_llm', outcome: 'budget' })}
         />
       </OpsKpiGrid>
 
@@ -609,6 +796,7 @@ export function CostPanel({ data }: { data: OpsMetricsResponse }) {
             spentBrlCents={internal.spentBrlCents}
             remainingBrlCents={internal.remainingBrlCents}
             monthlyBudgetBrlCents={internal.monthlyBudgetBrlCents}
+            onClick={() => open({ kind: 'budget' })}
           />
         </div>
         <div className="ops-chart-span-6">
@@ -616,11 +804,27 @@ export function CostPanel({ data }: { data: OpsMetricsResponse }) {
             llmResolved={internal.llmResolved}
             localFallback={internal.localFallback}
             budgetExhausted={internal.budgetExhausted}
+            onOutcomeClick={(outcome) => open({ kind: 'internal_llm', outcome })}
           />
         </div>
       </div>
 
-      <OpsPanel title="Detalhes do orçamento" description="Classificador e higiene — migration 043.">
+      <OpsPanel
+        title="Detalhes do orçamento"
+        description="Classificador e higiene — migration 043. Clique para resumo."
+      >
+        <div
+          className="ops-panel-click-target"
+          role="button"
+          tabIndex={0}
+          onClick={() => open({ kind: 'budget' })}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              open({ kind: 'budget' })
+            }
+          }}
+        >
         <Descriptions size="small" column={2}>
           <Descriptions.Item label="Gasto USD">
             {formatUsdCents(internal.totalCostUsdCents)}
@@ -642,6 +846,7 @@ export function CostPanel({ data }: { data: OpsMetricsResponse }) {
             Orçamento esgotado — classificação pode usar apenas regras locais.
           </Text>
         )}
+        </div>
       </OpsPanel>
     </div>
   )

@@ -1,0 +1,23 @@
+{
+  "id": "qa-test-user",
+  "title": "Conta Supabase QA — e-mail/senha",
+  "authMethod": "email_password",
+  "socialLogin": "deferred",
+  "email": "definir em .env.e2e.local — QA_TEST_EMAIL",
+  "password": "nunca commitar — QA_TEST_PASSWORD",
+  "setupSteps": [
+    "Supabase Dashboard → Users → Add user (email confirmed)",
+    "Login em /login com e-mail/senha (não Google/Microsoft)",
+    "Aceitar compliance se COMPLIANCE_GATE_ENABLED",
+    "Opcional: npm run link:demo-patients com AUTH_SUBJECT do user.id"
+  ],
+  "playwright": {
+    "helper": "packages/web/e2e/helpers/login.ts",
+    "envFile": "packages/web/.env.e2e.local",
+    "storageStateOptional": "packages/web/playwright/.auth/user.json"
+  },
+  "notes": [
+    "OAuth Google/Microsoft: suite manual futura auth-oauth-smoke",
+    "Ver docs/testing/AUTH_TESTING.md"
+  ]
+}
