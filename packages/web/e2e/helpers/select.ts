@@ -9,7 +9,7 @@ export async function selectAntOption(
 ) {
   const root = scope ?? page
   await root.getByLabel(fieldLabel, { exact: true }).click()
-  const option = page.getByRole('option', { name: optionName })
-  await option.waitFor({ state: 'visible', timeout: 8_000 })
-  await option.click()
+  const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
+  await dropdown.waitFor({ state: 'visible', timeout: 8_000 })
+  await dropdown.getByRole('option', { name: optionName }).click()
 }

@@ -20,6 +20,8 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | Fase 3 business-full no CI | Mesma stack da Fase 2; 11 specs ~15 min com build Vite | `ci-e2e-business-full.yml` nightly; não gate PR até 7 noites verdes |
 | Login E2E timeout em `/login` | Primeiro login sem `legal_document_acceptances` → `/compliance/accept`; Select Ant Design sem `title` | `acceptComplianceIfPresent` no helper auth; `getByRole('option')` para Sexo |
 | Fase 4 Ava no CI | LLM real indisponível sem API keys | `AVA_TEST_MODE=1` na API + specs `ava-companion-smoke` / `ava-guardrail-smoke` |
+| Ava specs no project `smoke` | `testMatch: /smoke\.spec\.ts$/` casava `ava-*-smoke.spec.ts` | Restringir a `e2e/smoke.spec.ts` apenas |
+| Select Ant Design no Playwright | `role=option` existe mas fica hidden no portal | Clicar via `.ant-select-dropdown:not(.ant-select-dropdown-hidden)` |
 | Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |
 | Imports duplicados (`PatientPgRepository`, `VaccinePgRepository`) | merge/copy-paste | `tsc` pega imediatamente |
 

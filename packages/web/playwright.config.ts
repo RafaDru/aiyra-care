@@ -34,11 +34,11 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   projects: process.env.CI
     ? [
-        { name: 'smoke', testMatch: /smoke\.spec\.ts$/ },
+        { name: 'smoke', testMatch: /e2e\/smoke\.spec\.ts$/ },
         {
           name: 'e2e',
-          testMatch: /\.spec\.ts$/,
-          testIgnore: /smoke\.spec\.ts$/,
+          testMatch: /e2e\/.*\.spec\.ts$/,
+          testIgnore: /e2e\/smoke\.spec\.ts$/,
           dependencies: ['smoke'],
         },
       ]
