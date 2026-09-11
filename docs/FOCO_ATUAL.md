@@ -23,12 +23,15 @@
 - Medidas, medicações, vacinas, exames (CRUD + sync)
 - Lembretes (`CareReminderBanner`, notificações)
 
-**Gaps prováveis (discovery):**
+**Discovery (2026-09-11):** [`discovery/day-to-day-clinician-access.md`](./discovery/day-to-day-clinician-access.md) — captura rápida + «Levar na consulta» (link/QR/PDF) + tiers de extrato.
 
-- Fluxo único «registrar agora» (1–2 toques) a partir do dashboard ou Ava
-- Eventos do dia visíveis na home / Carteira (não só dentro do perfil)
-- Ligação automática thread ↔ medida ↔ medicação ↔ agenda
-- Suites QA: `patient-health-thread`, medidas rápidas (ver `BUSINESS_ACTION_MATRIX.md`)
+**Gaps → MVP proposto:**
+
+- **D1** Wizard «Levar na consulta» (reusa export + QR + link 48h)
+- **D2** «+ Registro rápido» (5 tipos, &lt; 30s)
+- **D3** Bloco «Hoje» na Carteira
+- Programa de indicação bilateral — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
+- Suites QA: `patient-clinical-export`, `family-quick-capture`, `patient-health-thread`
 
 ### 2 — Consolidação Ava parceira
 
@@ -68,6 +71,7 @@
 | `9259d64` | Ops: aba **Negócio** (`BusinessPanel`) |
 | `e5c64a2` | `npm run ops:business-weekly` |
 | `36fa56e` | Fix project `smoke` + dropdown Select (1ª iteração) |
+| `56e56be` | Select force click + `FOCO_ATUAL.md` — **regression verde** |
 
 ---
 

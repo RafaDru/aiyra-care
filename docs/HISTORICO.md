@@ -15,7 +15,18 @@
 
 ### Próximo
 - Regression verde; acumular 7 noites `business-full`.
-- Discovery UX «registrar evento do dia» (frente 1 em `FOCO_ATUAL.md`).
+- Discovery formalizado: `docs/discovery/day-to-day-clinician-access.md` + `referral-growth-loop.md`.
+
+## [2026-09-11] - Discovery dia a dia + médico + indicação bilateral
+
+### Decisão
+- Prioridade produto: captura rápida familiar + «Levar na consulta» (link/QR/PDF) antes de portal médico completo.
+- Programa de indicação (*referral program*) documentado para debate — desconto paciente↔médico; regras vitalício vs enquanto ativo em aberto.
+
+### Artefatos
+- `docs/discovery/day-to-day-clinician-access.md`
+- `docs/discovery/referral-growth-loop.md`
+- Épicos roadmap: `family-day-to-day`, `referral-growth-loop`
 
 ## [2026-09-08] - CI: build API desbloqueado (51 erros tsc)
 

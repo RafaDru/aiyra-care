@@ -17,9 +17,10 @@
 
 | Jobs-to-be-done | Hoje no app | Gap |
 |-----------------|-------------|-----|
-| Ver contexto antes/durante consulta | Export PDF, share 48h, resumo determinístico | Portal «só leitura» sem login Aiyra |
+| Ver contexto antes/durante consulta | Export PDF, share 48h, resumo determinístico | Wizard «Levar na consulta» + QR; portal sem login |
 | Entender sequência consulta → exame | Timeline, `clinical_entity_links` | UX médico dedicada |
 | Receber atualização após sync | Share manual | Notificação opt-in ao médico |
+| Indicação paciente → médico assina | — | **Programa de indicação** — ver [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md) |
 
 **Pacote roadmap:** `b2b-segment-clinicians`.
 

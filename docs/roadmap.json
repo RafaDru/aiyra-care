@@ -1333,6 +1333,41 @@
       ]
     },
     {
+      "id": "family-day-to-day",
+      "category": "negocio",
+      "priority": "P1",
+      "title": "Dia a dia — captura rápida + levar na consulta",
+      "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
+      "status": "in_progress",
+      "statusLabel": "Discovery — MVP D1 wizard consulta",
+      "items": [
+        {
+          "id": "family-day-to-day-discovery",
+          "title": "Discovery UX + canais médico",
+          "status": "done",
+          "detail": "docs/discovery/day-to-day-clinician-access.md — captura, export tiers, fases D1–D5."
+        },
+        {
+          "id": "clinician-share-wizard",
+          "title": "Wizard «Levar na consulta» (link + QR + PDF)",
+          "status": "planned",
+          "detail": "Reusa clinical-export/shares; QR do shareUrl; CTA dashboard e perfil."
+        },
+        {
+          "id": "family-quick-capture",
+          "title": "«+ Registro rápido» global",
+          "status": "planned",
+          "detail": "Sheet: sintoma, medida, medicação, agenda, documento; lente paciente."
+        },
+        {
+          "id": "family-day-timeline",
+          "title": "Bloco «Hoje» na Carteira",
+          "status": "planned",
+          "detail": "Timeline do dia + atalhos de captura."
+        }
+      ]
+    },
+    {
       "id": "documentation-knowledge-base",
       "category": "tecnico",
       "priority": "P2",
@@ -2101,7 +2136,7 @@
           "id": "run-ops-alert-investigator",
           "title": "Investigador Cursor — alertas infra (Tier 0)",
           "status": "done",
-          "detail": "ops-alert-investigator-dispatch; auto em critical infra no checkAndDispatch; OpsAlertsTable + notas ops; estado em memória (Fase A); playbook docs/ops/automations/ops-alert-investigator.prompt.md."
+          "detail": "ops-alert-investigator-dispatch; auto critical infra; OpsAlertsTable; migration 065 ops_alert_incidents (PG); playbook docs/ops/automations/ops-alert-investigator.prompt.md."
         },
         {
           "id": "run-support-investigator-automation",
@@ -2511,6 +2546,13 @@
           "title": "Validação com 2–3 conversas (pediatra / família beta)",
           "status": "planned",
           "detail": "Ajustar mapa após feedback; não bloqueia desenvolvimento técnico."
+        },
+        {
+          "id": "referral-growth-loop",
+          "title": "Programa de indicação bilateral (paciente ↔ médico)",
+          "status": "planned",
+          "detail": "Debate: docs/discovery/referral-growth-loop.md — descontos, atribuição via link export, anti-fraude; revisão legal+fiscal.",
+          "reviewBadge": ["legal", "fiscal"]
         }
       ]
     },

@@ -18,6 +18,7 @@
 
 ### Produto e negócio
 
+- [`discovery/`](./discovery/) — discovery ativo (dia a dia, médico, indicação)
 - [`ECOSYSTEM.md`](./ECOSYSTEM.md) — personas, monetização
 - [`B2B_PARTNERS.md`](./B2B_PARTNERS.md) — parceiros B2B
 - [`FAMILY_ACCESS_MODEL.md`](./FAMILY_ACCESS_MODEL.md) — conta × família × perfil de saúde
