@@ -22,6 +22,8 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | Fase 4 Ava no CI | LLM real indisponível sem API keys | `AVA_TEST_MODE=1` na API + specs `ava-companion-smoke` / `ava-guardrail-smoke` |
 | Ava specs no project `smoke` | `testMatch: /smoke\.spec\.ts$/` casava `ava-*-smoke.spec.ts` | Restringir a `e2e/smoke.spec.ts` apenas |
 | Select Ant Design no Playwright | `role=option` e dropdown ficam hidden durante `ant-slide-up-appear` | `.ant-select-item-option` + `click({ force: true })`; não exigir `visible` no portal |
+| business-full 11× `Invalid login credentials` | Dois workflows E2E em paralelo (`regression` + `business-full`) — `qa:create-test-user` gira senha no mesmo Supabase | `concurrency: e2e-playwright-supabase` + senha fixa `QA_*_PASSWORD` no CI |
+| Select flake no onboarding (`.last()` no portal) | Opção de dropdown anterior ainda no DOM | Escopar em `.ant-select-dropdown:not(.ant-select-dropdown-hidden)` |
 | Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |
 | Imports duplicados (`PatientPgRepository`, `VaccinePgRepository`) | merge/copy-paste | `tsc` pega imediatamente |
 

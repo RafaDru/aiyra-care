@@ -10,6 +10,11 @@ on:
   pull_request:
     branches: [main]
 
+# Um job por vez — qa:create-test-user gira senha no Supabase compartilhado.
+concurrency:
+  group: e2e-playwright-supabase
+  cancel-in-progress: false
+
 jobs:
   secrets-gate:
     runs-on: ubuntu-latest
@@ -61,6 +66,8 @@ jobs:
       CONNECT_WORKER_EXTERNAL: 1
       SYNC_SCHEDULED_INTERVAL_MS: 0
       AVA_TEST_MODE: 1
+      QA_TEST_PASSWORD: ci-e2e-qa-test-v1
+      QA_ONBOARDING_PASSWORD: ci-e2e-qa-onboarding-v1
 
     steps:
       - uses: actions/checkout@v4

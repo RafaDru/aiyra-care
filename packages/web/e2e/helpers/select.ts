@@ -10,10 +10,12 @@ export async function selectAntOption(
   const root = scope ?? page
   const field = root.getByLabel(fieldLabel, { exact: true })
   await field.click()
-  const option = page
+  const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()
+  await dropdown.waitFor({ state: 'attached', timeout: 15_000 })
+  const option = dropdown
     .locator('.ant-select-item-option')
     .filter({ hasText: optionName })
-    .last()
+    .first()
   await option.waitFor({ state: 'attached', timeout: 15_000 })
   await option.click({ force: true })
 }
