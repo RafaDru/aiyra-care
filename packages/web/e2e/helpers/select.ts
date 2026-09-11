@@ -9,6 +9,7 @@ export async function selectAntOption(
 ) {
   const root = scope ?? page
   const field = root.getByLabel(fieldLabel, { exact: true })
+  await field.scrollIntoViewIfNeeded()
   await field.click()
   const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()
   await dropdown.waitFor({ state: 'attached', timeout: 15_000 })
@@ -17,5 +18,8 @@ export async function selectAntOption(
     .filter({ hasText: optionName })
     .first()
   await option.waitFor({ state: 'attached', timeout: 15_000 })
-  await option.click({ force: true })
+  // Portal Ant Design: opção pode estar fora do viewport no headless CI.
+  await option.evaluate((node) => {
+    ;(node as HTMLElement).click()
+  })
 }
