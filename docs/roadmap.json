@@ -589,8 +589,8 @@
       "priority": "P2",
       "title": "SUS — ConecteSUS e Caderneta",
       "summary": "Import guiado gov.br; sessão persistida (reimport sem browser). Próximo: Carteira silenciosa + Vacinas.",
-      "status": "in_progress",
-      "statusLabel": "Sessão gov.br OK",
+      "status": "done",
+      "statusLabel": "ConecteSUS + reimport + lembrete",
       "items": [
         {
           "id": "sus-import-core",
@@ -1577,8 +1577,8 @@
       "priority": "P2",
       "title": "Higienização de dados (estilo Google Photos)",
       "summary": "Detector na inserção; job semanal; prompt no login; merge só com confirmação. docs/DATA_HYGIENE.md.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "hygiene-candidates-table",
@@ -1821,8 +1821,8 @@
       "priority": "P2",
       "title": "Classificador de rótulos Amil (consulta/exame) + roteamento canônico",
       "summary": "Motor modular Hexagonal (port + engine + adapter) que classifica descrições de 'Atendimentos Realizados' e roteia consulta→medical_records, exame→exams. Reutilizável em integração e jobs. docs/CLASSIFICATION_ENGINE.md.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "classifier-port-engine",
@@ -1971,6 +1971,12 @@
           "title": "Playwright family-access-matrix",
           "status": "done",
           "detail": "Smoke UI /settings/family com seed matriz; 5 personas Supabase = épico seguinte (full matrix login)."
+        },
+        {
+          "id": "qa-ci-ava-e2e",
+          "title": "CI Ava smoke (AVA_TEST_MODE + Playwright)",
+          "status": "done",
+          "detail": "ava-companion-smoke + ava-guardrail-smoke na regression; AVA_TEST_MODE=1 nos workflows E2E."
         }
       ]
     },
@@ -2153,45 +2159,45 @@
       "priority": "P2",
       "title": "Analytics de negócio (agregados, sem PHI)",
       "summary": "Visão executiva e operacional: funis de ativação, retenção, uso por feature, volume de suporte, billing e saúde de integrações — cruzando product_events, support_reports, client_errors e Stripe. Complementa observability-platform (técnico) e product-analytics-optin (NLP opt-in). Primeira superfície: aba Negócio no console ops ou relatórios semanais.",
-      "status": "planned",
-      "statusLabel": "Planejado",
+      "status": "in_progress",
+      "statusLabel": "MVP aba Negócio no ops",
       "reviewBadge": ["legal", "business"],
       "items": [
         {
           "id": "biz-analytics-funnel-activation",
           "title": "Funil ativação (cadastro → sync → valor)",
-          "status": "planned",
-          "detail": "Cohortes por semana: signup, primeiro paciente, primeiro link convênio, primeiro sync OK, export clínico; só contagens agregadas em product_events."
+          "status": "done",
+          "detail": "MVP: contagens agregadas em GET /api/metrics → metrics.business.activation (contas, paciente, link, sync 7d, onboarding)."
         },
         {
           "id": "biz-analytics-retention",
           "title": "Retenção e engajamento (WAU/MAU)",
-          "status": "planned",
-          "detail": "Sessões autenticadas, retorno Carteira/Ava, churn proxy (conta sem evento 30d); sem mapa por usuário na UI pública."
+          "status": "done",
+          "detail": "MVP: WAU/MAU + WAU/MAU% + contas inativas 30d via product_events; sem mapa por usuário na UI."
         },
         {
           "id": "biz-analytics-support-sla",
           "title": "Métricas suporte (volume × categoria × SLA)",
-          "status": "planned",
-          "detail": "support_reports + analysis_status; tempo open→triaged→resolved; % com consent técnico; correlação com alertas ops."
+          "status": "done",
+          "detail": "MVP: support_reports (open/triaged/resolved 7d, média horas, consent %, analysis_status, categorias 30d)."
         },
         {
           "id": "biz-analytics-billing",
           "title": "Receita e conversão billing",
-          "status": "planned",
-          "detail": "Stripe: MRR, trial→paid, créditos manuscrito; eventos billing_* em product_events; dashboard interno."
+          "status": "done",
+          "detail": "MVP: billing_checkout_* 7d/30d, planos pagos (account_entitlements), compras/receita 30d (billing_purchases)."
         },
         {
           "id": "biz-analytics-integration-health",
           "title": "Saúde integrações por portal (negócio)",
-          "status": "planned",
-          "detail": "Taxa sync OK por portal × plano; tempo até primeiro dado; input para priorizar Connect vs suporte."
+          "status": "done",
+          "detail": "MVP: sync_jobs 7d por portal (total, OK, fail %, links distintos) em metrics.business.integrationHealth7d."
         },
         {
           "id": "biz-analytics-ops-console-tab",
           "title": "Aba «Negócio» no console ops",
-          "status": "planned",
-          "detail": "KPIs + gráficos 7d/30d; export CSV agregado; link para investigações Tier 0 quando SLA estourar.",
+          "status": "done",
+          "detail": "BusinessPanel.tsx + tab Negócio no OpsMetricsDashboard; KPIs ativação, engajamento, suporte, billing, integrações.",
           "reviewBadge": ["design"]
         },
         {

@@ -43,6 +43,7 @@ export class OpsMetricsService {
       stripeWebhookRejected1h,
       supportOpenCount,
       supportSubmitted24h,
+      business,
     ] = await Promise.all([
       this.repo.avaTokenPercentiles(24),
       this.repo.avaTokenPercentiles(24 * 7),
@@ -64,6 +65,7 @@ export class OpsMetricsService {
       this.repo.stripeWebhookRejectedCount1h(),
       this.repo.supportReportsOpenCount(),
       this.repo.supportReportsSubmitted24h(),
+      this.repo.businessAnalytics(),
     ])
 
     const featureHealth24h = buildFeatureHealthMatrix(
@@ -132,6 +134,7 @@ export class OpsMetricsService {
         openCount: supportOpenCount,
         submitted24h: supportSubmitted24h,
       },
+      business,
     }
 
     return { metrics, alerts: evaluateOpsAlerts(metrics) }

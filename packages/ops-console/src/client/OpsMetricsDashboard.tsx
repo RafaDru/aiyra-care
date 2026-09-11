@@ -12,11 +12,12 @@ import {
   SyncPanel,
 } from './ops-panels.js'
 import { SupportPanel } from './SupportPanel.js'
+import { BusinessPanel } from './BusinessPanel.js'
 import { OpsDrillDownProvider } from './ops-drill-down.js'
 
 const TAB_STORAGE_KEY = 'ops-console-active-tab'
 
-type TabKey = 'overview' | 'product' | 'support' | 'sync' | 'ava' | 'infra' | 'cost'
+type TabKey = 'overview' | 'business' | 'product' | 'support' | 'sync' | 'ava' | 'infra' | 'cost'
 
 function TabLabel({ text, count, alert }: { text: string; count?: number; alert?: boolean }) {
   return (
@@ -44,15 +45,15 @@ export function OpsMetricsDashboard({
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const fromUrl = new URLSearchParams(window.location.search).get('tab')
     if (
-      fromUrl === 'overview' || fromUrl === 'product' || fromUrl === 'support' || fromUrl === 'sync'
-      || fromUrl === 'ava' || fromUrl === 'infra' || fromUrl === 'cost'
+      fromUrl === 'overview' || fromUrl === 'business' || fromUrl === 'product' || fromUrl === 'support'
+      || fromUrl === 'sync' || fromUrl === 'ava' || fromUrl === 'infra' || fromUrl === 'cost'
     ) {
       return fromUrl
     }
     const saved = localStorage.getItem(TAB_STORAGE_KEY)
     if (
-      saved === 'overview' || saved === 'product' || saved === 'support' || saved === 'sync'
-      || saved === 'ava' || saved === 'infra' || saved === 'cost'
+      saved === 'overview' || saved === 'business' || saved === 'product' || saved === 'support'
+      || saved === 'sync' || saved === 'ava' || saved === 'infra' || saved === 'cost'
     ) {
       return saved
     }
@@ -82,6 +83,15 @@ export function OpsMetricsDashboard({
       children: (
         <div className="ops-tab-panel">
           <OverviewPanel data={data} onRefresh={onRefresh} />
+        </div>
+      ),
+    },
+    {
+      key: 'business',
+      label: <TabLabel text="Negócio" />,
+      children: (
+        <div className="ops-tab-panel">
+          <BusinessPanel data={data} />
         </div>
       ),
     },

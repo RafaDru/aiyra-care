@@ -716,6 +716,8 @@ export function InfraPanel({
     </div>
   )
 }
+
+function ProbeStatusInline({
   ok,
   latencyMs,
   error,
