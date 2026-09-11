@@ -1928,7 +1928,7 @@
       "title": "QA integrado — suites manuais + E2E CI",
       "summary": "Processo QA como analista: suite por feature, regressão main, execução paralela com massas isoladas. docs/testing/QA_PROCESS.md.",
       "status": "in_progress",
-      "statusLabel": "Onda 1 CI verde — nightly business-full (Fase 3) pendente",
+      "statusLabel": "Onda 1 gate PR + Onda 2 nightly CI — promover gate após 7 noites verdes",
       "items": [
         {
           "id": "qa-process-docs",
@@ -1945,8 +1945,8 @@
         {
           "id": "qa-seed-family-matrix",
           "title": "Seed QA matriz família (João/Maria/Francisco/Vitória)",
-          "status": "planned",
-          "detail": "packages/api/scripts/seed-qa-family-matrix.mjs + fixture family-matrix.json."
+          "status": "done",
+          "detail": "packages/api/scripts/seed-qa-family-matrix.mjs + fixture family-matrix.json; beforeAll family-access-matrix spec."
         },
         {
           "id": "qa-e2e-core-auth",
@@ -1963,14 +1963,14 @@
         {
           "id": "qa-ci-business-full",
           "title": "CI nightly business-full (Onda 2 Playwright)",
-          "status": "planned",
-          "detail": "ci-e2e-business-full.yml — 11 specs; nightly + artifacts; ver AUTOMATION_ROADMAP.md Fase 3."
+          "status": "done",
+          "detail": ".github/workflows/ci-e2e-business-full.yml — 11 specs; cron 05:00 UTC + workflow_dispatch; artifacts 14d; npm run test:e2e:ci:business-full."
         },
         {
           "id": "qa-e2e-family-matrix",
           "title": "Playwright family-access-matrix",
-          "status": "planned",
-          "detail": "Paralelo no CI; depende seed-qa-family-matrix."
+          "status": "done",
+          "detail": "Smoke UI /settings/family com seed matriz; 5 personas Supabase = épico seguinte (full matrix login)."
         }
       ]
     },

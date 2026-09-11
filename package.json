@@ -59,6 +59,8 @@
     "test:e2e:business-full": "cd packages/web && npm run test:e2e:business-full",
     "test:e2e:ci": "node scripts/ci-e2e-regression.mjs --skip-api-start",
     "test:e2e:ci:full": "node scripts/ci-e2e-regression.mjs",
+    "test:e2e:ci:business-full": "node scripts/ci-e2e-business-full.mjs --skip-api-start",
+    "test:e2e:ci:business-full:full": "node scripts/ci-e2e-business-full.mjs",
     "up:preview": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/up-preview.ps1",
     "move:workspace": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/move-to-workspace.ps1",
     "move:workspace:copy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/move-to-workspace.ps1 -CopyOnly",

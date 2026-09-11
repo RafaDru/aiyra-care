@@ -1,6 +1,6 @@
 # Automação QA — manual → Playwright → CI
 
-> **Última atualização:** 2026-09-08
+> **Última atualização:** 2026-09-11
 
 ## Fases
 
@@ -9,7 +9,7 @@
 | **0** | Suites manuais + `npm run qa:run` | — | ✅ |
 | **1** | Playwright Onda 1 local (`test:e2e:regression`) | — | ✅ |
 | **2** | **CI** `ci-e2e-regression.yml` — PG + API + Playwright Onda 1 | PR/push `main` | ✅ |
-| **3** | CI `business-full` (Onda 2) + artifacts | opcional nightly | ⬜ |
+| **3** | CI `business-full` (Onda 2) + artifacts | nightly + manual | ✅ |
 | **4** | Ava lane + mocks LLM | — | ⬜ |
 
 ## Fase 2 — workflow
@@ -58,12 +58,6 @@ npm run test:e2e:ci:full
 | `web` | Playwright **smoke** apenas (sem Supabase) |
 | `agents` | import Python |
 
-## Próximo (Fase 3)
-
-Ver seção completa abaixo.
-
----
-
 ## Fase 3 — CI `business-full` (Onda 2 Playwright)
 
 ### Objetivo
@@ -111,9 +105,9 @@ Mesma base (PG, migrate, legal, `qa:create-*-user`, API `:3010`), **mais**:
 
 **Fixture de arquivo:** `patient-documents-crud` precisa de PDF em `packages/web/e2e/fixtures/` (commitado no repo, sem PHI).
 
-### Workflow proposto
+### Workflow
 
-Arquivo sugerido: `.github/workflows/ci-e2e-business-full.yml`
+Arquivo: [`.github/workflows/ci-e2e-business-full.yml`](../../.github/workflows/ci-e2e-business-full.yml)
 
 ```yaml
 on:
@@ -139,7 +133,7 @@ on:
 | Artifacts | `playwright-report/`, `test-results/` | trace/screenshot só em falha |
 | `trace` | `retain-on-failure` no CI | debug sem inflar sucesso |
 
-Script local espelho: `scripts/ci-e2e-business-full.mjs` + `npm run test:e2e:ci:business-full`.
+Script local espelho: `scripts/ci-e2e-business-full.mjs` + `npm run test:e2e:ci:business-full` (API já no ar) ou `test:e2e:ci:business-full:full`.
 
 ### Secrets e ambiente
 

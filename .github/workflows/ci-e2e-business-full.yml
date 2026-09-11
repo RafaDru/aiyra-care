@@ -1,0 +1,135 @@
+# Fase 3 — lane business-full (Onda 1+2 Playwright): PG + API + 11 specs
+# Nightly + manual; não bloqueia PR (promover após 7 noites verdes — ver AUTOMATION_ROADMAP.md)
+# Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE, VITE_SUPABASE_ANON_KEY
+
+name: E2E business-full
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  secrets-gate:
+    runs-on: ubuntu-latest
+    outputs:
+      has_supabase: ${{ steps.check.outputs.has_supabase }}
+    steps:
+      - id: check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        run: |
+          if [ -n "$SUPABASE_URL" ]; then
+            echo "has_supabase=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_supabase=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Secrets Supabase ausentes — e2e-business-full ignorado."
+          fi
+
+  e2e-business-full:
+    needs: secrets-gate
+    if: needs.secrets-gate.outputs.has_supabase == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: aiyracare_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CI: true
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aiyracare_e2e
+      CRYPTO_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      VITE_API_URL: http://127.0.0.1:3010
+      PORT: 3010
+      CONNECT_WORKER_EXTERNAL: 1
+      SYNC_SCHEDULED_INTERVAL_MS: 0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare database and QA users
+        run: |
+          npm run migrate:dry-run
+          node packages/api/scripts/seed-legal-documents.mjs
+          npm run qa:create-test-user
+          npm run qa:create-onboarding-user
+
+      - name: Build API
+        working-directory: packages/api
+        run: npm run build
+
+      - name: Start API
+        working-directory: packages/api
+        run: |
+          nohup node dist/index.js > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 45); do
+            if curl -sf http://127.0.0.1:3010/health; then
+              exit 0
+            fi
+            if [ -f /tmp/api.pid ] && ! kill -0 "$(cat /tmp/api.pid)" 2>/dev/null; then
+              echo "API process exited before /health responded"
+              break
+            fi
+            sleep 2
+          done
+          echo "--- api.log (completo) ---"
+          cat /tmp/api.log 2>/dev/null || true
+          if [ -f /tmp/api.pid ]; then
+            echo "--- api pid ---"
+            cat /tmp/api.pid
+            ps -p "$(cat /tmp/api.pid)" -o pid,cmd 2>/dev/null || true
+          fi
+          exit 1
+
+      - name: Install Playwright Chromium
+        working-directory: packages/web
+        run: npx playwright install chromium --with-deps
+
+      - name: Playwright business-full (Onda 1+2)
+        run: npm run test:e2e:business-full
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-business-full
+          path: packages/web/playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-business-full
+          path: packages/web/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
