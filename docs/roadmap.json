@@ -1928,7 +1928,7 @@
       "title": "QA integrado — suites manuais + E2E CI",
       "summary": "Processo QA como analista: suite por feature, regressão main, execução paralela com massas isoladas. docs/testing/QA_PROCESS.md.",
       "status": "in_progress",
-      "statusLabel": "Docs + CLI manual — automação CI em andamento",
+      "statusLabel": "Onda 1 CI verde — nightly business-full (Fase 3) pendente",
       "items": [
         {
           "id": "qa-process-docs",
