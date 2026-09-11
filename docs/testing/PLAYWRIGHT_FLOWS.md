@@ -56,8 +56,8 @@ Legenda **status:** ✅ done · 🟡 partial · ⬜ planned · 🚫 blocked · �
 | **2** | `integrations-link-sync` | `e2e/suites/integrations-link-sync.spec.ts` | qa.e2e | `core-demo` | ✅ | Bradesco vínculo manual |
 | **2** | `hygiene-dedup-ui` | `e2e/suites/hygiene-dedup-ui.spec.ts` | qa.e2e | seed hygiene | ✅ | `qa:seed-hygiene-candidate` |
 | **2** | `support-user-report` | `e2e/suites/support-user-report.spec.ts` | qa.e2e | — | ✅ | Modal reportar |
-| **3** | `ava-companion-smoke` | `e2e/suites/ava-companion-smoke.spec.ts` | qa.e2e | `core-demo` | ⬜ | Mock LLM futuro |
-| **3** | `ava-guardrail-smoke` | `e2e/suites/ava-guardrail-smoke.spec.ts` | qa.e2e | — | ⬜ | Off-topic sem LLM |
+| **3** | `ava-companion-smoke` | `e2e/suites/ava-companion-smoke.spec.ts` | qa.e2e | `core-demo` | ✅ | `AVA_TEST_MODE=1` |
+| **3** | `ava-guardrail-smoke` | `e2e/suites/ava-guardrail-smoke.spec.ts` | qa.e2e | — | ✅ | Off-topic sem LLM |
 | **3** | `ava-conversation-crud` | `e2e/suites/ava-conversation-crud.spec.ts` | qa.e2e | — | ⬜ | |
 | **—** | `compliance-gate-ui` | `e2e/suites/compliance-gate.spec.ts` | fresh user | — | 👁 | Checkbox Ant Design — manual |
 | **—** | `settings-account` | `e2e/suites/settings-account.spec.ts` | qa.e2e | — | ⬜ | Perfil cuidador |

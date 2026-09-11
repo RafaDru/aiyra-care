@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import { selectAntOption } from './select'
 
 export async function dismissCookieBanner(page: Page) {
   const btn = page.getByRole('button', { name: 'Entendi' })
@@ -26,8 +27,7 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
   await dismissCookieBanner(page)
   await page.getByLabel('Nome completo').fill(profile.name)
   await fillMaskedDate(page, 'Data de nascimento', profile.birthDate)
-  await page.getByLabel('Sexo').click()
-  await page.getByTitle(profile.genderLabel).click()
+  await selectAntOption(page, 'Sexo', profile.genderLabel)
   await page.getByLabel('CPF', { exact: true }).fill(profile.cpf)
   await page.getByRole('button', { name: 'Concluir cadastro' }).click()
   await page.waitForURL(/\/$/, { timeout: 25_000 })

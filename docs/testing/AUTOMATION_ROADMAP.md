@@ -174,3 +174,16 @@ Futuro (matriz família **completa**, 5 logins distintos): criar personas Supaba
 
 Ver [`PLAYWRIGHT_FLOWS.md`](./PLAYWRIGHT_FLOWS.md).
 
+---
+
+## Fase 4 — Ava E2E (Onda 3)
+
+| Entrega | Status |
+|---------|--------|
+| `AVA_TEST_MODE=1` na API (`ava-test-mode.ts`) | ✅ |
+| Specs `ava-companion-smoke`, `ava-guardrail-smoke` | ✅ |
+| Inclusão na regression + business-full | ✅ |
+| Assert SSE estrutural | ⬜ futuro |
+
+Pré-requisitos CI: mesmos secrets da Fase 2 + `AVA_TEST_MODE=1` no job API.
+

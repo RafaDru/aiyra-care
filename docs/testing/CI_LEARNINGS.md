@@ -18,6 +18,8 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | `api.log` só `{"level":50,...}` sem mensagem | `logMethod` sanitizava `Error` → `{}`; `app.log.error(err)` perdia stack | Preservar `Error` no hook; `console.error` no catch de startup |
 | API morre no CI sem `GROQ_API_KEY` | `groq-llm.adapter.ts` fazia `new Groq()` no import (via Ava → scraper agent) | Inicialização lazy como em `llm-chat.providers.ts`; Groq só ao chamar LLM |
 | Fase 3 business-full no CI | Mesma stack da Fase 2; 11 specs ~15 min com build Vite | `ci-e2e-business-full.yml` nightly; não gate PR até 7 noites verdes |
+| Login E2E timeout em `/login` | Primeiro login sem `legal_document_acceptances` → `/compliance/accept`; Select Ant Design sem `title` | `acceptComplianceIfPresent` no helper auth; `getByRole('option')` para Sexo |
+| Fase 4 Ava no CI | LLM real indisponível sem API keys | `AVA_TEST_MODE=1` na API + specs `ava-companion-smoke` / `ava-guardrail-smoke` |
 | Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |
 | Imports duplicados (`PatientPgRepository`, `VaccinePgRepository`) | merge/copy-paste | `tsc` pega imediatamente |
 

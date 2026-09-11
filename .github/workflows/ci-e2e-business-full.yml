@@ -59,6 +59,7 @@ jobs:
       PORT: 3010
       CONNECT_WORKER_EXTERNAL: 1
       SYNC_SCHEDULED_INTERVAL_MS: 0
+      AVA_TEST_MODE: 1
 
     steps:
       - uses: actions/checkout@v4

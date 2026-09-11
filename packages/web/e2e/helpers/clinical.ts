@@ -85,7 +85,7 @@ export async function uploadClinicalDocument(page: Page, patientId: string) {
   const dialog = page.getByRole('dialog', { name: 'Adicionar Arquivo' })
   await dialog.waitFor({ state: 'visible' })
   await dialog.locator('.ant-select').click()
-  await page.getByTitle('Outro').click()
+  await page.getByRole('option', { name: 'Outro' }).click()
   await dialog.locator('input[type="file"]').setInputFiles(uploadFixture)
   await dialog.getByRole('button', { name: 'Salvar' }).click()
   await dialog.waitFor({ state: 'hidden', timeout: 15_000 })

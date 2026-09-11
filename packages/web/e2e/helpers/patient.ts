@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { uniqueQaCpf } from './fixtures'
+import { selectAntOption } from './select'
 import { hideAvaDock } from './ui'
 
 export type CreatePatientInput = {
@@ -28,8 +29,7 @@ export async function createPatientFromDashboard(page: Page, input: CreatePatien
   await dialog.getByLabel('Nome', { exact: true }).fill(input.name)
   await fillMaskedDate(page, 'Data de Nascimento', input.birthDate)
   if (input.genderLabel) {
-    await dialog.getByLabel('Sexo').click()
-    await page.getByTitle(input.genderLabel).click()
+    await selectAntOption(page, 'Sexo', input.genderLabel, dialog)
   }
   const cpf = input.cpf ?? uniqueQaCpf()
   await dialog.getByLabel('CPF', { exact: true }).fill(cpf)

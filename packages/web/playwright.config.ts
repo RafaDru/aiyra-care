@@ -32,6 +32,17 @@ export default defineConfig({
   workers: 1,
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
+  projects: process.env.CI
+    ? [
+        { name: 'smoke', testMatch: /smoke\.spec\.ts$/ },
+        {
+          name: 'e2e',
+          testMatch: /\.spec\.ts$/,
+          testIgnore: /smoke\.spec\.ts$/,
+          dependencies: ['smoke'],
+        },
+      ]
+    : undefined,
   reporter: process.env.CI
     ? [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]]
     : 'list',

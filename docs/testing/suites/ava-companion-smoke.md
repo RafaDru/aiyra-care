@@ -21,3 +21,9 @@ Escopo: [`AVA_QA_SCOPE.md`](../AVA_QA_SCOPE.md).
 ## Não avaliar
 
 - Correção clínica do texto — só presença de resposta.
+
+## QA automatizado
+
+- Playwright: `packages/web/e2e/suites/ava-companion-smoke.spec.ts`
+- CI: `AVA_TEST_MODE=1` no workflow `ci-e2e-regression.yml`
+- `npm run qa:run -- --suite ava-companion-smoke` (manual)

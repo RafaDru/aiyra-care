@@ -6,8 +6,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "test:e2e": "playwright test",
-    "test:e2e:regression": "playwright test smoke.spec.ts onboarding.spec.ts suites/core-patient-crud.spec.ts",
-    "test:e2e:business-full": "playwright test smoke.spec.ts onboarding.spec.ts suites/core-patient-crud.spec.ts suites/patient-exams-crud.spec.ts suites/patient-medications-crud.spec.ts suites/patient-documents-crud.spec.ts suites/integrations-link-sync.spec.ts suites/support-user-report.spec.ts suites/family-access-matrix.spec.ts suites/hygiene-dedup-ui.spec.ts",
+    "test:e2e:regression": "playwright test smoke.spec.ts onboarding.spec.ts suites/core-patient-crud.spec.ts suites/ava-companion-smoke.spec.ts suites/ava-guardrail-smoke.spec.ts",
+    "test:e2e:ava": "playwright test suites/ava-companion-smoke.spec.ts suites/ava-guardrail-smoke.spec.ts",
+    "test:e2e:business-full": "playwright test smoke.spec.ts onboarding.spec.ts suites/core-patient-crud.spec.ts suites/patient-exams-crud.spec.ts suites/patient-medications-crud.spec.ts suites/patient-documents-crud.spec.ts suites/integrations-link-sync.spec.ts suites/support-user-report.spec.ts suites/family-access-matrix.spec.ts suites/hygiene-dedup-ui.spec.ts suites/ava-companion-smoke.spec.ts suites/ava-guardrail-smoke.spec.ts",
     "clean:stale-js": "node -e \"const fs=require('fs');const p=require('path');function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.js'))fs.unlinkSync(f);}}walk('src');\""
   },
   "dependencies": {

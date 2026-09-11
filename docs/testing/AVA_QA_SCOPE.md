@@ -48,10 +48,11 @@ npm run qa:run-all -- --lane ava
 
 ---
 
-## Automação futura
+## Automação CI (Fase 4)
 
-- Mock LLM em CI para resposta fixa (`AVA_TEST_MODE=1`).
-- Assert em estrutura SSE (`activity` → `complete`), não no texto.
-- Guardrail: assert HTTP + payload sem `llm_usage` quando off-topic.
+- `AVA_TEST_MODE=1` na API — resposta fixa para mensagens de saúde (`ava-test-mode.ts`).
+- Playwright: `e2e/suites/ava-companion-smoke.spec.ts`, `ava-guardrail-smoke.spec.ts`.
+- Guardrail off-topic continua sem LLM; assert no texto de redirecionamento.
+- SSE (`activity` → `complete`) — assert estrutural futuro.
 
 Ver [`AUTOMATION_ROADMAP.md`](./AUTOMATION_ROADMAP.md) Fase 4.

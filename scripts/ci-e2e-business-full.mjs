@@ -28,6 +28,7 @@ process.env.VITE_SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? process.env.SUP
 process.env.VITE_API_URL = process.env.VITE_API_URL ?? 'http://127.0.0.1:3010'
 process.env.PORT = process.env.PORT ?? '3010'
 process.env.CI = process.env.CI ?? '1'
+process.env.AVA_TEST_MODE = process.env.AVA_TEST_MODE ?? '1'
 
 function run(label, command, args, opts = {}) {
   console.log(`\n=== ${label} ===`)

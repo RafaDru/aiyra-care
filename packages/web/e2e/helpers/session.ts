@@ -11,6 +11,7 @@ const repoRoot = resolve(process.cwd(), '..', '..')
 
 export type EnsureSessionOptions = {
   keepHygienePrompt?: boolean
+  keepAvaDock?: boolean
 }
 
 export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions) {
@@ -37,7 +38,9 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   }
 
   await novoPaciente.waitFor({ state: 'visible', timeout: 15_000 })
-  await hideAvaDock(page)
+  if (!opts?.keepAvaDock) {
+    await hideAvaDock(page)
+  }
   if (!opts?.keepHygienePrompt) {
     await dismissHygienePrompt(page)
   }
