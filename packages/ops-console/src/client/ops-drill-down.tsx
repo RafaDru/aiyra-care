@@ -61,6 +61,13 @@ const CATEGORY_LABEL: Record<string, string> = {
   other: 'Outro',
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  open: 'Aberto',
+  triaged: 'Triado',
+  resolved: 'Resolvido',
+  closed: 'Fechado',
+}
+
 function JsonBlock({ value }: { value: unknown }) {
   if (value == null) return <Text type="secondary">—</Text>
   return (
@@ -73,10 +80,19 @@ function JsonBlock({ value }: { value: unknown }) {
 function DrillAlertDetail({
   alert,
   triage,
+  analysis,
 }: {
   alert: OpsAlert
   triage?: OpsAlertTriageRow
+  analysis?: import('./ops.types.js').OpsAlertAnalysisRecord
 }) {
+  const analysisLabel: Record<string, string> = {
+    none: 'Sem análise',
+    pending: 'Pendente',
+    in_progress: 'Em análise',
+    completed: 'Concluída',
+    failed: 'Falhou',
+  }
   return (
     <>
       <Descriptions size="small" column={1} bordered>
@@ -86,6 +102,22 @@ function DrillAlertDetail({
         <Descriptions.Item label="Categoria">{alert.category}</Descriptions.Item>
         <Descriptions.Item label="Mensagem">{alert.message}</Descriptions.Item>
         <Descriptions.Item label="ID"><Text code>{alert.id}</Text></Descriptions.Item>
+        {analysis && (
+          <Descriptions.Item label="Análise">
+            {analysisLabel[analysis.analysisStatus] ?? analysis.analysisStatus}
+          </Descriptions.Item>
+        )}
+        {analysis?.operatorNotes && (
+          <Descriptions.Item label="Notas ops">{analysis.operatorNotes}</Descriptions.Item>
+        )}
+        {analysis?.analysisSummary && (
+          <Descriptions.Item label="Resumo">{analysis.analysisSummary}</Descriptions.Item>
+        )}
+        {analysis?.analysisLastError && (
+          <Descriptions.Item label="Erro análise">
+            <Text type="danger">{analysis.analysisLastError}</Text>
+          </Descriptions.Item>
+        )}
         {triage && (
           <>
             <Descriptions.Item label="Pager">
@@ -189,7 +221,13 @@ function DrillContent({ drill, data }: { drill: OpsDrillDown; data: OpsMetricsRe
       return <DrillAlertsList alerts={data.alerts} triage={data.triage} filter={drill.filter} />
 
     case 'alert':
-      return <DrillAlertDetail alert={drill.alert} triage={drill.triage} />
+      return (
+        <DrillAlertDetail
+          alert={drill.alert}
+          triage={drill.triage}
+          analysis={data.alertAnalysis?.[drill.alert.id]}
+        />
+      )
 
     case 'sync_stuck':
       return (
@@ -473,6 +511,20 @@ function DrillContent({ drill, data }: { drill: OpsDrillDown; data: OpsMetricsRe
 
     case 'support_report': {
       const row = drill.row
+      const analysisLabel: Record<string, string> = {
+        none: 'Sem análise',
+        pending: 'Pendente',
+        in_progress: 'Em análise',
+        completed: 'Concluída',
+        failed: 'Falhou',
+      }
+      const analysisColor: Record<string, string> = {
+        none: 'default',
+        pending: 'gold',
+        in_progress: 'processing',
+        completed: 'success',
+        failed: 'error',
+      }
       return (
         <>
           {row.descriptionPreview && (
@@ -480,6 +532,40 @@ function DrillContent({ drill, data }: { drill: OpsDrillDown; data: OpsMetricsRe
           )}
           <Descriptions size="small" column={1} bordered>
             <Descriptions.Item label="ID"><Text code>{row.id}</Text></Descriptions.Item>
+            <Descriptions.Item label="Fila">
+              <Tag>{STATUS_LABEL[row.status] ?? row.status}</Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Análise">
+              <Tag color={analysisColor[row.analysisStatus]}>
+                {analysisLabel[row.analysisStatus] ?? row.analysisStatus}
+              </Tag>
+            </Descriptions.Item>
+            {row.analysisRequestedAt && (
+              <Descriptions.Item label="Análise solicitada">
+                {new Date(row.analysisRequestedAt).toLocaleString('pt-BR')}
+              </Descriptions.Item>
+            )}
+            {row.analysisCompletedAt && (
+              <Descriptions.Item label="Análise concluída">
+                {new Date(row.analysisCompletedAt).toLocaleString('pt-BR')}
+              </Descriptions.Item>
+            )}
+            {row.operatorNotes && (
+              <Descriptions.Item label="Notas do operador">{row.operatorNotes}</Descriptions.Item>
+            )}
+            {row.analysisSummary && (
+              <Descriptions.Item label="Resumo análise">{row.analysisSummary}</Descriptions.Item>
+            )}
+            {row.analysisArtifactPath && (
+              <Descriptions.Item label="Artefato">
+                <Text code>{row.analysisArtifactPath}</Text>
+              </Descriptions.Item>
+            )}
+            {row.analysisLastError && (
+              <Descriptions.Item label="Erro análise">
+                <Text type="danger">{row.analysisLastError}</Text>
+              </Descriptions.Item>
+            )}
             <Descriptions.Item label="Categoria">{CATEGORY_LABEL[row.category] ?? row.category}</Descriptions.Item>
             <Descriptions.Item label="Rota">{row.route ?? '—'}</Descriptions.Item>
             <Descriptions.Item label="Conta"><Text code>{row.accountId}</Text></Descriptions.Item>

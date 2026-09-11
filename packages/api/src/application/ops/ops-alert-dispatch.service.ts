@@ -11,6 +11,7 @@ import {
   sanitizeOpsToastText,
   type OpsAlertToast,
 } from '../../domain/ops/ops-alert-toast.js'
+import type { OpsAlertAnalysisService } from './ops-alert-analysis.service.js'
 
 const DEFAULT_COOLDOWN_MS = 30 * 60 * 1000
 
@@ -85,7 +86,10 @@ export function buildOpsAlertDispatchPayload(
 export class OpsAlertDispatchService {
   private readonly lastSentAt = new Map<string, number>()
 
-  constructor(private readonly metrics: OpsMetricsService) {}
+  constructor(
+    private readonly metrics: OpsMetricsService,
+    private readonly alertAnalysis?: OpsAlertAnalysisService,
+  ) {}
 
   async checkAndDispatch(): Promise<{
     checkedAt: string
@@ -95,6 +99,7 @@ export class OpsAlertDispatchService {
     dispatched: boolean
     webhookConfigured: boolean
     triage: OpsAlertTriageRow[]
+    investigatorDispatched?: number
   }> {
     const checkedAt = new Date().toISOString()
     const webhook = process.env.OPS_ALERT_WEBHOOK_URL?.trim()
@@ -113,6 +118,9 @@ export class OpsAlertDispatchService {
     })
 
     if (!webhook || toSend.length === 0) {
+      const investigatorDispatched = this.alertAnalysis
+        ? await this.alertAnalysis.maybeAutoInvestigate(severityFiltered, triage, checkedAt)
+        : 0
       return {
         checkedAt,
         alertCount: severityFiltered.length,
@@ -121,6 +129,7 @@ export class OpsAlertDispatchService {
         dispatched: false,
         webhookConfigured: Boolean(webhook),
         triage,
+        investigatorDispatched,
       }
     }
 
@@ -138,6 +147,10 @@ export class OpsAlertDispatchService {
       this.lastSentAt.set(alert.id, now)
     }
 
+    const investigatorDispatched = this.alertAnalysis
+      ? await this.alertAnalysis.maybeAutoInvestigate(toSend, triage, checkedAt)
+      : 0
+
     return {
       checkedAt,
       alertCount: severityFiltered.length,
@@ -146,6 +159,7 @@ export class OpsAlertDispatchService {
       dispatched: true,
       webhookConfigured: true,
       triage,
+      investigatorDispatched,
     }
   }
 }

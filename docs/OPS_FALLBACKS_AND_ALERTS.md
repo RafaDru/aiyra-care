@@ -78,6 +78,15 @@ Modo padrão `OPS_ALERTS_DISPATCH_MODE=human_required`:
 - **Critical** → `humanRequired` → webhook (se passou severidade + cooldown).
 - **Warnings auto** (sem pager): `llm_quota_spike`, `internal_llm_budget_exhausted`, `infra_*_slow`, `infra_neo4j_down`, `sync_fail_rate_*` em warning.
 
+### Investigador Cursor (Fase A — memória)
+
+Alertas **infra critical** com pager humano disparam agente Tier 0 no «Verificar e acionar» (paralelo ao toast), se:
+
+- `OPS_ALERT_INVESTIGATOR_AUTO` ≠ `0` (default on)
+- `CURSOR_OPS_ALERT_AUTOMATION_WEBHOOK_URL` ou `CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL` + key configurados
+
+Console: coluna **Análise** + botões **Analisar** / **Concluir** (estado em memória do ops-console — some ao reiniciar). Playbook: `docs/ops/automations/ops-alert-investigator.prompt.md`.
+
 `OPS_ALERTS_MIN_SEVERITY=critical` (padrão) filtra warnings antes do dispatch.
 
 ## Fallbacks dormentes (runtime degradado)

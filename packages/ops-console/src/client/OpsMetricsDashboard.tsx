@@ -81,7 +81,7 @@ export function OpsMetricsDashboard({
       label: <TabLabel text="Visão geral" count={badges.overview} alert />,
       children: (
         <div className="ops-tab-panel">
-          <OverviewPanel data={data} />
+          <OverviewPanel data={data} onRefresh={onRefresh} />
         </div>
       ),
     },
@@ -130,7 +130,7 @@ export function OpsMetricsDashboard({
       label: <TabLabel text="Infra" count={badges.infra} alert={badges.infra > 0} />,
       children: (
         <div className="ops-tab-panel">
-          <InfraPanel data={data} runtime={runtime} stackSlot={stackSlot} />
+          <InfraPanel data={data} runtime={runtime} stackSlot={stackSlot} onRefresh={onRefresh} />
         </div>
       ),
     },

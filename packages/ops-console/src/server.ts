@@ -21,6 +21,8 @@ import { RuntimeDegradedService } from '../../api/src/application/ops/runtime-de
 import { RuntimeDegradedPgRepository } from '../../api/src/infrastructure/persistence/runtime-degraded.pg.repository.js'
 import { SupportReportPgRepository } from '../../api/src/infrastructure/persistence/support-report.pg.repository.js'
 import { OpsSupportReportService } from '../../api/src/application/ops/ops-support-report.service.js'
+import { OpsAlertAnalysisService } from '../../api/src/application/ops/ops-alert-analysis.service.js'
+import { getOpsAlertAnalysisMemoryStore } from '../../api/src/application/ops/ops-alert-analysis-memory.store.js'
 import { runOpsProbe } from '../../api/src/application/ops/ops-probe.service.js'
 import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe-artifact.js'
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
@@ -64,7 +66,8 @@ const metricsService = new OpsMetricsService(
   ),
 )
 const runtimeService = new RuntimeDegradedService(new RuntimeDegradedPgRepository(pool))
-const dispatchService = new OpsAlertDispatchService(metricsService)
+const alertAnalysisService = new OpsAlertAnalysisService(getOpsAlertAnalysisMemoryStore())
+const dispatchService = new OpsAlertDispatchService(metricsService, alertAnalysisService)
 const supportReportService = new OpsSupportReportService(new SupportReportPgRepository(pool))
 
 async function runProbeCycle(): Promise<void> {
@@ -131,7 +134,8 @@ async function main() {
     const payload = await metricsService.getMetrics()
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
-    return { ...payload, runtime, triage }
+    const alertAnalysis = alertAnalysisService.getAll()
+    return { ...payload, runtime, triage, alertAnalysis }
   })
 
   fastify.post('/api/alerts/check', async () => {
@@ -144,8 +148,47 @@ async function main() {
       metrics: metricsPayload.metrics,
       alerts: metricsPayload.alerts,
     })
-    return result
+    return { ...result, alertAnalysis: alertAnalysisService.getAll() }
   })
+
+  fastify.post<{ Params: { id: string }; Body: { operatorNotes?: string } }>(
+    '/api/ops-alerts/:id/analyze',
+    async (req, reply) => {
+      const metricsPayload = await metricsService.getMetrics()
+      const alert = metricsPayload.alerts.find((a) => a.id === req.params.id)
+      if (!alert) {
+        return reply.status(404).send({ error: 'not_found', message: 'Alerta não ativo no momento' })
+      }
+      const triage = triageOpsAlerts(metricsPayload.alerts).find((t) => t.alertId === alert.id)
+      const result = await alertAnalysisService.requestAnalysis(alert, {
+        triage,
+        operatorNotes: req.body?.operatorNotes,
+        trigger: 'manual',
+        checkedAt: new Date().toISOString(),
+        respectCooldown: false,
+      })
+      if (!result.ok) {
+        const code = result.error === 'cooldown' ? 429 : 503
+        return reply.status(code).send({ error: result.error, message: result.message })
+      }
+      return { ...result, alertAnalysis: alertAnalysisService.getForAlert(alert.id) }
+    },
+  )
+
+  fastify.post<{
+    Params: { id: string }
+    Body: { analysisSummary?: string; analysisArtifactPath?: string }
+  }>(
+    '/api/ops-alerts/:id/complete-analysis',
+    async (req, reply) => {
+      const ok = alertAnalysisService.completeAnalysis(req.params.id, {
+        analysisSummary: req.body?.analysisSummary,
+        analysisArtifactPath: req.body?.analysisArtifactPath,
+      })
+      if (!ok) return reply.status(400).send({ error: 'invalid_payload' })
+      return { ok: true, alertAnalysis: alertAnalysisService.getForAlert(req.params.id) }
+    },
+  )
 
   fastify.get('/api/stack/status', async () => getStackStatus())
 
@@ -184,6 +227,36 @@ async function main() {
       }
       const ok = await supportReportService.updateStatus(req.params.id, status)
       if (!ok) return reply.status(404).send({ error: 'not_found' })
+      return { ok: true }
+    },
+  )
+
+  fastify.post<{ Params: { id: string }; Body: { operatorNotes?: string } }>(
+    '/api/support-reports/:id/analyze',
+    async (req, reply) => {
+      const result = await supportReportService.requestAnalysis(
+        req.params.id,
+        req.body?.operatorNotes,
+      )
+      if (!result.ok) {
+        const code = result.error === 'not_found' ? 404 : 503
+        return reply.status(code).send({ error: result.error, message: result.message })
+      }
+      return result
+    },
+  )
+
+  fastify.post<{
+    Params: { id: string }
+    Body: { analysisSummary?: string; analysisArtifactPath?: string }
+  }>(
+    '/api/support-reports/:id/complete-analysis',
+    async (req, reply) => {
+      const ok = await supportReportService.completeAnalysis(req.params.id, {
+        analysisSummary: req.body?.analysisSummary,
+        analysisArtifactPath: req.body?.analysisArtifactPath,
+      })
+      if (!ok) return reply.status(400).send({ error: 'invalid_payload' })
       return { ok: true }
     },
   )

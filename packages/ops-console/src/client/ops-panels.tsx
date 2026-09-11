@@ -36,6 +36,7 @@ import { OpsKpiCard, OpsKpiGrid } from './components/OpsKpiCard.js'
 import { resolveClientFeatureArea, resolveClientFeatureLabel } from './ops-feature-catalog.js'
 import { formatBrl, formatUsdCents } from './ops-format.js'
 import { useOpsDrillDown } from './ops-drill-down.js'
+import { OpsAlertsTable } from './OpsAlertsTable.js'
 import { AIYRACARE_TOKENS } from './theme/ops-theme.js'
 
 export { formatBrl, formatUsdCents } from './ops-format.js'
@@ -116,7 +117,13 @@ function FeatureCatalogMap({
   )
 }
 
-export function OverviewPanel({ data }: { data: OpsMetricsResponse }) {
+export function OverviewPanel({
+  data,
+  onRefresh,
+}: {
+  data: OpsMetricsResponse
+  onRefresh?: () => void | Promise<void>
+}) {
   const { open } = useOpsDrillDown()
   const metrics = data.metrics
   const alerts = data.alerts
@@ -215,51 +222,7 @@ export function OverviewPanel({ data }: { data: OpsMetricsResponse }) {
         </div>
       </div>
 
-      <OpsPanel title="Alertas derivados" description="Triagem pager: humano vs automático. Clique na linha para detalhes.">
-        {alerts.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum alerta no momento" />
-        ) : (
-          <Table<OpsAlert>
-            size="small"
-            rowKey="id"
-            pagination={false}
-            dataSource={alerts}
-            onRow={(row) => ({
-              className: 'ops-row-clickable',
-              onClick: () => open({
-                kind: 'alert',
-                alert: row,
-                triage: data.triage?.find((x) => x.alertId === row.id),
-              }),
-            })}
-            columns={[
-              {
-                title: 'Pager',
-                key: 'human',
-                width: 72,
-                render: (_: unknown, row: OpsAlert) => {
-                  const t = data.triage?.find((x) => x.alertId === row.id)
-                  return t?.humanRequired ? <Tag color="error">humano</Tag> : <Tag>auto</Tag>
-                },
-              },
-              {
-                title: 'Severidade',
-                dataIndex: 'severity',
-                width: 100,
-                render: (s: OpsAlert['severity']) => <Tag color={SEVERITY_COLOR[s]}>{s}</Tag>,
-              },
-              { title: 'Categoria', dataIndex: 'category', width: 90 },
-              { title: 'Mensagem', dataIndex: 'message' },
-              {
-                title: 'ID',
-                dataIndex: 'id',
-                width: 160,
-                render: (id: string) => <Text code>{id}</Text>,
-              },
-            ]}
-          />
-        )}
-      </OpsPanel>
+      <OpsAlertsTable data={data} onRefresh={onRefresh} />
     </div>
   )
 }
@@ -631,10 +594,12 @@ export function InfraPanel({
   data,
   runtime,
   stackSlot,
+  onRefresh,
 }: {
   data: OpsMetricsResponse
   runtime?: RuntimeDegradedView
   stackSlot?: ReactNode
+  onRefresh?: () => void | Promise<void>
 }) {
   const { open } = useOpsDrillDown()
   const metrics = data.metrics
@@ -740,11 +705,17 @@ export function InfraPanel({
           </Descriptions>
         </OpsPanel>
       )}
+
+      <OpsAlertsTable
+        data={data}
+        onRefresh={onRefresh}
+        filter={{ category: 'infra' }}
+        title="Alertas de infra"
+        description="Critical infra dispara agente automaticamente no «Verificar e acionar» (se webhook configurado)."
+      />
     </div>
   )
 }
-
-function ProbeStatusInline({
   ok,
   latencyMs,
   error,

@@ -23,9 +23,7 @@ export function OpsShell({
   return (
     <div className="ops-shell">
       {deploymentTier && (
-        <div className="ops-env-banner" aria-hidden={false}>
-          <OpsEnvironmentBadge tier={deploymentTier} />
-        </div>
+        <OpsEnvironmentBadge tier={deploymentTier} />
       )}
       <header className="ops-header">
         <div className="ops-header-brand">

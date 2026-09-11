@@ -21,14 +21,31 @@ Telemetria paralela: `product_events.support_report_submitted` com `properties.k
 ## Fluxo ops (hoje)
 
 ```text
-Usuário → POST /support/reports → PG support_reports (open)
+Usuário → POST /support/reports → PG support_reports (open, analysis_status=none|in_progress)
                 ↓
         support_report_submitted (product_events)
                 ↓
-        POST SUPPORT_REPORT_WEBHOOK_URL (payload sem PHI)
+        POST SUPPORT_REPORT_WEBHOOK_URL (toast [Suporte])
+        POST CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL (opcional — Tier 0)
                 ↓
-        Console :3013/:3023 → aba Suporte (fila open + triagem)
+        Console :3013/:3023 → aba Suporte
+          · coluna Análise (none | pending | in_progress | completed | failed)
+          · Analisar + notas ops → re-dispara agente Cursor
+          · Concluir → grava resumo/artefato
+          · Triar / Resolver → fila humana (independente da análise)
 ```
+
+### Status de análise (migration **064**)
+
+| `analysis_status` | Significado |
+|-------------------|-------------|
+| `none` | Webhook Cursor não configurado ou nunca disparado |
+| `pending` | Falhou no auto-dispatch — use **Analisar** manual |
+| `in_progress` | Agente disparado — aguarda `docs/ops/investigations/*.md` |
+| `completed` | Operador marcou conclusão (`analysis_summary` / artefato) |
+| `failed` | Último dispatch falhou (`analysis_last_error`) |
+
+`operator_notes` — contexto **ops** (sem PHI) enviado ao agente no payload `operatorNotes`.
 
 ---
 

@@ -40,6 +40,24 @@ export const opsApi = {
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
   dispatchCheck: () =>
     request<OpsAlertsDispatchResult>('/api/alerts/check', { method: 'POST' }),
+  analyzeOpsAlert: (id: string, operatorNotes?: string) =>
+    request<{ ok: boolean; analysisStatus: string; message: string }>(
+      `/api/ops-alerts/${encodeURIComponent(id)}/analyze`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operatorNotes }),
+      },
+    ),
+  completeOpsAlertAnalysis: (
+    id: string,
+    payload: { analysisSummary?: string; analysisArtifactPath?: string },
+  ) =>
+    request<{ ok: boolean }>(`/api/ops-alerts/${encodeURIComponent(id)}/complete-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }),
   stackStatus: () => request<StackActionResult>('/api/stack/status'),
   stackAction: (action: 'start' | 'stop' | 'restart') =>
     request<StackActionResult>(`/api/stack/${action}`, { method: 'POST' }),
@@ -52,5 +70,23 @@ export const opsApi = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
+    }),
+  analyzeSupportReport: (id: string, operatorNotes?: string) =>
+    request<{ ok: boolean; analysisStatus: string; message: string }>(
+      `/api/support-reports/${id}/analyze`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operatorNotes }),
+      },
+    ),
+  completeSupportAnalysis: (
+    id: string,
+    payload: { analysisSummary?: string; analysisArtifactPath?: string },
+  ) =>
+    request<{ ok: boolean }>(`/api/support-reports/${id}/complete-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     }),
 }

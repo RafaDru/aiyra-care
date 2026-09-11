@@ -14,6 +14,8 @@ Use apenas estes campos do payload:
 | `topFingerprint` | Fingerprint de `client_errors` (se `consentTechnical`) |
 | `consentTechnical` | Se há bundle técnico no PG |
 | `dashboardUrl` | Console ops aba Suporte |
+| `operatorNotes` | Contexto **ops** (sem PHI) passado manualmente no console — priorize na hipótese |
+| `investigation.trigger` | `auto` (submit) ou `manual` (botão Analisar) |
 
 **Proibido:** buscar descrição livre do usuário, `accountId`, `patientId`, dados clínicos, screenshots.
 
@@ -24,12 +26,13 @@ Produzir **rascunho de investigação** para triagem humana — **não** abrir P
 ## Passos
 
 1. Ler `docs/ops/SUPPORT_REPORTS.md` (tabela de triagem por categoria).
-2. Se `topFingerprint`: buscar no repo referências ao fingerprint em `client_errors`, handlers de erro e a rota.
-3. Se `route`: mapear para página/componente em `packages/web/src` (ex.: `/patients/:id` → `detail.tsx`).
-4. Para `incorrect_data` ou sync: checar docs `SYNC_DELTA.md`, integrações na rota.
-5. Para `ux_confusion`: checar `product_events` allowlist em `docs/ops/TELEMETRY.md` e funil da rota.
-6. Hipóteses ranqueadas (máx. 3) com evidência no código ou docs.
-7. Próximos passos para humano (query SQL sugerida **sem** expor PHI — use só `report_id`).
+2. Se `operatorNotes`: incorporar como contexto operacional (não é relato do usuário — pode citar ambiente, passos de repro, hipótese humana).
+3. Se `topFingerprint`: buscar no repo referências ao fingerprint em `client_errors`, handlers de erro e a rota.
+4. Se `route`: mapear para página/componente em `packages/web/src` (ex.: `/patients/:id` → `detail.tsx`).
+5. Para `incorrect_data` ou sync: checar docs `SYNC_DELTA.md`, integrações na rota.
+6. Para `ux_confusion`: checar `product_events` allowlist em `docs/ops/TELEMETRY.md` e funil da rota.
+7. Hipóteses ranqueadas (máx. 3) com evidência no código ou docs.
+8. Próximos passos para humano (query SQL sugerida **sem** expor PHI — use só `report_id`).
 
 ## Saída obrigatória
 
@@ -46,6 +49,8 @@ Estrutura:
 - **Rota:** …
 - **Fingerprint:** …
 - **Tier:** 0 (rascunho automático)
+- **Gatilho:** auto | manual
+- **Notas ops:** … (se houver)
 
 ## Hipóteses
 1. …

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-03",
+  "updatedAt": "2026-09-11",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Fase atual (pré-CNPJ):** estruturar ambientes dev/staging/prod, massas e esteiras enquanto a regularização fiscal permite cobrança live; paralelo: discovery B2B (médicos, planos, labs, farmácias). **Go-live B2C:** código pronto no essencial; pendências com badge 🧑‍⚖️ dependem de revisão humana (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -2088,8 +2088,20 @@
           "id": "run-support-user-reports",
           "title": "Reportar problema — chamado + bundle LGPD",
           "status": "in_progress",
-          "detail": "Migration 061; POST/GET /support/reports; botão global AppLayout; consentimento técnico/perfil; product_events support_report_submitted. Runbook ops: docs/ops/SUPPORT_REPORTS.md. Fase 2: fila console, screenshot, webhook.",
+          "detail": "Migration 061 + 064 (analysis_status, operator_notes); fila console :3013; Analisar/Concluir + agente Cursor Tier 0; POST/GET /support/reports; docs/ops/SUPPORT_REPORTS.md.",
           "reviewBadge": ["legal"]
+        },
+        {
+          "id": "run-ops-alert-investigator",
+          "title": "Investigador Cursor — alertas infra (Tier 0)",
+          "status": "done",
+          "detail": "ops-alert-investigator-dispatch; auto em critical infra no checkAndDispatch; OpsAlertsTable + notas ops; estado em memória (Fase A); playbook docs/ops/automations/ops-alert-investigator.prompt.md."
+        },
+        {
+          "id": "run-support-investigator-automation",
+          "title": "Investigador Cursor — chamados suporte (Tier 0)",
+          "status": "done",
+          "detail": "CURSOR_SUPPORT_AUTOMATION_WEBHOOK_*; dispatch no submit + manual; docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md."
         },
         {
           "id": "run-operation-model-doc",
@@ -2132,6 +2144,68 @@
           "title": "Canal ops produção + worker heartbeat + Stripe alert",
           "status": "done",
           "detail": "setup:ops-prod; worker_stale + stripe_webhook_failures; test:ops + ops:smoke no CI; docs/ops/RUNBOOK_ALERTS.md."
+        }
+      ]
+    },
+    {
+      "id": "business-analytics",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Analytics de negócio (agregados, sem PHI)",
+      "summary": "Visão executiva e operacional: funis de ativação, retenção, uso por feature, volume de suporte, billing e saúde de integrações — cruzando product_events, support_reports, client_errors e Stripe. Complementa observability-platform (técnico) e product-analytics-optin (NLP opt-in). Primeira superfície: aba Negócio no console ops ou relatórios semanais.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "reviewBadge": ["legal", "business"],
+      "items": [
+        {
+          "id": "biz-analytics-funnel-activation",
+          "title": "Funil ativação (cadastro → sync → valor)",
+          "status": "planned",
+          "detail": "Cohortes por semana: signup, primeiro paciente, primeiro link convênio, primeiro sync OK, export clínico; só contagens agregadas em product_events."
+        },
+        {
+          "id": "biz-analytics-retention",
+          "title": "Retenção e engajamento (WAU/MAU)",
+          "status": "planned",
+          "detail": "Sessões autenticadas, retorno Carteira/Ava, churn proxy (conta sem evento 30d); sem mapa por usuário na UI pública."
+        },
+        {
+          "id": "biz-analytics-support-sla",
+          "title": "Métricas suporte (volume × categoria × SLA)",
+          "status": "planned",
+          "detail": "support_reports + analysis_status; tempo open→triaged→resolved; % com consent técnico; correlação com alertas ops."
+        },
+        {
+          "id": "biz-analytics-billing",
+          "title": "Receita e conversão billing",
+          "status": "planned",
+          "detail": "Stripe: MRR, trial→paid, créditos manuscrito; eventos billing_* em product_events; dashboard interno."
+        },
+        {
+          "id": "biz-analytics-integration-health",
+          "title": "Saúde integrações por portal (negócio)",
+          "status": "planned",
+          "detail": "Taxa sync OK por portal × plano; tempo até primeiro dado; input para priorizar Connect vs suporte."
+        },
+        {
+          "id": "biz-analytics-ops-console-tab",
+          "title": "Aba «Negócio» no console ops",
+          "status": "planned",
+          "detail": "KPIs + gráficos 7d/30d; export CSV agregado; link para investigações Tier 0 quando SLA estourar.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "biz-analytics-weekly-report",
+          "title": "Relatório semanal automático (interno)",
+          "status": "planned",
+          "detail": "Job ou script: markdown/e-mail para operador com highlights; sem PHI; opcional webhook."
+        },
+        {
+          "id": "biz-analytics-lgpd-guardrails",
+          "title": "Guardrails LGPD analytics negócio",
+          "status": "planned",
+          "detail": "Documentar finalidade, minimização e retenção em docs/legal/ + DATA_PROCESSING_MAP; revisão jurídica antes de métricas novas.",
+          "reviewBadge": ["legal"]
         }
       ]
     },

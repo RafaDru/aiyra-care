@@ -1,13 +1,26 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Descriptions, message, Segmented, Space, Table, Tag, Typography } from 'antd'
-import { ReloadOutlined } from '@ant-design/icons'
+import {
+  Alert,
+  Button,
+  Descriptions,
+  Input,
+  Modal,
+  message,
+  Segmented,
+  Space,
+  Table,
+  Tag,
+  Typography,
+} from 'antd'
+import { ReloadOutlined, RobotOutlined } from '@ant-design/icons'
 import type { SupportReportOpsRow } from './ops.types.js'
 import { OpsKpiCard, OpsKpiGrid } from './components/OpsKpiCard.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { useOpsDrillDown } from './ops-drill-down.js'
 import { opsApi } from './api.js'
 
-const { Text } = Typography
+const { Text, Paragraph } = Typography
+const { TextArea } = Input
 
 const CATEGORY_LABEL: Record<string, string> = {
   technical_bug: 'Erro técnico',
@@ -21,6 +34,22 @@ const STATUS_LABEL: Record<string, string> = {
   triaged: 'Triado',
   resolved: 'Resolvido',
   closed: 'Fechado',
+}
+
+const ANALYSIS_LABEL: Record<SupportReportOpsRow['analysisStatus'], string> = {
+  none: 'Sem análise',
+  pending: 'Pendente',
+  in_progress: 'Em análise',
+  completed: 'Concluída',
+  failed: 'Falhou',
+}
+
+const ANALYSIS_COLOR: Record<SupportReportOpsRow['analysisStatus'], string> = {
+  none: 'default',
+  pending: 'gold',
+  in_progress: 'processing',
+  completed: 'success',
+  failed: 'error',
 }
 
 type QueueStatus = 'open' | 'triaged' | 'resolved'
@@ -40,6 +69,11 @@ export function SupportPanel({
   const [rows, setRows] = useState<SupportReportOpsRow[]>([])
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [localOpenCount, setLocalOpenCount] = useState(openCount)
+  const [analyzeTarget, setAnalyzeTarget] = useState<SupportReportOpsRow | null>(null)
+  const [analyzeNotes, setAnalyzeNotes] = useState('')
+  const [completeTarget, setCompleteTarget] = useState<SupportReportOpsRow | null>(null)
+  const [completeSummary, setCompleteSummary] = useState('')
+  const [completeArtifact, setCompleteArtifact] = useState('')
 
   useEffect(() => {
     setLocalOpenCount(openCount)
@@ -83,6 +117,56 @@ export function SupportPanel({
     }
   }
 
+  const openAnalyzeModal = (row: SupportReportOpsRow) => {
+    setAnalyzeTarget(row)
+    setAnalyzeNotes(row.operatorNotes ?? '')
+  }
+
+  const submitAnalyze = async () => {
+    if (!analyzeTarget) return
+    setUpdatingId(analyzeTarget.id)
+    try {
+      const result = await opsApi.analyzeSupportReport(analyzeTarget.id, analyzeNotes)
+      message.success(result.message)
+      setAnalyzeTarget(null)
+      onQueueChange?.()
+      await load(queueStatus)
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Falha ao disparar análise')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const openCompleteModal = (row: SupportReportOpsRow) => {
+    setCompleteTarget(row)
+    setCompleteSummary(row.analysisSummary ?? '')
+    setCompleteArtifact(row.analysisArtifactPath ?? '')
+  }
+
+  const submitComplete = async () => {
+    if (!completeTarget) return
+    if (!completeSummary.trim() && !completeArtifact.trim()) {
+      message.warning('Informe um resumo ou caminho do artefato')
+      return
+    }
+    setUpdatingId(completeTarget.id)
+    try {
+      await opsApi.completeSupportAnalysis(completeTarget.id, {
+        analysisSummary: completeSummary,
+        analysisArtifactPath: completeArtifact || undefined,
+      })
+      message.success('Análise marcada como concluída')
+      setCompleteTarget(null)
+      onQueueChange?.()
+      await load(queueStatus)
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Falha ao concluir análise')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   return (
     <div className="ops-panel-stack">
       <OpsKpiStrip
@@ -95,6 +179,21 @@ export function SupportPanel({
       />
 
       <Alert
+        type="info"
+        showIcon
+        message="Ciclo de suporte"
+        description={(
+          <>
+            <strong>Triar/Resolver</strong> atualiza a fila humana.{' '}
+            <strong>Analisar</strong> dispara o agente Cursor (Tier 0) — use notas para contexto
+            extra. Chamados sem webhook configurado ficam «Sem análise» até você analisar manualmente
+            ou concluir com resumo.
+          </>
+        )}
+        style={{ marginBottom: 8 }}
+      />
+
+      <Alert
         type="warning"
         showIcon
         message="Dados sensíveis"
@@ -104,7 +203,7 @@ export function SupportPanel({
 
       <OpsPanel
         title="Fila de suporte"
-        description="Chamados «Reportar problema» — migration 061."
+        description="Chamados «Reportar problema» — migration 061 + ciclo de análise 064."
         extra={(
           <Space size={8}>
             <Segmented
@@ -136,29 +235,7 @@ export function SupportPanel({
           })}
           expandable={{
             expandedRowRender: (row) => (
-              <div style={{ maxWidth: 720 }}>
-                {row.descriptionPreview && (
-                  <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-                    {row.descriptionPreview}
-                  </Text>
-                )}
-                <Descriptions size="small" column={1} bordered>
-                  <Descriptions.Item label="Conta">
-                    <Text code>{row.accountId}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="App">
-                    {row.appVersion ?? '—'}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Expira">
-                    {new Date(row.expiresAt).toLocaleString('pt-BR')}
-                  </Descriptions.Item>
-                </Descriptions>
-                {row.consentTechnical && Object.keys(row.diagnosticContext).length > 0 && (
-                  <pre style={{ marginTop: 12, fontSize: 11, maxHeight: 240, overflow: 'auto' }}>
-                    {JSON.stringify(row.diagnosticContext, null, 2)}
-                  </pre>
-                )}
-              </div>
+              <SupportReportDetail row={row} />
             ),
           }}
           columns={[
@@ -169,10 +246,18 @@ export function SupportPanel({
               render: (id: string) => <Text code>{id.slice(0, 8)}</Text>,
             },
             {
-              title: 'Status',
+              title: 'Fila',
               dataIndex: 'status',
               width: 88,
               render: (s: string) => <Tag>{STATUS_LABEL[s] ?? s}</Tag>,
+            },
+            {
+              title: 'Análise',
+              dataIndex: 'analysisStatus',
+              width: 110,
+              render: (s: SupportReportOpsRow['analysisStatus']) => (
+                <Tag color={ANALYSIS_COLOR[s]}>{ANALYSIS_LABEL[s] ?? s}</Tag>
+              ),
             },
             {
               title: 'Categoria',
@@ -201,9 +286,28 @@ export function SupportPanel({
             {
               title: 'Ações',
               key: 'actions',
-              width: 180,
+              width: 280,
               render: (_: unknown, row: SupportReportOpsRow) => (
-                <Space size={4} onClick={(e) => e.stopPropagation()}>
+                <Space size={4} wrap onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    size="small"
+                    icon={<RobotOutlined />}
+                    loading={updatingId === row.id}
+                    onClick={() => openAnalyzeModal(row)}
+                  >
+                    {row.analysisStatus === 'completed' || row.analysisStatus === 'in_progress'
+                      ? 'Reanalisar'
+                      : 'Analisar'}
+                  </Button>
+                  {row.analysisStatus !== 'completed' && (
+                    <Button
+                      size="small"
+                      loading={updatingId === row.id}
+                      onClick={() => openCompleteModal(row)}
+                    >
+                      Concluir
+                    </Button>
+                  )}
                   {queueStatus === 'open' && (
                     <Button
                       size="small"
@@ -229,6 +333,126 @@ export function SupportPanel({
           ]}
         />
       </OpsPanel>
+
+      <Modal
+        title={`Analisar chamado ${analyzeTarget?.id.slice(0, 8) ?? ''}`}
+        open={analyzeTarget != null}
+        onCancel={() => setAnalyzeTarget(null)}
+        onOk={() => void submitAnalyze()}
+        okText="Disparar agente"
+        confirmLoading={updatingId === analyzeTarget?.id}
+        destroyOnClose
+      >
+        <Paragraph type="secondary">
+          Notas para o agente Cursor (sem PHI). Ex.: «usuário disse que sumiu após sync Unimed»,
+          «reproduziu em preview :5174».
+        </Paragraph>
+        <TextArea
+          rows={4}
+          maxLength={2000}
+          value={analyzeNotes}
+          onChange={(e) => setAnalyzeNotes(e.target.value)}
+          placeholder="Contexto opcional para a investigação Tier 0…"
+        />
+        {analyzeTarget?.analysisLastError && (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginTop: 12 }}
+            message="Último erro"
+            description={analyzeTarget.analysisLastError}
+          />
+        )}
+      </Modal>
+
+      <Modal
+        title={`Concluir análise ${completeTarget?.id.slice(0, 8) ?? ''}`}
+        open={completeTarget != null}
+        onCancel={() => setCompleteTarget(null)}
+        onOk={() => void submitComplete()}
+        okText="Marcar concluída"
+        confirmLoading={updatingId === completeTarget?.id}
+        destroyOnClose
+      >
+        <Paragraph type="secondary">
+          Use quando o agente terminou ou você investigou manualmente — fecha o ciclo de análise
+          (independente de Triar/Resolver).
+        </Paragraph>
+        <TextArea
+          rows={4}
+          maxLength={4000}
+          value={completeSummary}
+          onChange={(e) => setCompleteSummary(e.target.value)}
+          placeholder="Resumo da conclusão…"
+          style={{ marginBottom: 12 }}
+        />
+        <Input
+          maxLength={512}
+          value={completeArtifact}
+          onChange={(e) => setCompleteArtifact(e.target.value)}
+          placeholder="Caminho do artefato (opcional), ex. docs/ops/investigations/2026-09-08-abc.md"
+        />
+      </Modal>
+    </div>
+  )
+}
+
+function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
+  return (
+    <div style={{ maxWidth: 720 }}>
+      {row.descriptionPreview && (
+        <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
+          {row.descriptionPreview}
+        </Text>
+      )}
+      <Descriptions size="small" column={1} bordered>
+        <Descriptions.Item label="Fila">
+          <Tag>{STATUS_LABEL[row.status] ?? row.status}</Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="Análise">
+          <Tag color={ANALYSIS_COLOR[row.analysisStatus]}>
+            {ANALYSIS_LABEL[row.analysisStatus]}
+          </Tag>
+        </Descriptions.Item>
+        {row.analysisRequestedAt && (
+          <Descriptions.Item label="Análise solicitada">
+            {new Date(row.analysisRequestedAt).toLocaleString('pt-BR')}
+          </Descriptions.Item>
+        )}
+        {row.analysisCompletedAt && (
+          <Descriptions.Item label="Análise concluída">
+            {new Date(row.analysisCompletedAt).toLocaleString('pt-BR')}
+          </Descriptions.Item>
+        )}
+        {row.operatorNotes && (
+          <Descriptions.Item label="Notas do operador">{row.operatorNotes}</Descriptions.Item>
+        )}
+        {row.analysisSummary && (
+          <Descriptions.Item label="Resumo">{row.analysisSummary}</Descriptions.Item>
+        )}
+        {row.analysisArtifactPath && (
+          <Descriptions.Item label="Artefato">
+            <Text code>{row.analysisArtifactPath}</Text>
+          </Descriptions.Item>
+        )}
+        {row.analysisLastError && (
+          <Descriptions.Item label="Erro análise">
+            <Text type="danger">{row.analysisLastError}</Text>
+          </Descriptions.Item>
+        )}
+        <Descriptions.Item label="Conta">
+          <Text code>{row.accountId}</Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="App">{row.appVersion ?? '—'}</Descriptions.Item>
+        <Descriptions.Item label="Expira">
+          {new Date(row.expiresAt).toLocaleString('pt-BR')}
+        </Descriptions.Item>
+      </Descriptions>
+      {row.consentTechnical && Object.keys(row.diagnosticContext).length > 0 && (
+        <pre style={{ marginTop: 12, fontSize: 11, maxHeight: 240, overflow: 'auto' }}>
+          {JSON.stringify(row.diagnosticContext, null, 2)}
+        </pre>
+      )}
     </div>
   )
 }

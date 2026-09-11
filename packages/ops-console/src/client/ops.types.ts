@@ -1,5 +1,19 @@
 export type OpsAlertSeverity = 'warning' | 'critical'
 
+export interface OpsAlertAnalysisRecord {
+  alertId: string
+  analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'
+  operatorNotes: string | null
+  analysisSummary: string | null
+  analysisArtifactPath: string | null
+  analysisRequestedAt: string | null
+  analysisCompletedAt: string | null
+  analysisLastError: string | null
+  lastSeverity: string | null
+  lastCategory: string | null
+  lastMessage: string | null
+}
+
 export interface OpsAlert {
   id: string
   severity: OpsAlertSeverity
@@ -192,6 +206,13 @@ export interface SupportReportOpsRow {
   createdAt: string
   expiresAt: string
   diagnosticContext: Record<string, unknown>
+  analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'
+  operatorNotes: string | null
+  analysisSummary: string | null
+  analysisArtifactPath: string | null
+  analysisRequestedAt: string | null
+  analysisCompletedAt: string | null
+  analysisLastError: string | null
 }
 
 export interface RuntimeDegradedView {
@@ -217,6 +238,7 @@ export interface OpsMetricsResponse {
   alerts: OpsAlert[]
   runtime?: RuntimeDegradedView
   triage?: OpsAlertTriageRow[]
+  alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
 }
 
 export interface OpsAlertsDispatchResult {
@@ -227,6 +249,8 @@ export interface OpsAlertsDispatchResult {
   dispatched: boolean
   webhookConfigured: boolean
   triage: OpsAlertTriageRow[]
+  investigatorDispatched?: number
+  alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
 }
 
 export interface StackServiceStatus {
