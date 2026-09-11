@@ -75,10 +75,11 @@
 
 | Workflow | Run | Resultado | Notas |
 |----------|-----|-----------|-------|
-| E2E regression | [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392) | **FAIL** | 2 passed (smoke), 4 failed — flake Select Sexo no onboarding/ensureSession |
-| E2E business-full | [34634817991](https://github.com/RafaDru/aiyra-care/actions/runs/34634817991) | _verificar_ | Disparado manualmente após Fase 3 |
+| E2E regression | [34636197555](https://github.com/RafaDru/aiyra-care/actions/runs/34636197555) | **PASS** | 6 specs (smoke + onboarding + core-patient + 2 Ava); fix `56e56be` |
+| E2E regression | [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392) | FAIL | flake Select — corrigido em `56e56be` |
+| E2E business-full | [34634817991](https://github.com/RafaDru/aiyra-care/actions/runs/34634817991) | FAIL | pré-fix Select; re-disparar após validação |
 
-**Causa raiz (regression):** Ant Design Select no CI — dropdown/opção tratados como hidden durante animação `ant-slide-up-appear`. Correção em andamento: `selectAntOption` via `.ant-select-item-option` + `force: true`.
+**Causa raiz (regression, resolvida):** Ant Design Select no CI — dropdown hidden na animação `ant-slide-up-appear`. Fix: `.ant-select-item-option` + `click({ force: true })` (`56e56be`).
 
 **Meta:** 7 noites verdes no `business-full` antes de promover a gate obrigatório (`AUTOMATION_ROADMAP.md`).
 

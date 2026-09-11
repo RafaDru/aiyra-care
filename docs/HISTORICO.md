@@ -11,7 +11,7 @@
 - Helpers E2E: compliance pós-login, Select Ant Design, projects Playwright (`smoke` isolado).
 - `ava-test-mode.ts`, specs `ava-companion-smoke` / `ava-guardrail-smoke`.
 - Ops: aba Negócio (`BusinessPanel`), `metrics.business` na API.
-- CI regression run [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392): **FAIL** (flake Select) — correção `force` em `.ant-select-item-option`.
+- CI regression [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392) FAIL (flake Select) → fix `56e56be` → [34636197555](https://github.com/RafaDru/aiyra-care/actions/runs/34636197555) **PASS**.
 
 ### Próximo
 - Regression verde; acumular 7 noites `business-full`.
