@@ -1,5 +1,22 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-11] - QA CI Fase 4 Ava + ops Negócio + foco produto
+
+### Decisão
+- Tracking vivo em `docs/FOCO_ATUAL.md` — três frentes: dia a dia família, Ava parceira, ambiente profissional.
+- E2E regression inclui specs Ava com `AVA_TEST_MODE=1` (sem LLM real no CI).
+- Relatório semanal interno: `npm run ops:business-weekly` (sem PHI).
+
+### Realizado
+- Helpers E2E: compliance pós-login, Select Ant Design, projects Playwright (`smoke` isolado).
+- `ava-test-mode.ts`, specs `ava-companion-smoke` / `ava-guardrail-smoke`.
+- Ops: aba Negócio (`BusinessPanel`), `metrics.business` na API.
+- CI regression run [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392): **FAIL** (flake Select) — correção `force` em `.ant-select-item-option`.
+
+### Próximo
+- Regression verde; acumular 7 noites `business-full`.
+- Discovery UX «registrar evento do dia» (frente 1 em `FOCO_ATUAL.md`).
+
 ## [2026-09-08] - CI: build API desbloqueado (51 erros tsc)
 
 ### Decisão

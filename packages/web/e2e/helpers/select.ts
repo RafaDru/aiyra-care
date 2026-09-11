@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
-/** Ant Design Select — opções expõem role="option", não title. */
+/** Ant Design Select — opções no portal; evitar wait visible (animação slide-up no CI). */
 export async function selectAntOption(
   page: Page,
   fieldLabel: string,
@@ -8,8 +8,12 @@ export async function selectAntOption(
   scope?: Locator,
 ) {
   const root = scope ?? page
-  await root.getByLabel(fieldLabel, { exact: true }).click()
-  const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
-  await dropdown.waitFor({ state: 'visible', timeout: 8_000 })
-  await dropdown.getByRole('option', { name: optionName }).click()
+  const field = root.getByLabel(fieldLabel, { exact: true })
+  await field.click()
+  const option = page
+    .locator('.ant-select-item-option')
+    .filter({ hasText: optionName })
+    .last()
+  await option.waitFor({ state: 'attached', timeout: 15_000 })
+  await option.click({ force: true })
 }

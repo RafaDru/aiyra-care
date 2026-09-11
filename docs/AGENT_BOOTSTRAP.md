@@ -12,6 +12,7 @@
 | 3 | `docs/roadmap.json` (item/épico relevante) | Status de entrega |
 | 4 | `docs/DOCUMENTATION_SYSTEM.md` | Ritual ao entregar |
 | 5 | Doc de domínio linkado na feature (`seeAlso`) | Profundidade técnica |
+| — | `docs/FOCO_ATUAL.md` | Prioridades do momento + status CI (tracking entre sessões) |
 
 ## Ritual ao entregar (obrigatório)
 

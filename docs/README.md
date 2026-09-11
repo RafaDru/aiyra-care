@@ -12,6 +12,7 @@
 | [`features/`](./features/) | Ficha por capacidade de produto |
 | [`help/`](./help/) | FAQ e textos de ajuda (usuário + Ava) |
 | [`HISTORICO.md`](./HISTORICO.md) | Decisões datadas |
+| [`FOCO_ATUAL.md`](./FOCO_ATUAL.md) | Prioridades vivas + tracking CI/sessão |
 
 ## Por área
 

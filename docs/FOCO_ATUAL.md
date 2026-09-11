@@ -1,0 +1,96 @@
+# Foco atual — tracking vivo
+
+> **Última atualização:** 2026-09-11  
+> Documento de acompanhamento entre sessões — complementa `roadmap.json` e `HISTORICO.md`.  
+> Atualizar a cada entrega relevante ou mudança de prioridade.
+
+---
+
+## Prioridades do produto (Rafael — set/2026)
+
+| # | Frente | Intenção | Épicos / docs |
+|---|--------|----------|----------------|
+| 1 | **Dia a dia da família** | Registrar eventos do cotidiano (sintoma, medida, medicação, consulta, lembrete) com mínimo esforço | `agenda-calendario`, health threads (`acompanhamento`), `MEASUREMENTS.md`, `CareReminderBanner` |
+| 2 | **Ava parceira** | Consolidar Ava como companheira contínua — não só chat, mas contexto, proatividade e confiança | `ava-companion-platform`, `AVA_OPERATIONAL.md` (G2–G4), `AVA_PATIENT_LENS.md`, `AVA_EXPRESSIONS.md` |
+| 3 | **Ambiente do profissional** | Preparar superfície médica/clínica sem comprometer o núcleo família | `b2b-partner-platform`, `B2B_PARTNERS.md`, org/RBAC (055), export/share clínico |
+
+### 1 — Dia a dia (família registrando eventos)
+
+**Já existe (base):**
+
+- Agenda + `scheduled_events` (CRUD, ICS, Google/Outlook OAuth)
+- Acompanhamentos (`health_threads`, kind `acompanhamento`)
+- Medidas, medicações, vacinas, exames (CRUD + sync)
+- Lembretes (`CareReminderBanner`, notificações)
+
+**Gaps prováveis (discovery):**
+
+- Fluxo único «registrar agora» (1–2 toques) a partir do dashboard ou Ava
+- Eventos do dia visíveis na home / Carteira (não só dentro do perfil)
+- Ligação automática thread ↔ medida ↔ medicação ↔ agenda
+- Suites QA: `patient-health-thread`, medidas rápidas (ver `BUSINESS_ACTION_MATRIX.md`)
+
+### 2 — Consolidação Ava parceira
+
+**Entregue recentemente:**
+
+- Dock global, conversas persistidas, lente de paciente, guardrails, pins G1
+- CI: `AVA_TEST_MODE=1` + specs `ava-companion-smoke`, `ava-guardrail-smoke`
+
+**Próximo (operacional):**
+
+- G2: aceleradores + transparência de contexto (já parcial — `ava-context-transparency` done)
+- G3: ações propostas executáveis com confirmação (`ava-proposed-action`)
+- Expressão visual + narrativa (`AVA_EXPRESSIONS.md`)
+- Não julgar qualidade LLM em QA — só comportamento determinístico (`AVA_QA_SCOPE.md`)
+
+### 3 — Ambiente profissional da medicina
+
+**Já existe:**
+
+- Primitives org (`055`), export clínico PDF, share token 48h
+- Discovery B2B documentado
+
+**Próximo:**
+
+- RBAC profissional (`b2b-platform-rbac`) — médico, admin clínica, read-only parceiro
+- Pacote clínico: portal leve de compartilhamento (`b2b-segment-clinicians`)
+- Console parceiro vs ops-console interno
+- Revisões tier 2+: legal + medical antes de go-live B2B
+
+---
+
+## Entregas técnicas recentes (2026-09-11)
+
+| Commit | Resumo |
+|--------|--------|
+| `6a84b3a` | E2E: compliance login, Select Ant Design, Fase 4 Ava (`AVA_TEST_MODE`) |
+| `9259d64` | Ops: aba **Negócio** (`BusinessPanel`) |
+| `e5c64a2` | `npm run ops:business-weekly` |
+| `36fa56e` | Fix project `smoke` + dropdown Select (1ª iteração) |
+
+---
+
+## CI E2E — status
+
+| Workflow | Run | Resultado | Notas |
+|----------|-----|-----------|-------|
+| E2E regression | [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392) | **FAIL** | 2 passed (smoke), 4 failed — flake Select Sexo no onboarding/ensureSession |
+| E2E business-full | [34634817991](https://github.com/RafaDru/aiyra-care/actions/runs/34634817991) | _verificar_ | Disparado manualmente após Fase 3 |
+
+**Causa raiz (regression):** Ant Design Select no CI — dropdown/opção tratados como hidden durante animação `ant-slide-up-appear`. Correção em andamento: `selectAntOption` via `.ant-select-item-option` + `force: true`.
+
+**Meta:** 7 noites verdes no `business-full` antes de promover a gate obrigatório (`AUTOMATION_ROADMAP.md`).
+
+---
+
+## Ritual de atualização
+
+Ao fechar uma sessão ou entrega:
+
+1. Esta seção **Entregas técnicas** + tabela **CI**
+2. `docs/HISTORICO.md` — decisões
+3. `docs/roadmap.json` — `status` / `detail` dos itens tocados
+4. Feature card em `docs/features/` se mudou produto
+
+Ver também: [`AGENT_BOOTSTRAP.md`](./AGENT_BOOTSTRAP.md), [`testing/CI_LEARNINGS.md`](./testing/CI_LEARNINGS.md).
