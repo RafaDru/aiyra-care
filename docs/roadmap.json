@@ -2203,8 +2203,8 @@
         {
           "id": "biz-analytics-weekly-report",
           "title": "Relatório semanal automático (interno)",
-          "status": "planned",
-          "detail": "Job ou script: markdown/e-mail para operador com highlights; sem PHI; opcional webhook."
+          "status": "done",
+          "detail": "npm run ops:business-weekly → markdown em docs/ops/reports/; OPS_WEEKLY_REPORT_WEBHOOK_URL opcional (Slack)."
         },
         {
           "id": "biz-analytics-lgpd-guardrails",

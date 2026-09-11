@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-08",
+  "updatedAt": "2026-09-11",
   "description": "Índice de capacidades de produto — ver docs/DOCUMENTATION_SYSTEM.md",
   "features": [
     {
@@ -84,6 +84,20 @@
       "api": ["POST /support/reports", "GET /support/reports", "GET /support/reports/:id"],
       "helpTopics": [],
       "tags": ["suporte", "lgpd", "observabilidade", "bugs"]
+    },
+    {
+      "id": "business-analytics-ops",
+      "epicId": "business-analytics",
+      "title": "Analytics de negócio (console ops)",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/business-analytics-ops.md",
+      "domainDoc": "docs/OBSERVABILITY.md",
+      "routes": [],
+      "api": ["GET /ops/metrics"],
+      "helpTopics": [],
+      "tags": ["ops", "analytics", "negócio", "sem-phi"]
     },
     {
       "id": "documentation-knowledge-base",

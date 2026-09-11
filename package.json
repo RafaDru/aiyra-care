@@ -18,6 +18,7 @@
     "ops:metrics": "cd packages/api && npm run ops:metrics",
     "ops:alerts-check": "cd packages/api && npm run ops:alerts-check",
     "ops:triage": "cd packages/api && npm run ops:triage",
+    "ops:business-weekly": "cd packages/api && npm run ops:business-weekly",
     "ops:probe": "cd packages/api && npm run ops:probe",
     "ops:console": "cd packages/ops-console && npm run dev",
     "ops:console:up": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ops-console-up.ps1",
