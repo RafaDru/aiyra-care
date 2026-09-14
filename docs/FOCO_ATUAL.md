@@ -29,7 +29,7 @@
 
 - **D1** Wizard «Levar na consulta» — **entregue** (link + QR + PDF + rota pública)
 - **D2** «+ Registro rápido» (5 tipos) — **entregue** (header global + sheet)
-- **D3** Bloco «Hoje» na Carteira
+- **D3** Bloco «Hoje» na Carteira — **entregue** (`WalletTodayPanel`)
 - Programa de indicação bilateral — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
 - Suites QA: `patient-clinical-export`, `family-quick-capture`, `patient-health-thread`
 
@@ -85,7 +85,7 @@
 | E2E business-full | [34857416100](https://github.com/RafaDru/aiyra-care/actions/runs/34857416100) | **PASS** | 11 passed, 2 flaky Ava (`ava-companion-smoke`, `ava-guardrail-smoke`) |
 | E2E business-full | [34634817991](https://github.com/RafaDru/aiyra-care/actions/runs/34634817991) | FAIL | pré-fix Select — histórico |
 
-**Meta:** 7 noites verdes no `business-full` antes de promover a gate obrigatório (`AUTOMATION_ROADMAP.md`). **Progresso: 1/7** (run `34857416100`).
+**Meta:** 7 semanas verdes no `business-full` (agendado **sexta 06:00 BRT**) antes de gate em PR (`AUTOMATION_ROADMAP.md`). **Progresso: 1/7** (run `34857416100`, quando era diário).
 
 ---
 

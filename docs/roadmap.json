@@ -1339,7 +1339,7 @@
       "title": "Dia a dia — captura rápida + levar na consulta",
       "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
       "status": "in_progress",
-      "statusLabel": "D2 registro rápido entregue — D3 bloco Hoje",
+      "statusLabel": "D1–D3 entregues — referral / portal médico (D4+)",
       "items": [
         {
           "id": "family-day-to-day-discovery",
@@ -1362,8 +1362,8 @@
         {
           "id": "family-day-timeline",
           "title": "Bloco «Hoje» na Carteira",
-          "status": "planned",
-          "detail": "Timeline do dia + atalhos de captura."
+          "status": "done",
+          "detail": "WalletTodayPanel na Carteira; agenda/lembretes/registros do dia; CTAs captura e consulta."
         }
       ]
     },

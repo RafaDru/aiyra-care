@@ -29,6 +29,7 @@ import { CoverageTab } from './tabs/CoverageTab.js'
 import { IntegrationsTab, type IntegrationsTabHandle } from './tabs/IntegrationsTab.js'
 import { AgendaTab } from './tabs/AgendaTab.js'
 import { PatientContextPanel } from '../../components/patient/PatientContextPanel.js'
+import { PatientConsultVisitHost } from '../../components/patient/PatientConsultVisitHost.js'
 import { HealthThreadsPanel } from '../../components/patient/HealthThreadsPanel.js'
 import { PatientAccessGrantsDrawer } from '../../components/family/PatientAccessGrantsDrawer.js'
 import { trackSyncJobSkipped, trackSyncJobStarted } from '../../lib/telemetry/sync-telemetry.js'
@@ -566,6 +567,8 @@ export function PatientDetail() {
           }
         }}
       />
+
+      <PatientConsultVisitHost patientId={patient.id} patientName={patient.name} />
 
       <FamilySupportPanel patientId={patient.id} />
 

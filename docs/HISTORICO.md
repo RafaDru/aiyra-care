@@ -1,5 +1,19 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-14] - D3 «Hoje» na Carteira + CI business-full semanal
+
+### Decisão
+- `business-full` deixa de rodar diário → **sexta 06:00 BRT** (09:00 UTC); regression continua em cada push.
+- Wizard «Levar na consulta» sobe para `PatientConsultVisitHost` (funciona em qualquer aba do perfil).
+
+### Realizado
+- `WalletTodayPanel` na aba Carteira — agenda do dia, lembretes, registros; CTAs captura e consulta.
+- Suite QA `family-day-timeline`.
+- Workflow `.github/workflows/ci-e2e-business-full.yml` — `cron: 0 9 * * 5`.
+
+### Próximo
+- D4 referral / e-mail médico (discovery).
+
 ## [2026-09-14] - D2 «+ Registro rápido» global
 
 ### Decisão

@@ -203,6 +203,20 @@
       "estimatedMinutes": 5
     },
     {
+      "id": "family-day-timeline",
+      "domain": "clinico",
+      "title": "Carteira — bloco Hoje",
+      "featureId": "family-day-timeline",
+      "lane": "business-full",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/family-day-timeline.md",
+      "coverage": "partial",
+      "businessActions": ["wallet.today_view"],
+      "automation": { "status": "done", "spec": "packages/web/e2e/suites/family-day-timeline.spec.ts" },
+      "estimatedMinutes": 5
+    },
+    {
       "id": "ops-health",
       "domain": "ops",
       "title": "Ops — health e métricas",
@@ -237,6 +251,7 @@
         "support-user-report",
         "patient-clinical-export",
         "family-quick-capture",
+        "family-day-timeline",
         "ava-companion-smoke",
         "ava-guardrail-smoke",
         "ava-conversation-crud"

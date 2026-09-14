@@ -1185,6 +1185,15 @@
     "cpf_card": "Cartão / Comprovante CPF",
     "cnh": "CNH"
   },
+  "walletToday": {
+    "title": "Hoje",
+    "subtitle": "{{date}}",
+    "empty": "Nada registrado ainda hoje",
+    "emptyCta": "Registrar o primeiro evento",
+    "consultCta": "Levar na consulta",
+    "reminderTag": "Lembrete",
+    "snooze": "Adiar 30 min"
+  },
   "quickCapture": {
     "trigger": "Registro rápido",
     "title": "Registro rápido",

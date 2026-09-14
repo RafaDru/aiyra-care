@@ -23,6 +23,7 @@ import {
 } from './wallet-shared.js'
 import { buildWalletSyncBanners, walletSyncBannerMessage } from '../../../lib/wallet-sync-banner.js'
 import { saveWalletLinkCache, getWalletLinkCache } from '../../../lib/wallet-link-cache.js'
+import { WalletTodayPanel } from '../../../components/patient/WalletTodayPanel.js'
 
 const { Text, Title } = Typography
 
@@ -165,6 +166,8 @@ export function WalletCardsTab({
           Cartões e credenciais para consulta e atendimento. Sincronização em Integrações.
         </Text>
       </div>
+
+      <WalletTodayPanel patientId={patient.id} refreshKey={syncRefreshKey} />
 
       <div>
         <Text strong style={{ display: 'block', marginBottom: 10 }}>Sistema público</Text>

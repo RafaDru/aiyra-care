@@ -124,6 +124,24 @@
       "tags": ["captura", "dia a dia", "família", "medidas", "agenda"]
     },
     {
+      "id": "family-day-timeline",
+      "epicId": "family-day-to-day",
+      "title": "Bloco «Hoje» na Carteira",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/family-day-timeline.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/patients/:id?tab=wallet"],
+      "api": [
+        "GET /scheduled-events",
+        "GET /care-reminders/pending",
+        "GET /measurements/timeline"
+      ],
+      "helpTopics": [],
+      "tags": ["carteira", "timeline", "dia a dia", "agenda"]
+    },
+    {
       "id": "business-analytics-ops",
       "epicId": "business-analytics",
       "title": "Analytics de negócio (console ops)",

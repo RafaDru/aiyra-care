@@ -64,6 +64,7 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Higienização** — resolver duplicata | RU | `hygiene-dedup-ui` | 🟡 |
 | **Export clínico** — gerar + link compartilhado | C | `patient-clinical-export` | ✅ |
 | **Registro rápido** — nota / medida / medicação / agenda / doc | C | `family-quick-capture` | ✅ |
+| **Carteira — Hoje** — timeline do dia + atalhos | R | `family-day-timeline` | ✅ |
 | **Quem tem acesso** — grant / revogar | CRD | `family-access-matrix` | 🟡 |
 
 ### Ava (trilho próprio)

@@ -9,7 +9,7 @@
 | **0** | Suites manuais + `npm run qa:run` | — | ✅ |
 | **1** | Playwright Onda 1 local (`test:e2e:regression`) | — | ✅ |
 | **2** | **CI** `ci-e2e-regression.yml` — PG + API + Playwright Onda 1 | PR/push `main` | ✅ |
-| **3** | CI `business-full` (Onda 2) + artifacts | nightly + manual | ✅ |
+| **3** | CI `business-full` (Onda 2) + artifacts | semanal (sexta) + manual | ✅ |
 | **4** | Ava lane + mocks LLM | — | ⬜ |
 
 ## Fase 2 — workflow
@@ -71,7 +71,7 @@ npm run test:e2e:business-full   # 11 specs, ~2,5 min local (API+web já no ar)
 | Lane | Specs | Tempo típico | Gate sugerido |
 |------|-------|--------------|---------------|
 | `regression` (Fase 2) | 3 | ~1,5 min | **Obrigatório** em PR/push `main` |
-| `business-full` (Fase 3) | 11 | ~8–12 min no CI (build web + PG) | **Nightly** → depois opcional em PR |
+| `business-full` (Fase 3) | 13+ | ~8–12 min no CI (build web + PG) | **Semanal (sexta 06:00 BRT)** + `workflow_dispatch` |
 
 ### Os 11 specs
 
@@ -112,7 +112,7 @@ Arquivo: [`.github/workflows/ci-e2e-business-full.yml`](../../.github/workflows/
 ```yaml
 on:
   schedule:
-    - cron: '0 5 * * *'      # 05:00 UTC — após merges do dia anterior
+    - cron: '0 9 * * 5'      # Sexta 09:00 UTC = 06:00 America/Sao_Paulo
   workflow_dispatch: {}     # re-run manual
   # pull_request:            # habilitar só após flake < 2% em nightly
 ```
@@ -153,7 +153,7 @@ Futuro (matriz família **completa**, 5 logins distintos): criar personas Supaba
 
 ### Critérios para promover a gate obrigatório
 
-1. **7 noites** consecutivas verdes no nightly (ou 14 runs `workflow_dispatch`).
+1. **7 semanas** consecutivas verdes no agendamento de sexta (ou runs manuais `workflow_dispatch` antes de gate em PR).
 2. Tempo médio estável **&lt; 15 min**.
 3. Zero flake recorrente no mesmo spec (rastrear via artifact).
 4. Marcar check required em *Branch protection* junto com `e2e-regression`.
