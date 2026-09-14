@@ -68,6 +68,7 @@ jobs:
       AVA_TEST_MODE: 1
       QA_TEST_PASSWORD: ci-e2e-qa-test-v1
       QA_ONBOARDING_PASSWORD: ci-e2e-qa-onboarding-v1
+      OCR_CI_STUB: 1
 
     steps:
       - uses: actions/checkout@v4

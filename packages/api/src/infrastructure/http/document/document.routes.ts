@@ -7,9 +7,10 @@ import { HandwritingCreditsService } from '../../../application/handwriting/hand
 import { isLocalOcrSufficient } from '../../../application/document/ocr-quality.js'
 import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
 import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
-import { GcsFileStorage } from '../../storage/gcs.storage.js'
+import { resolveFileStorage } from '../../storage/resolve-file-storage.js'
 import { CascadeOcrProvider } from '../../ocr/cascade-ocr.provider.js'
 import { buildDocumentOcrProviders } from '../../ocr/document-ocr.factory.js'
+import { E2eStubOcrProvider } from '../../ocr/e2e-stub-ocr.provider.js'
 import { pgPool } from '../../../db/postgres.js'
 import { HandwritingCreditsPgRepository } from '../../persistence/handwriting-credits.pg.repository.js'
 import { LlmUsagePgRepository } from '../../persistence/llm-usage.pg.repository.js'
@@ -22,15 +23,20 @@ export async function documentRoutes(app: FastifyInstance) {
   await app.register(multipart, { limits: { fileSize: 20 * 1024 * 1024 } })
 
   // Product path: local algorithms first (Tesseract / TrOCR); Google Vision only if insufficient. No LLM.
-  const ocrFactory = (documentType: DocumentType) =>
-    new CascadeOcrProvider(
+  const ocrFactory = (documentType: DocumentType) => {
+    if (process.env.OCR_CI_STUB === '1') {
+      return new CascadeOcrProvider([new E2eStubOcrProvider()], () => true)
+    }
+    return new CascadeOcrProvider(
       buildDocumentOcrProviders(documentType),
       (text) => isLocalOcrSufficient(documentType, text),
     )
+  }
 
+  const fileStorage = resolveFileStorage()
   const service = new DocumentService(
     new DocumentPgRepository(pgPool),
-    new GcsFileStorage(),
+    fileStorage,
     new PatientPgRepository(pgPool),
     ocrFactory,
   )
@@ -41,7 +47,7 @@ export async function documentRoutes(app: FastifyInstance) {
     pgPool,
     service,
     handwritingCredits,
-    new GcsFileStorage(),
+    fileStorage,
     new CascadePrescriptionUnderstandingProvider(),
     new GeminiVaccineCardUnderstandingProvider(),
     llmQuota,

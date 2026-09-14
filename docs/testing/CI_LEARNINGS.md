@@ -27,6 +27,7 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | `patient-documents-crud` timeout | Upload OCR + revisão obrigatória; Select antigo no modal | `clickAntSelectOption`, aguardar «Documento processado», confirmar revisão OCR |
 | Ava specs flaky no CI | Bolha visível antes do texto SSE | `waitForAvaAssistantReply` com `toContainText` 60s |
 | Nightly `createUser: {}` | Supabase intermitente / corrida | `ensure-qa-auth-user.mjs` com retry |
+| `patient-documents` sem «Documento processado» | GCS indisponível no runner + OCR lento | `resolveFileStorage()` local + `OCR_CI_STUB=1` no CI |
 | Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |
 | Imports duplicados (`PatientPgRepository`, `VaccinePgRepository`) | merge/copy-paste | `tsc` pega imediatamente |
 
