@@ -86,6 +86,24 @@
       "tags": ["suporte", "lgpd", "observabilidade", "bugs"]
     },
     {
+      "id": "patient-clinical-export",
+      "epicId": "family-day-to-day",
+      "title": "Export clínico — Levar na consulta (link, QR, PDF)",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/patient-clinical-export.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/patients/:id", "/clinical-export/:token"],
+      "api": [
+        "GET /patients/:id/clinical-export",
+        "POST /patients/:id/clinical-export/shares",
+        "GET /clinical-export/share/:token"
+      ],
+      "helpTopics": [],
+      "tags": ["export", "clínico", "consulta", "share", "família"]
+    },
+    {
       "id": "business-analytics-ops",
       "epicId": "business-analytics",
       "title": "Analytics de negócio (console ops)",

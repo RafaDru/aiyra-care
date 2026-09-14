@@ -62,7 +62,7 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Integrações** — vincular plano, sincronizar (modal) | CRU | `integrations-link-sync` | 🟡 |
 | **Convênios** — importar / vincular | C | `patient-insurance` | ⬜ |
 | **Higienização** — resolver duplicata | RU | `hygiene-dedup-ui` | 🟡 |
-| **Export clínico** — gerar + link compartilhado | C | `patient-clinical-export` | ⬜ |
+| **Export clínico** — gerar + link compartilhado | C | `patient-clinical-export` | ✅ |
 | **Quem tem acesso** — grant / revogar | CRD | `family-access-matrix` | 🟡 |
 
 ### Ava (trilho próprio)

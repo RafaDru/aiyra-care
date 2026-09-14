@@ -7,6 +7,9 @@ export const PRODUCT_EVENT_NAMES = [
   'ava_context_unpin',
   'ava_patient_switch_hook',
   'ava_proposed_action_executed',
+  'ava_proposed_action_shown',
+  'ava_proposed_action_failed',
+  'ava_turn_recorded',
   'sync_job_terminal',
   'sync_job_started',
   'billing_checkout_started',
@@ -31,6 +34,10 @@ export const PRODUCT_EVENT_NAMES = [
   'notification_optin_changed',
   'app_screen_viewed',
   'support_report_submitted',
+  'consult_visit_share_created',
+  'consult_visit_link_copied',
+  'consult_visit_print',
+  'consult_visit_whatsapp',
 ] as const
 
 export type ProductEventName = typeof PRODUCT_EVENT_NAMES[number]
@@ -76,6 +83,16 @@ export const PRODUCT_EVENT_PROPERTY_KEYS = new Set([
   'enabled',
   'patient_count',
   'access_level',
+  'intent_bucket',
+  'reflection_satisfactory',
+  'reflection_revised',
+  'reflection_severity',
+  'needs_full_context',
+  'proposed_action_count',
+  'insights_included',
+  'has_attachment',
+  'has_entity_pin',
+  'action_count',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret/i

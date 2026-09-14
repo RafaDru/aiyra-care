@@ -1,5 +1,19 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-11] - D1 Wizard «Levar na consulta»
+
+### Decisão
+- MVP D1 aprovado antes do «+ Registro rápido» (D2): reutilizar export clínico + share token 48h.
+
+### Realizado
+- `ConsultVisitWizardModal` — link, QR, PDF, WhatsApp; CTA no painel «Resumo clínico».
+- Rota pública web `/clinical-export/:token` (gap: API já gerava URL sem página).
+- Telemetria `consult_visit_*` na allowlist de `product_events`.
+- Suite QA `patient-clinical-export` + spec Playwright.
+
+### Próximo
+- D2 «+ Registro rápido»; CTA opcional no dashboard.
+
 ## [2026-09-11] - QA CI Fase 4 Ava + ops Negócio + foco produto
 
 ### Decisão

@@ -1339,7 +1339,7 @@
       "title": "Dia a dia — captura rápida + levar na consulta",
       "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
       "status": "in_progress",
-      "statusLabel": "Discovery — MVP D1 wizard consulta",
+      "statusLabel": "D1 wizard consulta entregue — D2 registro rápido",
       "items": [
         {
           "id": "family-day-to-day-discovery",
@@ -1350,8 +1350,8 @@
         {
           "id": "clinician-share-wizard",
           "title": "Wizard «Levar na consulta» (link + QR + PDF)",
-          "status": "planned",
-          "detail": "Reusa clinical-export/shares; QR do shareUrl; CTA dashboard e perfil."
+          "status": "done",
+          "detail": "ConsultVisitWizardModal + rota pública /clinical-export/:token; CTA no perfil (contexto clínico)."
         },
         {
           "id": "family-quick-capture",

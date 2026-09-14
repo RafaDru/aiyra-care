@@ -1,6 +1,6 @@
 # Foco atual — tracking vivo
 
-> **Última atualização:** 2026-09-11  
+> **Última atualização:** 2026-09-14  
 > Documento de acompanhamento entre sessões — complementa `roadmap.json` e `HISTORICO.md`.  
 > Atualizar a cada entrega relevante ou mudança de prioridade.
 
@@ -27,7 +27,7 @@
 
 **Gaps → MVP proposto:**
 
-- **D1** Wizard «Levar na consulta» (reusa export + QR + link 48h)
+- **D1** Wizard «Levar na consulta» — **entregue** (link + QR + PDF + rota pública)
 - **D2** «+ Registro rápido» (5 tipos, &lt; 30s)
 - **D3** Bloco «Hoje» na Carteira
 - Programa de indicação bilateral — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
@@ -72,6 +72,8 @@
 | `e5c64a2` | `npm run ops:business-weekly` |
 | `36fa56e` | Fix project `smoke` + dropdown Select (1ª iteração) |
 | `56e56be` | Select force click + `FOCO_ATUAL.md` — **regression verde** |
+| `b093195`+ | CI: mutex Playwright, senhas QA fixas, helpers E2E, OCR stub |
+| *(esta sessão)* | **D1** Wizard «Levar na consulta» — `ConsultVisitWizardModal`, `/clinical-export/:token`, suite QA |
 
 ---
 
@@ -79,13 +81,11 @@
 
 | Workflow | Run | Resultado | Notas |
 |----------|-----|-----------|-------|
-| E2E regression | [34636197555](https://github.com/RafaDru/aiyra-care/actions/runs/34636197555) | **PASS** | 6 specs (smoke + onboarding + core-patient + 2 Ava); fix `56e56be` |
-| E2E regression | [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392) | FAIL | flake Select — corrigido em `56e56be` |
-| E2E business-full | [34634817991](https://github.com/RafaDru/aiyra-care/actions/runs/34634817991) | FAIL | pré-fix Select; re-disparar após validação |
+| E2E regression | [34857415954](https://github.com/RafaDru/aiyra-care/actions/runs/34857415954) | **PASS** | smoke + onboarding + core-patient + 2 Ava |
+| E2E business-full | [34857416100](https://github.com/RafaDru/aiyra-care/actions/runs/34857416100) | **PASS** | 11 passed, 2 flaky Ava (`ava-companion-smoke`, `ava-guardrail-smoke`) |
+| E2E business-full | [34634817991](https://github.com/RafaDru/aiyra-care/actions/runs/34634817991) | FAIL | pré-fix Select — histórico |
 
-**Causa raiz (regression, resolvida):** Ant Design Select no CI — dropdown hidden na animação `ant-slide-up-appear`. Fix: `.ant-select-item-option` + `click({ force: true })` (`56e56be`).
-
-**Meta:** 7 noites verdes no `business-full` antes de promover a gate obrigatório (`AUTOMATION_ROADMAP.md`).
+**Meta:** 7 noites verdes no `business-full` antes de promover a gate obrigatório (`AUTOMATION_ROADMAP.md`). **Progresso: 1/7** (run `34857416100`).
 
 ---
 

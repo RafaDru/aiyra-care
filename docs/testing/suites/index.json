@@ -175,6 +175,20 @@
       "estimatedMinutes": 30
     },
     {
+      "id": "patient-clinical-export",
+      "domain": "clinico",
+      "title": "Export clínico — wizard Levar na consulta",
+      "featureId": "patient-clinical-export",
+      "lane": "business-full",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/patient-clinical-export.md",
+      "coverage": "partial",
+      "businessActions": ["clinical_export.share"],
+      "automation": { "status": "done", "spec": "packages/web/e2e/suites/patient-clinical-export.spec.ts" },
+      "estimatedMinutes": 5
+    },
+    {
       "id": "ops-health",
       "domain": "ops",
       "title": "Ops — health e métricas",
@@ -207,6 +221,7 @@
         "integrations-link-sync",
         "hygiene-dedup-ui",
         "support-user-report",
+        "patient-clinical-export",
         "ava-companion-smoke",
         "ava-guardrail-smoke",
         "ava-conversation-crud"

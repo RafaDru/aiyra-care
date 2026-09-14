@@ -657,6 +657,9 @@ export type ProductEventName =
   | 'ava_context_unpin'
   | 'ava_patient_switch_hook'
   | 'ava_proposed_action_executed'
+  | 'ava_proposed_action_shown'
+  | 'ava_proposed_action_failed'
+  | 'ava_turn_recorded'
   | 'sync_job_terminal'
   | 'sync_job_started'
   | 'billing_checkout_started'
@@ -676,6 +679,10 @@ export type ProductEventName =
   | 'notification_optin_changed'
   | 'app_screen_viewed'
   | 'support_report_submitted'
+  | 'consult_visit_share_created'
+  | 'consult_visit_link_copied'
+  | 'consult_visit_print'
+  | 'consult_visit_whatsapp'
 
 export type SupportReportCategory =
   | 'technical_bug'
