@@ -8,7 +8,11 @@ import type {
 } from './ops.types.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { OpsKpiCard, OpsKpiGrid } from './components/OpsKpiCard.js'
-import { BizAvaTurnsTimeline, BizGrowthTimeline } from './components/OpsCharts.js'
+import {
+  BizAvaTurnsTimeline,
+  BizCumulativeGrowthTimeline,
+  BizGrowthTimeline,
+} from './components/OpsCharts.js'
 import { formatBrl } from './ops-format.js'
 import { resolveClientFeatureLabel } from './ops-feature-catalog.js'
 
@@ -36,6 +40,18 @@ const AVA_ACTION_LABEL: Record<string, string> = {
   hygiene_dismiss: 'Dispensar higiene',
 }
 
+const AVA_INTENT_LABEL: Record<string, string> = {
+  exam: 'Exames / laudos',
+  vaccine: 'Vacinas',
+  medication: 'Medicamentos',
+  sync_integration: 'Sync / convênio',
+  hygiene: 'Higienização / duplicatas',
+  export_share: 'Export / compartilhar',
+  emergency: 'Emergência',
+  navigation: 'Navegação no app',
+  general: 'Geral',
+}
+
 function pct(part: number, total: number): string {
   if (total <= 0) return '—'
   return `${Math.round((part / total) * 1000) / 10}%`
@@ -52,18 +68,7 @@ function deltaHint(newCount: number): string {
 }
 
 function featureLabel(key: string): string {
-  if (key.includes('_') && !key.startsWith('api:')) {
-    try {
-      return resolveClientFeatureLabel(key)
-    } catch {
-      return key.replace(/_/g, ' ')
-    }
-  }
-  try {
-    return resolveClientFeatureLabel(key)
-  } catch {
-    return key.replace(/_/g, ' ')
-  }
+  return resolveClientFeatureLabel(key)
 }
 
 const integrationColumns: ColumnsType<BizIntegrationPortalRow> = [
@@ -152,7 +157,10 @@ export function BusinessPanel({ data }: { data: OpsMetricsResponse }) {
       </OpsPanel>
 
       <div className="ops-chart-grid">
-        <div className="ops-chart-span-12">
+        <div className="ops-chart-span-6">
+          <BizCumulativeGrowthTimeline rows={growthDaily30d} totals={totals} />
+        </div>
+        <div className="ops-chart-span-6">
           <BizGrowthTimeline rows={growthDaily30d} />
         </div>
       </div>
@@ -218,6 +226,72 @@ export function BusinessPanel({ data }: { data: OpsMetricsResponse }) {
               ]}
             />
           </>
+        )}
+
+        <Title level={5} style={{ marginTop: 20, marginBottom: 8 }}>
+          Aprendizado (30d)
+        </Title>
+        <OpsKpiGrid>
+          <OpsKpiCard
+            label="Turnos registrados"
+            value={ava.learning.turnsRecorded30d}
+            hint="server ava_turn_recorded"
+          />
+          <OpsKpiCard
+            label="Respostas insatisfatórias"
+            value={ava.learning.unsatisfactoryRatePct != null ? `${ava.learning.unsatisfactoryRatePct}%` : '—'}
+            alert={(ava.learning.unsatisfactoryRatePct ?? 0) > 15}
+          />
+          <OpsKpiCard
+            label="Ações mostradas"
+            value={ava.learning.proposedFunnel30d.shown}
+          />
+          <OpsKpiCard
+            label="Conversão ação"
+            value={ava.learning.proposedFunnel30d.executionRatePct != null
+              ? `${ava.learning.proposedFunnel30d.executionRatePct}%`
+              : '—'}
+            hint={`${ava.learning.proposedFunnel30d.executed} ok · ${ava.learning.proposedFunnel30d.failed} falha`}
+          />
+        </OpsKpiGrid>
+
+        {ava.learning.intentBreakdown30d.length > 0 && (
+          <Table
+            size="small"
+            style={{ marginTop: 16 }}
+            pagination={false}
+            rowKey="intent"
+            dataSource={ava.learning.intentBreakdown30d}
+            columns={[
+              {
+                title: 'Intenção',
+                dataIndex: 'intent',
+                render: (v: string) => AVA_INTENT_LABEL[v] ?? v,
+              },
+              { title: 'Turnos', dataIndex: 'turns', width: 80 },
+              {
+                title: 'Insatisf.',
+                dataIndex: 'unsatisfactory',
+                width: 90,
+                render: (v: number, row) => (
+                  <Tag color={v > 0 && v / Math.max(row.turns, 1) > 0.2 ? 'warning' : 'default'}>
+                    {v}
+                  </Tag>
+                ),
+              },
+              { title: 'Ctx cheio', dataIndex: 'needsFullContext', width: 90 },
+              { title: 'Revisadas', dataIndex: 'revised', width: 90 },
+            ]}
+          />
+        )}
+
+        {ava.learning.reflectionBySeverity30d.length > 0 && (
+          <Text type="secondary" style={{ fontSize: 12, marginTop: 12, display: 'block' }}>
+            Reflexão por severidade:{' '}
+            {ava.learning.reflectionBySeverity30d
+              .map((r) => `${r.severity} (${r.count})`)
+              .join(' · ')}
+          </Text>
         )}
 
         {ava.proposedActions.length > 0 && (

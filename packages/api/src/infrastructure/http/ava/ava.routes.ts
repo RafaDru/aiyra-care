@@ -39,6 +39,8 @@ import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repositor
 import { AvaConversationPgRepository } from '../../persistence/ava-conversation.pg.repository.js'
 import { AvaSessionContextPgRepository } from '../../persistence/ava-session-context.pg.repository.js'
 import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
+import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
 import { AvaController } from './ava.controller.js'
 import { AvaConversationController } from './ava-conversation.controller.js'
 import { AvaActionController } from './ava-action.controller.js'
@@ -125,7 +127,8 @@ export async function avaRoutes(app: FastifyInstance) {
     sessionContext,
     proposedActions,
   )
-  const controller = new AvaController(avaChat)
+  const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
+  const controller = new AvaController(avaChat, productEvents)
   const conversationController = new AvaConversationController(conversations, sessionContext)
   const actionController = new AvaActionController(proposedActions, contextSuggestions)
 

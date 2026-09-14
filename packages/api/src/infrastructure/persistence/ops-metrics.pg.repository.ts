@@ -419,6 +419,10 @@ export class OpsMetricsPgRepository {
       avaFailuresRes,
       avaProposedRes,
       avaDailyRes,
+      avaIntentRes,
+      avaProposedFunnelRes,
+      avaReflectionSeverityRes,
+      avaTurnsRecordedRes,
       compositionRes,
       supportRes,
       supportCategoriesRes,
@@ -598,6 +602,54 @@ export class OpsMetricsPgRepository {
       ),
       this.pool.query(
         `SELECT
+           COALESCE(properties->>'intent_bucket', 'general') AS intent,
+           COUNT(*)::int AS turns,
+           COUNT(*) FILTER (
+             WHERE COALESCE(properties->>'reflection_satisfactory', 'true') = 'false'
+           )::int AS unsatisfactory,
+           COUNT(*) FILTER (
+             WHERE COALESCE(properties->>'needs_full_context', 'false') = 'true'
+           )::int AS needs_full_context,
+           COUNT(*) FILTER (
+             WHERE COALESCE(properties->>'reflection_revised', 'false') = 'true'
+           )::int AS revised
+         FROM product_events
+         WHERE event_name = 'ava_turn_recorded'
+           AND created_at >= NOW() - INTERVAL '30 days'
+         GROUP BY 1
+         ORDER BY turns DESC`,
+      ),
+      this.pool.query(
+        `SELECT
+           COUNT(*) FILTER (WHERE event_name = 'ava_proposed_action_shown')::int AS shown,
+           COUNT(*) FILTER (WHERE event_name = 'ava_proposed_action_executed')::int AS executed,
+           COUNT(*) FILTER (WHERE event_name = 'ava_proposed_action_failed')::int AS failed
+         FROM product_events
+         WHERE created_at >= NOW() - INTERVAL '30 days'
+           AND event_name IN (
+             'ava_proposed_action_shown',
+             'ava_proposed_action_executed',
+             'ava_proposed_action_failed'
+           )`,
+      ),
+      this.pool.query(
+        `SELECT
+           COALESCE(properties->>'reflection_severity', 'unknown') AS severity,
+           COUNT(*)::int AS count
+         FROM product_events
+         WHERE event_name = 'ava_turn_recorded'
+           AND created_at >= NOW() - INTERVAL '30 days'
+         GROUP BY 1
+         ORDER BY count DESC`,
+      ),
+      this.pool.query(
+        `SELECT COUNT(*)::int AS turns_recorded
+         FROM product_events
+         WHERE event_name = 'ava_turn_recorded'
+           AND created_at >= NOW() - INTERVAL '30 days'`,
+      ),
+      this.pool.query(
+        `SELECT
            domain,
            COUNT(*)::int AS scopes_touched,
            COUNT(DISTINCT patient_id) FILTER (WHERE patient_id IS NOT NULL)::int AS patients_touched
@@ -700,6 +752,18 @@ export class OpsMetricsPgRepository {
     const avaQuota30d = Number(avaSummary.quota_blocked_30d ?? 0)
     const avaUnresolved30d = avaFailed30d + avaQuota30d
     const avaTerminal30d = avaCompleted30d + avaUnresolved30d
+    const proposedFunnel = avaProposedFunnelRes.rows[0] as Record<string, unknown>
+    const proposedShown = Number(proposedFunnel.shown ?? 0)
+    const proposedExecuted = Number(proposedFunnel.executed ?? 0)
+    const turnsRecorded30d = Number((avaTurnsRecordedRes.rows[0] as Record<string, unknown>)?.turns_recorded ?? 0)
+    const intentRows = avaIntentRes.rows.map((row) => ({
+      intent: row.intent as string,
+      turns: Number(row.turns),
+      unsatisfactory: Number(row.unsatisfactory),
+      needsFullContext: Number(row.needs_full_context),
+      revised: Number(row.revised),
+    }))
+    const unsatisfactoryTotal = intentRows.reduce((n, r) => n + r.unsatisfactory, 0)
 
     return {
       totals: {
@@ -761,6 +825,25 @@ export class OpsMetricsPgRepository {
           completed: Number(row.completed),
           unresolved: Number(row.unresolved),
         })),
+        learning: {
+          intentBreakdown30d: intentRows,
+          proposedFunnel30d: {
+            shown: proposedShown,
+            executed: proposedExecuted,
+            failed: Number(proposedFunnel.failed ?? 0),
+            executionRatePct: proposedShown > 0
+              ? Math.round((proposedExecuted / proposedShown) * 1000) / 10
+              : null,
+          },
+          reflectionBySeverity30d: avaReflectionSeverityRes.rows.map((row) => ({
+            severity: row.severity as string,
+            count: Number(row.count),
+          })),
+          unsatisfactoryRatePct: turnsRecorded30d > 0
+            ? Math.round((unsatisfactoryTotal / turnsRecorded30d) * 1000) / 10
+            : null,
+          turnsRecorded30d,
+        },
       },
       composition: {
         activeDomains30d: compositionRes.rows.map((row) => ({

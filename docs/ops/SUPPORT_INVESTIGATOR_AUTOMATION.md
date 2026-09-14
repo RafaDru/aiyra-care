@@ -1,4 +1,4 @@
-# Agente investigador — Cursor Automation (Tier 0)
+# Suporte Desenvolvimento — Cursor Automation (Tier 0)
 
 > Webhook `support_report` → agente no monorepo → rascunho em `docs/ops/investigations/`
 
@@ -9,12 +9,14 @@ POST /support/reports
         │
         ├─► OPS_ALERT_WEBHOOK_URL (:3012)     → toast Windows + console Suporte
         │
-        └─► CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL → Cursor Automation (agente)
+        └─► CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL → Cursor Automation (agente)
                     │
                     └─► docs/ops/investigations/YYYY-MM-DD-<id>.md
 ```
 
 Canais **independentes**: o notificador local e a Automation recebem o mesmo payload (investigator inclui `investigation: { tier: 0 }`).
+
+**Ambiente:** `environment.deploymentTier` (`integration` \| `preview` \| `production`) vem de `DEPLOYMENT_TIER` na API que disparou — não infira pela porta. As vars `CURSOR_*_WEBHOOK_*` podem ficar **só no `.env`** (mesma Automation para dev e preview).
 
 ---
 
@@ -24,7 +26,7 @@ Canais **independentes**: o notificador local e a Automation recebem o mesmo pay
 
 | Campo | Valor |
 |-------|--------|
-| **Nome** | AiyraCare — Investigador suporte (Tier 0) |
+| **Nome** | AiyraCare — Suporte Desenvolvimento (Tier 0) |
 | **Trigger** | HTTP webhook |
 | **Repo** | `RafaDru/aiyra-care` · branch `main` |
 | **Modelo** | Composer 2.5 (ou equivalente com reasoning) |
@@ -54,8 +56,8 @@ Canais **independentes**: o notificador local e a Automation recebem o mesmo pay
 OPS_ALERT_WEBHOOK_URL=http://127.0.0.1:3012/ops-alert
 
 # Agente investigador (após salvar a Automation)
-CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL=https://api2.cursor.sh/automations/webhook/...
-CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY=crsr_...   # «Generate auth header» no trigger Webhook
+CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL=https://api2.cursor.sh/automations/webhook/...
+CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY=crsr_...   # «Generate auth header» no trigger Webhook
 ```
 
 O token **não** é a URL — na mesma tela do webhook, clique **Generate auth header** (ou **Copy auth header**) e cole só o `crsr_...`.
@@ -123,7 +125,7 @@ Envia payload de teste para notificador **e** Automation. Esperado:
 
 | Sintoma | Ação |
 |---------|------|
-| Só toast, sem agente | `CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL` ausente ou API não reiniciada |
+| Só toast, sem agente | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL` ausente ou API não reiniciada |
 | Automation não dispara | URL expirada/regenerada — copiar nova URL do editor |
 | Agente sem arquivo | Ver Runs da Automation; prompt pode precisar de commit do playbook no `main` |
 | 401 no webhook | Conferir auth configurada no editor da Automation |

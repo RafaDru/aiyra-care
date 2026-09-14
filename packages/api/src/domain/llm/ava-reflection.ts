@@ -35,7 +35,7 @@ const PRESCRIPTION_PATTERNS: RegExp[] = [
   /\bdiminua a dose\b/i,
 ]
 
-const EMERGENCY_USER_KEYWORDS = /\b(samu|192|193|emergência|urgência|risco de vida|desmaio|convulsão|não respira)\b/i
+export const EMERGENCY_USER_KEYWORDS = /\b(samu|192|193|emergência|urgência|risco de vida|desmaio|convulsão|não respira)\b/i
 
 export function isAvaReflectionEnabled(): boolean {
   const v = process.env.AVA_REFLECTION_ENABLED?.trim().toLowerCase()

@@ -19,6 +19,9 @@ import {
 import type {
   AvaProviderMixRow,
   AvaTokenPercentiles,
+  BizAvaDailyRow,
+  BizDailyGrowthRow,
+  BizTotals,
   OpsAlert,
   OpsHourlyAvaEventBucket,
   OpsHourlyAvaTokensBucket,
@@ -680,6 +683,125 @@ export function InternalLlmOutcomeChart({
           <Tooltip />
           <Legend />
         </PieChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+function formatDayLabel(isoDay: string): string {
+  const [, month, day] = isoDay.split('-')
+  return `${day}/${month}`
+}
+
+function buildCumulativeSeries(rows: BizDailyGrowthRow[], totals: BizTotals) {
+  const sumAccounts = rows.reduce((n, r) => n + r.newAccounts, 0)
+  const sumPatients = rows.reduce((n, r) => n + r.newPatients, 0)
+  const sumFamilies = rows.reduce((n, r) => n + r.newFamilies, 0)
+  let accounts = totals.accounts - sumAccounts
+  let patients = totals.patients - sumPatients
+  let families = totals.families - sumFamilies
+  return rows.map((row) => {
+    accounts += row.newAccounts
+    patients += row.newPatients
+    families += row.newFamilies
+    return {
+      day: row.day,
+      label: formatDayLabel(row.day),
+      accounts,
+      patients,
+      families,
+    }
+  })
+}
+
+export function BizCumulativeGrowthTimeline({
+  rows,
+  totals,
+}: {
+  rows: BizDailyGrowthRow[]
+  totals: BizTotals
+}) {
+  const data = buildCumulativeSeries(rows, totals)
+  if (!data.length) {
+    return (
+      <ChartFrame title="Totais ao longo do tempo" subtitle="Evolução acumulada · 30d">
+        <EmptyChart message="Sem dados" />
+      </ChartFrame>
+    )
+  }
+  return (
+    <ChartFrame title="Totais ao longo do tempo" subtitle="Evolução acumulada · 30d">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 11 }} width={44} allowDecimals={false} />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="accounts" name="Usuários" stroke={C.primary} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="patients" name="Pacientes" stroke={C.info} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="families" name="Famílias" stroke={C.success} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function BizGrowthTimeline({ rows }: { rows: BizDailyGrowthRow[] }) {
+  const data = rows.map((row) => ({
+    ...row,
+    label: formatDayLabel(row.day),
+  }))
+  if (!data.length) {
+    return (
+      <ChartFrame title="Crescimento" subtitle="Novos cadastros · 30d">
+        <EmptyChart message="Sem dados" />
+      </ChartFrame>
+    )
+  }
+  return (
+    <ChartFrame title="Crescimento" subtitle="Novos por dia · usuários, pacientes, famílias">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 11 }} width={36} allowDecimals={false} />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="newAccounts" name="Usuários" stroke={C.primary} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="newPatients" name="Pacientes" stroke={C.info} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="newFamilies" name="Famílias" stroke={C.success} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function BizAvaTurnsTimeline({ rows }: { rows: BizAvaDailyRow[] }) {
+  const data = rows.map((row) => ({
+    ...row,
+    label: formatDayLabel(row.day),
+  }))
+  if (!data.length) {
+    return (
+      <ChartFrame title="Ava — turnos" subtitle="30d">
+        <EmptyChart message="Sem turnos Ava" />
+      </ChartFrame>
+    )
+  }
+  return (
+    <ChartFrame title="Ava — turnos" subtitle="Iniciados vs concluídos vs não resolvidos">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 11 }} width={36} allowDecimals={false} />
+          <Tooltip />
+          <Legend />
+          <Area type="monotone" dataKey="started" name="Iniciados" stroke={C.info} fill={`${C.info}33`} />
+          <Area type="monotone" dataKey="completed" name="Concluídos" stroke={C.success} fill={`${C.success}33`} />
+          <Area type="monotone" dataKey="unresolved" name="Não resolvidos" stroke={C.error} fill={`${C.error}33`} />
+        </AreaChart>
       </ResponsiveContainer>
     </ChartFrame>
   )

@@ -1,6 +1,6 @@
 {
-  "name": "AiyraCare — Investigador alertas ops (Tier 0)",
-  "description": "Webhook ops_alert → análise infra/sync/llm no monorepo. Rascunho em docs/ops/investigations/.",
+  "name": "AiyraCare — Suporte SRE (Tier 0)",
+  "description": "Lane Suporte SRE — webhook ops_alert (alertas infra/sync/llm). Rascunho em docs/ops/investigations/.",
   "workflow": {
     "triggers": [
       {

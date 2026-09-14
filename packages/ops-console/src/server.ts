@@ -22,7 +22,7 @@ import { RuntimeDegradedPgRepository } from '../../api/src/infrastructure/persis
 import { SupportReportPgRepository } from '../../api/src/infrastructure/persistence/support-report.pg.repository.js'
 import { OpsSupportReportService } from '../../api/src/application/ops/ops-support-report.service.js'
 import { OpsAlertAnalysisService } from '../../api/src/application/ops/ops-alert-analysis.service.js'
-import { getOpsAlertAnalysisMemoryStore } from '../../api/src/application/ops/ops-alert-analysis-memory.store.js'
+import { OpsAlertIncidentPgRepository } from '../../api/src/infrastructure/persistence/ops-alert-incident.pg.repository.js'
 import { runOpsProbe } from '../../api/src/application/ops/ops-probe.service.js'
 import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe-artifact.js'
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
@@ -66,7 +66,7 @@ const metricsService = new OpsMetricsService(
   ),
 )
 const runtimeService = new RuntimeDegradedService(new RuntimeDegradedPgRepository(pool))
-const alertAnalysisService = new OpsAlertAnalysisService(getOpsAlertAnalysisMemoryStore())
+const alertAnalysisService = new OpsAlertAnalysisService(new OpsAlertIncidentPgRepository(pool))
 const dispatchService = new OpsAlertDispatchService(metricsService, alertAnalysisService)
 const supportReportService = new OpsSupportReportService(new SupportReportPgRepository(pool))
 
@@ -134,7 +134,7 @@ async function main() {
     const payload = await metricsService.getMetrics()
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
-    const alertAnalysis = alertAnalysisService.getAll()
+    const alertAnalysis = await alertAnalysisService.getAll()
     return { ...payload, runtime, triage, alertAnalysis }
   })
 
@@ -148,7 +148,7 @@ async function main() {
       metrics: metricsPayload.metrics,
       alerts: metricsPayload.alerts,
     })
-    return { ...result, alertAnalysis: alertAnalysisService.getAll() }
+    return { ...result, alertAnalysis: await alertAnalysisService.getAll() }
   })
 
   fastify.post<{ Params: { id: string }; Body: { operatorNotes?: string } }>(
@@ -171,7 +171,7 @@ async function main() {
         const code = result.error === 'cooldown' ? 429 : 503
         return reply.status(code).send({ error: result.error, message: result.message })
       }
-      return { ...result, alertAnalysis: alertAnalysisService.getForAlert(alert.id) }
+      return { ...result, alertAnalysis: await alertAnalysisService.getForAlert(alert.id) }
     },
   )
 
@@ -181,12 +181,12 @@ async function main() {
   }>(
     '/api/ops-alerts/:id/complete-analysis',
     async (req, reply) => {
-      const ok = alertAnalysisService.completeAnalysis(req.params.id, {
+      const ok = await alertAnalysisService.completeAnalysis(req.params.id, {
         analysisSummary: req.body?.analysisSummary,
         analysisArtifactPath: req.body?.analysisArtifactPath,
       })
       if (!ok) return reply.status(400).send({ error: 'invalid_payload' })
-      return { ok: true, alertAnalysis: alertAnalysisService.getForAlert(req.params.id) }
+      return { ok: true, alertAnalysis: await alertAnalysisService.getForAlert(req.params.id) }
     },
   )
 

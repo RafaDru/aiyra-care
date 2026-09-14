@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { App, Button, Space, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -17,6 +17,18 @@ export function AvaProposedActions({ patientId, actions, onDone }: Props) {
   const { t } = useTranslation()
   const { message } = App.useApp()
   const [busyId, setBusyId] = useState<string | null>(null)
+  const shownKeyRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (actions.length === 0) return
+    const key = actions.map((a) => a.id).join(',')
+    if (shownKeyRef.current === key) return
+    shownKeyRef.current = key
+    trackProductEvent('ava_proposed_action_shown', {
+      action_count: actions.length,
+      action_type: actions[0]?.type ?? 'unknown',
+    }, { patientId })
+  }, [actions, patientId])
 
   if (actions.length === 0) return null
 
@@ -38,7 +50,12 @@ export function AvaProposedActions({ patientId, actions, onDone }: Props) {
       }, { patientId })
       onDone?.()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : t('common.error'))
+      const errMsg = e instanceof Error ? e.message : t('common.error')
+      trackProductEvent('ava_proposed_action_failed', {
+        action_type: action.type,
+        error_code: errMsg.slice(0, 64),
+      }, { patientId })
+      message.error(errMsg)
     } finally {
       setBusyId(null)
     }

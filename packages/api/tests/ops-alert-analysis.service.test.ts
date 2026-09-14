@@ -29,19 +29,19 @@ describe('OpsAlertAnalysisService', () => {
       checkedAt: '2026-09-08T12:00:00.000Z',
     })
     expect(result.ok).toBe(true)
-    const row = store.get('infra_api_down')
+    const row = await store.get('infra_api_down')
     expect(row.analysisStatus).toBe('in_progress')
     expect(row.operatorNotes).toBe('porta ocupada')
   })
 
-  it('completeAnalysis marks completed', () => {
+  it('completeAnalysis marks completed', async () => {
     const store = new OpsAlertAnalysisMemoryStore()
     const svc = new OpsAlertAnalysisService(store)
-    const ok = svc.completeAnalysis('infra_api_down', {
+    const ok = await svc.completeAnalysis('infra_api_down', {
       analysisSummary: 'API reiniciada via up.ps1',
       analysisArtifactPath: 'docs/ops/investigations/2026-09-08-infra_api_down.md',
     })
     expect(ok).toBe(true)
-    expect(store.get('infra_api_down').analysisStatus).toBe('completed')
+    expect((await store.get('infra_api_down')).analysisStatus).toBe('completed')
   })
 })

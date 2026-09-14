@@ -186,6 +186,34 @@ export interface BizAvaDailyRow {
   unresolved: number
 }
 
+export interface BizAvaIntentRow {
+  intent: string
+  turns: number
+  unsatisfactory: number
+  needsFullContext: number
+  revised: number
+}
+
+export interface BizAvaProposedFunnel {
+  shown: number
+  executed: number
+  failed: number
+  executionRatePct: number | null
+}
+
+export interface BizAvaReflectionRow {
+  severity: string
+  count: number
+}
+
+export interface BizAvaLearning {
+  intentBreakdown30d: BizAvaIntentRow[]
+  proposedFunnel30d: BizAvaProposedFunnel
+  reflectionBySeverity30d: BizAvaReflectionRow[]
+  unsatisfactoryRatePct: number | null
+  turnsRecorded30d: number
+}
+
 export interface BizAvaAnalytics {
   started30d: number
   completed30d: number
@@ -196,6 +224,7 @@ export interface BizAvaAnalytics {
   failures: BizAvaFailureRow[]
   proposedActions: BizAvaProposedActionRow[]
   daily30d: BizAvaDailyRow[]
+  learning: BizAvaLearning
 }
 
 export interface BizCompositionDomainRow {

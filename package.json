@@ -35,6 +35,7 @@
     "ops:notifier:restart": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ops-notifier-up.ps1 -Force && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ops-notifier-up.ps1 -Preview -Force",
     "ops:notifier:simulate": "cd packages/api && npm run ops:notifier:simulate",
     "ops:support-investigator:simulate": "node scripts/support-investigator-simulate.mjs",
+    "ops:alert-investigator:simulate": "node scripts/ops-alert-investigator-simulate.mjs",
     "setup:ops-prod": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-ops-prod.ps1",
     "setup:ops-preview": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-ops-preview.ps1",
     "setup:ops-alerts": "powershell -File scripts/setup-ops-alerts.ps1",

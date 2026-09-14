@@ -12,7 +12,7 @@ import {
   dispatchOpsAlertInvestigator,
   shouldAutoInvestigateOpsAlert,
 } from './ops-alert-investigator-dispatch.js'
-import type { OpsAlertAnalysisMemoryStore } from './ops-alert-analysis-memory.store.js'
+import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
 
 const DEFAULT_INVESTIGATOR_COOLDOWN_MS = 30 * 60 * 1000
 
@@ -42,13 +42,16 @@ export type RequestOpsAlertAnalysisResult =
   }
 
 export class OpsAlertAnalysisService {
-  constructor(private readonly store: OpsAlertAnalysisMemoryStore) {}
+  constructor(private readonly store: OpsAlertAnalysisStore) {}
 
-  getAll(): Record<string, OpsAlertAnalysisRecord> {
-    return this.store.getAll()
+  async getAll(): Promise<Record<string, OpsAlertAnalysisRecord>> {
+    const rows = await this.store.listAll()
+    const out: Record<string, OpsAlertAnalysisRecord> = {}
+    for (const row of rows) out[row.alertId] = row
+    return out
   }
 
-  getForAlert(alertId: string): OpsAlertAnalysisRecord {
+  async getForAlert(alertId: string): Promise<OpsAlertAnalysisRecord> {
     return this.store.get(alertId)
   }
 
@@ -62,13 +65,13 @@ export class OpsAlertAnalysisService {
       respectCooldown?: boolean
     },
   ): Promise<RequestOpsAlertAnalysisResult> {
-    const existing = this.store.get(alert.id)
+    const existing = await this.store.get(alert.id)
     const notes = sanitizeOpsAlertOperatorNotes(options.operatorNotes) ?? existing.operatorNotes
 
     if (
       options.trigger === 'auto'
       && options.respectCooldown
-      && !this.store.investigatorCooldownElapsed(alert.id, investigatorCooldownMs())
+      && !(await this.store.investigatorCooldownElapsed(alert.id, investigatorCooldownMs()))
     ) {
       return { ok: false, error: 'cooldown', message: 'Investigador em cooldown para este alerta' }
     }
@@ -94,10 +97,10 @@ export class OpsAlertAnalysisService {
       analysisRequestedAt: dispatch.outcome === 'sent' ? now : existing.analysisRequestedAt,
       analysisCompletedAt: dispatch.outcome === 'sent' ? null : existing.analysisCompletedAt,
     }
-    this.store.save(record)
+    await this.store.save(record)
 
     if (dispatch.outcome === 'sent') {
-      this.store.markInvestigatorSent(alert.id)
+      await this.store.markInvestigatorSent(alert.id)
       return {
         ok: true,
         analysisStatus: 'in_progress',
@@ -140,16 +143,16 @@ export class OpsAlertAnalysisService {
     return sent
   }
 
-  completeAnalysis(
+  async completeAnalysis(
     alertId: string,
     input: { analysisSummary?: string; analysisArtifactPath?: string },
-  ): boolean {
+  ): Promise<boolean> {
     const summary = sanitizeOpsAlertAnalysisSummary(input.analysisSummary)
     const artifact = input.analysisArtifactPath?.trim().slice(0, 512) ?? null
     if (!summary && !artifact) return false
 
-    const existing = this.store.get(alertId)
-    this.store.save({
+    const existing = await this.store.get(alertId)
+    await this.store.save({
       ...(existing.alertId === alertId ? existing : emptyOpsAlertAnalysis(alertId)),
       alertId,
       analysisStatus: 'completed',

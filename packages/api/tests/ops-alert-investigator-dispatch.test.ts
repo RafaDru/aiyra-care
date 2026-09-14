@@ -30,6 +30,7 @@ describe('ops-alert-investigator-dispatch', () => {
       },
     )
     expect(payload.type).toBe('ops_alert')
+    expect(payload.environment.deploymentTier).toBe('integration')
     expect(payload.alertId).toBe('infra_api_down')
     expect(payload.investigation).toEqual({ tier: 0, playbook: 'ops-alert-tier0', trigger: 'manual' })
     expect(payload.operatorNotes).toBe('reiniciei stack')

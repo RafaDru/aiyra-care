@@ -55,6 +55,10 @@ describe('support-report-dispatch', () => {
       text: 'Novo chamado: Bug técnico — /patients/x',
     })
     expect(payload.dashboardUrl).toContain('tab=support')
+    expect(payload.environment).toEqual({
+      deploymentTier: 'integration',
+      apiPublicUrl: 'http://127.0.0.1:3010',
+    })
     expect(JSON.stringify(payload)).not.toContain('febre')
     expect(JSON.stringify(payload)).not.toContain('acc-secret')
   })

@@ -1,10 +1,12 @@
+import {
+  resolveSreSupportAutomationWebhookKey,
+  resolveSreSupportAutomationWebhookUrl,
+} from '../../domain/ops/cursor-automation-env.js'
+import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
+import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import type { OpsAlert } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsAlertTriageRow } from '../../domain/ops/ops-alert-triage.js'
 import { resolveOpsAlertDashboardUrl } from './ops-alert-dispatch.service.js'
-import {
-  resolveSupportInvestigatorWebhookKey,
-  resolveSupportInvestigatorWebhookUrl,
-} from '../support-report/support-report-dispatch.js'
 
 export type OpsAlertInvestigatorDispatchResult =
   | { outcome: 'sent' }
@@ -20,6 +22,7 @@ export interface OpsAlertInvestigatorPayload {
   details?: Record<string, unknown>
   triage?: OpsAlertTriageRow
   dashboardUrl: string
+  environment: InvestigatorEnvironmentContext
   checkedAt: string
   text: string
   operatorNotes?: string | null
@@ -27,20 +30,11 @@ export interface OpsAlertInvestigatorPayload {
 }
 
 export function resolveOpsAlertInvestigatorWebhookUrl(): string | undefined {
-  const dedicated = process.env.CURSOR_OPS_ALERT_AUTOMATION_WEBHOOK_URL?.trim()
-  if (dedicated) return dedicated
-  return resolveSupportInvestigatorWebhookUrl()
+  return resolveSreSupportAutomationWebhookUrl()
 }
 
 export function resolveOpsAlertInvestigatorWebhookKey(): string | undefined {
-  const dedicated = process.env.CURSOR_OPS_ALERT_AUTOMATION_WEBHOOK_KEY?.trim()
-  if (dedicated) {
-    let raw = dedicated.replace(/^["']|["']$/g, '')
-    raw = raw.replace(/^Authorization:\s*/i, '')
-    raw = raw.replace(/^Bearer\s+/i, '')
-    return raw.length ? raw : undefined
-  }
-  return resolveSupportInvestigatorWebhookKey()
+  return resolveSreSupportAutomationWebhookKey()
 }
 
 export function isOpsAlertInvestigatorAutoEnabled(): boolean {
@@ -80,6 +74,7 @@ export function buildOpsAlertInvestigatorPayload(
     ...(alert.details ? { details: alert.details } : {}),
     ...(options.triage ? { triage: options.triage } : {}),
     dashboardUrl,
+    environment: resolveInvestigatorEnvironmentContext(),
     checkedAt: options.checkedAt,
     text: `Alerta ops: ${label}`,
     ...(options.operatorNotes ? { operatorNotes: options.operatorNotes.slice(0, 2000) } : {}),
@@ -103,9 +98,9 @@ export function analysisErrorFromOpsInvestigatorResult(
   if (result.outcome === 'skipped') {
     if (result.reason === 'auto_disabled') return null
     if (result.reason === 'webhook_not_configured') {
-      return 'CURSOR_OPS_ALERT_AUTOMATION_WEBHOOK_URL / CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL não configurado'
+      return 'CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL não configurado'
     }
-    return 'CURSOR_OPS_ALERT_AUTOMATION_WEBHOOK_KEY / CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
+    return 'CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
   }
   return null
 }

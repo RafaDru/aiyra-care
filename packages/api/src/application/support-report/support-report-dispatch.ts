@@ -1,3 +1,9 @@
+import {
+  resolveDevelopmentSupportAutomationWebhookKey,
+  resolveDevelopmentSupportAutomationWebhookUrl,
+} from '../../domain/ops/cursor-automation-env.js'
+import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
+import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -16,6 +22,7 @@ export interface SupportReportDispatchPayload {
   consentProfileAccess: boolean
   topFingerprint: string | null
   dashboardUrl: string
+  environment: InvestigatorEnvironmentContext
   submittedAt: string
   text: string
   toast: { title: string; body: string; icon: 'info' | 'warning' }
@@ -29,16 +36,11 @@ export type SupportInvestigatorDispatchResult =
   | { outcome: 'failed'; error: string }
 
 export function resolveSupportInvestigatorWebhookUrl(): string | undefined {
-  return process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL?.trim() || undefined
+  return resolveDevelopmentSupportAutomationWebhookUrl()
 }
 
 export function resolveSupportInvestigatorWebhookKey(): string | undefined {
-  let raw = process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY?.trim()
-  if (!raw) return undefined
-  raw = raw.replace(/^["']|["']$/g, '')
-  raw = raw.replace(/^Authorization:\s*/i, '')
-  raw = raw.replace(/^Bearer\s+/i, '')
-  return raw.length ? raw : undefined
+  return resolveDevelopmentSupportAutomationWebhookKey()
 }
 
 export function resolveSupportReportWebhookUrl(): string | undefined {
@@ -111,6 +113,7 @@ export function buildSupportReportDispatchPayload(
     consentProfileAccess: record.consentProfileAccess,
     topFingerprint,
     dashboardUrl,
+    environment: resolveInvestigatorEnvironmentContext(),
     submittedAt: record.createdAt.toISOString(),
     text: `Novo chamado: ${label}${routeSuffix}`,
     toast: {
@@ -196,8 +199,8 @@ export function analysisErrorFromInvestigatorResult(
   if (result.outcome === 'failed') return result.error
   if (result.outcome === 'skipped') {
     return result.reason === 'webhook_not_configured'
-      ? 'CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL não configurado'
-      : 'CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
+      ? 'CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL não configurado'
+      : 'CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
   }
   return null
 }

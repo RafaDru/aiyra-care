@@ -283,6 +283,11 @@ export function AvaChatPanel({
         tokens_total: res.usage.tokensTotal,
         provider: res.provider,
         tier: res.tier,
+        reflection_satisfactory: res.reflection.satisfactory,
+        reflection_revised: res.reflection.revised,
+        reflection_severity: res.reflection.severity,
+        proposed_action_count: res.proposedActions?.length ?? 0,
+        insights_included: res.insightsIncluded,
       }, { patientId })
     } catch (e) {
       setMessages((prev) => {

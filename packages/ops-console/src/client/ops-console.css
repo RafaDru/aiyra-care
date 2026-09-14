@@ -209,6 +209,14 @@ body {
   gap: 12px;
 }
 
+.ops-kpi-grid--hero {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.ops-kpi-grid--hero .ops-kpi-value {
+  font-size: 40px;
+}
+
 .ops-kpi-card {
   border: 1px solid var(--ops-border);
   border-radius: 12px;

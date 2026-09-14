@@ -1,31 +1,34 @@
 import type { OpsAlertAnalysisRecord } from '../../domain/ops/ops-alert-analysis.types.js'
 import { emptyOpsAlertAnalysis } from '../../domain/ops/ops-alert-analysis.types.js'
+import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
 
-/** Estado de análise em memória (Fase A — não persiste em PG). */
-export class OpsAlertAnalysisMemoryStore {
+/** Store em memória — testes e fallback sem PG. */
+export class OpsAlertAnalysisMemoryStore implements OpsAlertAnalysisStore {
   private readonly records = new Map<string, OpsAlertAnalysisRecord>()
   private readonly investigatorCooldown = new Map<string, number>()
 
-  get(alertId: string): OpsAlertAnalysisRecord {
+  async get(alertId: string): Promise<OpsAlertAnalysisRecord> {
     return this.records.get(alertId) ?? emptyOpsAlertAnalysis(alertId)
   }
 
-  getAll(): Record<string, OpsAlertAnalysisRecord> {
-    const out: Record<string, OpsAlertAnalysisRecord> = {}
-    for (const [id, row] of this.records) out[id] = row
-    return out
+  async listAll(): Promise<OpsAlertAnalysisRecord[]> {
+    return [...this.records.values()]
   }
 
-  save(record: OpsAlertAnalysisRecord): void {
+  async save(record: OpsAlertAnalysisRecord): Promise<void> {
     this.records.set(record.alertId, record)
   }
 
-  investigatorCooldownElapsed(alertId: string, cooldownMs: number, now = Date.now()): boolean {
+  async investigatorCooldownElapsed(
+    alertId: string,
+    cooldownMs: number,
+    now = Date.now(),
+  ): Promise<boolean> {
     const last = this.investigatorCooldown.get(alertId)
     return !last || now - last >= cooldownMs
   }
 
-  markInvestigatorSent(alertId: string, now = Date.now()): void {
+  async markInvestigatorSent(alertId: string, now = Date.now()): Promise<void> {
     this.investigatorCooldown.set(alertId, now)
   }
 }

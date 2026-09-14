@@ -1,6 +1,6 @@
 {
-  "name": "AiyraCare — Investigador suporte (Tier 0)",
-  "description": "Webhook support_report → análise no monorepo sem PHI. Rascunho em docs/ops/investigations/.",
+  "name": "AiyraCare — Suporte Desenvolvimento (Tier 0)",
+  "description": "Lane Suporte Desenvolvimento — webhook support_report (reporte manual no app). Rascunho em docs/ops/investigations/.",
   "workflow": {
     "triggers": [
       {

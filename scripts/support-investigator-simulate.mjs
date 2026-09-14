@@ -4,7 +4,7 @@
  *
  * Uso:
  *   node scripts/support-investigator-simulate.mjs
- *   CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL=https://... node scripts/support-investigator-simulate.mjs
+ *   CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL=https://... node scripts/support-investigator-simulate.mjs
  */
 import { config } from 'dotenv'
 import { resolve, dirname } from 'path'
@@ -15,6 +15,20 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 config({ path: resolve(root, '.env') })
 config({ path: resolve(root, '.env.preview'), override: false })
 
+function resolveDeploymentTier() {
+  const raw = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
+  if (raw === 'preview' || raw === 'production' || raw === 'integration') return raw
+  return 'integration'
+}
+
+function resolveEnvironment() {
+  const explicit = process.env.API_PUBLIC_URL?.trim()
+  const apiPublicUrl = explicit
+    ? explicit.replace(/\/$/, '')
+    : `http://${process.env.API_PUBLIC_HOST?.trim() || '127.0.0.1'}:${process.env.PORT?.trim() || '3010'}`
+  return { deploymentTier: resolveDeploymentTier(), apiPublicUrl }
+}
+
 const sample = {
   type: 'support_report',
   reportId: 'sim-' + Date.now().toString(36),
@@ -24,6 +38,7 @@ const sample = {
   consentProfileAccess: false,
   topFingerprint: 'sim_fingerprint_sync_timeout',
   dashboardUrl: 'http://127.0.0.1:3013?tab=support',
+  environment: resolveEnvironment(),
   submittedAt: new Date().toISOString(),
   text: 'Novo chamado: Bug técnico — /patients/demo',
   toast: {
@@ -44,6 +59,7 @@ async function post(label, url, body, bearerKey) {
     if (bearerKey) {
       let key = bearerKey.replace(/^["']|["']$/g, '')
       key = key.replace(/^Authorization:\s*/i, '')
+      key = key.replace(/^Authorization\s+/i, '')
       key = key.replace(/^Bearer\s+/i, '')
       headers.Authorization = `Bearer ${key}`
     }
@@ -67,8 +83,10 @@ async function post(label, url, body, bearerKey) {
 
 const notifierUrl = process.env.SUPPORT_REPORT_WEBHOOK_URL?.trim()
   || process.env.OPS_ALERT_WEBHOOK_URL?.trim()
-const investigatorUrl = process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL?.trim()
-const investigatorKey = process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY?.trim()
+const investigatorUrl = process.env.CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL?.trim()
+  || process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL?.trim()
+const investigatorKey = process.env.CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY?.trim()
+  || process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY?.trim()
 
 console.log('support-investigator-simulate')
 console.log('  reportId:', sample.reportId)
@@ -84,7 +102,7 @@ const investigatorOk = await post(
 
 if (investigatorUrl && !investigatorKey) {
   console.log('')
-  console.log('⚠️  Falta CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY no .env')
+  console.log('⚠️  Falta CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY no .env')
   console.log('   Na Automation → trigger Webhook → «Generate auth header» / «Copy auth header»')
   console.log('   Cole só o token crsr_... (sem prefixo Bearer)')
 }
@@ -93,7 +111,7 @@ if (!investigatorUrl) {
   console.log('')
   console.log('Para validar o agente:')
   console.log('  1. Cursor → Automations → criar webhook (ver docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md)')
-  console.log('  2. Cole a URL em .env: CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL=<url>')
+  console.log('  2. Cole a URL em .env: CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL=<url>')
   console.log('  3. Rode este script de novo')
 }
 
