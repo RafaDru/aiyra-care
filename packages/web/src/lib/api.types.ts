@@ -683,6 +683,8 @@ export type ProductEventName =
   | 'consult_visit_link_copied'
   | 'consult_visit_print'
   | 'consult_visit_whatsapp'
+  | 'quick_capture_opened'
+  | 'quick_capture_saved'
 
 export type SupportReportCategory =
   | 'technical_bug'

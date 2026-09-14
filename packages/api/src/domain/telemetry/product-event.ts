@@ -38,6 +38,8 @@ export const PRODUCT_EVENT_NAMES = [
   'consult_visit_link_copied',
   'consult_visit_print',
   'consult_visit_whatsapp',
+  'quick_capture_opened',
+  'quick_capture_saved',
 ] as const
 
 export type ProductEventName = typeof PRODUCT_EVENT_NAMES[number]
@@ -93,6 +95,7 @@ export const PRODUCT_EVENT_PROPERTY_KEYS = new Set([
   'has_attachment',
   'has_entity_pin',
   'action_count',
+  'capture_kind',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret/i

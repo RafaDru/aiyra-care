@@ -65,6 +65,7 @@ Legenda **status:** ✅ done · 🟡 partial · ⬜ planned · 🚫 blocked · �
 | **—** | `patient-vaccines-crud` | `e2e/suites/patient-vaccines-crud.spec.ts` | qa.e2e | — | ⬜ | Matriz ⬜ |
 | **—** | `patient-measurements-crud` | `e2e/suites/patient-measurements-crud.spec.ts` | qa.e2e | — | ⬜ | |
 | **—** | `patient-clinical-export` | `e2e/suites/patient-clinical-export.spec.ts` | qa.e2e | — | ✅ | |
+| **—** | `family-quick-capture` | `e2e/suites/family-quick-capture.spec.ts` | qa.e2e | — | ✅ | |
 | **4** | `amil-sync-options` | — | portal | `portal-amil-qa` | 🚫 | WAF — manual + nightly opcional |
 | **4** | `ops-health` | `packages/api/scripts/ops-smoke.ts` | ops key | — | 🟡 | HTTP, não browser |
 

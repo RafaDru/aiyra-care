@@ -1,5 +1,19 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-14] - D2 «+ Registro rápido» global
+
+### Decisão
+- MVP D2 no header (não FAB) para não competir com orb da Ava; reutilizar lente de paciente da Ava.
+
+### Realizado
+- `QuickCaptureSheet` — 5 tipos: nota, medida, medicação, agenda, documento.
+- CTA **Registro rápido** em `AppLayout`; bus `requestQuickCaptureOpen`.
+- Telemetria `quick_capture_opened` / `quick_capture_saved`.
+- Suite QA `family-quick-capture` + spec Playwright.
+
+### Próximo
+- D3 bloco «Hoje» na Carteira.
+
 ## [2026-09-11] - D1 Wizard «Levar na consulta»
 
 ### Decisão

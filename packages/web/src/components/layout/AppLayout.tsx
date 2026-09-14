@@ -13,6 +13,7 @@ import { AvaGlobalDock } from '../ava/AvaGlobalDock.js'
 import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
 import { SupportReportModal } from '../support/SupportReportModal.js'
+import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 
@@ -162,6 +163,7 @@ export function AppLayout() {
         >
           {collapsed && <AppLogo variant="wordmark" height={38} />}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {configured && user && <QuickCaptureGlobal />}
             {configured && user && (
               <Button
                 type="text"

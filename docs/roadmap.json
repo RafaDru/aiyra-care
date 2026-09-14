@@ -1339,7 +1339,7 @@
       "title": "Dia a dia — captura rápida + levar na consulta",
       "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
       "status": "in_progress",
-      "statusLabel": "D1 wizard consulta entregue — D2 registro rápido",
+      "statusLabel": "D2 registro rápido entregue — D3 bloco Hoje",
       "items": [
         {
           "id": "family-day-to-day-discovery",
@@ -1356,8 +1356,8 @@
         {
           "id": "family-quick-capture",
           "title": "«+ Registro rápido» global",
-          "status": "planned",
-          "detail": "Sheet: sintoma, medida, medicação, agenda, documento; lente paciente."
+          "status": "done",
+          "detail": "QuickCaptureSheet no header; 5 tipos; lente Ava; telemetria quick_capture_*."
         },
         {
           "id": "family-day-timeline",

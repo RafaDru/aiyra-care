@@ -28,7 +28,7 @@
 **Gaps → MVP proposto:**
 
 - **D1** Wizard «Levar na consulta» — **entregue** (link + QR + PDF + rota pública)
-- **D2** «+ Registro rápido» (5 tipos, &lt; 30s)
+- **D2** «+ Registro rápido» (5 tipos) — **entregue** (header global + sheet)
 - **D3** Bloco «Hoje» na Carteira
 - Programa de indicação bilateral — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
 - Suites QA: `patient-clinical-export`, `family-quick-capture`, `patient-health-thread`

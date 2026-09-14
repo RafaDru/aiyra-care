@@ -104,6 +104,26 @@
       "tags": ["export", "clínico", "consulta", "share", "família"]
     },
     {
+      "id": "family-quick-capture",
+      "epicId": "family-day-to-day",
+      "title": "«+ Registro rápido» global",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/family-quick-capture.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/*"],
+      "api": [
+        "POST /health-threads/:id/entries",
+        "POST /measurements/batch",
+        "POST /medication-administrations",
+        "POST /scheduled-events",
+        "POST /documents/upload"
+      ],
+      "helpTopics": [],
+      "tags": ["captura", "dia a dia", "família", "medidas", "agenda"]
+    },
+    {
       "id": "business-analytics-ops",
       "epicId": "business-analytics",
       "title": "Analytics de negócio (console ops)",

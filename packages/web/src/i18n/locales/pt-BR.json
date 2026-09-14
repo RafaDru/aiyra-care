@@ -1185,6 +1185,30 @@
     "cpf_card": "Cartão / Comprovante CPF",
     "cnh": "CNH"
   },
+  "quickCapture": {
+    "trigger": "Registro rápido",
+    "title": "Registro rápido",
+    "patientLabel": "Paciente",
+    "typeLabel": "Tipo",
+    "noPatients": "Nenhum paciente disponível",
+    "pickPatient": "Selecione um paciente",
+    "saved": "Registro salvo",
+    "error": "Não foi possível salvar",
+    "threadRequired": "Selecione um acompanhamento ou deixe apenas um ativo",
+    "defaultThreadTitle": "Registro do dia a dia",
+    "noteLabel": "Sintoma ou nota",
+    "noteRequired": "Descreva o que aconteceu",
+    "notePlaceholder": "Ex.: febre 38,5°C, vômito após almoço…",
+    "documentHint": "Foto ou PDF — exame, receita, atestado…",
+    "uploadDocument": "Enviar arquivo",
+    "kind": {
+      "note": "Nota",
+      "measurement": "Medida",
+      "medication": "Medicação",
+      "agenda": "Agenda",
+      "document": "Documento"
+    }
+  },
   "support": {
     "reportButton": "Reportar problema",
     "reportTitle": "Reportar um problema",

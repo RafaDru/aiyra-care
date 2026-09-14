@@ -189,6 +189,20 @@
       "estimatedMinutes": 5
     },
     {
+      "id": "family-quick-capture",
+      "domain": "clinico",
+      "title": "Registro rápido global (5 tipos)",
+      "featureId": "family-quick-capture",
+      "lane": "business-full",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/family-quick-capture.md",
+      "coverage": "partial",
+      "businessActions": ["quick_capture.note"],
+      "automation": { "status": "done", "spec": "packages/web/e2e/suites/family-quick-capture.spec.ts" },
+      "estimatedMinutes": 5
+    },
+    {
       "id": "ops-health",
       "domain": "ops",
       "title": "Ops — health e métricas",
@@ -222,6 +236,7 @@
         "hygiene-dedup-ui",
         "support-user-report",
         "patient-clinical-export",
+        "family-quick-capture",
         "ava-companion-smoke",
         "ava-guardrail-smoke",
         "ava-conversation-crud"
