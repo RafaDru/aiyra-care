@@ -4,37 +4,39 @@ import type { PatientContext } from '../../lib/api.types.js'
 import { subscribeConsultVisitOpen } from '../../lib/clinical-export-bus.js'
 import { ConsultVisitWizardModal } from './ConsultVisitWizardModal.js'
 
-interface Props {
-  patientId: string
-  patientName?: string
-}
-
-/** Modal «Levar na consulta» — uma instância por perfil, ativo em qualquer aba. */
-export function PatientConsultVisitHost({ patientId, patientName }: Props) {
+/** Modal «Levar na consulta» — global (dashboard, perfil, Carteira). */
+export function PatientConsultVisitHost() {
   const [open, setOpen] = useState(false)
+  const [patientId, setPatientId] = useState<string | null>(null)
   const [context, setContext] = useState<PatientContext | null>(null)
 
-  const openWizard = useCallback(() => {
+  const openWizard = useCallback((id: string) => {
+    setPatientId(id)
     setOpen(true)
     api.patients
-      .context(patientId)
+      .context(id)
       .then(setContext)
       .catch(() => setContext(null))
-  }, [patientId])
+  }, [])
 
   useEffect(() => {
     return subscribeConsultVisitOpen((req) => {
-      if (req.patientId === patientId) openWizard()
+      if (req.patientId) openWizard(req.patientId)
     })
-  }, [patientId, openWizard])
+  }, [openWizard])
+
+  if (!patientId) return null
 
   return (
     <ConsultVisitWizardModal
       open={open}
       patientId={patientId}
-      patientName={patientName ?? context?.identity.name}
+      patientName={context?.identity.name}
       context={context}
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setOpen(false)
+        setContext(null)
+      }}
     />
   )
 }

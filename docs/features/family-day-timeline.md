@@ -14,7 +14,7 @@ Na aba **Carteira** do paciente, o bloco **Hoje** mostra agenda do dia, lembrete
 
 ## Comportamento (usuário)
 
-1. Abre perfil → aba **Carteira**
+1. Abre **Dashboard** ou perfil → aba **Carteira**
 2. Vê card **Hoje** com data e lista cronológica (até 12 itens)
 3. Pode marcar item de agenda como feito ou adiar lembrete 30 min
 4. CTAs: **Registro rápido** (sheet global) e **Levar na consulta** (wizard em qualquer aba)
@@ -23,7 +23,7 @@ Na aba **Carteira** do paciente, o bloco **Hoje** mostra agenda do dia, lembrete
 
 | Tipo | Referência |
 |------|------------|
-| UI | `WalletTodayPanel.tsx`, `WalletCardsTab.tsx` |
+| UI | `WalletTodayPanel.tsx`, `WalletCardsTab.tsx`, `DashboardDayToDaySection.tsx` |
 | Wizard consulta (global no perfil) | `PatientConsultVisitHost.tsx` |
 | API | `GET /scheduled-events`, `GET /care-reminders/pending`, `GET /measurements/timeline` |
 

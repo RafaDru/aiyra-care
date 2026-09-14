@@ -34,4 +34,12 @@ test.describe('family-day-timeline', () => {
     await drawer.getByRole('button', { name: 'Cancelar' }).click()
     await drawer.waitFor({ state: 'hidden' })
   })
+
+  test('bloco Hoje visível no dashboard', async ({ page }) => {
+    await ensureQaE2eSession(page)
+
+    const todayCard = page.locator('.wallet-today-panel').first()
+    await expect(todayCard.getByText('Hoje', { exact: true })).toBeVisible({ timeout: 15_000 })
+    await expect(todayCard.getByRole('button', { name: 'Registro rápido' })).toBeVisible()
+  })
 })

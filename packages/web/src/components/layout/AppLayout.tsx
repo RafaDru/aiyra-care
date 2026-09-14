@@ -14,6 +14,7 @@ import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
 import { SupportReportModal } from '../support/SupportReportModal.js'
 import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
+import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 
@@ -191,6 +192,7 @@ export function AppLayout() {
         </Content>
       </Layout>
       <AvaGlobalDock />
+      {configured && user && <PatientConsultVisitHost />}
       <SupportReportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
     </Layout>
   )

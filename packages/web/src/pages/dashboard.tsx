@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
+import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
 import { useAuth } from '../contexts/AuthContext.js'
 
 const { Title, Text } = Typography
@@ -149,6 +150,8 @@ export function Dashboard() {
         title={t('patient.title')}
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
+
+      {patients.length > 0 && <DashboardDayToDaySection />}
 
       {loadError && (
         <Alert

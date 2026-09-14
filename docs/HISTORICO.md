@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-14] - Polish D3 dashboard + Ava E2E estável
+
+### Realizado
+- `DashboardDayToDaySection` — bloco «Hoje» no dashboard com lente de paciente.
+- Helpers Playwright Ava: aguardar composer idle + contagem de bolhas (menos flake no CI).
+- `CI_LEARNINGS.md` — business-full semanal documentado.
+
 ## [2026-09-14] - D3 «Hoje» na Carteira + CI business-full semanal
 
 ### Decisão

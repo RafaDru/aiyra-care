@@ -11,9 +11,10 @@ import {
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
-import type { CareReminderRow, MonitoringTimelineRow, ScheduledEvent } from '../../lib/api.types.js'
+import type { CareReminderRow, MonitoringTimelineRow, Patient, ScheduledEvent } from '../../lib/api.types.js'
 import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
 import { requestConsultVisitOpen } from '../../lib/clinical-export-bus.js'
+import { AvaPatientLensSelect } from '../ava/AvaPatientLensSelect.js'
 import './wallet-today-panel.css'
 
 const { Text, Title } = Typography
@@ -35,6 +36,9 @@ interface TodayItem {
 interface Props {
   patientId: string
   refreshKey?: number
+  patients?: Patient[]
+  routePatientId?: string | null
+  onPatientChange?: (id: string) => void
 }
 
 function isToday(iso: string): boolean {
@@ -52,8 +56,17 @@ function timelineKindTag(row: MonitoringTimelineRow): { tag: string; color: stri
   return { tag: 'Medida', color: 'blue' }
 }
 
-export function WalletTodayPanel({ patientId, refreshKey = 0 }: Props) {
+export function WalletTodayPanel({
+  patientId,
+  refreshKey = 0,
+  patients,
+  routePatientId,
+  onPatientChange,
+}: Props) {
   const { t } = useTranslation()
+  const lensPatients = patients ?? []
+  const showPatientPicker = lensPatients.length > 0 && Boolean(onPatientChange)
+  const activePatient = lensPatients.find((p) => p.id === patientId) ?? null
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<TodayItem[]>([])
   const [actingId, setActingId] = useState<string | null>(null)
@@ -172,6 +185,25 @@ export function WalletTodayPanel({ patientId, refreshKey = 0 }: Props) {
           </Button>
         </Space>
       </div>
+
+      {showPatientPicker && (
+        <div style={{ marginBottom: 12 }}>
+          <Text type="secondary" style={{ display: 'block', marginBottom: 6, fontSize: 12 }}>
+            {t('quickCapture.patientLabel')}
+          </Text>
+          <AvaPatientLensSelect
+            patients={lensPatients}
+            value={patientId}
+            onChange={onPatientChange!}
+            routePatientId={routePatientId}
+          />
+          {activePatient && (
+            <Text type="secondary" style={{ display: 'block', marginTop: 4, fontSize: 12 }}>
+              {activePatient.name}
+            </Text>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <Spin size="small" style={{ display: 'block', margin: '16px auto' }} />

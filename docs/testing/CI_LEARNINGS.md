@@ -1,6 +1,6 @@
 # CI — aprendizados (build API + E2E)
 
-> **Última atualização:** 2026-09-11
+> **Última atualização:** 2026-09-14
 
 ## O que aconteceu
 
@@ -17,7 +17,7 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | E2E regression para em "Wait for API" | `node dist/index.js` importa `@aiyra-care/connect` como `.ts` | `connect` deve gerar `dist/` antes do `tsc` da API (`api` build já encadeia) |
 | `api.log` só `{"level":50,...}` sem mensagem | `logMethod` sanitizava `Error` → `{}`; `app.log.error(err)` perdia stack | Preservar `Error` no hook; `console.error` no catch de startup |
 | API morre no CI sem `GROQ_API_KEY` | `groq-llm.adapter.ts` fazia `new Groq()` no import (via Ava → scraper agent) | Inicialização lazy como em `llm-chat.providers.ts`; Groq só ao chamar LLM |
-| Fase 3 business-full no CI | Mesma stack da Fase 2; 11 specs ~15 min com build Vite | `ci-e2e-business-full.yml` nightly; não gate PR até 7 noites verdes |
+| Fase 3 business-full no CI | Mesma stack da Fase 2; 13+ specs ~15 min com build Vite | `ci-e2e-business-full.yml` **sexta 06:00 BRT**; não gate PR até 7 semanas verdes |
 | Login E2E timeout em `/login` | Primeiro login sem `legal_document_acceptances` → `/compliance/accept`; Select Ant Design sem `title` | `acceptComplianceIfPresent` no helper auth; `getByRole('option')` para Sexo |
 | Fase 4 Ava no CI | LLM real indisponível sem API keys | `AVA_TEST_MODE=1` na API + specs `ava-companion-smoke` / `ava-guardrail-smoke` |
 | Ava specs no project `smoke` | `testMatch: /smoke\.spec\.ts$/` casava `ava-*-smoke.spec.ts` | Restringir a `e2e/smoke.spec.ts` apenas |
@@ -25,7 +25,7 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | business-full 11× `Invalid login credentials` | Dois workflows E2E em paralelo (`regression` + `business-full`) — `qa:create-test-user` gira senha no mesmo Supabase | `concurrency: e2e-playwright-supabase` + senha fixa `QA_*_PASSWORD` no CI |
 | Select flake no onboarding (`.last()` no portal) | Opção de dropdown anterior ainda no DOM | Escopar em `.ant-select-dropdown:not(.ant-select-dropdown-hidden)` |
 | `patient-documents-crud` timeout | Upload OCR + revisão obrigatória; Select antigo no modal | `clickAntSelectOption`, aguardar «Documento processado», confirmar revisão OCR |
-| Ava specs flaky no CI | Bolha visível antes do texto SSE | `waitForAvaAssistantReply` com `toContainText` 60s |
+| Ava specs flaky no CI | Bolha visível antes do texto SSE; 2ª mensagem antes do composer liberar | `waitAvaComposerReady` + contagem de bolhas + `toContainText` 90s |
 | Nightly `createUser: {}` | Supabase intermitente / corrida | `ensure-qa-auth-user.mjs` com retry |
 | `patient-documents` sem «Documento processado» | GCS indisponível no runner + OCR lento | `resolveFileStorage()` local + `OCR_CI_STUB=1` no CI |
 | Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |
