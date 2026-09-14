@@ -8,6 +8,7 @@ import { writeFileSync, existsSync, readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { config } from 'dotenv'
+import { ensureQaAuthUser } from './lib/ensure-qa-auth-user.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 config({ path: resolve(root, '.env') })
@@ -27,31 +28,12 @@ const admin = createClient(url, serviceRole, {
   auth: { autoRefreshToken: false, persistSession: false },
 })
 
-const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
-const existing = list?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase())
-
 let userId
-if (existing) {
-  const { data, error } = await admin.auth.admin.updateUserById(existing.id, {
-    password,
-    email_confirm: true,
-  })
-  if (error) {
-    console.error('updateUserById:', error.message)
-    process.exit(1)
-  }
-  userId = data.user.id
-} else {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) {
-    console.error('createUser:', error.message)
-    process.exit(1)
-  }
-  userId = data.user.id
+try {
+  userId = await ensureQaAuthUser(admin, email, password)
+} catch (err) {
+  console.error(err instanceof Error ? err.message : err)
+  process.exit(1)
 }
 
 const e2ePath = resolve(root, 'packages/web/.env.e2e.local')

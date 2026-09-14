@@ -24,6 +24,9 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | Select Ant Design no Playwright | `role=option` e dropdown ficam hidden durante `ant-slide-up-appear` | `.ant-select-item-option` + `click({ force: true })`; não exigir `visible` no portal |
 | business-full 11× `Invalid login credentials` | Dois workflows E2E em paralelo (`regression` + `business-full`) — `qa:create-test-user` gira senha no mesmo Supabase | `concurrency: e2e-playwright-supabase` + senha fixa `QA_*_PASSWORD` no CI |
 | Select flake no onboarding (`.last()` no portal) | Opção de dropdown anterior ainda no DOM | Escopar em `.ant-select-dropdown:not(.ant-select-dropdown-hidden)` |
+| `patient-documents-crud` timeout | Upload OCR + revisão obrigatória; Select antigo no modal | `clickAntSelectOption`, aguardar «Documento processado», confirmar revisão OCR |
+| Ava specs flaky no CI | Bolha visível antes do texto SSE | `waitForAvaAssistantReply` com `toContainText` 60s |
+| Nightly `createUser: {}` | Supabase intermitente / corrida | `ensure-qa-auth-user.mjs` com retry |
 | Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |
 | Imports duplicados (`PatientPgRepository`, `VaccinePgRepository`) | merge/copy-paste | `tsc` pega imediatamente |
 

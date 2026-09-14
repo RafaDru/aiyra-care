@@ -1,7 +1,8 @@
 import { resolve } from 'path'
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import { gotoPatientTab } from './navigation'
 import { hideAvaDock } from './ui'
+import { clickAntSelectOption } from './select'
 
 async function fillMaskedDate(page: Page, label: string, value: string) {
   const input = page.getByLabel(label, { exact: false })
@@ -81,27 +82,22 @@ const uploadFileName = 'amil-logo.png'
 
 export async function uploadClinicalDocument(page: Page, patientId: string) {
   await gotoPatientTab(page, patientId, 'documents')
+  await hideAvaDock(page)
   await page.getByRole('button', { name: 'Adicionar Arquivo' }).click()
   const dialog = page.getByRole('dialog', { name: 'Adicionar Arquivo' })
   await dialog.waitFor({ state: 'visible' })
-  await dialog.locator('.ant-select').click()
-  const option = page.locator('.ant-select-item-option').filter({ hasText: 'Outro' }).last()
-  await option.waitFor({ state: 'attached', timeout: 15_000 })
-  await option.click({ force: true })
+  await clickAntSelectOption(page, dialog.locator('.ant-select').first(), 'Outro')
   await dialog.locator('input[type="file"]').setInputFiles(uploadFixture)
   await dialog.getByRole('button', { name: 'Salvar' }).click()
   await dialog.waitFor({ state: 'hidden', timeout: 15_000 })
 
-  const progress = page.getByRole('dialog').filter({ hasText: /upload|processando|continuar/i })
-  const continueBtn = page.getByRole('button', { name: 'Continuar' })
-  await continueBtn.waitFor({ state: 'visible', timeout: 60_000 })
-  await continueBtn.click()
+  await expect(page.getByText('Documento processado')).toBeVisible({ timeout: 120_000 })
+  await page.getByRole('button', { name: 'Continuar' }).click()
 
-  const ocrReview = page.getByRole('dialog', { name: 'Revisão do OCR' })
-  if (await ocrReview.isVisible({ timeout: 5_000 }).catch(() => false)) {
-    await ocrReview.getByRole('button', { name: 'Confirmar e salvar' }).click()
-    await ocrReview.waitFor({ state: 'hidden', timeout: 15_000 })
-  }
+  const ocrReview = page.getByRole('dialog', { name: /Revisão do OCR/i })
+  await ocrReview.waitFor({ state: 'visible', timeout: 30_000 })
+  await ocrReview.getByRole('button', { name: /Confirmar e salvar/i }).click()
+  await ocrReview.waitFor({ state: 'hidden', timeout: 15_000 })
 
   await page.locator('tr').filter({ hasText: uploadFileName }).first().waitFor({ state: 'visible', timeout: 30_000 })
   return uploadFileName

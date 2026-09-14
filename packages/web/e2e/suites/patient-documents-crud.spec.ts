@@ -10,6 +10,7 @@ test.describe('patient-documents-crud', () => {
   })
 
   test('upload e exclusão de arquivo clínico', async ({ page }) => {
+    test.setTimeout(180_000)
     const suffix = Date.now()
 
     await ensureQaE2eSession(page)

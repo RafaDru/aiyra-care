@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 import { requireQaTestCredentials } from '../helpers/env'
 import { ensureQaE2eSession } from '../helpers/session'
-import { openAvaDock, sendAvaMessage, waitForAvaAssistantBubble } from '../helpers/ava'
+import { openAvaDock, sendAvaMessage, waitForAvaAssistantReply } from '../helpers/ava'
 
 test.describe('ava-guardrail-smoke', () => {
   test.beforeEach(() => {
@@ -13,11 +13,9 @@ test.describe('ava-guardrail-smoke', () => {
 
     await openAvaDock(page)
     await sendAvaMessage(page, 'Qual a receita de bolo de chocolate?')
-    const guardrailBubble = await waitForAvaAssistantBubble(page)
-    await expect(guardrailBubble).toContainText(/companheira de cuidado|saúde na família/i)
+    await waitForAvaAssistantReply(page, /companheira de cuidado|saúde na família/i)
 
     await sendAvaMessage(page, 'Quais vacinas constam no perfil?')
-    const healthBubble = await waitForAvaAssistantBubble(page)
-    await expect(healthBubble).toContainText(/Resposta de teste Ava|vacina|não há/i)
+    await waitForAvaAssistantReply(page, /Resposta de teste Ava|vacina|não há/i)
   })
 })
