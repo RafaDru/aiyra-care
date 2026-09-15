@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { opsApi } from './api.js'
 import { Tabs } from 'antd'
 import type { OpsMetricsResponse, RuntimeDegradedView } from './ops.types.js'
 import {
@@ -13,11 +14,12 @@ import {
 } from './ops-panels.js'
 import { SupportPanel } from './SupportPanel.js'
 import { BusinessPanel } from './BusinessPanel.js'
+import { IssuesPanel } from './IssuesPanel.js'
 import { OpsDrillDownProvider } from './ops-drill-down.js'
 
 const TAB_STORAGE_KEY = 'ops-console-active-tab'
 
-type TabKey = 'overview' | 'business' | 'product' | 'support' | 'sync' | 'ava' | 'infra' | 'cost'
+type TabKey = 'overview' | 'business' | 'issues' | 'product' | 'support' | 'sync' | 'ava' | 'infra' | 'cost'
 
 function TabLabel({ text, count, alert }: { text: string; count?: number; alert?: boolean }) {
   return (
@@ -42,23 +44,33 @@ export function OpsMetricsDashboard({
   onRefresh?: () => void
 }) {
   const metrics = data.metrics
+  const [issueAttention, setIssueAttention] = useState(0)
+
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const fromUrl = new URLSearchParams(window.location.search).get('tab')
     if (
-      fromUrl === 'overview' || fromUrl === 'business' || fromUrl === 'product' || fromUrl === 'support'
-      || fromUrl === 'sync' || fromUrl === 'ava' || fromUrl === 'infra' || fromUrl === 'cost'
+      fromUrl === 'overview' || fromUrl === 'business' || fromUrl === 'issues' || fromUrl === 'product'
+      || fromUrl === 'support' || fromUrl === 'sync' || fromUrl === 'ava' || fromUrl === 'infra'
+      || fromUrl === 'cost'
     ) {
       return fromUrl
     }
     const saved = localStorage.getItem(TAB_STORAGE_KEY)
     if (
-      saved === 'overview' || saved === 'business' || saved === 'product' || saved === 'support'
-      || saved === 'sync' || saved === 'ava' || saved === 'infra' || saved === 'cost'
+      saved === 'overview' || saved === 'business' || saved === 'issues' || saved === 'product'
+      || saved === 'support' || saved === 'sync' || saved === 'ava' || saved === 'infra'
+      || saved === 'cost'
     ) {
       return saved
     }
     return 'overview'
   })
+
+  useEffect(() => {
+    void opsApi.analysisAttentionCounts().then((c) => {
+      setIssueAttention(c.totalAttention)
+    }).catch(() => undefined)
+  }, [data])
 
   const badges = useMemo(() => ({
     overview: data.alerts.filter((a) => a.severity === 'critical').length,
@@ -92,6 +104,15 @@ export function OpsMetricsDashboard({
       children: (
         <div className="ops-tab-panel">
           <BusinessPanel data={data} />
+        </div>
+      ),
+    },
+    {
+      key: 'issues',
+      label: <TabLabel text="Issues" count={issueAttention} alert={issueAttention > 0} />,
+      children: (
+        <div className="ops-tab-panel">
+          <IssuesPanel onRefresh={onRefresh} />
         </div>
       ),
     },

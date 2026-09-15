@@ -89,4 +89,14 @@ export const opsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }),
+  analysisQueue: () =>
+    request<{ items: import('./ops.types.js').OpsAnalysisQueueItem[] }>('/api/analysis-queue'),
+  analysisAttentionCounts: () =>
+    request<import('./ops.types.js').OpsAnalysisAttentionCounts>(
+      '/api/analysis-queue/attention-counts',
+    ),
+  completeAnalysisQueueItem: (id: string) =>
+    request<{ ok: boolean }>(`/api/analysis-queue/${encodeURIComponent(id)}/complete`, {
+      method: 'POST',
+    }),
 }

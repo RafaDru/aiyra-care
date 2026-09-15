@@ -10,6 +10,7 @@ import {
   type CreateSupportReportInput,
   type SupportReportRecord,
 } from '../../domain/support-report/support-report.types.js'
+import type { OpsAnalysisQueueService } from '../ops/ops-analysis-queue.service.js'
 
 function addDays(date: Date, days: number): Date {
   const out = new Date(date)
@@ -21,6 +22,7 @@ export class SupportReportService {
   constructor(
     private readonly repo: SupportReportRepository,
     private readonly productEvents?: ProductEventService,
+    private readonly queueService?: OpsAnalysisQueueService,
   ) {}
 
   async create(accountId: string, input: CreateSupportReportInput): Promise<SupportReportRecord> {
@@ -70,14 +72,25 @@ export class SupportReportService {
     }
 
     void import('./support-report-dispatch.js').then(async ({
-      dispatchSupportReportNotifications,
+      dispatchSupportReport,
+      dispatchSupportReportInvestigator,
       analysisStatusFromInvestigatorResult,
       analysisErrorFromInvestigatorResult,
     }) => {
-      const result = await dispatchSupportReportNotifications(record).catch(() => ({
-        notifier: false,
-        investigator: { outcome: 'failed' as const, error: 'dispatch_failed' },
-      }))
+      const { investigateSupportReportWithQueue } = await import(
+        '../ops/ops-analysis-investigation.helper.js'
+      )
+      let investigator: Awaited<ReturnType<typeof dispatchSupportReportInvestigator>>
+      let notifier = false
+      try {
+        notifier = await dispatchSupportReport(record)
+        investigator = this.queueService
+          ? (await investigateSupportReportWithQueue(this.queueService, record, { trigger: 'auto' })).dispatch
+          : await dispatchSupportReportInvestigator(record, { trigger: 'auto' })
+      } catch {
+        investigator = { outcome: 'failed' as const, error: 'dispatch_failed' }
+      }
+      const result = { notifier, investigator }
       const analysisStatus = analysisStatusFromInvestigatorResult(result.investigator)
       const analysisError = analysisErrorFromInvestigatorResult(result.investigator)
       await this.repo.updateAnalysisStateForOps(record.id, {

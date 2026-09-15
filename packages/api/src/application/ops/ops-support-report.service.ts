@@ -4,6 +4,8 @@ import {
   analysisStatusFromInvestigatorResult,
   dispatchSupportReportInvestigator,
 } from '../support-report/support-report-dispatch.js'
+import { investigateSupportReportWithQueue } from './ops-analysis-investigation.helper.js'
+import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
 import type {
   SupportReportAnalysisStatus,
   SupportReportStatus,
@@ -66,7 +68,10 @@ export type RequestAnalysisResult =
   | { ok: false; error: 'not_found' | 'investigator_unavailable' | 'dispatch_failed'; message: string }
 
 export class OpsSupportReportService {
-  constructor(private readonly repo: SupportReportPgRepository) {}
+  constructor(
+    private readonly repo: SupportReportPgRepository,
+    private readonly queueService?: OpsAnalysisQueueService,
+  ) {}
 
   async list(status: SupportReportStatus = 'open', limit = 50): Promise<SupportReportOpsRow[]> {
     const rows = await this.repo.listForOps(status, limit)
@@ -88,10 +93,16 @@ export class OpsSupportReportService {
       await this.repo.updateOperatorNotesForOps(id, notes)
     }
 
-    const dispatch = await dispatchSupportReportInvestigator(
-      { ...record, operatorNotes: notes },
-      { operatorNotes: notes, trigger: 'manual' },
-    )
+    const fullRecord = { ...record, operatorNotes: notes }
+    const dispatch = this.queueService
+      ? (await investigateSupportReportWithQueue(this.queueService, fullRecord, {
+        operatorNotes: notes,
+        trigger: 'manual',
+      })).dispatch
+      : await dispatchSupportReportInvestigator(fullRecord, {
+        operatorNotes: notes,
+        trigger: 'manual',
+      })
 
     const analysisStatus = analysisStatusFromInvestigatorResult(dispatch)
     const analysisError = analysisErrorFromInvestigatorResult(dispatch)

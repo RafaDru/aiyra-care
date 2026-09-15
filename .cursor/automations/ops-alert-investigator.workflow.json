@@ -1,5 +1,5 @@
 {
-  "name": "AiyraCare — Suporte SRE (Tier 0)",
+  "name": "AiCare - Suporte SRE",
   "description": "Lane Suporte SRE — webhook ops_alert (alertas infra/sync/llm). Rascunho em docs/ops/investigations/.",
   "workflow": {
     "triggers": [
@@ -12,7 +12,7 @@
       "branch": "main"
     },
     "prompts": [
-      "Um alerta ops chegou via webhook HTTP (tipo ops_alert).\n\n1. Leia o corpo JSON (alertId, severity, category, message, details, triage, operatorNotes, dashboardUrl).\n2. Siga o playbook em docs/ops/automations/ops-alert-investigator.prompt.md.\n3. Escreva o rascunho em docs/ops/investigations/ com data de hoje e o alertId no nome do arquivo.\n4. Não abra PR nem altere código de produto (Tier 0).\n5. Não use dados clínicos — só metadados do webhook.\n\nAo terminar, resuma em 5 linhas: hipótese principal + arquivo criado."
+      "Alerta ops_alert — lane AiCare Suporte SRE.\n\n1. Leia JSON (alertId, environment, analysisQueue, triage, dashboardUrl).\n2. Playbook: docs/ops/automations/ops-alert-investigator.prompt.md.\n3. Rascunho em docs/ops/investigations/.\n4. Tier 0 — sem PR.\n5. POST analysisQueue.callbackUrl com queueId + remediationSummary + analysisArtifactPath (ver playbook Callback)."
     ],
     "model": "composer-2.5",
     "agentOptions": {

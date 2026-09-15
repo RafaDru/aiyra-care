@@ -1,5 +1,37 @@
 export type OpsAlertSeverity = 'warning' | 'critical'
 
+export interface OpsAnalysisQueueItem {
+  id: string
+  sourceType: 'support_report' | 'ops_alert'
+  sourceId: string
+  lane: 'development_support' | 'sre_support'
+  status: 'queued' | 'investigating' | 'fix_proposed' | 'completed' | 'dismissed' | 'failed'
+  priority: 'low' | 'normal' | 'high' | 'critical'
+  deploymentTier: string
+  title: string
+  errorSummary: string | null
+  contextSnapshot: Record<string, unknown>
+  remediationSummary: string | null
+  analysisArtifactPath: string | null
+  prUrl: string | null
+  analysisLastError: string | null
+  operatorNotes: string | null
+  investigationTrigger: 'auto' | 'manual' | null
+  queuedAt: string
+  investigationRequestedAt: string | null
+  completedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface OpsAnalysisAttentionCounts {
+  queued: number
+  investigating: number
+  fixProposed: number
+  failed: number
+  totalAttention: number
+}
+
 export interface OpsAlertAnalysisRecord {
   alertId: string
   analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'

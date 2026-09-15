@@ -185,7 +185,7 @@ export function SupportPanel({
         description={(
           <>
             <strong>Triar/Resolver</strong> atualiza a fila humana.{' '}
-            <strong>Analisar</strong> dispara Suporte Desenvolvimento (Tier 0) — use notas para contexto
+            <strong>Analisar</strong> dispara AiCare Suporte ao Desenvolvimento — use notas para contexto
             extra. Chamados sem webhook configurado ficam «Sem análise» até você analisar manualmente
             ou concluir com resumo.
           </>

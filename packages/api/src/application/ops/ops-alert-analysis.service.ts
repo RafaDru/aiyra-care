@@ -12,6 +12,8 @@ import {
   dispatchOpsAlertInvestigator,
   shouldAutoInvestigateOpsAlert,
 } from './ops-alert-investigator-dispatch.js'
+import { investigateOpsAlertWithQueue } from './ops-analysis-investigation.helper.js'
+import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
 import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
 
 const DEFAULT_INVESTIGATOR_COOLDOWN_MS = 30 * 60 * 1000
@@ -42,7 +44,10 @@ export type RequestOpsAlertAnalysisResult =
   }
 
 export class OpsAlertAnalysisService {
-  constructor(private readonly store: OpsAlertAnalysisStore) {}
+  constructor(
+    private readonly store: OpsAlertAnalysisStore,
+    private readonly queueService?: OpsAnalysisQueueService,
+  ) {}
 
   async getAll(): Promise<Record<string, OpsAlertAnalysisRecord>> {
     const rows = await this.store.listAll()
@@ -76,12 +81,19 @@ export class OpsAlertAnalysisService {
       return { ok: false, error: 'cooldown', message: 'Investigador em cooldown para este alerta' }
     }
 
-    const dispatch = await dispatchOpsAlertInvestigator(alert, {
-      checkedAt: options.checkedAt,
-      triage: options.triage,
-      operatorNotes: notes,
-      trigger: options.trigger,
-    })
+    const dispatch = this.queueService
+      ? (await investigateOpsAlertWithQueue(this.queueService, alert, {
+        checkedAt: options.checkedAt,
+        triage: options.triage,
+        operatorNotes: notes,
+        trigger: options.trigger,
+      })).dispatch
+      : await dispatchOpsAlertInvestigator(alert, {
+        checkedAt: options.checkedAt,
+        triage: options.triage,
+        operatorNotes: notes,
+        trigger: options.trigger,
+      })
 
     const analysisStatus = analysisStatusFromOpsInvestigatorResult(dispatch)
     const analysisError = analysisErrorFromOpsInvestigatorResult(dispatch)

@@ -27,12 +27,13 @@ export interface SupportReportDispatchPayload {
   text: string
   toast: { title: string; body: string; icon: 'info' | 'warning' }
   investigation?: { tier: 0 | 1; playbook: string; trigger: 'auto' | 'manual' }
+  analysisQueue?: { id: string; callbackUrl: string; lane: 'development_support' | 'sre_support' }
   operatorNotes?: string | null
 }
 
 export type SupportInvestigatorDispatchResult =
   | { outcome: 'sent' }
-  | { outcome: 'skipped'; reason: 'webhook_not_configured' | 'webhook_key_missing' }
+  | { outcome: 'skipped'; reason: 'webhook_not_configured' | 'webhook_key_missing' | 'pre_screen' }
   | { outcome: 'failed'; error: string }
 
 export function resolveSupportInvestigatorWebhookUrl(): string | undefined {
@@ -158,7 +159,11 @@ export async function dispatchSupportReport(
 
 export async function dispatchSupportReportInvestigator(
   record: SupportReportRecord,
-  options?: { operatorNotes?: string | null; trigger?: 'auto' | 'manual' },
+  options?: {
+    operatorNotes?: string | null
+    trigger?: 'auto' | 'manual'
+    analysisQueue?: { id: string; callbackUrl: string }
+  },
 ): Promise<SupportInvestigatorDispatchResult> {
   const webhook = resolveSupportInvestigatorWebhookUrl()
   if (!webhook) {
@@ -175,6 +180,15 @@ export async function dispatchSupportReportInvestigator(
       trigger,
     }),
     investigation: { tier: 0, playbook: 'support-report-tier0', trigger },
+    ...(options?.analysisQueue
+      ? {
+          analysisQueue: {
+            id: options.analysisQueue.id,
+            callbackUrl: options.analysisQueue.callbackUrl,
+            lane: 'development_support',
+          },
+        }
+      : {}),
   }
   try {
     await postSupportReportWebhook(webhook, payload, { bearerKey })

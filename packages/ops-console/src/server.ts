@@ -23,6 +23,10 @@ import { SupportReportPgRepository } from '../../api/src/infrastructure/persiste
 import { OpsSupportReportService } from '../../api/src/application/ops/ops-support-report.service.js'
 import { OpsAlertAnalysisService } from '../../api/src/application/ops/ops-alert-analysis.service.js'
 import { OpsAlertIncidentPgRepository } from '../../api/src/infrastructure/persistence/ops-alert-incident.pg.repository.js'
+import { OpsAnalysisQueuePgRepository } from '../../api/src/infrastructure/persistence/ops-analysis-queue.pg.repository.js'
+import { OpsAnalysisQueueService } from '../../api/src/application/ops/ops-analysis-queue.service.js'
+import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
+import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
 import { runOpsProbe } from '../../api/src/application/ops/ops-probe.service.js'
 import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe-artifact.js'
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
@@ -66,9 +70,16 @@ const metricsService = new OpsMetricsService(
   ),
 )
 const runtimeService = new RuntimeDegradedService(new RuntimeDegradedPgRepository(pool))
-const alertAnalysisService = new OpsAlertAnalysisService(new OpsAlertIncidentPgRepository(pool))
+const alertIncidentRepo = new OpsAlertIncidentPgRepository(pool)
+const supportRepo = new SupportReportPgRepository(pool)
+const analysisQueueService = new OpsAnalysisQueueService(
+  new OpsAnalysisQueuePgRepository(pool),
+  supportRepo,
+  alertIncidentRepo,
+)
+const alertAnalysisService = new OpsAlertAnalysisService(alertIncidentRepo, analysisQueueService)
 const dispatchService = new OpsAlertDispatchService(metricsService, alertAnalysisService)
-const supportReportService = new OpsSupportReportService(new SupportReportPgRepository(pool))
+const supportReportService = new OpsSupportReportService(supportRepo, analysisQueueService)
 
 async function runProbeCycle(): Promise<void> {
   try {
@@ -257,6 +268,38 @@ async function main() {
         analysisArtifactPath: req.body?.analysisArtifactPath,
       })
       if (!ok) return reply.status(400).send({ error: 'invalid_payload' })
+      return { ok: true }
+    },
+  )
+
+  fastify.get('/api/analysis-queue', async () => ({
+    items: await analysisQueueService.listOpen(100),
+  }))
+
+  fastify.get('/api/analysis-queue/attention-counts', async () =>
+    analysisQueueService.attentionCounts(deploymentTier),
+  )
+
+  fastify.post<{ Body: AgentAnalysisCallbackInput }>(
+    '/api/analysis-queue/callback',
+    async (req, reply) => {
+      if (!isInvestigatorCallbackAuthorized({
+        'x-investigator-callback-key': req.headers['x-investigator-callback-key'] as string,
+        'x-internal-ops-key': req.headers['x-internal-ops-key'] as string,
+      })) {
+        return reply.status(401).send({ error: 'unauthorized' })
+      }
+      const record = await analysisQueueService.completeFromAgent(req.body ?? {})
+      if (!record) return reply.status(400).send({ error: 'invalid_payload' })
+      return { ok: true, item: record }
+    },
+  )
+
+  fastify.post<{ Params: { id: string } }>(
+    '/api/analysis-queue/:id/complete',
+    async (req, reply) => {
+      const ok = await analysisQueueService.markHumanCompleted(req.params.id)
+      if (!ok) return reply.status(404).send({ error: 'not_found' })
       return { ok: true }
     },
   )

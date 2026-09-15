@@ -5,7 +5,9 @@ import { createAuthHook } from '../auth/auth.middleware.js'
 import { PatientMembershipPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
 import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
+import { OpsAnalysisQueueService } from '../../../application/ops/ops-analysis-queue.service.js'
 import { SupportReportService } from '../../../application/support-report/support-report.service.js'
+import { OpsAnalysisQueuePgRepository } from '../../persistence/ops-analysis-queue.pg.repository.js'
 import { SupportReportPgRepository } from '../../persistence/support-report.pg.repository.js'
 import { SupportReportController } from './support-report.controller.js'
 
@@ -19,7 +21,12 @@ export async function supportReportRoutes(app: FastifyInstance) {
   const memberships = new PatientMembershipPgRepository(pgPool)
   const requireAuth = createAuthHook(authService, true, memberships)
   const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
-  const service = new SupportReportService(new SupportReportPgRepository(pgPool), productEvents)
+  const supportRepo = new SupportReportPgRepository(pgPool)
+  const queueService = new OpsAnalysisQueueService(
+    new OpsAnalysisQueuePgRepository(pgPool),
+    supportRepo,
+  )
+  const service = new SupportReportService(supportRepo, productEvents, queueService)
   const controller = new SupportReportController(service)
 
   app.addHook('onRequest', requireAuth)

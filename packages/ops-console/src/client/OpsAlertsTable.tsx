@@ -65,7 +65,7 @@ export function OpsAlertsTable({
   onRefresh,
   filter,
   title = 'Alertas derivados',
-  description = 'Triagem pager + Suporte SRE (Tier 0). Clique na linha para detalhes.',
+  description = 'Triagem pager + AiCare Suporte SRE. Clique na linha para detalhes.',
 }: {
   data: OpsMetricsResponse
   onRefresh?: () => void | Promise<void>

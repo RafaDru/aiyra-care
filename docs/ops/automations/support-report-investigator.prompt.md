@@ -18,6 +18,8 @@ Use apenas estes campos do payload:
 | `environment.apiPublicUrl` | Base URL da API que disparou o webhook |
 | `operatorNotes` | Contexto **ops** (sem PHI) passado manualmente no console — priorize na hipótese |
 | `investigation.trigger` | `auto` (submit) ou `manual` (botão Analisar) |
+| `analysisQueue.id` | ID na pilha — cite no callback |
+| `analysisQueue.callbackUrl` | POST ao finalizar (ver «Callback» abaixo) |
 
 **Proibido:** buscar descrição livre do usuário, `accountId`, `patientId`, dados clínicos, screenshots.
 
@@ -68,6 +70,20 @@ Estrutura:
 ## Console
 <dashboardUrl>
 ```
+
+## Callback (obrigatório ao finalizar)
+
+`POST` em `analysisQueue.callbackUrl` com header `x-investigator-callback-key` ou `x-internal-ops-key` (valor em `OPS_INVESTIGATOR_CALLBACK_KEY` / `OPS_METRICS_KEY` no servidor ops).
+
+```json
+{
+  "queueId": "<analysisQueue.id>",
+  "remediationSummary": "Resumo em até 5 linhas: hipótese + o que foi feito",
+  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<id>.md"
+}
+```
+
+Isso marca a issue como **fix_proposed** no console (aba Issues).
 
 ## Limites
 

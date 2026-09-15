@@ -10,7 +10,7 @@ import { resolveOpsAlertDashboardUrl } from './ops-alert-dispatch.service.js'
 
 export type OpsAlertInvestigatorDispatchResult =
   | { outcome: 'sent' }
-  | { outcome: 'skipped'; reason: 'webhook_not_configured' | 'webhook_key_missing' | 'auto_disabled' }
+  | { outcome: 'skipped'; reason: 'webhook_not_configured' | 'webhook_key_missing' | 'auto_disabled' | 'pre_screen' }
   | { outcome: 'failed'; error: string }
 
 export interface OpsAlertInvestigatorPayload {
@@ -27,6 +27,7 @@ export interface OpsAlertInvestigatorPayload {
   text: string
   operatorNotes?: string | null
   investigation?: { tier: 0 | 1; playbook: string; trigger: 'auto' | 'manual' }
+  analysisQueue?: { id: string; callbackUrl: string; lane: 'development_support' | 'sre_support' }
 }
 
 export function resolveOpsAlertInvestigatorWebhookUrl(): string | undefined {
@@ -112,6 +113,7 @@ export async function dispatchOpsAlertInvestigator(
     triage?: OpsAlertTriageRow
     operatorNotes?: string | null
     trigger: 'auto' | 'manual'
+    analysisQueue?: { id: string; callbackUrl: string }
   },
 ): Promise<OpsAlertInvestigatorDispatchResult> {
   if (options.trigger === 'auto' && !isOpsAlertInvestigatorAutoEnabled()) {
@@ -122,7 +124,18 @@ export async function dispatchOpsAlertInvestigator(
   const bearerKey = resolveOpsAlertInvestigatorWebhookKey()
   if (!bearerKey) return { outcome: 'skipped', reason: 'webhook_key_missing' }
 
-  const payload = buildOpsAlertInvestigatorPayload(alert, options)
+  const payload = {
+    ...buildOpsAlertInvestigatorPayload(alert, options),
+    ...(options.analysisQueue
+      ? {
+          analysisQueue: {
+            id: options.analysisQueue.id,
+            callbackUrl: options.analysisQueue.callbackUrl,
+            lane: 'sre_support' as const,
+          },
+        }
+      : {}),
+  }
   try {
     const res = await fetch(webhook, {
       method: 'POST',

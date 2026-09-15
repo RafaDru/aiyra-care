@@ -10,6 +10,7 @@ $root = Split-Path $PSScriptRoot -Parent
 . (Join-Path $PSScriptRoot 'ops-notifier-instance.ps1')
 . (Join-Path $PSScriptRoot 'ops-notifier-health.ps1')
 . (Join-Path $PSScriptRoot 'ops-notifier-tray-ui.ps1')
+. (Join-Path $PSScriptRoot 'ops-notifier-attention.ps1')
 . (Join-Path $PSScriptRoot 'ops-notifier-toast-design.ps1')
 $iconPath = Join-Path $root 'packages\web\public\brand\logo-icon.png'
 $logSuffix = if ($env:OPS_NOTIFIER_LOG_SUFFIX) { $env:OPS_NOTIFIER_LOG_SUFFIX } else { '' }
@@ -464,6 +465,19 @@ function Invoke-LayerControl {
   } "$Action camada $Layer"
 }
 
+function Open-ObservabilityIssues {
+  $url = "http://127.0.0.1:$opsConsolePort/?tab=issues"
+  Start-Process $url
+}
+
+function Refresh-TrayAttention {
+  try {
+    Update-OpsTrayAttentionMenu -Menu $menu -OpsConsolePort ([int]$opsConsolePort)
+  } catch {
+    Write-NotifierLog "attention refresh: $($_.Exception.Message)"
+  }
+}
+
 function Open-Observability {
   $consoleUrl = "http://127.0.0.1:$opsConsolePort"
   try {
@@ -509,6 +523,7 @@ function Stop-Notifier {
   $timer.Stop()
   $healthTimer.Stop()
   $healthPollTimer.Stop()
+  $attentionTimer.Stop()
   if ($sync.Listener) {
     try { $sync.Listener.Stop() } catch { }
     try { $sync.Listener.Close() } catch { }
@@ -559,6 +574,32 @@ foreach ($key in $layerKeys) {
 
 $menu.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator)) | Out-Null
 
+$issuesHeader = New-OpsTrayMenuItem -Text 'Issues — carregando...' -Enabled $false
+$issuesHeader.Name = 'issues-header'
+try {
+  $issuesHeader.Font = New-Object System.Drawing.Font($issuesHeader.Font.FontFamily, $issuesHeader.Font.Size, [System.Drawing.FontStyle]::Bold)
+} catch { }
+$menu.Items.Add($issuesHeader) | Out-Null
+
+foreach ($issueEntry in @(
+  @{ name = 'issues-queued'; label = 'Na fila' },
+  @{ name = 'issues-investigating'; label = 'Investigando' },
+  @{ name = 'issues-fix-proposed'; label = 'Solução proposta' },
+  @{ name = 'issues-failed'; label = 'Falhou' }
+)) {
+  $issueItem = New-OpsTrayMenuItem -Text "$($issueEntry.label): …" -Enabled $false
+  $issueItem.Name = $issueEntry.name
+  $menu.Items.Add($issueItem) | Out-Null
+}
+
+$actionIssues = New-OpsTrayMenuItem -Text 'Abrir Issues no console' -Image (New-OpsTrayGlyphBitmap '📋', '#E0F2FE') -OnClick {
+  Invoke-TrayUiSafe { Open-ObservabilityIssues } 'abrir issues'
+}
+$actionIssues.Name = 'open-issues'
+$menu.Items.Add($actionIssues) | Out-Null
+
+$menu.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator)) | Out-Null
+
 $actionObs = New-OpsTrayMenuItem -Text "Observabilidade (:$opsConsolePort)" -Image (New-OpsTrayGlyphBitmap '📊') -OnClick { Invoke-TrayUiSafe { Open-Observability } 'abrir observabilidade' }
 $actionObs.Name = 'observability'
 $menu.Items.Add($actionObs) | Out-Null
@@ -595,6 +636,7 @@ $menu.Add_Opening({
       Apply-TrayHealth $script:healthCache
     }
     Start-TrayHealthRefresh -Force $true
+    Refresh-TrayAttention
   } catch {
     Write-NotifierLog "menu opening failed: $($_.Exception.Message)"
   }
@@ -615,7 +657,14 @@ $healthTimer = New-Object System.Windows.Forms.Timer
 $healthTimer.Interval = 30000
 $healthTimer.Add_Tick({ Start-TrayHealthRefresh })
 $healthTimer.Start()
+
+$attentionTimer = New-Object System.Windows.Forms.Timer
+$attentionTimer.Interval = 60000
+$attentionTimer.Add_Tick({ Refresh-TrayAttention })
+$attentionTimer.Start()
+
 Start-TrayHealthRefresh -Force $true
+Refresh-TrayAttention
 
 $timer = New-Object System.Windows.Forms.Timer
 $timer.Interval = 400
