@@ -630,6 +630,7 @@ export interface HygieneCandidateItem {
 export type AvaProposedActionType =
   | 'integration_sync'
   | 'clinical_export'
+  | 'consult_visit_open'
   | 'hygiene_merge'
   | 'hygiene_dismiss'
 
@@ -683,6 +684,12 @@ export type ProductEventName =
   | 'consult_visit_link_copied'
   | 'consult_visit_print'
   | 'consult_visit_whatsapp'
+  | 'consult_visit_email_sent'
+  | 'referral_link_created'
+  | 'referral_link_opened'
+  | 'clinician_share_viewed'
+  | 'clinician_share_feedback'
+  | 'clinician_share_cta_click'
   | 'quick_capture_opened'
   | 'quick_capture_saved'
 

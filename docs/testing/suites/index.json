@@ -217,6 +217,20 @@
       "estimatedMinutes": 5
     },
     {
+      "id": "patient-health-thread",
+      "domain": "clinico",
+      "title": "Health thread — wizard investigação",
+      "featureId": "patient-health-thread",
+      "lane": "business-full",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/patient-health-thread.md",
+      "coverage": "partial",
+      "businessActions": ["health_thread.investigation_create"],
+      "automation": { "status": "done", "spec": "packages/web/e2e/suites/patient-health-thread.spec.ts" },
+      "estimatedMinutes": 5
+    },
+    {
       "id": "ops-health",
       "domain": "ops",
       "title": "Ops — health e métricas",
@@ -252,6 +266,7 @@
         "patient-clinical-export",
         "family-quick-capture",
         "family-day-timeline",
+        "patient-health-thread",
         "ava-companion-smoke",
         "ava-guardrail-smoke",
         "ava-conversation-crud"

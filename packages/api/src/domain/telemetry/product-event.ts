@@ -40,6 +40,12 @@ export const PRODUCT_EVENT_NAMES = [
   'consult_visit_whatsapp',
   'quick_capture_opened',
   'quick_capture_saved',
+  'referral_link_created',
+  'referral_link_opened',
+  'consult_visit_email_sent',
+  'clinician_share_viewed',
+  'clinician_share_feedback',
+  'clinician_share_cta_click',
 ] as const
 
 export type ProductEventName = typeof PRODUCT_EVENT_NAMES[number]
@@ -47,6 +53,9 @@ export type ProductEventName = typeof PRODUCT_EVENT_NAMES[number]
 export const PUBLIC_LANDING_EVENT_NAMES = new Set<ProductEventName>([
   'landing_page_view',
   'landing_cta_click',
+  'clinician_share_viewed',
+  'clinician_share_feedback',
+  'clinician_share_cta_click',
 ])
 
 export const PRODUCT_EVENT_NAME_SET = new Set<string>(PRODUCT_EVENT_NAMES)
@@ -96,6 +105,11 @@ export const PRODUCT_EVENT_PROPERTY_KEYS = new Set([
   'has_entity_pin',
   'action_count',
   'capture_kind',
+  'has_referral',
+  'channel',
+  'email_skipped',
+  'mode',
+  'helpful',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret/i

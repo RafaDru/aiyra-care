@@ -102,10 +102,30 @@ export const api = {
       id: string,
       body: { mode?: 'summary' | 'full'; ttlHours?: number },
     ) =>
-      request<{ token: string; expiresAt: string; shareUrl: string }>(
+      request<{ token: string; expiresAt: string; shareUrl: string; referralCode: string | null }>(
         `/patients/${id}/clinical-export/shares`,
         { method: 'POST', body: JSON.stringify(body) },
       ),
+    emailClinicalExportShare: (
+      id: string,
+      body: {
+        recipientEmail: string
+        doctorName?: string
+        mode?: 'summary' | 'full'
+        ttlHours?: number
+      },
+    ) =>
+      request<{
+        ok: boolean
+        shareUrl: string
+        referralCode: string | null
+        expiresAt: string
+        emailSent: boolean
+        emailSkipped: boolean
+      }>(`/patients/${id}/clinical-export/shares/email`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
     timeline: (id: string, params?: import('./api.types.js').PatientTimelineQuery) => {
       const qs = new URLSearchParams()
       if (params?.timelineMonths) qs.set('timelineMonths', String(params.timelineMonths))

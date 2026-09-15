@@ -23,18 +23,20 @@ Wizard **Levar na consulta** no perfil do paciente gera um link temporário (48h
 1. No perfil do paciente (aba básica / contexto clínico), clica **Levar na consulta**
 2. Escolhe **Para consulta** (resumo) ou **Completo**
 3. O sistema gera link seguro (48h) automaticamente
-4. Pode **copiar link**, mostrar **QR Code**, **imprimir/PDF** ou **enviar no WhatsApp**
-5. O médico abre o link público (`/clinical-export/:token`) — sem login
+4. Pode **copiar link**, mostrar **QR Code**, **imprimir/PDF**, **enviar no WhatsApp** ou **enviar por e-mail ao médico**
+5. O link inclui código de indicação (`?ref=`) para atribuição futura (MVP sem billing)
+6. O médico abre o link público (`/clinical-export/:token`) — **portal do médico** sem login (D5)
 
 ## Superfície técnica
 
 | Tipo | Referência |
 |------|------------|
 | Rotas web | `/patients/:id` (CTA), `/clinical-export/:token` (público) |
-| API | `GET /patients/:id/clinical-export`, `POST /patients/:id/clinical-export/shares`, `GET /clinical-export/share/:token` |
-| UI | `ConsultVisitWizardModal.tsx`, `ClinicalExportSharePage.tsx`, `PatientContextPanel.tsx` |
+| API | `GET /patients/:id/clinical-export`, `POST /patients/:id/clinical-export/shares`, `POST .../shares/email`, `GET /clinical-export/share/:token` |
+| Migration | `066_referral_clinical_export.sql` — `app_accounts.referral_code`, metadados no share |
+| UI | `ConsultVisitWizardModal.tsx`, `ClinicalExportSharePage.tsx` (portal médico), `ClinicianShareFeedback.tsx` |
 | Bus | `clinical-export-bus.ts` — `requestConsultVisitOpen` |
-| Telemetria | `consult_visit_share_created`, `consult_visit_link_copied`, `consult_visit_print`, `consult_visit_whatsapp` |
+| Telemetria | `consult_visit_*`, `referral_link_*`, `consult_visit_email_sent`, `clinician_share_*` (público) |
 
 ## Modos de export
 
@@ -55,8 +57,13 @@ Wizard **Levar na consulta** no perfil do paciente gera um link temporário (48h
 - Suite: [`patient-clinical-export`](../testing/suites/patient-clinical-export.md)
 - Comando: `npm run qa:run -- --suite patient-clinical-export`
 
-## Fora de escopo (D1)
+## Portal do médico (D5)
 
-- CTA no dashboard (D1 perfil apenas)
-- Portal médico autenticado (épico B2B)
-- Registro rápido de eventos (D2)
+- Cabeçalho «Portal do médico» + cartão do paciente + disclaimer
+- Feedback «foi útil?» (telemetria pública, sem login)
+- CTA «Conhecer o AiyraCare» → landing
+
+## Fora de escopo
+
+- Programa de indicação com billing/descontos (`referral-growth-loop`)
+- Conta profissional autenticada / RBAC clínica (`b2b-platform-rbac`)

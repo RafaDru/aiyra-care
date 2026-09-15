@@ -22,4 +22,6 @@
 | 2 | Clicar **Levar na consulta** | Modal abre com modos Resumo/Completo | |
 | 3 | Aguardar geração do link | Botão **Copiar link** habilitado | |
 | 4 | Clicar **Copiar link** | Toast «Link copiado»; `POST .../clinical-export/shares` 201 | |
-| 5 | (Manual) Abrir URL em aba anônima | Página pública renderiza resumo | |
+| 5 | Preencher e-mail do médico e **Enviar e-mail** | Toast sucesso; `POST .../shares/email` 202 | |
+| 6 | Abrir URL em aba anônima | «Portal do médico», nome do paciente, feedback útil | |
+| 7 | (Manual) Abrir com `?ref=` | Telemetria `referral_link_opened` no servidor | |

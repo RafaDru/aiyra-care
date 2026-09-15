@@ -6,6 +6,7 @@
 
 | Documento | Caminho |
 |-----------|---------|
+| **Dossiê completo do produto (PDF)** | `docs/legal/AIYRACARE_DOSSIE_JURIDICO.pdf` (fonte: `AIYRACARE_DOSSIE_JURIDICO.md`) |
 | Termos de Uso v1.0 | `docs/legal/terms-of-use/v1.0.md` |
 | Política de Privacidade v1.0 | `docs/legal/privacy-policy/v1.0.md` |
 | Política de Cookies v1.0 | `docs/legal/cookie-policy/v1.0.md` |

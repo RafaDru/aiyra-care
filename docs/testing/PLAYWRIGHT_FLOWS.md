@@ -67,6 +67,7 @@ Legenda **status:** ✅ done · 🟡 partial · ⬜ planned · 🚫 blocked · �
 | **—** | `patient-clinical-export` | `e2e/suites/patient-clinical-export.spec.ts` | qa.e2e | — | ✅ | |
 | **—** | `family-quick-capture` | `e2e/suites/family-quick-capture.spec.ts` | qa.e2e | — | ✅ | |
 | **—** | `family-day-timeline` | `e2e/suites/family-day-timeline.spec.ts` | qa.e2e | — | ✅ | |
+| **—** | `patient-health-thread` | `e2e/suites/patient-health-thread.spec.ts` | qa.e2e | — | ✅ | |
 | **4** | `amil-sync-options` | — | portal | `portal-amil-qa` | 🚫 | WAF — manual + nightly opcional |
 | **4** | `ops-health` | `packages/api/scripts/ops-smoke.ts` | ops key | — | 🟡 | HTTP, não browser |
 

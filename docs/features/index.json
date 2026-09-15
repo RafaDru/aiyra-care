@@ -142,6 +142,24 @@
       "tags": ["carteira", "timeline", "dia a dia", "agenda"]
     },
     {
+      "id": "patient-health-thread",
+      "epicId": "family-day-to-day",
+      "title": "Health thread — investigação e acompanhamento",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/patient-health-thread.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/patients/:id"],
+      "api": [
+        "POST /health-threads/wizard/investigation",
+        "GET /health-threads",
+        "GET /health-threads/:id/detail"
+      ],
+      "helpTopics": [],
+      "tags": ["acompanhamento", "investigação", "health-thread", "clínico"]
+    },
+    {
       "id": "business-analytics-ops",
       "epicId": "business-analytics",
       "title": "Analytics de negócio (console ops)",

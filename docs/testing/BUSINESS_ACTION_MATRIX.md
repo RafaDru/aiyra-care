@@ -58,11 +58,11 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Medidas / crescimento** — lançar, editar | CRU | `patient-measurements-crud` | ⬜ |
 | **Timeline** — filtrar, agrupar | R | `patient-timeline` | ⬜ |
 | **Linha do tempo / Encadeamento** (Neo4j) | R | `patient-graph-paths` | ⬜ |
-| **Investigação / health thread** — wizard criar | C | `patient-health-thread` | ⬜ |
+| **Investigação / health thread** — wizard criar | C | `patient-health-thread` | ✅ |
 | **Integrações** — vincular plano, sincronizar (modal) | CRU | `integrations-link-sync` | 🟡 |
 | **Convênios** — importar / vincular | C | `patient-insurance` | ⬜ |
 | **Higienização** — resolver duplicata | RU | `hygiene-dedup-ui` | 🟡 |
-| **Export clínico** — gerar + link compartilhado | C | `patient-clinical-export` | ✅ |
+| **Export clínico** — gerar + link + e-mail médico | C | `patient-clinical-export` | ✅ |
 | **Registro rápido** — nota / medida / medicação / agenda / doc | C | `family-quick-capture` | ✅ |
 | **Carteira — Hoje** — timeline do dia + atalhos | R | `family-day-timeline` | ✅ |
 | **Quem tem acesso** — grant / revogar | CRD | `family-access-matrix` | 🟡 |
