@@ -1,5 +1,45 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-15] - Ava G3 ações confirmadas + RBAC org audit
+
+### Realizado
+- **G3:** `AvaProposedActions` exige `Modal.confirm` antes de executar sync/export/higiene/consulta; ação `consult_visit_open`; testes `ava-proposed-action.test.ts`.
+- **RBAC B2B:** `organization-rbac.ts` (admin/clinician/read_only); migration `067_organization_access_audit`; `GET /organizations/:id/access-audit`; `organization-rbac.test.ts`.
+
+### Próximo
+- Ava G4 tool calling; escopos RBAC por paciente; referral com billing (após parecer jurídico).
+
+## [2026-09-15] - Suite QA patient-health-thread
+
+### Realizado
+- Spec Playwright: wizard «Nova investigação» no painel Em acompanhamento.
+- Feature card `patient-health-thread` + entrada em `business-full` lane.
+
+## [2026-09-15] - D5 Portal médico leve (página pública)
+
+### Realizado
+- `ClinicalExportSharePage` — cabeçalho «Portal do médico», cartão do paciente, disclaimer, CTA landing.
+- `ClinicianShareFeedback` — feedback útil/pouco útil com telemetria pública `clinician_share_*`.
+- Suite `patient-clinical-export` — spec abre link em aba anônima.
+
+### Próximo
+- Conta profissional / RBAC (`b2b-platform-rbac`) ou programa referral com billing.
+
+## [2026-09-14] - D4 E-mail ao médico + referral no export clínico
+
+### Decisão
+- MVP D4: atribuição via `?ref=` + e-mail Resend — **sem** billing nem tabela `referrals` (ver `discovery/referral-growth-loop.md`).
+
+### Realizado
+- Migration `066_referral_clinical_export` — `app_accounts.referral_code`, metadados no share.
+- `POST /patients/:id/clinical-export/shares/email` + template pt-BR ao médico.
+- Wizard «Levar na consulta»: seção e-mail + alerta com código de indicação.
+- Telemetria `referral_link_created`, `referral_link_opened`, `consult_visit_email_sent`.
+- Suite `patient-clinical-export` — spec e-mail médico.
+
+### Próximo
+- D5 portal médico leve (B2B) ou programa de indicação com descontos.
+
 ## [2026-09-14] - Polish D3 dashboard + Ava E2E estável
 
 ### Realizado

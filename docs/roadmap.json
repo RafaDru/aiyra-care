@@ -1339,7 +1339,7 @@
       "title": "Dia a dia — captura rápida + levar na consulta",
       "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
       "status": "in_progress",
-      "statusLabel": "D1–D3 entregues — referral / portal médico (D4+)",
+      "statusLabel": "D1–D5 entregues — referral billing em debate",
       "items": [
         {
           "id": "family-day-to-day-discovery",
@@ -1364,6 +1364,18 @@
           "title": "Bloco «Hoje» na Carteira",
           "status": "done",
           "detail": "WalletTodayPanel na Carteira; agenda/lembretes/registros do dia; CTAs captura e consulta."
+        },
+        {
+          "id": "clinician-share-email-referral",
+          "title": "E-mail ao médico + código referral no share",
+          "status": "done",
+          "detail": "POST .../shares/email; migration 066; ?ref= na URL; telemetria referral_link_*; sem billing."
+        },
+        {
+          "id": "clinician-share-portal",
+          "title": "Portal médico leve (página pública)",
+          "status": "done",
+          "detail": "ClinicalExportSharePage com UX médico, feedback útil, CTA landing; telemetria clinician_share_* pública."
         }
       ]
     },
@@ -2574,8 +2586,9 @@
         {
           "id": "b2b-segment-clinicians",
           "title": "Pacote clínico — export, share, contexto consulta",
-          "status": "planned",
-          "detail": "Evoluir share token 48h, export PDF, resumo determinístico, timeline sequência; portal leve «visualizar compartilhamento» sem conta Aiyra (opcional)."
+          "status": "in_progress",
+          "statusLabel": "Portal público D5 — conta profissional em backlog",
+          "detail": "Share 48h + portal médico público (D5). Próximo: conta profissional, timeline sequência dedicada, notificação opt-in."
         },
         {
           "id": "b2b-segment-labs",
@@ -2606,8 +2619,9 @@
         {
           "id": "b2b-platform-rbac",
           "title": "RBAC profissional (médico, admin clínica, parceiro read-only)",
-          "status": "planned",
-          "detail": "Roles em Supabase ou PG; scopes por paciente/org; auditoria de acesso (LGPD)."
+          "status": "done",
+          "statusLabel": "Matriz roles + audit log org (067)",
+          "detail": "organization-rbac.ts (admin/clinician/read_only × view/manage_members/manage_org); migration 067 organization_access_audit; GET /organizations/:id/access-audit; scopes paciente em backlog."
         },
         {
           "id": "b2b-partner-api",

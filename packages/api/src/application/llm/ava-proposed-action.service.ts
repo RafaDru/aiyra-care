@@ -13,6 +13,7 @@ import {
 
 const SYNC_RE = /\b(sincroniz|sync|integra[cç][aã]o|portal|unimed|amil|mater|hermes|pardini)\b/i
 const EXPORT_RE = /\b(export|exportar|pdf|imprimir|compartilhar.*pront[uá]rio|relat[oó]rio cl[ií]nico)\b/i
+const CONSULT_VISIT_RE = /\b(levar na consulta|preparar consulta|consulta m[eé]dica|m[eé]dico na consulta)\b/i
 
 export class AvaProposedActionService {
   constructor(
@@ -56,6 +57,16 @@ export class AvaProposedActionService {
         type: 'clinical_export',
         label: 'Abrir exportação clínica',
         description: 'Gera prévia/impressão do prontuário (resumo ou completo).',
+        payload: { patientId, mode: 'summary' },
+      })
+    }
+
+    if (CONSULT_VISIT_RE.test(trimmed)) {
+      proposals.push({
+        id: randomUUID(),
+        type: 'consult_visit_open',
+        label: 'Levar na consulta',
+        description: 'Abre o wizard com link, QR Code e e-mail ao médico.',
         payload: { patientId, mode: 'summary' },
       })
     }
@@ -125,6 +136,15 @@ export class AvaProposedActionService {
           ok: true,
           message: 'Use o botão de exportação ou o link retornado',
           data: { patientId, mode, exportPath: `/patients/${patientId}/clinical-export?mode=${mode}` },
+        }
+      }
+      case 'consult_visit_open': {
+        const patientId = String(input.payload.patientId ?? '')
+        const mode = input.payload.mode === 'full' ? 'full' : 'summary'
+        return {
+          ok: true,
+          message: 'Wizard «Levar na consulta» aberto',
+          data: { patientId, mode, consultVisit: true },
         }
       }
       case 'hygiene_merge':

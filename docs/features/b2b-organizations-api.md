@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `b2b-platform-orgs` |
 | **Épico** | `b2b-partner-platform` |
-| **Status** | `done` (API mínima; sem UI parceiro) |
+| **Status** | `done` (API + RBAC audit 067; sem UI parceiro) |
 | **Categoria** | técnico |
 | **Prioridade** | P3 |
 
@@ -21,10 +21,10 @@ CRUD de **organizações** (clínica, lab, farmácia, plano) e **membros** com R
 
 | Tipo | Referência |
 |------|------------|
-| Migration | `055_organizations.sql` |
-| Domain | `packages/api/src/domain/organization/` |
-| API | `GET/POST/PATCH/DELETE /organizations`, members sub-routes |
-| Testes | `organization.service.test.ts` |
+| Migration | `055_organizations.sql`, `067_organization_access_audit.sql` |
+| Domain | `packages/api/src/domain/organization/` (`organization-rbac.ts`) |
+| API | `GET/POST/PATCH/DELETE /organizations`, members sub-routes, `GET /organizations/:id/access-audit` |
+| Testes | `organization.service.test.ts`, `organization-rbac.test.ts` |
 
 ## Fora de escopo
 

@@ -1,8 +1,23 @@
 # Foco atual — tracking vivo
 
-> **Última atualização:** 2026-09-14  
+> **Última atualização:** 2026-09-15  
 > Documento de acompanhamento entre sessões — complementa `roadmap.json` e `HISTORICO.md`.  
 > Atualizar a cada entrega relevante ou mudança de prioridade.
+
+---
+
+## Trabalhos em paralelo (set/2026)
+
+Apenas **duas** frentes ativas — não abrir terceira lane sem fechar ou pausar uma delas.
+
+| Frente | Escopo | Onde acompanhar |
+|--------|--------|-----------------|
+| **Produto** | Dia a dia família, export clínico, referral, portal médico, Ava G2–G3 | Esta seção + `docs/features/` + suites QA de negócio |
+| **Ops** | Pilha Issues, Automations AiCare (Dev + SRE), Tier 1 opt-in, tray/console | `docs/ops/AUTOMATIONS_LANES.md`, `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md` |
+
+**Ops — estado atual:** Fase 1–2 entregues (queue + callback + tray + pré-análise); Tier 1 em `main` (`OPS_INVESTIGATOR_TIER1`). Reimportar workflows após mudança: `.cursor/automations/README.md`.
+
+**Produto — entregue (set/15):** D4–D5 export clínico + portal médico + dossiê jurídico; suite `patient-health-thread`; Ava G3 confirmação; RBAC org audit (067).
 
 ---
 
@@ -30,8 +45,10 @@
 - **D1** Wizard «Levar na consulta» — **entregue** (link + QR + PDF + rota pública)
 - **D2** «+ Registro rápido» (5 tipos) — **entregue** (header global + sheet)
 - **D3** Bloco «Hoje» na Carteira + dashboard — **entregue** (`WalletTodayPanel`)
-- Programa de indicação bilateral — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
-- Suites QA: `patient-clinical-export`, `family-quick-capture`, `patient-health-thread`
+- **D4** E-mail ao médico + código referral no link — **entregue** (MVP atribuição; sem billing)
+- **D5** Portal médico leve (página pública) — **entregue**
+- Programa de indicação bilateral (descontos) — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
+- Suites QA dia a dia: `patient-clinical-export`, `family-quick-capture`, `family-day-timeline`, `patient-health-thread` — **todas com spec**
 
 ### 2 — Consolidação Ava parceira
 

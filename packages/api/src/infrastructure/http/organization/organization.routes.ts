@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { pgPool } from '../../../db/postgres.js'
+import { OrganizationAccessAuditService } from '../../../application/organization/organization-access-audit.service.js'
 import { OrganizationService } from '../../../application/organization/organization.service.js'
 import { OrganizationPgRepository } from '../../persistence/organization.pg.repository.js'
 import { getAuthService } from '../auth/auth.routes.js'
@@ -16,7 +17,10 @@ export async function organizationRoutes(app: FastifyInstance) {
 
   const memberships = new PatientMembershipPgRepository(pgPool)
   const requireAuth = createAuthHook(authService, true, memberships)
-  const controller = new OrganizationController(new OrganizationService(new OrganizationPgRepository(pgPool)))
+  const audit = new OrganizationAccessAuditService(pgPool)
+  const controller = new OrganizationController(
+    new OrganizationService(new OrganizationPgRepository(pgPool), audit),
+  )
 
   app.addHook('onRequest', requireAuth)
 
@@ -29,4 +33,5 @@ export async function organizationRoutes(app: FastifyInstance) {
   app.post('/organizations/:id/members', controller.addMember.bind(controller))
   app.patch('/organizations/:id/members/:memberId', controller.updateMember.bind(controller))
   app.delete('/organizations/:id/members/:memberId', controller.removeMember.bind(controller))
+  app.get('/organizations/:id/access-audit', controller.listAccessAudit.bind(controller))
 }

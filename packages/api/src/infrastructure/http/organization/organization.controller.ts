@@ -155,4 +155,16 @@ export class OrganizationController {
       return mapOrgError(err, reply)
     }
   }
+
+  async listAccessAudit(req: AuthenticatedRequest, reply: FastifyReply) {
+    if (!req.accountId) return reply.status(401).send({ message: 'Não autenticado' })
+    const params = organizationParamsSchema.safeParse(req.params)
+    if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    try {
+      const rows = await this.service.listAccessAudit(params.data.id, req.accountId)
+      return reply.send({ items: rows })
+    } catch (err) {
+      return mapOrgError(err, reply)
+    }
+  }
 }
