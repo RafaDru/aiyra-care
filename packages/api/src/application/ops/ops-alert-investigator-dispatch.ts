@@ -2,6 +2,10 @@ import {
   resolveSreSupportAutomationWebhookKey,
   resolveSreSupportAutomationWebhookUrl,
 } from '../../domain/ops/cursor-automation-env.js'
+import {
+  tier1PlaybookId,
+  type InvestigationTier,
+} from '../../domain/ops/investigator-tier.js'
 import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import type { OpsAlert } from '../../domain/ops/ops-metrics.types.js'
@@ -62,6 +66,7 @@ export function buildOpsAlertInvestigatorPayload(
     triage?: OpsAlertTriageRow
     operatorNotes?: string | null
     trigger: 'auto' | 'manual'
+    investigationTier?: InvestigationTier
   },
 ): OpsAlertInvestigatorPayload {
   const dashboardUrl = resolveOpsAlertDashboardUrl() ?? `http://127.0.0.1:${process.env.OPS_CONSOLE_PORT ?? '3013'}`
@@ -79,7 +84,13 @@ export function buildOpsAlertInvestigatorPayload(
     checkedAt: options.checkedAt,
     text: `Alerta ops: ${label}`,
     ...(options.operatorNotes ? { operatorNotes: options.operatorNotes.slice(0, 2000) } : {}),
-    investigation: { tier: 0, playbook: 'ops-alert-tier0', trigger: options.trigger },
+    investigation: {
+      tier: options.investigationTier ?? 0,
+      playbook: (options.investigationTier ?? 0) === 1
+        ? tier1PlaybookId('sre_support')
+        : 'ops-alert-tier0',
+      trigger: options.trigger,
+    },
   }
 }
 
@@ -114,6 +125,7 @@ export async function dispatchOpsAlertInvestigator(
     operatorNotes?: string | null
     trigger: 'auto' | 'manual'
     analysisQueue?: { id: string; callbackUrl: string }
+    investigationTier?: InvestigationTier
   },
 ): Promise<OpsAlertInvestigatorDispatchResult> {
   if (options.trigger === 'auto' && !isOpsAlertInvestigatorAutoEnabled()) {
@@ -125,7 +137,13 @@ export async function dispatchOpsAlertInvestigator(
   if (!bearerKey) return { outcome: 'skipped', reason: 'webhook_key_missing' }
 
   const payload = {
-    ...buildOpsAlertInvestigatorPayload(alert, options),
+    ...buildOpsAlertInvestigatorPayload(alert, {
+      checkedAt: options.checkedAt,
+      triage: options.triage,
+      operatorNotes: options.operatorNotes,
+      trigger: options.trigger,
+      investigationTier: options.investigationTier,
+    }),
     ...(options.analysisQueue
       ? {
           analysisQueue: {

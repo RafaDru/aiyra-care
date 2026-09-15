@@ -85,8 +85,29 @@ Estrutura:
 
 Isso marca a issue como **fix_proposed** no console (aba Issues).
 
-## Limites
+## Limites (Tier 0)
 
-- Sem commit de código de produto nesta execução (Tier 0).
+- Sem commit de código de produto nesta execução.
 - Sem acesso a PG de produção; só raciocínio sobre o monorepo e docs.
 - Se payload incompleto, documentar o que faltou e parar.
+
+## Tier 1 (`investigation.tier === 1`)
+
+Quando o payload traz `investigation.tier: 1` e `playbook: support-report-tier1`:
+
+1. Siga o Tier 0 (investigação + markdown em `docs/ops/investigations/`).
+2. Se a correção é **óbvia** e cabe nos gates → implemente no repo.
+3. Abra **PR draft** (`gh pr create --draft`) com labels `auto-investigator`, `tier-1`, `needs-human-review`.
+4. Gates completos: `docs/ops/automations/TIER1_GATES.md` (allowlist de paths, máx. 8 arquivos / 200 linhas).
+5. Callback inclui `prUrl`:
+
+```json
+{
+  "queueId": "<analysisQueue.id>",
+  "remediationSummary": "Correção: …",
+  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<id>.md",
+  "prUrl": "https://github.com/RafaDru/aiyra-care/pull/NNN"
+}
+```
+
+**Nunca** merge em `main`. Se não cabe nos gates, pare no Tier 0 (só markdown).

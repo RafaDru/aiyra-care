@@ -6,6 +6,10 @@ import {
   preScreenOpsAlert,
   preScreenSupportReport,
 } from '../../domain/ops/ops-analysis-pre-screen.js'
+import {
+  resolveOpsAlertInvestigationTier,
+  resolveSupportInvestigationTier,
+} from '../../domain/ops/investigator-tier.js'
 import { resolveInvestigatorCallbackUrl } from './ops-analysis-callback-url.js'
 import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
 import {
@@ -37,10 +41,12 @@ export async function investigateSupportReportWithQueue(
   }
 
   const callbackUrl = resolveInvestigatorCallbackUrl()
+  const investigationTier = resolveSupportInvestigationTier(record, options.trigger)
   const dispatch = await dispatchSupportReportInvestigator(record, {
     operatorNotes: options.operatorNotes,
     trigger: options.trigger,
     analysisQueue: { id: item.id, callbackUrl },
+    investigationTier,
   })
   if (dispatch.outcome === 'sent') {
     await queueService.markInvestigating(item.id)
@@ -78,9 +84,11 @@ export async function investigateOpsAlertWithQueue(
   }
 
   const callbackUrl = resolveInvestigatorCallbackUrl()
+  const investigationTier = resolveOpsAlertInvestigationTier(alert, options.trigger)
   const dispatch = await dispatchOpsAlertInvestigator(alert, {
     ...options,
     analysisQueue: { id: item.id, callbackUrl },
+    investigationTier,
   })
   if (dispatch.outcome === 'sent') {
     await queueService.markInvestigating(item.id)

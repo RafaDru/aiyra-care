@@ -88,7 +88,18 @@ Rascunho de investigação para triagem humana — **não** abrir PR nem alterar
 }
 ```
 
-## Limites
+## Limites (Tier 0)
 
-- Sem commit de código de produto (Tier 0).
+- Sem commit de código de produto.
 - Sem acesso a PG de produção; raciocínio sobre monorepo + docs + `details` do payload.
+
+## Tier 1 (`investigation.tier === 1`)
+
+Quando o payload traz `investigation.tier: 1` e `playbook: ops-alert-tier1`:
+
+1. Siga o Tier 0 (investigação + markdown).
+2. Correção dentro dos gates → PR **draft** (`gh pr create --draft`).
+3. Gates: `docs/ops/automations/TIER1_GATES.md`.
+4. Callback com `prUrl` (ver playbook suporte — mesmo formato JSON).
+
+**Nunca** merge em `main`. Infra crítica sem fix seguro → só markdown + runbook humano.

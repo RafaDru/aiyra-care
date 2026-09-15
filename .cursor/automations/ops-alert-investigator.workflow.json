@@ -12,7 +12,7 @@
       "branch": "main"
     },
     "prompts": [
-      "Alerta ops_alert — lane AiCare Suporte SRE.\n\n1. Leia JSON (alertId, environment, analysisQueue, triage, dashboardUrl).\n2. Playbook: docs/ops/automations/ops-alert-investigator.prompt.md.\n3. Rascunho em docs/ops/investigations/.\n4. Tier 0 — sem PR.\n5. POST analysisQueue.callbackUrl com queueId + remediationSummary + analysisArtifactPath (ver playbook Callback)."
+      "Alerta ops_alert — lane AiCare Suporte SRE.\n\n1. Leia JSON (alertId, environment, analysisQueue, investigation, triage, dashboardUrl).\n2. Playbook: docs/ops/automations/ops-alert-investigator.prompt.md.\n3. Rascunho em docs/ops/investigations/.\n4. investigation.tier 0 → só markdown. Tier 1 → PR draft nos gates (TIER1_GATES.md).\n5. POST analysisQueue.callbackUrl (queueId, remediationSummary, analysisArtifactPath; + prUrl se Tier 1)."
     ],
     "model": "composer-2.5",
     "agentOptions": {

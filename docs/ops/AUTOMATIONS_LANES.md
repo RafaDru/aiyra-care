@@ -39,3 +39,11 @@ Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas op
 > Callback em dev: o agente Cursor na nuvem **não alcança** `127.0.0.1:3013` — use preview público ou conclua manualmente até GCP.
 
 Runbook suporte: `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md` · import: `.cursor/automations/README.md`
+
+## Tier 1 — PR draft (opt-in)
+
+- `OPS_INVESTIGATOR_TIER1=1` na API (default **off**)
+- Payload inclui `investigation: { tier: 0|1, playbook, trigger }`
+- Gates: `docs/ops/automations/TIER1_GATES.md`
+- Suporte: `technical_bug` + `consentTechnical` → tier 1
+- SRE: `infra`/`sync`; auto só `critical`

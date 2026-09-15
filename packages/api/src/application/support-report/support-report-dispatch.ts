@@ -2,6 +2,10 @@ import {
   resolveDevelopmentSupportAutomationWebhookKey,
   resolveDevelopmentSupportAutomationWebhookUrl,
 } from '../../domain/ops/cursor-automation-env.js'
+import {
+  tier1PlaybookId,
+  type InvestigationTier,
+} from '../../domain/ops/investigator-tier.js'
 import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
@@ -163,6 +167,7 @@ export async function dispatchSupportReportInvestigator(
     operatorNotes?: string | null
     trigger?: 'auto' | 'manual'
     analysisQueue?: { id: string; callbackUrl: string }
+    investigationTier?: InvestigationTier
   },
 ): Promise<SupportInvestigatorDispatchResult> {
   const webhook = resolveSupportInvestigatorWebhookUrl()
@@ -174,12 +179,17 @@ export async function dispatchSupportReportInvestigator(
     return { outcome: 'skipped', reason: 'webhook_key_missing' }
   }
   const trigger = options?.trigger ?? 'auto'
+  const tier = options?.investigationTier ?? 0
   const payload: SupportReportDispatchPayload = {
     ...buildSupportReportDispatchPayload(record, {
       operatorNotes: options?.operatorNotes ?? record.operatorNotes,
       trigger,
     }),
-    investigation: { tier: 0, playbook: 'support-report-tier0', trigger },
+    investigation: {
+      tier,
+      playbook: tier === 1 ? tier1PlaybookId('development_support') : 'support-report-tier0',
+      trigger,
+    },
     ...(options?.analysisQueue
       ? {
           analysisQueue: {

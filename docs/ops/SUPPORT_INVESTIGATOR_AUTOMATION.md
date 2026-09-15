@@ -102,11 +102,20 @@ Envia payload de teste para notificador **e** Automation. Esperado:
 
 ---
 
-## 4. Tier 1 (futuro)
+## 4. Tier 1 — PR draft (opt-in)
 
-- PR draft para bugs óbvios de código
-- Correlação com `GET /ops/support-reports` (ops key)
-- Gate legal/médico antes de qualquer fix clínico
+```env
+OPS_INVESTIGATOR_TIER1=1   # default off — Tier 0 permanece o padrão
+```
+
+| Condição | Tier |
+|----------|------|
+| `technical_bug` + `consentTechnical` | 1 |
+| Outras categorias / sem consentimento | 0 |
+
+O payload inclui `investigation: { tier, playbook, trigger }`. Tier 1 permite PR **draft** dentro dos gates (`docs/ops/automations/TIER1_GATES.md`). Callback pode incluir `prUrl` — aparece na aba Issues.
+
+**Rollback:** `OPS_INVESTIGATOR_TIER1=0` → só markdown, sem alterar Automations.
 
 ---
 
