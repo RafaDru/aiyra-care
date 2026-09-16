@@ -11,7 +11,7 @@ async function waitAvaComposerReady(page: Page, timeout = 90_000) {
   await send.waitFor({ state: 'visible', timeout })
   await expect(input).toBeEnabled({ timeout })
   await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout })
-  await expect(send).toBeEnabled({ timeout })
+  // Send stays disabled until input has text — only assert enabled after fill (submitAvaMessage).
 }
 
 /** Aguarda resume de conversa e lista de mensagens após abrir o dock. */
