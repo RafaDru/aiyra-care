@@ -200,6 +200,20 @@
       "tags": ["marketing", "landing", "funil"]
     },
     {
+      "id": "first-visit-guided-ux",
+      "epicId": "dev-delivery-pipeline",
+      "title": "Primeira visita — guia leve e empty states",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/first-visit-guided-ux.md",
+      "domainDoc": "docs/AVA_VISION.md",
+      "routes": ["/"],
+      "api": ["GET /patients/:id/family-support/insights"],
+      "helpTopics": [],
+      "tags": ["onboarding", "ux", "ava", "i18n"]
+    },
+    {
       "id": "documentation-knowledge-base",
       "epicId": "documentation-knowledge-base",
       "title": "Base de conhecimento — features, ajuda e tracking",

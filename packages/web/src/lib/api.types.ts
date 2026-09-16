@@ -564,6 +564,7 @@ export interface FamilySupportInsight {
 export interface FamilySupportBundle {
   disclaimer: string
   insights: FamilySupportInsight[]
+  hasClinicalHistory: boolean
   generatedAt: string
   patientId: string
 }
@@ -692,6 +693,7 @@ export type ProductEventName =
   | 'clinician_share_cta_click'
   | 'quick_capture_opened'
   | 'quick_capture_saved'
+  | 'first_visit_tour_completed'
 
 export type SupportReportCategory =
   | 'technical_bug'

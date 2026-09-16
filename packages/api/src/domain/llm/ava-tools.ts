@@ -90,6 +90,7 @@ export async function runAvaContextTools(
   let bundle: FamilySupportBundle = {
     insights: [],
     disclaimer: '',
+    hasClinicalHistory: false,
     patientId: ctx.patientId,
     generatedAt: new Date().toISOString(),
   }

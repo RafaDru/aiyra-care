@@ -5,7 +5,7 @@ import type { FamilySupportBundle } from '../../domain/family-support/family-sup
 import { evaluateMedicationSafety, evaluateVitalRules } from './family-support-rules.js'
 
 const DISCLAIMER =
-  'Apoio à família para organizar informações e conversar com o pediatra. Não substitui consulta médica nem serviço de emergência. Em emergência, ligue 192 (SAMU).'
+  'Estamos aqui para ajudar sua família a organizar o cuidado e se preparar para conversar com o médico. Não substituímos consulta médica nem atendimento de emergência. Em caso de urgência, ligue 192 (SAMU).'
 
 const VITAL_CODES = ['temperature', 'heart_rate', 'spo2'] as const
 
@@ -57,6 +57,7 @@ export class FamilySupportService {
     const allergyRows = await this.allergies.findAll({ patientId })
     const medRows = await this.medications.findAll({ patientId })
     const activeMeds = medRows.filter((m) => m.isActive)
+    const hasClinicalHistory = observations.length > 0 || allergyRows.length > 0 || medRows.length > 0
 
     const insights = [
       ...evaluateVitalRules(vitalInputs),
@@ -83,6 +84,7 @@ export class FamilySupportService {
     return {
       disclaimer: DISCLAIMER,
       insights,
+      hasClinicalHistory,
       generatedAt: new Date().toISOString(),
       patientId,
     }

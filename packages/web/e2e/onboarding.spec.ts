@@ -34,5 +34,7 @@ test.describe('onboarding', () => {
     await expect(page.getByRole('heading', { name: 'QA Onboarding Titular' })).toBeVisible({
       timeout: 30_000,
     })
+
+    await expect(page.getByTestId('first-visit-tour-drawer')).toBeVisible({ timeout: 10_000 })
   })
 })

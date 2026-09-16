@@ -43,6 +43,19 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 
 > Signup via UI fora do gate E2E automático no dev (rate limit Supabase). Use conta dedicada + reset (cenário A) na CI.
 
+### D — Guia «Primeiros passos» (primeira visita)
+
+Conta recém-onboarded; `localStorage` sem `aiyracare.first_visit_tour_completed`.
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Concluir cenário A (dashboard `/`) | Drawer «Primeiros passos» abre em ~1s | |
+| 2 | Percorrer 4 etapas (família → pessoa → registro → Ava) | Textos i18n; etapa Ava desabilitada se zero pacientes | |
+| 3 | **Concluir** ou **Fechar guia** | Drawer fecha; flag localStorage; evento `first_visit_tour_completed` | |
+| 4 | Recarregar dashboard | Drawer não reaparece | |
+
+**Automação:** `packages/web/e2e/onboarding.spec.ts` (assert `data-testid="first-visit-tour-drawer"`)
+
 ### C — Bloqueio menor de 18 (manual rápido)
 
 | # | Ação | Resultado esperado | ✅/❌ |
