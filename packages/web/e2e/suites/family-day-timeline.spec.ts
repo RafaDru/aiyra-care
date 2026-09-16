@@ -23,7 +23,11 @@ test.describe('family-day-timeline', () => {
     })
 
     await openPatientByName(page, patientName)
-    await page.getByRole('radio', { name: /Plano & portais/i }).click()
+    const planSection = page
+      .locator('.patient-section-nav .ant-segmented-item-label')
+      .filter({ hasText: 'Plano & portais' })
+    await planSection.scrollIntoViewIfNeeded()
+    await planSection.click()
     await page.getByRole('tab', { name: 'Carteira' }).click()
 
     const todayCard = page.locator('.wallet-today-panel')

@@ -59,10 +59,9 @@ export async function sendAvaMessage(page: Page, text: string) {
   const avaBubblesBefore = await page.locator('.ava-chat-bubble-row--ava').count()
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
-  const send = page.getByRole('button', { name: 'Enviar' })
   await input.fill(text)
-  await expect(send).toBeEnabled({ timeout: 30_000 })
-  await send.click()
+  await expect(page.getByRole('button', { name: 'Enviar' })).toBeEnabled({ timeout: 30_000 })
+  await input.press('Enter')
 
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
     timeout: 45_000,
