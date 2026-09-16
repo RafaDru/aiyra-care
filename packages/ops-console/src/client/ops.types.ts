@@ -426,12 +426,57 @@ export interface OpsAlertTriageRow {
   reason: string
 }
 
+export interface OpsEnvTarget {
+  id: string
+  label: string
+  apiBase: string
+  port?: number
+  enabled: boolean
+  opsKey?: string
+}
+
+export interface OpsEnvTargetView {
+  id: string
+  label: string
+  apiBase?: string
+  fetchedAt?: string
+  source: 'remote' | 'local'
+}
+
 export interface OpsMetricsResponse {
   metrics: OpsMetricsSnapshot
   alerts: OpsAlert[]
   runtime?: RuntimeDegradedView
   triage?: OpsAlertTriageRow[]
   alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
+  envTarget?: OpsEnvTargetView
+}
+
+export interface ProductLifecycleSnapshot {
+  loadedAt: string
+  roadmapUpdatedAt?: string
+  featuresUpdatedAt?: string
+  epicsInProgress: Array<{
+    id: string
+    title: string
+    priority: string
+    category: string
+    status: string
+    statusLabel?: string
+    summary?: string
+    inProgressItems: number
+  }>
+  features: Array<{
+    id: string
+    epicId?: string
+    title: string
+    status: string
+    priority: string
+    category: string
+    doc: string
+    suiteId?: string
+    suiteDoc?: string
+  }>
 }
 
 export interface OpsAlertsDispatchResult {
