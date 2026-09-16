@@ -1,5 +1,18 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-16] - MVP: épico family-day-to-day fechado; referral billing fora do MVP
+
+### Decisão
+- Épico `family-day-to-day` marcado **done** no `roadmap.json` (D1–D5 + suites QA). Atribuição referral no share (D4) permanece sem billing.
+- **Programa de indicação bilateral com descontos** permanece **fora do MVP** — debate em `docs/discovery/referral-growth-loop.md`; depende de parecer jurídico formal antes de qualquer cobrança/desconto.
+
+### Realizado
+- Suite QA `patient-wallet` (smoke Carteira) + correção `docs/testing/suites/index.json` (entradas integrations/hygiene/support/ava desaninhadas).
+- i18n Batch S3: `i18n:check` + strings Ava report/lite mode.
+
+### Próximo
+- Merge drafts #4, #13, #18 + Ava stabilize; Rafael valida Staging `:5174`.
+
 ## [2026-09-16] - Cursor Projects + My Machines (execução local)
 
 ### Decisão
