@@ -87,7 +87,7 @@ Ver [`AVA_QA_SCOPE.md`](./AVA_QA_SCOPE.md).
 
 | Ação UI | CRUD | Suite | Cobertura |
 |---------|------|-------|-----------|
-| Reportar problema | C | `support-user-report` | 🟡 |
+| Reportar problema | C | `support-user-report` | ✅ |
 | Roadmap `/roadmap` | R | `regression-smoke` | ✅ |
 | Ops console (interno) | R | `ops-health` | 🟡 |
 
