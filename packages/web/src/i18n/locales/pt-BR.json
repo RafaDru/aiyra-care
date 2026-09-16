@@ -515,6 +515,14 @@
     "openIntegrations": "Ver integrações",
     "platformDocumentsMessage": "Quer ajuda para usar um documento nesta aba na conversa com o pediatra?",
     "platformExportMessage": "Antes de imprimir ou compartilhar, quer que eu destaque o que mais importa no prontuário?",
+    "liteModeBanner": "Ava em modo simplificado — respostas sem revisão automática. Confirme informações importantes com o pediatra.",
+    "thinkingStatusAriaLabel": "Status do processamento",
+    "reportPrint": {
+      "generatedAt": "Relatório gerado pelo AiyraCare · {{date}}",
+      "footer": "Ava é apoio à comunicação familiar — não substitui avaliação médica. Emergência: SAMU 192.",
+      "printPdf": "Imprimir / Salvar PDF",
+      "empty": "Nada para exibir ainda."
+    },
     "expressions": {
       "present": "Presente",
       "greeting": "Saudação",

@@ -429,7 +429,7 @@ export function AvaChatPanel({
       showIcon
       acknowledge={false}
       style={{ marginBottom: 8 }}
-      message="Ava em modo simplificado — respostas sem revisão automática. Confirme informações importantes com o pediatra."
+      message={t('ava.liteModeBanner')}
     />
   ) : null
 

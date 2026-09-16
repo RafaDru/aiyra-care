@@ -57,6 +57,7 @@
     "qa:list": "node scripts/qa-suite.mjs list",
     "qa:run": "node scripts/qa-suite.mjs run",
     "qa:run-all": "node scripts/qa-suite.mjs run-all",
+    "i18n:check": "node scripts/i18n-check.mjs",
     "test:e2e:regression": "cd packages/web && npm run test:e2e:regression",
     "test:e2e:business-full": "cd packages/web && npm run test:e2e:business-full",
     "test:e2e:ci": "node scripts/ci-e2e-regression.mjs --skip-api-start",

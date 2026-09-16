@@ -1,5 +1,7 @@
 import { Button, Modal, Space, Typography } from 'antd'
 import { PrinterOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
+import i18n from '../../i18n/index.js'
 import { AvaAvatar } from './AvaAvatar.js'
 import { AvaChatBubble } from './AvaChatBubble.js'
 import './ava-chat.css'
@@ -31,11 +33,13 @@ function escapeHtml(text: string): string {
 export function printAvaReport(title: string, messages: AvaReportMessage[]): void {
   const win = window.open('', '_blank', 'width=820,height=920')
   if (!win) return
+  const youLabel = i18n.t('ava.you')
+  const revisedLabel = i18n.t('ava.revised')
   const body = messages
     .map((m) =>
       m.role === 'user'
-        ? `<div class="msg msg-user"><div class="who">Você</div><div class="bubble bubble-user">${escapeHtml(m.text)}</div></div>`
-        : `<div class="msg"><div class="who">Ava${m.revised ? ' · revisada' : ''}</div><div class="bubble bubble-ava">${escapeHtml(m.text)}</div></div>`,
+        ? `<div class="msg msg-user"><div class="who">${escapeHtml(youLabel)}</div><div class="bubble bubble-user">${escapeHtml(m.text)}</div></div>`
+        : `<div class="msg"><div class="who">Ava${m.revised ? ` · ${escapeHtml(revisedLabel)}` : ''}</div><div class="bubble bubble-ava">${escapeHtml(m.text)}</div></div>`,
     )
     .join('\n')
   win.document.write(`<!doctype html>
@@ -58,9 +62,9 @@ export function printAvaReport(title: string, messages: AvaReportMessage[]): voi
 </head>
 <body>
   <h1>${escapeHtml(title)}</h1>
-  <div class="sub">Relatório gerado pelo AiyraCare · ${new Date().toLocaleString('pt-BR')}</div>
+  <div class="sub">${escapeHtml(i18n.t('ava.reportPrint.generatedAt', { date: new Date().toLocaleString(i18n.language === 'en' ? 'en-US' : 'pt-BR') }))}</div>
   ${body}
-  <footer>Ava é apoio à comunicação familiar — não substitui avaliação médica. Emergência: SAMU 192.</footer>
+  <footer>${escapeHtml(i18n.t('ava.reportPrint.footer'))}</footer>
 </body>
 </html>`)
   win.document.close()
@@ -70,6 +74,8 @@ export function printAvaReport(title: string, messages: AvaReportMessage[]): voi
 
 /** Modal "tela separada" com a conversa formatada + exportação PDF/impressão. */
 export function AvaReportModal({ open, onClose, title, messages }: Props) {
+  const { t } = useTranslation()
+
   return (
     <Modal
       open={open}
@@ -79,17 +85,17 @@ export function AvaReportModal({ open, onClose, title, messages }: Props) {
       footer={
         <Space>
           <Button icon={<PrinterOutlined />} onClick={() => printAvaReport(title, messages)}>
-            Imprimir / Salvar PDF
+            {t('ava.reportPrint.printPdf')}
           </Button>
           <Button type="primary" onClick={onClose}>
-            Fechar
+            {t('common.close')}
           </Button>
         </Space>
       }
     >
       <div className="ava-report-scroll" style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: 4 }}>
         {messages.length === 0 && (
-          <Text type="secondary">Nada para exibir ainda.</Text>
+          <Text type="secondary">{t('ava.reportPrint.empty')}</Text>
         )}
         {messages.map((m, idx) => (
           <div
