@@ -38,6 +38,15 @@ export async function openAvaDock(page: Page) {
   await waitForAvaDockSettled(page)
 }
 
+/** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
+export async function startFreshAvaConversation(page: Page) {
+  const btn = page.getByRole('button', { name: 'Nova conversa' })
+  if (await btn.isVisible().catch(() => false)) {
+    await btn.click()
+    await waitAvaComposerReady(page)
+  }
+}
+
 /** Aguarda texto na última bolha da Ava (SSE pode atrasar no CI). */
 export async function waitForAvaAssistantReply(
   page: Page,
@@ -57,11 +66,17 @@ export async function waitForAvaAssistantReply(
 
 export async function submitAvaMessage(page: Page, text: string) {
   await waitAvaComposerReady(page)
+  const avaBubblesBefore = await page.locator('.ava-chat-bubble-row--ava').count()
+
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click()
+
+  await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
+    timeout: 45_000,
+  })
 }
 
 export async function sendAvaMessage(page: Page, text: string) {
