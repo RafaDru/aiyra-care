@@ -1338,8 +1338,8 @@
       "priority": "P1",
       "title": "Dia a dia — captura rápida + levar na consulta",
       "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
-      "status": "in_progress",
-      "statusLabel": "D1–D5 entregues — referral billing em debate",
+      "status": "done",
+      "statusLabel": "D1–D5 + suites QA — referral billing aguarda jurídico",
       "items": [
         {
           "id": "family-day-to-day-discovery",
@@ -1931,6 +1931,12 @@
           "detail": "docs/CURSOR_AGENT_OPS.md — skills, hooks, troca de modelo."
         },
         {
+          "id": "del-cursor-my-machines",
+          "title": "Cursor Projects — My Machines worker local",
+          "status": "done",
+          "detail": "Worker NotebookRafael; autostart Windows; scripts/cursor-worker-*.ps1; docs/CURSOR_WORKSPACE.md."
+        },
+        {
           "id": "del-ci-vitest-critical",
           "title": "CI: vitest critical na API",
           "status": "done",
@@ -2140,21 +2146,27 @@
         {
           "id": "run-support-user-reports",
           "title": "Reportar problema — chamado + bundle LGPD",
-          "status": "in_progress",
-          "detail": "Migration 061 + 064 (analysis_status, operator_notes); fila console :3013; Analisar/Concluir + agente Cursor Tier 0; POST/GET /support/reports; docs/ops/SUPPORT_REPORTS.md.",
+          "status": "done",
+          "detail": "Migration 061 + 064; aba Suporte + Issues (066 ops_analysis_queue); investigationId; Analisar/Concluir + agente Cursor; docs/ops/SUPPORT_REPORTS.md + INVESTIGATION_CORRELATION.md.",
           "reviewBadge": ["legal"]
         },
         {
-          "id": "run-ops-alert-investigator",
-          "title": "Investigador Cursor — alertas infra (Tier 0)",
+          "id": "run-ops-analysis-queue",
+          "title": "Pilha Issues + callback agente",
           "status": "done",
-          "detail": "ops-alert-investigator-dispatch; auto critical infra; OpsAlertsTable; migration 065 ops_alert_incidents (PG); playbook docs/ops/automations/ops-alert-investigator.prompt.md."
+          "detail": "Migration 066; ops_analysis_queue; aba Issues :3013; tray contadores; pre-screen OPS_ANALYSIS_PRE_SCREEN; investigationId; docs/ops/INVESTIGATION_CORRELATION.md."
+        },
+        {
+          "id": "run-ops-alert-investigator",
+          "title": "Investigador Cursor — alertas infra (Tier 0–1)",
+          "status": "done",
+          "detail": "Lane AiCare Suporte SRE; ops-alert-investigator-dispatch + investigationId; migration 065; playbook docs/ops/automations/ops-alert-investigator.prompt.md; Tier 1 OPS_INVESTIGATOR_TIER1."
         },
         {
           "id": "run-support-investigator-automation",
-          "title": "Investigador Cursor — chamados suporte (Tier 0)",
+          "title": "Investigador Cursor — chamados suporte (Tier 0–1)",
           "status": "done",
-          "detail": "CURSOR_SUPPORT_AUTOMATION_WEBHOOK_*; dispatch no submit + manual; docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md."
+          "detail": "Lane AiCare Suporte ao Desenvolvimento; CURSOR_DEVELOPMENT_SUPPORT_*; investigationId; docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md; Tier 1 TIER1_GATES.md."
         },
         {
           "id": "run-operation-model-doc",
