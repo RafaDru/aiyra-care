@@ -55,7 +55,7 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Documentos** — upload, visualizar, excluir | CRU(D) | `patient-documents-crud` | ⬜ |
 | **Medicamentos** — adicionar, editar, desativar | CRUD | `patient-medications-crud` | ⬜ |
 | **Vacinas** — registrar, editar, excluir | CRUD | `patient-vaccines-crud` | ⬜ |
-| **Medidas / crescimento** — lançar, editar | CRU | `patient-measurements-crud` | ⬜ |
+| **Registros** (sintomas + medidas clínicas) — lançar, editar | CRU | `patient-measurements-crud` | ⬜ |
 | **Timeline** — filtrar, agrupar | R | `patient-timeline` | ⬜ |
 | **Linha do tempo / Encadeamento** (Neo4j) | R | `patient-graph-paths` | ⬜ |
 | **Investigação / health thread** — wizard criar | C | `patient-health-thread` | ✅ |

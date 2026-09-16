@@ -265,7 +265,8 @@
   "tabs": {
     "basic": "Basic info",
     "authorizations": "Authorizations",
-    "growth": "Measurements",
+    "growth": "Records",
+    "growthSubtitle": "Daily symptoms and clinical measures",
     "vaccines": "Vaccines",
     "medications": "Medications",
     "allergies": "Allergies",
@@ -751,7 +752,12 @@
     "tabMonitoring": "Monitoring",
     "tabCharts": "Charts",
     "tabAnthropometry": "Anthropometry",
+    "tabSubtitle": "Log symptoms (vomiting, fever) and clinical measures — weight, height, temperature, and more — in the daily history.",
     "logVitals": "Log vital signs",
+    "logWeightHeight": "Log weight/height",
+    "clinicalMeasuresSaved": "Weight and height saved",
+    "weightRequired": "Enter weight",
+    "heightRequired": "Enter height",
     "logMedication": "Log medication",
     "when": "Date and time",
     "what": "Entry",
@@ -764,19 +770,25 @@
     "error": "Could not save",
     "dose": "Dose given",
     "pickOrTypeMed": "e.g. Dipyrone, Paracetamol",
-    "medication.given": "Medication",
-    "component.systolic": "Systolic",
-    "component.diastolic": "Diastolic",
-    "type.weight": "Weight",
-    "type.height": "Height",
-    "type.head_circumference": "Head circumference",
-    "type.temperature": "Temperature",
-    "type.heart_rate": "Heart rate (bpm)",
-    "type.spo2": "SpO₂",
-    "type.blood_pressure": "Blood pressure",
-    "type.glucose": "Blood glucose",
-    "type.vomit": "Vomit",
-    "type.stool_abnormal": "Abnormal stool",
+    "medication": {
+      "given": "Medication"
+    },
+    "component": {
+      "systolic": "Systolic",
+      "diastolic": "Diastolic"
+    },
+    "type": {
+      "weight": "Weight",
+      "height": "Height",
+      "head_circumference": "Head circumference",
+      "temperature": "Temperature",
+      "heart_rate": "Heart rate (bpm)",
+      "spo2": "SpO₂",
+      "blood_pressure": "Blood pressure",
+      "glucose": "Blood glucose",
+      "vomit": "Vomit",
+      "stool_abnormal": "Abnormal stool"
+    },
     "noChartData": "No measurements to chart in this period",
     "snooze": "Snooze 30 min",
     "startMonitoring": "Start reminders",
@@ -811,11 +823,13 @@
     "vitalsSection": "Vital signs",
     "labSection": "Laboratory",
     "ocrAutoHint": "New synced reports feed charts automatically.",
-    "compare.feverVitals": "Fever + heart rate",
-    "compare.feverVitalsHint": "Temperature and heart rate in the same period",
-    "compare.respiratory": "SpO₂ + heart rate",
-    "compare.respiratoryHint": "Oxygen saturation and heart rate",
-    "compare.bloodPressure": "Blood pressure"
+    "compare": {
+      "feverVitals": "Fever + heart rate",
+      "feverVitalsHint": "Temperature and heart rate in the same period",
+      "respiratory": "SpO₂ + heart rate",
+      "respiratoryHint": "Oxygen saturation and heart rate",
+      "bloodPressure": "Blood pressure"
+    }
   },
   "familySupport": {
     "title": "Family support",
@@ -881,7 +895,16 @@
     "appliedBy": "Applied by",
     "clinic": "Clinic",
     "notes": "Notes",
-    "uploadCard": "Import vaccine card"
+    "uploadCard": "Import vaccine card",
+    "conecteSus": {
+      "title": "SUS vaccines (ConecteSUS)",
+      "descriptionFirstTime": "Bring vaccines given through Brazil's public health system into the record. The first time, we open gov.br for you to sign in; after that, re-import runs automatically — no browser needed.",
+      "descriptionReady": "Your gov.br account is connected. Fetch or re-import SUS vaccines anytime — no need to sign in again.",
+      "descriptionReadyWithDate": "Last import: {{date}}. Re-importing adds new SUS vaccines without duplicating what's already here.",
+      "guidedImport": "First import",
+      "reimportNow": "Re-import vaccines",
+      "cpfWarning": "Add the patient's CPF to import SUS vaccines."
+    }
   },
   "medication": {
     "new": "New Medication",

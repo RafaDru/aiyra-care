@@ -7,6 +7,9 @@ import { SupabaseAuthAdapter } from '../../auth/supabase-auth.adapter.js'
 import { AppAccountPgRepository, PatientMembershipPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
 import { PatientService } from '../../../application/patient/patient.service.js'
+import { MeasurementService } from '../../../application/measurement/measurement.service.js'
+import { WhoGrowthService } from '../../../application/measurement/who-growth.service.js'
+import { MeasurementPgRepository } from '../../persistence/measurement.pg.repository.js'
 import { GcsFileStorage } from '../../storage/gcs.storage.js'
 import { AuthController } from './auth.controller.js'
 import { createAuthHook } from './auth.middleware.js'
@@ -16,11 +19,14 @@ function buildAuthService(): AuthService | null {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE
   if (!url || !serviceKey) return null
   const patientRepo = new PatientPgRepository(pgPool)
+  const measurementRepo = new MeasurementPgRepository(pgPool)
+  const measurements = new MeasurementService(measurementRepo, new WhoGrowthService(patientRepo, measurementRepo))
   return new AuthService(
     new SupabaseAuthAdapter(url, serviceKey),
     new AppAccountPgRepository(pgPool),
     new PatientMembershipPgRepository(pgPool),
     new PatientService(patientRepo),
+    measurements,
   )
 }
 
