@@ -1,16 +1,41 @@
 import { expect, type Page } from '@playwright/test'
 
+function avaAssistantBubbleBody(page: Page) {
+  return page.locator('.ava-chat-bubble-row--ava').last().locator('.ava-chat-bubble__body')
+}
+
 async function waitAvaComposerReady(page: Page, timeout = 90_000) {
+  const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
+  await input.waitFor({ state: 'visible', timeout })
   await send.waitFor({ state: 'visible', timeout })
+  await expect(input).toBeEnabled({ timeout })
   await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout })
   await expect(send).toBeEnabled({ timeout })
 }
 
+/** Aguarda resume de conversa e lista de mensagens após abrir o dock. */
+async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
+  await page
+    .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout })
+    .catch(() => {})
+  await page
+    .waitForResponse((r) => /\/ava\/conversations\/[^/]+\/messages/.test(r.url()) && r.ok(), {
+      timeout: 15_000,
+    })
+    .catch(() => {})
+  await waitAvaComposerReady(page, timeout)
+}
+
 export async function openAvaDock(page: Page) {
+  const convoList = page
+    .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 30_000 })
+    .catch(() => null)
+
   await page.getByRole('button', { name: 'Abrir conversa com Ava' }).click({ force: true })
   await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 30_000 })
-  await waitAvaComposerReady(page)
+  await convoList
+  await waitForAvaDockSettled(page)
 }
 
 /** Aguarda texto na última bolha da Ava (SSE pode atrasar no CI). */
@@ -19,11 +44,15 @@ export async function waitForAvaAssistantReply(
   pattern: RegExp,
   timeout = 90_000,
 ) {
-  const bubble = page.locator('.ava-chat-bubble-row--ava').last()
-  await expect(bubble).toBeVisible({ timeout })
-  await expect(bubble).not.toHaveText(/^\s*$/, { timeout })
-  await expect(bubble).toContainText(pattern, { timeout })
-  return bubble
+  const body = avaAssistantBubbleBody(page)
+  await expect(body).toBeVisible({ timeout })
+  // Ignora só a tag "Ava" — bolha streaming aparece vazia antes do SSE.
+  await expect(async () => {
+    const text = (await body.innerText()).replace(/^Ava\s*/i, '').trim()
+    expect(text.length).toBeGreaterThan(0)
+  }).toPass({ timeout })
+  await expect(body).toContainText(pattern, { timeout })
+  return body
 }
 
 export async function sendAvaMessage(page: Page, text: string) {
@@ -37,7 +66,7 @@ export async function sendAvaMessage(page: Page, text: string) {
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
     timeout: 45_000,
   })
-  await waitForAvaAssistantReply(page, /\S/, 90_000)
+  await waitForAvaAssistantReply(page, /.{8,}/, 90_000)
   await waitAvaComposerReady(page)
 }
 
