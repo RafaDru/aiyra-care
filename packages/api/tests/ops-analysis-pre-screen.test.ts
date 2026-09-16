@@ -48,7 +48,7 @@ describe('ops-analysis-pre-screen', () => {
 
   it('dismisses smoke ops alert id', () => {
     const result = preScreenOpsAlert(
-      { id: 'sim_infra_down', severity: 'critical', category: 'infra', message: 'x' },
+      { id: 'sim_infra_down', severity: 'critical', category: 'infra', message: 'x', detectedAt: '2026-01-01T00:00:00.000Z' },
       'auto',
     )
     expect(result.outcome).toBe('dismiss')
