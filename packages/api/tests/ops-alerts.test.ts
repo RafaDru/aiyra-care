@@ -44,6 +44,7 @@ function emptySnapshot(): OpsMetricsSnapshot {
       avaEvents: [],
       clientErrors: [],
       avaTokens: [],
+      supportReportsSubmitted: [],
     },
   }
 }

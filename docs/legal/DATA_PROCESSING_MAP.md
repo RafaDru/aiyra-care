@@ -1,6 +1,6 @@
 # Mapa de tratamento de dados (LGPD) — AiyraCare
 
-> **Última atualização:** 2026-08-13  
+> **Última atualização:** 2026-09-16  
 > Documento operacional interno — complementa a Política de Privacidade v1.0. Revisar com DPO/advogado antes do go-live.
 
 ## Controlador
@@ -25,6 +25,7 @@
 | OCR / interpretação manuscrito | Conta | Funcionalidade sob demanda | Contrato / consentimento | Eventos de crédito + logs | Groq, OpenAI, Google Vision |
 | Sync jobs, logs de API | Conta / sistema | Operação, segurança | Legítimo interesse | Política de retenção de logs | Postgres |
 | Relatórios de problema (`support_reports`) | Conta | Suporte e correção de falhas | Consentimento (escopo) + contrato | 30 dias (`expires_at`); acesso perfil 7 dias se opt-in | Postgres |
+| Analytics de negócio (agregados ops) | Conta / sistema | Operação interna, funis e KPIs sem PHI | Legítimo interesse (art. 10) | Conforme tabelas-fonte (`product_events`, `support_reports`, billing) | Postgres (somente leitura agregada) |
 | Export / share links | Paciente | Compartilhar com médico | Ação do titular/responsável | TTL do link (ex. 48h) | Postgres |
 
 ## Transferência internacional
@@ -41,6 +42,10 @@ Suboperadores em cloud (Supabase, GCP, Stripe, LLMs) podem processar fora do Bra
 | Revogação consentimento | privacidade@ | Remover integração, excluir conta |
 | Informação sobre compartilhamento | Política de Privacidade | `/privacidade` |
 
+## Analytics de negócio (console ops)
+
+Métricas em `GET /ops/metrics` → `metrics.business` e relatório `npm run ops:business-weekly` usam **apenas agregados** (contagens, médias, percentuais). Não expõem nomes, CPF, descrições livres de chamados nem conteúdo clínico. Fontes: `product_events`, status/categoria de `support_reports`, `sync_jobs`, tabelas de billing. Novas dimensões exigem atualização deste mapa e revisão jurídica antes do go-live.
+
 ## Incidentes
 
 Ver [`INCIDENT_RESPONSE.md`](./INCIDENT_RESPONSE.md).
@@ -49,4 +54,5 @@ Ver [`INCIDENT_RESPONSE.md`](./INCIDENT_RESPONSE.md).
 
 | Data | Alteração |
 |------|-----------|
+| 2026-09-16 | Analytics de negócio (agregados ops) — finalidade, minimização, retenção |
 | 2026-08-13 | Versão operacional inicial (Fase C LGPD) |

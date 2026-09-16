@@ -58,10 +58,12 @@ type QueueStatus = 'open' | 'triaged' | 'resolved'
 export function SupportPanel({
   openCount,
   submitted24h,
+  submittedSparkline,
   onQueueChange,
 }: {
   openCount: number
   submitted24h: number
+  submittedSparkline?: number[]
   onQueueChange?: () => void
 }) {
   const { open } = useOpsDrillDown()
@@ -173,6 +175,7 @@ export function SupportPanel({
       <OpsKpiStrip
         openCount={localOpenCount}
         submitted24h={submitted24h}
+        submittedSparkline={submittedSparkline}
         onOpenClick={() => {
           setQueueStatus('open')
           if (rows[0]) open({ kind: 'support_report', row: rows[0] })
@@ -470,16 +473,22 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
 function OpsKpiStrip({
   openCount,
   submitted24h,
+  submittedSparkline,
   onOpenClick,
 }: {
   openCount: number
   submitted24h: number
+  submittedSparkline?: number[]
   onOpenClick?: () => void
 }) {
   return (
     <OpsKpiGrid>
       <OpsKpiCard label="Abertos" value={openCount} alert={openCount > 0} onClick={onOpenClick} />
-      <OpsKpiCard label="Submetidos (24h)" value={submitted24h} />
+      <OpsKpiCard
+        label="Submetidos (24h)"
+        value={submitted24h}
+        sparkline={submittedSparkline}
+      />
     </OpsKpiGrid>
   )
 }

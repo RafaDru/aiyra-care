@@ -137,7 +137,7 @@
       "parallelSafe": true,
       "fixtureId": "core-demo",
       "doc": "docs/testing/suites/support-user-report.md",
-      "coverage": "partial",
+      "coverage": "done",
       "automation": { "status": "done", "spec": "packages/web/e2e/suites/support-user-report.spec.ts" },
       "estimatedMinutes": 5
     },

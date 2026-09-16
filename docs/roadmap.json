@@ -2218,8 +2218,8 @@
       "priority": "P2",
       "title": "Analytics de negócio (agregados, sem PHI)",
       "summary": "Visão executiva e operacional: funis de ativação, retenção, uso por feature, volume de suporte, billing e saúde de integrações — cruzando product_events, support_reports, client_errors e Stripe. Complementa observability-platform (técnico) e product-analytics-optin (NLP opt-in). Primeira superfície: aba Negócio no console ops ou relatórios semanais.",
-      "status": "in_progress",
-      "statusLabel": "MVP aba Negócio no ops",
+      "status": "done",
+      "statusLabel": "MVP aba Negócio + guardrails LGPD",
       "reviewBadge": ["legal", "business"],
       "items": [
         {
@@ -2268,8 +2268,8 @@
         {
           "id": "biz-analytics-lgpd-guardrails",
           "title": "Guardrails LGPD analytics negócio",
-          "status": "planned",
-          "detail": "Documentar finalidade, minimização e retenção em docs/legal/ + DATA_PROCESSING_MAP; revisão jurídica antes de métricas novas.",
+          "status": "done",
+          "detail": "DATA_PROCESSING_MAP + feature card business-analytics-ops (finalidade, minimização, retenção); novas métricas exigem review legal.",
           "reviewBadge": ["legal"]
         }
       ]

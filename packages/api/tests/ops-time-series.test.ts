@@ -17,11 +17,13 @@ describe('ops-time-series', () => {
       [{ hour, completed: 5, failed: 1, quotaBlocked: 0 }],
       [{ hour, count: 4 }],
       [{ hour, turns: 3, tokens: 900 }],
+      [{ hour, count: 2 }],
     )
     expect(result.syncJobs[0].success).toBe(2)
     expect(result.avaEvents[0].completed).toBe(5)
     expect(result.clientErrors[0].count).toBe(4)
     expect(result.avaTokens[0].tokens).toBe(900)
+    expect(result.supportReportsSubmitted[0].count).toBe(2)
     expect(result.syncJobs[0].label).toBeTruthy()
   })
 })
