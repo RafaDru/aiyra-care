@@ -23,12 +23,14 @@ async function fillMaskedDate(page: Page, label: string, value: string) {
 }
 
 export async function completeOnboardingProfile(page: Page, profile: OnboardingProfileInput) {
-  await page.getByRole('heading', { name: 'Complete seu cadastro' }).waitFor({ timeout: 25_000 })
+  await page.getByRole('heading', { name: 'Bem-vindo ao AiyraCare' }).waitFor({ timeout: 25_000 })
   await dismissCookieBanner(page)
   await page.getByLabel('Nome completo').fill(profile.name)
   await fillMaskedDate(page, 'Data de nascimento', profile.birthDate)
   await selectAntOption(page, 'Sexo', profile.genderLabel)
   await page.getByLabel('CPF', { exact: true }).fill(profile.cpf)
-  await page.getByRole('button', { name: 'Concluir cadastro' }).click()
+  await page.getByRole('button', { name: 'Continuar' }).click()
+  await page.getByRole('heading', { name: 'Quem você acompanha?' }).waitFor({ timeout: 25_000 })
+  await page.getByRole('button', { name: 'Pular por agora' }).click()
   await page.waitForURL(/\/$/, { timeout: 25_000 })
 }

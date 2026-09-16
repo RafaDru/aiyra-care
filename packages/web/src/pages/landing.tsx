@@ -52,7 +52,7 @@ export function LandingPage() {
 
   const goLogin = (mode: 'login' | 'signup', section: string) => {
     trackCta(mode, section)
-    navigate('/login')
+    navigate(`/login?mode=${mode}`)
   }
 
   const pains = t('landing.pains.items', { returnObjects: true }) as Array<{ title: string; body: string }>
@@ -316,7 +316,7 @@ export function LandingPage() {
           <Link to="/termos" onClick={() => trackCta('terms', 'footer')}>{t('legal.termsLink')}</Link>
           <Link to="/privacidade" onClick={() => trackCta('privacy', 'footer')}>{t('legal.privacyLink')}</Link>
           <Link to="/cookies" onClick={() => trackCta('cookies', 'footer')}>{t('legal.cookiePolicyLink')}</Link>
-          <Link to="/login" onClick={() => trackCta('login', 'footer')}>{t('landing.ctaLogin')}</Link>
+          <Link to="/login?mode=login" onClick={() => trackCta('login', 'footer')}>{t('landing.ctaLogin')}</Link>
         </Space>
         <Text type="secondary" className="landing-footer-line">{t('landing.footerNote')}</Text>
         <Text type="secondary" className="landing-footer-line landing-footer-small">{t('landing.photoCredit')}</Text>

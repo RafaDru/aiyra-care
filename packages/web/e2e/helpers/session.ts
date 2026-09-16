@@ -20,8 +20,8 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   await loginViaPassword(page, email, password)
   await dismissCookieBanner(page)
 
-  const novoPaciente = page.getByRole('button', { name: 'Novo Paciente' })
-  const onboardingHeading = page.getByRole('heading', { name: 'Complete seu cadastro' })
+  const novoPaciente = page.getByRole('button', { name: 'Adicionar à família' })
+  const onboardingHeading = page.getByRole('heading', { name: 'Bem-vindo ao AiyraCare' })
 
   await Promise.race([
     novoPaciente.waitFor({ state: 'visible', timeout: 30_000 }),

@@ -33,6 +33,21 @@
       "estimatedMinutes": 10
     },
     {
+      "id": "auth-entry-flow",
+      "domain": "conta",
+      "title": "Entrada auth — landing, login/signup e onboarding guiado",
+      "lane": "regression",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "requiredForMain": true,
+      "order": 2,
+      "doc": "docs/testing/suites/auth-entry-flow.md",
+      "coverage": "partial",
+      "businessActions": ["auth.login", "auth.signup_mode", "onboarding.complete"],
+      "automation": { "status": "partial", "spec": "packages/web/e2e/suites/auth-entry-flow.spec.ts" },
+      "estimatedMinutes": 10
+    },
+    {
       "id": "core-patient-crud",
       "domain": "conta",
       "title": "Paciente — CRUD completo (criar, editar, excluir)",
@@ -276,7 +291,7 @@
     "regression": {
       "title": "Gate pré-main (rápido)",
       "description": "Sequencial — smoke + onboarding + paciente CRUD",
-      "suiteIds": ["regression-smoke", "onboarding-flow", "core-patient-crud"]
+      "suiteIds": ["regression-smoke", "onboarding-flow", "auth-entry-flow", "core-patient-crud"]
     },
     "business-full": {
       "title": "Teste completo de negócio via UI",
@@ -284,6 +299,7 @@
       "suiteIds": [
         "regression-smoke",
         "onboarding-flow",
+        "auth-entry-flow",
         "core-patient-crud",
         "family-access-matrix",
         "patient-exams-crud",
