@@ -32,7 +32,7 @@
 ## [2026-09-15] - Ops Tier 1 + pilha Issues (commits anteriores)
 
 ### Realizado
-- Migration 066 `ops_analysis_queue`; aba Issues; tray contadores; pré-análise `OPS_ANALYSIS_PRE_SCREEN`; Tier 1 opt-in `OPS_INVESTIGATOR_TIER1`.
+- Migration 068 `ops_analysis_queue`; aba Issues; tray contadores; pré-análise `OPS_ANALYSIS_PRE_SCREEN`; Tier 1 opt-in `OPS_INVESTIGATOR_TIER1`.
 - Automations: **AiCare - Suporte ao Desenvolvimento** + **AiCare - Suporte SRE**.
 
 ## [2026-09-15] - Push main: produto D4–D5 + G3 + RBAC (`aa43ba7`, `90f357b`)

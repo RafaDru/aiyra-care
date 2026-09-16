@@ -45,6 +45,8 @@ function encryptOptional(text) {
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
 
 async function resetDemo(client) {
+  // care_circles.billing_owner_account_id → app_accounts (ON DELETE RESTRICT)
+  await client.query('DELETE FROM care_circles WHERE billing_owner_account_id = $1', [DEMO_ACCOUNT_ID])
   await client.query('DELETE FROM patients WHERE id = ANY($1::uuid[])', [[PATIENT_LUCAS_ID, PATIENT_ANA_ID]])
   await client.query('DELETE FROM app_accounts WHERE id = $1', [DEMO_ACCOUNT_ID])
   console.log('demo data removed')
@@ -122,6 +124,33 @@ async function seed(client) {
       [DEMO_ACCOUNT_ID, row.id],
     )
   }
+
+  // Mirror migration 059 backfill — app_accounts must exist before care_circles FK
+  await client.query(
+    `INSERT INTO care_circles (name, billing_owner_account_id)
+     SELECT 'Minha família', $1
+     WHERE NOT EXISTS (
+       SELECT 1 FROM care_circles c WHERE c.billing_owner_account_id = $1
+     )`,
+    [DEMO_ACCOUNT_ID],
+  )
+  await client.query(
+    `INSERT INTO care_circle_members (circle_id, account_id, role)
+     SELECT c.id, c.billing_owner_account_id, 'owner'
+     FROM care_circles c
+     WHERE c.billing_owner_account_id = $1
+     ON CONFLICT (circle_id, account_id) DO NOTHING`,
+    [DEMO_ACCOUNT_ID],
+  )
+  await client.query(
+    `INSERT INTO patient_circle_links (patient_id, circle_id)
+     SELECT p.id, c.id
+     FROM patients p
+     JOIN care_circles c ON c.billing_owner_account_id = p.owner_account_id
+     WHERE p.id = ANY($1::uuid[])
+     ON CONFLICT (patient_id, circle_id) DO NOTHING`,
+    [[PATIENT_LUCAS_ID, PATIENT_ANA_ID]],
+  )
 
   await client.query(
     `INSERT INTO integration_links (

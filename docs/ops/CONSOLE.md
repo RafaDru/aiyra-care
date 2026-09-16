@@ -67,7 +67,7 @@ Auto-refresh: 60s (aba visível).
 
 | Bloco | Fonte |
 |-------|--------|
-| Fila `queued` → `fix_proposed` | `ops_analysis_queue` (migration 066) |
+| Fila `queued` → `fix_proposed` | `ops_analysis_queue` (migration 068) |
 | Coluna **investigationId** | UUID canônico — correlaciona toast, webhook e Automations |
 | Deep link | `?tab=issues&investigationId=<uuid>` |
 

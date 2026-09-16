@@ -29,7 +29,7 @@ Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas op
 
 ## Fase 1 — Pilha + callback
 
-- Tabela `ops_analysis_queue` (migration **066**): `node packages/api/scripts/apply-migration-066.mjs`
+- Tabela `ops_analysis_queue` (migration **068**): `node packages/api/scripts/apply-migration-068.mjs`
 - Enfileira em todo reporte/alerta investigado; payload inclui `analysisQueue.id` + `callbackUrl`
 - Agente finaliza com `POST /api/analysis-queue/callback` (header `x-investigator-callback-key` = `OPS_INVESTIGATOR_CALLBACK_KEY` ou `OPS_METRICS_KEY`)
 - Console: aba **Issues** (`?tab=issues`) — status `fix_proposed` → botão **Revisado**

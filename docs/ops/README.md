@@ -86,7 +86,7 @@ Regra LGPD ops: **agregar e diagnosticar**; não exportar prontuário em Slack/w
 | Aba | Mede | Fontes PG |
 |-----|------|-----------|
 | **Visão geral** | Alertas critical, KPIs | `evaluateOpsAlerts`, probe |
-| **Issues** | Pilha unificada investigação (`investigationId`) | `ops_analysis_queue` (066) |
+| **Issues** | Pilha unificada investigação (`investigationId`) | `ops_analysis_queue` (068) |
 | **Produto & UX** | Erros cliente, mapa features, matriz acesso×falha | `client_errors`, `product_events` |
 | **Sync** | Jobs, fail rate portal, stuck | `sync_jobs` |
 | **Ava & LLM** | Turnos, tokens, cascade, quota | `llm_usage_events`, `product_events` |
@@ -121,7 +121,7 @@ Detalhe: [`CONSOLE.md`](./CONSOLE.md).
 | `run-user-escalation` | Sync crítico opt-in | done |
 | — | Painel **Suporte** no console (`support_reports` open) | **done** (aba Suporte :3023) |
 | — | Webhook `SUPPORT_REPORT_WEBHOOK_URL` | **done** (`support-report-dispatch.ts`) |
-| — | Pilha `ops_analysis_queue` + callback | **done** — migration 066 · [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md) |
+| — | Pilha `ops_analysis_queue` + callback | **done** — migration 068 · [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md) |
 | — | Agente investigador (Tier 0–1) | **done** — AiCare Dev + SRE · [`SUPPORT_INVESTIGATOR_AUTOMATION.md`](./SUPPORT_INVESTIGATOR_AUTOMATION.md) · [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md) |
 | `product-analytics-optin` | Analytics semântico opt-in | P3 — fora do ops imediato |
 
