@@ -49,7 +49,7 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 
 | Ação UI | CRUD | Suite | Cobertura |
 |---------|------|-------|-----------|
-| **Carteira** — visualizar plano / sync silencioso | R | `patient-wallet` | ⬜ |
+| **Carteira** — visualizar plano / sync silencioso | R | `patient-wallet` | 🟡 |
 | **Exames** — adicionar manual, editar, excluir | CRUD | `patient-exams-crud` | ⬜ |
 | **Exames** — marcadores / dashboard | R | `patient-exam-markers` | ⬜ |
 | **Documentos** — upload, visualizar, excluir | CRU(D) | `patient-documents-crud` | ⬜ |
