@@ -169,7 +169,7 @@ export function Dashboard() {
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={
             <span>
-              {t('common.empty')}<br />
+              {t('patient.emptyFamily')}<br />
               <Button type="link" icon={<PlusOutlined />} onClick={() => setModalOpen(true)} style={{ marginTop: 8 }}>
                 {t('patient.new')}
               </Button>

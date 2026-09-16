@@ -4,7 +4,7 @@
     "subtitle": "Cuidado infantil com inteligência"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Início",
     "emergency": "Emergência",
     "integrations": "Integrações",
     "roadmap": "Roadmap",
@@ -14,7 +14,14 @@
   },
   "auth": {
     "title": "Entrar",
+    "titleLogin": "Bem-vindo de volta",
+    "titleSignup": "Crie sua conta",
     "subtitle": "Acesse com Google, Microsoft ou e-mail e senha",
+    "subtitleLogin": "Entre com sua conta existente para acessar a saúde da sua família.",
+    "subtitleSignup": "Cadastre-se para começar a organizar a saúde de quem você cuida.",
+    "modeLogin": "Já sou cliente",
+    "modeSignup": "Sou novo cliente",
+    "emailConfirmHint": "Podemos enviar um e-mail de confirmação, se essa opção estiver ativa no ambiente. Você pode continuar o cadastro normalmente.",
     "google": "Continuar com Google",
     "microsoft": "Continuar com Microsoft",
     "emailDivider": "ou e-mail",
@@ -133,6 +140,12 @@
   "onboarding": {
     "title": "Complete seu cadastro",
     "subtitle": "Precisamos de alguns dados para criar seu perfil. O cadastro é permitido apenas para maiores de 18 anos.",
+    "welcomeTitle": "Bem-vindo ao AiyraCare",
+    "welcomeSubtitle": "Primeiro, vamos criar o seu perfil de titular. O cadastro é permitido apenas para maiores de 18 anos.",
+    "steps": {
+      "profile": "Seu perfil",
+      "dependents": "Sua família"
+    },
     "name": "Nome completo",
     "nameRequired": "Informe seu nome",
     "birthDate": "Data de nascimento",
@@ -142,11 +155,24 @@
     "genderRequired": "Selecione o sexo",
     "cpfRequired": "Informe o CPF",
     "cpfInvalid": "CPF deve ter 11 dígitos",
+    "cnsLabel": "CNS (opcional)",
+    "cnsHint": "Pode adicionar depois, por exemplo ao conectar o SUS.",
     "cnsPlaceholder": "Nº do Cartão SUS",
     "weight": "Peso",
     "height": "Altura",
+    "weightOptional": "Peso (opcional)",
+    "heightOptional": "Altura (opcional)",
+    "continue": "Continuar",
+    "dependentsTitle": "Quem você acompanha?",
+    "dependentsSubtitle": "Adicione filhos, pais ou outras pessoas que você cuida. Você pode pular e fazer isso depois.",
+    "dependentName": "Nome",
+    "addDependent": "Adicionar à família",
+    "dependentsAdded": "{{count}} perfil(is) adicionado(s)",
+    "skipDependents": "Pular por agora",
+    "finish": "Ir para o início",
     "submit": "Concluir cadastro",
-    "error": "Não foi possível concluir o cadastro"
+    "error": "Não foi possível concluir o cadastro",
+    "dependentError": "Não foi possível adicionar o perfil"
   },
   "settings": {
     "subtitle": "Preferências do aplicativo",
@@ -387,8 +413,9 @@
     }
   },
   "patient": {
-    "title": "Meus Pacientes",
-    "new": "Novo Paciente",
+    "title": "Sua família",
+    "new": "Adicionar à família",
+    "emptyFamily": "Sua família ainda não tem perfis de saúde cadastrados.",
     "edit": "Editar",
     "delete": "Remover",
     "deleteConfirm": "Remover paciente?",

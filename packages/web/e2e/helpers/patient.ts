@@ -19,7 +19,7 @@ async function fillMaskedDate(page: Page, label: string, value: string) {
 }
 
 export async function openNewPatientModal(page: Page) {
-  await page.getByRole('button', { name: 'Novo Paciente' }).click({ force: true })
+  await page.getByRole('button', { name: 'Adicionar à família' }).click({ force: true })
   await page.getByRole('dialog').waitFor({ state: 'visible' })
 }
 

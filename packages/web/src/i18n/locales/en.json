@@ -4,7 +4,7 @@
     "subtitle": "Pediatric care with intelligence"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Home",
     "emergency": "Emergency",
     "integrations": "Integrations",
     "roadmap": "Roadmap",
@@ -14,7 +14,14 @@
   },
   "auth": {
     "title": "Sign in",
+    "titleLogin": "Welcome back",
+    "titleSignup": "Create your account",
     "subtitle": "Use Google, Microsoft or email and password",
+    "subtitleLogin": "Sign in with your existing account to access your family's health.",
+    "subtitleSignup": "Sign up to start organizing the health of those you care for.",
+    "modeLogin": "Existing customer",
+    "modeSignup": "New customer",
+    "emailConfirmHint": "We may send a confirmation email if that option is enabled in this environment. You can continue onboarding normally.",
     "google": "Continue with Google",
     "microsoft": "Continue with Microsoft",
     "emailDivider": "or email",
@@ -133,6 +140,12 @@
   "onboarding": {
     "title": "Complete your profile",
     "subtitle": "We need a few details to create your profile. Registration is only available for adults 18 or older.",
+    "welcomeTitle": "Welcome to AiyraCare",
+    "welcomeSubtitle": "First, let's create your account holder profile. Registration is only available for adults 18 or older.",
+    "steps": {
+      "profile": "Your profile",
+      "dependents": "Your family"
+    },
     "name": "Full name",
     "nameRequired": "Enter your name",
     "birthDate": "Date of birth",
@@ -142,11 +155,24 @@
     "genderRequired": "Select sex",
     "cpfRequired": "Enter your CPF",
     "cpfInvalid": "CPF must have 11 digits",
+    "cnsLabel": "CNS (optional)",
+    "cnsHint": "You can add this later, for example when connecting SUS.",
     "cnsPlaceholder": "SUS card number",
     "weight": "Weight",
     "height": "Height",
+    "weightOptional": "Weight (optional)",
+    "heightOptional": "Height (optional)",
+    "continue": "Continue",
+    "dependentsTitle": "Who do you care for?",
+    "dependentsSubtitle": "Add children, parents, or others you support. You can skip and do this later.",
+    "dependentName": "Name",
+    "addDependent": "Add to family",
+    "dependentsAdded": "{{count}} profile(s) added",
+    "skipDependents": "Skip for now",
+    "finish": "Go to home",
     "submit": "Complete registration",
-    "error": "Could not complete registration"
+    "error": "Could not complete registration",
+    "dependentError": "Could not add profile"
   },
   "settings": {
     "subtitle": "Application preferences",
@@ -240,8 +266,9 @@
     }
   },
   "patient": {
-    "title": "My Patients",
-    "new": "New Patient",
+    "title": "Your family",
+    "new": "Add to family",
+    "emptyFamily": "Your family doesn't have any health profiles yet.",
     "edit": "Edit",
     "delete": "Remove",
     "deleteConfirm": "Remove patient?",
