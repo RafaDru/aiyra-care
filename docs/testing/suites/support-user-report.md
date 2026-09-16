@@ -4,21 +4,22 @@
 |-------|--------|
 | **ID** | `support-user-report` |
 | **Feature** | [`support-user-reports`](../../features/support-user-reports.md) |
-| **Lane** | `feature` |
+| **Lane** | `business-full` |
 | **Fixture** | `core-demo` |
 | **parallelSafe** | `true` |
-| **Automação** | `planned` |
+| **Automação** | `done` — `packages/web/e2e/suites/support-user-report.spec.ts` |
 
 ## Pré-requisitos
 
 - [ ] Migration 061 aplicada
-- [ ] Usuário autenticado
+- [ ] API e web em execução
+- [ ] Conta QA E2E com compliance aceito
 
 ## Passos
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
-| 1 | Abrir fluxo “Reportar problema” (menu global) | Modal ou página abre | |
-| 2 | Preencher descrição + consentimento LGPD | Checkbox obrigatório | |
-| 3 | Enviar | Toast sucesso; `POST /support/reports` 201 | |
-| 4 | (Ops) Verificar em console `:3013` ou API | Report listado sem PHI indevido | |
+| 1 | Abrir fluxo «Reportar problema» (header global) | Modal «Reportar um problema» abre | |
+| 2 | Confirmar consentimentos LGPD visíveis; preencher descrição opcional | Checkbox «contexto técnico» default on; descrição aceita texto | |
+| 3 | Enviar | Toast «Relatório enviado»; `POST /support/reports` 201; modal fecha | |
+| 4 | (Ops) Verificar em console `:3013` ou API | Report listado sem PHI indevido no bundle | |
