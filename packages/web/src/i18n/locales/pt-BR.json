@@ -473,7 +473,8 @@
   "tabs": {
     "basic": "Dados básicos",
     "authorizations": "Autorizações",
-    "growth": "Medidas",
+    "growth": "Registros",
+    "growthSubtitle": "Sintomas do dia e medidas clínicas",
     "vaccines": "Vacinas",
     "medications": "Medicações",
     "allergies": "Alergias",
@@ -971,7 +972,12 @@
     "tabMonitoring": "Monitoramento",
     "tabCharts": "Gráficos",
     "tabAnthropometry": "Antropometria",
+    "tabSubtitle": "Registre sintomas (vômito, febre) e medidas clínicas — peso, altura, temperatura e mais — no histórico do dia.",
     "logVitals": "Registrar sinais vitais",
+    "logWeightHeight": "Registrar peso/altura",
+    "clinicalMeasuresSaved": "Peso e altura registrados",
+    "weightRequired": "Informe o peso",
+    "heightRequired": "Informe a altura",
     "logMedication": "Registrar medicação",
     "when": "Data e hora",
     "what": "Registro",
@@ -984,19 +990,25 @@
     "error": "Não foi possível salvar",
     "dose": "Dose administrada",
     "pickOrTypeMed": "Ex.: Dipirona, Paracetamol",
-    "medication.given": "Medicação",
-    "component.systolic": "Sistólica",
-    "component.diastolic": "Diastólica",
-    "type.weight": "Peso",
-    "type.height": "Altura",
-    "type.head_circumference": "Perímetro cefálico",
-    "type.temperature": "Temperatura",
-    "type.heart_rate": "Batimentos (bpm)",
-    "type.spo2": "Saturação (SpO₂)",
-    "type.blood_pressure": "Pressão arterial",
-    "type.glucose": "Glicemia",
-    "type.vomit": "Vômito",
-    "type.stool_abnormal": "Evacuação alterada",
+    "medication": {
+      "given": "Medicação"
+    },
+    "component": {
+      "systolic": "Sistólica",
+      "diastolic": "Diastólica"
+    },
+    "type": {
+      "weight": "Peso",
+      "height": "Altura",
+      "head_circumference": "Perímetro cefálico",
+      "temperature": "Temperatura",
+      "heart_rate": "Batimentos (bpm)",
+      "spo2": "Saturação (SpO₂)",
+      "blood_pressure": "Pressão arterial",
+      "glucose": "Glicemia",
+      "vomit": "Vômito",
+      "stool_abnormal": "Evacuação alterada"
+    },
     "noChartData": "Sem medições para gráfico neste período",
     "snooze": "Adiar 30 min",
     "startMonitoring": "Iniciar lembretes",
@@ -1031,11 +1043,13 @@
     "vitalsSection": "Sinais vitais",
     "labSection": "Laboratorial",
     "ocrAutoHint": "Novos laudos sincronizados alimentam os gráficos automaticamente.",
-    "compare.feverVitals": "Febre + batimentos",
-    "compare.feverVitalsHint": "Temperatura e frequência cardíaca no mesmo período",
-    "compare.respiratory": "Oxigenação + batimentos",
-    "compare.respiratoryHint": "SpO₂ e frequência cardíaca",
-    "compare.bloodPressure": "Pressão arterial"
+    "compare": {
+      "feverVitals": "Febre + batimentos",
+      "feverVitalsHint": "Temperatura e frequência cardíaca no mesmo período",
+      "respiratory": "Oxigenação + batimentos",
+      "respiratoryHint": "SpO₂ e frequência cardíaca",
+      "bloodPressure": "Pressão arterial"
+    }
   },
   "familySupport": {
     "title": "Apoio familiar",
@@ -1103,7 +1117,16 @@
     "appliedBy": "Aplicado por",
     "clinic": "Clínica/Posto",
     "notes": "Observações",
-    "uploadCard": "Importar cartão"
+    "uploadCard": "Importar cartão",
+    "conecteSus": {
+      "title": "Vacinas do SUS (ConecteSUS)",
+      "descriptionFirstTime": "Importe as vacinas aplicadas no SUS para o prontuário. Na primeira vez, abrimos o gov.br para você entrar com sua conta; depois, a reimportação é automática — sem abrir o navegador de novo.",
+      "descriptionReady": "Sua conta gov.br está conectada. Busque ou reimporte vacinas do SUS quando quiser — sem precisar fazer login novamente.",
+      "descriptionReadyWithDate": "Última importação: {{date}}. Reimportar traz vacinas novas do SUS sem duplicar o que já está aqui.",
+      "guidedImport": "Primeira importação",
+      "reimportNow": "Reimportar vacinas",
+      "cpfWarning": "Cadastre o CPF do paciente para importar vacinas do SUS."
+    }
   },
   "medication": {
     "new": "Nova Medicação",
@@ -1325,7 +1348,7 @@
     "uploadDocument": "Enviar arquivo",
     "kind": {
       "note": "Nota",
-      "measurement": "Medida",
+      "measurement": "Sinais vitais",
       "medication": "Medicação",
       "agenda": "Agenda",
       "document": "Documento"

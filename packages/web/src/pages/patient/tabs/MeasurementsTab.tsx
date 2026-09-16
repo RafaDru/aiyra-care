@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Button, DatePicker, Form, Input, InputNumber, Select, Space, Table, Typography, Segmented, App, Tag, AutoComplete, Modal,
 } from 'antd'
-import { PlusOutlined, MedicineBoxOutlined, ThunderboltOutlined, FilePdfOutlined, NotificationOutlined } from '@ant-design/icons'
+import { PlusOutlined, MedicineBoxOutlined, ThunderboltOutlined, FilePdfOutlined, NotificationOutlined, ColumnHeightOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
@@ -46,6 +46,7 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
   const [vitalsOpen, setVitalsOpen] = useState(false)
   const [medOpen, setMedOpen] = useState(false)
   const [anthroOpen, setAnthroOpen] = useState(false)
+  const [clinicalOpen, setClinicalOpen] = useState(false)
   const [packOpen, setPackOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [exportReport, setExportReport] = useState<MonitoringExportReport | null>(null)
@@ -177,6 +178,9 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
 
   return (
     <>
+      <Typography.Paragraph type="secondary" style={{ marginBottom: 16, marginTop: 0 }}>
+        {t('measurement.tabSubtitle')}
+      </Typography.Paragraph>
       <Space style={{ marginBottom: 16, flexWrap: 'wrap' }} size="middle">
         <Segmented
           value={view}
@@ -197,6 +201,9 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
         />
         <Button type="primary" icon={<ThunderboltOutlined />} onClick={() => setVitalsOpen(true)}>
           {t('measurement.logVitals')}
+        </Button>
+        <Button icon={<ColumnHeightOutlined />} onClick={() => setClinicalOpen(true)}>
+          {t('measurement.logWeightHeight')}
         </Button>
         <Button icon={<MedicineBoxOutlined />} onClick={() => setMedOpen(true)}>
           {t('measurement.logMedication')}
@@ -320,6 +327,38 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
         </Form.Item>
         <Form.Item name="notes" label={t('growth.notes')}>
           <Input.TextArea rows={2} />
+        </Form.Item>
+      </EntityFormModal>
+
+      <EntityFormModal
+        open={clinicalOpen}
+        title={t('measurement.logWeightHeight')}
+        successMsg={t('measurement.clinicalMeasuresSaved')}
+        onClose={() => setClinicalOpen(false)}
+        onSubmit={async (values) => {
+          const observedAt = (values.observedAt as Dayjs).toISOString()
+          const items = [
+            { typeCode: 'weight', valueNumeric: values.weightKg as number | undefined },
+            { typeCode: 'height', valueNumeric: values.heightCm as number | undefined },
+          ].filter((i) => i.valueNumeric != null)
+          if (!items.length) throw new Error('empty')
+          await api.measurements.createBatch({
+            patientId,
+            observedAt,
+            healthThreadId,
+            items,
+          })
+          load()
+        }}
+      >
+        <Form.Item name="observedAt" label={t('measurement.when')} initialValue={dayjs()} rules={[{ required: true }]}>
+          <DatePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item name="weightKg" label={t('growth.weight')}>
+          <InputNumber min={0} step={0.1} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item name="heightCm" label={t('growth.height')}>
+          <InputNumber min={0} step={0.1} style={{ width: '100%' }} />
         </Form.Item>
       </EntityFormModal>
 
