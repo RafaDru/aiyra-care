@@ -28,9 +28,9 @@ test.describe('family-day-timeline', () => {
       .filter({ hasText: 'Plano & portais' })
     await planSection.scrollIntoViewIfNeeded()
     await planSection.click()
-    await page.getByRole('tab', { name: 'Carteira' }).click()
 
     const todayCard = page.locator('.wallet-today-panel')
+    await expect(todayCard).toBeVisible({ timeout: 20_000 })
     await expect(todayCard.getByText('Hoje', { exact: true })).toBeVisible()
     await todayCard.getByRole('button', { name: 'Registro rápido' }).click()
 

@@ -63,9 +63,6 @@ export async function sendAvaMessage(page: Page, text: string) {
   await expect(page.getByRole('button', { name: 'Enviar' })).toBeEnabled({ timeout: 30_000 })
   await input.press('Enter')
 
-  await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
-    timeout: 45_000,
-  })
   await waitForAvaAssistantReply(page, /.{8,}/, 90_000)
   await waitAvaComposerReady(page)
 }

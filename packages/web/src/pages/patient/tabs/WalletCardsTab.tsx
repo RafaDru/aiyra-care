@@ -112,7 +112,7 @@ export function WalletCardsTab({
           setMemberships([])
         }
       })
-  }, [patient.id, links.map((l) => `${l.id}:${l.cardNumber ?? ''}`).join('|'), insuranceLinks])
+  }, [patient.id, links.map((l) => `${l.id}:${l.cardNumber ?? ''}`).join('|')])
 
   useEffect(() => {
     if (!highlightCard || !highlightRef.current) return
