@@ -44,9 +44,12 @@ describe('ProductEventService.ingest', () => {
 })
 
 describe('PRODUCT_EVENT_NAME_SET', () => {
-  it('includes ava and sync events', () => {
+  it('includes ava, sync and instrumentation events', () => {
     expect(PRODUCT_EVENT_NAME_SET.has('ava_chat_completed')).toBe(true)
     expect(PRODUCT_EVENT_NAME_SET.has('sync_job_terminal')).toBe(true)
+    expect(PRODUCT_EVENT_NAME_SET.has('sync_job_started')).toBe(true)
+    expect(PRODUCT_EVENT_NAME_SET.has('app_screen_viewed')).toBe(true)
+    expect(PRODUCT_EVENT_NAME_SET.has('family_invite_created')).toBe(true)
     expect(PRODUCT_EVENT_NAME_SET.has('landing_page_view')).toBe(true)
   })
 })

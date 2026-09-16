@@ -1,4 +1,567 @@
-# Histórico do Projeto Open Health
+# Histórico do Projeto AiyraCare
+
+## [2026-09-16] - Cursor Projects + My Machines (execução local)
+
+### Decisão
+- Modo **Projects**: coordenador na nuvem; implementação no checkout local via **My Machines** (`NotebookRafael`), não VM cloud clone.
+- Autostart no logon Windows — tarefa `AiyraCare-CursorMyMachinesWorker` (+45s).
+
+### Realizado
+- CLI `agent` + fix Windows `better-sqlite3` (`scripts/cursor-worker-repair.ps1`).
+- Scripts `cursor-worker-start|install-autostart|uninstall-autostart.ps1`.
+- Runbook: `docs/CURSOR_WORKSPACE.md`, `docs/CURSOR_AGENT_OPS.md`.
+
+### Próximo
+- `.cursor/mcp.json` no repo para MCP stdio no worker; fallback WSL se bug Node voltar.
+
+## [2026-09-16] - Ops: investigationId + notificador PS 5.1
+
+### Decisão
+- Chave canônica de correlação entre console Suporte/Issues, toast, webhook Cursor e callback do agente: **`investigationId`** = `ops_analysis_queue.id` (UUID). `reportId` / `alertId` permanecem como origem do evento.
+
+### Realizado
+- Domínio `investigation-correlation.ts`; payload webhook com `investigationId` + `[inv:xxxxxxxx]` no `text`; callback aceita `investigationId` (legado `queueId`).
+- Console: coluna `investigationId` (Issues + Suporte), deep link `?tab=issues&investigationId=`, componente copiar ID.
+- Simulates incluem `analysisQueue` + `investigationId`; enqueue antes do toast no submit de suporte.
+- Fix `ops-notifier-attention.ps1` — compatível Windows PowerShell 5.1 (`??`, `$Label:`).
+- Docs: `docs/ops/INVESTIGATION_CORRELATION.md`, playbooks e `AUTOMATIONS_LANES.md`.
+
+### Próximo
+- Callback público em preview GCP; persistir `backgroundComposerId` (opcional); Tier 1 em produção com revisão humana.
+
+## [2026-09-15] - Ops Tier 1 + pilha Issues (commits anteriores)
+
+### Realizado
+- Migration 066 `ops_analysis_queue`; aba Issues; tray contadores; pré-análise `OPS_ANALYSIS_PRE_SCREEN`; Tier 1 opt-in `OPS_INVESTIGATOR_TIER1`.
+- Automations: **AiCare - Suporte ao Desenvolvimento** + **AiCare - Suporte SRE**.
+
+## [2026-09-15] - Push main: produto D4–D5 + G3 + RBAC (`aa43ba7`, `90f357b`)
+
+### Realizado
+- D4 referral/e-mail + D5 portal médico + dossiê jurídico PDF + suites QA.
+- Ava G3 + RBAC org (067) — ver entradas abaixo.
+
+## [2026-09-15] - Ava G3 ações confirmadas + RBAC org audit
+
+### Realizado
+- **G3:** `AvaProposedActions` exige `Modal.confirm` antes de executar sync/export/higiene/consulta; ação `consult_visit_open`; testes `ava-proposed-action.test.ts`.
+- **RBAC B2B:** `organization-rbac.ts` (admin/clinician/read_only); migration `067_organization_access_audit`; `GET /organizations/:id/access-audit`; `organization-rbac.test.ts`.
+
+### Próximo
+- Ava G4 tool calling; escopos RBAC por paciente; referral com billing (após parecer jurídico).
+
+## [2026-09-15] - Suite QA patient-health-thread
+
+### Realizado
+- Spec Playwright: wizard «Nova investigação» no painel Em acompanhamento.
+- Feature card `patient-health-thread` + entrada em `business-full` lane.
+
+## [2026-09-15] - D5 Portal médico leve (página pública)
+
+### Realizado
+- `ClinicalExportSharePage` — cabeçalho «Portal do médico», cartão do paciente, disclaimer, CTA landing.
+- `ClinicianShareFeedback` — feedback útil/pouco útil com telemetria pública `clinician_share_*`.
+- Suite `patient-clinical-export` — spec abre link em aba anônima.
+
+### Próximo
+- Conta profissional / RBAC (`b2b-platform-rbac`) ou programa referral com billing.
+
+## [2026-09-14] - D4 E-mail ao médico + referral no export clínico
+
+### Decisão
+- MVP D4: atribuição via `?ref=` + e-mail Resend — **sem** billing nem tabela `referrals` (ver `discovery/referral-growth-loop.md`).
+
+### Realizado
+- Migration `066_referral_clinical_export` — `app_accounts.referral_code`, metadados no share.
+- `POST /patients/:id/clinical-export/shares/email` + template pt-BR ao médico.
+- Wizard «Levar na consulta»: seção e-mail + alerta com código de indicação.
+- Telemetria `referral_link_created`, `referral_link_opened`, `consult_visit_email_sent`.
+- Suite `patient-clinical-export` — spec e-mail médico.
+
+### Próximo
+- D5 portal médico leve (B2B) ou programa de indicação com descontos.
+
+## [2026-09-14] - Polish D3 dashboard + Ava E2E estável
+
+### Realizado
+- `DashboardDayToDaySection` — bloco «Hoje» no dashboard com lente de paciente.
+- Helpers Playwright Ava: aguardar composer idle + contagem de bolhas (menos flake no CI).
+- `CI_LEARNINGS.md` — business-full semanal documentado.
+
+## [2026-09-14] - D3 «Hoje» na Carteira + CI business-full semanal
+
+### Decisão
+- `business-full` deixa de rodar diário → **sexta 06:00 BRT** (09:00 UTC); regression continua em cada push.
+- Wizard «Levar na consulta» sobe para `PatientConsultVisitHost` (funciona em qualquer aba do perfil).
+
+### Realizado
+- `WalletTodayPanel` na aba Carteira — agenda do dia, lembretes, registros; CTAs captura e consulta.
+- Suite QA `family-day-timeline`.
+- Workflow `.github/workflows/ci-e2e-business-full.yml` — `cron: 0 9 * * 5`.
+
+### Próximo
+- D4 referral / e-mail médico (discovery).
+
+## [2026-09-14] - D2 «+ Registro rápido» global
+
+### Decisão
+- MVP D2 no header (não FAB) para não competir com orb da Ava; reutilizar lente de paciente da Ava.
+
+### Realizado
+- `QuickCaptureSheet` — 5 tipos: nota, medida, medicação, agenda, documento.
+- CTA **Registro rápido** em `AppLayout`; bus `requestQuickCaptureOpen`.
+- Telemetria `quick_capture_opened` / `quick_capture_saved`.
+- Suite QA `family-quick-capture` + spec Playwright.
+
+### Próximo
+- D3 bloco «Hoje» na Carteira.
+
+## [2026-09-11] - D1 Wizard «Levar na consulta»
+
+### Decisão
+- MVP D1 aprovado antes do «+ Registro rápido» (D2): reutilizar export clínico + share token 48h.
+
+### Realizado
+- `ConsultVisitWizardModal` — link, QR, PDF, WhatsApp; CTA no painel «Resumo clínico».
+- Rota pública web `/clinical-export/:token` (gap: API já gerava URL sem página).
+- Telemetria `consult_visit_*` na allowlist de `product_events`.
+- Suite QA `patient-clinical-export` + spec Playwright.
+
+### Próximo
+- D2 «+ Registro rápido»; CTA opcional no dashboard.
+
+## [2026-09-11] - QA CI Fase 4 Ava + ops Negócio + foco produto
+
+### Decisão
+- Tracking vivo em `docs/FOCO_ATUAL.md` — três frentes: dia a dia família, Ava parceira, ambiente profissional.
+- E2E regression inclui specs Ava com `AVA_TEST_MODE=1` (sem LLM real no CI).
+- Relatório semanal interno: `npm run ops:business-weekly` (sem PHI).
+
+### Realizado
+- Helpers E2E: compliance pós-login, Select Ant Design, projects Playwright (`smoke` isolado).
+- `ava-test-mode.ts`, specs `ava-companion-smoke` / `ava-guardrail-smoke`.
+- Ops: aba Negócio (`BusinessPanel`), `metrics.business` na API.
+- CI regression [34634939392](https://github.com/RafaDru/aiyra-care/actions/runs/34634939392) FAIL (flake Select) → fix `56e56be` → [34636197555](https://github.com/RafaDru/aiyra-care/actions/runs/34636197555) **PASS**.
+
+### Próximo
+- Regression verde; acumular 7 noites `business-full`.
+- Discovery formalizado: `docs/discovery/day-to-day-clinician-access.md` + `referral-growth-loop.md`.
+
+## [2026-09-11] - Discovery dia a dia + médico + indicação bilateral
+
+### Decisão
+- Prioridade produto: captura rápida familiar + «Levar na consulta» (link/QR/PDF) antes de portal médico completo.
+- Programa de indicação (*referral program*) documentado para debate — desconto paciente↔médico; regras vitalício vs enquanto ativo em aberto.
+
+### Artefatos
+- `docs/discovery/day-to-day-clinician-access.md`
+- `docs/discovery/referral-growth-loop.md`
+- Épicos roadmap: `family-day-to-day`, `referral-growth-loop`
+
+## [2026-09-08] - CI: build API desbloqueado (51 erros tsc)
+
+### Decisão
+- **`npm run build` em `packages/api` é gate real** — `npm run dev` (tsx) não substitui CI.
+- Dívida de tipos acumulada bloqueava E2E regression antes dos testes Playwright.
+
+### Realizado
+- Correção de ~51 erros TypeScript (Connect, Ava, support-report, scrapers, Fastify logger).
+- Aprendizados: `docs/testing/CI_LEARNINGS.md` (incl. nota sobre compactação de contexto e split de agentes).
+
+## [2026-09-08] - Hooks QA endurecidos — entrega sem pedir teste
+
+### Decisão
+- Rafael **não** precisa pedir «teste completo» a cada feature — é DoD + hook `stop`.
+- Edição em `packages/*` produto → pendente até `npm run qa:run` ou `qa:run-all`.
+- `git push` → aviso de regressão no hook shell.
+
+### Realizado
+- `.cursor/hooks/lib/qa-ritual.mjs`, `after-file-edit-qa-ritual.mjs`
+- `stop-doc-ritual.mjs` — docs + QA (`loop_limit: 3`)
+- `before-shell.mjs` — detecta `qa:run` e alerta push
+- Regra always-on `.cursor/rules/qa-delivery.mdc`
+
+## [2026-09-08] - Processo QA operacional — suites manuais + paralelo
+
+### Decisão
+- Feature **não está entregue** sem suite QA executável (`docs/testing/suites/<id>.md`).
+- Push em **`main`**: regressão manual `npm run qa:run-all -- --lane regression` (até CI absorver).
+- Suites **paralelas** com fixtures isoladas — metáfora de vários QAs simultâneos (`PARALLEL_QA_MODEL.md`).
+- Suite manual = especificação; Playwright converge para o mesmo `suite-id` (`AUTOMATION_ROADMAP.md`).
+
+### Realizado (épico qa-e2e-platform)
+- Hub **`docs/testing/`** — `QA_PROCESS`, `MANUAL_TEST_RUNBOOK`, catálogo `suites/index.json`, fixtures.
+- CLI **`npm run qa:list`**, **`qa:run`**, **`qa:run-all`** (`scripts/qa-suite.mjs`).
+- Suites iniciais: smoke, core-auth-dashboard, family-access-matrix, amil, hygiene, support, ops.
+- Ritual de entrega atualizado: `DOCUMENTATION_SYSTEM`, `DELIVERY_PIPELINE`, `TESTING_VERTICALS`, `AGENT_BOOTSTRAP`.
+- **Hooks endurecidos** — `.cursor/rules/qa-delivery.mdc` + `qa-ritual` em `stop` / `before-shell`.
+
+### Próximo (épico `qa-e2e-platform`)
+- [ ] `seed-qa-family-matrix.mjs`
+- [ ] `e2e/suites/core-auth-dashboard.spec.ts`
+- [ ] CI job regressão integrada (PG + API + Playwright)
+
+## [2026-09-08] - DNS local `.test` pausado — localhost canônico
+
+### Decisão
+- Hostnames `*.aiyracare.test` + Caddy **pausados** (setup hosts/admin não concluído).
+- URLs canônicas: `localhost:5173/5174`, API/Ops em `127.0.0.1` com portas.
+- `up.ps1` sempre loopback; `.env.preview` sem `AIYRA_LOCAL_HOSTNAMES`.
+
+### Realizado
+- **`npm run up:both`** — dev + staging local em sequência (`scripts/up-both.ps1`).
+- **`npm run startup:*`** — tarefas agendadas Windows (bandeja ops + stacks no logon).
+- **Dashboard** — `Promise.allSettled`: falha em `/care-circles/dashboard` não bloqueia lista de pacientes.
+- **Ops scripts** — `env-status`, notifier e console alinhados às portas dev/preview.
+
+### Armadilha migrations (dev)
+- `up.ps1` força `DATABASE_URL=…/aiyracare`; scripts `apply-migration-NNN` leem `.env` (muitas vezes `aiyracare_preview`).
+- Ao aplicar migration manualmente no **Ambiente 1**, use:  
+  `$env:DATABASE_URL="postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare"; node packages/api/scripts/apply-migration-NNN.mjs`
+
+### Próximo (semana)
+- [ ] Executar suite `family-access-matrix` (após seed) — `npm run qa:run -- --suite family-access-matrix`
+- [ ] `fleury-unified-connector` ou validação PoC Fleury com conta real
+- [ ] Configurar `RESEND_API_KEY` em preview quando testar e-mails transacionais
+
+## [2026-09-04] - Família: e-mail transacional (convite + compartilhamento)
+
+### Realizado
+- **FamilyAccessEmailService** — templates pt-BR para convite de cuidador e compartilhamento entre famílias.
+- **Adapter Resend** — `RESEND_API_KEY` + `TRANSACTIONAL_EMAIL_FROM`; modo noop em dev.
+- Disparo assíncrono após `createInvite` e `create` profile share (não bloqueia API).
+
+### Configurar em produção
+- `TRANSACTIONAL_EMAIL_PROVIDER=resend`
+- Domínio verificado no Resend + `TRANSACTIONAL_EMAIL_FROM`
+
+## [2026-09-04] - Família: perfil compartilhado entre círculos (063 — caso Mariana)
+
+### Realizado
+- **Migration 063** — `patient_profile_share_invites`; `patient_circle_links.link_kind` (`primary` | `shared`).
+- **API** — titular envia convite cross-família; receptor (owner/admin) aceita escolhendo círculo; revogação remove vínculo `shared`.
+- **Dashboard** — grupos por família filtram perfis sem grant do usuário.
+- **UI** — `ProfileShareCard` em `/settings/family`; tag «Compartilhado» no painel de famílias.
+
+### Decisão
+- Compartilhamento é **iniciado pelo titular do perfil** (não pelo círculo receptor) — alinhado LGPD e `FAMILY_ACCESS_MODEL.md`.
+- **Grants** continuam independentes: aparecer no círculo ≠ ver dados clínicos (ex.: Maria sem grant em Mariana).
+
+### Próximo
+- [ ] Teste E2E matriz João/Maria/Francisco/Vitória
+
+## [2026-09-04] - Investigador suporte — Cursor Automation (Tier 0)
+
+### Realizado
+- Fan-out `CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL` em `dispatchSupportReportNotifications`.
+- Playbook `docs/ops/automations/support-report-investigator.prompt.md` + prefill workflow JSON.
+- Simulação `npm run ops:support-investigator:simulate`.
+- Runbook `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md`.
+
+### Validar
+- Salvar Automation no Cursor → copiar webhook URL para `.env` → simular ou Reportar problema no app.
+
+### Realizado
+- **`support-report-dispatch.ts`** — POST assíncrono após criar chamado; payload sem PHI (id, category, route, fingerprint top).
+- Fallback para `OPS_ALERT_WEBHOOK_URL`; link do console via `OPS_ALERT_DASHBOARD_URL` / `OPS_CONSOLE_PORT`.
+- Testes: `support-report-dispatch.test.ts`.
+- Docs: `SUPPORT_REPORTS.md`, hub `docs/ops/README.md`.
+
+### Próximo
+- [ ] Sparkline `support_report_submitted` na aba Suporte
+- [ ] Agente investigador (Tier 0–1)
+
+## [2026-09-04] - Família: audit log de acesso (062)
+
+### Realizado
+- **Migration 062** — `patient_access_audit_events` (grant/convite sem PHI na linha).
+- **API** — `GET /patients/:id/access-audit` (titular); gravação em grant, revoke, invite sent/accept/revoke.
+- **Telemetria** — `patient_access_granted` + eventos família existentes via server.
+- **UI** — histórico no drawer «Quem tem acesso».
+
+## [2026-09-04] - Suporte: Reportar problema (061) + consentimento LGPD
+
+### Realizado
+- **Migration 061** — `support_reports` (chamado, bundle diagnóstico JSON, TTL 30d, opt-in acesso perfil 7d).
+- **API** — `POST/GET /support/reports`; enriquecimento com `product_events` + `client_errors` se `consentTechnical`.
+- **Web** — botão global no header + modal com categorias e checkboxes de consentimento.
+- **Telemetria** — `support_report_submitted`.
+- **Docs** — `docs/features/support-user-reports.md`, `DATA_PROCESSING_MAP`.
+- **Hub sessão Ops** — `docs/ops/README.md` (+ `CONSOLE`, `TELEMETRY`, `SUPPORT_REPORTS`); regra `.cursor/rules/aiyra-ops-session.mdc`.
+
+### Próximo
+- [x] Fila no ops console — aba **Suporte** (`GET/PATCH /api/support-reports` no `:3013`/`:3023`)
+- [ ] Captura de screenshot (UI)
+- [x] Webhook `SUPPORT_REPORT_WEBHOOK_URL` / agente investigador (webhook feito)
+
+## [2026-09-04] - Ops console: aba Suporte (fila support_reports)
+
+### Realizado
+- **`OpsSupportReportService`** — lista open + PATCH triaged/resolved via PG.
+- **Console** — aba Suporte com KPIs, tabela expandível (bundle técnico), ações Triar/Resolver.
+- **Métricas** — `supportReports.openCount` e `submitted24h` no snapshot.
+
+### Próximo
+- [x] Webhook `SUPPORT_REPORT_WEBHOOK_URL`
+- [ ] Sparkline `support_report_submitted` na aba Suporte
+
+## [2026-09-04] - Ops: instrumentação web (sync, família, telas)
+
+### Realizado
+- **Eventos** — `sync_job_started`, `app_screen_viewed`, família (`family_invite_*`), `patient_access_revoked`, compliance, `notification_optin_changed`.
+- **Web** — `useScreenTelemetry` no `AppLayout`; helpers `sync-telemetry`; `reportClientError` em falhas de sync/convite.
+- **Catálogo ops** — features `settings_family`, `family_invite`, `compliance`; `app_screen_viewed` resolve pela rota.
+- **Docs** — `OBSERVABILITY.md`, passo no `PREVIEW_LOCAL_TEST_GUIDE`.
+
+## [2026-09-03] - Família: convites ↔ círculos, dashboard agrupado, ACL drawer
+
+### Realizado
+- **Migration 060** — `care_circle_id` + `circle_role` em convites; aceite adiciona membro ao círculo.
+- **Convites** — seletor de família na UI; perfis filtrados por círculo; inferência automática do círculo padrão.
+- **Care circles UI** — renomear, vincular/desvincular perfis (owner/admin).
+- **Dashboard** — agrupamento por família quando há múltiplos círculos ou perfis «outros».
+- **Perfil** — drawer «Quem tem acesso» com revogação (titular).
+- **API** — `GET /care-circles/dashboard`; grants com e-mail/displayName.
+
+### Próximo
+- [ ] Audit log de concessões (`family-access-audit-log`)
+- [ ] E-mail transacional do convite
+
+## [2026-09-03] - Família: Care Circles (059) + UI Configurações
+
+### Realizado
+- **Migration 059** — `care_circles`, `care_circle_members`, `patient_circle_links`; backfill «Minha família» por titular.
+- **API** — `GET/POST/PATCH /care-circles`, membros e vínculos de perfil; limite 2 admins por círculo.
+- **Web** — Configurações → **Família e cuidadores** (`/settings/family`): painel de círculos + convites (movidos da aba Conta).
+- **Testes** — `care-circle.service.test.ts` (criação + limite admin).
+
+### Próximo
+- [x] Vincular convites (058) a `care_circle_id` — entregue em 060 (entrada acima)
+- [x] Dashboard agrupado por família — entregue (entrada acima)
+- [ ] Audit log de concessões (`family-access-audit-log`)
+
+## [2026-09-03] - connect-worker Cloud Run Job (preview GCP)
+
+### Realizado
+- **`job.ts`** — modos `sync` e `ops` para Cloud Run Job.
+- **`Dockerfile.connect-worker`** + `gcp-preview-worker.mjs` (jobs + scheduler opcional).
+- **`promote-preview.yml`** — input `deploy_worker`.
+- Preview local: `connect-worker` carrega `.env.preview`.
+
+### Nota
+Promote GCP = **staging/preview (Ambiente 2)**, não produção. Primeiro deploy cloud aguarda Cloud SQL + secrets.
+
+## [2026-09-03] - GCP Preview: deploy Cloud Run no promote-preview
+
+### Realizado
+- **`gcp-preview-deploy.mjs`** — build/push Artifact Registry + deploy API/web/ops no Cloud Run.
+- **`gcp-preview-provision.mjs`** — enable APIs + criar repositório Docker.
+- **`promote-preview.yml`** — input `deploy_gcp` com auth GCP + secrets Environment preview.
+- Roadmap: `env-preview-gcp-deploy` e `env-preview-gcp-worker` **done** (código); primeiro deploy cloud pendente secrets + Cloud SQL.
+
+### Próximo (infra)
+- [ ] Secrets `GCP_SA_KEY` + vars no GitHub Environment `preview`
+- [ ] Cloud SQL + primeiro `deploy_gcp=true` + `deploy_worker=true`
+
+## [2026-09-03] - Delivery + GCP Preview: dry-run, Dockerfiles, runbook beta
+
+### Realizado
+- **`del-migration-dry-run`** — `npm run migrate:dry-run`; job `migrations` no CI (Postgres efêmero).
+- **`del-deploy-runbook`** — `docs/infra/DEPLOY_BETA_RUNBOOK.md`.
+- **`env-preview-gcp-deploy`** in_progress — Dockerfiles em `infra/docker/`; `npm run build:preview-images`.
+- **Ops console** — tag grande de ambiente (Desenvolvimento / Staging / Produtivo) no header.
+
+### Próximo
+- [ ] Wire `gcloud run deploy` em `promote-preview.yml`
+- [ ] Aprovação Rafael staging → promote GCP
+
+## [2026-09-03] - Ops: épico Run fechado + runbook GCP Preview
+
+### Realizado
+- **`prod-run-intelligence`** marcado **done** no roadmap (validação manual staging pendente Rafael).
+- **`env-preview-host`** → **in_progress**; sub-itens `env-preview-local-hostnames` e `env-preview-gcp-runbook` done.
+- **Runbook:** `docs/infra/GCP_PREVIEW_RUNBOOK.md` (Cloud SQL + Cloud Run + promote/post-deploy).
+- **Staging local:** hostnames `.test` + Caddy; `link:demo-patients`; `preview:validate` com fallback loopback; webhook ops local no preview.
+
+### Próximo
+- [ ] `env-preview-gcp-deploy` — wire `promote-preview.yml` com Cloud Run
+- [ ] Aprovação Rafael em `promotion-report-last.md` após teste staging
+
+## [2026-09-03] - Base de conhecimento e entregas roadmap (família, Amil, B2B, docs)
+
+### Contexto
+Consolidar tracking de negócio/funcionalidade para humanos e LLMs; fechar itens alinhados do roadmap (higienização Neo4j, Amil filtro, orgs B2B, screenshots landing, preview).
+
+### Realizado
+- **Documentação:** `docs/DOCUMENTATION_SYSTEM.md`, `docs/README.md`, `docs/features/` + `index.json`, `docs/help/*`.
+- **Bootstrap pós-compactação:** `docs/AGENT_BOOTSTRAP.md`, `.cursor/rules/agent-bootstrap.mdc`, hooks `sessionStart` / `preCompact` / `postToolUse` / doc-ritual / `stop`.
+- **API:** `GET /project/context` passa a incluir catálogo `features` do index.
+- **Família (design):** `docs/FAMILY_ACCESS_MODEL.md` + épico `family-access-model` + feature card.
+- **Família (fase 1 grants):** migration `057_patient_access_grants`, `PatientAccessService`, rotas `/patients/:id/access-grants`.
+- **Família (convites MVP):** migration `058_patient_access_invites`, `/family-access/invites`, UI Configurações → Conta, `/invite/accept`.
+- **Amil:** modal período/beneficiário; query params sync; sub-etapa `fetch-utilizacao`.
+- **B2B:** API `/organizations` + members (migration 055).
+- **Higienização:** `HygieneGraphProjector` DUPLICATE_CANDIDATE + testes.
+- **Preview:** `up-preview.ps1` aplica migrations antes do seed.
+- **Landing:** screenshots reais em `packages/web/public/landing/`.
+
+### Decisão
+- **Fonte de verdade semântica** permanece no repo (`roadmap.json` + feature cards + domain docs).
+- **GitHub Projects** = kanban operacional com labels `roadmap:<id>`, não substitui `.md`.
+
+### Próximo
+- [ ] `family-access-glossary-ui` — copy Cuidador / Perfil de saúde
+- [ ] `ava-help-knowledge-base` — expor help para Ava
+- [ ] Labels `roadmap:*` no GitHub
+
+## [2026-09-03] - Ops Run: console visual, gráficos e checklist preparação
+
+### Contexto
+Fechar itens `run-ops-console-visual-design` e `run-ops-console-charts-scales` do épico `prod-run-intelligence`; consolidar workspace canônico `aiyra-care`.
+
+### Realizado
+- **Console `:3013`:** tema AiyraCare (`ops-theme.tsx`), KPIs com sparklines, gráficos Recharts (sync, Ava, probe, fail rate, orçamento).
+- **Thresholds:** `ops-thresholds.ts` — latência probe ok/warning/critical alinhada à API (`OPS_PROBE_*`).
+- **Séries:** `timeSeries24h` na API + percentis Ava 24h vs 7d no painel Ava.
+- **Docs:** `docs/infra/OPS_PREP_CHECKLIST.md` — ritual local, preview, gates.
+- **Workspace:** canônico `%USERPROFILE%\workspace\aiyra-care` (repo `RafaDru/aiyra-care`); pasta `aiyra-cara` removida.
+
+### Próximo
+- [ ] `run-dev-audit-bridge` — correlacionar dev-audit com product_events
+- [ ] Validar `promotion:gates` no Preview local
+
+### Próximo
+- [ ] `env-preview-host` — Preview no GCP
+
+## [2026-09-03] - Validação local preview + ritual `preview:validate`
+
+### Realizado
+- **`npm run preview:validate`** — ritual único (dual-keys, health, post-deploy, smoke preview, dev-audit bridge).
+- **Fix `.env.preview`** — API/console carregam override quando `PORT=3020` / `DEPLOYMENT_TIER=preview`.
+- **PG preview** — `seed:staging-refresh` em `aiyracare_preview` (Lucas/Ana demo + volume sintético).
+- **Guia manual:** `docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md` (~45 min de roteiro).
+- **Validado:** `preview:validate` OK · integração `ops:smoke` FULL OK · notificadores `:3012` + `:3022`.
+
+## [2026-09-03] - run-dev-audit-bridge: hooks Cursor × product_events
+
+### Realizado
+- **CLI** `npm run dev-audit:bridge` — lê `docs/dev-audit/**/*.jsonl` + `product_events` no PG.
+- **API** `GET /ops/dev-audit-bridge` — relatório JSON (ops key).
+- **Correlação:** buckets horários agente vs uso app; hints operacionais; output `dev-audit-bridge-last.json`.
+- **Testes:** `dev-audit-bridge.test.ts` no `test:ops`.
+
+### Próximo
+- [ ] `env-preview-host` — Preview no GCP
+
+## [2026-09-03] - run-user-escalation: aviso família em sync crítico (opt-in)
+
+### Realizado
+- **Migration 056** — `account_notification_preferences` + `sync_escalation_incidents` (open → resolved).
+- **API:** `GET/PATCH /account/notification-preferences`, `GET /account/sync-escalations`.
+- **Gatilho:** 3+ falhas em 24h no mesmo `integration_link`; cooldown 6h; resolve ao sync OK.
+- **Canal:** webhook genérico (`USER_ESCALATION_WEBHOOK_URL` ou `OPS_ALERT_WEBHOOK_URL`) — sem PHI.
+- **UI:** Configurações → Geral → toggle opt-in.
+- **Telemetria:** `sync_escalation_opened` / `sync_escalation_resolved`.
+
+### Próximo
+- [ ] `run-dev-audit-bridge` — correlacionar dev-audit com product_events
+- [ ] `env-preview-host` — Preview no GCP
+
+## [2026-09-03] - Ops dual keys: `.env.preview` isolado
+
+### Realizado
+- **Arquivo `.env.preview`** — chaves ops e PG preview separados de `.env` (integração).
+- **Scripts:** `setup:ops-preview` escreve em `.env.preview`; `validate:ops-dual-keys` bloqueia chaves iguais.
+- **`up.ps1 -Preview`** — carrega `.env` + override `.env.preview`.
+- **Gates:** `promotion:gates` inclui validação opcional de dual keys.
+
+### Próximo
+- [ ] `env-preview-host` — Preview no GCP
+
+## [2026-09-03] - Workspace canônico `aiyra-care`
+
+### Decisão
+- Repositório e workspace: `%USERPROFILE%\workspace\aiyra-care` (`https://github.com/RafaDru/aiyra-care.git`).
+- Nome `aiyra-cara` descontinuado; ver `docs/CURSOR_WORKSPACE.md` e `scripts/migrate-cursor-workspace.ps1`.
+
+## [2026-09-02] - Política ambientes: local → GCP Preview
+
+### Decisão
+- **Ambiente 1 (Integração):** permanece **local** (+ CI GitHub).
+- **Ambiente 2 (Preview):** **local** (`up:preview`, `3020/5174`) até ritmo de promoção + testes estável; depois **GCP** (projeto `openhealth-503119`).
+- **Cursor Cloud:** fora de escopo por hora.
+- Docs: `TWO_ENV_MODEL.md`, `ENV_PREVIEW.md`, `DEPLOY_PREVIEW.md`.
+
+## [2026-09-02] - SUS lembrete reimport + B2B org schema
+
+### Realizado
+- **Migration 054** — `sus_reimport` em `care_reminders`; lembrete 6 meses após sync ConecteSUS.
+- **Migration 055** — `organizations` + `organization_members` (B2B primitives).
+- **UI:** `CareReminderBanner` — ação «Reimportar SUS» no perfil do paciente.
+- Domain `Organization` entity; roadmap `sus-reminder` done.
+
+## [2026-09-02] - SUS sync silencioso + reimport UX + E2E smoke
+
+### Realizado
+- **API:** `POST /patients/:id/conectesus/sync?silent=1` — fetch HTTP gov.br + import com dedup.
+- **Web:** `useSilentConecteSUSSync` na Carteira; `SusPublicHealthBanner` na aba Vacinas.
+- **E2E:** Playwright `e2e/smoke.spec.ts` no CI web job.
+- Roadmap: `sus-reimport-ux`, `del-e2e-smoke` done.
+
+## [2026-09-02] - Ambientes: volume staging + CI staging + probe gate
+
+### Realizado
+- **seed-staging-volume.mjs** — sync_jobs, product_events, llm_usage sintéticos.
+- **refresh-staging-demo.mjs**, **apply-all-migrations.mjs**, **staging-probe-gate.mjs**.
+- **CI:** `.github/workflows/staging.yml` (database-smoke), `deploy-prod.yml` (manual).
+- Docs: `BACKUP.md`, `DEPLOY_STAGING.md`; épico `platform-environments` **done**.
+
+## [2026-09-02] - Ecossistema visual + ambientes + seed demo
+
+### Contexto
+CNPJ em regularização; priorizar estruturação técnica e mapa de negócio (personas B2B + marketplace farmácias horizonte).
+
+### Realizado
+- **docs/ECOSYSTEM.md** — mapas mermaid (personas, valor, monetização, marketplace sem patrocínio).
+- **docs/B2B_PARTNERS.md** — segmentos + marketplace farmácias.
+- **docs/infra/ENVIRONMENTS.md** — matriz local/staging/prod.
+- **seed-demo-data.mjs** + `npm run seed:demo`; **validate-migrations.mjs** no CI.
+- Roadmap: `business-ecosystem`, itens `platform-environments` parciais done.
+
+## [2026-09-02] - Roadmap: ambientes dev/staging/prod + discovery B2B
+
+### Contexto
+Regularização de CNPJ em andamento — cobrança live adiada; foco em estruturar aplicação (massas, staging sintético, esteiras) e planejar oferta B2B.
+
+### Realizado
+- **Roadmap** — épicos `platform-environments` (P2) e `b2b-partner-platform` (P3) em `docs/roadmap.json`.
+- **Ambientes:** gerador de massas, staging «shape produtivo» com dados fake, CI staging/prod, gates migration, backup, sondas, worker parity.
+- **B2B:** discovery por segmento (médicos, planos, labs, farmácias), primitives org/RBAC/API, pricing e contratos.
+
+### Decisões
+- **Staging** não restaura dump de prod com PHI; massas sintéticas LGPD-safe.
+- **B2B** em discovery separado do go-live B2C; export/share médico evolui dentro do pacote clínico.
+- Docs detalhados: `docs/infra/ENVIRONMENTS.md` e `docs/B2B_PARTNERS.md` (backlog nos épicos).
+
+## [2026-09-01] - Sessão gov.br persistida + auth genérico nos portais
+
+### Contexto
+ConecteSUS/Caderneta abriam Chrome em cada “Buscar”; falhas de sync em convênios não orientavam o usuário a atualizar senha vs reconectar sessão.
+
+### Realizado
+- **Migration 053** — `govbr_sessions` (token FHIR por `account_id`); `integration_links.auth_attention`; `sync_jobs.failure_kind`.
+- **SUS:** `GovBrTokenSession` + `PublicHealthScrapeService`; reimport ConecteSUS/Caderneta **sem browser** enquanto token válido; `GET /account/govbr-session`.
+- **Auth portais:** `domain/portal-auth/portal-auth-failure.ts` + `portal-sync-auth.helper.ts`; UI Integrações com avisos credentials/session.
+- **Docs:** `SUS_CONECTESUS.md`, `CONNECT.md`, `project-context.json`, roadmap `sus-govbr-session` + `connect-portal-auth`.
+
+### Decisões
+- Sessão **gov.br** na **conta** (`govbr_sessions`), espelhando `calendar_connections` — não em `integration_links` (que é vínculo paciente×portal com senha).
+- Sessão **convênio/hospital/lab** continua em `integration_links.encrypted_session_token`.
+- Scrapers gov.br ainda em `packages/api` (Connect Fase 2); contrato canônico government pendente.
+
+### To-Dos
+- [ ] ConecteSUS no sync silenciente da Carteira quando `govbr_session.sessionReady`
+- [ ] UX reimport SUS em Vacinas (`sus-reimport-ux`)
 
 ## [2026-09-01] - Grupo Fleury UI fase 1 + ops dashboard local
 
@@ -700,7 +1263,7 @@ Ant Design. O Open Design mantém as paletas de cores, tokens e descrições
 visuais, enquanto o frontend consome esses tokens via bridge.
 
 ### Realizado
-- [x] Design system "open-health" atualizado no Open Design com 3 paletas
+- [x] Design system "aiyra-care" atualizado no Open Design com 3 paletas
 - [x] DESIGN.md com descrição completa de componentes e estilos
 - [x] brand.json com paletas, tipografia, layout e voice & tone
 - [x] tokens.palettes.json (indigo #4F46E5, teal #0D9488, rose #E11D48)
@@ -720,7 +1283,7 @@ Open Design (tokens) → sync-opendesign.ps1 → ThemeProvider → Ant Design Co
 
 ### Realizado
 - [x] .env gerado a partir de variáveis de ambiente da máquina
-- [x] PostgreSQL local: database openhealth + schema relacional aplicado
+- [x] PostgreSQL local: database aiyracare + schema relacional aplicado
 - [x] Neo4J local (porta 7687) + schema de grafos aplicado
 - [x] API Fastify: rotas /health e /health/db (PG ok, Neo4J ok)
 - [x] GitHub Secrets: GROQ_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE, NEO4J_*
@@ -737,7 +1300,7 @@ Open Design (tokens) → sync-opendesign.ps1 → ThemeProvider → Ant Design Co
 ## [2026-07-21] - Fundação do Projeto
 
 ### Contexto
-Criação do Open Health, sistema para centralizar histórico médico infantil.
+Criação do AiyraCare, sistema para centralizar histórico médico infantil.
 
 ### Crianças Cadastradas
 - **Luís Drummond Freitas Reis** - Nasc: 23/01/2020 - 20kg
@@ -746,7 +1309,7 @@ Criação do Open Health, sistema para centralizar histórico médico infantil.
 ### Decisões Arquiteturais Iniciais
 | Decisão | Opção | Motivo |
 |---------|-------|--------|
-| Repositório | open-health (GitHub) | Novo repositório dedicado |
+| Repositório | aiyra-care (GitHub) | Novo repositório dedicado |
 | Banco Relacional | PostgreSQL (Supabase) | Free Tier gerenciado |
 | Banco de Grafos | Neo4J AuraDB Free | Free Tier gerenciado |
 | Mobile | React Native + Expo | Multiplataforma |
@@ -756,7 +1319,7 @@ Criação do Open Health, sistema para centralizar histórico médico infantil.
 
 ### Estrutura Inicial do Projeto
 ```
-open-health/
+aiyra-care/
 ├── .github/workflows/   # CI/CD
 ├── docs/                 # Documentação viva e histórico
 ├── packages/
@@ -777,7 +1340,7 @@ open-health/
 ```
 
 ### Realizado na Fundação
-- [x] Repositório GitHub criado (RafaDru/open-health) e push realizado
+- [x] Repositório GitHub criado (RafaDru/aiyra-care) e push realizado
 - [x] Estrutura monorepo montada (packages/web, mobile, api, agents)
 - [x] Schemas PostgreSQL (8 tabelas)
 - [x] Modelo Neo4J (nós e relacionamentos)
@@ -1176,7 +1739,7 @@ Precisamos levar o histórico ao consultório de forma útil — não só dump c
 ## [2026-07-28] - Backlog: Rede credenciada agregada (“Decolar” da saúde)
 
 ### Contexto
-Hoje cada operadora/SUS tem sua própria busca de rede. A ideia é um módulo de descoberta unificada no Open Health: o usuário/paciente busca uma vez e o sistema compõe resultados de vários provedores vinculados (e do SUS), melhorando o ranking com o tempo — análogo à Decolar para voos/hotéis, mas para rede credenciada.
+Hoje cada operadora/SUS tem sua própria busca de rede. A ideia é um módulo de descoberta unificada no AiyraCare: o usuário/paciente busca uma vez e o sistema compõe resultados de vários provedores vinculados (e do SUS), melhorando o ranking com o tempo — análogo à Decolar para voos/hotéis, mas para rede credenciada.
 
 ### Backlog (não implementar agora)
 - [ ] **Módulo Rede Credenciada** — busca (especialidade, local, nome, urgência etc.)

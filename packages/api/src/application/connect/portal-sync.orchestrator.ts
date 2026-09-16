@@ -7,7 +7,6 @@ import { UnimedBhSyncScraper } from '../../infrastructure/scraper/unimedbh-sync.
 import { AmilSyncScraper } from '../../infrastructure/scraper/amil-sync.scraper.js'
 import { isUnimedSessionUsable } from '../../infrastructure/scraper/unimedbh-login.helper.js'
 import {
-  updateJob,
   type SyncAuthorizationDetail,
 } from '../../infrastructure/scraper/sync-progress-store.js'
 import { encrypt, decrypt } from '../../infrastructure/crypto-helper.js'
@@ -20,13 +19,28 @@ import {
   computeUnimedAuthorizationSince,
   computeUnimedExtratoMonths,
   computeAmilGuidesPeriodStart,
+  computeAmilUtilizationPeriod,
 } from './sync-delta.helper.js'
 import { normalizeName } from './connect-sync.helpers.js'
+import {
+  applyPortalSyncAuthFailure,
+} from '../integration-link/portal-sync-auth.helper.js'
 import type { UnimedBhUsageItem } from '../../infrastructure/scraper/unimedbh-extrato.scraper.js'
 import type {
   SyncBeneficiaryDetail,
   SyncUnmatchedBeneficiary,
 } from '../../infrastructure/scraper/sync-progress-store.js'
+import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
+
+function emitScraperProgress(
+  onProgress: (step: string, message: string, status: 'running' | 'success' | 'failed') => void,
+): (p: ScraperProgress) => void {
+  return (p) => onProgress(
+    p.step,
+    p.message,
+    p.status === 'failed' ? 'failed' : p.status === 'success' ? 'success' : 'running',
+  )
+}
 
 export interface UnimedSyncParams {
   link: IntegrationLink
@@ -53,6 +67,11 @@ export interface AmilSyncParams {
   interactiveLogin?: boolean
   /** Sync silencioso — janela menor em guias/tokens. */
   incremental?: boolean
+  /** Filtra atendimentos a uma marca ótica (beneficiário). */
+  amilMarcaOtica?: string
+  /** Sobrescreve janela de utilização (sync manual). */
+  amilUtilizationStart?: Date
+  amilUtilizationEnd?: Date
 }
 
 export interface AmilSyncResult {
@@ -95,7 +114,7 @@ export class PortalSyncOrchestrator {
     const result = await scraper.scrape(
       link.email!,
       decryptedPassword,
-      (p) => void updateJob(jobId, p),
+      emitScraperProgress(onProgress),
       {
         patientName: patient?.name,
         cardNumber: link.cardNumber || undefined,
@@ -142,6 +161,7 @@ export class PortalSyncOrchestrator {
       link.setCardNumber(importOutcome.cardNumberHint)
     }
 
+    link.clearAuthAttention()
     link.markSynced()
     await this.linkRepo.update(link)
 
@@ -154,17 +174,16 @@ export class PortalSyncOrchestrator {
   async handleUnimedSyncFailure(link: IntegrationLink, err: unknown, log?: FastifyBaseLogger): Promise<string> {
     const message = err instanceof Error ? err.message : 'Erro na sincronização'
     log?.error(err, 'Unimed sync failed')
-    if (/login|autentic|acesso\.unimed|sess[aã]o|portal do cliente|expirad/i.test(message)) {
-      link.clearSessionToken()
-      await this.linkRepo.update(link).catch(() => {})
-    }
-    return message
+    return applyPortalSyncAuthFailure(link, this.linkRepo, 'unimed', message)
   }
 
   async runAmilSync(params: AmilSyncParams): Promise<AmilSyncResult> {
-    const { link, decryptedPassword, jobId, onProgress, patientName, log, interactiveLogin, incremental = false } = params
+    const { link, decryptedPassword, jobId, onProgress, patientName, log, interactiveLogin, incremental = false, amilMarcaOtica, amilUtilizationStart, amilUtilizationEnd } = params
 
     const guidesPeriodStart = computeAmilGuidesPeriodStart(link, incremental)
+    const defaultUtilization = computeAmilUtilizationPeriod(link, incremental)
+    const utilizationPeriodStart = amilUtilizationStart ?? defaultUtilization.start
+    const utilizationPeriodEnd = amilUtilizationEnd ?? defaultUtilization.end
     if (incremental) {
       log?.info(
         { linkId: link.id, guidesPeriodStart: guidesPeriodStart.toISOString() },
@@ -191,13 +210,16 @@ export class PortalSyncOrchestrator {
     const result = await amilScraper.scrape(
       link.email!,
       decryptedPassword,
-      (p) => void updateJob(jobId, p),
+      emitScraperProgress(onProgress),
       {
         patientName,
         cardNumber: link.cardNumber || undefined,
         sessionToken: storedToken,
         interactiveLogin,
         guidesPeriodStart,
+        utilizationPeriodStart,
+        utilizationPeriodEnd,
+        marcaOticaFilter: amilMarcaOtica,
         incremental,
       },
     )
@@ -222,6 +244,7 @@ export class PortalSyncOrchestrator {
       link.setCardNumber(cardHint)
     }
 
+    link.clearAuthAttention()
     link.markSynced()
     await this.linkRepo.update(link)
 
@@ -235,12 +258,7 @@ export class PortalSyncOrchestrator {
   async handleAmilSyncFailure(link: IntegrationLink, err: unknown, log?: FastifyBaseLogger): Promise<string> {
     const message = err instanceof Error ? err.message : 'Erro na sincronização Amil'
     log?.error(err, 'Amil sync failed')
-    const badCredentials = /inv[aá]lid|senha/i.test(message)
-    if (!badCredentials && /401|403|sess[aã]o|token|expirad/i.test(message)) {
-      link.clearSessionToken()
-      await this.linkRepo.update(link).catch(() => {})
-    }
-    return message
+    return applyPortalSyncAuthFailure(link, this.linkRepo, 'amil', message)
   }
 
   /** Classificador Amil com fallback LLM (custo interno) — degrada p/ regras se desligado/teto esgotado. */

@@ -2,9 +2,9 @@
 
 ## What is this project
 
-**AiyraCare (Filhos)** — monorepo for child healthcare with centralized medical history (Luís and Bruno). Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: `docs/PROJETO.md`; decision log: `docs/HISTORICO.md`.
+**AiyraCare** — monorepo `aiyra-care` (`@aiyra-care/*`). Workspace: `%USERPROFILE%\workspace\aiyra-care` — ver `docs/CURSOR_WORKSPACE.md`. Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: `docs/PROJETO.md`; decision log: `docs/HISTORICO.md`.
 
-**Context for LLMs/agents:** `GET http://127.0.0.1:3010/project/context` — structured app snapshot + decisions + parsed `HISTORICO.md` + migrations list. Curated source: `docs/project-context.json` (update on architecture/roadmap changes). **Prioritized roadmap:** `docs/roadmap.json` + UI menu (`GET /roadmap`).
+**Context for LLMs/agents:** `GET http://127.0.0.1:3010/project/context` — structured app snapshot + decisions + parsed `HISTORICO.md` + migrations list + **features catalog** (`docs/features/index.json`). Curated source: `docs/project-context.json` (update on architecture/roadmap changes). **Documentation model:** `docs/DOCUMENTATION_SYSTEM.md`. **Bootstrap (pós-compactação):** `docs/AGENT_BOOTSTRAP.md` — re-injetado via hooks `sessionStart` + `postToolUse`. **Prioritized roadmap:** `docs/roadmap.json` + UI menu (`GET /roadmap`).
 
 ## Monorepo structure
 
@@ -27,7 +27,7 @@ When user says "up", "sobe", "sobe os serviços", or "restart":
 ```powershell
 taskkill /F /IM node.exe 2>&1 | Out-Null
 Start-Sleep 2
-powershell -File "C:\Users\rafae\Documents\Filhos\scripts\up.ps1" *>$null
+powershell -File "$env:USERPROFILE\workspace\aiyra-care\scripts\up.ps1" *>$null
 ```
 
 Always use `*>$null` to suppress output so the chat doesn't get stuck.
@@ -37,7 +37,7 @@ Always use `*>$null` to suppress output so the chat doesn't get stuck.
 - **API:** http://127.0.0.1:3010/health — `cd packages/api && npm run dev` (tsx watch)
 - **Web:** http://localhost:5173 — `cd packages/web && npm run dev` (vite)
 - **Logs:** `api.log` and `web.log` in project root
-- **DB:** `postgresql://postgres:postgres123@127.0.0.1:5432/openhealth`
+- **DB:** `postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare`
 
 ## Build, test, lint
 
@@ -78,7 +78,7 @@ There is **no top-level lint or typecheck** — root `npm run lint` is a no-op (
 | **Unimed BH** | Yes | Playwright login `acesso.unimedbh.com.br` | Extract (consults/copay), authorizations (OutSystems APIs), plan (Virtual Card), QR/token |
 | **Amil** | Yes (validated) | Saved JWT → CDP Chrome → Playwright (fallback) | Plan, eligibility, guides/tokens → `Authorization` |
 | **Bradesco Saúde** | No (link + manual import only) | — | — |
-| **ConecteSUS** | Manual gov.br import | Interactive FHIR login | Vaccines, exams |
+| **ConecteSUS** | Import guiado gov.br (`govbr_sessions`) | Interactive FHIR; reimport sem browser se sessão válida | Vaccines, exams |
 | **Mater Dei** | Yes | Scraper + JSON session | Exams, visits, reports/images |
 | **Hermes Pardini** | Yes (PKCE session) | Browser OAuth PKCE (+ HTTP refresh) | Exams via Grupo Fleury Precision Care — UI «Grupo Fleury»; `portal_type` `hermes_pardini` — ver `docs/FLEURY_PRECISION_CARE.md` |
 
@@ -124,13 +124,14 @@ Entities and attributes live in **Postgres**; Neo4j stores **associations** betw
 - Silent wallet: `useSilentWalletSync.ts`, `useWalletLinkSyncStatus.ts`, `silent-sync.ts`
 - Sync modal: `packages/web/src/components/scraper/SyncProgressModal.tsx`
 - Link plan: modal in `detail.tsx` + `ImportInsuranceModal.tsx`
+- **Família:** `packages/web/src/pages/settings/family.tsx`, `/invite/accept`, `packages/web/src/components/family/`
 - API client: `packages/web/src/lib/api.ts`
 
 **UI grouped lists rule:** new screens with **card/row groups** must keep horizontal alignment between groups. Use `GroupedAlignedTables`, `ALIGNED_COL` (`aligned-table-columns.ts`), `AlignedFieldGrid`. Logos: `packages/web/public/brands/`.
 
 ## Migrations
 
-SQL in `database/relational/`. Scripts: `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Orçamento LLM interno (cliente vs interno + teto R$100): **043** — ver `docs/LLM_USAGE.md#custo-cliente-vs-interno-migration-043`. Catálogo semântico dinâmico: **044**. Marcadores de exame (`exam_result_items`): **045**; idempotência + `source_document_id`: **046**. Ava conversas: **047**; pins sessão: **048** — ver `docs/AVA_VISION.md`.
+SQL in `database/relational/`. Scripts: `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Orçamento LLM interno (cliente vs interno + teto R$100): **043** — ver `docs/LLM_USAGE.md#custo-cliente-vs-interno-migration-043`. Catálogo semântico dinâmico: **044**. Marcadores de exame (`exam_result_items`): **045**; idempotência + `source_document_id`: **046**. Ava conversas: **047**; pins sessão: **048** — ver `docs/AVA_VISION.md`. Telemetria produto: **049**; gerações domínio: **050**; client errors: **051**; runtime degraded: **052**. **gov.br sessão SUS + auth_attention:** **053** — ver `docs/SUS_CONECTESUS.md`, `docs/CONNECT.md`. **Família / acesso:** grants **057**, convites **058**, care circles **059**, convites↔círculo **060**, audit ACL **062** — ver `docs/FAMILY_ACCESS_MODEL.md`, UI `/settings/family`. **Suporte:** reportar problema **061** — ver `docs/features/support-user-reports.md`.
 
 ## Legal / LGPD
 
@@ -146,8 +147,19 @@ For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/F
 ## Cursor hooks + entrega
 
 - Hooks: `.cursor/hooks.json` — auditoria em `docs/dev-audit/`; ver `docs/CURSOR_AGENT_OPS.md`.
-- Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → CI (build API + critical + web).
-- Roadmap entrega: épicos `dev-delivery-pipeline`, `prod-run-intelligence`.
+- **Projects / execução local:** My Machines worker — `docs/CURSOR_WORKSPACE.md`, `scripts/cursor-worker-start.ps1`.
+- **Ambientes não prod:** [`docs/infra/TWO_ENV_MODEL.md`](docs/infra/TWO_ENV_MODEL.md) — Ambiente 1 **local**; Ambiente 2 **local** (`up:preview`) até ritmo funcional, depois **GCP**; matriz [`docs/infra/ENVIRONMENTS.md`](docs/infra/ENVIRONMENTS.md).
+- Antes de pedir aprovação Preview: `npm run promotion:gates` + [`docs/TESTING_VERTICALS.md`](docs/TESTING_VERTICALS.md).
+- Antes de push `main`: `npm run qa:run-all -- --lane regression` — ver [`docs/testing/QA_PROCESS.md`](docs/testing/QA_PROCESS.md).
+- QA por feature: `npm run qa:run -- --suite <id>` · catálogo: `npm run qa:list`
+- Teste completo UI: `npm run qa:run-all -- --lane business-full` · Ava: `--lane ava`.
+- Preview local (após aprovação): `npm run up:preview` — PG `aiyracare_preview`, API `:3020`, web `:5174`, ops `:3023`.
+- Ritual staging: `npm run preview:validate` · guia [`docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md`](docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md).
+- Hostnames locais (pausado): [`docs/infra/LOCAL_HOSTNAMES.md`](docs/infra/LOCAL_HOSTNAMES.md) — hoje use `localhost:5173` / `:5174`.
+- Status stack: `npm run env:status` · pacientes demo: `$env:AUTH_SUBJECT="<sub>"; npm run link:demo-patients`.
+- GCP preview (quando secrets prontos): `provision:preview:gcp`, `deploy:preview:gcp`, `deploy:preview:worker` — [`docs/infra/GCP_PREVIEW_RUNBOOK.md`](docs/infra/GCP_PREVIEW_RUNBOOK.md).
+- Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → QA regressão → CI.
+- Roadmap entrega: épicos `dev-delivery-pipeline`, `prod-run-intelligence`, `platform-environments`.
 
 ## Tests API
 
@@ -155,7 +167,13 @@ For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/F
 cd packages/api && npx vitest run
 ```
 
-Critical tests only: `npm run test:critical` (runs a focused subset).
+Ops suite (alertas, triagem, fallbacks, pipeline): `npm run test:ops` (root or `packages/api`).
+
+Smoke HTTP: `npm run ops:smoke`; full stack `OPS_SMOKE_FULL=1`; CI uses `OPS_SMOKE_SKIP_HTTP=1`.
+
+Prod setup: `npm run setup:ops-prod` · Runbook: `docs/ops/RUNBOOK_ALERTS.md`.
+
+Critical tests only: `npm run test:critical` (runs a focused subset; includes ops pipeline + runtime-degraded).
 
 ## Commits / PRs
 
@@ -165,6 +183,11 @@ Only commit or open a PR when the user explicitly asks. Follow PR template in `.
 
 | Doc | Content |
 |-----|---------|
+| `docs/DOCUMENTATION_SYSTEM.md` | Tiers de docs, feature cards, help, GitHub Projects |
+| `docs/README.md` | Hub de navegação da documentação |
+| `docs/features/` | Ficha por capacidade + `index.json` |
+| `docs/help/` | FAQ para usuário e base Ava |
+| `docs/FAMILY_ACCESS_MODEL.md` | Conta × família × perfil de saúde (discovery) |
 | `docs/AVA_VISION.md` | Global companion, sessions, pins, moonshot |
 | `docs/AVA_OPERATIONAL.md` | Fases G1–G4 Ava operacional (aceleradores, ações) |
 | `docs/AVA_EXPRESSIONS.md` | Expressões visuais + linha narrativa (nome do cuidador) |
@@ -173,6 +196,7 @@ Only commit or open a PR when the user explicitly asks. Follow PR template in `.
 | `docs/DATA_HYGIENE.md` | Dedup (Google Photos style) |
 | `docs/CLASSIFICATION_ENGINE.md` | Operator label classification engine |
 | `docs/OBSERVABILITY.md` | Proactive monitoring, product_events |
+| `docs/OPS_FALLBACKS_AND_ALERTS.md` | Diagramas alertas, triagem, fallbacks, roadmap |
 | `docs/OPERATION_MODEL.md` | Operação enxuta: fases §13, P0 §14, cache, fallbacks |
 | `docs/PARALLEL_WORK.md` | Paralelizar ops vs PoC Fleury |
 | `docs/roadmap.json` | Epics `ava-*`, `observability-platform`, `data-hygiene-dedup` |

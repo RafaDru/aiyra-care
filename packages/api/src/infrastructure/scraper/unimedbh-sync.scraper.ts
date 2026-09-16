@@ -339,8 +339,8 @@ export class UnimedBhSyncScraper {
     } | null
 
     const rawList = [
-      ...(listJson.data?.LocalDadosAutorizacaoAUTORIZACOES?.List ?? []),
-      ...(listJson.data?.LocalDadosAutorizacaoEXAMES?.List ?? []),
+      ...(listJson?.data?.LocalDadosAutorizacaoAUTORIZACOES?.List ?? []),
+      ...(listJson?.data?.LocalDadosAutorizacaoEXAMES?.List ?? []),
     ]
 
     const bySolic = new Map<string, OutSystemsListItem>()

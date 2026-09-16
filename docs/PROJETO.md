@@ -1,8 +1,8 @@
-# Open Health - Documento Vivo do Projeto
+# AiyraCare - Documento Vivo do Projeto
 
-> **Última atualização:** 2026-08-13  
+> **Última atualização:** 2026-09-01  
 > **Status:** P0–P2 código entregue; agenda Google+Outlook; billing Stripe; legal/compliance tech; **próximo:** Agentes RAG (P3)  
-> **Repositório:** https://github.com/RafaDru/open-health
+> **Repositório:** https://github.com/RafaDru/aiyra-care
 
 ---
 
@@ -10,7 +10,8 @@
 
 | Área | Disponível |
 |------|------------|
-| **Sync portais** | Unimed, Amil, Mater Dei, Hermes (silent delta); Bradesco; worker agendado; SSE |
+| **Sync portais** | Unimed, Amil, Mater Dei, Hermes (silent delta); Bradesco; worker agendado; SSE; **auth_attention** em falhas |
+| **SUS / gov.br** | ConecteSUS + Caderneta import guiado; **govbr_sessions** (reimport sem browser); ver `SUS_CONECTESUS.md` |
 | **Clínico** | Contexto determinístico, timeline, trilhas, sequência consulta→auth→exame, Neo4j Encadeamento |
 | **Export** | Resumido/completo, PDF/impressão, share link 48h |
 | **Agenda** | Eventos programados, ICS import, Google + Outlook OAuth sync |
@@ -302,7 +303,7 @@ Código: `packages/api/src/domain/import-lineage/`, `application/import-lineage/
 | Diagnosis | diagnoses | patientId, medicalRecordId |
 | Authorization | authorizations | patientId |
 | AuthorizationItem | authorization_items | authorizationId |
-| IntegrationLink | integration_links | patientId, portal; campos: email (CPF Amil/Bradesco), encrypted_password, encrypted_session_token, session_expires_at, card_number |
+| IntegrationLink | integration_links | patientId, portal; email/CPF, encrypted_password, encrypted_session_token, session_expires_at, card_number, **auth_attention** |
 | InsurancePlan | insurance_plans | operator + external_key |
 | PlanMembership | plan_memberships | patientId, plan, member_number |
 
@@ -433,12 +434,28 @@ Symptom ──LED_TO───────> Diagnosis ──RESULTED_IN──> Tr
 
 ## Scraper ConecteSUS
 
-### Fluxo de Importação
+> Detalhe atual: `docs/SUS_CONECTESUS.md` (sessão `govbr_sessions`, migration 053).
+
+### Fluxo de importação (2026-09-01)
+
+```
+Usuário informa CPF (ConecteSUS) ou abre Caderneta
+    ↓
+GovBrSessionService — token válido em govbr_sessions?
+    ├── Sim → FHIR HTTP (sem browser)
+    └── Não → Chrome + login gov.br → persiste token cifrado na conta
+    ↓
+Preview vacinas/exames no modal
+    ↓
+Usuário clica Importar → grava no paciente (dedup)
+```
+
+### Fluxo legado (antes da migration 053)
 
 ```
 Usuário informa CPF
     ↓
-Abre navegador Chrome (non-headless)
+Abre navegador Chrome (non-headless) em cada busca
     ↓
 Usuário faz login manual no gov.br
     ↓
@@ -663,12 +680,12 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 
 ## Open Design Integration
 
-O **Open Design** (Powerformer v0.16.0) gerencia o design system do Open Health.
+O **Open Design** (Powerformer v0.16.0) gerencia o design system do AiyraCare.
 
 ### Localização
 ```
 %APPDATA%\Open Design\namespaces\release-stable-win\data\design-systems\
-└── open-health-platform-for-users-and-patients/
+└── aiyra-care-platform-for-users-and-patients/
     ├── DESIGN.md              ← Descrição para AI agents
     ├── brand.json             ← Paletas, tipografia, layout
     ├── metadata.json          ← Metadados do projeto
@@ -767,17 +784,19 @@ Para aplicar migrations manualmente (sem psql no PATH), executar o SQL via clien
 | Recurso | Uso |
 |---------|-----|
 | `docs/project-context.json` | Foto **curada** — camadas, decisões, roadmap, integrações (atualizar ao evoluir arquitetura) |
-| `GET /project/context` | Agrega JSON + `HISTORICO.md` parseado + lista de migrations em runtime |
+| `docs/features/index.json` | Catálogo de capacidades — também em `GET /project/context` |
+| `docs/DOCUMENTATION_SYSTEM.md` | Como documentar entregas, features e ajuda |
+| `GET /project/context` | Agrega JSON + `HISTORICO.md` parseado + lista de migrations + features |
 | `GET /sessions` | Só sessões do histórico (subset do context) |
 | `docs/PROJETO.md` / `AGENTS.md` | Narrativa longa e instruções operacionais |
 
-Agentes devem preferir `/project/context` para estado atual; markdown para detalhe profundo.
+Agentes devem preferir `/project/context` para estado atual; **feature card** (`docs/features/<id>.md`) para o “para quê”; markdown de domínio para detalhe profundo.
 
 ---
 
 ## Roadmap
 
-Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: `roadmap.json`). A UI do app lê via `GET /roadmap`.
+Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: `roadmap.json`). A UI do app lê via `GET /roadmap`. **Tracking:** [`DOCUMENTATION_SYSTEM.md`](./DOCUMENTATION_SYSTEM.md).
 
 ---
 

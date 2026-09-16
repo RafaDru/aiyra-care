@@ -1,6 +1,6 @@
 import type { Pool } from 'pg'
-import type { CanonicalSyncBatch, CanonicalRecord } from '@open-health/connect'
-import { canonicalSyncBatchSchema } from '@open-health/connect'
+import type { CanonicalSyncBatch, CanonicalRecord } from '@aiyra-care/connect'
+import { canonicalSyncBatchSchema } from '@aiyra-care/connect'
 import { Authorization } from '../../domain/authorization/authorization.entity.js'
 import { AuthorizationItem } from '../../domain/authorization/authorization-item.entity.js'
 import { Exam } from '../../domain/exam/exam.entity.js'
@@ -29,7 +29,6 @@ import {
   matchAmilBeneficiaryToPatient,
   type MatchablePatient,
 } from '../insurance-plan/amil-beneficiary-matcher.js'
-import { PatientPgRepository } from '../../infrastructure/persistence/patient.pg.repository.js'
 import {
   findOriginatingConsulta,
   normalizeName,
@@ -259,7 +258,7 @@ export class CanonicalBatchImporterService {
     const draft = MedicalRecord.create({
       patientId,
       recordDate: parsedDate,
-      recordType: record.recordType || item?.kind || 'outro',
+      recordType: record.recordType || 'outro',
       doctorName: item?.doctorName || undefined,
       clinicName: 'Unimed BH',
       description: record.description || item?.procedureDescription || undefined,
@@ -323,7 +322,7 @@ export class CanonicalBatchImporterService {
     const draft = MedicalRecord.create({
       patientId,
       recordDate: parsedDate,
-      recordType: record.recordType || item?.kind || 'outro',
+      recordType: record.recordType || 'outro',
       doctorName: item?.doctorName || undefined,
       clinicName: item?.providerName || record.providerName || 'Amil',
       description: record.description || item?.procedureDescription || undefined,

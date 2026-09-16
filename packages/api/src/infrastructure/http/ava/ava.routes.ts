@@ -33,13 +33,14 @@ import { AvaContextSuggestionsService } from '../../../application/llm/ava-conte
 import { HygieneService } from '../../../application/hygiene/hygiene.service.js'
 import { IntegrationLinkSyncService } from '../../../application/integration-link/integration-link-sync.service.js'
 import { HygienePgRepository } from '../../persistence/hygiene.pg.repository.js'
-import { VaccinePgRepository } from '../../persistence/vaccine.pg.repository.js'
 import { AppAccountPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { IntegrationLinkPgRepository } from '../../persistence/integration-link.pg.repository.js'
 import { ExamOrderPgRepository } from '../../persistence/exam-order.pg.repository.js'
 import { AvaConversationPgRepository } from '../../persistence/ava-conversation.pg.repository.js'
 import { AvaSessionContextPgRepository } from '../../persistence/ava-session-context.pg.repository.js'
 import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
+import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
 import { AvaController } from './ava.controller.js'
 import { AvaConversationController } from './ava-conversation.controller.js'
 import { AvaActionController } from './ava-action.controller.js'
@@ -126,7 +127,8 @@ export async function avaRoutes(app: FastifyInstance) {
     sessionContext,
     proposedActions,
   )
-  const controller = new AvaController(avaChat)
+  const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
+  const controller = new AvaController(avaChat, productEvents)
   const conversationController = new AvaConversationController(conversations, sessionContext)
   const actionController = new AvaActionController(proposedActions, contextSuggestions)
 

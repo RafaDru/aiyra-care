@@ -1,8 +1,14 @@
 import type { LlmInternalCostService } from '../llm/llm-internal-cost.service.js'
 import { evaluateOpsAlerts } from '../../domain/ops/ops-alerts.js'
+import {
+  getOpsFeatureCatalog,
+  resolveFeatureKeyFromProductEvent,
+} from '../../domain/ops/ops-feature-catalog.js'
+import { buildFeatureHealthMatrix } from '../../domain/ops/ops-feature-health.js'
+import { buildTimeSeries24h } from '../../domain/ops/ops-time-series.js'
 import type { OpsAlert, OpsMetricsSnapshot } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsMetricsPgRepository } from '../../infrastructure/persistence/ops-metrics.pg.repository.js'
-import { readOpsProbeArtifact } from './ops-probe-artifact.js'
+import { readOpsProbeArtifact, writeOpsMetricsArtifact } from './ops-probe-artifact.js'
 
 export interface OpsMetricsResponse {
   metrics: OpsMetricsSnapshot
@@ -27,6 +33,17 @@ export class OpsMetricsService {
       product5m,
       errorFingerprints24h,
       clientErrorFingerprints24h,
+      productEventUsage24h,
+      clientErrorFeatureCounts24h,
+      syncJobsHourly24h,
+      avaEventsHourly24h,
+      clientErrorsHourly24h,
+      avaTokensHourly24h,
+      workerLastTickAt,
+      stripeWebhookRejected1h,
+      supportOpenCount,
+      supportSubmitted24h,
+      business,
     ] = await Promise.all([
       this.repo.avaTokenPercentiles(24),
       this.repo.avaTokenPercentiles(24 * 7),
@@ -38,7 +55,24 @@ export class OpsMetricsService {
       this.repo.productEventCountsSinceMinutes(5),
       this.repo.errorFingerprints24h(25),
       this.repo.clientErrorFingerprints24h(30),
+      this.repo.productEventUsage24h(),
+      this.repo.clientErrorFeatureCounts24h(),
+      this.repo.syncJobsHourly24h(),
+      this.repo.avaEventsHourly24h(),
+      this.repo.clientErrorsHourly24h(),
+      this.repo.avaTokensHourly24h(),
+      this.repo.opsWorkerLastTickAt(),
+      this.repo.stripeWebhookRejectedCount1h(),
+      this.repo.supportReportsOpenCount(),
+      this.repo.supportReportsSubmitted24h(),
+      this.repo.businessAnalytics(),
     ])
+
+    const featureHealth24h = buildFeatureHealthMatrix(
+      productEventUsage24h,
+      clientErrorFeatureCounts24h,
+      resolveFeatureKeyFromProductEvent,
+    )
 
     let internalLlm: OpsMetricsSnapshot['internalLlm'] | undefined
     if (this.internalCost) {
@@ -55,6 +89,10 @@ export class OpsMetricsService {
         exhausted: indicators.exhausted,
       }
     }
+
+    const workerStaleMinutes = workerLastTickAt
+      ? Math.max(0, (Date.now() - new Date(workerLastTickAt).getTime()) / 60_000)
+      : null
 
     const metrics: OpsMetricsSnapshot = {
       generatedAt: new Date().toISOString(),
@@ -78,7 +116,25 @@ export class OpsMetricsService {
       internalLlm,
       errorFingerprints24h,
       clientErrorFingerprints24h,
-      probe: readOpsProbeArtifact(),
+      featureHealth24h,
+      featureCatalog: getOpsFeatureCatalog(),
+      timeSeries24h: buildTimeSeries24h(
+        syncJobsHourly24h,
+        avaEventsHourly24h,
+        clientErrorsHourly24h,
+        avaTokensHourly24h,
+      ),
+      probe: readOpsProbeArtifact() ?? undefined,
+      ops: {
+        workerLastTickAt,
+        workerStaleMinutes,
+        stripeWebhookRejected1h,
+      },
+      supportReports: {
+        openCount: supportOpenCount,
+        submitted24h: supportSubmitted24h,
+      },
+      business,
     }
 
     return { metrics, alerts: evaluateOpsAlerts(metrics) }

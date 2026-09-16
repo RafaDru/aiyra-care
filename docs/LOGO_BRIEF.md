@@ -1,13 +1,13 @@
 # Aiyra Care — Brief de logomarca
 
-Brief enviado ao **Open Design** (design system `open-health-platform-for-users-and-patients`) para geração e revisão de propostas.
+Brief enviado ao **Open Design** (design system `aiyra-care-platform-for-users-and-patients`) para geração e revisão de propostas.
 
 ## Conceito (direção do produto)
 
 - **Símbolo:** coração formado por círculos de diversos tamanhos, interligados por linhas finas (rede / constelação / dados conectados).
 - **Cor do símbolo:** amarelo AiyraCare `#ECC94B` (token `colorWarning`).
 - **Wordmark:** **Aiyra Care** — tipografia limpa, peso semibold.
-- **Tagline:** **Open Health Platform** — abaixo do nome, caps, tracking amplo, cor secundária `#64748B`.
+- **Tagline:** **AiyraCare Platform** — abaixo do nome, caps, tracking amplo, cor secundária `#64748B`.
 - **Cor de marca principal:** roxo `#6B46C1` (ações, wordmark).
 - **Cor de acento:** rosa `#ED64A6` (links, destaques).
 
@@ -31,16 +31,16 @@ Assets sincronizados em:
 
 ```
 %APPDATA%\Open Design\namespaces\release-stable-win\data\design-systems\
-  open-health-platform-for-users-and-patients\assets\
+  aiyra-care-platform-for-users-and-patients\assets\
 ```
 
-Abra o **Open Design** → design system **Open Health Platform** → aba **Brand** para revisar propostas e pedir variações ao agente de branding.
+Abra o **Open Design** → design system **AiyraCare Platform** → aba **Brand** para revisar propostas e pedir variações ao agente de branding.
 
 Para reprocessar tokens após mudanças no `brand.json`:
 
 ```powershell
 # Quando o CLI `od` estiver disponível no PATH:
-od brand finalize open-health-platform-for-users-and-patients
+od brand finalize aiyra-care-platform-for-users-and-patients
 ```
 
 ## Próximo passo na plataforma

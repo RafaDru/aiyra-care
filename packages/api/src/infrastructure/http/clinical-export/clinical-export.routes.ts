@@ -1,7 +1,10 @@
 import type { FastifyInstance } from 'fastify'
+import { ClinicalExportEmailService } from '../../../application/notifications/clinical-export-email.service.js'
 import { ClinicalExportShareService } from '../../../application/patient/clinical-export-share.service.js'
 import { PatientContextService } from '../../../application/patient/patient-context.service.js'
 import { PatientService } from '../../../application/patient/patient.service.js'
+import { ReferralCodeService } from '../../../application/referral/referral-code.service.js'
+import { ProductEventService } from '../../../application/telemetry/product-event.service.js'
 import { PatientMembershipPgRepository } from '../../persistence/app-account.pg.repository.js'
 import { PatientPgRepository } from '../../persistence/patient.pg.repository.js'
 import { AllergyPgRepository } from '../../persistence/allergy.pg.repository.js'
@@ -16,6 +19,7 @@ import { InsurancePlanService } from '../../../application/insurance-plan/insura
 import { InsurancePlanPgRepository } from '../../persistence/insurance-plan.pg.repository.js'
 import { PlanMembershipPgRepository } from '../../persistence/plan-membership.pg.repository.js'
 import { HealthThreadPgRepository } from '../../persistence/health-thread.pg.repository.js'
+import { ProductEventPgRepository } from '../../persistence/product-event.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
 import { ClinicalExportController } from './clinical-export.controller.js'
 
@@ -40,9 +44,21 @@ export async function clinicalExportRoutes(app: FastifyInstance) {
   const shareService = new ClinicalExportShareService(pgPool, contextService)
   const patientService = new PatientService(new PatientPgRepository(pgPool))
   const memberships = new PatientMembershipPgRepository(pgPool)
-  const controller = new ClinicalExportController(contextService, shareService, patientService, memberships)
+  const referralCodes = new ReferralCodeService(pgPool)
+  const exportEmails = new ClinicalExportEmailService()
+  const productEvents = new ProductEventService(new ProductEventPgRepository(pgPool))
+  const controller = new ClinicalExportController(
+    contextService,
+    shareService,
+    patientService,
+    referralCodes,
+    exportEmails,
+    productEvents,
+    memberships,
+  )
 
   app.get('/clinical-export/share/:token', controller.getSharedExport.bind(controller))
   app.get('/patients/:id/clinical-export', controller.getExport.bind(controller))
   app.post('/patients/:id/clinical-export/shares', controller.createShare.bind(controller))
+  app.post('/patients/:id/clinical-export/shares/email', controller.emailShare.bind(controller))
 }

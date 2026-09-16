@@ -8,7 +8,7 @@
     "emergency": "Emergency",
     "integrations": "Integrations",
     "roadmap": "Roadmap",
-    "ops": "Ops",
+    "ops": "Observability",
     "session": "Sessions",
     "settings": "Settings"
   },
@@ -166,6 +166,14 @@
     },
     "devTools": "Development",
     "devToolsHint": "Product roadmap and development session log (HISTORICO.md).",
+    "notifications": {
+      "title": "Notifications",
+      "syncEscalation": "Alert on repeated sync failures",
+      "syncEscalationHint": "Email or team-configured channel — no clinical data. You can turn this off anytime.",
+      "syncEscalationLegal": "Opt-in per privacy policy — generic messages only, no PHI.",
+      "saved": "Preference saved",
+      "saveError": "Could not save"
+    },
     "accessibility": {
       "title": "Accessibility",
       "hint": "Visual adjustments for easier reading. Icons and labels accompany colors — not color alone.",
@@ -349,6 +357,14 @@
     "acceleratorMarker": "What does this marker mean and how should I interpret the trend?",
     "contextAcceleratorsLabel": "Context shortcuts",
     "proposedActionsLabel": "Confirmed actions",
+    "proposedActionConfirmOk": "Confirm and run",
+    "proposedActionConfirmCancel": "Cancel",
+    "proposedActionConfirmDefaultTitle": "Confirm action?",
+    "proposedActionConfirmSyncTitle": "Start synchronization?",
+    "proposedActionConfirmExportTitle": "Open clinical export?",
+    "proposedActionConfirmConsultTitle": "Open «Bring to appointment»?",
+    "proposedActionConfirmHygieneMergeTitle": "Merge duplicate records?",
+    "proposedActionConfirmHygieneDismissTitle": "Keep records separate?",
     "openIntegrations": "View integrations",
     "platformDocumentsMessage": "Need help using a document from this tab for the pediatrician visit?",
     "platformExportMessage": "Before printing or sharing, want me to highlight what matters most in the record?",

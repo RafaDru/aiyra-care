@@ -7,6 +7,7 @@ import { LegalDocumentModal } from '../components/legal/LegalDocumentModal.js'
 import { api } from '../lib/api.js'
 import type { ComplianceStatus, LegalDocumentKind } from '../lib/api.types.js'
 import { COMPLIANCE_ACCEPT_PATH } from '../lib/legal-paths.js'
+import { trackProductEvent } from '../lib/product-events.js'
 
 const { Title, Text } = Typography
 
@@ -46,7 +47,7 @@ export function ComplianceAcceptPage() {
       const next = await api.compliance.accept()
       setStatus(next)
       if (next.compliant) {
-        // Notifica o RequireCompliance (valida 1x por sessão) sem reload
+        trackProductEvent('compliance_accepted', { step: 'gate' })
         window.dispatchEvent(new Event('aiyracare:compliance-accepted'))
         navigate('/', { replace: true })
       }

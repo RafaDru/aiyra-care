@@ -8,12 +8,14 @@ import {
   fetchGroupHasFailure,
   getSyncPortalProfile,
   isFleuryOtpLoginMessage,
+  isFleuryOtpInAppMessage,
   isInteractiveLoginMessage,
   mainStepStatus,
   resolveSyncStepIndex,
   type SyncablePortalType,
 } from '../../lib/sync-portal-profile.js'
 import { FleuryOtpSyncHint } from './FleuryOtpSyncHint.js'
+import { FleuryOtpSyncInput } from './FleuryOtpSyncInput.js'
 import type { SyncJobOverallStatus, SyncStepDetail } from '../../lib/sync-job-progress.js'
 
 const { Text } = Typography
@@ -52,6 +54,7 @@ export interface SyncJobCardViewProps {
   timeLabel?: string | null
   noveltyText?: string | null
   longRunning?: boolean
+  jobId?: string
 }
 
 export function SyncJobCardView({
@@ -63,21 +66,29 @@ export function SyncJobCardView({
   timeLabel,
   noveltyText,
   longRunning,
+  jobId,
 }: SyncJobCardViewProps) {
   const profile = getSyncPortalProfile(portalType)
   const loginDetail = stepDetails.login
   const loginMessage = loginDetail?.message || message
+  const showFleuryOtpInApp = status === 'running'
+    && jobId
+    && portalType === 'hermes_pardini'
+    && loginDetail?.status === 'running'
+    && isFleuryOtpInAppMessage(loginMessage)
   const showFleuryOtpHint = status === 'running'
     && portalType === 'hermes_pardini'
     && loginDetail?.status === 'running'
+    && !showFleuryOtpInApp
     && isFleuryOtpLoginMessage(loginMessage)
   const showInteractiveLoginHint = status === 'running'
     && loginDetail?.status === 'running'
     && !showFleuryOtpHint
+    && !showFleuryOtpInApp
     && isInteractiveLoginMessage(loginMessage)
 
   const footer = noveltyText || (status !== 'running' ? message : '')
-  const runningMessage = message && !showInteractiveLoginHint && !showFleuryOtpHint && status === 'running' ? message : ''
+  const runningMessage = message && !showInteractiveLoginHint && !showFleuryOtpHint && !showFleuryOtpInApp && status === 'running' ? message : ''
 
   return (
     <Card size="small" style={CARD_MARGIN} styles={{ body: CARD_BODY_STYLE }}>
@@ -105,6 +116,8 @@ export function SyncJobCardView({
         </div>
         <StatusIcon status={status} />
       </div>
+
+      {showFleuryOtpInApp && jobId && <FleuryOtpSyncInput jobId={jobId} />}
 
       {showFleuryOtpHint && <FleuryOtpSyncHint />}
 
@@ -196,6 +209,7 @@ export function SyncJobLiveCard({
       message={message}
       stepDetails={stepDetails}
       longRunning={longRunning}
+      jobId={jobId}
     />
   )
 }

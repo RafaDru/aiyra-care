@@ -57,6 +57,17 @@ describe('AvaProposedActionService.detectProposals', () => {
     expect(proposals.some((p) => p.type === 'integration_sync')).toBe(true)
   })
 
+  it('detects consult visit proposal', async () => {
+    const svc = new AvaProposedActionService(
+      { findAllByPatient: vi.fn(), findById: vi.fn() } as never,
+      { listForAccount: vi.fn(async () => []) } as never,
+      hygieneService as never,
+      syncService as never,
+    )
+    const proposals = await svc.detectProposals('acc', 'pat-1', 'Preciso levar na consulta amanhã')
+    expect(proposals.some((p) => p.type === 'consult_visit_open')).toBe(true)
+  })
+
   it('detects clinical export proposal', async () => {
     const svc = new AvaProposedActionService(
       { findAllByPatient: vi.fn(), findById: vi.fn() } as never,

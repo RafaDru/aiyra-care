@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, Select, App, Alert, Checkbox } from 'antd'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
-import { PlusOutlined, ManOutlined, WomanOutlined, UserSwitchOutlined, FireOutlined, SmileOutlined } from '@ant-design/icons'
+import { PlusOutlined, ManOutlined, WomanOutlined, UserSwitchOutlined, FireOutlined, SmileOutlined, TeamOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
+import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
 import { useAuth } from '../contexts/AuthContext.js'
 
 const { Title, Text } = Typography
@@ -24,6 +25,7 @@ export function Dashboard() {
   const { message } = App.useApp()
   const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
   const [patients, setPatients] = useState<Patient[]>([])
+  const [circleGroups, setCircleGroups] = useState<Array<{ id: string; name: string; patientIds: string[] }>>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
@@ -39,10 +41,19 @@ export function Dashboard() {
 
   const load = () => {
     setLoadError(null)
-    return api.patients.list()
-      .then(setPatients)
+    return Promise.allSettled([api.patients.list(), api.careCircles.dashboard()])
+      .then(([patientsResult, circlesResult]) => {
+        if (patientsResult.status === 'rejected') {
+          setPatients([])
+          setCircleGroups([])
+          throw patientsResult.reason
+        }
+        setPatients(patientsResult.value)
+        setCircleGroups(circlesResult.status === 'fulfilled' ? circlesResult.value : [])
+      })
       .catch((err) => {
         setPatients([])
+        setCircleGroups([])
         setLoadError(err instanceof Error ? err.message : 'Falha ao carregar pacientes')
       })
   }
@@ -84,7 +95,54 @@ export function Dashboard() {
     return acc
   }, {} as Record<string, Patient[]>)
 
+  const groupedByCircle = useMemo(() => {
+    const patientMap = new Map(patients.map((p) => [p.id, p]))
+    const assigned = new Set<string>()
+    const sections = circleGroups
+      .map((g) => {
+        const list = g.patientIds.map((id) => patientMap.get(id)).filter(Boolean) as Patient[]
+        list.forEach((p) => assigned.add(p.id))
+        return list.length ? { id: g.id, name: g.name, patients: list } : null
+      })
+      .filter(Boolean) as Array<{ id: string; name: string; patients: Patient[] }>
+    const other = patients.filter((p) => !assigned.has(p.id))
+    return { sections, other }
+  }, [patients, circleGroups])
+
+  const renderPatientGrid = (list: Patient[]) => (
+    <Row gutter={[20, 20]}>
+      {list.map((p) => (
+        <Col xs={24} sm={12} lg={8} xl={6} key={p.id}>
+          <PatientCard patient={p} onClick={() => navigate(`/patients/${p.id}`)} />
+        </Col>
+      ))}
+    </Row>
+  )
+
+  const renderAgeSections = (list: Patient[]) => {
+    const byAge = ['adults', 'adolescents', 'children'].reduce((acc, cat) => {
+      const rows = list.filter((p) => p.ageCategory === cat)
+      if (rows.length) acc[cat] = rows
+      return acc
+    }, {} as Record<string, Patient[]>)
+    return Object.entries(byAge).map(([cat, rows]) => {
+      const cfg = CATEGORY_CONFIG[cat]
+      return (
+        <div key={cat} style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{ fontSize: 18, color: cfg.color }}>{cfg.icon}</span>
+            <Title level={5} style={{ margin: 0, color: cfg.color }}>{cfg.label}</Title>
+            <Tag color={cfg.color}>{rows.length}</Tag>
+          </div>
+          {renderPatientGrid(rows)}
+        </div>
+      )
+    })
+  }
+
   if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
+
+  const useCircleLayout = groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0
 
   return (
     <div>
@@ -92,6 +150,8 @@ export function Dashboard() {
         title={t('patient.title')}
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
+
+      {patients.length > 0 && <DashboardDayToDaySection />}
 
       {loadError && (
         <Alert
@@ -117,6 +177,28 @@ export function Dashboard() {
           }
           style={{ marginTop: 80 }}
         />
+      ) : useCircleLayout ? (
+        <>
+          {groupedByCircle.sections.map((section) => (
+            <div key={section.id} style={{ marginBottom: 40 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <TeamOutlined style={{ fontSize: 22, color: '#4F46E5' }} />
+                <Title level={4} style={{ margin: 0 }}>{section.name}</Title>
+                <Tag color="geekblue">{section.patients.length}</Tag>
+              </div>
+              {renderAgeSections(section.patients)}
+            </div>
+          ))}
+          {groupedByCircle.other.length > 0 && (
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <Title level={4} style={{ margin: 0 }}>{t('family.circles.otherProfiles')}</Title>
+                <Tag>{groupedByCircle.other.length}</Tag>
+              </div>
+              {renderAgeSections(groupedByCircle.other)}
+            </div>
+          )}
+        </>
       ) : (
         Object.entries(grouped).map(([cat, list]) => {
           const cfg = CATEGORY_CONFIG[cat]
@@ -127,13 +209,7 @@ export function Dashboard() {
                 <Title level={4} style={{ margin: 0, color: cfg.color }}>{cfg.label}</Title>
                 <Tag color={cfg.color}>{list.length}</Tag>
               </div>
-              <Row gutter={[20, 20]}>
-                {list.map((p) => (
-                  <Col xs={24} sm={12} lg={8} xl={6} key={p.id}>
-                    <PatientCard patient={p} onClick={() => navigate(`/patients/${p.id}`)} />
-                  </Col>
-                ))}
-              </Row>
+              {renderPatientGrid(list)}
             </div>
           )
         })

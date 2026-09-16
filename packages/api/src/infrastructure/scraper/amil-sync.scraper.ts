@@ -63,6 +63,11 @@ export interface AmilScrapeOpts {
   interactiveLogin?: boolean
   /** Início do período para PostTokens (guias). Default: 12 meses. */
   guidesPeriodStart?: Date
+  /** Período BuscarDemonstrativoUtilizacao (atendimentos). */
+  utilizationPeriodStart?: Date
+  utilizationPeriodEnd?: Date
+  /** Filtra sync a um beneficiário (marca ótica). */
+  marcaOticaFilter?: string
   /** Sync silencioso — pula fetch de plano/carências. */
   incremental?: boolean
 }
@@ -892,6 +897,7 @@ export class AmilSyncScraper {
 
     for (const b of beneficiaries) {
       const marcaOtica = beneficiaryMarca(b) || holderMarca
+      if (opts?.marcaOticaFilter && marcaOtica !== opts.marcaOticaFilter) continue
       const snapshot = mapBeneficiarySnapshot(b)
       const label = snapshot.name.split(' ')[0] || 'beneficiário'
 
@@ -933,7 +939,10 @@ export class AmilSyncScraper {
       })
 
       emit('fetch-utilizacao', `Utilização — ${label}...`, 'running')
-      const usageItems = await fetchAmilUtilizacao(request, token, marcaOtica, API)
+      const usageItems = await fetchAmilUtilizacao(request, token, marcaOtica, API, {
+        periodStart: opts?.utilizationPeriodStart,
+        periodEnd: opts?.utilizationPeriodEnd,
+      })
 
       beneficiaryData.push({
         beneficiary: snapshot,

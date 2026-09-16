@@ -1,0 +1,277 @@
+import {
+  resolveDevelopmentSupportAutomationWebhookKey,
+  resolveDevelopmentSupportAutomationWebhookUrl,
+} from '../../domain/ops/cursor-automation-env.js'
+import {
+  tier1PlaybookId,
+  type InvestigationTier,
+} from '../../domain/ops/investigator-tier.js'
+import {
+  buildOpsConsoleUrl,
+  formatInvestigationIdShort,
+} from '../../domain/ops/investigation-correlation.js'
+import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
+import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
+import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
+
+const CATEGORY_LABEL: Record<string, string> = {
+  technical_bug: 'Bug técnico',
+  incorrect_data: 'Dado incorreto',
+  ux_confusion: 'Confusão de UX',
+  other: 'Outro',
+}
+
+export interface SupportReportDispatchPayload {
+  type: 'support_report'
+  /** Chave canônica — `ops_analysis_queue.id` quando enfileirado */
+  investigationId?: string
+  reportId: string
+  category: string
+  route: string | null
+  consentTechnical: boolean
+  consentProfileAccess: boolean
+  topFingerprint: string | null
+  dashboardUrl: string
+  environment: InvestigatorEnvironmentContext
+  submittedAt: string
+  text: string
+  toast: { title: string; body: string; icon: 'info' | 'warning' }
+  investigation?: { tier: 0 | 1; playbook: string; trigger: 'auto' | 'manual' }
+  analysisQueue?: { id: string; callbackUrl: string; lane: 'development_support' | 'sre_support' }
+  operatorNotes?: string | null
+}
+
+export type SupportInvestigatorDispatchResult =
+  | { outcome: 'sent' }
+  | { outcome: 'skipped'; reason: 'webhook_not_configured' | 'webhook_key_missing' | 'pre_screen' }
+  | { outcome: 'failed'; error: string }
+
+export function resolveSupportInvestigatorWebhookUrl(): string | undefined {
+  return resolveDevelopmentSupportAutomationWebhookUrl()
+}
+
+export function resolveSupportInvestigatorWebhookKey(): string | undefined {
+  return resolveDevelopmentSupportAutomationWebhookKey()
+}
+
+export function resolveSupportReportWebhookUrl(): string | undefined {
+  const dedicated = process.env.SUPPORT_REPORT_WEBHOOK_URL?.trim()
+  if (dedicated) return dedicated
+  return process.env.OPS_ALERT_WEBHOOK_URL?.trim() || undefined
+}
+
+export function resolveSupportReportOpsConsoleBaseUrl(): string {
+  const explicit = process.env.OPS_ALERT_DASHBOARD_URL?.trim()
+    || process.env.OPS_CONSOLE_PUBLIC_URL?.trim()
+  if (explicit) {
+    let url = explicit.replace(/\/$/, '').replace(/\?.*$/, '')
+    if (/:5173\/ops$/.test(url)) {
+      const host = process.env.OPS_CONSOLE_HOST?.trim() || '127.0.0.1'
+      const port = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
+      url = `http://${host}:${port}`
+    }
+    return url
+  }
+  const port = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
+  return `http://127.0.0.1:${port}`
+}
+
+export function resolveSupportReportOpsConsoleUrl(options?: {
+  investigationId?: string
+  reportId?: string
+}): string {
+  return buildOpsConsoleUrl(resolveSupportReportOpsConsoleBaseUrl(), {
+    tab: 'issues',
+    investigationId: options?.investigationId,
+    reportId: options?.reportId,
+  })
+}
+
+function categoryLabel(category: string): string {
+  return CATEGORY_LABEL[category] ?? category
+}
+
+function buildToastBody(
+  category: string,
+  route: string | null,
+  topFingerprint: string | null,
+  investigationId?: string,
+): string {
+  const lines = [categoryLabel(category)]
+  if (route) lines.push(route)
+  if (topFingerprint) lines.push(`Erro: ${topFingerprint}`)
+  if (investigationId) lines.push(`Investigation: ${investigationId}`)
+  lines.push('Console → aba Issues')
+  return lines.join('\n')
+}
+
+function extractTopFingerprint(diagnosticContext: Record<string, unknown>): string | null {
+  const errors = diagnosticContext.recentClientErrors
+  if (!Array.isArray(errors) || !errors.length) return null
+  const first = errors[0] as Record<string, unknown> | undefined
+  const fp = first?.fingerprint
+  return typeof fp === 'string' && fp.length ? fp.slice(0, 32) : null
+}
+
+export function buildSupportReportDispatchPayload(
+  record: SupportReportRecord,
+  options?: {
+    operatorNotes?: string | null
+    trigger?: 'auto' | 'manual'
+    investigationId?: string
+  },
+): SupportReportDispatchPayload {
+  const topFingerprint = record.consentTechnical
+    ? extractTopFingerprint(record.diagnosticContext)
+    : null
+  const investigationId = options?.investigationId
+  const dashboardUrl = resolveSupportReportOpsConsoleUrl({
+    investigationId,
+    reportId: record.id,
+  })
+  const toastBody = buildToastBody(record.category, record.route, topFingerprint, investigationId)
+  const label = categoryLabel(record.category)
+  const routeSuffix = record.route ? ` — ${record.route}` : ''
+  const invSuffix = investigationId ? ` [inv:${formatInvestigationIdShort(investigationId)}]` : ''
+
+  return {
+    type: 'support_report',
+    ...(investigationId ? { investigationId } : {}),
+    reportId: record.id,
+    category: record.category,
+    route: record.route,
+    consentTechnical: record.consentTechnical,
+    consentProfileAccess: record.consentProfileAccess,
+    topFingerprint,
+    dashboardUrl,
+    environment: resolveInvestigatorEnvironmentContext(),
+    submittedAt: record.createdAt.toISOString(),
+    text: `Novo chamado: ${label}${routeSuffix}${invSuffix}`,
+    toast: {
+      title: '[Suporte] Novo chamado',
+      body: `[?] Reporte manual\n${toastBody}`,
+      icon: 'info',
+    },
+    ...(options?.operatorNotes
+      ? { operatorNotes: options.operatorNotes.slice(0, 2000) }
+      : {}),
+  }
+}
+
+export async function postSupportReportWebhook(
+  url: string,
+  payload: SupportReportDispatchPayload,
+  options?: { bearerKey?: string },
+): Promise<void> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (options?.bearerKey) {
+    headers.Authorization = `Bearer ${options.bearerKey}`
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    throw new Error(`support_report webhook failed (${url}): HTTP ${res.status}`)
+  }
+}
+
+export async function dispatchSupportReport(
+  record: SupportReportRecord,
+  options?: { investigationId?: string },
+): Promise<boolean> {
+  const webhook = resolveSupportReportWebhookUrl()
+  if (!webhook) return false
+  const payload = buildSupportReportDispatchPayload(record, {
+    investigationId: options?.investigationId,
+  })
+  await postSupportReportWebhook(webhook, payload)
+  return true
+}
+
+export async function dispatchSupportReportInvestigator(
+  record: SupportReportRecord,
+  options?: {
+    operatorNotes?: string | null
+    trigger?: 'auto' | 'manual'
+    analysisQueue?: { id: string; callbackUrl: string }
+    investigationTier?: InvestigationTier
+  },
+): Promise<SupportInvestigatorDispatchResult> {
+  const webhook = resolveSupportInvestigatorWebhookUrl()
+  if (!webhook) {
+    return { outcome: 'skipped', reason: 'webhook_not_configured' }
+  }
+  const bearerKey = resolveSupportInvestigatorWebhookKey()
+  if (!bearerKey) {
+    return { outcome: 'skipped', reason: 'webhook_key_missing' }
+  }
+  const trigger = options?.trigger ?? 'auto'
+  const tier = options?.investigationTier ?? 0
+  const investigationId = options?.analysisQueue?.id
+  const payload: SupportReportDispatchPayload = {
+    ...buildSupportReportDispatchPayload(record, {
+      operatorNotes: options?.operatorNotes ?? record.operatorNotes,
+      trigger,
+      investigationId,
+    }),
+    investigation: {
+      tier,
+      playbook: tier === 1 ? tier1PlaybookId('development_support') : 'support-report-tier0',
+      trigger,
+    },
+    ...(options?.analysisQueue
+      ? {
+          investigationId: options.analysisQueue.id,
+          analysisQueue: {
+            id: options.analysisQueue.id,
+            callbackUrl: options.analysisQueue.callbackUrl,
+            lane: 'development_support',
+          },
+        }
+      : {}),
+  }
+  try {
+    await postSupportReportWebhook(webhook, payload, { bearerKey })
+    return { outcome: 'sent' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'investigator_dispatch_failed'
+    return { outcome: 'failed', error: message }
+  }
+}
+
+export function analysisStatusFromInvestigatorResult(
+  result: SupportInvestigatorDispatchResult,
+): 'none' | 'pending' | 'in_progress' | 'failed' {
+  if (result.outcome === 'sent') return 'in_progress'
+  if (result.outcome === 'skipped') return 'none'
+  return 'failed'
+}
+
+export function analysisErrorFromInvestigatorResult(
+  result: SupportInvestigatorDispatchResult,
+): string | null {
+  if (result.outcome === 'failed') return result.error
+  if (result.outcome === 'skipped') {
+    return result.reason === 'webhook_not_configured'
+      ? 'CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL não configurado'
+      : 'CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
+  }
+  return null
+}
+
+export async function dispatchSupportReportNotifications(
+  record: SupportReportRecord,
+): Promise<{ notifier: boolean; investigator: SupportInvestigatorDispatchResult }> {
+  const [notifier, investigator] = await Promise.allSettled([
+    dispatchSupportReport(record),
+    dispatchSupportReportInvestigator(record, { trigger: 'auto' }),
+  ])
+  return {
+    notifier: notifier.status === 'fulfilled' && notifier.value,
+    investigator: investigator.status === 'fulfilled'
+      ? investigator.value
+      : { outcome: 'failed', error: 'investigator_dispatch_failed' },
+  }
+}

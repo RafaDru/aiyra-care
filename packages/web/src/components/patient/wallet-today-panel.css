@@ -1,0 +1,21 @@
+.wallet-today-panel {
+  border: 1px solid var(--border, #f0f0f0);
+  background: var(--card-bg, #fff);
+}
+
+.wallet-today-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.wallet-today-panel__list .ant-list-item {
+  padding-inline: 0;
+}
+
+.wallet-today-panel__list .ant-list-item-meta-title {
+  margin-bottom: 0 !important;
+}

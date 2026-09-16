@@ -20,6 +20,8 @@ export interface SyncNoveltySummary {
   newMedicalRecords?: number
 }
 
+import type { PortalAuthFailureKind } from '../../domain/portal-auth/portal-auth-failure.js'
+
 export interface SyncJobProps {
   id: string
   integrationLinkId: string
@@ -32,6 +34,7 @@ export interface SyncJobProps {
   result: SyncResult | null
   novelty: SyncNoveltySummary | null
   error: string | null
+  failureKind: PortalAuthFailureKind | null
   startedAt: Date
   finishedAt: Date | null
   createdAt: Date
@@ -60,6 +63,7 @@ export class SyncJob {
       result: null,
       novelty: null,
       error: null,
+      failureKind: null,
       startedAt: now,
       finishedAt: null,
       createdAt: now,

@@ -4,7 +4,7 @@ Plataforma de cuidado infantil com histórico médico centralizado (prontuário 
 
 ## Repositório
 
-https://github.com/RafaDru/open-health
+https://github.com/RafaDru/aiyra-care
 
 ## Estrutura
 
@@ -39,7 +39,7 @@ npm install
 - Web: http://localhost:5173  
 - API: http://127.0.0.1:3010/health  
 
-Requer PostgreSQL local (`openhealth`) e variáveis em `.env` (ver `.env.example`).
+Requer PostgreSQL local (`aiyracare`) e variáveis em `.env` (ver `.env.example`).
 
 ## Documentação para continuidade (IA / dev)
 

@@ -6,7 +6,11 @@
 import Groq from 'groq-sdk'
 import type { OcrProvider, OcrResult } from '../../domain/document/ocr-provider.js'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+function groqClient(): Groq {
+  const apiKey = process.env.GROQ_API_KEY?.trim()
+  if (!apiKey) throw new Error('GROQ_API_KEY não configurada')
+  return new Groq({ apiKey })
+}
 
 const supportedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp']
 
@@ -19,10 +23,7 @@ export class GroqOcrProvider implements OcrProvider {
     if (!supportedMimeTypes.includes(mimeType)) {
       throw new Error(`Formato não suportado para OCR via LLM: ${mimeType}`)
     }
-    if (!process.env.GROQ_API_KEY) {
-      throw new Error('GROQ_API_KEY não configurada')
-    }
-
+    const groq = groqClient()
     const base64 = buffer.toString('base64')
     const dataUrl = `data:${mimeType};base64,${base64}`
 

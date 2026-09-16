@@ -149,7 +149,17 @@ export function createApiLoggerConfig(): {
     hooks: {
       logMethod(args, method) {
         if (args.length > 0 && typeof args[0] === 'object' && args[0] !== null) {
-          args[0] = sanitizeLogObject(args[0])
+          if (args[0] instanceof Error) {
+            const err = args[0]
+            args[0] = {
+              type: err.name,
+              message: err.message,
+              code: (err as NodeJS.ErrnoException).code,
+              stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+            }
+          } else {
+            args[0] = sanitizeLogObject(args[0])
+          }
         }
         method.apply(this, args)
       },

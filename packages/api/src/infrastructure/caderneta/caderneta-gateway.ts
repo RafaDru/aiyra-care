@@ -1,4 +1,3 @@
-import { chromium } from 'playwright'
 import type {
   ScrapedClinicalRecord,
   ScrapedDevelopmentMilestone,
@@ -8,13 +7,11 @@ import type {
   ScraperResult,
 } from '../../domain/scraper/scraper-types.js'
 import type { ScraperProgress } from '../../domain/scraper/health-portal-scraper.js'
+import type { GovBrTokenSession } from '../govbr/govbr-token-session.js'
 
 const GERENCIADOR_BASE = 'https://gerenciador-superapp-api.saude.gov.br'
-const TOKEN_URL = '**/govbr-proxy.saude.gov.br/api/token/gerar*'
 const LOGIN_URL =
-  'https://sso.acesso.gov.br/authorize?response_type=code&client_id=conectesus-app.saude.gov.br&scope=openid+email+phone+profile+govbr_confiabilidades&redirect_uri=https://cadernetadacrianca.saude.gov.br/login&nonce=openhealth-caderneta&state=openhealth-caderneta'
-const LOGIN_TIMEOUT = 5 * 60 * 1000
-const EXPIRY_MARGIN_MS = 60_000
+  'https://sso.acesso.gov.br/authorize?response_type=code&client_id=conectesus-app.saude.gov.br&scope=openid+email+phone+profile+govbr_confiabilidades&redirect_uri=https://cadernetadacrianca.saude.gov.br/login&nonce=aiyracare-caderneta&state=aiyracare-caderneta'
 
 type JsonRecord = Record<string, unknown>
 
@@ -115,68 +112,28 @@ function mapRndsImmunizationRow(row: JsonRecord, childCpf: string): {
 }
 
 export class CadernetaGateway {
-  private accessToken = ''
-  private tokenExpiresAt = 0
+  constructor(private readonly tokenSession: GovBrTokenSession) {}
 
-  private isExpired(): boolean {
-    return Date.now() + EXPIRY_MARGIN_MS >= this.tokenExpiresAt
+  private browserConfig() {
+    return {
+      startUrl: LOGIN_URL,
+      navigateMessage: 'Abrindo Caderneta da Criança (gov.br)...',
+    }
   }
 
   async loginViaBrowser(onProgress?: (p: ScraperProgress) => void): Promise<string> {
-    const emit = (step: string, message: string, status: ScraperProgress['status']) =>
-      onProgress?.({ step, message, status })
-
-    const browser = await chromium.launch({
-      headless: false,
-      channel: 'chrome',
-      args: ['--disable-blink-features=AutomationControlled'],
-    })
-    const context = await browser.newContext({
-      locale: 'pt-BR',
-      timezoneId: 'America/Sao_Paulo',
-    })
-    await context.addInitScript(() => {
-      Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false })
-    })
-    const page = await context.newPage()
-
-    try {
-      const tokenPromise = page.waitForResponse(
-        (r) => r.url().includes('govbr-proxy.saude.gov.br/api/token/gerar') && r.status() === 200,
-        { timeout: LOGIN_TIMEOUT },
-      )
-
-      emit('navigate', 'Abrindo Caderneta da Criança (gov.br)...', 'running')
-      await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded', timeout: 120_000 })
-
-      if (!page.url().includes('sso.acesso.gov.br')) {
-        emit('login', 'Faça login no gov.br na janela aberta. Aguardando...', 'running')
-      } else {
-        emit('login', 'Faça login no gov.br na janela aberta. Aguardando...', 'running')
-      }
-
-      const response = await tokenPromise
-      const body = await response.json() as { access_token?: string; expires_in?: number }
-      if (!body.access_token) throw new Error('Token gov.br não retornado')
-      this.accessToken = body.access_token
-      this.tokenExpiresAt = Date.now() + (body.expires_in || 3600) * 1000
-
-      emit('login', 'Login detectado! Coletando família e vacinas...', 'success')
-      return this.accessToken
-    } finally {
-      await browser.close()
-    }
+    await this.tokenSession.ensureToken(onProgress, this.browserConfig())
+    onProgress?.({ step: 'login', message: 'Login detectado! Coletando família e vacinas...', status: 'success' })
+    return this.tokenSession.getAccessToken()
   }
 
   private async ensureToken(onProgress?: (p: ScraperProgress) => void): Promise<void> {
-    if (!this.accessToken || this.isExpired()) {
-      await this.loginViaBrowser(onProgress)
-    }
+    await this.tokenSession.ensureToken(onProgress, this.browserConfig())
   }
 
   private childHeaders(childCpf: string): Record<string, string> {
     return {
-      Authorization: `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.tokenSession.getAccessToken()}`,
       'Content-Type': 'application/json',
       'X-Cpf-crianca': childCpf.replace(/\D/g, ''),
     }
@@ -185,7 +142,7 @@ export class CadernetaGateway {
   private async gerenciadorGet(path: string, childCpf?: string, onProgress?: (p: ScraperProgress) => void): Promise<unknown> {
     await this.ensureToken(onProgress)
     const headers: Record<string, string> = {
-      Authorization: `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.tokenSession.getAccessToken()}`,
       Accept: 'application/json',
     }
     if (childCpf) headers['X-Cpf-crianca'] = childCpf.replace(/\D/g, '')
@@ -193,10 +150,9 @@ export class CadernetaGateway {
     const url = `${GERENCIADOR_BASE}${path}`
     const res = await fetch(url, { headers })
     if (res.status === 401) {
-      this.accessToken = ''
-      this.tokenExpiresAt = 0
+      this.tokenSession.clear()
       await this.ensureToken(onProgress)
-      headers.Authorization = `Bearer ${this.accessToken}`
+      headers.Authorization = `Bearer ${this.tokenSession.getAccessToken()}`
       const retry = await fetch(url, { headers })
       if (!retry.ok) throw new Error(`Caderneta API ${retry.status}: ${await retry.text().catch(() => '')}`)
       return retry.json()
@@ -206,8 +162,9 @@ export class CadernetaGateway {
   }
 
   getResponsibleCpf(): string | undefined {
-    if (!this.accessToken) return undefined
-    const payload = decodeJwtPayload(this.accessToken)
+    const token = this.tokenSession.getAccessToken()
+    if (!token) return undefined
+    const payload = decodeJwtPayload(token)
     const sub = typeof payload.sub === 'string' ? payload.sub.replace(/\D/g, '') : ''
     return sub.length === 11 ? sub : undefined
   }

@@ -1,0 +1,65 @@
+# Agent bootstrap — índice obrigatório
+
+> **Propósito:** sobreviver à **compactação de contexto**. Texto curto re-injetado via hook `sessionStart` e `postToolUse` (pós-compact).  
+> **Não duplicar** conteúdo longo aqui — só o **índice de verificação**.
+
+## Ordem de leitura (antes de código de produto)
+
+| # | Recurso | Para quê |
+|---|---------|----------|
+| 1 | `GET /project/context` ou `docs/project-context.json` | Estado do app, domínios, decisões, features |
+| 2 | `docs/features/index.json` → card em `docs/features/<id>.md` | **Para quê** existe a capacidade |
+| 3 | `docs/roadmap.json` (item/épico relevante) | Status de entrega |
+| 4 | `docs/DOCUMENTATION_SYSTEM.md` | Ritual ao entregar |
+| 5 | Doc de domínio linkado na feature (`seeAlso`) | Profundidade técnica |
+| — | `docs/FOCO_ATUAL.md` | Prioridades do momento + status CI (tracking entre sessões) |
+
+## Ritual ao entregar (obrigatório)
+
+1. `docs/roadmap.json` — `status` + `detail`
+2. `docs/features/<id>.md` + entrada em `docs/features/index.json`
+3. Decisão relevante → `docs/HISTORICO.md`
+4. Afeta usuário → `docs/help/<tópico>.md`
+5. Issue/PR → label `roadmap:<item-id>`
+6. **Suite QA** → `docs/testing/suites/<id>.md` + `npm run qa:run` + relatório PASS/FAIL (hook `stop` se faltar)
+
+## Ritual QA (automático — Rafael não precisa pedir)
+
+Ver `.cursor/rules/qa-delivery.mdc` e `docs/testing/QA_PROCESS.md`.
+
+## Acordos de trabalho (sempre válidos)
+
+| Doc | Conteúdo |
+|-----|----------|
+| `AGENTS.md` | Stack, comandos, arquitetura, hooks |
+| `docs/CURSOR_AGENT_OPS.md` | Guard-rails, skills tier, hooks |
+| `docs/CURSOR_WORKSPACE.md` | Workspace canônico + Projects / My Machines local |
+| `docs/DELIVERY_PIPELINE.md` | Gates `promotion:gates`, preview |
+| `docs/testing/QA_PROCESS.md` | QA manual + paralelo + gate `main` |
+| `docs/FEATURE_REVIEW_FRAMEWORK.md` | Tier 0–3 antes de merge |
+
+## API rápida
+
+- Roadmap UI: `GET /roadmap`
+- Contexto LLM: `GET /project/context` (inclui catálogo `features`)
+- Hub docs: `docs/README.md`
+
+## Sessão «Aiyra: Ops» (observabilidade)
+
+| Doc | Uso |
+|-----|-----|
+| `docs/ops/README.md` | Hub — ler antes de ops |
+| `docs/ops/CONSOLE.md` | Console `:3013` |
+| `docs/ops/TELEMETRY.md` | Queries / LGPD |
+| `docs/ops/SUPPORT_REPORTS.md` | Migration 061 |
+| `docs/ops/INVESTIGATION_CORRELATION.md` | Chave `investigationId` (console ↔ Automations) |
+| `docs/ops/AUTOMATIONS_LANES.md` | Lanes AiCare + pilha Issues |
+
+Regra: `.cursor/rules/aiyra-ops-session.mdc`
+
+## Não fazer
+
+- Inferir “para quê” só pelo código — ler feature card primeiro.
+- Feature card por componente React — uma card por **capacidade**.
+- GitHub Project como fonte de verdade — espelho com label `roadmap:<id>`.
+- Encerrar entrega de produto sem `npm run qa:run` — hook `stop` reabre o turno.

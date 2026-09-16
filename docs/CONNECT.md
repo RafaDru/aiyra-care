@@ -32,7 +32,7 @@ Connect extrai, normaliza e entrega **payload canônico**. O Core importa no dom
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Pacote `@open-health/connect` (Fase 1)
+## Pacote `@aiyra-care/connect` (Fase 1)
 
 | Módulo | Conteúdo |
 |--------|----------|
@@ -49,7 +49,7 @@ Scrapers **ainda** em `packages/api` — migração incremental.
 | `payer` | Unimed BH, Amil, Bradesco | autorizações, carteira, cobertura |
 | `provider` | Mater Dei, laboratórios | exames, atendimentos |
 | `pharmacy` | (futuro) | dispensação, receitas |
-| `government` | ConecteSUS, Caderneta | imunizações, import manual |
+| `government` | ConecteSUS, Caderneta | imunizações, import guiado gov.br |
 | `identity` | gov.br | fluxos interativos |
 
 ## Auth profiles
@@ -60,9 +60,18 @@ Scrapers **ainda** em `packages/api` — migração incremental.
 | `session_basic` | Unimed, Mater Dei (email/senha) |
 | `session_token` | Amil JWT `userToken` |
 | `interactive_govbr` | ConecteSUS, Caderneta |
+| `interactive_otp` | Grupo Fleury Precision Care (SMS/e-mail/WhatsApp) |
 | `api_key` | APIs REST futuras |
 
-Credenciais ficam no **Connect vault**; o Core guarda só `connectionId` + `patientId` em `integration_links` (evolução da tabela atual).
+Credenciais ficam no **Connect vault** (evolução); o Core guarda hoje:
+
+| Armazenamento | Quem | Uso |
+|---------------|------|-----|
+| `integration_links` | paciente × portal | email/CPF + senha cifrada + `encrypted_session_token` (Unimed, Amil, Mater Dei, Hermes) + `auth_attention` após falha de sync |
+| `govbr_sessions` | conta (`account_id`) | token FHIR `govbr-proxy` após login interativo — ConecteSUS + Caderneta (migration **053**) |
+| `calendar_connections` | conta × paciente | OAuth Google/Microsoft |
+
+Gov.br **não** usa `integration_links` — identidade do responsável, não credencial de operadora.
 
 ## Contrato HTTP (Fase 3 — microserviço)
 
@@ -175,9 +184,23 @@ Hermes Pardini **não** usa APIs isoladas — o portal de resultados é **Precis
 | Controller persiste exames | Extractor → batch → importer |
 | `packages/agents/integracao` (Python) | Avaliar merge ou agente dentro de Connect |
 
+## SUS / gov.br (Core, Fase 1)
+
+- Import guiado: `POST /scraper/conectesus` | `POST /scraper/caderneta` → `PublicHealthScrapeService`
+- Sessão: `GovBrSessionService` + `govbr_sessions`; status `GET /account/govbr-session`
+- Gateways: `ConecteSUSGateway`, `CadernetaGateway` + `GovBrTokenSession` (browser só se token expirado)
+- Ver `docs/SUS_CONECTESUS.md`
+
+## Falha de autenticação (portais com vínculo)
+
+- Domínio: `packages/api/src/domain/portal-auth/portal-auth-failure.ts`
+- Aplicação: `portal-sync-auth.helper.ts` → `auth_attention` no link + `failure_kind` no job
+- UI: Integrações — “Atualize a senha” vs “Sincronize novamente”
+
 ## Referências no código
 
 - Registry: `packages/connect/src/registry/connectors.ts`
 - Port Core: `packages/api/src/domain/connect/` (reexport)
 - Import pipeline: `packages/api/src/application/import-lineage/`
+- Gov.br: `packages/api/src/application/govbr/`, `infrastructure/govbr/govbr-token-session.ts`
 - UI sync steps: `packages/api/src/domain/scraper/sync-portal-profile.ts` (migrar perfis UI ao Connect depois)

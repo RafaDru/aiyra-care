@@ -14,7 +14,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 config({ path: resolve(root, '.env') })
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const cacheRepo = new SemanticCatalogCachePgRepository(pool)
@@ -51,7 +51,10 @@ const service = new UnifiedSemanticClassifierService<string, string>({
     if (!canSpend) return null
 
     try {
-      const completion = await router.completeJson(messages, 'premium', { allowLlmDataSharing: true })
+      const completion = await router.completeJson(messages, 'premium', {
+        allowLlmDataSharing: true,
+        opencodeSessionId: 'semantic-classification-smoke',
+      })
       await costService.recordCall({
         provider: completion.provider,
         model: completion.model,

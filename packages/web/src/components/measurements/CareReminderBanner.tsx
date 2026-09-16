@@ -11,9 +11,10 @@ interface Props {
   patientId: string
   onMeasure?: (reminder: CareReminderRow) => void
   onMedication?: (reminder: CareReminderRow) => void
+  onSusReimport?: (reminder: CareReminderRow) => void
 }
 
-export function CareReminderBanner({ patientId, onMeasure, onMedication }: Props) {
+export function CareReminderBanner({ patientId, onMeasure, onMedication, onSusReimport }: Props) {
   const { t } = useTranslation()
   const [pending, setPending] = useState<CareReminderRow[]>([])
   const [sessionHidden, setSessionHidden] = useState<Set<string>>(() => new Set())
@@ -73,11 +74,16 @@ export function CareReminderBanner({ patientId, onMeasure, onMedication }: Props
                 size="small"
                 type="primary"
                 onClick={() => {
-                  if (r.reminderKind === 'medication') onMedication?.(r)
+                  if (r.reminderKind === 'sus_reimport') onSusReimport?.(r)
+                  else if (r.reminderKind === 'medication') onMedication?.(r)
                   else onMeasure?.(r)
                 }}
               >
-                {r.reminderKind === 'medication' ? t('measurement.logMedication') : t('measurement.logVitals')}
+                {r.reminderKind === 'sus_reimport'
+                  ? 'Reimportar SUS'
+                  : r.reminderKind === 'medication'
+                    ? t('measurement.logMedication')
+                    : t('measurement.logVitals')}
               </Button>
               <Button
                 size="small"

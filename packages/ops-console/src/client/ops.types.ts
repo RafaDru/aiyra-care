@@ -1,0 +1,468 @@
+export type OpsAlertSeverity = 'warning' | 'critical'
+
+export interface OpsAnalysisQueueItem {
+  id: string
+  sourceType: 'support_report' | 'ops_alert'
+  sourceId: string
+  lane: 'development_support' | 'sre_support'
+  status: 'queued' | 'investigating' | 'fix_proposed' | 'completed' | 'dismissed' | 'failed'
+  priority: 'low' | 'normal' | 'high' | 'critical'
+  deploymentTier: string
+  title: string
+  errorSummary: string | null
+  contextSnapshot: Record<string, unknown>
+  remediationSummary: string | null
+  analysisArtifactPath: string | null
+  prUrl: string | null
+  analysisLastError: string | null
+  operatorNotes: string | null
+  investigationTrigger: 'auto' | 'manual' | null
+  queuedAt: string
+  investigationRequestedAt: string | null
+  completedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface OpsAnalysisAttentionCounts {
+  queued: number
+  investigating: number
+  fixProposed: number
+  failed: number
+  totalAttention: number
+}
+
+export interface OpsAlertAnalysisRecord {
+  alertId: string
+  analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'
+  operatorNotes: string | null
+  analysisSummary: string | null
+  analysisArtifactPath: string | null
+  analysisRequestedAt: string | null
+  analysisCompletedAt: string | null
+  analysisLastError: string | null
+  lastSeverity: string | null
+  lastCategory: string | null
+  lastMessage: string | null
+}
+
+export interface OpsAlert {
+  id: string
+  severity: OpsAlertSeverity
+  category: 'sync' | 'llm' | 'product' | 'infra'
+  message: string
+  details?: Record<string, unknown>
+}
+
+export interface OpsProbeSnapshot {
+  checkedAt: string
+  api: { ok: boolean; latencyMs: number; status?: number; error?: string }
+  postgres: { ok: boolean; latencyMs: number; error?: string }
+  neo4j?: { ok: boolean; latencyMs: number; error?: string }
+}
+
+export interface AvaTokenPercentiles {
+  windowHours: number
+  turns: number
+  tokensTotalSum: number
+  tokensInSum: number
+  tokensOutSum: number
+  p50Tokens: number | null
+  p95Tokens: number | null
+}
+
+export interface AvaProviderMixRow {
+  provider: string
+  model: string
+  turns: number
+  tokensTotal: number
+}
+
+export interface ClientErrorFingerprintRow {
+  fingerprint: string
+  feature: string
+  errorKind: string
+  errorCode: string
+  count: number
+  accountCount: number
+  lastSeenAt: string
+}
+
+export interface FeatureHealthRow {
+  featureKey: string
+  label: string
+  area: string
+  section: 'infra' | 'product' | 'sync' | 'ava' | 'cost'
+  routeExample?: string
+  usageEvents24h: number
+  usageSessions24h: number
+  errorCount24h: number
+  accountCount24h: number
+  failRatePct: number
+  signal: 'hot' | 'errors_only' | 'ok' | 'low_signal'
+}
+
+export interface OpsFeatureCatalogEntry {
+  key: string
+  label: string
+  area: string
+  section: FeatureHealthRow['section']
+  routeExample?: string
+  description?: string
+}
+
+export interface OpsHourlyBucket {
+  hour: string
+  label: string
+}
+
+export interface OpsHourlySyncBucket extends OpsHourlyBucket {
+  success: number
+  failed: number
+}
+
+export interface OpsHourlyAvaEventBucket extends OpsHourlyBucket {
+  completed: number
+  failed: number
+  quotaBlocked: number
+}
+
+export interface OpsHourlyCountBucket extends OpsHourlyBucket {
+  count: number
+}
+
+export interface OpsHourlyAvaTokensBucket extends OpsHourlyBucket {
+  turns: number
+  tokens: number
+}
+
+export interface OpsTimeSeries24h {
+  syncJobs: OpsHourlySyncBucket[]
+  avaEvents: OpsHourlyAvaEventBucket[]
+  clientErrors: OpsHourlyCountBucket[]
+  avaTokens: OpsHourlyAvaTokensBucket[]
+}
+
+export interface ErrorFingerprintRow {
+  eventName: string
+  fingerprint: string
+  count: number
+  lastSeenAt: string
+}
+
+export interface SyncPortalStatsRow {
+  portalType: string
+  total: number
+  failed: number
+  success: number
+  failRatePct: number
+}
+
+export interface SyncStuckJobRow {
+  jobId: string
+  integrationLinkId: string
+  portalType: string
+  status: string
+  startedAt: string
+  minutesRunning: number
+}
+
+export interface SyncRecentFailureRow {
+  jobId: string
+  portalType: string
+  integrationLinkId: string
+  error: string | null
+  finishedAt: string
+}
+
+export interface BizTotals {
+  accounts: number
+  patients: number
+  families: number
+  familyMemberAccounts: number
+  newAccounts30d: number
+  newPatients30d: number
+  newFamilies30d: number
+}
+
+export interface BizDailyGrowthRow {
+  day: string
+  newAccounts: number
+  newPatients: number
+  newFamilies: number
+}
+
+export interface BizFeatureUsageRow {
+  featureKey: string
+  eventCount: number
+  sessionCount: number
+  accountCount: number
+}
+
+export interface BizAvaFailureRow {
+  errorCode: string
+  count: number
+  lastSeenAt: string
+}
+
+export interface BizAvaProposedActionRow {
+  actionType: string
+  count: number
+  okCount: number
+}
+
+export interface BizAvaDailyRow {
+  day: string
+  started: number
+  completed: number
+  unresolved: number
+}
+
+export interface BizAvaIntentRow {
+  intent: string
+  turns: number
+  unsatisfactory: number
+  needsFullContext: number
+  revised: number
+}
+
+export interface BizAvaProposedFunnel {
+  shown: number
+  executed: number
+  failed: number
+  executionRatePct: number | null
+}
+
+export interface BizAvaReflectionRow {
+  severity: string
+  count: number
+}
+
+export interface BizAvaLearning {
+  intentBreakdown30d: BizAvaIntentRow[]
+  proposedFunnel30d: BizAvaProposedFunnel
+  reflectionBySeverity30d: BizAvaReflectionRow[]
+  unsatisfactoryRatePct: number | null
+  turnsRecorded30d: number
+}
+
+export interface BizAvaAnalytics {
+  started30d: number
+  completed30d: number
+  failed30d: number
+  quotaBlocked30d: number
+  unresolved30d: number
+  successRatePct: number | null
+  failures: BizAvaFailureRow[]
+  proposedActions: BizAvaProposedActionRow[]
+  daily30d: BizAvaDailyRow[]
+  learning: BizAvaLearning
+}
+
+export interface BizCompositionDomainRow {
+  domain: string
+  scopesTouched30d: number
+  patientsTouched30d: number
+}
+
+export interface BizDataComposition {
+  activeDomains30d: BizCompositionDomainRow[]
+}
+
+export interface BizActivationFunnel {
+  totalAccounts: number
+  accountsWithPatient: number
+  accountsWithIntegrationLink: number
+  accountsWithSyncSuccess7d: number
+  accountsOnboardingComplete: number
+}
+
+export interface BizEngagement {
+  wau: number
+  mau: number
+  wauOverMauPct: number | null
+  dormantAccounts30d: number
+}
+
+export interface BizSupportCategoryRow {
+  category: string
+  count: number
+}
+
+export interface BizSupportMetrics {
+  openCount: number
+  triagedCount: number
+  resolved7d: number
+  avgHoursToResolve7d: number | null
+  consentTechnicalPct: number | null
+  analysisPending: number
+  analysisCompleted: number
+  byCategory30d: BizSupportCategoryRow[]
+}
+
+export interface BizBillingMetrics {
+  checkoutStarted7d: number
+  checkoutCompleted7d: number
+  checkoutStarted30d: number
+  checkoutCompleted30d: number
+  paidPlans: number
+  purchasesCompleted30d: number
+  revenueBrlCents30d: number
+}
+
+export interface BizIntegrationPortalRow {
+  portalType: string
+  total7d: number
+  success7d: number
+  failRatePct: number
+  distinctLinks: number
+}
+
+export interface OpsBusinessAnalytics {
+  totals: BizTotals
+  growthDaily30d: BizDailyGrowthRow[]
+  activation: BizActivationFunnel
+  engagement: BizEngagement
+  topFeatures30d: BizFeatureUsageRow[]
+  ava: BizAvaAnalytics
+  composition: BizDataComposition
+  support: BizSupportMetrics
+  billing: BizBillingMetrics
+  integrationHealth7d: BizIntegrationPortalRow[]
+}
+
+export interface OpsInternalLlmSnapshot {
+  calls: number
+  llmResolved: number
+  localFallback: number
+  budgetExhausted: number
+  totalCostUsdCents: number
+  monthlyBudgetBrlCents: number
+  spentBrlCents: number
+  remainingBrlCents: number
+  exhausted: boolean
+}
+
+export interface OpsMetricsSnapshot {
+  generatedAt: string
+  ava: {
+    last24h: AvaTokenPercentiles
+    last7d: AvaTokenPercentiles
+    providerMix24h: AvaProviderMixRow[]
+  }
+  sync: {
+    portalStats24h: SyncPortalStatsRow[]
+    stuckJobs: SyncStuckJobRow[]
+    recentFailures: SyncRecentFailureRow[]
+  }
+  productEvents: {
+    last1h: {
+      windowHours: number
+      avaChatCompleted: number
+      avaChatFailed: number
+      avaQuotaBlocked: number
+    }
+    last5m: {
+      avaChatCompleted: number
+      avaChatFailed: number
+    }
+  }
+  internalLlm?: OpsInternalLlmSnapshot
+  errorFingerprints24h: ErrorFingerprintRow[]
+  clientErrorFingerprints24h: ClientErrorFingerprintRow[]
+  featureHealth24h: FeatureHealthRow[]
+  featureCatalog: OpsFeatureCatalogEntry[]
+  timeSeries24h: OpsTimeSeries24h
+  probe?: OpsProbeSnapshot
+  supportReports?: {
+    openCount: number
+    submitted24h: number
+  }
+  business?: OpsBusinessAnalytics
+}
+
+export interface SupportReportOpsRow {
+  id: string
+  accountId: string
+  status: string
+  category: string
+  route: string | null
+  descriptionPreview: string | null
+  consentTechnical: boolean
+  consentProfileAccess: boolean
+  hasScreenshot: boolean
+  appVersion: string | null
+  createdAt: string
+  expiresAt: string
+  diagnosticContext: Record<string, unknown>
+  analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'
+  operatorNotes: string | null
+  analysisSummary: string | null
+  analysisArtifactPath: string | null
+  analysisRequestedAt: string | null
+  analysisCompletedAt: string | null
+  analysisLastError: string | null
+  investigationId: string | null
+}
+
+export interface RuntimeDegradedView {
+  avaLite: boolean
+  avaLiteReason: string | null
+  degradedRead: boolean
+  degradedReadAsOf: string | null
+  degradedReadReason: string | null
+  syncDegradedPortals: string[]
+}
+
+export interface OpsAlertTriageRow {
+  alertId: string
+  severity: OpsAlertSeverity
+  category: OpsAlert['category']
+  tier: 'infra' | 'app_sync' | 'llm' | 'product'
+  humanRequired: boolean
+  reason: string
+}
+
+export interface OpsMetricsResponse {
+  metrics: OpsMetricsSnapshot
+  alerts: OpsAlert[]
+  runtime?: RuntimeDegradedView
+  triage?: OpsAlertTriageRow[]
+  alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
+}
+
+export interface OpsAlertsDispatchResult {
+  checkedAt: string
+  alertCount: number
+  humanRequiredCount: number
+  dispatchMode: 'all' | 'human_required'
+  dispatched: boolean
+  webhookConfigured: boolean
+  triage: OpsAlertTriageRow[]
+  investigatorDispatched?: number
+  alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
+}
+
+export interface StackServiceStatus {
+  up: boolean
+  status: number | null
+  error?: string | null
+  service?: string
+  healthStatus?: string
+}
+
+export interface StackStatusSnapshot {
+  checkedAt: string
+  apiPort: number
+  webPort: number
+  api: StackServiceStatus
+  web: StackServiceStatus
+}
+
+export interface StackActionResult {
+  action: 'status' | 'start' | 'stop' | 'restart'
+  message?: string
+  status: StackStatusSnapshot
+  platform?: string
+  error?: string
+}

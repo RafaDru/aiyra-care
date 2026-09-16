@@ -3,6 +3,8 @@ import { Popover, Typography } from 'antd'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { PatientContext, PatientTimelineEvent } from '../../lib/api.types.js'
+import { FleuryLaboratoryCell } from '../brands/FleuryLaboratoryCell.js'
+import { isFleuryPrecisionSource } from '../../lib/fleury-laboratory.js'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
 import { timelineKindMeta } from './timeline-kind-meta.js'
 import './patient-context-timeline.css'
@@ -97,11 +99,17 @@ function ExamItemsList({ items }: { items: TimelineItem[] }) {
           {orderItems.map((item, index) => (
             <div key={item.entityId ?? `${orderId}-${index}`} className="patient-context-timeline__popover-item">
               <Text style={{ fontSize: 12 }}>{item.title}</Text>
-              {item.subtitle && (
+              {item.subtitle && isFleuryPrecisionSource(item.source) ? (
+                <FleuryLaboratoryCell
+                  source={item.source}
+                  laboratory={item.subtitle}
+                  showGroupSeal={false}
+                />
+              ) : item.subtitle ? (
                 <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>
                   {item.subtitle}
                 </Text>
-              )}
+              ) : null}
             </div>
           ))}
         </div>
@@ -109,11 +117,17 @@ function ExamItemsList({ items }: { items: TimelineItem[] }) {
       {noOrder.map((item, index) => (
         <div key={item.entityId ?? `no-order-${index}`} className="patient-context-timeline__popover-item">
           <Text style={{ fontSize: 12 }}>{item.title}</Text>
-          {item.subtitle && (
+          {item.subtitle && isFleuryPrecisionSource(item.source) ? (
+            <FleuryLaboratoryCell
+              source={item.source}
+              laboratory={item.subtitle}
+              showGroupSeal={false}
+            />
+          ) : item.subtitle ? (
             <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>
               {item.subtitle}
             </Text>
-          )}
+          ) : null}
         </div>
       ))}
     </div>
@@ -166,9 +180,19 @@ function EventPopoverContent({ event }: { event: TimelineEvent }) {
       </Text>
       <Text style={{ display: 'block', fontSize: 13 }}>{event.title}</Text>
       {event.subtitle && (
-        <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>
-          {event.subtitle}
-        </Text>
+        isFleuryPrecisionSource(event.source) ? (
+          <div style={{ marginTop: 4 }}>
+            <FleuryLaboratoryCell
+              source={event.source}
+              laboratory={event.subtitle}
+              showGroupSeal={false}
+            />
+          </div>
+        ) : (
+          <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>
+            {event.subtitle}
+          </Text>
+        )
       )}
       <Text type="secondary" style={{ display: 'block', fontSize: 11, marginTop: 8 }}>
         {formatFullDate(event.date)} · {event.source}

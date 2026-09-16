@@ -10,6 +10,16 @@ export function loadMonorepoEnv(): string {
   const envPath = path.join(root, '.env')
   dotenv.config({ path: envPath })
 
+  const previewPath = path.join(root, '.env.preview')
+  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
+  const dbUrl = process.env.DATABASE_URL ?? ''
+  if (
+    existsSync(previewPath) &&
+    (tier === 'preview' || dbUrl.includes('aiyracare_preview') || process.env.PORT === '3020')
+  ) {
+    dotenv.config({ path: previewPath, override: true })
+  }
+
   const key = process.env.GOOGLE_APPLICATION_CREDENTIALS
   if (key && !isAbsolute(key)) {
     const fromRoot = resolve(root, key)
@@ -22,6 +32,6 @@ export function loadMonorepoEnv(): string {
 export function createWorkerPool(): pg.Pool {
   return new pg.Pool({
     connectionString:
-      process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+      process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
   })
 }

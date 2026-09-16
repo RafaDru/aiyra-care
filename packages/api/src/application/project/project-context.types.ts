@@ -94,4 +94,23 @@ export interface ProjectContext extends ProjectContextSnapshot {
     sessions: HistoricoSession[]
     latestSession?: HistoricoSession
   }
+  /** Catálogo de capacidades — docs/features/index.json */
+  features?: {
+    schemaVersion: number
+    updatedAt: string
+    features: Array<{
+      id: string
+      epicId: string
+      title: string
+      status: string
+      category: string
+      priority: string
+      doc: string
+      domainDoc?: string
+      routes: string[]
+      api: string[]
+      helpTopics: string[]
+      tags: string[]
+    }>
+  }
 }

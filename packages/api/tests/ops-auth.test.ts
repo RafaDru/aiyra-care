@@ -6,6 +6,7 @@ describe('ops-auth', () => {
     expect(isOpsRoute('/ops/metrics')).toBe(true)
     expect(isOpsRoute('/ops/alerts')).toBe(true)
     expect(isOpsRoute('/ops/alerts/check')).toBe(true)
+    expect(isOpsRoute('/ops/dev-audit-bridge')).toBe(true)
     expect(isOpsRoute('/patients')).toBe(false)
   })
 

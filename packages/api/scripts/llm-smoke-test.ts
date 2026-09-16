@@ -95,14 +95,16 @@ console.log('  Consent sharing:', withSharing)
 
 const rows: Row[] = []
 
+const SMOKE_SESSION = 'llm-smoke-test'
+
 if (withSharing && opencodeZenApiKey()) {
-  rows.push(await probe('zen-free', () => completeWithOpenCodeZenFree(messages, 'free')))
+  rows.push(await probe('zen-free', () => completeWithOpenCodeZenFree(messages, 'free', { sessionId: SMOKE_SESSION })))
 } else if (withSharing) {
   rows.push({ name: 'zen-free', ok: false, error: 'sem OPENCODE_ZEN/GO key' })
 }
 
 if (opencodeGoApiKey()) {
-  rows.push(await probe('opencode-go', () => completeWithOpenCodeGo(messages, 'free')))
+  rows.push(await probe('opencode-go', () => completeWithOpenCodeGo(messages, 'free', { sessionId: SMOKE_SESSION })))
 }
 
 if (process.env.GEMINI_API_KEY?.trim()) {

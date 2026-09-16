@@ -21,6 +21,7 @@ import {
 } from '../../domain/llm/llm-marker-extraction-prompt.js'
 import type { ExtractedExamMarkerItem } from '../../domain/exam-artifact/exam-artifact.types.js'
 import { normalizeHealthLabel } from '../../domain/classification/label-classification.js'
+import { stableOpenCodeSessionFromParts } from '../../domain/llm/opencode-session.js'
 
 export interface LlmMarkerFallbackOptions {
   patientId?: string
@@ -67,8 +68,10 @@ export class LlmMarkerFallbackExtractor {
     }
 
     try {
+      const markerSessionId = `exam-marker:${this.opts.patientId ?? 'unknown'}:${stableOpenCodeSessionFromParts([reportText])}`
       const completion = await this.router.completeJson(messages, 'premium', {
         allowLlmDataSharing: defaultAllowZenFree(),
+        opencodeSessionId: markerSessionId,
       })
 
       await this.costService.recordCall({

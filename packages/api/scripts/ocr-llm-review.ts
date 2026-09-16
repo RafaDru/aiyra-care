@@ -9,11 +9,13 @@
  *   npx tsx scripts/ocr-llm-review.ts --document-id <uuid>
  */
 import { readFileSync } from 'fs'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
 import pg from 'pg'
 
-dotenv.config({ path: new URL('../../../.env', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1') })
-dotenv.config({ path: 'C:/Users/rafae/Documents/Filhos/.env' })
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..')
+dotenv.config({ path: join(repoRoot, '.env') })
 
 import { GroqLlmAdapter } from '../src/infrastructure/llm/groq-llm.adapter.ts'
 import { parseIdentityDocument } from '../src/domain/document/identity-document.parser.ts'

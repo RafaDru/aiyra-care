@@ -29,15 +29,16 @@ export class ExamOrderController {
       const path = order.resultFileUrl
       if (!path) return reply.status(404).send({ message: 'Pedido sem arquivo de laudo' })
       const file = await this.service.readResultFile(path)
-      const label = order.notes
-        ? (() => {
-            try {
-              const parsed = JSON.parse(order.notes) as { portalOrderLabel?: string }
-              if (parsed.portalOrderLabel) return parsed.portalOrderLabel
-            } catch { /* ignore */ }
-            return null
-          })()
-        : null
+      const label =
+        (order.notes
+          ? (() => {
+              try {
+                const parsed = JSON.parse(order.notes) as { portalOrderLabel?: string }
+                if (parsed.portalOrderLabel) return parsed.portalOrderLabel
+              } catch { /* ignore */ }
+              return null
+            })()
+          : null)
         ?? (order.portalOrderId && order.source === 'hermes_pardini'
           ? formatHermesPardiniCompoundPortalOrderId(order.portalOrderId)
           : order.portalOrderId)

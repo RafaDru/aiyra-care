@@ -1,6 +1,8 @@
 import Groq from 'groq-sdk'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+const groq = process.env.GROQ_API_KEY?.trim()
+  ? new Groq({ apiKey: process.env.GROQ_API_KEY })
+  : null
 
 export interface LlmMessage { role: 'system' | 'user' | 'assistant'; content: string }
 
@@ -8,6 +10,7 @@ export class GroqLlmAdapter {
   private model = 'llama-3.3-70b-versatile'
 
   async ask(messages: LlmMessage[]): Promise<string> {
+    if (!groq) throw new Error('GROQ_API_KEY não configurada')
     const completion = await groq.chat.completions.create({
       model: this.model,
       messages: messages.map(m => ({ role: m.role, content: m.content })),

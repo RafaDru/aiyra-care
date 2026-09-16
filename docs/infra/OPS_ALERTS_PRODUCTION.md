@@ -64,7 +64,7 @@ powershell -File scripts/setup-ops-alerts.ps1 -RegisterScheduledTask -IntervalMi
 
 ```bash
 # Linux cron exemplo
-*/15 * * * * cd /opt/open-health && npm run ops:alerts-check >> /var/log/aiyracare-ops-alerts.log 2>&1
+*/15 * * * * cd /opt/aiyra-care && npm run ops:alerts-check >> /var/log/aiyracare-ops-alerts.log 2>&1
 ```
 
 ### 4. Smoke após deploy
@@ -76,7 +76,12 @@ npm run ops:alerts-check
 
 # HTTP (API + chave)
 npm run ops:smoke
+
+# Template produção (ntfy + worker monitor)
+npm run setup:ops-prod
 ```
+
+Runbook por alerta: `docs/ops/RUNBOOK_ALERTS.md`.
 
 `ops:smoke` valida `/health`, `/ops/metrics` e `/ops/alerts` com `x-internal-ops-key`.
 

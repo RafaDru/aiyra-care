@@ -18,6 +18,10 @@ const UNIMED_LOOKBACK_DAYS = 14
 export const AMIL_GUIAS_MONTHS_FULL = 12
 /** Meses de guias no sync silencioso/incremental. */
 export const AMIL_GUIAS_MONTHS_INCREMENTAL = 2
+/** Meses de atendimentos realizados (utilização) no sync manual. */
+export const AMIL_UTILIZACAO_MONTHS_FULL = 24
+/** Meses de utilização no sync incremental. */
+export const AMIL_UTILIZACAO_MONTHS_INCREMENTAL = 2
 const AMIL_LOOKBACK_DAYS = 14
 
 function formatDateYmd(d: Date): string {
@@ -129,6 +133,25 @@ export function computeAmilGuidesPeriodStart(link: IntegrationLink, incremental:
   const start = new Date()
   start.setMonth(start.getMonth() - AMIL_GUIAS_MONTHS_INCREMENTAL)
   return start
+}
+
+/** Janela BuscarDemonstrativoUtilizacao (atendimentos realizados). */
+export function computeAmilUtilizationPeriod(
+  link: IntegrationLink,
+  incremental: boolean,
+): { start: Date; end: Date } {
+  const end = new Date()
+  if (!incremental) {
+    const start = new Date()
+    start.setMonth(start.getMonth() - AMIL_UTILIZACAO_MONTHS_FULL)
+    return { start, end }
+  }
+  if (link.lastSyncAt) {
+    return { start: subtractDays(link.lastSyncAt, AMIL_LOOKBACK_DAYS), end }
+  }
+  const start = new Date()
+  start.setMonth(start.getMonth() - AMIL_UTILIZACAO_MONTHS_INCREMENTAL)
+  return { start, end }
 }
 
 export function collectHouseholdPatientIds(

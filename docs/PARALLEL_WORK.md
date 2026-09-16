@@ -7,6 +7,7 @@
 | Linha | Foco | Pastas típicas | Conflito |
 |-------|------|----------------|----------|
 | **A — Operação (Fase 1)** | Sondas, alertas infra, banner Carteira | `domain/ops/*`, `scripts/ops-*`, `connect-worker/src/ops-*`, `WalletCardsTab`, `wallet-sync-banner` | Baixo com Fleury |
+| **E — Ambientes + Ops dual** | Integração vs Preview, gates, setup ops por env | `docs/infra/TWO_ENV_*`, `OPS_TWO_ENV_SETUP`, `setup-ops-preview` | Baixo com features se keys separadas |
 | **B — PoC Fleury** | Auth Precision, marca, probes CLI | `hermes-pardini-*`, `probe-fleury-*`, `scripts/lib/fleury-*` | Baixo com A |
 | **C — Fase 2 cache** | `data_generations`, `/account/freshness` | `database/`, `patient-context`, `AuthContext` | Médio — após Fleury estável |
 | **D — Integração Fleury prod** | Portal type, sync service, integration-link | `integration-link-sync`, scrapers, `INSURANCE_PORTALS` | Sequencial após B |

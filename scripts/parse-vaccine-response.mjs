@@ -1,6 +1,8 @@
 import fs from 'fs'
+import { join } from 'path'
+import { REPO_ROOT } from './repo-root.mjs'
 
-const t = fs.readFileSync('C:/Users/rafae/Documents/Filhos/tmp-chunk-148.js', 'utf8')
+const t = fs.readFileSync(join(REPO_ROOT, 'tmp-chunk-148.js'), 'utf8')
 for (const key of ['lista-imunobiologicos', 'historico-clinico', 'imunobiolog', 'statusVacina', 'dose', 'aplicad']) {
   let i = 0
   let c = 0

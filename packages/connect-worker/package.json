@@ -1,5 +1,5 @@
 {
-  "name": "@open-health/connect-worker",
+  "name": "@aiyra-care/connect-worker",
   "version": "0.1.0",
   "private": true,
   "description": "Runner apartado para sync scheduled (Connect) — consome IntegrationLinkSyncService via PG",
@@ -7,6 +7,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "once": "tsx src/run-once.ts",
+    "job": "tsx src/job.ts",
     "ops-alerts:once": "tsx src/ops-alerts-once.ts"
   },
   "dependencies": {

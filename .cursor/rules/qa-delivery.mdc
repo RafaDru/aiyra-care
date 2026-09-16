@@ -1,0 +1,34 @@
+---
+description: QA obrigatório ao entregar produto — suite + execução manual
+alwaysApply: true
+---
+
+# AiyraCare — entrega com QA (obrigatório)
+
+Ao **entregar** ou alterar comportamento de produto (`packages/api` domínio/app/infra HTTP, `packages/web` pages/components), **sem esperar o Rafael pedir**:
+
+## Checklist de encerramento
+
+1. **Suite QA** — cada **ação de negócio** na UI (CRUD ou ciclo equivalente) em `docs/testing/suites/<id>.md`; ver [`BUSINESS_ACTION_MATRIX.md`](docs/testing/BUSINESS_ACTION_MATRIX.md).
+2. **Feature card** — seção **QA** com link da suite.
+3. **Executar** — `npm run qa:run -- --suite <id>`; regressão feature grande: `qa:run-all -- --lane business-full`.
+4. **Ava** — suites na lane `ava`; **não** exigir qualidade LLM — ver `docs/testing/AVA_QA_SCOPE.md`.
+5. **Relatório** — PASS/FAIL no chat.
+
+## Não precisa repetir no chat
+
+- «Faz o teste completo» — é **Definition of Done** padrão.
+- Rafael pode pedir só revalidação: «re-roda suite X».
+
+## Exceções (tier 0 — só com justificativa no chat)
+
+- Copy/i18n sem mudança de fluxo: `test:critical` basta; suite só se critério de aceite mudou.
+- Só docs/scripts ops sem `packages/*` produto: sem suite nova.
+
+## Hooks
+
+- Edição de produto → ritual QA pendente até `npm run qa:run` ou `qa:run-all`.
+- `stop` → follow-up se suite não executada.
+- `git push` → aviso de regressão.
+
+Hub: `docs/testing/README.md` · `docs/AGENT_BOOTSTRAP.md`

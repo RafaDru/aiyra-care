@@ -25,7 +25,9 @@ import {
   hermesPardiniAllowPasswordOnUnified,
   hermesPardiniPortalEntryUrl,
   hermesPardiniUseUnifiedLogin,
+  fleuryPrecisionOtpInApp,
 } from './hermes-pardini.portal.js'
+import { fleuryPrecisionOtpInAppMessage } from './hermes-pardini-otp-session.js'
 
 export interface HermesPardiniSyncResult {
   session: HermesPardiniSession
@@ -57,7 +59,7 @@ async function acquireHermesPardiniSession(
   login: string,
   password: string,
   emit: (p: ScraperProgress) => void,
-  opts?: { sessionJson?: string; interactiveLogin?: boolean; forceFreshLogin?: boolean },
+  opts?: { sessionJson?: string; interactiveLogin?: boolean; forceFreshLogin?: boolean; jobId?: string },
 ): Promise<HermesPardiniSession> {
   const request = await playwrightRequest.newContext()
 
@@ -106,19 +108,24 @@ async function acquireHermesPardiniSession(
     }
 
     const interactive = opts?.interactiveLogin ?? true
-    const headless = hermesPardiniBrowserHeadless(interactive)
     const useUnified = hermesPardiniUseUnifiedLogin()
     const otpTimeoutMs = fleuryPrecisionOtpTimeoutMs()
+    const otpInAppEnabled = useUnified && opts?.jobId && fleuryPrecisionOtpInApp()
+    const headless = otpInAppEnabled
+      ? process.env.HERMES_PARDINI_HEADLESS !== '0'
+      : hermesPardiniBrowserHeadless(interactive)
 
     emit({
       step: 'login',
-      message: headless
-        ? useUnified
-          ? 'Login Grupo Fleury (OTP) no browser…'
-          : 'Login no portal Precision Care (PKCE)…'
-        : useUnified
-          ? 'Abrindo Grupo Fleury — no Chrome: CPF → código SMS, e-mail ou WhatsApp'
-          : 'Abrindo portal Precision Care — aguarde o portal carregar os resultados…',
+      message: otpInAppEnabled
+        ? 'Grupo Fleury — enviando código de verificação…'
+        : headless
+          ? useUnified
+            ? 'Login Grupo Fleury (OTP) no browser…'
+            : 'Login no portal Precision Care (PKCE)…'
+          : useUnified
+            ? 'Abrindo Grupo Fleury — no Chrome: CPF → código SMS, e-mail ou WhatsApp'
+            : 'Abrindo portal Precision Care — aguarde o portal carregar os resultados…',
       status: 'running',
     })
 
@@ -140,6 +147,16 @@ async function acquireHermesPardiniSession(
         autoFillPassword,
         prefillUsername: unifiedEntry,
         tokenTimeoutMs: unifiedEntry ? otpTimeoutMs : 120_000,
+        otpInApp: otpInAppEnabled && opts?.jobId
+          ? {
+              jobId: opts.jobId,
+              onAwaitingOtp: () => emit({
+                step: 'login',
+                message: fleuryPrecisionOtpInAppMessage(),
+                status: 'running',
+              }),
+            }
+          : undefined,
       })
 
       let loginResult
@@ -210,7 +227,7 @@ export class HermesPardiniSyncScraper {
     login: string,
     password: string,
     onProgress?: (p: ScraperProgress) => void,
-    opts?: { sessionJson?: string; interactiveLogin?: boolean; examStartDate?: string },
+    opts?: { sessionJson?: string; interactiveLogin?: boolean; examStartDate?: string; jobId?: string },
   ): Promise<HermesPardiniSyncResult> {
     const emit = (step: string, message: string, status: ScraperProgress['status']) =>
       onProgress?.({ step, message, status })
@@ -244,7 +261,7 @@ export class HermesPardiniSyncScraper {
       login,
       password,
       (p) => onProgress?.(p),
-      opts,
+      { ...opts, jobId: opts?.jobId },
     )
 
     const request = await playwrightRequest.newContext()
@@ -262,6 +279,7 @@ export class HermesPardiniSyncScraper {
           {
             interactiveLogin: opts?.interactiveLogin ?? true,
             forceFreshLogin: true,
+            jobId: opts?.jobId,
           },
         )
         fetchResult = await fetchExamsWithSession(session, request)

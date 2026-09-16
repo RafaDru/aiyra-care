@@ -6,7 +6,7 @@ import ptBR from './locales/pt-BR.json' with { type: 'json' }
 import en from './locales/en.json' with { type: 'json' }
 import { syncDayjsLocale } from '../lib/dayjs-locale.js'
 
-const saved = localStorage.getItem('openhealth-lang')
+const saved = localStorage.getItem('aiyra-care-lang')
 const initialLang = saved || 'pt-BR'
 syncDayjsLocale(initialLang)
 
@@ -25,7 +25,7 @@ i18n.on('languageChanged', (lang) => {
 })
 
 export function setLanguage(lang: string) {
-  localStorage.setItem('openhealth-lang', lang)
+  localStorage.setItem('aiyra-care-lang', lang)
   syncDayjsLocale(lang)
   void i18n.changeLanguage(lang)
 }

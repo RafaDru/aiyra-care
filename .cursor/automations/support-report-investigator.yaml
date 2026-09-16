@@ -1,0 +1,33 @@
+name: AiyraCare — Investigador suporte (Tier 0)
+description: >
+  Webhook support_report → agente investiga o monorepo (sem PHI).
+  Saída em docs/ops/investigations/. Tier 0 — sem PR automático.
+
+# Rascunho versionado. O Cursor NÃO importa este arquivo sozinho ao reiniciar.
+# Import único: Automations → Create → importar support-report-investigator.workflow.json
+# ou colar o bloco instructions abaixo. Depois de salvar, copie a URL do webhook para .env:
+#   CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL=<url>
+
+git:
+  repo: RafaDru/aiyra-care
+  branch: main
+
+trigger:
+  type: webhook
+
+model: composer-2.5
+
+instructions: |
+  Um chamado de suporte chegou via webhook HTTP (tipo support_report).
+
+  1. Leia o corpo JSON do webhook: reportId, category, route, topFingerprint,
+     consentTechnical, dashboardUrl.
+  2. Siga o playbook em docs/ops/automations/support-report-investigator.prompt.md.
+  3. Escreva o rascunho em docs/ops/investigations/ com data de hoje e prefixo do reportId.
+  4. Não abra PR nem altere código de produto (Tier 0).
+  5. Não use descrição do usuário nem dados clínicos — só metadados do webhook.
+
+  Ao terminar, resuma em 5 linhas: hipótese principal + arquivo criado.
+
+playbook: docs/ops/automations/support-report-investigator.prompt.md
+runbook: docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md

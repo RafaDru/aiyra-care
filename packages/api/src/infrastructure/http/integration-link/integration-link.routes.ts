@@ -5,15 +5,22 @@ import { bindSyncCompletionNotifier, publishSyncCompletion } from '../../sync/sy
 import { pgPool } from '../../../db/postgres.js'
 import { getDataGenerationService } from '../account-freshness/account-freshness.routes.js'
 import { PatientAccountPgResolver } from '../../persistence/hygiene.pg.repository.js'
+import { getUserEscalationService } from '../user-escalation/user-escalation.routes.js'
 
 export async function integrationLinkRoutes(app: FastifyInstance) {
   const repo = new IntegrationLinkPgRepository(pgPool)
   const dataGen = getDataGenerationService()
   const accountResolver = new PatientAccountPgResolver(pgPool)
+  const userEscalation = getUserEscalationService(pgPool)
   bindSyncCompletionNotifier(async (event) => {
     const link = await repo.findById(event.integrationLinkId)
     if (!link) return
     publishSyncCompletion({ ...event, patientId: link.patientId })
+    try {
+      await userEscalation.handleSyncTerminal(event, link.patientId)
+    } catch {
+      // escalation must not break sync
+    }
     if (event.status === 'success') {
       try {
         const accountId = await accountResolver.resolveAccountIdForPatient(link.patientId)
@@ -34,5 +41,6 @@ export async function integrationLinkRoutes(app: FastifyInstance) {
   app.post('/integration-links/:id/virtual-card', ctrl.virtualCard.bind(ctrl))
   app.get('/integration-links/:id/sync-status', ctrl.syncStatus.bind(ctrl))
   app.get('/integration-links/sync-progress/:jobId', ctrl.syncProgress.bind(ctrl))
+  app.post('/integration-links/sync-progress/:jobId/otp', ctrl.syncSubmitOtp.bind(ctrl))
   app.get('/integration-links/sync-progress/:jobId/stream', ctrl.syncProgressStream.bind(ctrl))
 }

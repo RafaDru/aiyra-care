@@ -115,7 +115,14 @@ export function useIntegrationSyncHistory(syncTargets: IntegrationLink[], refres
       cancelled = true
       window.clearInterval(id)
     }
-  }, [syncTargets, refreshKey, pausePolling, authLoading, authUserId, authConfigured])
+  }, [
+    syncTargets.map((l) => l.effectiveSyncLinkId ?? l.id).join('|'),
+    refreshKey,
+    pausePolling,
+    authLoading,
+    authUserId,
+    authConfigured,
+  ])
 
   const groupedByDate = useMemo(() => {
     const withTime = entries.filter((e) => e.finishedAt || e.isActive)

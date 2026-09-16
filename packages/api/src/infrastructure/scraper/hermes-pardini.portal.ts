@@ -116,3 +116,10 @@ export function fleuryPrecisionOtpTimeoutMs(): number {
   if (!Number.isFinite(n) || n < 60_000) return 180_000
   return Math.min(n, 600_000)
 }
+
+/** OTP digitado no app (modal) em vez de só no Chrome. `0` = hint Chrome legado. */
+export function fleuryPrecisionOtpInApp(): boolean {
+  const raw = process.env.FLEURY_PRECISION_OTP_IN_APP?.trim().toLowerCase()
+  if (raw === '0' || raw === 'false' || raw === 'no') return false
+  return true
+}

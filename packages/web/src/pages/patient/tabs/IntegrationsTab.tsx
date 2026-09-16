@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react'
 import {
   Typography, Button, Space, Tag, Modal, Form, Input, App, Alert, Table, Dropdown, Tooltip,
 } from 'antd'
@@ -8,7 +8,7 @@ import {
   PlusOutlined, MoreOutlined, QrcodeOutlined,
 } from '@ant-design/icons'
 import { api } from '../../../lib/api.js'
-import type { Patient, IntegrationLink } from '../../../lib/api.types.js'
+import type { Patient, IntegrationLink, GovBrSessionView } from '../../../lib/api.types.js'
 import type { IntegrationLinkSyncStatus } from '../../../lib/api.types.js'
 import { BrandCoverageOperator } from '../../../components/brands/BrandCoverageOperator.js'
 import { brandOrFallback } from '../../../components/brands/brand-config.js'
@@ -25,17 +25,18 @@ import {
 } from '../../../lib/silent-sync.js'
 import type { WalletDockJob } from '../../../components/scraper/WalletSyncDock.js'
 import { IntegrationsSyncSidebar } from '../../../components/integrations/IntegrationsSyncSidebar.js'
+import { AmilSyncOptionsModal, type AmilSyncOptions } from '../../../components/integrations/AmilSyncOptionsModal.js'
 import { GroupedAlignedTables } from '../../../components/layout/GroupedAlignedTables.js'
 import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
 import { SessionStatusTag } from '../../../components/ui/StatusTag.js'
 import { isHintDismissed } from '../../../lib/dismissed-hints.js'
 import { ALIGNED_COL } from '../../../components/layout/aligned-table-columns.js'
 import { useIntegrationSyncHistory } from '../../../hooks/useIntegrationSyncHistory.js'
+import { trackSyncJobSkipped, trackSyncJobStarted } from '../../../lib/telemetry/sync-telemetry.js'
+import { reportApiClientError } from '../../../lib/client-errors.js'
 import type { SyncablePortalType } from '../../../lib/sync-portal-profile.js'
 import type { SyncJobOverallStatus } from '../../../lib/sync-job-progress.js'
 import { useAuth } from '../../../contexts/AuthContext.js'
-import { GoogleCalendarConnectCard } from '../../../components/calendar/GoogleCalendarConnectCard.js'
-import { OutlookCalendarConnectCard } from '../../../components/calendar/OutlookCalendarConnectCard.js'
 import {
   INSURANCE_PORTALS,
   HOSPITAL_PORTALS,
@@ -160,10 +161,22 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const [pickerOpen, setPickerOpen] = useState(false)
   const [publicHealthPortal, setPublicHealthPortal] = useState<PublicHealthPortal | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  const [govbrSession, setGovbrSession] = useState<GovBrSessionView | null>(null)
+  const [amilSyncTarget, setAmilSyncTarget] = useState<{ linkId: string; portalType: string } | null>(null)
+
+  useEffect(() => {
+    if (authConfigured && authLoading) return
+    api.account.govbrSession()
+      .then(setGovbrSession)
+      .catch(() => setGovbrSession(null))
+  }, [authConfigured, authLoading, historyRefreshKey])
 
   const dockLinkIds = new Set(dockJobs.map((j) => j.linkId))
-  const syncTargets = collectSyncTargets(links)
-  const linkedPortals = new Set(links.map((l) => l.portalType))
+  const syncTargets = useMemo(() => collectSyncTargets(links ?? []), [links])
+  const linkedPortals = useMemo(
+    () => new Set((links ?? []).map((l) => l.portalType)),
+    [links],
+  )
   const { groupedByDate, activeEntries } = useIntegrationSyncHistory(
     syncTargets,
     historyRefreshKey,
@@ -181,7 +194,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const startManualSync = useCallback(async (
     linkId: string,
     portalType: string,
-    opts?: { force?: boolean },
+    opts?: { force?: boolean; amil?: AmilSyncOptions },
   ) => {
     if (!isSyncablePortal(portalType)) return
     if (
@@ -192,21 +205,34 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
     }
     setStartingLinkIds((prev) => new Set(prev).add(linkId))
     try {
-      const r = await api.integrationLinks.sync(linkId, { force: opts?.force })
+      const r = await api.integrationLinks.sync(linkId, {
+        force: opts?.force,
+        amilMarcaOtica: opts?.amil?.amilMarcaOtica,
+        amilUtilizationStart: opts?.amil?.amilUtilizationStart,
+        amilUtilizationEnd: opts?.amil?.amilUtilizationEnd,
+      })
       if (r.skipped) {
+        trackSyncJobSkipped(portalType, r.reason ?? 'skipped', 'manual', patient.id)
         if (r.reason === 'session_required') {
           message.info('Primeira conexão ou sessão expirada — Sincronizar pode abrir o portal')
         }
         return
       }
       if (r.jobId) {
+        trackSyncJobStarted(portalType, 'manual', patient.id)
         setDockJobs((prev) => [
           ...prev,
           { jobId: r.jobId!, linkId, portalType: portalType as SyncablePortalType },
         ])
       }
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro na sincronização')
+      const msg = err instanceof Error ? err.message : 'Erro na sincronização'
+      reportApiClientError(`/integration-links/${linkId}/sync`, 0, {
+        patientId: patient.id,
+        route: `/patients/${patient.id}`,
+        message: msg,
+      })
+      message.error(msg)
     } finally {
       setStartingLinkIds((prev) => {
         const next = new Set(prev)
@@ -214,7 +240,22 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
         return next
       })
     }
-  }, [message])
+  }, [message, patient.id])
+
+  const requestManualSync = useCallback((linkId: string, portalType: string) => {
+    if (portalType === 'amil') {
+      setAmilSyncTarget({ linkId, portalType })
+      return
+    }
+    void startManualSync(linkId, portalType, { force: true })
+  }, [startManualSync])
+
+  const confirmAmilSync = useCallback((amil: AmilSyncOptions) => {
+    if (!amilSyncTarget) return
+    const { linkId, portalType } = amilSyncTarget
+    setAmilSyncTarget(null)
+    void startManualSync(linkId, portalType, { force: true, amil })
+  }, [amilSyncTarget, startManualSync])
 
   const syncAll = useCallback(async () => {
     if (syncTargets.length === 0) {
@@ -291,7 +332,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
 
   const buildRows = (): TableRow[] => {
     const rows: TableRow[] = []
-    for (const link of links) {
+    for (const link of links ?? []) {
       const meta = brandOrFallback(link.portalType)
       const group = INSURANCE_PORTALS.has(link.portalType) ? 'health' as const
         : HOSPITAL_PORTALS.has(link.portalType) ? 'hospital' as const
@@ -351,9 +392,14 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
               Pardini · Fleury · a+ · Labs a+
             </Text>
           )}
-          {row.link?.syncAuthority === 'titular' && row.link.managedByPatientName && (
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
-              Via titular · {row.link.managedByPatientName.split(' ')[0]}
+          {row.link?.authAttention === 'credentials' && (
+            <Text type="danger" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
+              Atualize a senha em Editar credenciais
+            </Text>
+          )}
+          {row.link?.authAttention === 'session' && (
+            <Text type="warning" style={{ fontSize: 11, display: 'block', marginTop: 4, paddingLeft: 2 }}>
+              Sincronize novamente para reconectar
             </Text>
           )}
         </div>
@@ -365,8 +411,13 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       width: ALIGNED_COL.session,
       render: (_, row) => {
         if (row.kind === 'public') {
-          return row.publicPortal === 'conectesus'
-            ? (patient.cns ? <Tag color="success">CNS no perfil</Tag> : <Tag>Pendente</Tag>)
+          if (row.publicPortal === 'conectesus') {
+            return govbrSession?.sessionReady
+              ? <SessionStatusTag ready />
+              : <Tag>gov.br pendente</Tag>
+          }
+          return govbrSession?.sessionReady
+            ? <SessionStatusTag ready />
             : <Tag>gov.br</Tag>
         }
         const link = row.link!
@@ -383,7 +434,13 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       key: 'lastSync',
       width: ALIGNED_COL.lastSync,
       render: (_, row) => {
-        if (row.kind === 'public') return <Text type="secondary">Importação manual</Text>
+        if (row.kind === 'public') {
+          if (govbrSession?.conectesusLastFetchAt) {
+            const d = new Date(govbrSession.conectesusLastFetchAt)
+            return <Text type="secondary">Última busca {d.toLocaleDateString('pt-BR')}</Text>
+          }
+          return <Text type="secondary">Importação guiada (gov.br)</Text>
+        }
         const syncId = row.syncLinkId!
         return (
           <LinkSyncStatusCell
@@ -449,7 +506,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
               icon={<SyncOutlined />}
               loading={isLinkSyncing(syncLinkId)}
               disabled={!isSyncablePortal(link.portalType)}
-              onClick={() => startManualSync(syncLinkId, link.portalType, { force: true })}
+              onClick={() => requestManualSync(syncLinkId, link.portalType)}
             >
               {managedByTitular ? `Via ${titularName}` : 'Sincronizar'}
             </Button>
@@ -523,9 +580,6 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           </Space>
         </div>
 
-        <GoogleCalendarConnectCard patientId={patient.id} />
-        <OutlookCalendarConnectCard patientId={patient.id} />
-
         {rows.length === 0 ? (
           isHintDismissed('integrations.empty') ? (
             <Typography.Text type="secondary">Nenhuma integração — use Nova integração para vincular um portal.</Typography.Text>
@@ -563,7 +617,10 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           patientId={patient.id}
           linkedChildrenCount={linkedChildrenCount}
           onClose={() => setPublicHealthPortal(null)}
-          onImported={onCardUpdated}
+          onImported={() => {
+            onCardUpdated()
+            setHistoryRefreshKey((k) => k + 1)
+          }}
         />
 
         <Modal
@@ -581,6 +638,12 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
             </Form.Item>
           </Form>
         </Modal>
+
+        <AmilSyncOptionsModal
+          open={amilSyncTarget != null}
+          onCancel={() => setAmilSyncTarget(null)}
+          onConfirm={confirmAmilSync}
+        />
       </div>
 
       <IntegrationsSyncSidebar

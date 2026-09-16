@@ -6,6 +6,9 @@ const SYNC_STUCK_MINUTES = 30
 const LLM_CASCADE_WINDOW_MIN = 5
 const LLM_CASCADE_MIN_FAILURES = 3
 const QUOTA_SPIKE_1H = 10
+const STRIPE_WEBHOOK_WARN_1H = 3
+const STRIPE_WEBHOOK_CRITICAL_1H = 10
+const WORKER_STALE_MINUTES = Number(process.env.OPS_WORKER_STALE_MINUTES ?? '45')
 const API_PROBE_SLOW_MS = Number(process.env.OPS_PROBE_API_SLOW_MS ?? '3000')
 const PG_PROBE_SLOW_MS = Number(process.env.OPS_PROBE_PG_SLOW_MS ?? '500')
 
@@ -132,6 +135,53 @@ export function evaluateOpsAlerts(snapshot: OpsMetricsSnapshot): OpsAlert[] {
         spentBrlCents: snapshot.internalLlm.spentBrlCents,
         monthlyBudgetBrlCents: snapshot.internalLlm.monthlyBudgetBrlCents,
       },
+    })
+  }
+
+  const stripeRejected = snapshot.ops?.stripeWebhookRejected1h ?? 0
+  if (stripeRejected >= STRIPE_WEBHOOK_CRITICAL_1H) {
+    alerts.push({
+      id: 'stripe_webhook_failures',
+      severity: 'critical',
+      category: 'product',
+      message: `${stripeRejected} falhas de webhook Stripe (1h)`,
+      details: { count: stripeRejected, windowHours: 1 },
+    })
+  } else if (stripeRejected >= STRIPE_WEBHOOK_WARN_1H) {
+    alerts.push({
+      id: 'stripe_webhook_failures',
+      severity: 'warning',
+      category: 'product',
+      message: `${stripeRejected} falhas de webhook Stripe (1h)`,
+      details: { count: stripeRejected, windowHours: 1 },
+    })
+  }
+
+  const workerStaleMinutes = snapshot.ops?.workerStaleMinutes
+  const monitorWorker = process.env.OPS_WORKER_MONITOR?.trim() === '1'
+  if (workerStaleMinutes != null && workerStaleMinutes >= WORKER_STALE_MINUTES) {
+    alerts.push({
+      id: 'worker_stale',
+      severity: 'critical',
+      category: 'infra',
+      message: `Connect-worker sem heartbeat há ${Math.round(workerStaleMinutes)} min`,
+      details: {
+        workerLastTickAt: snapshot.ops?.workerLastTickAt,
+        staleMinutes: workerStaleMinutes,
+        thresholdMinutes: WORKER_STALE_MINUTES,
+      },
+    })
+  } else if (
+    monitorWorker
+    && snapshot.ops?.workerLastTickAt == null
+    && workerStaleMinutes == null
+  ) {
+    alerts.push({
+      id: 'worker_stale',
+      severity: 'critical',
+      category: 'infra',
+      message: 'Connect-worker: nenhum heartbeat registrado (OPS_WORKER_MONITOR=1)',
+      details: { thresholdMinutes: WORKER_STALE_MINUTES },
     })
   }
 

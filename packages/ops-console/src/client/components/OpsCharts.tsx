@@ -1,0 +1,808 @@
+import type { ReactNode } from 'react'
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import type {
+  AvaProviderMixRow,
+  AvaTokenPercentiles,
+  BizAvaDailyRow,
+  BizDailyGrowthRow,
+  BizTotals,
+  OpsAlert,
+  OpsHourlyAvaEventBucket,
+  OpsHourlyAvaTokensBucket,
+  OpsHourlyCountBucket,
+  OpsHourlySyncBucket,
+  OpsMetricsSnapshot,
+  SyncPortalStatsRow,
+  FeatureHealthRow,
+} from '../ops.types.js'
+import { AIYRACARE_TOKENS } from '../theme/ops-theme.js'
+import {
+  OPS_PROBE_API_SLOW_MS,
+  OPS_PROBE_PG_SLOW_MS,
+  probeLatencyTone,
+} from '../theme/ops-thresholds.js'
+
+const C = {
+  primary: AIYRACARE_TOKENS.colorPrimary,
+  info: AIYRACARE_TOKENS.colorInfo,
+  success: AIYRACARE_TOKENS.colorSuccess,
+  error: AIYRACARE_TOKENS.colorError,
+  warning: '#F59E0B',
+  slate: '#94A3B8',
+  grid: '#E2E8F0',
+}
+
+const PIE_COLORS = [C.primary, C.info, C.success, C.warning, C.error, '#6366F1', '#14B8A6']
+
+function ChartFrame({
+  title,
+  subtitle,
+  height = 280,
+  clickable = false,
+  children,
+}: {
+  title: string
+  subtitle?: string
+  height?: number
+  clickable?: boolean
+  children: ReactNode
+}) {
+  return (
+    <div className={`ops-chart-frame${clickable ? ' ops-chart-frame--clickable' : ''}`}>
+      <div className="ops-chart-frame__head">
+        <div className="ops-chart-frame__title">{title}</div>
+        {subtitle && <div className="ops-chart-frame__subtitle">{subtitle}</div>}
+        {clickable && <div className="ops-chart-frame__hint">Clique para detalhes</div>}
+      </div>
+      <div className="ops-chart-frame__body" style={{ height }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function EmptyChart({ message }: { message: string }) {
+  return (
+    <div className="ops-chart-empty">{message}</div>
+  )
+}
+
+const PIE_CATEGORY_MAP: Record<string, 'sync' | 'llm' | 'product' | 'infra'> = {
+  Sync: 'sync',
+  LLM: 'llm',
+  Produto: 'product',
+  Infra: 'infra',
+}
+
+export function AlertCategoryPie({
+  alerts,
+  onCategoryClick,
+}: {
+  alerts: OpsAlert[]
+  onCategoryClick?: (category: OpsAlert['category'], name: string) => void
+}) {
+  const data = [
+    { name: 'Sync', value: alerts.filter((a) => a.category === 'sync').length },
+    { name: 'LLM', value: alerts.filter((a) => a.category === 'llm').length },
+    { name: 'Produto', value: alerts.filter((a) => a.category === 'product').length },
+    { name: 'Infra', value: alerts.filter((a) => a.category === 'infra').length },
+  ].filter((d) => d.value > 0)
+
+  if (!data.length) {
+    return (
+      <ChartFrame title="Alertas por categoria" subtitle="Distribuição atual">
+        <EmptyChart message="Sem alertas ativos" />
+      </ChartFrame>
+    )
+  }
+
+  return (
+    <ChartFrame title="Alertas por categoria" subtitle="Distribuição atual" clickable={Boolean(onCategoryClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={52}
+            outerRadius={88}
+            paddingAngle={2}
+            style={{ cursor: onCategoryClick ? 'pointer' : undefined }}
+            onClick={(entry) => {
+              const name = String(entry?.name ?? '')
+              const cat = PIE_CATEGORY_MAP[name]
+              if (cat && onCategoryClick) onCategoryClick(cat, name)
+            }}
+          >
+            {data.map((_, i) => (
+              <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function ClientErrorsTimeline({
+  rows,
+  onHourClick,
+}: {
+  rows: OpsHourlyCountBucket[]
+  onHourClick?: (row: OpsHourlyCountBucket) => void
+}) {
+  if (!rows.length) {
+    return (
+      <ChartFrame title="Erros cliente" subtitle="Por hora · 24h">
+        <EmptyChart message="Sem erros na janela" />
+      </ChartFrame>
+    )
+  }
+
+  return (
+    <ChartFrame title="Erros cliente" subtitle="Por hora · 24h" clickable={Boolean(onHourClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={rows}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          onClick={(state) => {
+            const payload = state?.activePayload?.[0]?.payload as OpsHourlyCountBucket | undefined
+            if (payload && onHourClick) onHourClick(payload)
+          }}
+          style={{ cursor: onHourClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={36} />
+          <Tooltip />
+          <Area type="monotone" dataKey="count" name="Erros" stroke={C.error} fill={C.error} fillOpacity={0.2} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function SyncJobsTimeline({
+  rows,
+  onHourClick,
+}: {
+  rows: OpsHourlySyncBucket[]
+  onHourClick?: (row: OpsHourlySyncBucket) => void
+}) {
+  if (!rows.length) {
+    return (
+      <ChartFrame title="Jobs sync" subtitle="OK vs falha · 24h">
+        <EmptyChart message="Sem jobs na janela" />
+      </ChartFrame>
+    )
+  }
+
+  return (
+    <ChartFrame title="Jobs sync" subtitle="OK vs falha · 24h" clickable={Boolean(onHourClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={rows}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          onClick={(state) => {
+            const payload = state?.activePayload?.[0]?.payload as OpsHourlySyncBucket | undefined
+            if (payload && onHourClick) onHourClick(payload)
+          }}
+          style={{ cursor: onHourClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={36} />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="success" name="OK" stackId="sync" fill={C.success} radius={[0, 0, 0, 0]} />
+          <Bar dataKey="failed" name="Falha" stackId="sync" fill={C.error} radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function PortalFailRateChart({
+  rows,
+  onPortalClick,
+}: {
+  rows: SyncPortalStatsRow[]
+  onPortalClick?: (portalType: string) => void
+}) {
+  if (!rows.length) {
+    return (
+      <ChartFrame title="Fail rate por portal" subtitle="Últimas 24h">
+        <EmptyChart message="Sem jobs" />
+      </ChartFrame>
+    )
+  }
+
+  const data = rows.map((r) => ({
+    portal: r.portalType,
+    failRate: r.failRatePct,
+    failed: r.failed,
+    total: r.total,
+  }))
+
+  return (
+    <ChartFrame title="Fail rate por portal" subtitle="Últimas 24h" clickable={Boolean(onPortalClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 8, right: 16, left: 8, bottom: 0 }}
+          onClick={(state) => {
+            const payload = state?.activePayload?.[0]?.payload as { portal: string } | undefined
+            if (payload?.portal && onPortalClick) onPortalClick(payload.portal)
+          }}
+          style={{ cursor: onPortalClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} horizontal={false} />
+          <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+          <YAxis type="category" dataKey="portal" tick={{ fontSize: 11 }} width={100} />
+          <Tooltip formatter={(v: number) => [`${v}%`, 'Fail rate']} />
+          <Bar dataKey="failRate" name="Fail %" fill={C.warning} radius={[0, 4, 4, 0]}>
+            {data.map((entry) => (
+              <Cell
+                key={entry.portal}
+                fill={entry.failRate >= 50 ? C.error : entry.failRate >= 20 ? C.warning : C.success}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function FeatureFailRateChart({
+  rows,
+  onFeatureClick,
+}: {
+  rows: FeatureHealthRow[]
+  onFeatureClick?: (row: FeatureHealthRow) => void
+}) {
+  const data = rows
+    .filter((r) => r.errorCount24h > 0 || r.usageSessions24h > 0)
+    .slice(0, 10)
+    .map((r) => ({
+      name: r.label,
+      failRate: r.failRatePct,
+      errors: r.errorCount24h,
+    }))
+
+  if (!data.length) {
+    return (
+      <ChartFrame title="Fail rate por feature" subtitle="Top áreas · 24h">
+        <EmptyChart message="Sem dados de uso/erro" />
+      </ChartFrame>
+    )
+  }
+
+  return (
+    <ChartFrame title="Fail rate por feature" subtitle="Top áreas · 24h" height={320} clickable={Boolean(onFeatureClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 8, right: 16, left: 8, bottom: 0 }}
+          onClick={(state) => {
+            const name = String(state?.activePayload?.[0]?.payload?.name ?? '')
+            const row = rows.find((r) => r.label === name)
+            if (row && onFeatureClick) onFeatureClick(row)
+          }}
+          style={{ cursor: onFeatureClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} horizontal={false} />
+          <XAxis type="number" domain={[0, 'auto']} tick={{ fontSize: 11 }} unit="%" />
+          <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={140} />
+          <Tooltip />
+          <Bar dataKey="failRate" name="Fail %" fill={C.primary} radius={[0, 4, 4, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function AvaEventsTimeline({
+  rows,
+  onHourClick,
+}: {
+  rows: OpsHourlyAvaEventBucket[]
+  onHourClick?: (row: OpsHourlyAvaEventBucket) => void
+}) {
+  if (!rows.length) {
+    return (
+      <ChartFrame title="Turnos Ava" subtitle="Completo vs falha · 24h">
+        <EmptyChart message="Sem eventos Ava" />
+      </ChartFrame>
+    )
+  }
+
+  return (
+    <ChartFrame title="Turnos Ava" subtitle="Completo vs falha · 24h" clickable={Boolean(onHourClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={rows}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          onClick={(state) => {
+            const payload = state?.activePayload?.[0]?.payload as OpsHourlyAvaEventBucket | undefined
+            if (payload && onHourClick) onHourClick(payload)
+          }}
+          style={{ cursor: onHourClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={36} />
+          <Tooltip />
+          <Legend />
+          <Area type="monotone" dataKey="completed" name="OK" stackId="ava" stroke={C.success} fill={C.success} fillOpacity={0.35} />
+          <Area type="monotone" dataKey="failed" name="Falha" stackId="ava" stroke={C.error} fill={C.error} fillOpacity={0.4} />
+          <Area type="monotone" dataKey="quotaBlocked" name="Quota" stackId="ava" stroke={C.warning} fill={C.warning} fillOpacity={0.35} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function AvaTokensTimeline({
+  rows,
+  onHourClick,
+}: {
+  rows: OpsHourlyAvaTokensBucket[]
+  onHourClick?: (row: OpsHourlyAvaTokensBucket) => void
+}) {
+  if (!rows.length) {
+    return (
+      <ChartFrame title="Tokens Ava" subtitle="Volume por hora · 24h">
+        <EmptyChart message="Sem turnos LLM" />
+      </ChartFrame>
+    )
+  }
+
+  return (
+    <ChartFrame title="Tokens Ava" subtitle="Volume por hora · 24h" clickable={Boolean(onHourClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={rows}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          onClick={(state) => {
+            const payload = state?.activePayload?.[0]?.payload as OpsHourlyAvaTokensBucket | undefined
+            if (payload && onHourClick) onHourClick(payload)
+          }}
+          style={{ cursor: onHourClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+          <YAxis yAxisId="tokens" tick={{ fontSize: 11 }} width={48} />
+          <YAxis yAxisId="turns" orientation="right" tick={{ fontSize: 11 }} width={36} allowDecimals={false} />
+          <Tooltip />
+          <Legend />
+          <Line yAxisId="tokens" type="monotone" dataKey="tokens" name="Tokens" stroke={C.primary} strokeWidth={2} dot={false} />
+          <Line yAxisId="turns" type="monotone" dataKey="turns" name="Turnos" stroke={C.info} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function ProviderMixChart({
+  rows,
+  onProviderClick,
+}: {
+  rows: AvaProviderMixRow[]
+  onProviderClick?: (row: AvaProviderMixRow) => void
+}) {
+  if (!rows.length) {
+    return (
+      <ChartFrame title="Mix de provedores" subtitle="Turnos · 24h">
+        <EmptyChart message="Sem turnos" />
+      </ChartFrame>
+    )
+  }
+
+  const data = rows.map((r) => ({
+    name: `${r.provider}/${r.model}`,
+    turns: r.turns,
+  }))
+
+  return (
+    <ChartFrame title="Mix de provedores" subtitle="Turnos · 24h" clickable={Boolean(onProviderClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="turns"
+            nameKey="name"
+            innerRadius={48}
+            outerRadius={88}
+            paddingAngle={1}
+            style={{ cursor: onProviderClick ? 'pointer' : undefined }}
+            onClick={(entry) => {
+              const name = String(entry?.name ?? '')
+              const row = rows.find((r) => `${r.provider}/${r.model}` === name)
+              if (row && onProviderClick) onProviderClick(row)
+            }}
+          >
+            {data.map((_, i) => (
+              <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+        </PieChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+const PROBE_FILL = {
+  success: C.success,
+  warning: C.warning,
+  error: C.error,
+} as const
+
+export function ProbeLatencyChart({
+  probe,
+  onTargetClick,
+}: {
+  probe: OpsMetricsSnapshot['probe']
+  onTargetClick?: (target: 'api' | 'postgres' | 'neo4j') => void
+}) {
+  if (!probe) {
+    return (
+      <ChartFrame title="Latência da sonda" subtitle="Última leitura">
+        <EmptyChart message="Probe não disponível" />
+      </ChartFrame>
+    )
+  }
+
+  const data = [
+    {
+      name: 'API',
+      ms: probe.api.latencyMs,
+      ok: probe.api.ok,
+      slowMs: OPS_PROBE_API_SLOW_MS,
+      tone: probeLatencyTone(probe.api.ok, probe.api.latencyMs, OPS_PROBE_API_SLOW_MS),
+    },
+    {
+      name: 'Postgres',
+      ms: probe.postgres.latencyMs,
+      ok: probe.postgres.ok,
+      slowMs: OPS_PROBE_PG_SLOW_MS,
+      tone: probeLatencyTone(probe.postgres.ok, probe.postgres.latencyMs, OPS_PROBE_PG_SLOW_MS),
+    },
+    ...(probe.neo4j
+      ? [{
+          name: 'Neo4j',
+          ms: probe.neo4j.latencyMs,
+          ok: probe.neo4j.ok,
+          slowMs: OPS_PROBE_PG_SLOW_MS,
+          tone: probeLatencyTone(probe.neo4j.ok, probe.neo4j.latencyMs, OPS_PROBE_PG_SLOW_MS),
+        }]
+      : []),
+  ]
+
+  return (
+    <ChartFrame
+      title="Latência da sonda"
+      subtitle={`Última leitura · limiar API ${OPS_PROBE_API_SLOW_MS} ms · PG ${OPS_PROBE_PG_SLOW_MS} ms`}
+      clickable={Boolean(onTargetClick)}
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          onClick={(state) => {
+            const name = String(state?.activePayload?.[0]?.payload?.name ?? '').toLowerCase()
+            if (name === 'api' && onTargetClick) onTargetClick('api')
+            else if (name === 'postgres' && onTargetClick) onTargetClick('postgres')
+            else if (name === 'neo4j' && onTargetClick) onTargetClick('neo4j')
+          }}
+          style={{ cursor: onTargetClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 11 }} width={40} />
+          <Tooltip
+            formatter={(v: number, _name, item) => {
+              const row = item.payload as (typeof data)[number]
+              return [`${v} ms (limiar ${row.slowMs} ms)`, 'Latência']
+            }}
+          />
+          <Bar dataKey="ms" name="ms" radius={[6, 6, 0, 0]}>
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={PROBE_FILL[entry.tone]} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function AvaPercentilesCompareChart({
+  last24h,
+  last7d,
+  onWindowClick,
+}: {
+  last24h: AvaTokenPercentiles
+  last7d: AvaTokenPercentiles
+  onWindowClick?: (window: '24h' | '7d') => void
+}) {
+  const data = [
+    { window: '24h', p50: last24h.p50Tokens ?? 0, p95: last24h.p95Tokens ?? 0, turns: last24h.turns },
+    { window: '7d', p50: last7d.p50Tokens ?? 0, p95: last7d.p95Tokens ?? 0, turns: last7d.turns },
+  ]
+
+  if (!last24h.turns && !last7d.turns) {
+    return (
+      <ChartFrame title="Percentis Ava" subtitle="p50 / p95 tokens · 24h vs 7d">
+        <EmptyChart message="Sem turnos na janela" />
+      </ChartFrame>
+    )
+  }
+
+  return (
+    <ChartFrame title="Percentis Ava" subtitle="p50 / p95 tokens · 24h vs 7d" clickable={Boolean(onWindowClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          onClick={(state) => {
+            const window = String(state?.activePayload?.[0]?.payload?.window ?? '')
+            if ((window === '24h' || window === '7d') && onWindowClick) onWindowClick(window)
+          }}
+          style={{ cursor: onWindowClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="window" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 11 }} width={48} />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="p50" name="p50" fill={C.info} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="p95" name="p95" fill={C.primary} radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function BudgetUsageChart({
+  spentBrlCents,
+  remainingBrlCents,
+  monthlyBudgetBrlCents,
+  onClick,
+}: {
+  spentBrlCents: number
+  remainingBrlCents: number
+  monthlyBudgetBrlCents: number
+  onClick?: () => void
+}) {
+  const data = [
+    { name: 'Gasto', value: spentBrlCents },
+    { name: 'Restante', value: remainingBrlCents },
+  ]
+
+  return (
+    <ChartFrame
+      title="Orçamento interno"
+      subtitle={`Teto ${(monthlyBudgetBrlCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`}
+      clickable={Boolean(onClick)}
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+          onClick={() => onClick?.()}
+          style={{ cursor: onClick ? 'pointer' : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 11 }} width={56} tickFormatter={(v) => `${(v / 100).toFixed(0)}`} />
+          <Tooltip formatter={(v: number) => [(v / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), '']} />
+          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+            <Cell fill={C.error} />
+            <Cell fill={C.success} />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function InternalLlmOutcomeChart({
+  llmResolved,
+  localFallback,
+  budgetExhausted,
+  onOutcomeClick,
+}: {
+  llmResolved: number
+  localFallback: number
+  budgetExhausted: number
+  onOutcomeClick?: (outcome: 'llm' | 'fallback' | 'budget') => void
+}) {
+  const data = [
+    { name: 'LLM ok', value: llmResolved },
+    { name: 'Fallback', value: localFallback },
+    { name: 'Budget', value: budgetExhausted },
+  ].filter((d) => d.value > 0)
+
+  if (!data.length) {
+    return (
+      <ChartFrame title="Desfechos LLM interno" subtitle="Classificador / higiene">
+        <EmptyChart message="Sem chamadas" />
+      </ChartFrame>
+    )
+  }
+
+  const outcomeMap: Record<string, 'llm' | 'fallback' | 'budget'> = {
+    'LLM ok': 'llm',
+    Fallback: 'fallback',
+    Budget: 'budget',
+  }
+
+  return (
+    <ChartFrame title="Desfechos LLM interno" subtitle="Classificador / higiene" clickable={Boolean(onOutcomeClick)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={48}
+            outerRadius={88}
+            style={{ cursor: onOutcomeClick ? 'pointer' : undefined }}
+            onClick={(entry) => {
+              const key = outcomeMap[String(entry?.name ?? '')]
+              if (key && onOutcomeClick) onOutcomeClick(key)
+            }}
+          >
+            {data.map((_, i) => (
+              <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+function formatDayLabel(isoDay: string): string {
+  const [, month, day] = isoDay.split('-')
+  return `${day}/${month}`
+}
+
+function buildCumulativeSeries(rows: BizDailyGrowthRow[], totals: BizTotals) {
+  const sumAccounts = rows.reduce((n, r) => n + r.newAccounts, 0)
+  const sumPatients = rows.reduce((n, r) => n + r.newPatients, 0)
+  const sumFamilies = rows.reduce((n, r) => n + r.newFamilies, 0)
+  let accounts = totals.accounts - sumAccounts
+  let patients = totals.patients - sumPatients
+  let families = totals.families - sumFamilies
+  return rows.map((row) => {
+    accounts += row.newAccounts
+    patients += row.newPatients
+    families += row.newFamilies
+    return {
+      day: row.day,
+      label: formatDayLabel(row.day),
+      accounts,
+      patients,
+      families,
+    }
+  })
+}
+
+export function BizCumulativeGrowthTimeline({
+  rows,
+  totals,
+}: {
+  rows: BizDailyGrowthRow[]
+  totals: BizTotals
+}) {
+  const data = buildCumulativeSeries(rows, totals)
+  if (!data.length) {
+    return (
+      <ChartFrame title="Totais ao longo do tempo" subtitle="Evolução acumulada · 30d">
+        <EmptyChart message="Sem dados" />
+      </ChartFrame>
+    )
+  }
+  return (
+    <ChartFrame title="Totais ao longo do tempo" subtitle="Evolução acumulada · 30d">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 11 }} width={44} allowDecimals={false} />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="accounts" name="Usuários" stroke={C.primary} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="patients" name="Pacientes" stroke={C.info} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="families" name="Famílias" stroke={C.success} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function BizGrowthTimeline({ rows }: { rows: BizDailyGrowthRow[] }) {
+  const data = rows.map((row) => ({
+    ...row,
+    label: formatDayLabel(row.day),
+  }))
+  if (!data.length) {
+    return (
+      <ChartFrame title="Crescimento" subtitle="Novos cadastros · 30d">
+        <EmptyChart message="Sem dados" />
+      </ChartFrame>
+    )
+  }
+  return (
+    <ChartFrame title="Crescimento" subtitle="Novos por dia · usuários, pacientes, famílias">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 11 }} width={36} allowDecimals={false} />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="newAccounts" name="Usuários" stroke={C.primary} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="newPatients" name="Pacientes" stroke={C.info} strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="newFamilies" name="Famílias" stroke={C.success} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}
+
+export function BizAvaTurnsTimeline({ rows }: { rows: BizAvaDailyRow[] }) {
+  const data = rows.map((row) => ({
+    ...row,
+    label: formatDayLabel(row.day),
+  }))
+  if (!data.length) {
+    return (
+      <ChartFrame title="Ava — turnos" subtitle="30d">
+        <EmptyChart message="Sem turnos Ava" />
+      </ChartFrame>
+    )
+  }
+  return (
+    <ChartFrame title="Ava — turnos" subtitle="Iniciados vs concluídos vs não resolvidos">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 11 }} width={36} allowDecimals={false} />
+          <Tooltip />
+          <Legend />
+          <Area type="monotone" dataKey="started" name="Iniciados" stroke={C.info} fill={`${C.info}33`} />
+          <Area type="monotone" dataKey="completed" name="Concluídos" stroke={C.success} fill={`${C.success}33`} />
+          <Area type="monotone" dataKey="unresolved" name="Não resolvidos" stroke={C.error} fill={`${C.error}33`} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  )
+}

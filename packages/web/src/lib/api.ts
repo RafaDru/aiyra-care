@@ -84,15 +84,6 @@ async function request<T>(path: string, options?: RequestInit & { skipErrorRepor
   return res.json()
 }
 
-function opsRequestHeaders(): Record<string, string> {
-  const key =
-    (typeof localStorage !== 'undefined' ? localStorage.getItem('opsMetricsKey') : null)
-    ?? import.meta.env.VITE_OPS_METRICS_KEY
-  const headers: Record<string, string> = {}
-  if (key) headers['x-internal-ops-key'] = key
-  return headers
-}
-
 import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream.js'
 
 export const api = {
@@ -111,10 +102,30 @@ export const api = {
       id: string,
       body: { mode?: 'summary' | 'full'; ttlHours?: number },
     ) =>
-      request<{ token: string; expiresAt: string; shareUrl: string }>(
+      request<{ token: string; expiresAt: string; shareUrl: string; referralCode: string | null }>(
         `/patients/${id}/clinical-export/shares`,
         { method: 'POST', body: JSON.stringify(body) },
       ),
+    emailClinicalExportShare: (
+      id: string,
+      body: {
+        recipientEmail: string
+        doctorName?: string
+        mode?: 'summary' | 'full'
+        ttlHours?: number
+      },
+    ) =>
+      request<{
+        ok: boolean
+        shareUrl: string
+        referralCode: string | null
+        expiresAt: string
+        emailSent: boolean
+        emailSkipped: boolean
+      }>(`/patients/${id}/clinical-export/shares/email`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
     timeline: (id: string, params?: import('./api.types.js').PatientTimelineQuery) => {
       const qs = new URLSearchParams()
       if (params?.timelineMonths) qs.set('timelineMonths', String(params.timelineMonths))
@@ -150,6 +161,13 @@ export const api = {
       request<import('./api.types.js').VaccineScheduleItem[]>(`/patients/${patientId}/vaccine-schedule`),
     developmentMilestones: (patientId: string) =>
       request<import('./api.types.js').DevelopmentMilestone[]>(`/patients/${patientId}/development-milestones`),
+    conectesusSync: (patientId: string, opts?: { silent?: boolean }) => {
+      const qs = opts?.silent ? '?silent=1' : ''
+      return request<import('./api.types.js').ConecteSUSSyncResult>(
+        `/patients/${patientId}/conectesus/sync${qs}`,
+        { method: 'POST' },
+      )
+    },
   },
   growthRecords: {
     list: (patientId?: string) => request<import('./api.types.js').GrowthRecord[]>(`/growth-records${patientId ? `?patientId=${patientId}` : ''}`),
@@ -362,6 +380,29 @@ export const api = {
         body: JSON.stringify(body),
         skipErrorReport: true,
       }),
+  },
+  support: {
+    createReport: (body: {
+      category: import('./api.types.js').SupportReportCategory
+      description?: string
+      route?: string
+      sessionId?: string
+      patientId?: string
+      consentTechnical: boolean
+      consentScreenshot: boolean
+      consentProfileAccess: boolean
+      screenshotData?: string
+      appVersion?: string
+      userAgent?: string
+      clientContext?: Record<string, unknown>
+    }) =>
+      request<import('./api.types.js').SupportReportSummary>('/support/reports', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        skipErrorReport: true,
+      }),
+    listReports: () =>
+      request<import('./api.types.js').SupportReportSummary[]>('/support/reports'),
   },
   llm: {
     quota: () => request<import('./api.types.js').LlmUsageQuota>('/llm/usage/quota'),
@@ -613,10 +654,19 @@ export const api = {
     create: (data: object) => request<import('./api.types.js').IntegrationLink>('/integration-links', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: object) => request<import('./api.types.js').IntegrationLink>(`/integration-links/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: string) => request<void>(`/integration-links/${id}`, { method: 'DELETE' }),
-    sync: (id: string, opts?: { silent?: boolean; force?: boolean }) => {
+    sync: (id: string, opts?: {
+      silent?: boolean
+      force?: boolean
+      amilMarcaOtica?: string
+      amilUtilizationStart?: string
+      amilUtilizationEnd?: string
+    }) => {
       const params = new URLSearchParams()
       if (opts?.silent) params.set('silent', '1')
       if (opts?.force) params.set('force', '1')
+      if (opts?.amilMarcaOtica) params.set('amilMarcaOtica', opts.amilMarcaOtica)
+      if (opts?.amilUtilizationStart) params.set('amilUtilizationStart', opts.amilUtilizationStart)
+      if (opts?.amilUtilizationEnd) params.set('amilUtilizationEnd', opts.amilUtilizationEnd)
       const q = params.toString()
       return request<{ jobId: string | null; silent?: boolean; skipped?: boolean; reason?: string }>(
         `/integration-links/${id}/sync${q ? `?${q}` : ''}`,
@@ -625,6 +675,11 @@ export const api = {
     },
     virtualCard: (id: string) => request<import('./api.types.js').UnimedVirtualCard>(`/integration-links/${id}/virtual-card`, { method: 'POST' }),
     syncStatus: (id: string) => request<import('./api.types.js').IntegrationLinkSyncStatus>(`/integration-links/${id}/sync-status`),
+    submitSyncOtp: (jobId: string, code: string) =>
+      request<{ ok: boolean }>(`/integration-links/sync-progress/${jobId}/otp`, {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      }),
     syncProgress: (jobId: string) => request<{
       step: string
       message: string
@@ -766,24 +821,7 @@ export const api = {
   },
   account: {
     freshness: () => request<import('./api.types.js').AccountFreshnessView>('/account/freshness'),
-  },
-  ops: {
-    metrics: () =>
-      request<import('./ops.types.js').OpsMetricsResponse>('/ops/metrics', {
-        headers: opsRequestHeaders(),
-        skipErrorReport: true,
-      }),
-    alerts: () =>
-      request<{ generatedAt: string; alerts: import('./ops.types.js').OpsAlert[] }>('/ops/alerts', {
-        headers: opsRequestHeaders(),
-        skipErrorReport: true,
-      }),
-    dispatchCheck: () =>
-      request<import('./ops.types.js').OpsAlertsDispatchResult>('/ops/alerts/check', {
-        method: 'POST',
-        headers: opsRequestHeaders(),
-        skipErrorReport: true,
-      }),
+    govbrSession: () => request<import('./api.types.js').GovBrSessionView>('/account/govbr-session'),
   },
   auth: {
     me: () => request<import('./api.types.js').AuthSyncResponse>('/auth/me'),
@@ -804,6 +842,164 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
+  },
+  notifications: {
+    getPreferences: () =>
+      request<{ syncEscalationEmail: boolean; syncEscalationOptedInAt: string | null }>(
+        '/account/notification-preferences',
+      ),
+    updatePreferences: (syncEscalationEmail: boolean) =>
+      request<{ syncEscalationEmail: boolean; syncEscalationOptedInAt: string | null }>(
+        '/account/notification-preferences',
+        { method: 'PATCH', body: JSON.stringify({ syncEscalationEmail }) },
+      ),
+  },
+  careCircles: {
+    list: () =>
+      request<Array<{ id: string; name: string; memberRole?: string }>>('/care-circles'),
+    dashboard: () =>
+      request<Array<{ id: string; name: string; memberRole: string; patientIds: string[] }>>(
+        '/care-circles/dashboard',
+      ),
+    get: (id: string) =>
+      request<{
+        id: string
+        name: string
+        memberRole: string
+        members: Array<{
+          id: string
+          accountId: string
+          role: string
+          email?: string | null
+          displayName?: string | null
+        }>
+        patients: Array<{ patientId: string; patientName: string }>
+      }>(`/care-circles/${id}`),
+    create: (name: string) =>
+      request<{ id: string; name: string }>('/care-circles', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      }),
+    update: (id: string, name: string) =>
+      request<{ id: string; name: string }>(`/care-circles/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+      }),
+    listLinkablePatients: (id: string) =>
+      request<Array<{ id: string; name: string }>>(`/care-circles/${id}/linkable-patients`),
+    linkPatient: (circleId: string, patientId: string) =>
+      request<void>(`/care-circles/${circleId}/patients`, {
+        method: 'POST',
+        body: JSON.stringify({ patientId }),
+      }),
+    unlinkPatient: (circleId: string, patientId: string) =>
+      request<void>(`/care-circles/${circleId}/patients/${patientId}`, { method: 'DELETE' }),
+  },
+  patientAccess: {
+    listGrants: (patientId: string) =>
+      request<Array<{
+        id: string
+        accountId: string
+        accessLevel: string
+        membershipRole: string
+        email?: string | null
+        displayName?: string | null
+      }>>(`/patients/${patientId}/access-grants`),
+    revokeGrant: (patientId: string, grantId: string) =>
+      request<void>(`/patients/${patientId}/access-grants/${grantId}`, { method: 'DELETE' }),
+    listAccessAudit: (patientId: string) =>
+      request<Array<{
+        id: string
+        action: string
+        accessLevel: string | null
+        membershipRole: string | null
+        createdAt: string
+        actor: { accountId: string; displayName: string | null; email: string | null }
+        target: { accountId: string; displayName: string | null; email: string | null } | null
+      }>>(`/patients/${patientId}/access-audit`),
+  },
+  familyAccess: {
+    listInvites: () =>
+      request<Array<{
+        id: string
+        inviteeEmail: string
+        patientIds: string[]
+        accessLevel: string
+        status: string
+        expiresAt: string
+      }>>('/family-access/invites'),
+    listOwnedPatients: (careCircleId?: string) =>
+      request<Array<{ id: string; name: string }>>(
+        careCircleId
+          ? `/family-access/owned-patients?careCircleId=${encodeURIComponent(careCircleId)}`
+          : '/family-access/owned-patients',
+      ),
+    createInvite: (data: {
+      inviteeEmail: string
+      patientIds: string[]
+      accessLevel?: string
+      careCircleId?: string
+      legitimacyAck: true
+    }) =>
+      request<{ acceptUrl: string; id: string }>('/family-access/invites', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    revokeInvite: (id: string) =>
+      request<void>(`/family-access/invites/${id}`, { method: 'DELETE' }),
+    previewInvite: (token: string) =>
+      request<{
+        inviteeEmail: string
+        patientNames: string[]
+        inviterDisplayName: string | null
+        circleName?: string | null
+        accessLevel: string
+        status: string
+        expiresAt: string
+      }>(`/family-access/invites/preview/${token}`),
+    acceptInvite: (token: string) =>
+      request('/family-access/invites/accept', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+      }),
+    listProfileSharesSent: () =>
+      request<Array<{
+        id: string
+        patientId: string
+        patientName: string
+        targetAccountEmail: string
+        targetCircleId: string | null
+        targetCircleName: string | null
+        status: string
+        expiresAt: string
+      }>>('/family-access/profile-shares/sent'),
+    listProfileSharesIncoming: () =>
+      request<Array<{
+        id: string
+        patientId: string
+        patientName: string
+        targetAccountEmail: string
+        status: string
+        expiresAt: string
+      }>>('/family-access/profile-shares/incoming'),
+    createProfileShare: (data: {
+      patientId: string
+      targetAccountEmail: string
+      legitimacyAck: true
+    }) =>
+      request('/family-access/profile-shares', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    acceptProfileShare: (data: { inviteId: string; circleId: string }) =>
+      request(`/family-access/profile-shares/${data.inviteId}/accept`, {
+        method: 'POST',
+        body: JSON.stringify({ circleId: data.circleId }),
+      }),
+    declineProfileShare: (id: string) =>
+      request<void>(`/family-access/profile-shares/${id}/decline`, { method: 'POST' }),
+    revokeProfileShare: (id: string) =>
+      request<void>(`/family-access/profile-shares/${id}`, { method: 'DELETE' }),
   },
   project: {
     context: () => request<import('./api.types.js').ProjectContext>('/project/context'),

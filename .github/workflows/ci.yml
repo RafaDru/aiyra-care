@@ -19,7 +19,39 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run build
+      - run: npm run validate:migrations
       - run: npm run test:critical
+      - run: npm run test:ops
+      - run: OPS_SMOKE_SKIP_HTTP=1 npm run ops:smoke
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: aiyracare_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install API workspace
+        working-directory: packages/api
+        run: npm ci
+      - name: Migration dry-run
+        run: npm run migrate:dry-run
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aiyracare_ci
 
   web:
     runs-on: ubuntu-latest
@@ -33,6 +65,12 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run build
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+      - name: Playwright smoke (sem API)
+        run: npx playwright test smoke.spec.ts
+        env:
+          E2E_SMOKE_ONLY: 1
 
   agents:
     runs-on: ubuntu-latest

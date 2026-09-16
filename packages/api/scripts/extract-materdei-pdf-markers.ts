@@ -18,7 +18,7 @@ const keyFile = resolve(root, process.env.GOOGLE_APPLICATION_CREDENTIALS || 'ope
 process.env.GOOGLE_APPLICATION_CREDENTIALS = keyFile
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 async function runMaterDeiBackfill() {

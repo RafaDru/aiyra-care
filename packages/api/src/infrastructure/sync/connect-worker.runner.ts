@@ -65,12 +65,22 @@ export async function runConnectWorkerBatch(
   return report
 }
 
+export interface ConnectWorkerLoopOptions {
+  log?: ConnectWorkerLogger | FastifyBaseLogger
+  onBatchStart?: () => void
+}
+
 export function startConnectWorkerLoop(
   pool: Pool,
   intervalMs: number,
-  log?: ConnectWorkerLogger | FastifyBaseLogger,
+  logOrOptions?: ConnectWorkerLogger | FastifyBaseLogger | ConnectWorkerLoopOptions,
 ): { stop: () => void } {
-  const logger = asConnectWorkerLogger(log)
+  const options: ConnectWorkerLoopOptions = logOrOptions
+    && typeof logOrOptions === 'object'
+    && 'onBatchStart' in logOrOptions
+    ? logOrOptions
+    : { log: logOrOptions as ConnectWorkerLogger | FastifyBaseLogger | undefined }
+  const logger = asConnectWorkerLogger(options.log)
   let intervalHandle: ReturnType<typeof setInterval> | null = null
   let running = false
 
@@ -81,6 +91,7 @@ export function startConnectWorkerLoop(
     }
     running = true
     try {
+      options.onBatchStart?.()
       await runConnectWorkerBatch(pool, logger)
     } catch (err) {
       logger.error('Connect worker batch failed', {

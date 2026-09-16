@@ -12,6 +12,7 @@ export type AuthProfile =
   | 'session_basic'
   | 'session_token'
   | 'interactive_govbr'
+  | 'interactive_otp'
   | 'api_key'
 
 /** O que o connector pode extrair em sync. */
@@ -36,6 +37,8 @@ export interface ConnectorDefinition {
   capabilities: ConnectorCapability[]
   /** Mapeia integration_links.portal_type legado durante migração */
   legacyPortalType?: string
+  /** Submarcas visíveis na UI (Grupo Fleury: Pardini, Fleury, a+, Labs a+). */
+  subBrands?: string[]
   /** Etapas de sync para UI (espelho de sync-portal-profile) */
   syncStepKeys?: string[]
 }

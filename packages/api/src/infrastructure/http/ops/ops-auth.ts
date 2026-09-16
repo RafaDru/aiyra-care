@@ -27,5 +27,8 @@ export function assertOpsMetricsAccess(
 }
 
 export function isOpsRoute(path: string): boolean {
-  return path === '/ops/metrics' || path === '/ops/alerts' || path === '/ops/alerts/check'
+  return path === '/ops/metrics'
+    || path === '/ops/alerts'
+    || path === '/ops/alerts/check'
+    || path === '/ops/dev-audit-bridge'
 }

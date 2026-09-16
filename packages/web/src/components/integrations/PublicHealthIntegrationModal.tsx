@@ -7,6 +7,7 @@ import { api } from '../../lib/api.js'
 import type {
   CadernetaFamilyImportPlan,
   CadernetaMatchReason,
+  GovBrSessionView,
   Patient,
   ScraperResult,
 } from '../../lib/api.types.js'
@@ -55,9 +56,11 @@ export function PublicHealthIntegrationModal({
   const [plan, setPlan] = useState<CadernetaFamilyImportPlan | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [patient, setPatient] = useState<Patient | null>(null)
+  const [govbrSession, setGovbrSession] = useState<GovBrSessionView | null>(null)
 
   const option = portal ? getIntegrationOption(portal) : undefined
   const isCaderneta = portal === 'caderneta'
+  const govbrReady = govbrSession?.sessionReady ?? false
   const hasPreview = isCaderneta ? plan != null : result != null
   const canImport = isCaderneta
     ? plan != null && plan.matches.length > 0
@@ -73,6 +76,9 @@ export function PublicHealthIntegrationModal({
         })
       }
     }).catch(() => setPatient(null))
+    api.account.govbrSession()
+      .then(setGovbrSession)
+      .catch(() => setGovbrSession(null))
   }, [open, patientId, portal, form])
 
   const resetState = () => {
@@ -99,6 +105,8 @@ export function PublicHealthIntegrationModal({
         setResult(null)
         const data = await api.scraper.conectesus({ cpf: values.cpf.replace(/\D/g, '') })
         setResult(data)
+        const session = await api.account.govbrSession().catch(() => null)
+        if (session) setGovbrSession(session)
         message.success(`${data.vaccines.length} vacinas, ${data.exams.length} exames encontrados`)
       } else {
         setLoading(true)
@@ -107,6 +115,8 @@ export function PublicHealthIntegrationModal({
         setPlan(null)
         const data = await api.scraper.caderneta()
         setResult(data)
+        const session = await api.account.govbrSession().catch(() => null)
+        if (session) setGovbrSession(session)
         const bundles = data.childBundles ?? []
         if (bundles.length === 0) {
           setError('Nenhum dependente encontrado na Minha Família do gov.br.')
@@ -287,13 +297,15 @@ export function PublicHealthIntegrationModal({
             </Form>
           )}
           <Alert
-            type="info"
+            type={govbrReady ? 'success' : 'info'}
             showIcon
-            icon={<ChromeOutlined />}
+            icon={govbrReady ? <CloudDownloadOutlined /> : <ChromeOutlined />}
             message={
-              isCaderneta
-                ? <>Uma janela do navegador será aberta para login no <strong>gov.br</strong> como responsável. Não é necessário senha neste app — use a conta do pai/mãe na Minha Família.</>
-                : <>Uma janela do navegador será aberta para login no <strong>gov.br</strong>. Apenas o CPF é necessário aqui — a senha é solicitada pelo próprio gov.br.</>
+              govbrReady
+                ? 'Sessão gov.br ativa — a busca usa HTTP sem abrir navegador até a sessão expirar.'
+                : isCaderneta
+                  ? <>Na primeira vez, uma janela do navegador abre para login no <strong>gov.br</strong> como responsável. Depois, a sessão fica salva para reimportações.</>
+                  : <>Na primeira vez, uma janela abre para login no <strong>gov.br</strong>. Depois, reimportações usam a sessão salva (sem navegador).</>
             }
           />
         </>
@@ -303,11 +315,15 @@ export function PublicHealthIntegrationModal({
         <div style={{ textAlign: 'center', padding: '32px 0' }}>
           <Spin size="large" />
           <p style={{ marginTop: 16, fontSize: 15 }}>
-            <ChromeOutlined /> Uma janela do navegador foi aberta.
+            {govbrReady
+              ? <><CloudDownloadOutlined /> Buscando dados no ConecteSUS (sessão gov.br)...</>
+              : <><ChromeOutlined /> Uma janela do navegador foi aberta.</>}
           </p>
-          <p style={{ color: '#666' }}>
-            Faça o login no <strong>gov.br</strong> na janela e aguarde...
-          </p>
+          {!govbrReady && (
+            <p style={{ color: '#666' }}>
+              Faça o login no <strong>gov.br</strong> na janela e aguarde...
+            </p>
+          )}
         </div>
       )}
 

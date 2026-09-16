@@ -9,7 +9,16 @@ const __dirname = dirname(__filename)
 
 const PROJECT_ROOT = resolve(__dirname, '../../../../..')
 const PROJECT_CONTEXT_PATH = resolve(PROJECT_ROOT, 'docs/project-context.json')
+const FEATURES_INDEX_PATH = resolve(PROJECT_ROOT, 'docs/features/index.json')
 const MIGRATIONS_DIR = resolve(PROJECT_ROOT, 'database/relational')
+
+function loadFeaturesIndex() {
+  try {
+    return JSON.parse(readFileSync(FEATURES_INDEX_PATH, 'utf-8'))
+  } catch {
+    return undefined
+  }
+}
 
 function loadSnapshot(): ProjectContextSnapshot {
   const raw = readFileSync(PROJECT_CONTEXT_PATH, 'utf-8')
@@ -38,6 +47,7 @@ export class ProjectContextService {
     return {
       ...snapshot,
       migrations: listMigrations(),
+      features: loadFeaturesIndex(),
       historico: {
         sessionCount: sessions.length,
         sessions,

@@ -630,6 +630,7 @@ export interface HygieneCandidateItem {
 export type AvaProposedActionType =
   | 'integration_sync'
   | 'clinical_export'
+  | 'consult_visit_open'
   | 'hygiene_merge'
   | 'hygiene_dismiss'
 
@@ -657,7 +658,11 @@ export type ProductEventName =
   | 'ava_context_unpin'
   | 'ava_patient_switch_hook'
   | 'ava_proposed_action_executed'
+  | 'ava_proposed_action_shown'
+  | 'ava_proposed_action_failed'
+  | 'ava_turn_recorded'
   | 'sync_job_terminal'
+  | 'sync_job_started'
   | 'billing_checkout_started'
   | 'billing_checkout_completed'
   | 'hygiene_prompt_shown'
@@ -665,6 +670,50 @@ export type ProductEventName =
   | 'onboarding_step'
   | 'landing_page_view'
   | 'landing_cta_click'
+  | 'family_invite_created'
+  | 'family_invite_accepted'
+  | 'family_invite_revoked'
+  | 'family_invite_failed'
+  | 'patient_access_revoked'
+  | 'compliance_accepted'
+  | 'compliance_gate_redirect'
+  | 'notification_optin_changed'
+  | 'app_screen_viewed'
+  | 'support_report_submitted'
+  | 'consult_visit_share_created'
+  | 'consult_visit_link_copied'
+  | 'consult_visit_print'
+  | 'consult_visit_whatsapp'
+  | 'consult_visit_email_sent'
+  | 'referral_link_created'
+  | 'referral_link_opened'
+  | 'clinician_share_viewed'
+  | 'clinician_share_feedback'
+  | 'clinician_share_cta_click'
+  | 'quick_capture_opened'
+  | 'quick_capture_saved'
+
+export type SupportReportCategory =
+  | 'technical_bug'
+  | 'incorrect_data'
+  | 'ux_confusion'
+  | 'other'
+
+export interface SupportReportSummary {
+  id: string
+  status: 'open' | 'triaged' | 'resolved' | 'closed'
+  category: SupportReportCategory
+  description: string | null
+  route: string | null
+  patientId: string | null
+  consentTechnical: boolean
+  consentScreenshot: boolean
+  consentProfileAccess: boolean
+  profileAccessUntil: string | null
+  hasScreenshot: boolean
+  expiresAt: string
+  createdAt: string
+}
 
 export interface AvaConversation {
   id: string
@@ -792,7 +841,7 @@ export interface CareReminderRow {
   id: string
   patientId: string
   healthThreadId: string | null
-  reminderKind: 'measurement' | 'medication'
+  reminderKind: 'measurement' | 'medication' | 'sus_reimport'
   targetCode: string | null
   medicationName: string | null
   title: string
@@ -1409,6 +1458,8 @@ export interface IntegrationLink {
   sessionReady?: boolean
   /** Portal em modo degradado — scheduled/silent sync pausado. */
   syncDegraded?: boolean
+  /** Credenciais ou sessão precisam de atenção após falha de sync. */
+  authAttention?: 'none' | 'credentials' | 'session'
 }
 
 export interface SyncNoveltySummary {
@@ -1688,6 +1739,21 @@ export interface CadernetaFamilyImportResult {
   plan: CadernetaFamilyImportPlan
   byPatient: Array<{ patientId: string; patientName: string; result: CadernetaImportResult }>
   totals: CadernetaImportResult
+}
+
+export interface GovBrSessionView {
+  sessionReady: boolean
+  expiresAt: string | null
+  conectesusLastFetchAt: string | null
+}
+
+export interface ConecteSUSSyncResult {
+  skipped?: string
+  importedVaccines?: number
+  importedExams?: number
+  skippedDuplicates?: number
+  fetchedVaccines?: number
+  fetchedExams?: number
 }
 
 export interface AccountFreshnessView {

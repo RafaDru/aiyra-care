@@ -1,4 +1,6 @@
 import fs from 'fs'
+import { join } from 'path'
+import { REPO_ROOT } from './repo-root.mjs'
 
 function scanFile(path) {
   const t = fs.readFileSync(path, 'utf8')
@@ -13,6 +15,6 @@ function scanFile(path) {
   console.log('chunk refs:', [...new Set(chunkRefs)].join(','))
 }
 
-scanFile('C:/Users/rafae/Documents/Filhos/tmp-chunk-7653.js')
+scanFile(join(REPO_ROOT, 'tmp-chunk-7653.js'))
 console.log('---')
-scanFile('C:/Users/rafae/Documents/Filhos/tmp-chunk-2076.js')
+scanFile(join(REPO_ROOT, 'tmp-chunk-2076.js'))

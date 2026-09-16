@@ -6,6 +6,7 @@ import { estimateTokenUsage } from '../../domain/llm/llm-internal-prompt.js'
 import { buildClassificationMessages, parseClassificationJson } from '../../domain/llm/llm-internal-prompt.js'
 import type { SemanticCacheRepositoryPort } from '../../domain/semantic-classification/semantic-classification.types.js'
 import { normalizeHealthLabel } from '../../domain/classification/label-classification.js'
+import { normalizeOpenCodeSessionId } from '../../domain/llm/opencode-session.js'
 
 export interface LlmBackedLabelClassifierOptions {
   /** Motor local determinístico (regras + fuzzy) — sempre como base. Deve ter classifySync. */
@@ -101,10 +102,13 @@ export class LlmBackedLabelClassifier implements LabelClassifierEngine {
     }
 
     try {
+      const labelSessionId = this.patientId
+        ? normalizeOpenCodeSessionId(`label-classify:${this.patientId}`)
+        : normalizeOpenCodeSessionId('label-classify:global')
       const completion = await this.router.completeJson(
         messages,
         this.tier,
-        { allowLlmDataSharing: this.allowZenFree },
+        { allowLlmDataSharing: this.allowZenFree, opencodeSessionId: labelSessionId },
       )
       await this.costService.recordCall({
         provider: completion.provider,

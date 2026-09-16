@@ -51,4 +51,11 @@ describe('CareReminderService', () => {
     const done = await service.complete(r.id)
     expect(done.nextFireAt.getTime()).toBeGreaterThan(Date.now() - 5000)
   })
+
+  it('scheduleSusReimportReminder upserts sus reminder', async () => {
+    const r = await service.scheduleSusReimportReminder('p1')
+    expect(r.reminderKind).toBe('sus_reimport')
+    const again = await service.scheduleSusReimportReminder('p1')
+    expect(again.id).toBe(r.id)
+  })
 })

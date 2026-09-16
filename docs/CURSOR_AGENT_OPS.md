@@ -1,6 +1,6 @@
 # Operação agêntica no Cursor — guard-rails LLM-agnósticos
 
-> **Última atualização:** 2026-08-24  
+> **Última atualização:** 2026-09-16  
 > Objetivo: operação efetiva com **troca de modelo** (Composer, Claude, Gemini, etc.) sem perder segurança de código e processo.
 
 ## O que é estável (não depende do LLM)
@@ -8,6 +8,7 @@
 | Camada | Artefato | Função |
 |--------|----------|--------|
 | Contexto fixo | `AGENTS.md`, `docs/PROJETO.md`, `docs/project-context.json` | Stack, comandos, arquitetura |
+| Documentação | `docs/DOCUMENTATION_SYSTEM.md`, `docs/features/` | Tracking negócio + feature cards |
 | Skills | `.cursor/skills/aiyracare-*` | Procedimentos de revisão tiered |
 | Hooks | `.cursor/hooks.json` + scripts Node | Auditoria + bloqueio determinístico |
 | Rules | `AGENTS.md` (workspace rules) | Políticas de commit, PR, serviços |
@@ -20,12 +21,34 @@ O modelo **interpreta** skills; hooks e CI **executam** independentemente do mod
 
 | Evento | Script | Comportamento |
 |--------|--------|---------------|
-| `sessionStart` | `session-start.mjs` | Log em `docs/dev-audit/sessions/` |
-| `beforeShellExecution` | `before-shell.mjs` | Audita; bloqueia destrutivos; pede confirmação em commit/push |
+| `sessionStart` | `session-start.mjs` | Log + **`additional_context`** com `docs/AGENT_BOOTSTRAP.md` |
+| `preCompact` | `pre-compact.mjs` | Log compactação; flag para re-injetar bootstrap |
+| `postToolUse` | `post-tool-bootstrap.mjs` | Após compact, re-injeta bootstrap na próxima ferramenta |
+| `beforeShellExecution` | `before-shell.mjs` | Audita; bloqueia destrutivos; commit/push ask; **registra `qa:run`**; aviso regressão em push |
 | `afterFileEdit` | `after-file-edit.mjs` | Log path + ferramenta |
+| `afterFileEdit` | `after-file-edit-doc-ritual.mjs` | Marca ritual docs se produto sem `docs/features` |
+| `afterFileEdit` | `after-file-edit-qa-ritual.mjs` | Marca ritual QA se produto sem `qa:run` |
 | `preToolUse` | `pre-tool-guard.mjs` | Bloqueia Write/Delete em `.env` e credenciais |
+| `stop` | `stop-doc-ritual.mjs` | `followup_message` se ritual docs **ou QA** pendente (`loop_limit: 3`) |
+
+Regras always-on: `.cursor/rules/agent-bootstrap.mdc`, **`.cursor/rules/qa-delivery.mdc`**.
 
 Configuração: `.cursor/hooks.json`. Debug: aba **Hooks** no Cursor.
+
+## Cursor Projects + My Machines (execução local)
+
+O modo **Projects** coordena na nuvem; para rodar tool calls no checkout desta máquina (Postgres local, hooks, Playwright, MCP stdio), use **My Machines**.
+
+| Artefato | Função |
+|----------|--------|
+| `docs/CURSOR_WORKSPACE.md` | Runbook completo (setup, verificação, limitações) |
+| `scripts/cursor-worker-start.ps1` | Sobe worker `NotebookRafael` |
+| `scripts/cursor-worker-install-autostart.ps1` | Tarefa Windows `AiyraCare-CursorMyMachinesWorker` no logon |
+| `scripts/cursor-worker-repair.ps1` | Fix `better-sqlite3` após `agent update` (Windows) |
+
+Verificação: `agent worker debug` → `Visibility: 1 worker`. No picker de ambiente: **My Machines** → `NotebookRafael`.
+
+Docs Cursor: [My Machines](https://cursor.com/docs/cloud-agent/my-machines) · [Projects](https://cursor.com/blog/projects).
 
 ## Skills obrigatórias por tipo de mudança
 
@@ -57,4 +80,17 @@ Invocar no chat antes de merge (tier ≥ 2):
 - `beforeSubmitPrompt` — detecção de secrets no prompt (opcional)
 - Hook `subagentStart` — limitar subagents em paths sensíveis
 - CI: E2E smoke + migration dry-run
-- Integrar `docs/dev-audit/` com `product_events` em staging (sem PHI)
+- Integrar `docs/dev-audit/` com `product_events` em staging (sem PHI) — **done** · `npm run dev-audit:bridge` · `GET /ops/dev-audit-bridge`
+
+## Sessão Cursor «Aiyra: Ops»
+
+Trabalho de observabilidade, console `:3013`, alertas e `support_reports` concentra-se no hub:
+
+| Doc | Conteúdo |
+|-----|----------|
+| [`docs/ops/README.md`](./ops/README.md) | Índice da sessão — **ler primeiro** |
+| [`docs/ops/CONSOLE.md`](./ops/CONSOLE.md) | Abas do console |
+| [`docs/ops/TELEMETRY.md`](./ops/TELEMETRY.md) | Queries PG, LGPD |
+| [`docs/ops/SUPPORT_REPORTS.md`](./ops/SUPPORT_REPORTS.md) | Chamados «Reportar problema» |
+
+Regra Cursor opcional: `.cursor/rules/aiyra-ops-session.mdc` (ativar neste chat).

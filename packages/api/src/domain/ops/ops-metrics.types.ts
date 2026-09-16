@@ -64,6 +64,217 @@ export interface ClientErrorFingerprintRow {
   lastSeenAt: string
 }
 
+export interface FeatureHealthRow {
+  featureKey: string
+  label: string
+  area: string
+  section: 'infra' | 'product' | 'sync' | 'ava' | 'cost'
+  routeExample?: string
+  usageEvents24h: number
+  usageSessions24h: number
+  errorCount24h: number
+  accountCount24h: number
+  failRatePct: number
+  signal: 'hot' | 'errors_only' | 'ok' | 'low_signal'
+}
+
+export interface OpsFeatureCatalogEntry {
+  key: string
+  label: string
+  area: string
+  section: FeatureHealthRow['section']
+  routeExample?: string
+  description?: string
+}
+
+export interface OpsHourlyBucket {
+  hour: string
+  label: string
+}
+
+export interface OpsHourlySyncBucket extends OpsHourlyBucket {
+  success: number
+  failed: number
+}
+
+export interface OpsHourlyAvaEventBucket extends OpsHourlyBucket {
+  completed: number
+  failed: number
+  quotaBlocked: number
+}
+
+export interface OpsHourlyCountBucket extends OpsHourlyBucket {
+  count: number
+}
+
+export interface OpsHourlyAvaTokensBucket extends OpsHourlyBucket {
+  turns: number
+  tokens: number
+}
+
+export interface OpsTimeSeries24h {
+  syncJobs: OpsHourlySyncBucket[]
+  avaEvents: OpsHourlyAvaEventBucket[]
+  clientErrors: OpsHourlyCountBucket[]
+  avaTokens: OpsHourlyAvaTokensBucket[]
+}
+
+export interface BizTotals {
+  accounts: number
+  patients: number
+  families: number
+  familyMemberAccounts: number
+  newAccounts30d: number
+  newPatients30d: number
+  newFamilies30d: number
+}
+
+export interface BizDailyGrowthRow {
+  day: string
+  newAccounts: number
+  newPatients: number
+  newFamilies: number
+}
+
+export interface BizFeatureUsageRow {
+  featureKey: string
+  eventCount: number
+  sessionCount: number
+  accountCount: number
+}
+
+export interface BizAvaFailureRow {
+  errorCode: string
+  count: number
+  lastSeenAt: string
+}
+
+export interface BizAvaProposedActionRow {
+  actionType: string
+  count: number
+  okCount: number
+}
+
+export interface BizAvaDailyRow {
+  day: string
+  started: number
+  completed: number
+  unresolved: number
+}
+
+export interface BizAvaIntentRow {
+  intent: string
+  turns: number
+  unsatisfactory: number
+  needsFullContext: number
+  revised: number
+}
+
+export interface BizAvaProposedFunnel {
+  shown: number
+  executed: number
+  failed: number
+  executionRatePct: number | null
+}
+
+export interface BizAvaReflectionRow {
+  severity: string
+  count: number
+}
+
+export interface BizAvaLearning {
+  intentBreakdown30d: BizAvaIntentRow[]
+  proposedFunnel30d: BizAvaProposedFunnel
+  reflectionBySeverity30d: BizAvaReflectionRow[]
+  unsatisfactoryRatePct: number | null
+  turnsRecorded30d: number
+}
+
+export interface BizAvaAnalytics {
+  started30d: number
+  completed30d: number
+  failed30d: number
+  quotaBlocked30d: number
+  unresolved30d: number
+  successRatePct: number | null
+  failures: BizAvaFailureRow[]
+  proposedActions: BizAvaProposedActionRow[]
+  daily30d: BizAvaDailyRow[]
+  learning: BizAvaLearning
+}
+
+export interface BizCompositionDomainRow {
+  domain: string
+  scopesTouched30d: number
+  patientsTouched30d: number
+}
+
+export interface BizDataComposition {
+  activeDomains30d: BizCompositionDomainRow[]
+}
+
+export interface BizActivationFunnel {
+  totalAccounts: number
+  accountsWithPatient: number
+  accountsWithIntegrationLink: number
+  accountsWithSyncSuccess7d: number
+  accountsOnboardingComplete: number
+}
+
+export interface BizEngagement {
+  wau: number
+  mau: number
+  wauOverMauPct: number | null
+  dormantAccounts30d: number
+}
+
+export interface BizSupportCategoryRow {
+  category: string
+  count: number
+}
+
+export interface BizSupportMetrics {
+  openCount: number
+  triagedCount: number
+  resolved7d: number
+  avgHoursToResolve7d: number | null
+  consentTechnicalPct: number | null
+  analysisPending: number
+  analysisCompleted: number
+  byCategory30d: BizSupportCategoryRow[]
+}
+
+export interface BizBillingMetrics {
+  checkoutStarted7d: number
+  checkoutCompleted7d: number
+  checkoutStarted30d: number
+  checkoutCompleted30d: number
+  paidPlans: number
+  purchasesCompleted30d: number
+  revenueBrlCents30d: number
+}
+
+export interface BizIntegrationPortalRow {
+  portalType: string
+  total7d: number
+  success7d: number
+  failRatePct: number
+  distinctLinks: number
+}
+
+export interface OpsBusinessAnalytics {
+  totals: BizTotals
+  growthDaily30d: BizDailyGrowthRow[]
+  activation: BizActivationFunnel
+  engagement: BizEngagement
+  topFeatures30d: BizFeatureUsageRow[]
+  ava: BizAvaAnalytics
+  composition: BizDataComposition
+  support: BizSupportMetrics
+  billing: BizBillingMetrics
+  integrationHealth7d: BizIntegrationPortalRow[]
+}
+
 export interface OpsProbeSnapshot {
   checkedAt: string
   api: {
@@ -113,7 +324,20 @@ export interface OpsMetricsSnapshot {
   }
   errorFingerprints24h: ErrorFingerprintRow[]
   clientErrorFingerprints24h: ClientErrorFingerprintRow[]
+  featureHealth24h: FeatureHealthRow[]
+  featureCatalog: OpsFeatureCatalogEntry[]
+  timeSeries24h: OpsTimeSeries24h
   probe?: OpsProbeSnapshot
+  ops?: {
+    workerLastTickAt: string | null
+    workerStaleMinutes: number | null
+    stripeWebhookRejected1h: number
+  }
+  supportReports?: {
+    openCount: number
+    submitted24h: number
+  }
+  business?: OpsBusinessAnalytics
 }
 
 export type OpsAlertSeverity = 'warning' | 'critical'

@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-11",
+  "description": "Índice de capacidades de produto — ver docs/DOCUMENTATION_SYSTEM.md",
+  "features": [
+    {
+      "id": "family-access-model",
+      "epicId": "family-access-model",
+      "title": "Família — múltiplos cuidadores e acesso por perfil",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/family-access-model.md",
+      "domainDoc": "docs/FAMILY_ACCESS_MODEL.md",
+      "routes": ["/", "/patients/:id", "/settings/family", "/settings/account", "/invite/accept"],
+      "api": [
+        "GET /patients/:id/access-grants",
+        "POST /patients/:id/access-grants",
+        "DELETE /patients/:id/access-grants/:grantId",
+        "GET/POST/DELETE /family-access/invites",
+        "POST /family-access/invites/accept",
+        "GET/POST/DELETE /family-access/profile-shares",
+        "POST /family-access/profile-shares/:id/accept",
+        "GET/POST/PATCH /care-circles",
+        "GET/POST/DELETE /care-circles/:id/members",
+        "GET/POST/DELETE /care-circles/:id/patients",
+        "GET /care-circles/dashboard"
+      ],
+      "helpTopics": ["familia-multiplos-cuidadores", "quem-pode-ver-perfil-saude"],
+      "tags": ["conta", "lgpd", "família", "acl"]
+    },
+    {
+      "id": "beneficiary-view-filter",
+      "epicId": "amil-routing-classifier",
+      "title": "Sincronizar Amil — filtro período e beneficiário",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/amil-sync-options.md",
+      "domainDoc": "docs/SYNC_DELTA.md",
+      "routes": ["/patients/:id"],
+      "api": ["POST /integration-links/:id/sync?amilMarcaOtica&amilUtilizationStart&amilUtilizationEnd"],
+      "helpTopics": ["sincronizar-amil", "atendimentos-amil-periodo"],
+      "tags": ["amil", "integrações", "sync"]
+    },
+    {
+      "id": "hygiene-neo4j-candidate",
+      "epicId": "data-hygiene-dedup",
+      "title": "Higienização — arestas DUPLICATE_CANDIDATE no Neo4j",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P2",
+      "doc": "docs/features/hygiene-neo4j-candidates.md",
+      "domainDoc": "docs/DATA_HYGIENE.md",
+      "routes": ["/patients/:id"],
+      "api": ["GET /hygiene/candidates", "POST /hygiene/candidates/:id/resolve"],
+      "helpTopics": ["duplicatas-exames-vacinas"],
+      "tags": ["higienização", "neo4j", "dedup"]
+    },
+    {
+      "id": "b2b-platform-orgs",
+      "epicId": "b2b-partner-platform",
+      "title": "Organizações B2B — API primitives",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P3",
+      "doc": "docs/features/b2b-organizations-api.md",
+      "domainDoc": "docs/B2B_PARTNERS.md",
+      "routes": [],
+      "api": ["GET/POST/PATCH/DELETE /organizations", "GET/POST/PATCH/DELETE /organizations/:id/members"],
+      "helpTopics": [],
+      "tags": ["b2b", "organizations", "api"]
+    },
+    {
+      "id": "support-user-reports",
+      "epicId": "prod-run-intelligence",
+      "title": "Reportar problema — suporte com consentimento",
+      "status": "in_progress",
+      "category": "tecnico",
+      "priority": "P1",
+      "doc": "docs/features/support-user-reports.md",
+      "domainDoc": "docs/OBSERVABILITY.md",
+      "routes": ["*"],
+      "api": ["POST /support/reports", "GET /support/reports", "GET /support/reports/:id"],
+      "helpTopics": [],
+      "tags": ["suporte", "lgpd", "observabilidade", "bugs"]
+    },
+    {
+      "id": "patient-clinical-export",
+      "epicId": "family-day-to-day",
+      "title": "Export clínico — Levar na consulta (link, QR, PDF)",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/patient-clinical-export.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/patients/:id", "/clinical-export/:token"],
+      "api": [
+        "GET /patients/:id/clinical-export",
+        "POST /patients/:id/clinical-export/shares",
+        "GET /clinical-export/share/:token"
+      ],
+      "helpTopics": [],
+      "tags": ["export", "clínico", "consulta", "share", "família"]
+    },
+    {
+      "id": "family-quick-capture",
+      "epicId": "family-day-to-day",
+      "title": "«+ Registro rápido» global",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/family-quick-capture.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/*"],
+      "api": [
+        "POST /health-threads/:id/entries",
+        "POST /measurements/batch",
+        "POST /medication-administrations",
+        "POST /scheduled-events",
+        "POST /documents/upload"
+      ],
+      "helpTopics": [],
+      "tags": ["captura", "dia a dia", "família", "medidas", "agenda"]
+    },
+    {
+      "id": "family-day-timeline",
+      "epicId": "family-day-to-day",
+      "title": "Bloco «Hoje» na Carteira",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/family-day-timeline.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/patients/:id?tab=wallet"],
+      "api": [
+        "GET /scheduled-events",
+        "GET /care-reminders/pending",
+        "GET /measurements/timeline"
+      ],
+      "helpTopics": [],
+      "tags": ["carteira", "timeline", "dia a dia", "agenda"]
+    },
+    {
+      "id": "patient-health-thread",
+      "epicId": "family-day-to-day",
+      "title": "Health thread — investigação e acompanhamento",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/patient-health-thread.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/patients/:id"],
+      "api": [
+        "POST /health-threads/wizard/investigation",
+        "GET /health-threads",
+        "GET /health-threads/:id/detail"
+      ],
+      "helpTopics": [],
+      "tags": ["acompanhamento", "investigação", "health-thread", "clínico"]
+    },
+    {
+      "id": "business-analytics-ops",
+      "epicId": "business-analytics",
+      "title": "Analytics de negócio (console ops)",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/business-analytics-ops.md",
+      "domainDoc": "docs/OBSERVABILITY.md",
+      "routes": [],
+      "api": ["GET /ops/metrics"],
+      "helpTopics": [],
+      "tags": ["ops", "analytics", "negócio", "sem-phi"]
+    },
+    {
+      "id": "documentation-knowledge-base",
+      "epicId": "documentation-knowledge-base",
+      "title": "Base de conhecimento — features, ajuda e tracking",
+      "status": "in_progress",
+      "category": "tecnico",
+      "priority": "P2",
+      "doc": "docs/DOCUMENTATION_SYSTEM.md",
+      "domainDoc": "docs/DOCUMENTATION_SYSTEM.md",
+      "routes": ["/roadmap"],
+      "api": ["GET /project/context", "GET /roadmap"],
+      "helpTopics": [],
+      "tags": ["documentação", "agentes", "ava"]
+    }
+  ]
+}

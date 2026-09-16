@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-08-31",
+  "updatedAt": "2026-09-11",
   "title": "Roadmap AiyraCare",
-  "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Tecnologia de go-live:** pronta no que é código; pendências com badge 🧑‍⚖️ dependem de revisão humana/profissional (advogado, contador, consultor, médico).",
+  "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Fase atual (pré-CNPJ):** estruturar ambientes dev/staging/prod, massas e esteiras enquanto a regularização fiscal permite cobrança live; paralelo: discovery B2B (médicos, planos, labs, farmácias). **Go-live B2C:** código pronto no essencial; pendências com badge 🧑‍⚖️ dependem de revisão humana (advogado, contador, consultor, médico).",
   "reviewBadges": [
     {
       "id": "legal",
@@ -104,7 +104,8 @@
     "Entidades e atributos no PG; relações de negócio no PG; Neo4j para caminhos, pins de sessão Ava e candidatos de higienização.",
     "Os portais (Unimed, Amil, etc.) trazem pedaços soltos — o app organiza e liga o que importa para o cuidado.",
     "O resumo clínico é montado de forma determinística (sem “inventar” com IA) para você confiar no que leva ao pediatra.",
-    "Sync silencioso quando possível; browser ou login manual só quando o portal exige."
+    "Sync silencioso quando possível; browser ou login manual só quando o portal exige.",
+    "Prioridades P0–P4 e numeração de itens **organizam temas** — a ordem de execução pode divergir (ex.: ambientes antes de B2B marketplace)."
   ],
   "epics": [
     {
@@ -178,7 +179,7 @@
       "items": [
         {
           "id": "connect-contract",
-          "title": "Pacote @open-health/connect (registry + payload canônico)",
+          "title": "Pacote @aiyra-care/connect (registry + payload canônico)",
           "status": "done",
           "detail": "Fase 1: tipos, CONNECTOR_REGISTRY, CanonicalSyncBatch; scrapers ainda em packages/api."
         },
@@ -241,6 +242,12 @@
           "title": "Intervenção humana só em falha recuperável",
           "status": "done",
           "detail": "useSilentWalletSync na Carteira; modal só em Integrações; toast se silent falha (login/CDP)."
+        },
+        {
+          "id": "connect-portal-auth",
+          "title": "Classificação genérica falha de auth (credenciais vs sessão)",
+          "status": "done",
+          "detail": "portal-auth-failure.ts; auth_attention em integration_links; failure_kind em sync_jobs; avisos UI Integrações."
         }
       ]
     },
@@ -280,20 +287,26 @@
         {
           "id": "fleury-otp-sync-ui",
           "title": "Sync interativo OTP na UI (modal código)",
-          "status": "planned",
-          "detail": "Primeiro login SMS/WhatsApp/e-mail; persistir refresh; silent só com sessionReady."
+          "status": "done",
+          "detail": "POST /integration-links/sync-progress/:jobId/otp; modal FleuryOtpSyncInput; browser headless com OTP in-app (FLEURY_PRECISION_OTP_IN_APP=1)."
         },
         {
           "id": "fleury-unified-connector",
           "title": "Connector grupo_fleury_precision_care (multi-marca)",
-          "status": "planned",
-          "detail": "Evoluir hermes_pardini ou novo portal_type; marca configurável; Connect registry."
+          "status": "in_progress",
+          "detail": "CONNECTOR_REGISTRY + GET /connect/connectors; subBrands; auth interactive_otp; scraper ainda em api."
         },
         {
           "id": "fleury-ui-label",
           "title": "UI «Grupo Fleury / Precision Care» (não só Hermes)",
           "status": "done",
-          "detail": "Fase 1: card integrações, busca por marca, chips/sync Grupo Fleury, logos em public/brands/fleury. Pendente: badge em exames + landing."
+          "detail": "Fase 1: card integrações, busca por marca, chips/sync Grupo Fleury, logos em public/brands/fleury."
+        },
+        {
+          "id": "fleury-ui-exam-badge",
+          "title": "Badge laboratório nos exames (fase 2)",
+          "status": "done",
+          "detail": "Coluna laboratório com marca + selo Grupo Fleury; filtro por submarca; timeline popover; fleuryLabBrand em notes no sync."
         },
         {
           "id": "fleury-legal-review",
@@ -559,14 +572,55 @@
         {
           "id": "int-source-tag-brand-tint",
           "title": "Padrão de Origem com Logos e Tinting de Operadora",
-          "status": "planned",
-          "detail": "Evoluir o SourceTag nas listagens de entidades (exames, consultas, autorizações, vacinas) para adotar as logomarcas, ícones e paletas de cores no estilo de cartões/tinting da tela de Convênios."
+          "status": "done",
+          "detail": "SourceTag usa brandForPortal (Grupo Fleury para hermes_pardini), logo + faixa lateral tint."
         },
         {
           "id": "int-amil-correlacao",
           "title": "Amil — heurística correlação autorização ↔ atendimento",
           "status": "planned",
           "detail": "Desenvolver heurística para vincular medical_records/exams da Amil com authorizations por paciente, data, procedimento e prestador, dado que a API não fornece ID de correlação. (Perg. 5)."
+        }
+      ]
+    },
+    {
+      "id": "sus-public-health",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "SUS — ConecteSUS e Caderneta",
+      "summary": "Import guiado gov.br; sessão persistida (reimport sem browser). Próximo: Carteira silenciosa + Vacinas.",
+      "status": "done",
+      "statusLabel": "ConecteSUS + reimport + lembrete",
+      "items": [
+        {
+          "id": "sus-import-core",
+          "title": "Import ConecteSUS + Caderneta (gov.br)",
+          "status": "done",
+          "detail": "PublicHealthIntegrationModal; POST /scraper/conectesus; connectors government no Connect."
+        },
+        {
+          "id": "sus-govbr-session",
+          "title": "Sessão gov.br persistida (migration 053)",
+          "status": "done",
+          "detail": "govbr_sessions por conta; GET /account/govbr-session; reimport HTTP sem browser; PublicHealthScrapeService."
+        },
+        {
+          "id": "sus-docs",
+          "title": "Documentação SUS_CONECTESUS.md",
+          "status": "done",
+          "detail": "Arquitetura hexagonal, fluxo primeira/reimport, referências código."
+        },
+        {
+          "id": "sus-reimport-ux",
+          "title": "UX reimport guiado (Vacinas + Integrações)",
+          "status": "done",
+          "detail": "SusPublicHealthBanner em Vacinas; POST /patients/:id/conectesus/sync; silent Carteira via useSilentConecteSUSSync."
+        },
+        {
+          "id": "sus-reminder",
+          "title": "Lembrete opcional reimport (6–12 meses)",
+          "status": "done",
+          "detail": "care_reminders sus_reimport (054); schedule após sync SUS; CareReminderBanner; SUS_REIMPORT_REMINDER_DAYS default 180."
         }
       ]
     },
@@ -1212,6 +1266,181 @@
       ]
     },
     {
+      "id": "family-access-model",
+      "category": "negocio",
+      "priority": "P1",
+      "title": "Família — múltiplos cuidadores e acesso por perfil",
+      "summary": "Separar conta (login/pagador), círculo familiar e perfil de saúde; convites com escopo por paciente; suporte a famílias reconstituídas (mesmo filho, visibilidades diferentes).",
+      "status": "done",
+      "statusLabel": "MVP família completo — e-mail transacional opcional via Resend",
+      "items": [
+        {
+          "id": "family-access-model-doc",
+          "title": "Modelo conceitual conta × círculo × perfil",
+          "status": "done",
+          "detail": "docs/FAMILY_ACCESS_MODEL.md — matriz João/Maria/Francisco/Vitória; FHIR/Novix; fases 0–3.",
+          "reviewBadge": ["legal", "medical"]
+        },
+        {
+          "id": "family-access-glossary-ui",
+          "title": "Glossário produto — Cuidador, Família, Perfil de saúde",
+          "status": "done",
+          "detail": "Chaves i18n family.glossary; copy convites e círculos em /settings/family.",
+          "reviewBadge": ["content"]
+        },
+        {
+          "id": "family-access-grants-schema",
+          "title": "ACL explícito — grants por conta e paciente",
+          "status": "done",
+          "detail": "Migration 057 `patient_access_grants`; backfill; API GET/POST/DELETE `/patients/:id/access-grants`; drawer «Quem tem acesso» no perfil; limite 2 co-admins full.",
+          "reviewBadge": ["security", "legal"]
+        },
+        {
+          "id": "family-access-invite-flow",
+          "title": "Convite por e-mail — co-admin com escopo de perfis",
+          "status": "done",
+          "detail": "058 `patient_access_invites`; 060 `care_circle_id` no convite; API `/family-access/invites` + `/invite/accept`; seletor de família na UI; link copiável; checkbox LGPD.",
+          "reviewBadge": ["legal", "security"]
+        },
+        {
+          "id": "family-access-care-circles",
+          "title": "Care circles — agrupamento Família A / B",
+          "status": "done",
+          "detail": "059 care_circles + members + patient_circle_links; API /care-circles + /dashboard; UI /settings/family (criar, renomear, vincular perfis); backfill «Minha família»; dashboard agrupado por família.",
+          "reviewBadge": ["legal"]
+        },
+        {
+          "id": "family-access-blended-patient",
+          "title": "Mesmo perfil em dois círculos (custódia compartilhada)",
+          "status": "done",
+          "detail": "Migration 063 patient_profile_share_invites + link_kind shared em patient_circle_links; titular convida outra família; aceite vincula perfil ao círculo receptor; dashboard filtra por grants; UI ProfileShareCard em /settings/family.",
+          "reviewBadge": ["legal", "medical"]
+        },
+        {
+          "id": "family-access-audit-log",
+          "title": "Trilha de auditoria — grant/revoke e acesso sensível",
+          "status": "done",
+          "detail": "Migration 062 patient_access_audit_events; GET /patients/:id/access-audit; eventos em grant/convite; product_events patient_access_granted; UI histórico no drawer.",
+          "reviewBadge": ["legal", "security"]
+        },
+        {
+          "id": "family-access-transactional-email",
+          "title": "E-mail transacional — convite cuidador e compartilhamento entre famílias",
+          "status": "done",
+          "detail": "FamilyAccessEmailService + adapter Resend (RESEND_API_KEY); envio assíncrono em createInvite e profile share; noop sem chave; templates pt-BR.",
+          "reviewBadge": ["legal", "content"]
+        }
+      ]
+    },
+    {
+      "id": "family-day-to-day",
+      "category": "negocio",
+      "priority": "P1",
+      "title": "Dia a dia — captura rápida + levar na consulta",
+      "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
+      "status": "done",
+      "statusLabel": "D1–D5 + suites QA — referral billing aguarda jurídico",
+      "items": [
+        {
+          "id": "family-day-to-day-discovery",
+          "title": "Discovery UX + canais médico",
+          "status": "done",
+          "detail": "docs/discovery/day-to-day-clinician-access.md — captura, export tiers, fases D1–D5."
+        },
+        {
+          "id": "clinician-share-wizard",
+          "title": "Wizard «Levar na consulta» (link + QR + PDF)",
+          "status": "done",
+          "detail": "ConsultVisitWizardModal + rota pública /clinical-export/:token; CTA no perfil (contexto clínico)."
+        },
+        {
+          "id": "family-quick-capture",
+          "title": "«+ Registro rápido» global",
+          "status": "done",
+          "detail": "QuickCaptureSheet no header; 5 tipos; lente Ava; telemetria quick_capture_*."
+        },
+        {
+          "id": "family-day-timeline",
+          "title": "Bloco «Hoje» na Carteira",
+          "status": "done",
+          "detail": "WalletTodayPanel na Carteira; agenda/lembretes/registros do dia; CTAs captura e consulta."
+        },
+        {
+          "id": "clinician-share-email-referral",
+          "title": "E-mail ao médico + código referral no share",
+          "status": "done",
+          "detail": "POST .../shares/email; migration 066; ?ref= na URL; telemetria referral_link_*; sem billing."
+        },
+        {
+          "id": "clinician-share-portal",
+          "title": "Portal médico leve (página pública)",
+          "status": "done",
+          "detail": "ClinicalExportSharePage com UX médico, feedback útil, CTA landing; telemetria clinician_share_* pública."
+        }
+      ]
+    },
+    {
+      "id": "documentation-knowledge-base",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Base de conhecimento — tracking negócio + agentes",
+      "summary": "Sistema em camadas: roadmap.json (entrega) + feature cards + help/FAQ + project/context; GitHub Projects como espelho operacional.",
+      "status": "in_progress",
+      "statusLabel": "Em andamento",
+      "items": [
+        {
+          "id": "documentation-system-spec",
+          "title": "Especificação DOCUMENTATION_SYSTEM.md",
+          "status": "done",
+          "detail": "Tiers 0–3; GitHub Projects complementar; fluxo ao entregar; ordem de leitura Ava/LLM."
+        },
+        {
+          "id": "documentation-features-index",
+          "title": "Feature cards + index.json",
+          "status": "done",
+          "detail": "docs/features/* + index.json; GET /project/context inclui features; template _TEMPLATE.md."
+        },
+        {
+          "id": "documentation-help-topics",
+          "title": "Tópicos de ajuda (FAQ)",
+          "status": "done",
+          "detail": "docs/help/* — Amil, duplicatas, múltiplos cuidadores, acesso LGPD."
+        },
+        {
+          "id": "documentation-hub-readme",
+          "title": "Hub docs/README.md",
+          "status": "done",
+          "detail": "Índice navegável por área; link em PROJETO.md e AGENTS.md."
+        },
+        {
+          "id": "documentation-hooks-bootstrap",
+          "title": "Hooks bootstrap pós-compactação + ritual docs",
+          "status": "done",
+          "detail": "sessionStart additional_context; preCompact+postToolUse re-inject; afterFileEdit doc-ritual; stop followup; agent-bootstrap.mdc; AGENT_BOOTSTRAP.md."
+        },
+        {
+          "id": "documentation-github-labels",
+          "title": "Labels roadmap:* em issues/PRs",
+          "status": "planned",
+          "detail": "Convenção label roadmap:<item-id>; opcional sync GitHub Project ↔ roadmap.json."
+        },
+        {
+          "id": "ava-help-knowledge-base",
+          "title": "API ajuda para Ava (RAG leve)",
+          "status": "planned",
+          "detail": "GET /help/topics + citação docs/help; aceleradores com helpTopic id.",
+          "reviewBadge": ["medical"]
+        },
+        {
+          "id": "documentation-in-app-help",
+          "title": "UI Ajuda / Dúvidas no app",
+          "status": "planned",
+          "detail": "Drawer ou /help consumindo API; busca por tópico; i18n en.",
+          "reviewBadge": ["content"]
+        }
+      ]
+    },
+    {
       "id": "settings-area-structure",
       "category": "negocio",
       "priority": "P2",
@@ -1313,8 +1542,8 @@
         {
           "id": "ava-health-guardrails",
           "title": "Guardrails — Ava só em contexto de saúde",
-          "status": "planned",
-          "detail": "Bloquear temas fora de saúde/cuidado familiar (código, automação na plataforma, etc.); respostas dentro de limites de segurança e LGPD.",
+          "status": "done",
+          "detail": "classifyAvaUserMessage + resposta fixa sem LLM para off-topic óbvio; AVA_HEALTH_GUARDRAIL=0 desliga; heurística pt-BR (código, finanças, etc.).",
           "reviewBadge": ["legal", "security"]
         }
       ]
@@ -1325,8 +1554,8 @@
       "priority": "P2",
       "title": "Ava — contexto visível (pins + hooks)",
       "summary": "Painel lateral: pacientes, exames, acompanhamentos no contexto; troca de paciente com hooks; compactação gerenciada.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "ava-session-pins",
@@ -1395,8 +1624,8 @@
       "priority": "P2",
       "title": "Higienização de dados (estilo Google Photos)",
       "summary": "Detector na inserção; job semanal; prompt no login; merge só com confirmação. docs/DATA_HYGIENE.md.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "hygiene-candidates-table",
@@ -1413,20 +1642,20 @@
         {
           "id": "hygiene-weekly-job",
           "title": "Varredura semanal por conta",
-          "status": "planned",
-          "detail": "npm run scan:hygiene; agendar em connect-worker."
+          "status": "done",
+          "detail": "HYGIENE_SCAN_INTERVAL_MS no connect-worker (default 0); npm run scan:hygiene manual."
         },
         {
           "id": "hygiene-login-ui",
           "title": "Modal proativo no login",
-          "status": "planned",
-          "detail": "Photos-style; dismiss = not duplicate."
+          "status": "done",
+          "detail": "HygieneLoginPrompt em AppLayout; snooze local; dismiss = not duplicate."
         },
         {
           "id": "hygiene-neo4j-candidate",
           "title": "Arestas DUPLICATE_CANDIDATE no grafo",
-          "status": "planned",
-          "detail": "Opcional; PG authoritative."
+          "status": "done",
+          "detail": "HygieneGraphProjector — DUPLICATE_CANDIDATE + CANONICAL_SAME_AS; PG authoritative."
         }
       ]
     },
@@ -1639,8 +1868,8 @@
       "priority": "P2",
       "title": "Classificador de rótulos Amil (consulta/exame) + roteamento canônico",
       "summary": "Motor modular Hexagonal (port + engine + adapter) que classifica descrições de 'Atendimentos Realizados' e roteia consulta→medical_records, exame→exams. Reutilizável em integração e jobs. docs/CLASSIFICATION_ENGINE.md.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "status": "done",
+      "statusLabel": "Entregue",
       "items": [
         {
           "id": "classifier-port-engine",
@@ -1663,8 +1892,8 @@
         {
           "id": "classifier-llm-fallback",
           "title": "Hook fallback LLM (llm-router) para rótulos ambíguos",
-          "status": "in_progress",
-          "detail": "LlmBackedLabelClassifier + testes; integração completa no fluxo Amil sync pendente de tuning."
+          "status": "done",
+          "detail": "LlmBackedLabelClassifier via buildClassificationClassifier no PortalSyncOrchestrator (Amil sync)."
         },
         {
           "id": "classifier-embedding-engine",
@@ -1675,8 +1904,8 @@
         {
           "id": "beneficiary-view-filter",
           "title": "Seletor de período/beneficiário na tela Atendimentos Amil",
-          "status": "planned",
-          "detail": "Fetch todas as faixas; comparar raw para dedup antes do destino."
+          "status": "done",
+          "detail": "Modal AmilSyncOptionsModal + query params amilMarcaOtica/amilUtilization*; sub-etapa fetch-utilizacao."
         }
       ]
     },
@@ -1686,8 +1915,8 @@
       "priority": "P2",
       "title": "Pipeline de entrega dev → beta",
       "summary": "Ciclo mínimo para merges seguros: contexto, hooks, tier review, CI. docs/DELIVERY_PIPELINE.md.",
-      "status": "in_progress",
-      "statusLabel": "Hooks + CI endurecido",
+      "status": "done",
+      "statusLabel": "Gates + dry-run + runbook beta",
       "items": [
         {
           "id": "del-hooks-audit",
@@ -1700,6 +1929,12 @@
           "title": "Documentação operação agêntica LLM-agnóstica",
           "status": "done",
           "detail": "docs/CURSOR_AGENT_OPS.md — skills, hooks, troca de modelo."
+        },
+        {
+          "id": "del-cursor-my-machines",
+          "title": "Cursor Projects — My Machines worker local",
+          "status": "done",
+          "detail": "Worker NotebookRafael; autostart Windows; scripts/cursor-worker-*.ps1; docs/CURSOR_WORKSPACE.md."
         },
         {
           "id": "del-ci-vitest-critical",
@@ -1722,20 +1957,79 @@
         {
           "id": "del-e2e-smoke",
           "title": "Smoke E2E web mínimo",
-          "status": "planned",
-          "detail": "Login → paciente → exames; Playwright em CI opcional."
+          "status": "done",
+          "detail": "Playwright packages/web/e2e/smoke.spec.ts — login + landing; CI web job."
         },
         {
           "id": "del-migration-dry-run",
           "title": "Migration dry-run em PR",
-          "status": "planned",
-          "detail": "Script apply-migration contra PG ephemeral ou validação SQL."
+          "status": "done",
+          "detail": "npm run migrate:dry-run; job migrations em ci.yml (Postgres 16 efêmero + apply-all-migrations)."
         },
         {
           "id": "del-deploy-runbook",
           "title": "Deploy beta + runbook",
+          "status": "done",
+          "detail": "docs/infra/DEPLOY_BETA_RUNBOOK.md — API+web+ops+worker+PG; rollback; secrets; checklist MVP beta."
+        }
+      ]
+    },
+    {
+      "id": "qa-e2e-platform",
+      "category": "tecnico",
+      "priority": "P1",
+      "title": "QA integrado — suites manuais + E2E CI",
+      "summary": "Processo QA como analista: suite por feature, regressão main, execução paralela com massas isoladas. docs/testing/QA_PROCESS.md.",
+      "status": "in_progress",
+      "statusLabel": "Onda 1 gate PR + Onda 2 nightly CI — promover gate após 7 noites verdes",
+      "items": [
+        {
+          "id": "qa-process-docs",
+          "title": "Documentação processo QA + catálogo suites",
+          "status": "done",
+          "detail": "docs/testing/*; suites/index.json; npm run qa:list|qa:run|qa:run-all."
+        },
+        {
+          "id": "qa-hooks-enforcement",
+          "title": "Hooks Cursor — ritual QA em stop + push",
+          "status": "done",
+          "detail": "qa-ritual.mjs; after-file-edit-qa-ritual; qa-delivery.mdc; before-shell aviso regressão."
+        },
+        {
+          "id": "qa-seed-family-matrix",
+          "title": "Seed QA matriz família (João/Maria/Francisco/Vitória)",
+          "status": "done",
+          "detail": "packages/api/scripts/seed-qa-family-matrix.mjs + fixture family-matrix.json; beforeAll family-access-matrix spec."
+        },
+        {
+          "id": "qa-e2e-core-auth",
+          "title": "Playwright core-auth-dashboard",
           "status": "planned",
-          "detail": "API+web+worker+PG; rollback; secrets; checklist MVP beta."
+          "detail": "packages/web/e2e/suites/core-auth-dashboard.spec.ts + auth helper Supabase test."
+        },
+        {
+          "id": "qa-ci-regression",
+          "title": "CI job e2e-regression (PG + API + Playwright)",
+          "status": "done",
+          "detail": ".github/workflows/ci-e2e-regression.yml — lane Onda 1; ver AUTOMATION_ROADMAP.md."
+        },
+        {
+          "id": "qa-ci-business-full",
+          "title": "CI nightly business-full (Onda 2 Playwright)",
+          "status": "done",
+          "detail": ".github/workflows/ci-e2e-business-full.yml — 11 specs; cron 05:00 UTC + workflow_dispatch; artifacts 14d; npm run test:e2e:ci:business-full."
+        },
+        {
+          "id": "qa-e2e-family-matrix",
+          "title": "Playwright family-access-matrix",
+          "status": "done",
+          "detail": "Smoke UI /settings/family com seed matriz; 5 personas Supabase = épico seguinte (full matrix login)."
+        },
+        {
+          "id": "qa-ci-ava-e2e",
+          "title": "CI Ava smoke (AVA_TEST_MODE + Playwright)",
+          "status": "done",
+          "detail": "ava-companion-smoke + ava-guardrail-smoke na regression; AVA_TEST_MODE=1 nos workflows E2E."
         }
       ]
     },
@@ -1744,9 +2038,9 @@
       "category": "tecnico",
       "priority": "P2",
       "title": "Run — captura inteligente de bugs e acionamentos",
-      "summary": "Operação em produção: eventos sem PHI, alertas sync/LLM, triagem proativa. Complementa observability-platform.",
-      "status": "in_progress",
-      "statusLabel": "Em progresso",
+      "summary": "Operação em produção: eventos sem PHI, alertas sync/LLM, triagem proativa, UX do console ops (mapa de features, acesso×falha). Complementa observability-platform.",
+      "status": "done",
+      "statusLabel": "Entregue — validar em staging local",
       "items": [
         {
           "id": "run-product-events-ingest",
@@ -1774,9 +2068,50 @@
         },
         {
           "id": "run-ops-dashboard-web",
-          "title": "Dashboard ops /ops",
+          "title": "Console ops independente (:3013)",
           "status": "done",
-          "detail": "Alertas, probe, fingerprints; menu dev; x-internal-ops-key."
+          "detail": "packages/ops-console — PG direto, stack controls, não depende do web :5173."
+        },
+        {
+          "id": "run-ops-triage",
+          "title": "Triagem alertas + dispatch human_required",
+          "status": "done",
+          "detail": "ops-alert-triage.ts; OPS_ALERTS_DISPATCH_MODE; npm run ops:triage."
+        },
+        {
+          "id": "run-ops-console-visual-design",
+          "title": "Design console ops — hierarquia e thresholds",
+          "status": "done",
+          "detail": "ops-theme + tokens Aiyra; KPI alert; probe ok/warning/critical; microcopy por OpsPanel; ops-console.css.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "run-ops-console-charts-scales",
+          "title": "Gráficos e escalas no console ops",
+          "status": "done",
+          "detail": "Recharts: séries 24h, fail rate portal, percentis 24h/7d, sparklines KPI; timeSeries24h na API.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "run-ops-console-sections",
+          "title": "Seções por contexto de observabilidade",
+          "status": "done",
+          "detail": "Reorganizar :3013 em blocos narrativos: Infra (probe, stack), Produto/UX (erros cliente, mapa), Sync & integrações, Ava/LLM, Custo interno — título + «o que mede» + thresholds por seção.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "run-ops-feature-catalog",
+          "title": "Catálogo humanizado de features (mapa do app)",
+          "status": "done",
+          "detail": "Chave técnica (patient_detail, api:ava) → label PT, área (Carteira, Paciente, Integrações…), rota exemplo; ops-feature-catalog.ts; mapa no console :3013.",
+          "reviewBadge": ["design", "business"]
+        },
+        {
+          "id": "run-ops-feature-health-matrix",
+          "title": "Matriz acesso × fail rate (analytics × ops)",
+          "status": "done",
+          "detail": "Cruzar product_events (sessões/eventos 24h) com client_errors — taxa de falha por feature; tabela Saúde por feature no console ops.",
+          "reviewBadge": ["design"]
         },
         {
           "id": "run-ops-alert-channels-doc",
@@ -1799,14 +2134,39 @@
         {
           "id": "run-user-escalation",
           "title": "Acionamento proativo (opt-in)",
-          "status": "planned",
-          "detail": "Notificar família em sync crítico falho persistente; sem PHI no canal."
+          "status": "done",
+          "detail": "Migration 056; opt-in settings; incidentes open/resolved; webhook genérico sem PHI; 3 falhas/24h; product_events sync_escalation_*."
         },
         {
           "id": "run-dev-audit-bridge",
           "title": "Bridge dev-audit → staging metrics",
-          "status": "planned",
-          "detail": "Correlacionar hooks de dev com product_events em ambiente staging."
+          "status": "done",
+          "detail": "npm run dev-audit:bridge; GET /ops/dev-audit-bridge; correlaciona hooks Cursor com product_events por hora (sem PHI)."
+        },
+        {
+          "id": "run-support-user-reports",
+          "title": "Reportar problema — chamado + bundle LGPD",
+          "status": "done",
+          "detail": "Migration 061 + 064; aba Suporte + Issues (066 ops_analysis_queue); investigationId; Analisar/Concluir + agente Cursor; docs/ops/SUPPORT_REPORTS.md + INVESTIGATION_CORRELATION.md.",
+          "reviewBadge": ["legal"]
+        },
+        {
+          "id": "run-ops-analysis-queue",
+          "title": "Pilha Issues + callback agente",
+          "status": "done",
+          "detail": "Migration 066; ops_analysis_queue; aba Issues :3013; tray contadores; pre-screen OPS_ANALYSIS_PRE_SCREEN; investigationId; docs/ops/INVESTIGATION_CORRELATION.md."
+        },
+        {
+          "id": "run-ops-alert-investigator",
+          "title": "Investigador Cursor — alertas infra (Tier 0–1)",
+          "status": "done",
+          "detail": "Lane AiCare Suporte SRE; ops-alert-investigator-dispatch + investigationId; migration 065; playbook docs/ops/automations/ops-alert-investigator.prompt.md; Tier 1 OPS_INVESTIGATOR_TIER1."
+        },
+        {
+          "id": "run-support-investigator-automation",
+          "title": "Investigador Cursor — chamados suporte (Tier 0–1)",
+          "status": "done",
+          "detail": "Lane AiCare Suporte ao Desenvolvimento; CURSOR_DEVELOPMENT_SUPPORT_*; investigationId; docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md; Tier 1 TIER1_GATES.md."
         },
         {
           "id": "run-operation-model-doc",
@@ -1837,6 +2197,80 @@
           "title": "Fallbacks dormentes (snapshot D-1, Ava lite)",
           "status": "done",
           "detail": "Gatilho forte; banner stale. Ver OPERATION_MODEL §6."
+        },
+        {
+          "id": "run-ops-automated-tests",
+          "title": "Testes automatizados ops + smoke HTTP",
+          "status": "done",
+          "detail": "npm run test:ops (pipeline, triagem, fallbacks); ops:smoke + OPS_SMOKE_FULL; docs/OPS_FALLBACKS_AND_ALERTS.md."
+        },
+        {
+          "id": "run-ops-prod-channel",
+          "title": "Canal ops produção + worker heartbeat + Stripe alert",
+          "status": "done",
+          "detail": "setup:ops-prod; worker_stale + stripe_webhook_failures; test:ops + ops:smoke no CI; docs/ops/RUNBOOK_ALERTS.md."
+        }
+      ]
+    },
+    {
+      "id": "business-analytics",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Analytics de negócio (agregados, sem PHI)",
+      "summary": "Visão executiva e operacional: funis de ativação, retenção, uso por feature, volume de suporte, billing e saúde de integrações — cruzando product_events, support_reports, client_errors e Stripe. Complementa observability-platform (técnico) e product-analytics-optin (NLP opt-in). Primeira superfície: aba Negócio no console ops ou relatórios semanais.",
+      "status": "in_progress",
+      "statusLabel": "MVP aba Negócio no ops",
+      "reviewBadge": ["legal", "business"],
+      "items": [
+        {
+          "id": "biz-analytics-funnel-activation",
+          "title": "Funil ativação (cadastro → sync → valor)",
+          "status": "done",
+          "detail": "MVP: contagens agregadas em GET /api/metrics → metrics.business.activation (contas, paciente, link, sync 7d, onboarding)."
+        },
+        {
+          "id": "biz-analytics-retention",
+          "title": "Retenção e engajamento (WAU/MAU)",
+          "status": "done",
+          "detail": "MVP: WAU/MAU + WAU/MAU% + contas inativas 30d via product_events; sem mapa por usuário na UI."
+        },
+        {
+          "id": "biz-analytics-support-sla",
+          "title": "Métricas suporte (volume × categoria × SLA)",
+          "status": "done",
+          "detail": "MVP: support_reports (open/triaged/resolved 7d, média horas, consent %, analysis_status, categorias 30d)."
+        },
+        {
+          "id": "biz-analytics-billing",
+          "title": "Receita e conversão billing",
+          "status": "done",
+          "detail": "MVP: billing_checkout_* 7d/30d, planos pagos (account_entitlements), compras/receita 30d (billing_purchases)."
+        },
+        {
+          "id": "biz-analytics-integration-health",
+          "title": "Saúde integrações por portal (negócio)",
+          "status": "done",
+          "detail": "MVP: sync_jobs 7d por portal (total, OK, fail %, links distintos) em metrics.business.integrationHealth7d."
+        },
+        {
+          "id": "biz-analytics-ops-console-tab",
+          "title": "Aba «Negócio» no console ops",
+          "status": "done",
+          "detail": "BusinessPanel.tsx + tab Negócio no OpsMetricsDashboard; KPIs ativação, engajamento, suporte, billing, integrações.",
+          "reviewBadge": ["design"]
+        },
+        {
+          "id": "biz-analytics-weekly-report",
+          "title": "Relatório semanal automático (interno)",
+          "status": "done",
+          "detail": "npm run ops:business-weekly → markdown em docs/ops/reports/; OPS_WEEKLY_REPORT_WEBHOOK_URL opcional (Slack)."
+        },
+        {
+          "id": "biz-analytics-lgpd-guardrails",
+          "title": "Guardrails LGPD analytics negócio",
+          "status": "planned",
+          "detail": "Documentar finalidade, minimização e retenção em docs/legal/ + DATA_PROCESSING_MAP; revisão jurídica antes de métricas novas.",
+          "reviewBadge": ["legal"]
         }
       ]
     },
@@ -1913,8 +2347,8 @@
         {
           "id": "landing-real-screenshots",
           "title": "Screenshots reais do app na landing",
-          "status": "in_progress",
-          "detail": "Script capture-landing-screenshots.mjs + public/landing/*.png; fallback mock se arquivo ausente."
+          "status": "done",
+          "detail": "capture-landing-screenshots.mjs — dashboard, patient-overview, agenda, exams, ava-chat em public/landing/."
         },
         {
           "id": "landing-public-billing-offers",
@@ -1951,6 +2385,287 @@
           "title": "FAQ + contato comercial / suporte",
           "status": "planned",
           "detail": "Link compliance/contact API; formulário lead opcional."
+        }
+      ]
+    },
+    {
+      "id": "platform-environments",
+      "category": "tecnico",
+      "priority": "P2",
+      "title": "Ambientes — dev, staging e produção",
+      "summary": "Três camadas com paridade operacional: local (massas + scrapers), staging (shape produtivo com dados sintéticos, sem PHI real) e prod (live após CNPJ). Complementa dev-delivery-pipeline e prod-run-intelligence. Ver docs/infra/ENVIRONMENTS.md (a criar).",
+      "status": "done",
+      "statusLabel": "Completo",
+      "items": [
+        {
+          "id": "env-topology-doc",
+          "title": "Matriz de ambientes (local / staging / prod)",
+          "status": "done",
+          "detail": "docs/infra/ENVIRONMENTS.md — URLs, PG, worker, Neo4j, Stripe test vs live, OPS keys, COMPLIANCE_GATE; o que roda em cada camada."
+        },
+        {
+          "id": "env-mass-generator",
+          "title": "Gerador de massas (seed CLI)",
+          "status": "done",
+          "detail": "npm run seed:demo — scripts/seed-demo-data.mjs; conta demo, 2 pacientes, convênios mock sessionReady, timeline sintética; --reset."
+        },
+        {
+          "id": "env-faker-rules",
+          "title": "Regras de dados sintéticos (LGPD-safe)",
+          "status": "done",
+          "detail": "CPF/CNS fake no seed; ENVIRONMENTS.md proíbe restore prod→dev; CRYPTO_KEY por ambiente documentado."
+        },
+        {
+          "id": "env-staging-synthetic-prod",
+          "title": "Staging «shape produtivo» (post-prod representativo)",
+          "status": "done",
+          "detail": "seed-staging-volume.mjs — sync_jobs, product_events, llm_usage com marker staging-volume-seed; vars STAGING_SEED_*."
+        },
+        {
+          "id": "env-staging-refresh",
+          "title": "Job refresh staging (reset + re-seed)",
+          "status": "done",
+          "detail": "npm run seed:staging-refresh — reset demo + volume; migrate:all para PG vazio."
+        },
+        {
+          "id": "env-ci-deploy-staging",
+          "title": "Esteira CI → deploy staging automático",
+          "status": "done",
+          "detail": ".github/workflows/staging.yml — build + database-smoke; deploy placeholder + docs/infra/DEPLOY_STAGING.md."
+        },
+        {
+          "id": "env-ci-deploy-prod",
+          "title": "Esteira deploy produção (manual + gates)",
+          "status": "done",
+          "detail": ".github/workflows/deploy-prod.yml workflow_dispatch + checklist; deploy real quando host prod."
+        },
+        {
+          "id": "env-migration-gates",
+          "title": "Gates de migration em PR e pré-deploy",
+          "status": "done",
+          "detail": "validate-migrations.mjs no CI; alinha del-migration-dry-run (apply em PG ephemeral — backlog)."
+        },
+        {
+          "id": "env-secrets-parity",
+          "title": "Templates .env e secrets por ambiente",
+          "status": "done",
+          "detail": ".env.example + tabela em ENVIRONMENTS.md; sem valores reais no repo."
+        },
+        {
+          "id": "env-backup-restore",
+          "title": "Backup PG + drill de restore",
+          "status": "done",
+          "detail": "docs/infra/BACKUP.md — política, pg_dump local, proibição restore prod→staging."
+        },
+        {
+          "id": "env-synthetic-monitoring",
+          "title": "Sondas em staging (pré-promote)",
+          "status": "done",
+          "detail": "staging-probe-gate.mjs + npm run staging:probe-gate."
+        },
+        {
+          "id": "env-worker-parity",
+          "title": "Paridade connect-worker + ops alerts",
+          "status": "done",
+          "detail": "ENVIRONMENTS.md § Connect worker; CONNECT_WORKER_EXTERNAL."
+        },
+        {
+          "id": "env-feature-flags",
+          "title": "Flags de runtime / degrade por ambiente",
+          "status": "done",
+          "detail": "Tabela flags em ENVIRONMENTS.md."
+        },
+        {
+          "id": "env-deploy-runbook",
+          "title": "Runbook deploy beta → prod",
+          "status": "done",
+          "detail": "Seção promote/rollback em ENVIRONMENTS.md; alinha del-deploy-runbook."
+        },
+        {
+          "id": "env-two-model-doc",
+          "title": "Modelo dois ambientes não prod (Integração + Preview)",
+          "status": "done",
+          "detail": "docs/infra/TWO_ENV_MODEL.md, ENV_INTEGRATION.md, ENV_PREVIEW.md — fluxo aprovação Rafael."
+        },
+        {
+          "id": "env-testing-verticals",
+          "title": "Matriz verticais de teste (funcional / integrado / segurança / performance)",
+          "status": "done",
+          "detail": "docs/TESTING_VERTICALS.md — quando rodar cada vertical; template PROMOTION_REPORT.md."
+        },
+        {
+          "id": "env-promotion-gates-cli",
+          "title": "CLI promotion:gates + relatório automático",
+          "status": "done",
+          "detail": "scripts/run-promotion-gates.mjs → promotion-report-last.md; root npm run promotion:gates."
+        },
+        {
+          "id": "env-promote-preview-workflow",
+          "title": "Workflow GitHub promote-preview (manual)",
+          "status": "done",
+          "detail": ".github/workflows/promote-preview.yml — Environment preview; gates + deploy placeholder."
+        },
+        {
+          "id": "env-preview-local-hostnames",
+          "title": "Hostnames locais staging (.test + Caddy)",
+          "status": "done",
+          "detail": "Caddyfile, npm run hosts:register + caddy:local; LOCAL_HOSTNAMES.md; up.ps1 AIYRA_LOCAL_HOSTNAMES; ops-console-url fallback."
+        },
+        {
+          "id": "env-preview-gcp-runbook",
+          "title": "Runbook GCP Preview (Cloud SQL + Run)",
+          "status": "done",
+          "detail": "docs/infra/GCP_PREVIEW_RUNBOOK.md — checklist openhealth-503119; promote + post-deploy."
+        },
+        {
+          "id": "env-preview-host",
+          "title": "Preview Ambiente 2 no GCP",
+          "status": "in_progress",
+          "statusLabel": "Código pronto — primeiro promote GCP quando secrets/host",
+          "detail": "API/web/ops/worker automatizados; falta Cloud SQL + secrets GitHub + promote manual."
+        },
+        {
+          "id": "env-preview-gcp-deploy",
+          "title": "Deploy real promote-preview.yml (GCP)",
+          "status": "done",
+          "detail": "scripts/gcp-preview-deploy.mjs + provision; promote-preview.yml input deploy_gcp; Artifact Registry + Cloud Run API/web/ops."
+        },
+        {
+          "id": "env-preview-gcp-worker",
+          "title": "connect-worker Cloud Run Job (preview GCP)",
+          "status": "done",
+          "detail": "Dockerfile.connect-worker; job.ts (sync|ops); gcp-preview-worker.mjs; promote deploy_worker; scheduler opcional."
+        },
+        {
+          "id": "env-ops-dual-keys",
+          "title": "OPS keys + webhooks distintos Integração vs Preview",
+          "status": "done",
+          "detail": ".env.preview local + validate:ops-dual-keys; setup:ops-preview; up.ps1 -Preview override; GitHub Environments integration/preview."
+        }
+      ]
+    },
+    {
+      "id": "business-ecosystem",
+      "category": "negocio",
+      "priority": "P3",
+      "title": "Ecossistema Aiyra — personas e plano de negócio",
+      "summary": "Mapa visual de personas (família núcleo; parceiros B2B; marketplace farmácias horizonte sem patrocínio inicial). docs/ECOSYSTEM.md + B2B_PARTNERS.md.",
+      "status": "in_progress",
+      "statusLabel": "Mapa v1 entregue",
+      "items": [
+        {
+          "id": "eco-visual-doc",
+          "title": "Documentação visual do ecossistema",
+          "status": "done",
+          "detail": "docs/ECOSYSTEM.md — mermaid personas, camadas de valor, modelo de negócio, fluxos família e farmácia."
+        },
+        {
+          "id": "eco-marketplace-pharmacy",
+          "title": "Horizonte — marketplace farmácias/drogarias",
+          "status": "planned",
+          "detail": "Persona adicional; monetização transação/rede; lista neutra sem patrocínio editorial; regulatório ANVISA; ver B2B_PARTNERS §5."
+        },
+        {
+          "id": "eco-validation-interviews",
+          "title": "Validação com 2–3 conversas (pediatra / família beta)",
+          "status": "planned",
+          "detail": "Ajustar mapa após feedback; não bloqueia desenvolvimento técnico."
+        },
+        {
+          "id": "referral-growth-loop",
+          "title": "Programa de indicação bilateral (paciente ↔ médico)",
+          "status": "planned",
+          "detail": "Debate: docs/discovery/referral-growth-loop.md — descontos, atribuição via link export, anti-fraude; revisão legal+fiscal.",
+          "reviewBadge": ["legal", "fiscal"]
+        }
+      ]
+    },
+    {
+      "id": "b2b-partner-platform",
+      "category": "negocio",
+      "priority": "P3",
+      "title": "B2B — parceiros (médicos, planos, labs, farmácias)",
+      "summary": "Discovery e estruturação de ofertas para o lado profissional/institucional — sem comprometer o núcleo família (B2C). Ver docs/B2B_PARTNERS.md.",
+      "status": "in_progress",
+      "statusLabel": "Discovery doc v1",
+      "items": [
+        {
+          "id": "b2b-discovery-doc",
+          "title": "Landscape + jobs-to-be-done por segmento",
+          "status": "done",
+          "detail": "docs/B2B_PARTNERS.md — médicos, operadoras, laboratórios, farmácias, marketplace horizonte."
+        },
+        {
+          "id": "b2b-segment-clinicians",
+          "title": "Pacote clínico — export, share, contexto consulta",
+          "status": "in_progress",
+          "statusLabel": "Portal público D5 — conta profissional em backlog",
+          "detail": "Share 48h + portal médico público (D5). Próximo: conta profissional, timeline sequência dedicada, notificação opt-in."
+        },
+        {
+          "id": "b2b-segment-labs",
+          "title": "Pacote laboratórios — entrega de resultados (Connect inbound)",
+          "status": "planned",
+          "detail": "API/webhook para lab enviar laudo estruturado → Exam pipeline; alinha exam-artifact + Connect Fase 2; marca Fleury/Hermes como referência outbound."
+        },
+        {
+          "id": "b2b-segment-plans",
+          "title": "Pacote operadoras — visão beneficiário (futuro regulado)",
+          "status": "planned",
+          "detail": "Não é vender dados agregados sem contrato; foco: autorização/eligibility já no sync família; B2B = ferramenta para gestor de beneficiários ou API white-label — discovery legal primeiro.",
+          "reviewBadge": ["legal", "regulatory"]
+        },
+        {
+          "id": "b2b-segment-pharma",
+          "title": "Pacote farmácias — adesão e medicação",
+          "status": "planned",
+          "detail": "Catálogo medicação + lembretes + histórico uso; parceria adesão terapêutica; sem recomendação clínica automática sem gate médico.",
+          "reviewBadge": ["medical", "legal"]
+        },
+        {
+          "id": "b2b-platform-orgs",
+          "title": "Primitives — organizações e multi-tenant",
+          "status": "done",
+          "detail": "Migration 055 + OrganizationService + GET/POST/PATCH/DELETE /organizations + members RBAC admin."
+        },
+        {
+          "id": "b2b-platform-rbac",
+          "title": "RBAC profissional (médico, admin clínica, parceiro read-only)",
+          "status": "done",
+          "statusLabel": "Matriz roles + audit log org (067)",
+          "detail": "organization-rbac.ts (admin/clinician/read_only × view/manage_members/manage_org); migration 067 organization_access_audit; GET /organizations/:id/access-audit; scopes paciente em backlog."
+        },
+        {
+          "id": "b2b-partner-api",
+          "title": "API parceiro (keys, rate limit, webhook)",
+          "status": "planned",
+          "detail": "POST laudo, GET status import; sandbox keys em staging; documentação OpenAPI segmentada B2B."
+        },
+        {
+          "id": "b2b-partner-portal",
+          "title": "Console parceiro (UI mínima)",
+          "status": "planned",
+          "detail": "Dashboard: imports, erros sync inbound, uso API; separado do ops-console interno."
+        },
+        {
+          "id": "b2b-pricing-model",
+          "title": "Modelo de preço B2B vs família",
+          "status": "planned",
+          "detail": "Stripe Billing produtos B2B (per seat, per org, usage API); não bloquear B2C; alinha BILLING.md.",
+          "reviewBadge": ["fiscal", "legal"]
+        },
+        {
+          "id": "b2b-legal-contracts",
+          "title": "Contratos B2B + evidência (DocuSign path)",
+          "status": "planned",
+          "detail": "LEGAL_COMPLIANCE §11 — B2C click-wrap; B2B contrato clínica/lab via DocuSign adapter futuro.",
+          "reviewBadge": ["legal"]
+        },
+        {
+          "id": "b2b-pilot-criteria",
+          "title": "Critérios de piloto (1 clínica + 1 lab)",
+          "status": "planned",
+          "detail": "Métricas sucesso piloto: tempo export consulta, laudos importados, zero PHI em logs parceiro, SLA suporte."
         }
       ]
     },

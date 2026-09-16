@@ -67,6 +67,38 @@ export class CareReminderService {
     return created
   }
 
+  /** Agenda próximo lembrete de reimport SUS (default 180 dias). */
+  async scheduleSusReimportReminder(patientId: string, from = new Date()) {
+    const days = Number(process.env.SUS_REIMPORT_REMINDER_DAYS ?? '180')
+    const intervalMinutes = Math.max(1, days) * 24 * 60
+    const nextFireAt = new Date(from.getTime() + intervalMinutes * 60 * 1000)
+    const title = 'Reimportar vacinas e exames do ConecteSUS'
+    const all = await this.repo.findAll({ patientId, activeOnly: true })
+    const existing = all.find((r) => r.reminderKind === 'sus_reimport')
+    if (existing) {
+      const d = existing.toJSON()
+      return this.repo.update(
+        CareReminder.restore({
+          ...d,
+          title,
+          intervalMinutes,
+          lastCompletedAt: from,
+          nextFireAt,
+          active: true,
+          updatedAt: from,
+        }),
+      )
+    }
+    return this.create({
+      patientId,
+      reminderKind: 'sus_reimport',
+      targetCode: 'conectesus',
+      title,
+      intervalMinutes,
+      nextFireAt,
+    })
+  }
+
   async complete(id: string) {
     const existing = await this.findById(id)
     const updated = existing.rescheduleFrom(new Date())

@@ -1,12 +1,14 @@
 import { Card, Select, Space, Switch, Typography, Button, Alert } from 'antd'
-import { MoonOutlined, SunOutlined, ProjectOutlined, LinkOutlined } from '@ant-design/icons'
+import { MoonOutlined, SunOutlined, ProjectOutlined, LinkOutlined, RadarChartOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme/ThemeProvider.js'
 import { setLanguage } from '../../i18n/index.js'
 import { AIYRACARE_TOKENS } from '../../theme/aiyracare-tokens.js'
 import { ACCESSIBILITY_RESOURCES } from '../../lib/accessibility-preferences.js'
 import type { AccessibilityMode } from '../../lib/accessibility-preferences.js'
+import { NotificationPreferencesCard } from '../../components/settings/NotificationPreferencesCard.js'
 
 const { Text, Title, Link } = Typography
 
@@ -75,6 +77,8 @@ export function SettingsGeneralPage() {
         </Space>
       </Card>
 
+      <NotificationPreferencesCard />
+
       <Card>
         <Title level={5} style={{ marginTop: 0 }}>{t('settings.language')}</Title>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
@@ -96,9 +100,14 @@ export function SettingsGeneralPage() {
         <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
           {t('settings.devToolsHint')}
         </Text>
-        <Button type="default" icon={<ProjectOutlined />} onClick={() => navigate('/roadmap')}>
-          {t('nav.roadmap')}
-        </Button>
+        <Space wrap>
+          <Button type="default" icon={<ProjectOutlined />} onClick={() => navigate('/roadmap')}>
+            {t('nav.roadmap')}
+          </Button>
+          <Button type="default" icon={<RadarChartOutlined />} onClick={() => openOpsConsole()}>
+            {t('nav.ops')}
+          </Button>
+        </Space>
       </Card>
     </Space>
   )

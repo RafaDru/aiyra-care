@@ -1,0 +1,13 @@
+{
+  "stylesheet": "docs/legal/dossie-juridico-pdf.css",
+  "pdf_options": {
+    "format": "A4",
+    "printBackground": true,
+    "margin": {
+      "top": "18mm",
+      "right": "15mm",
+      "bottom": "18mm",
+      "left": "15mm"
+    }
+  }
+}

@@ -11,6 +11,7 @@ docs/legal/
   DATA_PROCESSING_MAP.md    ← mapa LGPD (operacional)
   INCIDENT_RESPONSE.md      ← runbook vazamento (operacional)
   LAWYER_REVIEW_CHECKLIST.md
+  AIYRACARE_DOSSIE_JURIDICO.md / .pdf  ← dossiê produto para advogados
   FISCAL_NFSE.md            ← NFS-e + Contabilizei
   ANVISA_SAMD_POSITION.md   ← gate antes de RAG clínico
   terms-of-use/

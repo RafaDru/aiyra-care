@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined } from '@ant-design/icons'
+import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined, CustomerServiceOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -12,17 +12,24 @@ import { ThemeSwitcher } from '../ui/ThemeSwitcher.js'
 import { AvaGlobalDock } from '../ava/AvaGlobalDock.js'
 import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
+import { SupportReportModal } from '../support/SupportReportModal.js'
+import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
+import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
+import { openOpsConsole } from '../../lib/ops-console-url.js'
+import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation()
   const { configured, user, signOut } = useAuth()
   const { darkMode } = useTheme()
+  useScreenTelemetry()
 
   const userMenuItems: MenuProps['items'] = [
     {
@@ -43,11 +50,7 @@ export function AppLayout() {
           ? '/settings'
           : ''
 
-  const devSelectedKeys = location.pathname.startsWith('/roadmap')
-    ? ['/roadmap']
-    : location.pathname.startsWith('/ops')
-      ? ['/ops']
-      : []
+  const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
@@ -110,9 +113,15 @@ export function AppLayout() {
               selectedKeys={devSelectedKeys}
               items={[
                 { key: '/roadmap', icon: <ProjectOutlined />, label: t('nav.roadmap') },
-                { key: '/ops', icon: <RadarChartOutlined />, label: t('nav.ops') },
+                { key: 'ops-console', icon: <RadarChartOutlined />, label: t('nav.ops') },
               ]}
-              onClick={({ key }) => navigate(key)}
+              onClick={({ key }) => {
+                if (key === 'ops-console') {
+                  openOpsConsole()
+                  return
+                }
+                navigate(key)
+              }}
               style={{ borderRight: 0, background: 'transparent' }}
             />
           </div>
@@ -155,6 +164,16 @@ export function AppLayout() {
         >
           {collapsed && <AppLogo variant="wordmark" height={38} />}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {configured && user && <QuickCaptureGlobal />}
+            {configured && user && (
+              <Button
+                type="text"
+                icon={<CustomerServiceOutlined />}
+                onClick={() => setSupportOpen(true)}
+              >
+                {t('support.reportButton')}
+              </Button>
+            )}
             {configured && user && (
               <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
                 <Button type="text" icon={<UserOutlined />}>
@@ -173,6 +192,8 @@ export function AppLayout() {
         </Content>
       </Layout>
       <AvaGlobalDock />
+      {configured && user && <PatientConsultVisitHost />}
+      <SupportReportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
     </Layout>
   )
 }

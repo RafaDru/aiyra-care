@@ -8,6 +8,7 @@ import {
 } from '../../domain/llm/llm-policy.js'
 import { completeWithGemini, completeWithGroq, streamWithGemini } from './llm-chat.providers.js'
 import { completeWithOpenCodeGo, completeWithOpenCodeZenFree } from './opencode-chat.provider.js'
+import { resolveOpenCodeSessionId } from '../../domain/llm/opencode-session.js'
 
 type Attempt = { provider: string; ok: boolean; error?: string }
 
@@ -46,6 +47,11 @@ export class LlmRouter {
     const suffix = jsonMode ? '-json' : ''
     const maxTokens = jsonMode ? 512 : undefined
     const jsonOpts = jsonMode ? { jsonMode: true, maxTokens } : { maxTokens }
+    const opencodeSessionId = resolveOpenCodeSessionId(
+      routerOpts?.opencodeSessionId,
+      ['llm-router', jsonMode ? 'json' : 'chat', tier],
+    )
+    const opencodeOpts = { ...jsonOpts, sessionId: opencodeSessionId }
     const deltaState = { sent: false }
     const onReplyDelta = routerOpts?.onReplyDelta
     const emitDelta = onReplyDelta
@@ -82,13 +88,13 @@ export class LlmRouter {
 
     if (routerOpts?.allowLlmDataSharing && opencodeZenApiKey()) {
       const zen = await tryProvider(`opencode-zen-free${suffix}`, () =>
-        completeWithOpenCodeZenFree(messages, tier, jsonOpts))
+        completeWithOpenCodeZenFree(messages, tier, opencodeOpts))
       if (zen) return zen
     }
 
     if (opencodeGoApiKey()) {
       const go = await tryProvider(`opencode-go${suffix}`, () =>
-        completeWithOpenCodeGo(messages, tier, jsonOpts))
+        completeWithOpenCodeGo(messages, tier, opencodeOpts))
       if (go) return go
     }
 

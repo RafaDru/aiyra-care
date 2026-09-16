@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Card, List, Spin, Tag, Typography } from 'antd'
-import { PrinterOutlined } from '@ant-design/icons'
+import { MedicineBoxOutlined, PrinterOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
 import type { PatientContext } from '../../lib/api.types.js'
 import { PatientContextTimeline } from './PatientContextTimeline.js'
@@ -12,7 +12,7 @@ import {
 } from './health-thread-kinds.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
 import { PatientPendenciesSection } from './PatientPendenciesSection.js'
-import { subscribeClinicalExportOpen } from '../../lib/clinical-export-bus.js'
+import { requestConsultVisitOpen, subscribeClinicalExportOpen } from '../../lib/clinical-export-bus.js'
 import {
   hasNewDomain,
   markDomainSeen,
@@ -30,7 +30,6 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [exportOpen, setExportOpen] = useState(false)
-
   const reloadContext = useCallback((force = false) => {
     if (!force && context && !hasNewDomain(patientId, 'timeline')) return
     setLoading(true)
@@ -71,14 +70,24 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
         size="small"
         style={{ marginBottom: 16 }}
         extra={
-          <Button
-            size="small"
-            type="link"
-            icon={<PrinterOutlined />}
-            onClick={() => setExportOpen(true)}
-          >
-            Imprimir / PDF
-          </Button>
+          <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            <Button
+              size="small"
+              type="primary"
+              icon={<MedicineBoxOutlined />}
+              onClick={() => requestConsultVisitOpen({ patientId })}
+            >
+              Levar na consulta
+            </Button>
+            <Button
+              size="small"
+              type="link"
+              icon={<PrinterOutlined />}
+              onClick={() => setExportOpen(true)}
+            >
+              Imprimir / PDF
+            </Button>
+          </span>
         }
       >
       <Paragraph style={{ marginBottom: 16 }}>{context.textSummary}</Paragraph>

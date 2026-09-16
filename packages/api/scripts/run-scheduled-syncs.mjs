@@ -9,7 +9,7 @@ dotenv.config({ path: path.join(root, '.env') })
 const { runConnectWorkerBatch } = await import('../src/infrastructure/sync/connect-worker.runner.js')
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 console.log('Running scheduled integration sync batch...')

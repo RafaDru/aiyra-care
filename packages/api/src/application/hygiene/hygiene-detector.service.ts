@@ -5,6 +5,7 @@ import type { VaccineRepository } from '../../domain/vaccine/vaccine.repository.
 import { findExamDuplicateCandidates } from '../../domain/hygiene/exam-duplicate-detector.js'
 import { findVaccineDuplicateCandidates } from '../../domain/hygiene/vaccine-duplicate-detector.js'
 import type { HygieneRepository, PatientAccountResolver } from '../../domain/hygiene/hygiene.repository.js'
+import { scheduleHygieneDuplicateCandidate } from '../../infrastructure/graph/hygiene-graph.js'
 
 export class HygieneDetectorService {
   constructor(
@@ -77,7 +78,18 @@ export class HygieneDetectorService {
         score: c.score,
         evidence: c.evidence,
       })
-      if (row) created++
+      if (row) {
+        created++
+        scheduleHygieneDuplicateCandidate({
+          patientId,
+          entityType,
+          entityIdA: row.entityIdA,
+          entityIdB: row.entityIdB,
+          candidateId: row.id,
+          score: row.score,
+          detector: row.detector,
+        })
+      }
     }
     return created
   }

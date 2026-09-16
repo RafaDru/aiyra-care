@@ -1,0 +1,26 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Git tag ou SHA para deploy'
+        required: true
+        default: 'main'
+
+jobs:
+  checklist:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Pré-deploy checklist (manual)
+        run: |
+          echo "=== Deploy produção — gates obrigatórios ==="
+          echo "1. Staging CI verde + staging:probe-gate OK"
+          echo "2. Backup PG prod (ver docs/infra/BACKUP.md)"
+          echo "3. human-review-gates fiscal: CNPJ + Stripe live + NFS-e"
+          echo "4. Migration dry-run em clone"
+          echo "5. Ordem: API → connect-worker → web"
+          echo "6. Post-deploy: health + ops:probe + smoke billing (live)"
+          echo "Release solicitado: ${{ inputs.release_tag }}"
+          echo "Configure deploy real neste job quando host prod existir."

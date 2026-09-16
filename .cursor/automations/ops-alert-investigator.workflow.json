@@ -1,0 +1,24 @@
+{
+  "name": "AiCare - Suporte SRE",
+  "description": "Lane Suporte SRE — webhook ops_alert (alertas infra/sync/llm). Rascunho em docs/ops/investigations/.",
+  "workflow": {
+    "triggers": [
+      {
+        "webhook": {}
+      }
+    ],
+    "gitConfig": {
+      "repo": "RafaDru/aiyra-care",
+      "branch": "main"
+    },
+    "prompts": [
+      "Alerta ops_alert — lane AiCare Suporte SRE.\n\n1. Leia JSON (investigationId, alertId, environment, analysisQueue, investigation, triage, dashboardUrl).\n2. Playbook: docs/ops/automations/ops-alert-investigator.prompt.md.\n3. Rascunho em docs/ops/investigations/.\n4. investigation.tier 0 → só markdown. Tier 1 → PR draft nos gates (TIER1_GATES.md).\n5. POST callback com investigationId + remediationSummary + analysisArtifactPath (+ prUrl se Tier 1)."
+    ],
+    "model": "composer-2.5",
+    "agentOptions": {
+      "skipInstall": false
+    },
+    "memoryEnabled": true,
+    "actions": []
+  }
+}

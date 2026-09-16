@@ -26,6 +26,12 @@ import {
   EXAM_INTENT_RE,
   VACCINE_INTENT_RE,
 } from '../../domain/llm/ava-context-aggregate.js'
+import {
+  type AvaActivityEmitter,
+  type AvaActivityEvent,
+  emitAvaActivity,
+} from '../../domain/llm/ava-activity.js'
+import { buildAvaOpenCodeSessionId } from '../../domain/llm/opencode-session.js'
 
 const AVA_SYSTEM_BASE = `Você é Ava, agente virtual de apoio familiar do AiyraCare.
 Regras obrigatórias:
@@ -158,11 +164,21 @@ Mensagem atual do responsável: ${trimmed}`
     let model = 'n/a'
     let attempts = 0
 
+    const opencodeSessionId = buildAvaOpenCodeSessionId({
+      conversationId: input.conversationId,
+      scopeId: input.scopeId,
+      patientId: input.patientId,
+      healthThreadId: input.healthThreadId,
+    })
     const routerOpts = {
       allowLlmDataSharing: input.allowLlmDataSharing ?? false,
       onReplyDelta: input.onReplyDelta,
+      opencodeSessionId,
     }
-    const routerOptsNoStream = { allowLlmDataSharing: input.allowLlmDataSharing ?? false }
+    const routerOptsNoStream = {
+      allowLlmDataSharing: input.allowLlmDataSharing ?? false,
+      opencodeSessionId,
+    }
 
     attempts += 1
     steps.push('resposta inicial')
@@ -176,7 +192,7 @@ Mensagem atual do responsável: ${trimmed}`
 
     let revised = false
     let deterministic = validateAvaReplyDeterministic(reply, input.bundle.insights, trimmed, reflectionOpts)
-    let critique = null
+    let critique: AvaCritiqueResult | null = null
 
     if (isAvaReflectionEnabled() && !input.liteMode) {
       emit('reflection.rules_check', 'reflection', 'start')
@@ -184,7 +200,7 @@ Mensagem atual do responsável: ${trimmed}`
         steps.push('verificação por regras ok')
         emit('reflection.rules_ok', 'reflection', 'done')
         if (shouldSkipLlmCritique(deterministic, reply, trimmed)) {
-          critique = { satisfactory: true, issues: [], severity: 'ok' }
+          critique = { satisfactory: true, issues: [], severity: 'ok' } satisfies AvaCritiqueResult
           steps.push('crítica LLM omitida (regras ok)')
           emit('reflection.quality_critique', 'reflection', 'skip')
         } else {

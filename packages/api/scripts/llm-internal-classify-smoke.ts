@@ -19,7 +19,7 @@ config({ path: resolve(root, '.env') })
 
 const label = process.argv[2] ?? 'CONSULTA MEDICA EM DOMICILIO COM PROCEDIMENTO AVANCADO 778877'
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const classifier = buildClassificationClassifier(pool, { allowLlm: true, trigger: 'smoke' })

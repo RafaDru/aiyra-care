@@ -46,7 +46,7 @@ Persistência planejada: `hygiene_candidates` (PG) com `entity_type`, `entity_id
 
 - Batch por conta: todos os pares plausíveis não decididos.
 - Alimenta a mesma fila; não altera dados automaticamente.
-- Worker: `packages/connect-worker` ou script agendado na API.
+- Worker: `packages/connect-worker` com `HYGIENE_SCAN_INTERVAL_MS` (ex.: `604800000` = 7 dias) ou script manual `npm run scan:hygiene`.
 
 ### 3. Proativo no login
 

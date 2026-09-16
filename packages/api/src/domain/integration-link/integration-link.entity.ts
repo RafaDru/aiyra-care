@@ -8,6 +8,7 @@ export interface IntegrationLinkProps {
   cardNumber?: string
   active?: boolean
   lastSyncAt?: Date
+  authAttention?: 'none' | 'credentials' | 'session'
 }
 
 export interface IntegrationLinkData {
@@ -21,6 +22,7 @@ export interface IntegrationLinkData {
   cardNumber: string | null
   active: boolean
   lastSyncAt: Date | null
+  authAttention: 'none' | 'credentials' | 'session'
   createdAt: Date
   updatedAt: Date
 }
@@ -40,6 +42,7 @@ export class IntegrationLink {
       cardNumber: props.cardNumber ?? null,
       active: props.active ?? true,
       lastSyncAt: props.lastSyncAt ?? null,
+      authAttention: props.authAttention ?? 'none',
       createdAt: new Date(),
       updatedAt: new Date(),
     })
@@ -57,6 +60,7 @@ export class IntegrationLink {
   get cardNumber(): string | null { return this.data.cardNumber }
   get active(): boolean { return this.data.active }
   get lastSyncAt(): Date | null { return this.data.lastSyncAt }
+  get authAttention(): IntegrationLinkData['authAttention'] { return this.data.authAttention }
   get createdAt(): Date { return this.data.createdAt }
   get updatedAt(): Date { return this.data.updatedAt }
 
@@ -76,6 +80,16 @@ export class IntegrationLink {
   clearSessionToken(): void {
     this.data.encryptedSessionToken = null
     this.data.sessionExpiresAt = null
+    this.data.updatedAt = new Date()
+  }
+
+  setAuthAttention(attention: IntegrationLinkData['authAttention']): void {
+    this.data.authAttention = attention
+    this.data.updatedAt = new Date()
+  }
+
+  clearAuthAttention(): void {
+    this.data.authAttention = 'none'
     this.data.updatedAt = new Date()
   }
 

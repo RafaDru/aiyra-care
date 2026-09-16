@@ -17,7 +17,7 @@ Keep Postgres source of truth; Connect vs Core boundary clear.
 
 - [ ] New concept maps to existing domain or needs new aggregate?
 - [ ] Name aligns with user language (família, carteira, acompanhamento)?
-- [ ] Integration: scraper in api infra vs `@open-health/connect` contract?
+- [ ] Integration: scraper in api infra vs `@aiyra-care/connect` contract?
 - [ ] Duplicate data vs `import_lineage` / canonical entity?
 - [ ] UI tab vs backend module consistency?
 - [ ] Roadmap epic/item id to update?

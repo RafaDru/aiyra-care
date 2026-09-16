@@ -11,13 +11,15 @@ import { OnboardingPage } from './pages/onboarding.js'
 import { SettingsLayout } from './layouts/SettingsLayout.js'
 import { SettingsGeneralPage } from './pages/settings/general.js'
 import { SettingsAccountPage } from './pages/settings/account.js'
+import { SettingsFamilyPage } from './pages/settings/family.js'
 import { SettingsPlanPage } from './pages/settings/plan.js'
 import { SettingsLegalPage } from './pages/settings/legal.js'
 import { RoadmapPage } from './pages/roadmap.js'
-import { OpsDashboardPage } from './pages/ops.js'
 import { EmergencyPage } from './pages/emergency.js'
 import { ComplianceAcceptPage } from './pages/compliance-accept.js'
 import { LegalDocumentPage } from './pages/legal-document.js'
+import { InviteAcceptPage } from './pages/invite-accept.js'
+import { ClinicalExportSharePage } from './pages/clinical-export-share.js'
 import { CookieConsentBanner } from './components/legal/CookieConsentBanner.js'
 
 export function App() {
@@ -30,6 +32,7 @@ export function App() {
         <Route path="/privacidade" element={<LegalDocumentPage kind="privacy_policy" />} />
         <Route path="/cookies" element={<LegalDocumentPage kind="cookie_policy" />} />
         <Route path="/consentimento-menor" element={<LegalDocumentPage kind="minor_guardian_consent" />} />
+        <Route path="/clinical-export/:token" element={<ClinicalExportSharePage />} />
         <Route element={<RequireAuth />}>
           <Route path="/compliance/accept" element={<ComplianceAcceptPage />} />
           <Route element={<RequireCompliance />}>
@@ -41,11 +44,12 @@ export function App() {
               <Route path="/emergency" element={<EmergencyPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />
-              <Route path="/ops" element={<OpsDashboardPage />} />
+              <Route path="/invite/accept" element={<InviteAcceptPage />} />
               <Route path="/settings" element={<SettingsLayout />}>
                 <Route index element={<Navigate to="general" replace />} />
                 <Route path="general" element={<SettingsGeneralPage />} />
                 <Route path="account" element={<SettingsAccountPage />} />
+                <Route path="family" element={<SettingsFamilyPage />} />
                 <Route path="plan" element={<SettingsPlanPage />} />
                 <Route path="legal" element={<SettingsLegalPage />} />
               </Route>

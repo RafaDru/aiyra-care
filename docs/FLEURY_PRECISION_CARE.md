@@ -60,7 +60,7 @@ O sync de produção usa perfil `pardini` (`HERMES_PARDINI_PACIENTE_API_DEFAULT_
 | ROPC CPF + senha protocolo | Diagnóstico only (`loginHermesPardiniApi`) | Token frequentemente **não** autoriza `GET /pedidos` |
 | Browser PKCE + senha protocolo | Sync manual (`HERMES_PARDINI_ALLOW_BROWSER=1`) | Fallback se OTP falhar (`?origin=pardini`) |
 | CPF + data nascimento | Portal default | Não automatizado |
-| **OTP SMS / e-mail / WhatsApp** | **Sync manual** (`FLEURY_PRECISION_UNIFIED_LOGIN=1`, default) | Chrome abre portal unificado; UI orienta código |
+| **OTP SMS / e-mail / WhatsApp** | **Sync manual** (`FLEURY_PRECISION_UNIFIED_LOGIN=1`, default) | `FLEURY_PRECISION_OTP_IN_APP=1` (default): modal no app + `POST …/sync-progress/:jobId/otp`; `0` = hint Chrome |
 | Refresh token | Sim (`refreshHermesPardiniApi`) | Após login browser ou OTP |
 
 Sessão persistida: `encrypted_session_token` + `pacienteApiHeaders` (replay HTTP).
@@ -127,8 +127,9 @@ npm run probe:fleury-marca
 | Portal type `hermes_pardini` | Produção |
 | Sync delta `computeHermesPardiniExamStartDate` | Produção |
 | PDF laudo por pedido | Produção |
-| Login OTP unificado | Sync manual (`FLEURY_PRECISION_UNIFIED_LOGIN=1`, default) | Chrome + hint UI (`FleuryOtpSyncHint`) |
+| Login OTP unificado | Sync manual (`FLEURY_PRECISION_UNIFIED_LOGIN=1`, default) | `FleuryOtpSyncInput` + `hermes-pardini-otp-session.ts` |
 | UI «Grupo Fleury» (fase 1) | Integrações, sync, carteira | Card + busca + logos submarcas |
+| UI laboratório nos exames (fase 2) | Aba Exames + timeline | Badge marca + selo grupo + filtro |
 | Connector multi-marca Fleury | Planejado | Connect `grupo_fleury_precision_care` |
 
 Arquivos principais:
@@ -157,8 +158,7 @@ Arquivos principais:
 | Prioridade | Entrega |
 |------------|---------|
 | P0 | Validar PoC OTP + perfis marca (scripts) |
-| P1 | Badge laboratório nos exames (`nomeUnidade` + selo Grupo Fleury) |
-| P2 | Sync OTP in-app (modal código SMS/WhatsApp) |
+| P1 | ~~Sync OTP in-app (modal código SMS/WhatsApp)~~ | done |
 | P3 | Connector Connect `grupo_fleury` com `marca` configurável |
 | P2 | Landing — família Fleury (texto; logos com jurídico) |
 | Legal | Kit oficial de logos + revisão scraping/termos |

@@ -1,14 +1,10 @@
 param(
   [Parameter(Mandatory = $true)][string]$Title,
-  [Parameter(Mandatory = $true)][string]$Body
+  [Parameter(Mandatory = $true)][string]$Body,
+  [ValidateSet('Error', 'Warning', 'Info', 'None')]
+  [string]$IconType = 'Warning',
+  [string]$BodyFile = ''
 )
 
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
-$notify = New-Object System.Windows.Forms.NotifyIcon
-$notify.Icon = [System.Drawing.SystemIcons]::Warning
-$notify.Visible = $true
-$notify.ShowBalloonTip(12000, $Title, $Body, [System.Windows.Forms.TooltipIcon]::Warning)
-Start-Sleep -Seconds 2
-$notify.Dispose()
+$displayScript = Join-Path $PSScriptRoot 'ops-toast-display.ps1'
+& $displayScript -Title $Title -Body $Body -BodyFile $BodyFile -IconType $IconType

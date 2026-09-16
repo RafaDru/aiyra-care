@@ -32,7 +32,7 @@ const sourceArg = process.argv.find((a) => a.startsWith('--source='))
 const source = sourceArg ? sourceArg.slice('--source='.length) : null
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
 const classifier = buildClassificationClassifier(pool, {

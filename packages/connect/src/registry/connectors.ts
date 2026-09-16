@@ -40,13 +40,15 @@ export const CONNECTOR_REGISTRY: Record<string, ConnectorDefinition> = {
     capabilities: ['sync_medical_records', 'sync_exams'],
     legacyPortalType: 'mater_dei',
   },
-  hermes_pardini: {
-    id: 'hermes_pardini',
-    label: 'Hermes Pardini',
+  grupo_fleury_precision_care: {
+    id: 'grupo_fleury_precision_care',
+    label: 'Grupo Fleury — Precision Care',
     category: 'provider',
-    authProfile: 'session_basic',
+    authProfile: 'interactive_otp',
     capabilities: ['sync_exams'],
     legacyPortalType: 'hermes_pardini',
+    subBrands: ['hermes_pardini', 'fleury', 'a_mais', 'labs_a'],
+    syncStepKeys: ['login', 'fetch-exams', 'fetch-files', 'importing', 'done'],
   },
   bradesco_saude: {
     id: 'bradesco_saude',

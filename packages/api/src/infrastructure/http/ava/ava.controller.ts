@@ -1,5 +1,7 @@
 import type { FastifyReply } from 'fastify'
 import type { AvaChatService } from '../../../application/llm/ava-chat.service.js'
+import type { ProductEventService } from '../../../application/telemetry/product-event.service.js'
+import { trackAvaTurnFailed, trackAvaTurnRecorded } from '../../../application/llm/ava-telemetry.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess } from '../auth/patient-access.guard.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
@@ -12,7 +14,10 @@ function writeSse(res: import('node:http').ServerResponse, event: string, data: 
 }
 
 export class AvaController {
-  constructor(private readonly avaChat: AvaChatService) {}
+  constructor(
+    private readonly avaChat: AvaChatService,
+    private readonly productEvents?: ProductEventService,
+  ) {}
 
   async chat(req: AuthenticatedRequest, reply: FastifyReply) {
     const params = avaChatParamsSchema.safeParse(req.params)
@@ -60,10 +65,26 @@ export class AvaController {
             writeSse(res, 'reply_delta', { text: chunk })
           }
         }
+        await trackAvaTurnRecorded(this.productEvents, {
+          accountId: req.accountId ?? null,
+          patientId: params.data.id,
+          userMessage: body.data.message,
+          conversationId: result.conversationId,
+          proposedActionCount: result.proposedActions?.length ?? 0,
+          hasAttachment: Boolean(body.data.attachmentDocumentId),
+          hasEntityPin: Boolean(body.data.entityPin),
+        }, result)
         writeSse(res, 'complete', result)
         res.end()
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
+        await trackAvaTurnFailed(this.productEvents, {
+          accountId: req.accountId ?? null,
+          patientId: params.data.id,
+          userMessage: body.data.message,
+          conversationId: body.data.conversationId,
+          errorMessage: message,
+        })
         if (message === 'LLM_QUOTA_EXCEEDED') {
           writeSse(res, 'error', { code: 'LLM_QUOTA_EXCEEDED', message: 'Franquia de IA esgotada.' })
         } else if (message === 'AVA_LLM_DISABLED') {
@@ -78,9 +99,25 @@ export class AvaController {
 
     try {
       const result = await this.avaChat.chat(chatInput)
+      await trackAvaTurnRecorded(this.productEvents, {
+        accountId: req.accountId ?? null,
+        patientId: params.data.id,
+        userMessage: body.data.message,
+        conversationId: result.conversationId,
+        proposedActionCount: result.proposedActions?.length ?? 0,
+        hasAttachment: Boolean(body.data.attachmentDocumentId),
+        hasEntityPin: Boolean(body.data.entityPin),
+      }, result)
       return reply.send(result)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
+      await trackAvaTurnFailed(this.productEvents, {
+        accountId: req.accountId ?? null,
+        patientId: params.data.id,
+        userMessage: body.data.message,
+        conversationId: body.data.conversationId,
+        errorMessage: message,
+      })
       if (message === 'LLM_QUOTA_EXCEEDED') {
         return reply.status(402).send({
           message: 'Franquia de IA esgotada — adquira créditos ou aguarde o próximo ciclo.',

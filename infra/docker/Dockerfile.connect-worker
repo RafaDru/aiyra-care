@@ -1,0 +1,19 @@
+# connect-worker — Cloud Run Job (sync batch ou ops probe+alerts)
+FROM node:22-bookworm-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV CONNECT_WORKER_JOB_MODE=ops
+
+COPY package.json package-lock.json ./
+COPY packages/api/package.json packages/api/
+COPY packages/connect/package.json packages/connect/
+COPY packages/connect-worker/package.json packages/connect-worker/
+
+RUN npm ci --workspace=@aiyra-care/connect-worker --workspace=@aiyra-care/api --workspace=@aiyra-care/connect
+
+COPY packages/connect packages/connect
+COPY packages/api packages/api
+COPY packages/connect-worker packages/connect-worker
+
+WORKDIR /app/packages/connect-worker
+CMD ["npx", "tsx", "src/job.ts"]

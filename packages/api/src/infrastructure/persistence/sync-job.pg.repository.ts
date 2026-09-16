@@ -4,6 +4,8 @@ import type { SyncResult } from '../scraper/sync-progress-store.js'
 import type { SyncNoveltySummary } from '../../domain/sync-job/sync-job.entity.js'
 import { unregisterSyncBrowser } from '../sync/sync-browser-registry.js'
 
+import type { PortalAuthFailureKind } from '../../domain/portal-auth/portal-auth-failure.js'
+
 function rowToProps(row: Record<string, unknown>): SyncJobProps {
   return {
     id: row.id as string,
@@ -17,6 +19,7 @@ function rowToProps(row: Record<string, unknown>): SyncJobProps {
     result: row.result as SyncResult | null,
     novelty: row.novelty as SyncNoveltySummary | null,
     error: row.error as string | null,
+    failureKind: (row.failure_kind as PortalAuthFailureKind | null) ?? null,
     startedAt: row.started_at as Date,
     finishedAt: row.finished_at as Date | null,
     createdAt: row.created_at as Date,
@@ -53,24 +56,45 @@ export class SyncJobPgRepository {
     result?: SyncResult
     novelty?: SyncNoveltySummary
     error?: string
+    failureKind?: PortalAuthFailureKind | null
     finishedAt?: Date
   }): Promise<void> {
     const terminal = args.status === 'success' || args.status === 'failed'
+    const errorValue = args.status === 'failed' ? (args.error ?? args.message) : null
+
+    if (terminal) {
+      await this.pool.query(
+        `UPDATE sync_jobs SET
+          step = $2, message = $3, status = $4, step_details = $5,
+          result = COALESCE($6, result), novelty = COALESCE($7, novelty),
+          error = $8, failure_kind = $9,
+          finished_at = COALESCE($10, NOW()),
+          updated_at = NOW()
+         WHERE id = $1`,
+        [
+          args.id, args.step, args.message, args.status,
+          JSON.stringify(args.stepDetails),
+          args.result ? JSON.stringify(args.result) : null,
+          args.novelty ? JSON.stringify(args.novelty) : null,
+          errorValue,
+          args.failureKind ?? null,
+          args.finishedAt ?? new Date(),
+        ],
+      )
+      return
+    }
+
     await this.pool.query(
       `UPDATE sync_jobs SET
         step = $2, message = $3, status = $4, step_details = $5,
         result = COALESCE($6, result), novelty = COALESCE($7, novelty),
-        error = COALESCE($8, error),
-        finished_at = CASE WHEN $4 IN ('success', 'failed') THEN COALESCE($9, NOW()) ELSE NULL END,
         updated_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1 AND status NOT IN ('success', 'failed')`,
       [
         args.id, args.step, args.message, args.status,
         JSON.stringify(args.stepDetails),
         args.result ? JSON.stringify(args.result) : null,
         args.novelty ? JSON.stringify(args.novelty) : null,
-        terminal ? (args.error ?? args.message) : null,
-        terminal ? (args.finishedAt ?? new Date()) : null,
       ],
     )
   }
@@ -80,7 +104,81 @@ export class SyncJobPgRepository {
     return rows[0] ? SyncJob.restore(rowToProps(rows[0])) : null
   }
 
+  /** Normaliza jobs órfãos (timeout, running+finished_at, done em step_details). */
+  async reconcileEnvironment(): Promise<{
+    timedOut: number
+    inconsistent: number
+    promoted: number
+    clearedSuccessErrors: number
+  }> {
+    const stale = await this.pool.query<{ id: string }>(
+      `SELECT id FROM sync_jobs
+       WHERE status IN ('pending', 'running')
+         AND started_at < NOW() - INTERVAL '30 minutes'`,
+    )
+    for (const row of stale.rows) {
+      await unregisterSyncBrowser(row.id)
+    }
+
+    const timedOut = await this.pool.query(
+      `UPDATE sync_jobs SET
+        status = 'failed', step = 'error',
+        message = 'Sincronização expirou (timeout)',
+        error = 'Sincronização expirou (timeout)',
+        finished_at = COALESCE(finished_at, NOW()), updated_at = NOW()
+       WHERE status IN ('pending', 'running')
+         AND started_at < NOW() - INTERVAL '30 minutes'`,
+    )
+
+    const inconsistent = await this.pool.query(
+      `UPDATE sync_jobs SET
+        status = 'failed', step = 'error',
+        message = 'Sincronização interrompida',
+        error = 'Job inconsistente (running com finished_at)',
+        finished_at = COALESCE(finished_at, NOW()), updated_at = NOW()
+       WHERE status IN ('pending', 'running') AND finished_at IS NOT NULL`,
+    )
+
+    const promoted = await this.pool.query(
+      `UPDATE sync_jobs SET
+        status = 'success',
+        step = 'done',
+        message = COALESCE(step_details->'done'->>'message', message),
+        error = NULL,
+        finished_at = COALESCE(finished_at, NOW()),
+        updated_at = NOW()
+       WHERE status IN ('pending', 'running')
+         AND (
+           step_details->'done'->>'status' = 'success'
+           OR (result IS NOT NULL AND step = 'importing')
+         )`,
+    )
+
+    const clearedErrors = await this.pool.query(
+      `UPDATE sync_jobs SET error = NULL, updated_at = NOW()
+       WHERE status = 'success' AND error IS NOT NULL`,
+    )
+
+    return {
+      timedOut: timedOut.rowCount ?? 0,
+      inconsistent: inconsistent.rowCount ?? 0,
+      promoted: promoted.rowCount ?? 0,
+      clearedSuccessErrors: clearedErrors.rowCount ?? 0,
+    }
+  }
+
   async findActiveByLinkId(linkId: string): Promise<SyncJob | null> {
+    await this.reconcileEnvironmentForLink(linkId)
+    const { rows } = await this.pool.query(
+      `SELECT * FROM sync_jobs
+       WHERE integration_link_id = $1 AND status IN ('pending', 'running')
+       ORDER BY started_at DESC LIMIT 1`,
+      [linkId],
+    )
+    return rows[0] ? SyncJob.restore(rowToProps(rows[0])) : null
+  }
+
+  private async reconcileEnvironmentForLink(linkId: string): Promise<void> {
     const stale = await this.pool.query<{ id: string }>(
       `SELECT id FROM sync_jobs
        WHERE integration_link_id = $1 AND status IN ('pending', 'running')
@@ -111,13 +209,21 @@ export class SyncJobPgRepository {
          AND finished_at IS NOT NULL`,
       [linkId],
     )
-    const { rows } = await this.pool.query(
-      `SELECT * FROM sync_jobs
+    await this.pool.query(
+      `UPDATE sync_jobs SET
+        status = 'success',
+        step = 'done',
+        message = COALESCE(step_details->'done'->>'message', message),
+        error = NULL,
+        finished_at = COALESCE(finished_at, NOW()),
+        updated_at = NOW()
        WHERE integration_link_id = $1 AND status IN ('pending', 'running')
-       ORDER BY started_at DESC LIMIT 1`,
+         AND (
+           step_details->'done'->>'status' = 'success'
+           OR (result IS NOT NULL AND step = 'importing')
+         )`,
       [linkId],
     )
-    return rows[0] ? SyncJob.restore(rowToProps(rows[0])) : null
   }
 
   async findLastCompletedByLinkId(linkId: string): Promise<SyncJob | null> {

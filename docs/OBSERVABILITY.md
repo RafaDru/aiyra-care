@@ -1,6 +1,6 @@
 # Observabilidade, monitoramento e analytics de produto
 
-> **Última atualização:** 2026-08-28  
+> **Última atualização:** 2026-09-04  
 > Objetivo: operação **proativa** (antecipar falhas e travamentos), não só reagir a tickets.  
 > LGPD: sem PHI em logs agregados; conteúdo clínico/chat só com opt-in explícito.
 
@@ -61,11 +61,27 @@ product_events (
 
 ### Métricas ops
 
-- `GET /ops/metrics` — Ava p50/p95 tokens, sync por portal, alertas derivados.
+- `GET /ops/metrics` — Ava p50/p95 tokens, sync por portal, alertas derivados (workers/CLI; **não** é o dashboard).
 - `GET /ops/alerts` — só alertas ativos.
-- **Web dev:** `http://localhost:5173/ops` — dashboard interno (métricas, alertas, probe); ver `docs/infra/OPS_ALERT_CHANNELS.md`.
+- **Dashboard dev:** `http://127.0.0.1:3013` — `packages/ops-console` (PG direto, independente do app); ver `docs/infra/OPS_ALERT_CHANNELS.md`.
 - Header `x-internal-ops-key` quando `OPS_METRICS_KEY` ou `LLM_INTERNAL_OBSERVABILITY_KEY` definido.
 - CLI: `npm run ops:metrics`.
+
+### Ops nos dois ambientes não prod
+
+Paridade de **capacidades** (health, métricas, alertas, `product_events`), com **isolamento** de keys, URLs e webhooks:
+
+| Capacidade | Ambiente 1 — Integração | Ambiente 2 — Preview |
+|------------|-------------------------|----------------------|
+| Health | `GET /health`, `/health/db` (local `3010`) | URL preview + probe gate |
+| Métricas / alertas | `OPS_METRICS_KEY` integration | `OPS_METRICS_KEY` preview (distinto) |
+| Webhook alertas | Opcional / canal `#dev` | Recomendado — canal preview |
+| Connect worker | Opcional local | **Obrigatório** (`CONNECT_WORKER_EXTERNAL=1` na API) |
+| Ops console | `localhost:3013` → PG local | Instância apontando PG preview |
+| Probe pré-uso | `staging:probe-gate` após mudança relevante | Obrigatório post-deploy |
+| `product_events` | Sim | Sim — cohorts separados |
+
+Processo: [`infra/TWO_ENV_MODEL.md`](./infra/TWO_ENV_MODEL.md) · deploy Preview: [`infra/ENV_PREVIEW.md`](./infra/ENV_PREVIEW.md).
 
 **Regras de `properties`:**
 
@@ -81,13 +97,21 @@ product_events (
 | `ava_context_pin` / `unpin` | Uso do painel |
 | `ava_patient_switch_hook` | UX multi-filho |
 | `sync_job_terminal` | success/fail por portal |
+| `sync_job_started` | Início manual/silent; `skipped` + `reason` quando API ignora |
+| `app_screen_viewed` | Uma vez por sessão/tela — alimenta matriz acesso × fail rate |
+| `family_invite_*` | Criar, aceitar, revogar, falha (sem e-mail no payload) |
+| `patient_access_revoked` | Titular revoga grant no perfil |
+| `compliance_gate_redirect` / `compliance_accepted` | Gate legal |
+| `notification_optin_changed` | Opt-in escalação sync (settings) |
 | `billing_checkout_started` / `completed` | Conversão |
 | `hygiene_prompt_shown` / `resolved` | Dedup (API + futura UI) |
 | `onboarding_step` | Onde trava onboarding |
 
 **Alertas externos:** webhook plugável (`OPS_ALERT_WEBHOOK_URL`) — local notifier, ntfy, e-mail, Slack · `npm run ops:alerts-check` · ver `docs/infra/OPS_ALERT_CHANNELS.md`.
 
-**Produção:** `docs/infra/OPS_ALERTS_PRODUCTION.md` · setup `npm run setup:ops-alerts` · smoke `npm run ops:smoke` · dashboard `http://localhost:5173/ops`.
+**Produção:** `docs/infra/OPS_ALERTS_PRODUCTION.md` · setup `npm run setup:ops-alerts` · smoke `npm run ops:smoke` · console ops (URL dedicada, não `/ops` no app).
+
+**Hub operacional (sessão Cursor «Aiyra: Ops»):** [`docs/ops/README.md`](./ops/README.md) · console [`docs/ops/CONSOLE.md`](./ops/CONSOLE.md) · telemetria [`docs/ops/TELEMETRY.md`](./ops/TELEMETRY.md) · suporte [`docs/ops/SUPPORT_REPORTS.md`](./ops/SUPPORT_REPORTS.md).
 
 **Fingerprints:** `errorFingerprints24h` em `GET /ops/metrics` — agrupa `product_events` por erro/status (24h).
 
@@ -169,6 +193,20 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 3. **Produto** — funil plano, higienização pendente, retenção conversas.
 4. **Custo** — tokens × provedor × tier (estimado).
 
+**Console ops (`packages/ops-console`, :3013)** — layout com abas, tokens AiyraCare, gráficos Recharts (`timeSeries24h`: sync, Ava, erros cliente) e uso da largura total da tela.
+
+### Contextos de observabilidade (layout do console)
+
+| Seção | O que mede | Fontes |
+|-------|------------|--------|
+| **Infra** | API, Postgres, Neo4j, stack local | `ops:probe`, controles start/stop |
+| **Produto & UX** | Erros de UI/API, mapa de features, acesso vs falha | `client_errors`, `product_events` + catálogo humanizado |
+| **Sync & integrações** | Jobs, fail rate por portal, stuck | `sync_jobs`, alertas derivados |
+| **Ava & LLM** | Turnos, tokens, cascade, quota | `llm_usage_events`, `product_events` |
+| **Custo interno** | Classificador/higiene, orçamento R$ | `llm_usage_events` internal |
+
+**Erros cliente:** catálogo em `packages/api/src/domain/ops/ops-feature-catalog.ts` (labels PT + área); matriz **Saúde por feature** no console cruza `product_events` (sessões/eventos 24h) com `client_errors` → fail rate e sinal (`hot`, `errors_only`, etc.). Agregação: `buildFeatureHealthMatrix` em `ops-feature-health.ts`.
+
 ## Roadmap
 
 Épicos `observability-platform`, `product-analytics-optin` em `docs/roadmap.json`.
@@ -176,10 +214,13 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 ## Estado atual
 
 - `product_events` + ingest web/API (Ava, sync, billing, onboarding, higiene).
-- Métricas e alertas: `GET /ops/metrics`, `GET /ops/alerts`, CLI `ops:metrics`, dispatch webhook.
+- Dispatch webhook com triagem: `human_required` default (`OPS_ALERTS_DISPATCH_MODE`); CLI `npm run ops:triage`.
 - Auth ops: `OPS_METRICS_KEY` + header `x-internal-ops-key` (sem JWT).
 - Agendamento: connect-worker, Task Scheduler (`setup-ops-alerts.ps1`), ou cron Linux.
 - Logs sanitizados (Pino redact).
 - GCP billing budgets: `docs/infra/GCP_BILLING_ALERTS.md`.
-- Smoke: `npm run ops:smoke`, `test:smoke:llm`, `test:smoke:billing`, `test:critical`.
-- Pendente fase 2: Grafana/Better Stack dashboard.
+- Smoke: `npm run ops:smoke`, `OPS_SMOKE_FULL=1` (console + notificador), `npm run test:ops`, `test:smoke:llm`, `test:smoke:billing`, `test:critical`.
+- Diagramas alertas/fallbacks: `docs/OPS_FALLBACKS_AND_ALERTS.md`.
+- Runbook operacional: `docs/ops/RUNBOOK_ALERTS.md`.
+- Checklist preparação: `docs/infra/OPS_PREP_CHECKLIST.md`.
+- Console ops `:3013`: seções por contexto, mapa de features, matriz acesso×falha (`run-ops-console-sections`, `run-ops-feature-catalog`, `run-ops-feature-health-matrix` done).

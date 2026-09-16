@@ -61,4 +61,4 @@ Primárias mais luminosas para contraste em fundo escuro; superfícies neutras e
 
 ## Open Design
 
-Tokens em `%APPDATA%\Open Design\...\open-health-platform-for-users-and-patients\system\` — paleta `aiyra` apenas (indigo/teal/rose removidos do produto).
+Tokens em `%APPDATA%\Open Design\...\aiyra-care-platform-for-users-and-patients\system\` — paleta `aiyra` apenas (indigo/teal/rose removidos do produto).

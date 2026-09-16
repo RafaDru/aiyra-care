@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { CanonicalSyncBatch, CanonicalRecord } from '@open-health/connect'
+import type { CanonicalSyncBatch, CanonicalRecord } from '@aiyra-care/connect'
 import type { AmilSyncResult } from '../../../infrastructure/scraper/amil-sync.scraper.js'
 import { AmilLabelClassifier } from '../../classification/amil-label-classifier.js'
 import { FuzzyExamCatalogLookup } from '../../../infrastructure/classification/fuzzy-exam-catalog-lookup.js'
@@ -11,7 +11,7 @@ const defaultClassifier: LabelClassifierEngine = new AmilLabelClassifier({
 })
 
 function procDescOf(usage: AmilSyncResult['beneficiaryData'][number]['usageItems'][number]): string {
-  return usage.procedureDescription || usage.kind || ''
+  return usage.procedureDescription || ''
 }
 
 export function amilResultToCanonicalBatch(

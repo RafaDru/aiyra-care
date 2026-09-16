@@ -1,6 +1,6 @@
 /** Cache local de cortes de exame (IndexedDB) — apenas desktop. */
 
-const DB_NAME = 'openhealth-exam-slices'
+const DB_NAME = 'aiyra-care-exam-slices'
 const STORE = 'slices'
 const MAX_ENTRIES = 12
 const DESKTOP_MIN_WIDTH = 1024

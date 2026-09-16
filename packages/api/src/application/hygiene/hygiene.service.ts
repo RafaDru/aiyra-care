@@ -12,6 +12,7 @@ import type {
   HygieneResolveDecision,
 } from '../../domain/hygiene/hygiene.types.js'
 import type { HygieneRepository } from '../../domain/hygiene/hygiene.repository.js'
+import { scheduleHygieneResolve } from '../../infrastructure/graph/hygiene-graph.js'
 
 export class HygieneService {
   constructor(
@@ -51,7 +52,38 @@ export class HygieneService {
       await this.recordSameEntity(updated, resolvedBy)
     }
 
+    const canonicalPair =
+      decision === 'same_entity'
+        ? pickCanonicalEntityPair(
+            updated.entityType,
+            updated.entityIdA,
+            updated.entityIdB,
+            (await this.loadSource(updated.entityType, updated.entityIdA)) ?? undefined,
+            (await this.loadSource(updated.entityType, updated.entityIdB)) ?? undefined,
+          )
+        : null
+
+    scheduleHygieneResolve({
+      patientId: updated.patientId,
+      entityType: updated.entityType as 'exam' | 'vaccine',
+      entityIdA: updated.entityIdA,
+      entityIdB: updated.entityIdB,
+      candidateId: updated.id,
+      decision,
+      canonicalId: canonicalPair?.[0],
+      duplicateId: canonicalPair?.[1],
+    })
+
     return this.enrichCandidate(updated)
+  }
+
+  private async loadSource(
+    entityType: HygieneCandidate['entityType'],
+    entityId: string,
+  ): Promise<string | null | undefined> {
+    if (entityType === 'exam') return (await this.exams.findById(entityId))?.source
+    if (entityType === 'vaccine') return (await this.vaccines.findById(entityId))?.source
+    return undefined
   }
 
   private async recordSameEntity(candidate: HygieneCandidate, resolvedBy: string): Promise<void> {
@@ -137,8 +169,8 @@ export class HygieneService {
       return {
         ...row,
         patientName,
-        entityA: a?.toJSON() ?? { id: row.entityIdA, missing: true },
-        entityB: b?.toJSON() ?? { id: row.entityIdB, missing: true },
+        entityA: (a?.toJSON() ?? { id: row.entityIdA, missing: true }) as Record<string, unknown>,
+        entityB: (b?.toJSON() ?? { id: row.entityIdB, missing: true }) as Record<string, unknown>,
       }
     }
     if (row.entityType === 'vaccine') {
@@ -147,8 +179,8 @@ export class HygieneService {
       return {
         ...row,
         patientName,
-        entityA: a?.toJSON() ?? { id: row.entityIdA, missing: true },
-        entityB: b?.toJSON() ?? { id: row.entityIdB, missing: true },
+        entityA: (a?.toJSON() ?? { id: row.entityIdA, missing: true }) as Record<string, unknown>,
+        entityB: (b?.toJSON() ?? { id: row.entityIdB, missing: true }) as Record<string, unknown>,
       }
     }
     return { ...row, patientName }

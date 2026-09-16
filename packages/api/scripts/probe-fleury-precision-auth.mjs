@@ -52,7 +52,7 @@ const networkLog = []
 
 async function loadLinkCredentials() {
   const pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/openhealth',
+    connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
   })
   try {
     const res = await pool.query(

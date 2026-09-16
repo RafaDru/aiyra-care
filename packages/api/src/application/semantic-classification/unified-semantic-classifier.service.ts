@@ -77,7 +77,7 @@ export class UnifiedSemanticClassifierService<TKind = string, TDest = string> {
 
     // --- TIER 1a: Cache Dinâmico no Banco (Hit de Aprendizados Anteriores do LLM) ---
     if (this.cacheRepo && normalizedLabel) {
-      const cached = await this.cacheRepo.findByNormalizedLabel<TKind, TDest>(
+      const cached = await this.cacheRepo.findByNormalizedLabel(
         this.domain,
         normalizedLabel,
       )
@@ -85,8 +85,8 @@ export class UnifiedSemanticClassifierService<TKind = string, TDest = string> {
         return {
           rawLabel,
           normalizedLabel,
-          kind: cached.kind,
-          destination: cached.destination,
+          kind: cached.kind as TKind,
+          destination: cached.destination as TDest,
           canonicalName: cached.canonicalName,
           catalogId: cached.catalogId,
           method: 'cache',
@@ -129,8 +129,8 @@ export class UnifiedSemanticClassifierService<TKind = string, TDest = string> {
               domain: this.domain,
               rawLabel,
               normalizedLabel,
-              kind: llmResult.kind,
-              destination: llmResult.destination,
+              kind: llmResult.kind as string & TKind,
+              destination: llmResult.destination as string & TDest,
               canonicalName: llmResult.canonicalName,
               catalogId: llmResult.catalogId,
               confidence: 0.90,
@@ -200,7 +200,7 @@ export class UnifiedSemanticClassifierService<TKind = string, TDest = string> {
   private async buildCombinedCatalog(): Promise<Array<SemanticCatalogEntry<TKind, TDest>>> {
     if (!this.cacheRepo) return this.staticCatalog
 
-    const cachedEntries = await this.cacheRepo.findAllByDomain<TKind, TDest>(this.domain).catch(() => [])
+    const cachedEntries = await this.cacheRepo.findAllByDomain(this.domain).catch(() => [])
     if (!cachedEntries.length) return this.staticCatalog
 
     const combined: Array<SemanticCatalogEntry<TKind, TDest>> = [...this.staticCatalog]
@@ -209,8 +209,8 @@ export class UnifiedSemanticClassifierService<TKind = string, TDest = string> {
       combined.push({
         id: c.catalogId ?? `dynamic:${c.id}`,
         canonicalName: c.canonicalName ?? c.rawLabel,
-        kind: c.kind,
-        destination: c.destination,
+        kind: c.kind as TKind,
+        destination: c.destination as TDest,
         aliases: [c.rawLabel, c.normalizedLabel],
         domain: this.domain,
       })

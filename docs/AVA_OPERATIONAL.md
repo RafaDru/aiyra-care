@@ -13,7 +13,7 @@ Ava tão ou mais **operacional** que o usuário: não só responder sobre o pron
 |------|---------|--------|
 | **G1 — Aceleradores + pins** | Botões “Pergunte à Ava” em entidades; dock abre com lente + pergunta + bloco de pin no prompt | **done** |
 | **G2 — Ações read-only** | Navegar abas, abrir laudo/PDF, listar sync status via chat (links + respostas estruturadas) | **done (V0)** |
-| **G3 — Ações com confirmação** | Sync portal, export clínico, resolver hygiene — POST só após confirmação UI | planejado |
+| **G3 — Ações com confirmação** | Sync portal, export clínico, consulta, hygiene — POST só após `Modal.confirm` | **done (MVP)** |
 | **G4 — Tool calling** | Runtime de ferramentas (`ava-tools.ts`) + SSE de atividade na UI | **parcial (read-only + reflexão)** |
 
 ## G4 — Ferramentas read-only (parcial)

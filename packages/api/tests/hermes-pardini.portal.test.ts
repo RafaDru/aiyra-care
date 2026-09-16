@@ -4,6 +4,7 @@ import {
   hermesPardiniPortalEntryUrl,
   fleuryPrecisionUnifiedEntryUrl,
   fleuryPrecisionOtpTimeoutMs,
+  fleuryPrecisionOtpInApp,
   hermesPardiniUseUnifiedLogin,
   FLEURY_PRECISION_MARCA_PROFILES,
   HERMES_PARDINI_PRECISION_CARE,
@@ -46,5 +47,15 @@ describe('hermes-pardini.portal', () => {
     process.env.FLEURY_PRECISION_OTP_TIMEOUT_MS = '240000'
     expect(fleuryPrecisionOtpTimeoutMs()).toBe(240_000)
     delete process.env.FLEURY_PRECISION_OTP_TIMEOUT_MS
+  })
+
+  it('defaults OTP in-app on (opt-out with FLEURY_PRECISION_OTP_IN_APP=0)', () => {
+    const prev = process.env.FLEURY_PRECISION_OTP_IN_APP
+    delete process.env.FLEURY_PRECISION_OTP_IN_APP
+    expect(fleuryPrecisionOtpInApp()).toBe(true)
+    process.env.FLEURY_PRECISION_OTP_IN_APP = '0'
+    expect(fleuryPrecisionOtpInApp()).toBe(false)
+    if (prev !== undefined) process.env.FLEURY_PRECISION_OTP_IN_APP = prev
+    else delete process.env.FLEURY_PRECISION_OTP_IN_APP
   })
 })

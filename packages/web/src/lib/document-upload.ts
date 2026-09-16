@@ -10,12 +10,18 @@ export interface DocumentUploadProgress {
   message?: string
 }
 
-export function uploadDocumentWithProgress(
+export async function uploadDocumentWithProgress(
   patientId: string,
   documentType: string,
   file: File,
   onProgress: (p: DocumentUploadProgress) => void,
 ): Promise<Document_> {
+  const { ensureAccessToken, supabaseConfigured } = await import('./supabase.js')
+  const token = await ensureAccessToken()
+  if (supabaseConfigured && !token) {
+    throw new Error('Sessão não disponível — faça login novamente')
+  }
+
   return new Promise((resolve, reject) => {
     const form = new FormData()
     form.append('patientId', patientId)
@@ -24,6 +30,7 @@ export function uploadDocumentWithProgress(
 
     const xhr = new XMLHttpRequest()
     xhr.open('POST', `${BASE_URL}/documents/upload`)
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {

@@ -8,6 +8,7 @@ import { SETTINGS_PATHS } from '../lib/settings-paths.js'
 const NAV_KEYS = [
   SETTINGS_PATHS.general,
   SETTINGS_PATHS.account,
+  SETTINGS_PATHS.family,
   SETTINGS_PATHS.plan,
   SETTINGS_PATHS.legal,
 ] as const
@@ -24,6 +25,7 @@ export function SettingsLayout() {
   const items: MenuProps['items'] = [
     { key: SETTINGS_PATHS.general, label: t('settings.nav.general') },
     { key: SETTINGS_PATHS.account, label: t('settings.nav.account') },
+    { key: SETTINGS_PATHS.family, label: t('settings.nav.family') },
     { key: SETTINGS_PATHS.plan, label: t('settings.nav.plan') },
     { key: SETTINGS_PATHS.legal, label: t('settings.nav.legal') },
   ]
