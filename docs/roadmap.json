@@ -2147,14 +2147,14 @@
           "id": "run-support-user-reports",
           "title": "Reportar problema — chamado + bundle LGPD",
           "status": "done",
-          "detail": "Migration 061 + 064; aba Suporte + Issues (066 ops_analysis_queue); investigationId; Analisar/Concluir + agente Cursor; docs/ops/SUPPORT_REPORTS.md + INVESTIGATION_CORRELATION.md.",
+          "detail": "Migration 061 + 064; aba Suporte + Issues (068 ops_analysis_queue); investigationId; Analisar/Concluir + agente Cursor; docs/ops/SUPPORT_REPORTS.md + INVESTIGATION_CORRELATION.md.",
           "reviewBadge": ["legal"]
         },
         {
           "id": "run-ops-analysis-queue",
           "title": "Pilha Issues + callback agente",
           "status": "done",
-          "detail": "Migration 066; ops_analysis_queue; aba Issues :3013; tray contadores; pre-screen OPS_ANALYSIS_PRE_SCREEN; investigationId; docs/ops/INVESTIGATION_CORRELATION.md."
+          "detail": "Migration 068; ops_analysis_queue; aba Issues :3013; tray contadores; pre-screen OPS_ANALYSIS_PRE_SCREEN; investigationId; docs/ops/INVESTIGATION_CORRELATION.md."
         },
         {
           "id": "run-ops-alert-investigator",
