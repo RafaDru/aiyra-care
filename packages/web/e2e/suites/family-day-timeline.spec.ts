@@ -23,15 +23,12 @@ test.describe('family-day-timeline', () => {
     })
 
     await openPatientByName(page, patientName)
-    const planSection = page
-      .locator('.patient-section-nav .ant-segmented-item-label')
-      .filter({ hasText: 'Plano & portais' })
-    await planSection.scrollIntoViewIfNeeded()
-    await planSection.click()
+    const patientId = page.url().match(/\/patients\/([^?]+)/)?.[1]
+    if (!patientId) throw new Error('ID do paciente não encontrado na URL')
+    await page.goto(`/patients/${patientId}?section=plan&tab=wallet`)
 
-    const todayCard = page.locator('.wallet-today-panel')
-    await expect(todayCard).toBeVisible({ timeout: 20_000 })
-    await expect(todayCard.getByText('Hoje', { exact: true })).toBeVisible()
+    const todayCard = page.locator('[id*="panel-wallet"] .wallet-today-panel')
+    await expect(todayCard.getByRole('heading', { name: 'Hoje' })).toBeVisible({ timeout: 20_000 })
     await todayCard.getByRole('button', { name: 'Registro rápido' }).click()
 
     const drawer = page.getByRole('dialog', { name: 'Registro rápido' })

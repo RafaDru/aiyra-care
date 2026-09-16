@@ -54,15 +54,16 @@ export async function waitForAvaAssistantReply(
   return body
 }
 
-export async function sendAvaMessage(page: Page, text: string) {
+export async function submitAvaMessage(page: Page, text: string) {
   await waitAvaComposerReady(page)
-  const avaBubblesBefore = await page.locator('.ava-chat-bubble-row--ava').count()
-
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   await input.fill(text)
   await expect(page.getByRole('button', { name: 'Enviar' })).toBeEnabled({ timeout: 30_000 })
   await input.press('Enter')
+}
 
+export async function sendAvaMessage(page: Page, text: string) {
+  await submitAvaMessage(page, text)
   await waitForAvaAssistantReply(page, /.{8,}/, 90_000)
   await waitAvaComposerReady(page)
 }
