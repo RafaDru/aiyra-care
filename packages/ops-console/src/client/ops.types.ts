@@ -143,6 +143,7 @@ export interface OpsTimeSeries24h {
   avaEvents: OpsHourlyAvaEventBucket[]
   clientErrors: OpsHourlyCountBucket[]
   avaTokens: OpsHourlyAvaTokensBucket[]
+  supportReportsSubmitted: OpsHourlyCountBucket[]
 }
 
 export interface ErrorFingerprintRow {

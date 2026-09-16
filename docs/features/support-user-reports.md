@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `support-user-reports` |
 | **Épico** | `prod-run-intelligence` |
-| **Status** | `in_progress` |
+| **Status** | `done` |
 | **Categoria** | técnico |
 | **Prioridade** | P1 |
 
@@ -53,12 +53,12 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 | `expires_at` | +30 dias |
 | `profile_access_until` | +7 dias se opt-in |
 
-## Fora de escopo (MVP)
+## Fora de escopo (backlog pós-MVP)
 
 - Captura de screenshot na UI (API pronta)
-- Fila no ops console `:3013`
-- Webhook Slack / agente investigador / PR automático
 - Criptografia KMS do bundle (JSON já sanitizado)
+
+> Aba Suporte no ops console (`:3013`), fila Issues e agente investigador já entregues — ver [`docs/ops/SUPPORT_REPORTS.md`](../ops/SUPPORT_REPORTS.md).
 
 ## Dependências
 
@@ -70,6 +70,12 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 - Volume de `support_report_submitted` por categoria
 - Tempo médio open → resolved (fase 2)
 - % relatórios com `consentTechnical` (esperado alto)
+
+## QA
+
+- Suite: [`support-user-report`](../testing/suites/support-user-report.md)
+- Comando: `npm run qa:run -- --suite support-user-report`
+- Automação: `packages/web/e2e/suites/support-user-report.spec.ts`
 
 ## Ver também
 
