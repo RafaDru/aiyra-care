@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Typography, Button, Space, Tag, Empty, Modal, App, QRCode, Spin, Alert, Descriptions, Tooltip,
 } from 'antd'
@@ -42,6 +43,7 @@ export function WalletCardsTab({
   highlightCard,
   onCardUpdated,
 }: Props) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [memberships, setMemberships] = useState<PlanMembershipWithPlan[]>([])
   const [tokenLink, setTokenLink] = useState<IntegrationLink | null>(null)
@@ -132,7 +134,7 @@ export function WalletCardsTab({
       setSecondsLeft(remainingSeconds(card.expiresAt))
       if (card.cardNumber && card.cardNumber !== link.cardNumber) onCardUpdated()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erro ao gerar QR Code / token'
+      const msg = err instanceof Error ? err.message : t('walletCards.tokenError')
       setTokenError(msg)
       if (!silent) message.error(msg)
     } finally {
@@ -165,16 +167,14 @@ export function WalletCardsTab({
   return (
     <Space direction="vertical" size={24} style={{ width: '100%' }}>
       <div>
-        <Title level={5} style={{ marginBottom: 4 }}>Carteira de {firstName}</Title>
-        <Text type="secondary">
-          Cartões e credenciais para consulta e atendimento. Sincronização em Integrações.
-        </Text>
+        <Title level={5} style={{ marginBottom: 4 }}>{t('walletCards.title', { name: firstName })}</Title>
+        <Text type="secondary">{t('walletCards.subtitle')}</Text>
       </div>
 
       <WalletTodayPanel patientId={patient.id} refreshKey={syncRefreshKey} />
 
       <div>
-        <Text strong style={{ display: 'block', marginBottom: 10 }}>Sistema público</Text>
+        <Text strong style={{ display: 'block', marginBottom: 10 }}>{t('walletCards.publicSystem')}</Text>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
           <div
             ref={highlightCard === 'conectesus' ? highlightRef : undefined}
@@ -183,13 +183,13 @@ export function WalletCardsTab({
               id="wallet-card-conectesus"
               brandKey="conectesus"
               holderName={patient.name}
-              numberLabel="Cartão Nacional (CNS)"
+              numberLabel={t('walletCards.cnsLabel')}
               numberValue={patient.cns ? formatCns(patient.cns) : '—'}
               highlighted={highlightCard === 'conectesus'}
               extra={
                 patient.cns
-                  ? <Tag color="success" style={{ margin: 0 }}>Ativo</Tag>
-                  : <Tag style={{ margin: 0, background: '#ffffff33', border: 'none', color: '#fff' }}>Pendente</Tag>
+                  ? <Tag color="success" style={{ margin: 0 }}>{t('walletCards.active')}</Tag>
+                  : <Tag style={{ margin: 0, background: '#ffffff33', border: 'none', color: '#fff' }}>{t('walletCards.pending')}</Tag>
               }
             />
             <CardToolbar>
@@ -202,14 +202,14 @@ export function WalletCardsTab({
               <WalletCardFace
                 id="wallet-card-caderneta"
                 brandKey="caderneta"
-                holderName={linkedChildrenCount > 0 ? `${linkedChildrenCount} filho(s) vinculado(s)` : patient.name}
-                numberLabel="Caderneta da Criança"
-                numberValue="Minha Família"
+                holderName={linkedChildrenCount > 0 ? t('walletCards.linkedChildren', { count: linkedChildrenCount }) : patient.name}
+                numberLabel={t('walletCards.childBookLabel')}
+                numberValue={t('walletCards.myFamily')}
                 highlighted={highlightCard === 'caderneta'}
                 extra={<Tag style={{ margin: 0, background: '#ffffff33', border: 'none', color: '#fff' }}>gov.br</Tag>}
               />
               <CardToolbar>
-                <Text type="secondary" style={{ fontSize: 12, flex: 1 }}>Calendário vacinal previsto + aplicado</Text>
+                <Text type="secondary" style={{ fontSize: 12, flex: 1 }}>{t('walletCards.vaccineCalendarHint')}</Text>
               </CardToolbar>
             </div>
           )}
@@ -217,9 +217,9 @@ export function WalletCardsTab({
       </div>
 
       <div>
-        <Text strong style={{ display: 'block', marginBottom: 4 }}>Plano de saúde</Text>
+        <Text strong style={{ display: 'block', marginBottom: 4 }}>{t('walletCards.healthPlan')}</Text>
         <Text type="secondary" style={{ display: 'block', marginBottom: 10, fontSize: 12 }}>
-          Carteirinhas das operadoras vinculadas. Atualização automática em segundo plano quando há sessão válida.
+          {t('walletCards.healthPlanHint')}
         </Text>
         {walletBanner && (
           <Alert
@@ -230,7 +230,7 @@ export function WalletCardsTab({
           />
         )}
         {insuranceLinks.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma carteirinha — vincule em Integrações" />
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('walletCards.noCards')} />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {insuranceLinks.map((link) => {
@@ -249,19 +249,19 @@ export function WalletCardsTab({
                     brandKey={link.portalType}
                     planLabel={membership?.plan?.planName}
                     holderName={patient.name}
-                    numberLabel="Nº da carteirinha"
+                    numberLabel={t('walletCards.cardNumberLabel')}
                     numberValue={cardNum}
                     highlighted={isHighlight}
                     extra={
                       <Tag color={link.active ? 'success' : 'default'} style={{ margin: 0 }}>
-                        {link.active ? 'Ativo' : 'Inativo'}
+                        {link.active ? t('walletCards.active') : t('walletCards.inactive')}
                       </Tag>
                     }
                   />
                   <CardToolbar>
                     {link.portalType === 'unimed' && (
                       <Button size="small" icon={<QrcodeOutlined />} onClick={() => openTokenModal(link)}>
-                        QR / Token
+                        {t('walletCards.qrToken')}
                       </Button>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -271,17 +271,17 @@ export function WalletCardsTab({
                           <Text type="secondary" style={{ fontSize: 11 }}>{meta.message}</Text>
                         </Space>
                       ) : meta?.noveltyText ? (
-                        <Tooltip title={meta.lastSyncLabel ? `Atualizado ${meta.lastSyncLabel}` : undefined}>
+                        <Tooltip title={meta.lastSyncLabel ? t('walletCards.updatedAt', { when: meta.lastSyncLabel }) : undefined}>
                           <Tag color="success" style={{ margin: 0, fontSize: 11 }}>{meta.noveltyText}</Tag>
                         </Tooltip>
                       ) : meta?.lastSyncLabel ? (
-                        <Text type="secondary" style={{ fontSize: 11 }}>Atualizado {meta.lastSyncLabel}</Text>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{t('walletCards.updatedAt', { when: meta.lastSyncLabel })}</Text>
                       ) : (
-                        <Text type="secondary" style={{ fontSize: 11 }}>Sincronize em Integrações na primeira vez</Text>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{t('walletCards.syncFirstTime')}</Text>
                       )}
                       {meta?.message && !meta.active && (
                         <Tooltip title={meta.message}>
-                          <Tag color="error" style={{ margin: '4px 0 0', fontSize: 10 }}>Falhou</Tag>
+                          <Tag color="error" style={{ margin: '4px 0 0', fontSize: 10 }}>{t('walletCards.failed')}</Tag>
                         </Tooltip>
                       )}
                     </div>
@@ -294,19 +294,19 @@ export function WalletCardsTab({
       </div>
 
       <div>
-        <Text strong style={{ display: 'block', marginBottom: 4 }}>Plano odontológico</Text>
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum plano odontológico vinculado" />
+        <Text strong style={{ display: 'block', marginBottom: 4 }}>{t('walletCards.dentalPlan')}</Text>
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('walletCards.noDentalPlan')} />
       </div>
 
       <Modal
-        title={<Space><BrandTag brand="unimed">Unimed BH</BrandTag> QR / Token</Space>}
+        title={<Space><BrandTag brand="unimed">Unimed BH</BrandTag> {t('walletCards.qrToken')}</Space>}
         open={!!tokenLink}
         onCancel={() => { setTokenLink(null); setVirtualCard(null); setTokenError(null) }}
         footer={[
-          <Button key="close" onClick={() => { setTokenLink(null); setVirtualCard(null) }}>Fechar</Button>,
+          <Button key="close" onClick={() => { setTokenLink(null); setVirtualCard(null) }}>{t('walletCards.tokenModal.close')}</Button>,
           <Button key="refresh" type="primary" icon={<SyncOutlined />} loading={loadingToken}
             disabled={!tokenLink} onClick={() => tokenLink && loadVirtualCard(tokenLink)}>
-            Gerar novo token
+            {t('walletCards.tokenModal.generateNew')}
           </Button>,
         ]}
         width={420}
@@ -314,7 +314,7 @@ export function WalletCardsTab({
         {loadingToken && !virtualCard ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <Spin size="large" />
-            <div style={{ marginTop: 12 }}><Text type="secondary">Acessando Cartão Virtual...</Text></div>
+            <div style={{ marginTop: 12 }}><Text type="secondary">{t('walletCards.tokenModal.loading')}</Text></div>
           </div>
         ) : tokenError && !virtualCard ? (
           <Alert type="error" showIcon message={tokenError} />
@@ -322,19 +322,19 @@ export function WalletCardsTab({
           <Space direction="vertical" size={16} style={{ width: '100%', alignItems: 'center', paddingTop: 8 }}>
             <QRCode value={virtualCard.qrCode || virtualCard.token} size={200} errorLevel="M" />
             <div style={{ textAlign: 'center' }}>
-              <Text type="secondary" style={{ fontSize: 12 }}>Token</Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>{t('walletCards.tokenModal.token')}</Text>
               <div style={{ fontFamily: 'monospace', fontSize: 28, fontWeight: 700, letterSpacing: 3 }}>
                 {virtualCard.token}
               </div>
               {virtualCard.expiresAt && (
                 <Tag color={secondsLeft <= 15 ? 'red' : 'green'} style={{ marginTop: 10 }}>
-                  Expira em {formatCountdown(secondsLeft)}
+                  {t('walletCards.tokenModal.expiresIn', { time: formatCountdown(secondsLeft) })}
                 </Tag>
               )}
             </div>
             <Descriptions size="small" column={1} bordered style={{ width: '100%' }}>
-              <Descriptions.Item label="Beneficiário">{virtualCard.holderName || patient.name}</Descriptions.Item>
-              <Descriptions.Item label="Carteirinha">
+              <Descriptions.Item label={t('walletCards.tokenModal.beneficiary')}>{virtualCard.holderName || patient.name}</Descriptions.Item>
+              <Descriptions.Item label={t('walletCards.tokenModal.card')}>
                 {formatCardNumber(virtualCard.cardNumber) || formatCardNumber(tokenLink?.cardNumber) || '—'}
               </Descriptions.Item>
               {virtualCard.productCode && (
