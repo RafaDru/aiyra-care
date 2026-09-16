@@ -10,7 +10,7 @@ test.describe('family-quick-capture', () => {
   test('registro rápido salva nota pelo header', async ({ page }) => {
     await ensureQaE2eSession(page)
 
-    await page.getByRole('button', { name: 'Registro rápido' }).click()
+    await page.locator('header.app-header').getByRole('button', { name: 'Registro rápido' }).click()
     const drawer = page.getByRole('dialog', { name: 'Registro rápido' })
     await drawer.waitFor({ state: 'visible' })
 
