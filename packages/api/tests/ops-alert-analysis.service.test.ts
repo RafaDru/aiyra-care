@@ -22,6 +22,7 @@ describe('OpsAlertAnalysisService', () => {
       severity: 'critical' as const,
       category: 'infra' as const,
       message: 'API down',
+      detectedAt: '2026-09-08T12:00:00.000Z',
     }
     const result = await svc.requestAnalysis(alert, {
       operatorNotes: 'porta ocupada',

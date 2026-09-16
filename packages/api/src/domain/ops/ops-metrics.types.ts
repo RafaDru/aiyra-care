@@ -347,5 +347,7 @@ export interface OpsAlert {
   severity: OpsAlertSeverity
   category: 'sync' | 'llm' | 'product' | 'infra'
   message: string
+  /** When the condition was detected (ISO). */
+  detectedAt: string
   details?: Record<string, unknown>
 }

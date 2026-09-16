@@ -51,16 +51,19 @@ function emptySnapshot(): OpsMetricsSnapshot {
 describe('evaluateOpsAlerts', () => {
   it('flags sync stuck jobs over 30 minutes', () => {
     const snapshot = emptySnapshot()
+    const startedAt = '2026-09-08T10:00:00.000Z'
     snapshot.sync.stuckJobs = [{
       jobId: 'j1',
       integrationLinkId: 'l1',
       portalType: 'unimed',
       status: 'running',
-      startedAt: new Date().toISOString(),
+      startedAt,
       minutesRunning: 45,
     }]
     const alerts = evaluateOpsAlerts(snapshot)
-    expect(alerts.some((a) => a.id === 'sync_stuck_j1')).toBe(true)
+    const stuck = alerts.find((a) => a.id === 'sync_stuck_j1')
+    expect(stuck).toBeTruthy()
+    expect(stuck?.detectedAt).toBe(startedAt)
   })
 
   it('flags high sync fail rate by portal', () => {
@@ -92,13 +95,25 @@ describe('evaluateOpsAlerts', () => {
 
   it('flags infra probe api down', () => {
     const snapshot = emptySnapshot()
+    const checkedAt = '2026-09-08T12:00:00.000Z'
     snapshot.probe = {
-      checkedAt: new Date().toISOString(),
+      checkedAt,
       api: { ok: false, latencyMs: 100, status: 503 },
       postgres: { ok: true, latencyMs: 12 },
     }
     const alerts = evaluateOpsAlerts(snapshot)
-    expect(alerts.some((a) => a.id === 'infra_api_down')).toBe(true)
+    const down = alerts.find((a) => a.id === 'infra_api_down')
+    expect(down).toBeTruthy()
+    expect(down?.detectedAt).toBe(checkedAt)
+  })
+
+  it('sets detectedAt to generatedAt for aggregate alerts', () => {
+    const snapshot = emptySnapshot()
+    snapshot.generatedAt = '2026-09-08T12:00:00.000Z'
+    snapshot.productEvents.last5m = { avaChatCompleted: 0, avaChatFailed: 5 }
+    const alerts = evaluateOpsAlerts(snapshot)
+    const cascade = alerts.find((a) => a.id === 'llm_cascade_fail')
+    expect(cascade?.detectedAt).toBe(snapshot.generatedAt)
   })
 
   it('flags infra probe postgres slow', () => {

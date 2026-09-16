@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { Descriptions, Empty, Modal, Table, Tag, Typography } from 'antd'
+import { Descriptions, Empty, Modal, Table, Tag, Tooltip, Typography } from 'antd'
 import type {
   ClientErrorFingerprintRow,
   ErrorFingerprintRow,
@@ -11,7 +11,7 @@ import type {
   SyncRecentFailureRow,
   SyncStuckJobRow,
 } from './ops.types.js'
-import { formatBrl, formatUsdCents } from './ops-format.js'
+import { formatBrl, formatDateTimePtBr, formatRelativePtBr, formatUsdCents } from './ops-format.js'
 import { resolveClientFeatureArea, resolveClientFeatureLabel } from './ops-feature-catalog.js'
 
 const { Text, Paragraph } = Typography
@@ -101,6 +101,11 @@ function DrillAlertDetail({
         </Descriptions.Item>
         <Descriptions.Item label="Categoria">{alert.category}</Descriptions.Item>
         <Descriptions.Item label="Mensagem">{alert.message}</Descriptions.Item>
+        <Descriptions.Item label="Detectado">
+          <Tooltip title={formatDateTimePtBr(alert.detectedAt)}>
+            <span>{formatRelativePtBr(alert.detectedAt)}</span>
+          </Tooltip>
+        </Descriptions.Item>
         <Descriptions.Item label="ID"><Text code>{alert.id}</Text></Descriptions.Item>
         {analysis && (
           <Descriptions.Item label="Análise">
