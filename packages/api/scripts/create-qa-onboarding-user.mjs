@@ -23,7 +23,7 @@ if (!url || !serviceRole) {
 
 const password =
   process.env.QA_ONBOARDING_PASSWORD?.trim() ||
-  (process.env.CI === 'true' ? 'ci-e2e-qa-onboarding-v1' : randomBytes(18).toString('base64url'))
+  (process.env.CI ? 'ci-e2e-qa-onboarding-v1' : randomBytes(18).toString('base64url'))
 const admin = createClient(url, serviceRole, {
   auth: { autoRefreshToken: false, persistSession: false },
 })
