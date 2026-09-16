@@ -1,4 +1,10 @@
-import type { OpsAlertsDispatchResult, OpsMetricsResponse, StackActionResult } from './ops.types.js'
+import type {
+  OpsAlertsDispatchResult,
+  OpsEnvTarget,
+  OpsMetricsResponse,
+  ProductLifecycleSnapshot,
+  StackActionResult,
+} from './ops.types.js'
 import type { OpsDeploymentTier } from './theme/ops-environment.js'
 
 export type OpsConsoleHealth = {
@@ -37,7 +43,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
-  metrics: () => request<OpsMetricsResponse>('/api/metrics'),
+  envTargets: () =>
+    request<{ targets: OpsEnvTarget[]; defaultTargetId: string }>('/api/env-targets'),
+  metrics: (targetId?: string) => {
+    const qs = targetId ? `?target=${encodeURIComponent(targetId)}` : ''
+    return request<OpsMetricsResponse>(`/api/metrics${qs}`)
+  },
+  productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
   dispatchCheck: () =>
     request<OpsAlertsDispatchResult>('/api/alerts/check', { method: 'POST' }),
   analyzeOpsAlert: (id: string, operatorNotes?: string) =>

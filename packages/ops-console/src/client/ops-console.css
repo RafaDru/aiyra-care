@@ -73,6 +73,13 @@ body {
   border-bottom-color: #ef4444;
 }
 
+.ops-env-selector {
+  background: var(--ops-surface-muted) !important;
+  border: 1px solid var(--ops-border);
+  border-radius: 8px;
+  padding: 2px;
+}
+
 .ops-header-brand {
   display: flex;
   align-items: center;

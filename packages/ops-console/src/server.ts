@@ -35,6 +35,9 @@ import {
   runStackAction,
   isStackControlEnabled,
 } from './stack-control.js'
+import { parseOpsEnvTargets, resolveOpsEnvTarget } from './ops-env-targets.js'
+import { fetchRemoteOpsMetrics } from './ops-remote-metrics.js'
+import { loadProductLifecycle } from './product-lifecycle.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -139,14 +142,62 @@ async function main() {
     status: 'ok',
     port,
     deploymentTier,
+    commandHub: true,
   }))
 
-  fastify.get('/api/metrics', async () => {
+  fastify.get('/api/env-targets', async () => ({
+    targets: parseOpsEnvTargets(),
+    defaultTargetId: parseOpsEnvTargets().find((t) => t.enabled)?.id ?? 'dev',
+  }))
+
+  let productLifecycleCache: ReturnType<typeof loadProductLifecycle> | undefined
+
+  fastify.get('/api/product-lifecycle', async () => {
+    productLifecycleCache = loadProductLifecycle(monorepoRoot)
+    return productLifecycleCache
+  })
+
+  fastify.get<{ Querystring: { target?: string } }>('/api/metrics', async (req, reply) => {
+    const targetId = req.query.target?.trim()
+    const target = resolveOpsEnvTarget(targetId)
+
+    if (target && target.enabled && target.apiBase) {
+      const remote = await fetchRemoteOpsMetrics(target)
+      if (remote.ok) {
+        const data = remote.data as Record<string, unknown>
+        return {
+          ...data,
+          envTarget: {
+            id: target.id,
+            label: target.label,
+            apiBase: target.apiBase,
+            fetchedAt: remote.fetchedAt,
+            source: 'remote',
+          },
+        }
+      }
+      if (targetId) {
+        return reply.status(502).send({
+          error: 'remote_metrics_failed',
+          message: remote.error,
+          targetId: target.id,
+        })
+      }
+    }
+
     const payload = await metricsService.getMetrics()
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
     const alertAnalysis = await alertAnalysisService.getAll()
-    return { ...payload, runtime, triage, alertAnalysis }
+    return {
+      ...payload,
+      runtime,
+      triage,
+      alertAnalysis,
+      envTarget: target
+        ? { id: target.id, label: target.label, source: 'local' }
+        : { id: 'local', label: 'Local PG', source: 'local' },
+    }
   })
 
   fastify.post('/api/alerts/check', async () => {
@@ -344,7 +395,8 @@ async function main() {
     throw err
   }
 
-  console.log(`[ops-console] http://${host}:${port} (independent observability console)`)
+  productLifecycleCache = loadProductLifecycle(monorepoRoot)
+  console.log(`[ops-console] http://${host}:${port} (command hub · ${parseOpsEnvTargets().length} env targets)`)
 
   await runProbeCycle()
   probeTimer = setInterval(() => runProbeCycle(), probeIntervalMs)

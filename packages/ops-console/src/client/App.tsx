@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Space, Spin, Tag } from 'antd'
+import { Alert, Button, Spin, Tag } from 'antd'
 import { ReloadOutlined, ThunderboltOutlined } from '@ant-design/icons'
-import type { OpsMetricsResponse } from './ops.types.js'
+import type { OpsEnvTarget, OpsMetricsResponse } from './ops.types.js'
 import { OpsMetricsDashboard } from './OpsMetricsDashboard.js'
 import { OpsShell } from './components/OpsShell.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { StackControlCard } from './StackControlCard.js'
+import {
+  OpsEnvironmentSelector,
+  readStoredEnvTarget,
+  storeEnvTarget,
+} from './components/OpsEnvironmentSelector.js'
 import { opsApi } from './api.js'
 import { countInfraIssues } from './ops-panels.js'
 import type { OpsDeploymentTier } from './theme/ops-environment.js'
@@ -25,11 +30,31 @@ export function App() {
   const [data, setData] = useState<OpsMetricsResponse | null>(null)
   const [dispatching, setDispatching] = useState(false)
   const [deploymentTier, setDeploymentTier] = useState<OpsDeploymentTier>('integration')
+  const [envTargets, setEnvTargets] = useState<OpsEnvTarget[]>([])
+  const [envTargetId, setEnvTargetId] = useState('dev')
+
+  useEffect(() => {
+    opsApi.envTargets().then((res) => {
+      setEnvTargets(res.targets)
+      const stored = readStoredEnvTarget()
+      const valid = res.targets.find((t) => t.id === stored && t.enabled)
+      setEnvTargetId(valid?.id ?? res.defaultTargetId)
+    }).catch(() => undefined)
+  }, [])
+
+  const onEnvTargetChange = (id: string) => {
+    storeEnvTarget(id)
+    setEnvTargetId(id)
+    setLoading(true)
+  }
 
   const load = useCallback(async () => {
     setError(null)
     try {
-      const [health, result] = await Promise.all([opsApi.health(), opsApi.metrics()])
+      const [health, result] = await Promise.all([
+        opsApi.health(),
+        opsApi.metrics(envTargetId),
+      ])
       setDeploymentTier(normalizeOpsDeploymentTier(health.deploymentTier, health.port))
       setData(result)
     } catch (err) {
@@ -39,15 +64,15 @@ export function App() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [envTargetId])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   const refresh = useCallback(async () => {
     setLoading(true)
     await load()
-  }, [load])
-
-  useEffect(() => {
-    load()
   }, [load])
 
   useEffect(() => {
@@ -80,12 +105,23 @@ export function App() {
 
   const metrics = data?.metrics
   const probeOk = metrics?.probe?.api.ok && metrics?.probe?.postgres.ok
+  const activeTarget = envTargets.find((t) => t.id === envTargetId)
+  const metricsSource = data?.envTarget?.source === 'remote'
+    ? `${activeTarget?.label ?? envTargetId} · ${activeTarget?.apiBase ?? ''}`
+    : 'Postgres local (fallback)'
 
   return (
     <OpsShell
-      title="Observabilidade"
-      subtitle={`${OPS_SUBTITLES[deploymentTier]} · docs/ops/README.md`}
+      title="Command Hub"
+      subtitle={`${OPS_SUBTITLES[deploymentTier]} · métricas: ${metricsSource}`}
       deploymentTier={deploymentTier}
+      envSelector={envTargets.length > 0 ? (
+        <OpsEnvironmentSelector
+          targets={envTargets}
+          value={envTargetId}
+          onChange={onEnvTargetChange}
+        />
+      ) : undefined}
       actions={
         <>
           <Button icon={<ReloadOutlined />} onClick={refresh} loading={loading}>
@@ -111,6 +147,12 @@ export function App() {
               <span className="ops-status-pill">
                 Probe {new Date(metrics.probe.checkedAt).toLocaleString('pt-BR')}
               </span>
+            )}
+            {activeTarget && (
+              <Tag color={activeTarget.enabled ? 'blue' : 'default'}>
+                Ops · {activeTarget.label}
+                {activeTarget.port ? ` :${activeTarget.port}` : ''}
+              </Tag>
             )}
             <Tag color={probeOk ? 'success' : 'error'}>
               {probeOk ? 'Dependências ok' : 'Degradado'}

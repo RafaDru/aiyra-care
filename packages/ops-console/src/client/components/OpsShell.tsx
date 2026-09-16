@@ -9,6 +9,7 @@ export function OpsShell({
   title,
   subtitle,
   deploymentTier,
+  envSelector,
   actions,
   statusStrip,
   children,
@@ -16,6 +17,7 @@ export function OpsShell({
   title: string
   subtitle: string
   deploymentTier?: OpsDeploymentTier
+  envSelector?: ReactNode
   actions?: ReactNode
   statusStrip?: ReactNode
   children: ReactNode
@@ -33,7 +35,10 @@ export function OpsShell({
             <Text type="secondary" style={{ fontSize: 13 }}>{subtitle}</Text>
           </div>
         </div>
-        {actions && <Space wrap>{actions}</Space>}
+        <Space wrap align="center">
+          {envSelector}
+          {actions}
+        </Space>
       </header>
       {statusStrip && <div className="ops-status-strip">{statusStrip}</div>}
       <main className="ops-main">{children}</main>
