@@ -29,7 +29,7 @@ Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas op
 
 ## Fase 1 — Pilha + callback
 
-- Tabela `ops_analysis_queue` (migration **066**): `node packages/api/scripts/apply-migration-066.mjs`
+- Tabela `ops_analysis_queue` (migration **068**): `node packages/api/scripts/apply-migration-068.mjs`
 - Enfileira em todo reporte/alerta investigado; payload inclui `analysisQueue.id` + `callbackUrl`
 - Agente finaliza com `POST /api/analysis-queue/callback` (header `x-investigator-callback-key` = `OPS_INVESTIGATOR_CALLBACK_KEY` ou `OPS_METRICS_KEY`)
 - Console: aba **Issues** (`?tab=issues`) — status `fix_proposed` → botão **Revisado**
@@ -39,6 +39,10 @@ Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas op
 > Callback em dev: o agente Cursor na nuvem **não alcança** `127.0.0.1:3013` — use preview público ou conclua manualmente até GCP.
 
 Runbook suporte: `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md` · import: `.cursor/automations/README.md`
+
+## Correlação (`investigationId`)
+
+Chave única = `ops_analysis_queue.id` — propagada em webhook, toast, console e callback. Ver `docs/ops/INVESTIGATION_CORRELATION.md`.
 
 ## Tier 1 — PR draft (opt-in)
 

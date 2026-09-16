@@ -1,7 +1,7 @@
 # Aiyra: Ops — hub da sessão
 
 > **Sessão Cursor:** use este arquivo como ponto de entrada ao trabalhar observabilidade, alertas, suporte e console `:3013`.  
-> **Última atualização:** 2026-09-04
+> **Última atualização:** 2026-09-16
 
 Este diretório é a **fonte de verdade operacional** do épico `prod-run-intelligence` e complementa [`docs/OBSERVABILITY.md`](../OBSERVABILITY.md) (visão arquitetural) com runbooks, queries e backlog executável.
 
@@ -15,8 +15,10 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 | 2 | [`CONSOLE.md`](./CONSOLE.md) | Abas do console `:3013`, o que cada uma mede |
 | 3 | [`TELEMETRY.md`](./TELEMETRY.md) | Tabelas PG, LGPD, queries úteis |
 | 4 | [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) | Chamados «Reportar problema» (migration 061) |
-| 5 | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | Resposta por tipo de alerta |
-| 6 | [`../OPS_FALLBACKS_AND_ALERTS.md`](../OPS_FALLBACKS_AND_ALERTS.md) | Diagramas fallbacks / triagem |
+| 5 | [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md) | Lanes AiCare Dev + SRE, pilha Issues |
+| 6 | [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md) | Chave `investigationId` entre console, toast e Automations |
+| 7 | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | Resposta por tipo de alerta |
+| 8 | [`../OPS_FALLBACKS_AND_ALERTS.md`](../OPS_FALLBACKS_AND_ALERTS.md) | Diagramas fallbacks / triagem |
 
 ---
 
@@ -84,6 +86,7 @@ Regra LGPD ops: **agregar e diagnosticar**; não exportar prontuário em Slack/w
 | Aba | Mede | Fontes PG |
 |-----|------|-----------|
 | **Visão geral** | Alertas critical, KPIs | `evaluateOpsAlerts`, probe |
+| **Issues** | Pilha unificada investigação (`investigationId`) | `ops_analysis_queue` (068) |
 | **Produto & UX** | Erros cliente, mapa features, matriz acesso×falha | `client_errors`, `product_events` |
 | **Sync** | Jobs, fail rate portal, stuck | `sync_jobs` |
 | **Ava & LLM** | Turnos, tokens, cascade, quota | `llm_usage_events`, `product_events` |
@@ -104,7 +107,7 @@ Detalhe: [`CONSOLE.md`](./CONSOLE.md).
 | **Telemetria** | `support_report_submitted` |
 | **Ops doc** | [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) |
 
-**Fase atual (MVP):** ingest + bundle técnico no PG. **Próximo na sessão Ops:** fila no console, webhook, triagem por fingerprint.
+**Fase atual:** ingest + fila **Issues** + agente Cursor (Tier 0/1) + `investigationId` para correlacionar com Automations.
 
 ---
 
@@ -112,13 +115,14 @@ Detalhe: [`CONSOLE.md`](./CONSOLE.md).
 
 | ID roadmap | Entrega | Status |
 |------------|---------|--------|
-| `run-support-user-reports` | Chamado LGPD + API + botão | **MVP done** — fila console pendente |
+| `run-support-user-reports` | Chamado LGPD + API + botão | **done** — aba Suporte + Issues + investigationId |
 | `run-ops-feature-health-matrix` | Matriz acesso×falha | done |
 | `run-dev-audit-bridge` | Bridge dev-audit | done |
 | `run-user-escalation` | Sync crítico opt-in | done |
 | — | Painel **Suporte** no console (`support_reports` open) | **done** (aba Suporte :3023) |
 | — | Webhook `SUPPORT_REPORT_WEBHOOK_URL` | **done** (`support-report-dispatch.ts`) |
-| — | Agente investigador → draft PR (Tier 0–1) | **Tier 0** — Cursor Automation + `CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL` · ver [`SUPPORT_INVESTIGATOR_AUTOMATION.md`](./SUPPORT_INVESTIGATOR_AUTOMATION.md) |
+| — | Pilha `ops_analysis_queue` + callback | **done** — migration 068 · [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md) |
+| — | Agente investigador (Tier 0–1) | **done** — AiCare Dev + SRE · [`SUPPORT_INVESTIGATOR_AUTOMATION.md`](./SUPPORT_INVESTIGATOR_AUTOMATION.md) · [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md) |
 | `product-analytics-optin` | Analytics semântico opt-in | P3 — fora do ops imediato |
 
 Atualizar esta tabela ao fechar itens em `docs/roadmap.json` → `prod-run-intelligence`.

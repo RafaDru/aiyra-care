@@ -51,6 +51,7 @@ function opsAlert(overrides: Partial<OpsAlert> = {}): OpsAlert {
     severity: 'critical',
     category: 'infra',
     message: 'API down',
+    detectedAt: new Date().toISOString(),
     ...overrides,
   }
 }

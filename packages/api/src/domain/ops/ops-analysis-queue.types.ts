@@ -42,6 +42,9 @@ export interface OpsAnalysisAttentionCounts {
 }
 
 export interface AgentAnalysisCallbackInput {
+  /** Chave canônica — `ops_analysis_queue.id` */
+  investigationId?: string
+  /** @deprecated use investigationId */
   queueId?: string
   sourceType?: AnalysisQueueSourceType
   sourceId?: string

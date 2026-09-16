@@ -95,8 +95,9 @@ Envia payload de teste para notificador **e** Automation. Esperado:
 ### C) Checklist da primeira run
 
 - [ ] Payload sem PHI (sem `accountId`, sem descrição livre)
-- [ ] Agente citou `reportId` e rota
-- [ ] Arquivo `docs/ops/investigations/*.md` criado
+- [ ] `investigationId` igual na aba Issues, no toast e no histórico Automations (`[inv:…]` no `text`)
+- [ ] Agente citou `investigationId` + `reportId` e rota
+- [ ] Arquivo `docs/ops/investigations/*.md` criado (prefixo 8 chars do investigationId)
 - [ ] Nenhum PR automático (Tier 0)
 - [ ] Falha da Automation **não** bloqueia o usuário no app
 
@@ -116,6 +117,20 @@ OPS_INVESTIGATOR_TIER1=1   # default off — Tier 0 permanece o padrão
 O payload inclui `investigation: { tier, playbook, trigger }`. Tier 1 permite PR **draft** dentro dos gates (`docs/ops/automations/TIER1_GATES.md`). Callback pode incluir `prUrl` — aparece na aba Issues.
 
 **Rollback:** `OPS_INVESTIGATOR_TIER1=0` → só markdown, sem alterar Automations.
+
+---
+
+## 5. Correlação (`investigationId`)
+
+| Onde | Campo |
+|------|--------|
+| Webhook | `investigationId` (= `analysisQueue.id`) |
+| Console Issues / Suporte | coluna `investigationId` |
+| Toast | `Investigation: <uuid>` |
+| Deep link | `?tab=issues&investigationId=<uuid>` |
+| Callback | `{ "investigationId": "…" }` |
+
+Runbook: [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md)
 
 ---
 

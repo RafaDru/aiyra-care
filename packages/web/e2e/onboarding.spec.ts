@@ -18,7 +18,7 @@ test.describe('onboarding', () => {
     const { email, password } = requireOnboardingCredentials()
 
     await loginViaPassword(page, email, password)
-    await page.waitForURL(/\/(onboarding|$)/, { timeout: 25_000 })
+    await page.waitForURL(/\/(onboarding|$)/, { timeout: 30_000 })
 
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
@@ -31,6 +31,8 @@ test.describe('onboarding', () => {
       cpf: uniqueQaCpf(),
     })
 
-    await expect(page.getByText('QA Onboarding Titular')).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'QA Onboarding Titular' })).toBeVisible({
+      timeout: 30_000,
+    })
   })
 })

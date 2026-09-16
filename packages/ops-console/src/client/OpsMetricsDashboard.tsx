@@ -45,6 +45,10 @@ export function OpsMetricsDashboard({
 }) {
   const metrics = data.metrics
   const [issueAttention, setIssueAttention] = useState(0)
+  const highlightInvestigationId = useMemo(
+    () => new URLSearchParams(window.location.search).get('investigationId'),
+    [],
+  )
 
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const fromUrl = new URLSearchParams(window.location.search).get('tab')
@@ -71,6 +75,12 @@ export function OpsMetricsDashboard({
       setIssueAttention(c.totalAttention)
     }).catch(() => undefined)
   }, [data])
+
+  useEffect(() => {
+    if (highlightInvestigationId) {
+      setActiveTab('issues')
+    }
+  }, [highlightInvestigationId])
 
   const badges = useMemo(() => ({
     overview: data.alerts.filter((a) => a.severity === 'critical').length,
@@ -112,7 +122,10 @@ export function OpsMetricsDashboard({
       label: <TabLabel text="Issues" count={issueAttention} alert={issueAttention > 0} />,
       children: (
         <div className="ops-tab-panel">
-          <IssuesPanel onRefresh={onRefresh} />
+          <IssuesPanel
+            onRefresh={onRefresh}
+            highlightInvestigationId={highlightInvestigationId}
+          />
         </div>
       ),
     },

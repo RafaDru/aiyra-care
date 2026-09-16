@@ -98,6 +98,7 @@ describe('ops pipeline — alertas → triagem → fallback → payload', () => 
       severity: 'critical',
       category: 'sync',
       message: 'stuck',
+      detectedAt: '2026-09-02T12:00:00.000Z',
       details: { jobId: 'j1' },
     })
     const triage = triageOpsAlerts(alerts)

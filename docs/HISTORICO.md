@@ -1,5 +1,46 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-16] - Cursor Projects + My Machines (execução local)
+
+### Decisão
+- Modo **Projects**: coordenador na nuvem; implementação no checkout local via **My Machines** (`NotebookRafael`), não VM cloud clone.
+- Autostart no logon Windows — tarefa `AiyraCare-CursorMyMachinesWorker` (+45s).
+
+### Realizado
+- CLI `agent` + fix Windows `better-sqlite3` (`scripts/cursor-worker-repair.ps1`).
+- Scripts `cursor-worker-start|install-autostart|uninstall-autostart.ps1`.
+- Runbook: `docs/CURSOR_WORKSPACE.md`, `docs/CURSOR_AGENT_OPS.md`.
+
+### Próximo
+- `.cursor/mcp.json` no repo para MCP stdio no worker; fallback WSL se bug Node voltar.
+
+## [2026-09-16] - Ops: investigationId + notificador PS 5.1
+
+### Decisão
+- Chave canônica de correlação entre console Suporte/Issues, toast, webhook Cursor e callback do agente: **`investigationId`** = `ops_analysis_queue.id` (UUID). `reportId` / `alertId` permanecem como origem do evento.
+
+### Realizado
+- Domínio `investigation-correlation.ts`; payload webhook com `investigationId` + `[inv:xxxxxxxx]` no `text`; callback aceita `investigationId` (legado `queueId`).
+- Console: coluna `investigationId` (Issues + Suporte), deep link `?tab=issues&investigationId=`, componente copiar ID.
+- Simulates incluem `analysisQueue` + `investigationId`; enqueue antes do toast no submit de suporte.
+- Fix `ops-notifier-attention.ps1` — compatível Windows PowerShell 5.1 (`??`, `$Label:`).
+- Docs: `docs/ops/INVESTIGATION_CORRELATION.md`, playbooks e `AUTOMATIONS_LANES.md`.
+
+### Próximo
+- Callback público em preview GCP; persistir `backgroundComposerId` (opcional); Tier 1 em produção com revisão humana.
+
+## [2026-09-15] - Ops Tier 1 + pilha Issues (commits anteriores)
+
+### Realizado
+- Migration 068 `ops_analysis_queue`; aba Issues; tray contadores; pré-análise `OPS_ANALYSIS_PRE_SCREEN`; Tier 1 opt-in `OPS_INVESTIGATOR_TIER1`.
+- Automations: **AiCare - Suporte ao Desenvolvimento** + **AiCare - Suporte SRE**.
+
+## [2026-09-15] - Push main: produto D4–D5 + G3 + RBAC (`aa43ba7`, `90f357b`)
+
+### Realizado
+- D4 referral/e-mail + D5 portal médico + dossiê jurídico PDF + suites QA.
+- Ava G3 + RBAC org (067) — ver entradas abaixo.
+
 ## [2026-09-15] - Ava G3 ações confirmadas + RBAC org audit
 
 ### Realizado

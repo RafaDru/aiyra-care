@@ -2,10 +2,12 @@ import type { OpsAlert } from '../../domain/ops/ops-metrics.types.js'
 import type {
   AgentAnalysisCallbackInput,
   AnalysisQueueLane,
+  AnalysisQueueSourceType,
   OpsAnalysisAttentionCounts,
   OpsAnalysisQueueRecord,
 } from '../../domain/ops/ops-analysis-queue.types.js'
 import { resolveDeploymentTier } from '../../domain/ops/investigator-environment.js'
+import { resolveInvestigationIdFromCallback } from '../../domain/ops/investigation-correlation.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
 import type { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import type { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
@@ -113,8 +115,9 @@ export class OpsAnalysisQueueService {
     if (!summary) return null
 
     let record: OpsAnalysisQueueRecord | null = null
-    if (input.queueId) {
-      record = await this.repo.applyAgentCallback(input.queueId, {
+    const investigationId = resolveInvestigationIdFromCallback(input)
+    if (investigationId) {
+      record = await this.repo.applyAgentCallback(investigationId, {
         remediationSummary: summary,
         analysisArtifactPath: input.analysisArtifactPath,
         prUrl: input.prUrl,
@@ -197,6 +200,20 @@ export class OpsAnalysisQueueService {
 
   attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
     return this.repo.attentionCounts(deploymentTier)
+  }
+
+  findInvestigationIdForSource(
+    sourceType: AnalysisQueueSourceType,
+    sourceId: string,
+  ): Promise<string | null> {
+    return this.repo.findBySource(sourceType, sourceId, resolveDeploymentTier()).then((r) => r?.id ?? null)
+  }
+
+  findInvestigationIdsForSources(
+    sourceType: AnalysisQueueSourceType,
+    sourceIds: string[],
+  ): Promise<Map<string, string>> {
+    return this.repo.findInvestigationIdsBySourceIds(sourceType, sourceIds, resolveDeploymentTier())
   }
 
   findById(id: string): Promise<OpsAnalysisQueueRecord | null> {

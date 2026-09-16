@@ -147,6 +147,7 @@ For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/F
 ## Cursor hooks + entrega
 
 - Hooks: `.cursor/hooks.json` — auditoria em `docs/dev-audit/`; ver `docs/CURSOR_AGENT_OPS.md`.
+- **Projects / execução local:** My Machines worker — `docs/CURSOR_WORKSPACE.md`, `scripts/cursor-worker-start.ps1`.
 - **Ambientes não prod:** [`docs/infra/TWO_ENV_MODEL.md`](docs/infra/TWO_ENV_MODEL.md) — Ambiente 1 **local**; Ambiente 2 **local** (`up:preview`) até ritmo funcional, depois **GCP**; matriz [`docs/infra/ENVIRONMENTS.md`](docs/infra/ENVIRONMENTS.md).
 - Antes de pedir aprovação Preview: `npm run promotion:gates` + [`docs/TESTING_VERTICALS.md`](docs/TESTING_VERTICALS.md).
 - Antes de push `main`: `npm run qa:run-all -- --lane regression` — ver [`docs/testing/QA_PROCESS.md`](docs/testing/QA_PROCESS.md).

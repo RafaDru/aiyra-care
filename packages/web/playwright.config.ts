@@ -33,15 +33,17 @@ export default defineConfig({
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
   projects: process.env.CI
-    ? [
-        { name: 'smoke', testMatch: /e2e\/smoke\.spec\.ts$/ },
-        {
-          name: 'e2e',
-          testMatch: /e2e\/.*\.spec\.ts$/,
-          testIgnore: /e2e\/smoke\.spec\.ts$/,
-          dependencies: ['smoke'],
-        },
-      ]
+    ? process.env.E2E_SMOKE_ONLY === '1'
+      ? [{ name: 'smoke', testMatch: /e2e\/smoke\.spec\.ts$/ }]
+      : [
+          { name: 'smoke', testMatch: /e2e\/smoke\.spec\.ts$/ },
+          {
+            name: 'e2e',
+            testMatch: /e2e\/.*\.spec\.ts$/,
+            testIgnore: /e2e\/smoke\.spec\.ts$/,
+            dependencies: ['smoke'],
+          },
+        ]
     : undefined,
   reporter: process.env.CI
     ? [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]]

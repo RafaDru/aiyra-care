@@ -29,6 +29,9 @@ process.env.VITE_API_URL = process.env.VITE_API_URL ?? 'http://127.0.0.1:3010'
 process.env.PORT = process.env.PORT ?? '3010'
 process.env.CI = process.env.CI ?? '1'
 process.env.AVA_TEST_MODE = process.env.AVA_TEST_MODE ?? '1'
+process.env.OCR_CI_STUB = process.env.OCR_CI_STUB ?? '1'
+process.env.QA_TEST_PASSWORD = process.env.QA_TEST_PASSWORD ?? 'ci-e2e-qa-test-v1'
+process.env.QA_ONBOARDING_PASSWORD = process.env.QA_ONBOARDING_PASSWORD ?? 'ci-e2e-qa-onboarding-v1'
 
 function run(label, command, args, opts = {}) {
   console.log(`\n=== ${label} ===`)

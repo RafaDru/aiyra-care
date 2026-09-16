@@ -1,6 +1,6 @@
 # Foco atual — tracking vivo
 
-> **Última atualização:** 2026-09-15  
+> **Última atualização:** 2026-09-16  
 > Documento de acompanhamento entre sessões — complementa `roadmap.json` e `HISTORICO.md`.  
 > Atualizar a cada entrega relevante ou mudança de prioridade.
 
@@ -12,12 +12,15 @@ Apenas **duas** frentes ativas — não abrir terceira lane sem fechar ou pausar
 
 | Frente | Escopo | Onde acompanhar |
 |--------|--------|-----------------|
-| **Produto** | Dia a dia família, export clínico, referral, portal médico, Ava G2–G3 | Esta seção + `docs/features/` + suites QA de negócio |
-| **Ops** | Pilha Issues, Automations AiCare (Dev + SRE), Tier 1 opt-in, tray/console | `docs/ops/AUTOMATIONS_LANES.md`, `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md` |
+| **Produto** | Épico `family-day-to-day` fechado (D1–D5); Ava G4; referral billing (pós-jurídico) | Esta seção + `docs/features/` + suites QA |
+| **Ops** | investigationId, Automations Dev/SRE, Tier 1 opt-in, tray/console | `docs/ops/INVESTIGATION_CORRELATION.md`, `AUTOMATIONS_LANES.md` |
+| **Tooling** | Cursor Projects + My Machines (`NotebookRafael`, autostart login) | `docs/CURSOR_WORKSPACE.md` |
 
-**Ops — estado atual:** Fase 1–2 entregues (queue + callback + tray + pré-análise); Tier 1 em `main` (`OPS_INVESTIGATOR_TIER1`). Reimportar workflows após mudança: `.cursor/automations/README.md`.
+**Ops — estado atual:** Fase 1–2 + **investigationId**; Tier 1 opt-in (`OPS_INVESTIGATOR_TIER1`). WIP ops em paralelo — commits separados do produto.
 
-**Produto — entregue (set/15):** D4–D5 export clínico + portal médico + dossiê jurídico; suite `patient-health-thread`; Ava G3 confirmação; RBAC org audit (067).
+**Produto — em `main` (set/15):** D1–D5 + dossiê jurídico + Ava G3 + RBAC 067 + suites QA alinhadas.
+
+**Tooling — configurado (set/16):** worker local para Projects; ver `scripts/cursor-worker-*.ps1`.
 
 ---
 
@@ -59,8 +62,7 @@ Apenas **duas** frentes ativas — não abrir terceira lane sem fechar ou pausar
 
 **Próximo (operacional):**
 
-- G2: aceleradores + transparência de contexto (já parcial — `ava-context-transparency` done)
-- G3: ações propostas executáveis com confirmação (`ava-proposed-action`)
+- **G4:** tool calling mutável amplo (`agent-runtime` — parcial)
 - Expressão visual + narrativa (`AVA_EXPRESSIONS.md`)
 - Não julgar qualidade LLM em QA — só comportamento determinístico (`AVA_QA_SCOPE.md`)
 
@@ -73,24 +75,20 @@ Apenas **duas** frentes ativas — não abrir terceira lane sem fechar ou pausar
 
 **Próximo:**
 
-- RBAC profissional (`b2b-platform-rbac`) — médico, admin clínica, read-only parceiro
-- Pacote clínico: portal leve de compartilhamento (`b2b-segment-clinicians`)
+- Escopos RBAC por paciente na org (clínico vê pacientes da clínica)
+- Referral com billing (após parecer jurídico formal)
 - Console parceiro vs ops-console interno
 - Revisões tier 2+: legal + medical antes de go-live B2B
 
 ---
 
-## Entregas técnicas recentes (2026-09-11)
+## Entregas técnicas recentes (2026-09-15/16)
 
-| Commit | Resumo |
-|--------|--------|
-| `6a84b3a` | E2E: compliance login, Select Ant Design, Fase 4 Ava (`AVA_TEST_MODE`) |
-| `9259d64` | Ops: aba **Negócio** (`BusinessPanel`) |
-| `e5c64a2` | `npm run ops:business-weekly` |
-| `36fa56e` | Fix project `smoke` + dropdown Select (1ª iteração) |
-| `56e56be` | Select force click + `FOCO_ATUAL.md` — **regression verde** |
-| `b093195`+ | CI: mutex Playwright, senhas QA fixas, helpers E2E, OCR stub |
-| *(esta sessão)* | **D1** Wizard «Levar na consulta» — `ConsultVisitWizardModal`, `/clinical-export/:token`, suite QA |
+| Commit / entrega | Resumo |
+|------------------|--------|
+| `aa43ba7` | D4 e-mail/referral + D5 portal médico + dossiê jurídico PDF + suite `patient-health-thread` |
+| `90f357b` | Ava G3 confirmação de ações + RBAC org audit (067) |
+| *(local, set/16)* | Cursor My Machines `NotebookRafael` + autostart Windows + scripts `cursor-worker-*` |
 
 ---
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Typography, Button, Space, Tag, Empty, Modal, App, QRCode, Spin, Alert, Descriptions, Tooltip,
 } from 'antd'
@@ -53,7 +53,20 @@ export function WalletCardsTab({
   const [govbrSession, setGovbrSession] = useState<GovBrSessionView | null>(null)
   const highlightRef = useRef<HTMLDivElement | null>(null)
 
-  const insuranceLinks = links.filter((l) => INSURANCE_PORTALS.has(l.portalType))
+  const insuranceLinks = useMemo(
+    () => links.filter((l) => INSURANCE_PORTALS.has(l.portalType)),
+    [links],
+  )
+
+  const bumpSyncRefresh = useCallback(() => {
+    onCardUpdated()
+    setSyncRefreshKey((k) => k + 1)
+  }, [onCardUpdated])
+
+  const onConecteSusSynced = useCallback(() => {
+    onCardUpdated()
+    api.account.govbrSession().then(setGovbrSession).catch(() => null)
+  }, [onCardUpdated])
 
   useEffect(() => {
     api.account.govbrSession()
@@ -61,26 +74,17 @@ export function WalletCardsTab({
       .catch(() => setGovbrSession(null))
   }, [patient.id])
 
-  useSilentWalletSync(links, () => {
-    onCardUpdated()
-    setSyncRefreshKey((k) => k + 1)
-  })
+  useSilentWalletSync(links, bumpSyncRefresh)
 
   useSilentConecteSUSSync(
     patient.id,
     patient.cpf,
     govbrSession?.sessionReady ?? false,
     govbrSession?.conectesusLastFetchAt,
-    () => {
-      onCardUpdated()
-      api.account.govbrSession().then(setGovbrSession).catch(() => null)
-    },
+    onConecteSusSynced,
   )
 
-  usePatientSyncCompletions(patient.id, () => {
-    onCardUpdated()
-    setSyncRefreshKey((k) => k + 1)
-  })
+  usePatientSyncCompletions(patient.id, bumpSyncRefresh)
 
   const syncMeta = useWalletLinkSyncStatus(insuranceLinks, syncRefreshKey, false)
   const walletBanner = walletSyncBannerMessage(buildWalletSyncBanners(insuranceLinks, syncMeta))
@@ -112,7 +116,7 @@ export function WalletCardsTab({
           setMemberships([])
         }
       })
-  }, [patient.id, links.map((l) => `${l.id}:${l.cardNumber ?? ''}`).join('|'), insuranceLinks])
+  }, [patient.id, links.map((l) => `${l.id}:${l.cardNumber ?? ''}`).join('|')])
 
   useEffect(() => {
     if (!highlightCard || !highlightRef.current) return

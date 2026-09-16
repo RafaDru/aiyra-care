@@ -6,6 +6,10 @@ import {
   tier1PlaybookId,
   type InvestigationTier,
 } from '../../domain/ops/investigator-tier.js'
+import {
+  buildOpsConsoleUrl,
+  formatInvestigationIdShort,
+} from '../../domain/ops/investigation-correlation.js'
 import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
@@ -19,6 +23,8 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 export interface SupportReportDispatchPayload {
   type: 'support_report'
+  /** Chave canônica — `ops_analysis_queue.id` quando enfileirado */
+  investigationId?: string
   reportId: string
   category: string
   route: string | null
@@ -54,23 +60,31 @@ export function resolveSupportReportWebhookUrl(): string | undefined {
   return process.env.OPS_ALERT_WEBHOOK_URL?.trim() || undefined
 }
 
-export function resolveSupportReportOpsConsoleUrl(): string {
+export function resolveSupportReportOpsConsoleBaseUrl(): string {
   const explicit = process.env.OPS_ALERT_DASHBOARD_URL?.trim()
     || process.env.OPS_CONSOLE_PUBLIC_URL?.trim()
-  let base: string
   if (explicit) {
-    let url = explicit.replace(/\/$/, '')
+    let url = explicit.replace(/\/$/, '').replace(/\?.*$/, '')
     if (/:5173\/ops$/.test(url)) {
       const host = process.env.OPS_CONSOLE_HOST?.trim() || '127.0.0.1'
       const port = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
       url = `http://${host}:${port}`
     }
-    base = url
-  } else {
-    const port = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
-    base = `http://127.0.0.1:${port}`
+    return url
   }
-  return `${base}?tab=support`
+  const port = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
+  return `http://127.0.0.1:${port}`
+}
+
+export function resolveSupportReportOpsConsoleUrl(options?: {
+  investigationId?: string
+  reportId?: string
+}): string {
+  return buildOpsConsoleUrl(resolveSupportReportOpsConsoleBaseUrl(), {
+    tab: 'issues',
+    investigationId: options?.investigationId,
+    reportId: options?.reportId,
+  })
 }
 
 function categoryLabel(category: string): string {
@@ -81,11 +95,13 @@ function buildToastBody(
   category: string,
   route: string | null,
   topFingerprint: string | null,
+  investigationId?: string,
 ): string {
   const lines = [categoryLabel(category)]
   if (route) lines.push(route)
   if (topFingerprint) lines.push(`Erro: ${topFingerprint}`)
-  lines.push('Console → aba Suporte')
+  if (investigationId) lines.push(`Investigation: ${investigationId}`)
+  lines.push('Console → aba Issues')
   return lines.join('\n')
 }
 
@@ -99,18 +115,28 @@ function extractTopFingerprint(diagnosticContext: Record<string, unknown>): stri
 
 export function buildSupportReportDispatchPayload(
   record: SupportReportRecord,
-  options?: { operatorNotes?: string | null; trigger?: 'auto' | 'manual' },
+  options?: {
+    operatorNotes?: string | null
+    trigger?: 'auto' | 'manual'
+    investigationId?: string
+  },
 ): SupportReportDispatchPayload {
   const topFingerprint = record.consentTechnical
     ? extractTopFingerprint(record.diagnosticContext)
     : null
-  const dashboardUrl = resolveSupportReportOpsConsoleUrl()
-  const toastBody = buildToastBody(record.category, record.route, topFingerprint)
+  const investigationId = options?.investigationId
+  const dashboardUrl = resolveSupportReportOpsConsoleUrl({
+    investigationId,
+    reportId: record.id,
+  })
+  const toastBody = buildToastBody(record.category, record.route, topFingerprint, investigationId)
   const label = categoryLabel(record.category)
   const routeSuffix = record.route ? ` — ${record.route}` : ''
+  const invSuffix = investigationId ? ` [inv:${formatInvestigationIdShort(investigationId)}]` : ''
 
   return {
     type: 'support_report',
+    ...(investigationId ? { investigationId } : {}),
     reportId: record.id,
     category: record.category,
     route: record.route,
@@ -120,7 +146,7 @@ export function buildSupportReportDispatchPayload(
     dashboardUrl,
     environment: resolveInvestigatorEnvironmentContext(),
     submittedAt: record.createdAt.toISOString(),
-    text: `Novo chamado: ${label}${routeSuffix}`,
+    text: `Novo chamado: ${label}${routeSuffix}${invSuffix}`,
     toast: {
       title: '[Suporte] Novo chamado',
       body: `[?] Reporte manual\n${toastBody}`,
@@ -153,10 +179,13 @@ export async function postSupportReportWebhook(
 
 export async function dispatchSupportReport(
   record: SupportReportRecord,
+  options?: { investigationId?: string },
 ): Promise<boolean> {
   const webhook = resolveSupportReportWebhookUrl()
   if (!webhook) return false
-  const payload = buildSupportReportDispatchPayload(record)
+  const payload = buildSupportReportDispatchPayload(record, {
+    investigationId: options?.investigationId,
+  })
   await postSupportReportWebhook(webhook, payload)
   return true
 }
@@ -180,10 +209,12 @@ export async function dispatchSupportReportInvestigator(
   }
   const trigger = options?.trigger ?? 'auto'
   const tier = options?.investigationTier ?? 0
+  const investigationId = options?.analysisQueue?.id
   const payload: SupportReportDispatchPayload = {
     ...buildSupportReportDispatchPayload(record, {
       operatorNotes: options?.operatorNotes ?? record.operatorNotes,
       trigger,
+      investigationId,
     }),
     investigation: {
       tier,
@@ -192,6 +223,7 @@ export async function dispatchSupportReportInvestigator(
     },
     ...(options?.analysisQueue
       ? {
+          investigationId: options.analysisQueue.id,
           analysisQueue: {
             id: options.analysisQueue.id,
             callbackUrl: options.analysisQueue.callbackUrl,

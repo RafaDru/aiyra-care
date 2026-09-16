@@ -7,6 +7,7 @@
 import { config } from 'dotenv'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import { randomUUID } from 'crypto'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 config({ path: resolve(root, '.env') })
@@ -48,26 +49,39 @@ const investigatorKey = dedicatedKey
     : cleanKey(process.env.CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY?.trim())
       || cleanKey(process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY?.trim()))
 
+const investigationId = randomUUID()
+const alertId = `sim_infra_api_down_${Date.now().toString(36)}`
+const consolePort = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
+const consoleBase = `http://127.0.0.1:${consolePort}`
+const callbackUrl = `${consoleBase}/api/analysis-queue/callback`
+const dashboardUrl = `${consoleBase}?tab=issues&investigationId=${investigationId}&alertId=${alertId}`
+
 const sample = {
   type: 'ops_alert',
-  alertId: `sim_infra_api_down_${Date.now().toString(36)}`,
+  investigationId,
+  alertId,
   severity: 'critical',
   category: 'infra',
   message: 'API health check failed (smoke test)',
   details: { source: 'ops-alert-investigator-smoke' },
   triage: {
-    alertId: 'sim',
+    alertId,
     severity: 'critical',
     category: 'infra',
     tier: 'infra',
     humanRequired: true,
     reason: 'smoke',
   },
-  dashboardUrl: 'http://127.0.0.1:3013',
+  dashboardUrl,
   environment: resolveEnvironment(),
   checkedAt: new Date().toISOString(),
-  text: 'Alerta ops smoke',
+  text: `Alerta ops smoke [inv:${investigationId.slice(0, 8)}]`,
   investigation: { tier: 0, playbook: 'ops-alert-tier0', trigger: 'manual' },
+  analysisQueue: {
+    id: investigationId,
+    callbackUrl,
+    lane: 'sre_support',
+  },
 }
 
 async function post(label, url, body, bearerKey) {
@@ -97,7 +111,8 @@ async function post(label, url, body, bearerKey) {
 }
 
 console.log('ops-alert-investigator-simulate')
-console.log('  alertId:', sample.alertId)
+console.log('  investigationId:', investigationId)
+console.log('  alertId:', alertId)
 console.log(
   '  webhook:',
   dedicatedUrl ? 'CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL' : 'CURSOR_DEVELOPMENT_SUPPORT_* (fallback)',

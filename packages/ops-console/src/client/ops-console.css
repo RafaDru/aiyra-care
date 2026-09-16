@@ -400,6 +400,10 @@ body {
   overflow: auto;
 }
 
+.ops-row-highlight > td {
+  background: rgba(56, 189, 248, 0.12) !important;
+}
+
 @media (max-width: 768px) {
   .ops-header,
   .ops-status-strip,

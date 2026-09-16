@@ -61,6 +61,32 @@ Auto-refresh: 60s (aba visível).
 
 ---
 
+## Aba: Issues
+
+**Objetivo:** pilha unificada de investigação (Suporte Dev + SRE).
+
+| Bloco | Fonte |
+|-------|--------|
+| Fila `queued` → `fix_proposed` | `ops_analysis_queue` (migration 068) |
+| Coluna **investigationId** | UUID canônico — correlaciona toast, webhook e Automations |
+| Deep link | `?tab=issues&investigationId=<uuid>` |
+
+Ver [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md).
+
+---
+
+## Aba: Suporte
+
+**Objetivo:** chamados «Reportar problema» (fila humana + análise legada).
+
+| Bloco | Fonte |
+|-------|--------|
+| Fila open / triaged / resolved | `support_reports` |
+| **investigationId** (quando enfileirado) | join com `ops_analysis_queue` |
+| Analisar / Concluir | dispara lane AiCare Dev |
+
+---
+
 ## Aba: Sync & integrações
 
 **Objetivo:** integrações (Unimed, Amil, Mater Dei, Hermes, etc.).

@@ -16,43 +16,48 @@ O Cursor **não** carrega estes arquivos automaticamente ao abrir ou reiniciar o
 
 Hub: `docs/ops/AUTOMATIONS_LANES.md`
 
-## Suporte Desenvolvimento (Tier 0)
+## Duas lanes (nomes finais no Cursor)
+
+| Lane | Nome na UI | JSON |
+|------|------------|------|
+| Suporte Desenvolvimento | **AiCare - Suporte ao Desenvolvimento** | `support-report-investigator.workflow.json` |
+| Suporte SRE | **AiCare - Suporte SRE** | `ops-alert-investigator.workflow.json` |
+
+Tier 0 (default) e Tier 1 (`OPS_INVESTIGATOR_TIER1=1`) usam **as mesmas** duas Automations — o tier vem no payload (`investigation.tier`).
+
+## Reimportar após mudança no JSON
+
+1. Pedir ao agente: «reimporte as automations ops» — abre o prefill no Glass Automations.
+2. **Ou** `Ctrl+Shift+P` → **Automations** → Create → importar o `.workflow.json`.
+3. Confira: trigger **Webhook**, repo `RafaDru/aiyra-care`, branch `main`, prompt com Tier 0/1.
+4. **Salvar** (se for automation nova, copie a URL; se editou a existente, a URL **não muda**).
+5. Validar: `npm run ops:support-investigator:simulate` e `npm run ops:alert-investigator:simulate`
+
+## Suporte Desenvolvimento
 
 | Arquivo | Uso |
 |---------|-----|
-| `support-report-investigator.workflow.json` | Importar no editor (JSON prefill) |
-| `support-report-investigator.yaml` | Referência legível + prompt inline |
-| `../docs/ops/automations/support-report-investigator.prompt.md` | Playbook completo |
+| `support-report-investigator.workflow.json` | Prefill / import |
+| `support-report-investigator.yaml` | Referência legível |
+| `../docs/ops/automations/support-report-investigator.prompt.md` | Playbook |
 
-### Passos (import único)
-
-1. `Ctrl+Shift+P` → **Automations** (ou janela Agents / Glass Automations).
-2. **Create** → importar `.cursor/automations/support-report-investigator.workflow.json`  
-   **ou** pedir ao agente: «abre a automation do investigador de suporte».
-3. Trigger: **Webhook** · Repo: `RafaDru/aiyra-care` · branch `main`.
-4. **Salvar** → copiar URL do webhook.
-5. `.env`:
-   ```env
-   CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL=<url>
-   ```
-6. Validar: `npm run ops:support-investigator:simulate`
+```env
+CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL=<url>
+CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY=crsr_...
+```
 
 Runbook: `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md`
 
-## Suporte SRE (Tier 0)
+## Suporte SRE
 
 | Arquivo | Uso |
 |---------|-----|
-| `ops-alert-investigator.workflow.json` | Importar no editor |
+| `ops-alert-investigator.workflow.json` | Prefill / import |
 | `../docs/ops/automations/ops-alert-investigator.prompt.md` | Playbook |
-
-Webhook **dedicado** (recomendado se você tem duas Automations):
 
 ```env
 CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL=<url>
 CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY=crsr_...
 ```
 
-Sem essas vars, alertas SRE usam o webhook de Suporte Desenvolvimento (fallback).
-
-Validar: `npm run ops:alert-investigator:simulate`
+Sem vars SRE, alertas usam webhook de Desenvolvimento (fallback legado).

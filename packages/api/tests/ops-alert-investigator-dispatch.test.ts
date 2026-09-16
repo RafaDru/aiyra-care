@@ -21,6 +21,7 @@ describe('ops-alert-investigator-dispatch', () => {
         severity: 'critical',
         category: 'infra',
         message: 'API down',
+        detectedAt: '2026-09-08T12:00:00.000Z',
         details: { latencyMs: 9000 },
       },
       {
@@ -39,15 +40,15 @@ describe('ops-alert-investigator-dispatch', () => {
 
   it('auto-investigate only infra critical human required', () => {
     expect(shouldAutoInvestigateOpsAlert(
-      { id: 'infra_api_down', severity: 'critical', category: 'infra', message: 'x' },
+      { id: 'infra_api_down', severity: 'critical', category: 'infra', message: 'x', detectedAt: '2026-01-01T00:00:00.000Z' },
       { alertId: 'infra_api_down', severity: 'critical', category: 'infra', tier: 'infra', humanRequired: true, reason: 'critical' },
     )).toBe(true)
     expect(shouldAutoInvestigateOpsAlert(
-      { id: 'infra_api_slow', severity: 'warning', category: 'infra', message: 'x' },
+      { id: 'infra_api_slow', severity: 'warning', category: 'infra', message: 'x', detectedAt: '2026-01-01T00:00:00.000Z' },
       { alertId: 'infra_api_slow', severity: 'warning', category: 'infra', tier: 'infra', humanRequired: false, reason: 'auto' },
     )).toBe(false)
     expect(shouldAutoInvestigateOpsAlert(
-      { id: 'llm_cascade_fail', severity: 'critical', category: 'llm', message: 'x' },
+      { id: 'llm_cascade_fail', severity: 'critical', category: 'llm', message: 'x', detectedAt: '2026-01-01T00:00:00.000Z' },
     )).toBe(false)
   })
 
@@ -58,7 +59,7 @@ describe('ops-alert-investigator-dispatch', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const result = await dispatchOpsAlertInvestigator(
-      { id: 'infra_postgres_down', severity: 'critical', category: 'infra', message: 'PG down' },
+      { id: 'infra_postgres_down', severity: 'critical', category: 'infra', message: 'PG down', detectedAt: '2026-09-08T12:00:00.000Z' },
       { checkedAt: '2026-09-08T12:00:00.000Z', trigger: 'auto' },
     )
     expect(result).toEqual({ outcome: 'sent' })

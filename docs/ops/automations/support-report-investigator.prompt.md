@@ -71,15 +71,23 @@ Estrutura:
 <dashboardUrl>
 ```
 
+## investigationId (correlação)
+
+- Chave canônica: `investigationId` no payload (= `analysisQueue.id`).
+- Cite no topo do markdown e no título do arquivo (`YYYY-MM-DD-<8chars>-….md`).
+- Busca no histórico Automations: `[inv:xxxxxxxx]` no campo `text`.
+
+Ver `docs/ops/INVESTIGATION_CORRELATION.md`.
+
 ## Callback (obrigatório ao finalizar)
 
 `POST` em `analysisQueue.callbackUrl` com header `x-investigator-callback-key` ou `x-internal-ops-key` (valor em `OPS_INVESTIGATOR_CALLBACK_KEY` / `OPS_METRICS_KEY` no servidor ops).
 
 ```json
 {
-  "queueId": "<analysisQueue.id>",
+  "investigationId": "<investigationId>",
   "remediationSummary": "Resumo em até 5 linhas: hipótese + o que foi feito",
-  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<id>.md"
+  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<8chars>-support.md"
 }
 ```
 
@@ -103,9 +111,9 @@ Quando o payload traz `investigation.tier: 1` e `playbook: support-report-tier1`
 
 ```json
 {
-  "queueId": "<analysisQueue.id>",
+  "investigationId": "<investigationId>",
   "remediationSummary": "Correção: …",
-  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<id>.md",
+  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<8chars>-support.md",
   "prUrl": "https://github.com/RafaDru/aiyra-care/pull/NNN"
 }
 ```
