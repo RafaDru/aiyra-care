@@ -15,7 +15,7 @@ const API_ROUTE_PATTERN =
 
 /** React Router paths que colidem com prefixos da API — refresh não deve ir ao backend. */
 const SPA_DOCUMENT_EXACT = new Set(['/roadmap', '/compliance/accept'])
-const SPA_DOCUMENT_PREFIXES = ['/patients/']
+const SPA_DOCUMENT_PREFIXES = ['/patients/', '/clinical-export/']
 
 function isSpaDocumentRequest(req: { url?: string; headers: Record<string, string | string[] | undefined> }): boolean {
   const accept = String(req.headers.accept ?? '')

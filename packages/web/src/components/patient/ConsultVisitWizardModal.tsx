@@ -82,7 +82,11 @@ export function ConsultVisitWizardModal({
 
   const handleCopyLink = async () => {
     if (!shareUrl) return
-    await navigator.clipboard.writeText(shareUrl)
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+    } catch {
+      // Headless / permissão negada — link segue disponível via QR e e-mail
+    }
     message.success(CLINICAL_EXPORT_COPY.shareCopied)
     trackProductEvent('consult_visit_link_copied', { mode }, { patientId })
   }
