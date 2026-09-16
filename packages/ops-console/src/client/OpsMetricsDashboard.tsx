@@ -150,15 +150,6 @@ export function OpsMetricsDashboard({
       ),
     },
     {
-      key: 'produto',
-      label: <TabLabel text="Produto" />,
-      children: (
-        <div className="ops-tab-panel">
-          <ProdutoLifecyclePanel />
-        </div>
-      ),
-    },
-    {
       key: 'product',
       label: <TabLabel text="Produto & UX" count={badges.product} alert={badges.product > 0} />,
       children: (
