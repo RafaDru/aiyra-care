@@ -82,11 +82,13 @@ Rascunho de investigação para triagem humana — **não** abrir PR nem alterar
 
 ```json
 {
-  "queueId": "<analysisQueue.id>",
+  "investigationId": "<investigationId>",
   "remediationSummary": "Resumo: hipótese + evidências + próximo passo",
-  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<alertId>.md"
+  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<8chars>-<alertId>.md"
 }
 ```
+
+Correlação: `docs/ops/INVESTIGATION_CORRELATION.md` — cite `investigationId` no topo do markdown.
 
 ## Limites (Tier 0)
 

@@ -186,6 +186,20 @@ export class OpsAnalysisQueuePgRepository {
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
+  async findInvestigationIdsBySourceIds(
+    sourceType: AnalysisQueueSourceType,
+    sourceIds: string[],
+    deploymentTier: string,
+  ): Promise<Map<string, string>> {
+    if (!sourceIds.length) return new Map()
+    const res = await this.pool.query<{ source_id: string; id: string }>(
+      `SELECT source_id, id::text AS id FROM ops_analysis_queue
+       WHERE source_type = $1 AND deployment_tier = $2 AND source_id = ANY($3::text[])`,
+      [sourceType, deploymentTier, sourceIds],
+    )
+    return new Map(res.rows.map((r) => [r.source_id, r.id]))
+  }
+
   async findBySource(
     sourceType: AnalysisQueueSourceType,
     sourceId: string,

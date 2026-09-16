@@ -36,9 +36,13 @@ export interface SupportReportOpsRow {
   analysisRequestedAt: string | null
   analysisCompletedAt: string | null
   analysisLastError: string | null
+  investigationId: string | null
 }
 
-function mapOpsRow(row: Awaited<ReturnType<SupportReportPgRepository['listForOps']>>[number]): SupportReportOpsRow {
+function mapOpsRow(
+  row: Awaited<ReturnType<SupportReportPgRepository['listForOps']>>[number],
+  investigationId?: string | null,
+): SupportReportOpsRow {
   return {
     id: row.id,
     accountId: row.accountId,
@@ -60,11 +64,12 @@ function mapOpsRow(row: Awaited<ReturnType<SupportReportPgRepository['listForOps
     analysisRequestedAt: row.analysisRequestedAt?.toISOString() ?? null,
     analysisCompletedAt: row.analysisCompletedAt?.toISOString() ?? null,
     analysisLastError: row.analysisLastError,
+    investigationId: investigationId ?? null,
   }
 }
 
 export type RequestAnalysisResult =
-  | { ok: true; analysisStatus: SupportReportAnalysisStatus; message: string }
+  | { ok: true; analysisStatus: SupportReportAnalysisStatus; message: string; investigationId?: string }
   | { ok: false; error: 'not_found' | 'investigator_unavailable' | 'dispatch_failed'; message: string }
 
 export class OpsSupportReportService {
@@ -75,7 +80,14 @@ export class OpsSupportReportService {
 
   async list(status: SupportReportStatus = 'open', limit = 50): Promise<SupportReportOpsRow[]> {
     const rows = await this.repo.listForOps(status, limit)
-    return rows.map(mapOpsRow)
+    if (!this.queueService || !rows.length) {
+      return rows.map((row) => mapOpsRow(row))
+    }
+    const invMap = await this.queueService.findInvestigationIdsForSources(
+      'support_report',
+      rows.map((r) => r.id),
+    )
+    return rows.map((row) => mapOpsRow(row, invMap.get(row.id)))
   }
 
   async updateStatus(id: string, status: 'triaged' | 'resolved' | 'closed'): Promise<boolean> {
@@ -94,15 +106,21 @@ export class OpsSupportReportService {
     }
 
     const fullRecord = { ...record, operatorNotes: notes }
-    const dispatch = this.queueService
-      ? (await investigateSupportReportWithQueue(this.queueService, fullRecord, {
-        operatorNotes: notes,
-        trigger: 'manual',
-      })).dispatch
-      : await dispatchSupportReportInvestigator(fullRecord, {
+    let investigationId: string | undefined
+    let dispatch: Awaited<ReturnType<typeof dispatchSupportReportInvestigator>>
+    if (this.queueService) {
+      const result = await investigateSupportReportWithQueue(this.queueService, fullRecord, {
         operatorNotes: notes,
         trigger: 'manual',
       })
+      investigationId = result.investigationId
+      dispatch = result.dispatch
+    } else {
+      dispatch = await dispatchSupportReportInvestigator(fullRecord, {
+        operatorNotes: notes,
+        trigger: 'manual',
+      })
+    }
 
     const analysisStatus = analysisStatusFromInvestigatorResult(dispatch)
     const analysisError = analysisErrorFromInvestigatorResult(dispatch)
@@ -120,7 +138,10 @@ export class OpsSupportReportService {
       return {
         ok: true,
         analysisStatus: 'in_progress',
-        message: 'Investigador Cursor disparado — aguarde o rascunho em docs/ops/investigations/',
+        message: investigationId
+          ? `Investigador disparado — investigationId ${investigationId.slice(0, 8)}…`
+          : 'Investigador Cursor disparado — aguarde o rascunho em docs/ops/investigations/',
+        investigationId,
       }
     }
 
@@ -147,12 +168,19 @@ export class OpsSupportReportService {
     const artifact = input.analysisArtifactPath?.trim().slice(0, 512) ?? null
     if (!summary && !artifact) return false
 
-    return this.repo.updateAnalysisStateForOps(id, {
+    const ok = await this.repo.updateAnalysisStateForOps(id, {
       analysisStatus: 'completed',
       analysisSummary: summary,
       analysisArtifactPath: artifact,
       analysisCompletedAt: new Date(),
       analysisLastError: null,
     })
+    if (ok && this.queueService) {
+      const invId = await this.queueService.findInvestigationIdForSource('support_report', id)
+      if (invId) {
+        await this.queueService.markHumanCompleted(invId).catch(() => undefined)
+      }
+    }
+    return ok
   }
 }

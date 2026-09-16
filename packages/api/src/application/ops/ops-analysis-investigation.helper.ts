@@ -25,18 +25,18 @@ export async function investigateSupportReportWithQueue(
   queueService: OpsAnalysisQueueService,
   record: SupportReportRecord,
   options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
-): Promise<{ queueId: string; dispatch: SupportInvestigatorDispatchResult }> {
+): Promise<{ investigationId: string; queueId: string; dispatch: SupportInvestigatorDispatchResult }> {
   const item = await queueService.enqueueSupportReport(record, options)
 
   if (isPreScreenEnabled()) {
     const pre = preScreenSupportReport(record, options.trigger)
     if (pre.outcome === 'dismiss') {
       await queueService.markDismissed(item.id, `pre_screen: ${pre.reason}`)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
     if (pre.outcome === 'defer') {
       await queueService.markDeferred(item.id, pre.reason)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
   }
 
@@ -53,7 +53,7 @@ export async function investigateSupportReportWithQueue(
   } else if (dispatch.outcome === 'failed') {
     await queueService.markFailed(item.id, dispatch.error)
   }
-  return { queueId: item.id, dispatch }
+  return { investigationId: item.id, queueId: item.id, dispatch }
 }
 
 export async function investigateOpsAlertWithQueue(
@@ -65,7 +65,7 @@ export async function investigateOpsAlertWithQueue(
     operatorNotes?: string | null
     trigger: 'auto' | 'manual'
   },
-): Promise<{ queueId: string; dispatch: OpsAlertInvestigatorDispatchResult }> {
+): Promise<{ investigationId: string; queueId: string; dispatch: OpsAlertInvestigatorDispatchResult }> {
   const item = await queueService.enqueueOpsAlert(alert, {
     operatorNotes: options.operatorNotes,
     trigger: options.trigger,
@@ -75,11 +75,11 @@ export async function investigateOpsAlertWithQueue(
     const pre = preScreenOpsAlert(alert, options.trigger)
     if (pre.outcome === 'dismiss') {
       await queueService.markDismissed(item.id, `pre_screen: ${pre.reason}`)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
     if (pre.outcome === 'defer') {
       await queueService.markDeferred(item.id, pre.reason)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
   }
 
@@ -95,5 +95,5 @@ export async function investigateOpsAlertWithQueue(
   } else if (dispatch.outcome === 'failed') {
     await queueService.markFailed(item.id, dispatch.error)
   }
-  return { queueId: item.id, dispatch }
+  return { investigationId: item.id, queueId: item.id, dispatch }
 }

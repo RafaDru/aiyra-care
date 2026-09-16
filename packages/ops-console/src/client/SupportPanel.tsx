@@ -14,6 +14,7 @@ import {
 } from 'antd'
 import { ReloadOutlined, RobotOutlined } from '@ant-design/icons'
 import type { SupportReportOpsRow } from './ops.types.js'
+import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsKpiCard, OpsKpiGrid } from './components/OpsKpiCard.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { useOpsDrillDown } from './ops-drill-down.js'
@@ -240,10 +241,16 @@ export function SupportPanel({
           }}
           columns={[
             {
-              title: 'ID',
+              title: 'reportId',
               dataIndex: 'id',
               width: 100,
               render: (id: string) => <Text code>{id.slice(0, 8)}</Text>,
+            },
+            {
+              title: 'investigationId',
+              dataIndex: 'investigationId',
+              width: 120,
+              render: (id: string | null) => <InvestigationIdTag investigationId={id} />,
             },
             {
               title: 'Fila',
@@ -408,6 +415,9 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
       <Descriptions size="small" column={1} bordered>
         <Descriptions.Item label="Fila">
           <Tag>{STATUS_LABEL[row.status] ?? row.status}</Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="investigationId">
+          <InvestigationIdTag investigationId={row.investigationId} showFull />
         </Descriptions.Item>
         <Descriptions.Item label="Análise">
           <Tag color={ANALYSIS_COLOR[row.analysisStatus]}>

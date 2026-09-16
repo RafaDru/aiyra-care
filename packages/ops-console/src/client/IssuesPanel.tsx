@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Empty, Space, Table, Tag, Typography, message } from 'antd'
+import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { opsApi } from './api.js'
 import type { OpsAnalysisQueueItem } from './ops.types.js'
@@ -29,7 +30,13 @@ const LANE_LABEL: Record<OpsAnalysisQueueItem['lane'], string> = {
   sre_support: 'Suporte SRE',
 }
 
-export function IssuesPanel({ onRefresh }: { onRefresh?: () => void }) {
+export function IssuesPanel({
+  onRefresh,
+  highlightInvestigationId,
+}: {
+  onRefresh?: () => void
+  highlightInvestigationId?: string | null
+}) {
   const [items, setItems] = useState<OpsAnalysisQueueItem[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -67,7 +74,7 @@ export function IssuesPanel({ onRefresh }: { onRefresh?: () => void }) {
   return (
     <OpsPanel
       title="Issues"
-      description="Pilha unificada — Suporte ao Desenvolvimento e Suporte SRE. Callback do agente preenche «Solução proposta»."
+      description="Pilha unificada — chave investigationId correlaciona console, toast, webhook e Automations."
     >
       <Alert
         type="info"
@@ -85,7 +92,18 @@ export function IssuesPanel({ onRefresh }: { onRefresh?: () => void }) {
           loading={loading}
           pagination={false}
           dataSource={items}
+          rowClassName={(row) => (
+            highlightInvestigationId && row.id === highlightInvestigationId
+              ? 'ops-row-highlight'
+              : ''
+          )}
           columns={[
+            {
+              title: 'investigationId',
+              dataIndex: 'id',
+              width: 120,
+              render: (id: string) => <InvestigationIdTag investigationId={id} />,
+            },
             {
               title: 'Lane',
               dataIndex: 'lane',
@@ -158,8 +176,12 @@ export function IssuesPanel({ onRefresh }: { onRefresh?: () => void }) {
                 {row.analysisLastError && (
                   <Paragraph type="danger">{row.analysisLastError}</Paragraph>
                 )}
+                <Paragraph>
+                  <Text strong>investigationId:</Text>{' '}
+                  <InvestigationIdTag investigationId={row.id} showFull />
+                </Paragraph>
                 <Text type="secondary">
-                  {row.sourceType} · {row.sourceId.slice(0, 12)}… · {row.lane}
+                  origem {row.sourceType} · {row.sourceId} · {row.lane}
                 </Text>
               </div>
             ),

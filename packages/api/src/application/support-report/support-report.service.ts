@@ -83,10 +83,18 @@ export class SupportReportService {
       let investigator: Awaited<ReturnType<typeof dispatchSupportReportInvestigator>>
       let notifier = false
       try {
-        notifier = await dispatchSupportReport(record)
-        investigator = this.queueService
-          ? (await investigateSupportReportWithQueue(this.queueService, record, { trigger: 'auto' })).dispatch
-          : await dispatchSupportReportInvestigator(record, { trigger: 'auto' })
+        if (this.queueService) {
+          const { queueId, dispatch } = await investigateSupportReportWithQueue(
+            this.queueService,
+            record,
+            { trigger: 'auto' },
+          )
+          investigator = dispatch
+          notifier = await dispatchSupportReport(record, { investigationId: queueId })
+        } else {
+          notifier = await dispatchSupportReport(record)
+          investigator = await dispatchSupportReportInvestigator(record, { trigger: 'auto' })
+        }
       } catch {
         investigator = { outcome: 'failed' as const, error: 'dispatch_failed' }
       }

@@ -402,6 +402,7 @@ export interface SupportReportOpsRow {
   analysisRequestedAt: string | null
   analysisCompletedAt: string | null
   analysisLastError: string | null
+  investigationId: string | null
 }
 
 export interface RuntimeDegradedView {

@@ -6,6 +6,10 @@ import {
   tier1PlaybookId,
   type InvestigationTier,
 } from '../../domain/ops/investigator-tier.js'
+import {
+  buildOpsConsoleUrl,
+  formatInvestigationIdShort,
+} from '../../domain/ops/investigation-correlation.js'
 import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
 import type { OpsAlert } from '../../domain/ops/ops-metrics.types.js'
@@ -19,6 +23,7 @@ export type OpsAlertInvestigatorDispatchResult =
 
 export interface OpsAlertInvestigatorPayload {
   type: 'ops_alert'
+  investigationId?: string
   alertId: string
   severity: OpsAlert['severity']
   category: OpsAlert['category']
@@ -67,12 +72,23 @@ export function buildOpsAlertInvestigatorPayload(
     operatorNotes?: string | null
     trigger: 'auto' | 'manual'
     investigationTier?: InvestigationTier
+    investigationId?: string
   },
 ): OpsAlertInvestigatorPayload {
-  const dashboardUrl = resolveOpsAlertDashboardUrl() ?? `http://127.0.0.1:${process.env.OPS_CONSOLE_PORT ?? '3013'}`
+  const consoleBase = resolveOpsAlertDashboardUrl()?.replace(/\?.*$/, '')
+    ?? `http://127.0.0.1:${process.env.OPS_CONSOLE_PORT ?? '3013'}`
+  const dashboardUrl = buildOpsConsoleUrl(consoleBase, {
+    tab: 'issues',
+    investigationId: options.investigationId,
+    alertId: alert.id,
+  })
   const label = `[${alert.severity}] ${alert.category}: ${alert.message}`
+  const invSuffix = options.investigationId
+    ? ` [inv:${formatInvestigationIdShort(options.investigationId)}]`
+    : ''
   return {
     type: 'ops_alert',
+    ...(options.investigationId ? { investigationId: options.investigationId } : {}),
     alertId: alert.id,
     severity: alert.severity,
     category: alert.category,
@@ -82,7 +98,7 @@ export function buildOpsAlertInvestigatorPayload(
     dashboardUrl,
     environment: resolveInvestigatorEnvironmentContext(),
     checkedAt: options.checkedAt,
-    text: `Alerta ops: ${label}`,
+    text: `Alerta ops: ${label}${invSuffix}`,
     ...(options.operatorNotes ? { operatorNotes: options.operatorNotes.slice(0, 2000) } : {}),
     investigation: {
       tier: options.investigationTier ?? 0,
@@ -136,6 +152,7 @@ export async function dispatchOpsAlertInvestigator(
   const bearerKey = resolveOpsAlertInvestigatorWebhookKey()
   if (!bearerKey) return { outcome: 'skipped', reason: 'webhook_key_missing' }
 
+  const investigationId = options.analysisQueue?.id
   const payload = {
     ...buildOpsAlertInvestigatorPayload(alert, {
       checkedAt: options.checkedAt,
@@ -143,9 +160,11 @@ export async function dispatchOpsAlertInvestigator(
       operatorNotes: options.operatorNotes,
       trigger: options.trigger,
       investigationTier: options.investigationTier,
+      investigationId,
     }),
     ...(options.analysisQueue
       ? {
+          investigationId: options.analysisQueue.id,
           analysisQueue: {
             id: options.analysisQueue.id,
             callbackUrl: options.analysisQueue.callbackUrl,

@@ -40,6 +40,10 @@ Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas op
 
 Runbook suporte: `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md` · import: `.cursor/automations/README.md`
 
+## Correlação (`investigationId`)
+
+Chave única = `ops_analysis_queue.id` — propagada em webhook, toast, console e callback. Ver `docs/ops/INVESTIGATION_CORRELATION.md`.
+
 ## Tier 1 — PR draft (opt-in)
 
 - `OPS_INVESTIGATOR_TIER1=1` na API (default **off**)
