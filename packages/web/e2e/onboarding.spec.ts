@@ -31,6 +31,8 @@ test.describe('onboarding', () => {
       cpf: uniqueQaCpf(),
     })
 
-    await expect(page.getByText('QA Onboarding Titular')).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'QA Onboarding Titular' })).toBeVisible({
+      timeout: 30_000,
+    })
   })
 })

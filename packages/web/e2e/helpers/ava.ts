@@ -11,7 +11,6 @@ async function waitAvaComposerReady(page: Page, timeout = 90_000) {
   await send.waitFor({ state: 'visible', timeout })
   await expect(input).toBeEnabled({ timeout })
   await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout })
-  await expect(send).toBeEnabled({ timeout })
 }
 
 /** Aguarda resume de conversa e lista de mensagens após abrir o dock. */
@@ -60,8 +59,10 @@ export async function sendAvaMessage(page: Page, text: string) {
   const avaBubblesBefore = await page.locator('.ava-chat-bubble-row--ava').count()
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
+  const send = page.getByRole('button', { name: 'Enviar' })
   await input.fill(text)
-  await page.getByRole('button', { name: 'Enviar' }).click()
+  await expect(send).toBeEnabled({ timeout: 30_000 })
+  await send.click()
 
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
     timeout: 45_000,

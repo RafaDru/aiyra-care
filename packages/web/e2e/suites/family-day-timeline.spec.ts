@@ -23,10 +23,8 @@ test.describe('family-day-timeline', () => {
     })
 
     await openPatientByName(page, patientName)
-    const patientId = page.url().match(/\/patients\/([^?]+)/)?.[1]
-    if (!patientId) throw new Error('ID do paciente não encontrado na URL')
-    await page.goto(`/patients/${patientId}?section=plan&tab=wallet`)
-    await page.getByRole('tab', { name: 'Carteira' }).waitFor({ state: 'visible', timeout: 15_000 })
+    await page.getByRole('radio', { name: /Plano & portais/i }).click()
+    await page.getByRole('tab', { name: 'Carteira' }).click()
 
     const todayCard = page.locator('.wallet-today-panel')
     await expect(todayCard.getByText('Hoje', { exact: true })).toBeVisible()
