@@ -51,5 +51,6 @@ describe('PRODUCT_EVENT_NAME_SET', () => {
     expect(PRODUCT_EVENT_NAME_SET.has('app_screen_viewed')).toBe(true)
     expect(PRODUCT_EVENT_NAME_SET.has('family_invite_created')).toBe(true)
     expect(PRODUCT_EVENT_NAME_SET.has('landing_page_view')).toBe(true)
+    expect(PRODUCT_EVENT_NAME_SET.has('first_visit_tour_completed')).toBe(true)
   })
 })

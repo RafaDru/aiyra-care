@@ -17,6 +17,7 @@ import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
 import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
+import { FirstVisitTourDrawer } from '../onboarding/FirstVisitTourDrawer.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -192,6 +193,7 @@ export function AppLayout() {
         </Content>
       </Layout>
       <AvaGlobalDock />
+      {configured && user && <FirstVisitTourDrawer />}
       {configured && user && <PatientConsultVisitHost />}
       <SupportReportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
     </Layout>

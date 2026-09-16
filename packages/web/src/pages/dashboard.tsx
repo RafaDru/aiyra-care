@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { subscribePatientCreateOpen } from '../lib/patient-create-bus.js'
 import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, Select, App, Alert, Checkbox } from 'antd'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
@@ -61,6 +62,8 @@ export function Dashboard() {
     if (authConfigured && (authLoading || !authUserId)) return
     load().finally(() => setLoading(false))
   }, [authConfigured, authLoading, authUserId])
+
+  useEffect(() => subscribePatientCreateOpen(() => setModalOpen(true)), [])
 
   const handleCreate = async () => {
     try {

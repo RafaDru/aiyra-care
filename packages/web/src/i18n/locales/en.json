@@ -148,6 +148,40 @@
     "submit": "Complete registration",
     "error": "Could not complete registration"
   },
+  "firstVisitTour": {
+    "title": "First steps",
+    "subtitle": "A quick guide to start organizing your family's care.",
+    "dismiss": "Close guide",
+    "back": "Back",
+    "next": "Next",
+    "complete": "Finish",
+    "noPatientsHint": "Start by adding someone you care for — then quick capture and Ava work better.",
+    "avaSeedMessage": "Hi! Help me understand how you can support my family's care.",
+    "steps": {
+      "family": {
+        "title": "Your family",
+        "description": "The dashboard brings together everyone you care for — yourself, children, and other health profiles."
+      },
+      "addPerson": {
+        "title": "Add a person",
+        "description": "Register a family member or create a health profile. You can mark the account holder as «you»."
+      },
+      "today": {
+        "title": "Today & quick capture",
+        "description": "Log vitals, medications, or daily notes — without opening the full record."
+      },
+      "ava": {
+        "title": "Ava, your companion",
+        "description": "Ava is always nearby to organize context and help you prepare for conversations with your doctor."
+      }
+    },
+    "actions": {
+      "family": "Go to your family",
+      "addPerson": "Add a person",
+      "today": "Open quick capture",
+      "ava": "Meet Ava"
+    }
+  },
   "settings": {
     "subtitle": "Application preferences",
     "appearance": "Appearance",
@@ -819,8 +853,10 @@
   },
   "familySupport": {
     "title": "Family support",
+    "disclaimer": "We're here to help your family organize care and prepare for conversations with your doctor. We don't replace medical visits or emergency care. In an emergency, call 192 (SAMU).",
     "sources": "Sources in the record",
     "noInsights": "No alerts right now — keep logging vitals and medications for context at the visit.",
+    "noInsightsWelcome": "Welcome! Start by adding someone you care for, logging a vital or medication, or connecting a health plan — so you're ready when it's time to talk to your doctor.",
     "priority": {
       "info": "info",
       "attention": "attention",
