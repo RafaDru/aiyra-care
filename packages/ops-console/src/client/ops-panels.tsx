@@ -222,7 +222,11 @@ export function OverviewPanel({
         </div>
       </div>
 
-      <OpsAlertsTable data={data} onRefresh={onRefresh} />
+      <OpsAlertsTable
+        data={data}
+        onRefresh={onRefresh}
+        description={`Métricas atualizadas: ${new Date(metrics.generatedAt).toLocaleString('pt-BR')}. Triagem pager + AiCare Suporte SRE. Clique na linha para detalhes.`}
+      />
     </div>
   )
 }
