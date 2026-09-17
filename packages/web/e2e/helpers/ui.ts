@@ -11,21 +11,20 @@ export async function hideAvaDock(page: Page) {
 
 /** Modal de primeiros passos bloqueia cliques no dashboard — dispensar exceto no spec de onboarding. */
 export async function dismissFirstVisitTour(page: Page) {
-  const modal = page.getByTestId('first-visit-tour-modal')
-  const visible = await modal.isVisible({ timeout: 3_000 }).catch(() => false)
-  if (!visible) {
-    await page.evaluate(() => {
-      localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
-    })
+  const dialog = page.getByRole('dialog', { name: /Primeiros passos|First steps/i })
+  if (await dialog.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    const dismiss = dialog.getByRole('button', { name: /Fechar guia|Close guide/i })
+    if (await dismiss.isVisible().catch(() => false)) {
+      await dismiss.click()
+    } else {
+      await dialog.getByRole('button', { name: 'Close' }).click()
+    }
+    await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
     return
   }
-  const dismiss = modal.getByRole('button', { name: 'Fechar guia' })
-  if (await dismiss.isVisible().catch(() => false)) {
-    await dismiss.click()
-  } else {
-    await modal.getByRole('button', { name: 'Close' }).click()
-  }
-  await modal.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
+  await page.evaluate(() => {
+    localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
+  })
 }
 
 /** Banner/modal de higienização bloqueia dashboard — adiar exceto no spec dedicado. */

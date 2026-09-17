@@ -37,6 +37,7 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
     })
   }
 
+  await dismissFirstVisitTour(page)
   await novoPaciente.waitFor({ state: 'visible', timeout: 15_000 })
   if (!opts?.keepAvaDock) {
     await hideAvaDock(page)
@@ -44,5 +45,4 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   if (!opts?.keepHygienePrompt) {
     await dismissHygienePrompt(page)
   }
-  await dismissFirstVisitTour(page)
 }
