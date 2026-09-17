@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { flushSync } from 'react-dom'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Alert, Button, Card, Form, Input, Select, Space, Spin, Steps, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
@@ -88,7 +89,9 @@ export function OnboardingPage() {
         heightCm: values.heightCm ? Number(values.heightCm) : undefined,
       })
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
-      goToDependentsStep()
+      flushSync(() => {
+        goToDependentsStep()
+      })
       await refreshSync()
     } catch (e) {
       setError(e instanceof Error ? e.message : t('onboarding.error'))

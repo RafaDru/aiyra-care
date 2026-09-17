@@ -1,13 +1,17 @@
 import { expect, type Page } from '@playwright/test'
 import { dismissFirstVisitTour } from './ui'
 
-function isAvaChatPost(res: { url: () => string; request: () => { method: () => string } }) {
-  if (res.request().method() !== 'POST') return false
+function isAvaChatPostUrl(method: string, url: string) {
+  if (method !== 'POST') return false
   try {
-    return new URL(res.url()).pathname.includes('/ava/chat')
+    return new URL(url).pathname.includes('/ava/chat')
   } catch {
     return false
   }
+}
+
+function isAvaChatPostRequest(req: { method: () => string; url: () => string }) {
+  return isAvaChatPostUrl(req.method(), req.url())
 }
 
 function avaAssistantBubbleBody(page: Page) {
@@ -92,7 +96,7 @@ export async function submitAvaMessage(page: Page, text: string) {
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
-  const chatStarted = page.waitForRequest((r) => isAvaChatPost(r), { timeout: 30_000 })
+  const chatStarted = page.waitForRequest((r) => isAvaChatPostRequest(r), { timeout: 30_000 })
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
