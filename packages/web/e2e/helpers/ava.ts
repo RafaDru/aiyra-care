@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import { dismissFirstVisitTour } from './ui'
 
 function avaAssistantBubbleBody(page: Page) {
   return page.locator('.ava-chat-bubble-row--ava').last().locator('.ava-chat-bubble__body')
@@ -28,6 +29,7 @@ async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
 }
 
 export async function openAvaDock(page: Page) {
+  await dismissFirstVisitTour(page)
   const convoList = page
     .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 30_000 })
     .catch(() => null)
