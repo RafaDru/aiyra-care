@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { flushSync } from 'react-dom'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Alert, Button, Card, Form, Input, Select, Space, Spin, Steps, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
@@ -23,13 +22,20 @@ type DependentDraft = {
   name: string
 }
 
+const ONBOARDING_WIZARD_STEP_KEY = 'aiyracare.onboarding_wizard_step'
+
+function readOnboardingWizardStep(): number {
+  if (typeof window === 'undefined') return 0
+  return sessionStorage.getItem(ONBOARDING_WIZARD_STEP_KEY) === '1' ? 1 : 0
+}
+
 export function OnboardingPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { configured, loading, needsProfile, refreshSync } = useAuth()
   const [profileForm] = Form.useForm()
   const [dependentForm] = Form.useForm()
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(readOnboardingWizardStep)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dependents, setDependents] = useState<DependentDraft[]>([])
@@ -58,11 +64,13 @@ export function OnboardingPage() {
   if (!needsProfile && currentStep === 0) return <Navigate to="/" replace />
 
   const goToDependentsStep = () => {
+    sessionStorage.setItem(ONBOARDING_WIZARD_STEP_KEY, '1')
     setCurrentStep(1)
     trackProductEvent('onboarding_step', { step: 'step_2_viewed' })
   }
 
   const finishOnboarding = (eventStep: 'dependents_skipped' | 'dependents_complete') => {
+    sessionStorage.removeItem(ONBOARDING_WIZARD_STEP_KEY)
     trackProductEvent('onboarding_step', { step: eventStep })
     navigate('/')
   }
@@ -89,9 +97,7 @@ export function OnboardingPage() {
         heightCm: values.heightCm ? Number(values.heightCm) : undefined,
       })
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
-      flushSync(() => {
-        goToDependentsStep()
-      })
+      goToDependentsStep()
       await refreshSync()
     } catch (e) {
       setError(e instanceof Error ? e.message : t('onboarding.error'))

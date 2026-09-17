@@ -55,6 +55,9 @@ export async function openAvaDock(page: Page) {
   await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 30_000 })
   await convoList
   await waitForAvaDockSettled(page)
+  if (process.env.CI) {
+    await page.waitForTimeout(6_500)
+  }
 }
 
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
