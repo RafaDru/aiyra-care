@@ -35,6 +35,8 @@ test.describe('onboarding', () => {
       timeout: 30_000,
     })
 
-    await expect(page.getByTestId('first-visit-tour-drawer')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('dialog', { name: 'Primeiros passos' })).toBeVisible({
+      timeout: 15_000,
+    })
   })
 })

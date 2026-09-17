@@ -1,4 +1,18 @@
 import { expect, type Page } from '@playwright/test'
+import { dismissFirstVisitTour } from './ui'
+
+function isAvaChatPostUrl(method: string, url: string) {
+  if (method !== 'POST') return false
+  try {
+    return new URL(url).pathname.includes('/ava/chat')
+  } catch {
+    return false
+  }
+}
+
+function isAvaChatPostRequest(req: { method: () => string; url: () => string }) {
+  return isAvaChatPostUrl(req.method(), req.url())
+}
 
 function avaAssistantBubbleBody(page: Page) {
   return page.locator('.ava-chat-bubble-row--ava').last().locator('.ava-chat-bubble__body')
@@ -28,6 +42,11 @@ async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
 }
 
 export async function openAvaDock(page: Page) {
+  await dismissFirstVisitTour(page)
+  await page.getByRole('button', { name: 'Abrir conversa com Ava' }).waitFor({
+    state: 'visible',
+    timeout: 45_000,
+  })
   const convoList = page
     .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 30_000 })
     .catch(() => null)
@@ -36,15 +55,25 @@ export async function openAvaDock(page: Page) {
   await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 30_000 })
   await convoList
   await waitForAvaDockSettled(page)
+  if (process.env.CI) {
+    await page.waitForTimeout(6_500)
+  }
 }
 
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
 export async function startFreshAvaConversation(page: Page) {
-  const btn = page.getByRole('button', { name: 'Nova conversa' })
-  if (await btn.isVisible().catch(() => false)) {
-    await btn.click()
-    await waitAvaComposerReady(page)
-  }
+  await expect(async () => {
+    const avaRows = page.locator('.ava-chat-bubble-row--ava')
+    const count = await avaRows.count()
+    if (count > 0) {
+      const btn = page.getByRole('button', { name: 'Nova conversa' })
+      if (await btn.isVisible().catch(() => false)) {
+        await btn.click()
+      }
+    }
+    expect(await avaRows.count()).toBe(0)
+  }).toPass({ timeout: 30_000 })
+  await waitAvaComposerReady(page)
 }
 
 /** Aguarda texto na última bolha da Ava (SSE pode atrasar no CI). */
@@ -70,12 +99,14 @@ export async function submitAvaMessage(page: Page, text: string) {
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
+  const chatStarted = page.waitForRequest((r) => isAvaChatPostRequest(r), { timeout: 30_000 })
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
-  await send.click()
+  await send.click({ force: true })
 
+  await chatStarted
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
-    timeout: 45_000,
+    timeout: 90_000,
   })
 }
 

@@ -1286,6 +1286,8 @@
   "walletToday": {
     "title": "Today",
     "subtitle": "{{date}}",
+    "lensLabel": "Who to view today",
+    "followingLine": "Following: {{name}}",
     "empty": "Nothing logged yet today",
     "emptyCta": "Log the first event",
     "consultCta": "Bring to appointment",

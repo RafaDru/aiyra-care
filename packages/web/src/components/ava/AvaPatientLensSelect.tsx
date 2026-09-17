@@ -11,11 +11,17 @@ interface Props {
   disabled?: boolean
 }
 
+function patientFirstName(name: string): string {
+  const trimmed = name.trim()
+  if (!trimmed) return name
+  return trimmed.split(/\s+/)[0] ?? trimmed
+}
+
 export function AvaPatientLensSelect({
   patients,
   value,
   onChange,
-  routePatientId,
+  routePatientId: _routePatientId,
   disabled,
 }: Props) {
   const { t } = useTranslation()
@@ -27,20 +33,25 @@ export function AvaPatientLensSelect({
       disabled={disabled || patients.length <= 1}
       onChange={onChange}
       popupMatchSelectWidth={false}
+      optionLabelProp="plainLabel"
       style={{ minWidth: 160, maxWidth: 220 }}
-      options={patients.map((p) => ({
-        value: p.id,
-        label: (
-          <span>
-            {p.name}
-            {p.isSelf && (
-              <Tag color="purple" style={{ marginLeft: 6, fontSize: 10, lineHeight: 18 }}>
-                {t('patient.you')}
-              </Tag>
-            )}
-          </span>
-        ),
-      }))}
+      options={patients.map((p) => {
+        const plainLabel = p.isSelf ? patientFirstName(p.name) : p.name
+        return {
+          value: p.id,
+          plainLabel,
+          label: (
+            <span>
+              {p.name}
+              {p.isSelf && (
+                <Tag color="purple" style={{ marginLeft: 6, fontSize: 10, lineHeight: 18 }}>
+                  {t('patient.you')}
+                </Tag>
+              )}
+            </span>
+          ),
+        }
+      })}
       aria-label={t('ava.patientLensLabel')}
     />
   )
