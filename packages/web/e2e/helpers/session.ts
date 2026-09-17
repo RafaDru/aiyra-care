@@ -9,6 +9,22 @@ import { hideAvaDock, dismissHygienePrompt, dismissFirstVisitTour } from './ui'
 
 const repoRoot = resolve(process.cwd(), '..', '..')
 
+async function waitForPatientList(page: Page) {
+  await page
+    .waitForResponse(
+      (r) => {
+        try {
+          const path = new URL(r.url()).pathname
+          return path === '/patients' && r.request().method() === 'GET' && r.ok()
+        } catch {
+          return false
+        }
+      },
+      { timeout: 30_000 },
+    )
+    .catch(() => undefined)
+}
+
 export type EnsureSessionOptions = {
   keepHygienePrompt?: boolean
   keepAvaDock?: boolean
@@ -35,9 +51,11 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
       genderLabel: 'Masculino',
       cpf: uniqueQaCpf(Date.now()),
     })
+    await waitForPatientList(page)
   }
 
   await dismissFirstVisitTour(page)
+  await waitForPatientList(page)
   await novoPaciente.waitFor({ state: 'visible', timeout: 15_000 })
   if (!opts?.keepAvaDock) {
     await hideAvaDock(page)
