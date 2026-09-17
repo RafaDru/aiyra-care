@@ -1,6 +1,15 @@
 import { expect, type Page } from '@playwright/test'
 import { dismissFirstVisitTour } from './ui'
 
+function isAvaChatPost(res: { url: () => string; request: () => { method: () => string } }) {
+  if (res.request().method() !== 'POST') return false
+  try {
+    return new URL(res.url()).pathname.includes('/ava/chat')
+  } catch {
+    return false
+  }
+}
+
 function avaAssistantBubbleBody(page: Page) {
   return page.locator('.ava-chat-bubble-row--ava').last().locator('.ava-chat-bubble__body')
 }
@@ -49,8 +58,9 @@ export async function startFreshAvaConversation(page: Page) {
   const btn = page.getByRole('button', { name: 'Nova conversa' })
   if (await btn.isVisible().catch(() => false)) {
     await btn.click()
-    await waitAvaComposerReady(page)
   }
+  await waitAvaComposerReady(page)
+  await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(0, { timeout: 20_000 })
 }
 
 /** Aguarda texto na última bolha da Ava (SSE pode atrasar no CI). */
@@ -76,6 +86,7 @@ export async function submitAvaMessage(page: Page, text: string) {
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
+  const chatDone = page.waitForResponse((r) => isAvaChatPost(r), { timeout: 120_000 })
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click()
@@ -83,6 +94,8 @@ export async function submitAvaMessage(page: Page, text: string) {
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
     timeout: 90_000,
   })
+  const chatResponse = await chatDone
+  expect(chatResponse.ok(), `POST /ava/chat falhou: HTTP ${chatResponse.status()}`).toBeTruthy()
 }
 
 export async function sendAvaMessage(page: Page, text: string) {
