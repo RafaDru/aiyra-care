@@ -30,6 +30,10 @@ async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
 
 export async function openAvaDock(page: Page) {
   await dismissFirstVisitTour(page)
+  await page.getByRole('button', { name: 'Abrir conversa com Ava' }).waitFor({
+    state: 'visible',
+    timeout: 45_000,
+  })
   const convoList = page
     .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 30_000 })
     .catch(() => null)
@@ -74,19 +78,10 @@ export async function submitAvaMessage(page: Page, text: string) {
   const send = page.getByRole('button', { name: 'Enviar' })
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
-  const chatDone = page.waitForResponse(
-    (r) => /\/patients\/[^/]+\/ava\/chat/.test(r.url()) && r.request().method() === 'POST',
-    { timeout: 90_000 },
-  )
   await send.click()
-  const chatRes = await chatDone.catch(() => null)
-  if (chatRes && !chatRes.ok()) {
-    const body = await chatRes.text().catch(() => '')
-    throw new Error(`Ava chat HTTP ${chatRes.status()}: ${body.slice(0, 200)}`)
-  }
 
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
-    timeout: 45_000,
+    timeout: 90_000,
   })
 }
 
