@@ -29,8 +29,19 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
   await fillMaskedDate(page, 'Data de nascimento', profile.birthDate)
   await selectAntOption(page, 'Sexo', profile.genderLabel)
   await page.getByLabel('CPF', { exact: true }).fill(profile.cpf)
+  const profileSave = page.waitForResponse(
+    (r) => r.url().includes('/auth/complete-profile') && r.request().method() === 'POST',
+    { timeout: 35_000 },
+  )
   await page.getByRole('button', { name: 'Continuar' }).click()
-  await page.getByRole('heading', { name: 'Quem você acompanha?' }).waitFor({ timeout: 25_000 })
-  await page.getByRole('button', { name: 'Pular por agora' }).click()
-  await page.waitForURL(/\/$/, { timeout: 25_000 })
+  await profileSave.catch(() => undefined)
+  const leftOnboarding = await page
+    .waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 12_000 })
+    .then(() => true)
+    .catch(() => false)
+  if (!leftOnboarding) {
+    await page.getByRole('heading', { name: 'Quem você acompanha?' }).waitFor({ timeout: 35_000 })
+    await page.getByRole('button', { name: 'Pular por agora' }).click()
+    await page.waitForURL(/\//, { timeout: 25_000 })
+  }
 }
