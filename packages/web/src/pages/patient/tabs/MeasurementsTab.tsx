@@ -435,7 +435,7 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
         {exportReport && (
           <MonitoringExportSheet
             report={exportReport}
-            patientName={patientName ?? 'Paciente'}
+            patientName={patientName ?? t('family.glossary.healthProfile')}
             threadTitle={threads.find((th) => th.id === healthThreadId)?.title}
           />
         )}
