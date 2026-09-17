@@ -1,7 +1,7 @@
 import { execSync } from 'child_process'
 import { resolve } from 'path'
 import type { Page } from '@playwright/test'
-import { loginViaPassword } from './auth'
+import { loginViaPassword, waitForSupabaseSession } from './auth'
 import { requireQaTestCredentials } from './env'
 import { completeOnboardingProfile, dismissCookieBanner } from './onboarding'
 import { uniqueQaCpf } from './fixtures'
@@ -34,6 +34,7 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   execSync('npm run qa:seed-e2e-account', { cwd: repoRoot, stdio: 'ignore' })
   const { email, password } = requireQaTestCredentials()
   await loginViaPassword(page, email, password)
+  await waitForSupabaseSession(page)
   await dismissCookieBanner(page)
 
   const novoPaciente = page.getByRole('button', { name: 'Adicionar à família' })

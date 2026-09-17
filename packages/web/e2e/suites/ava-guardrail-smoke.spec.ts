@@ -13,7 +13,7 @@ test.describe('ava-guardrail-smoke', () => {
 
   test.beforeEach(() => {
     requireQaTestCredentials()
-    if (process.env.CI) test.setTimeout(120_000)
+    if (process.env.CI) test.setTimeout(180_000)
   })
 
   test('off-topic bloqueado; saúde segue fluxo normal', async ({ page }) => {

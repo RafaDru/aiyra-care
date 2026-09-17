@@ -8,7 +8,7 @@ test.describe('ava-companion-smoke', () => {
 
   test.beforeEach(() => {
     requireQaTestCredentials()
-    if (process.env.CI) test.setTimeout(120_000)
+    if (process.env.CI) test.setTimeout(180_000)
   })
 
   test('dock abre e responde mensagem de saúde (modo teste)', async ({ page }) => {
