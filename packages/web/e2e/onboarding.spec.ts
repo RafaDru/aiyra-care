@@ -35,6 +35,6 @@ test.describe('onboarding', () => {
       timeout: 30_000,
     })
 
-    await expect(page.getByTestId('first-visit-tour-drawer')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByTestId('first-visit-tour-modal')).toBeVisible({ timeout: 10_000 })
   })
 })

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.js'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
-import { AuthPageLayout } from '../layouts/AuthPageLayout.js'
+import { OnboardingLayout } from '../layouts/OnboardingLayout.js'
 import { api } from '../lib/api.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
 import { trackProductEvent } from '../lib/product-events.js'
@@ -45,11 +45,11 @@ export function OnboardingPage() {
 
   if (loading) {
     return (
-      <AuthPageLayout>
+      <OnboardingLayout>
         <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
           <Spin size="large" />
         </div>
-      </AuthPageLayout>
+      </OnboardingLayout>
     )
   }
 
@@ -131,17 +131,18 @@ export function OnboardingPage() {
   }
 
   return (
-    <AuthPageLayout>
-      <Card>
-        <Steps
-          current={currentStep}
-          style={{ marginBottom: 24 }}
-          items={[
-            { title: t('onboarding.steps.profile') },
-            { title: t('onboarding.steps.dependents') },
-          ]}
-        />
+    <OnboardingLayout>
+      <Steps
+        current={currentStep}
+        style={{ marginBottom: 24 }}
+        responsive
+        items={[
+          { title: t('onboarding.steps.profile') },
+          { title: t('onboarding.steps.dependents') },
+        ]}
+      />
 
+      <Card variant="borderless" styles={{ body: { padding: 0 } }}>
         {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
 
         {currentStep === 0 ? (
@@ -274,6 +275,6 @@ export function OnboardingPage() {
           </>
         )}
       </Card>
-    </AuthPageLayout>
+    </OnboardingLayout>
   )
 }
