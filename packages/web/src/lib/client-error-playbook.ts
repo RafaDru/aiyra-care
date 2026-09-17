@@ -8,8 +8,8 @@ const FEATURE_MESSAGES: Record<string, Record<string, string>> = {
     HTTP_503: 'O resumo clínico está temporariamente indisponível.',
   },
   patient_detail: {
-    default: 'Não conseguimos carregar os dados do paciente.',
-    HTTP_404: 'Paciente não encontrado ou sem permissão.',
+    default: 'Não conseguimos carregar os dados do perfil.',
+    HTTP_404: 'Perfil não encontrado ou sem permissão.',
   },
   integrations: {
     default: 'Não conseguimos carregar as integrações.',
@@ -20,7 +20,7 @@ const FEATURE_MESSAGES: Record<string, Record<string, string>> = {
     HTTP_503: 'Pagamentos temporariamente indisponíveis.',
   },
   dashboard: {
-    default: 'Não conseguimos carregar a lista de pacientes.',
+    default: 'Não conseguimos carregar sua família.',
   },
   onboarding: {
     default: 'Não conseguimos salvar seu perfil. Tente novamente.',

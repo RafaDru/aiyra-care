@@ -12,6 +12,17 @@
     "session": "Sessões",
     "settings": "Configurações"
   },
+  "integrationsHub": {
+    "subtitle": "Conecte portais de saúde ao perfil de quem você cuida",
+    "perPatientTitle": "Integrações são por pessoa",
+    "perPatientDescription": "Selecione a pessoa e depois o portal. Você também pode gerenciar vínculos no perfil dela.",
+    "personLabel": "Quem",
+    "selectPlaceholder": "Selecione a pessoa",
+    "openProfile": "Abrir perfil de saúde",
+    "selectPersonTag": "Selecione uma pessoa",
+    "available": "Disponível",
+    "comingSoon": "Em breve"
+  },
   "auth": {
     "title": "Entrar",
     "titleLogin": "Bem-vindo de volta",
@@ -87,10 +98,10 @@
     "subscribeFamily": "Assinar plano família",
     "manageSubscription": "Gerenciar assinatura",
     "deleteTitle": "Excluir conta",
-    "deleteHint": "Remove sua conta, aceites legais e pacientes que você criou nesta conta. Vínculos com outros pacientes são apenas desfeitos.",
+    "deleteHint": "Remove sua conta, aceites legais e perfis de saúde que você criou nesta conta. Vínculos com outros perfis são apenas desfeitos.",
     "deleteButton": "Excluir minha conta",
     "deleteModalTitle": "Confirmar exclusão da conta",
-    "deleteWarning": "Esta ação é irreversível. Documentos na nuvem e dados clínicos dos seus pacientes serão removidos.",
+    "deleteWarning": "Esta ação é irreversível. Documentos na nuvem e dados clínicos dos seus perfis serão removidos.",
     "deleteTypeConfirm": "Digite EXCLUIR para confirmar:",
     "deleteConfirmButton": "Excluir permanentemente",
     "deleteConfirmError": "Digite EXCLUIR exatamente como mostrado.",
@@ -98,7 +109,7 @@
   },
   "accountProfile": {
     "title": "Perfil",
-    "subtitle": "Dados da conta para contato e identificação. Não substitui o cadastro clínico dos pacientes.",
+    "subtitle": "Dados da conta para contato e identificação. Não substitui o cadastro clínico dos perfis de saúde.",
     "sectionBasic": "Dados básicos",
     "sectionContact": "Contato e localização",
     "sectionSocial": "Redes e site",
@@ -194,7 +205,7 @@
       },
       "today": {
         "title": "Hoje e registro rápido",
-        "description": "Registre medidas, medicações ou notas do dia — sem precisar abrir o prontuário completo."
+        "description": "Registre medidas, medicações ou notas do dia — sem precisar abrir o histórico completo."
       },
       "ava": {
         "title": "Ava, sua companheira",
@@ -449,11 +460,26 @@
   "patient": {
     "title": "Sua família",
     "new": "Adicionar à família",
+    "addPerson": "Adicionar pessoa",
     "emptyFamily": "Sua família ainda não tem perfis de saúde cadastrados.",
     "edit": "Editar",
     "delete": "Remover",
-    "deleteConfirm": "Remover paciente?",
-    "notFound": "Paciente não encontrado",
+    "deleteConfirm": "Remover este perfil de saúde?",
+    "notFound": "Perfil não encontrado",
+    "createSuccess": "Perfil adicionado à família",
+    "loadListFailed": "Falha ao carregar os perfis",
+    "loadListErrorTitle": "Não foi possível carregar sua família",
+    "loadListRetry": "Tentar novamente",
+    "editModalTitle": "Editar perfil",
+    "cpfPrefillHint": "Pré-preenchido com o CPF do perfil",
+    "cpfFieldLabel": "CPF do perfil",
+    "inAppProfileColumn": "Perfil no app",
+    "profileLabel": "Perfil: {{name}}",
+    "importForProfile": "Importar para este perfil",
+    "openHealthProfile": "Abrir perfil de saúde",
+    "personFallback": "esta pessoa",
+    "importHint": "Os dados serão importados neste perfil. Para sync recorrente, vincule o portal em Integrações.",
+    "amilDependentSuccess": "Perfil adicionado. Sincronize novamente para importar guias e carteirinha.",
     "age": "anos",
     "months": "meses",
     "male": "Masculino",
@@ -462,7 +488,7 @@
     "height": "cm",
     "bloodType": "Tipo",
     "you": "Você",
-    "markAsSelf": "Este paciente é você (titular da conta)"
+    "markAsSelf": "Este perfil é você (titular da conta)"
   },
   "sections": {
     "overview": "Visão geral",
@@ -495,15 +521,15 @@
     "subtitle": "Agente Virtual Aiyra",
     "name": "Ava",
     "you": "Você",
-    "intro": "Descreva o que está ocorrendo. Ava organiza o contexto do prontuário e ajuda a preparar a conversa com o pediatra — sem substituir o médico.",
-    "introPersonal": "{{name}}, descreva o que está ocorrendo. Organizo o contexto do prontuário e ajudo a preparar a conversa com o pediatra — sem substituir o médico.",
+    "intro": "Descreva o que está ocorrendo. Ava organiza o histórico de saúde e ajuda a preparar a conversa com o pediatra — sem substituir o médico.",
+    "introPersonal": "{{name}}, descreva o que está ocorrendo. Organizo o histórico de saúde e ajudo a preparar a conversa com o pediatra — sem substituir o médico.",
     "placeholder": "Ex.: Ele está com febre desde ontem e não quer comer…",
     "quotaHint": "Saldo IA: ~{{credits}} créditos ({{tokens}} tokens estimados)",
     "quotaUsageLabel": "Uso do pool de IA",
     "quotaUsageDetail": "~{{credits}} créditos restantes ({{tokens}} tokens)",
     "quotaPoolDetail": "~{{credits}} créd. · {{tokens}} tokens · {{percent}}% do pool usado",
-    "patientLensLabel": "Falando sobre",
-    "patientLensOverrideHint": "Lente diferente da página atual — o contexto é deste paciente.",
+    "patientLensLabel": "Quem ver hoje",
+    "patientLensOverrideHint": "Lente diferente da página atual — o contexto é desta pessoa.",
     "quotaWarn": "Franquia de IA em {{percent}}% — considere um pacote se precisar de mais conversas.",
     "quotaExhausted": "Franquia de IA esgotada neste ciclo.",
     "quotaBypassed": "Franquia de IA desativada para testes (sem limite nesta conta).",
@@ -522,7 +548,7 @@
     "thinkingStatusHint": "Status do processamento (não é resposta da Ava)",
     "thinkingPhrases": {
       "pensando": "Pensando…",
-      "analisando": "Analisando o prontuário…",
+      "analisando": "Analisando o histórico…",
       "exames": "Pesquisando nos exames…",
       "organizando": "Organizando as informações…",
       "conferindo": "Conferindo os dados…"
@@ -555,13 +581,13 @@
     "deleteConversationBody": "Mensagens e pins serão removidos permanentemente. Esta ação não pode ser desfeita.",
     "conversationArchived": "Conversa arquivada",
     "conversationDeleted": "Conversa excluída",
-    "patientSwitchTitle": "Trocar paciente na lente",
+    "patientSwitchTitle": "Trocar pessoa na lente",
     "patientSwitchBody": "Esta conversa ainda inclui registros de {{names}} no contexto. Quer manter ou remover?",
     "patientSwitchKeep": "Manter no contexto",
     "patientSwitchRemove": "Remover pins antigos",
     "inactivityHint": "Passou um tempo desde a última mensagem — os registros pinados ainda estão no contexto. Remova os chips se a conversa mudou de assunto.",
     "accelerator": "Pergunte à Ava",
-    "acceleratorExam": "O que significa este exame no contexto do prontuário?",
+    "acceleratorExam": "O que significa este exame no contexto do histórico de saúde?",
     "acceleratorOrder": "O que este pedido de exame indica e como interpretar os resultados?",
     "acceleratorMarker": "O que significa este marcador e como interpretar a evolução?",
     "contextAcceleratorsLabel": "Atalhos de contexto",
@@ -576,7 +602,7 @@
     "proposedActionConfirmHygieneDismissTitle": "Manter registros separados?",
     "openIntegrations": "Ver integrações",
     "platformDocumentsMessage": "Quer ajuda para usar um documento nesta aba na conversa com o pediatra?",
-    "platformExportMessage": "Antes de imprimir ou compartilhar, quer que eu destaque o que mais importa no prontuário?",
+    "platformExportMessage": "Antes de imprimir ou compartilhar, quer que eu destaque o que mais importa no histórico?",
     "liteModeBanner": "Ava em modo simplificado — respostas sem revisão automática. Confirme informações importantes com o pediatra.",
     "thinkingStatusAriaLabel": "Status do processamento",
     "reportPrint": {
@@ -598,7 +624,7 @@
     "loginPromptTitle": "Registros parecidos no prontuário",
     "loginPromptBody": "Encontramos {{count}} possível duplicidade — como no Google Fotos, você pode unificar ou manter separado.",
     "progressLabel": "Item {{current}} de {{total}}",
-    "patientLabel": "Paciente: {{name}}",
+    "patientLabel": "Perfil: {{name}}",
     "patientUnknown": "nome não disponível",
     "entityTypeLabel": "Tipo: {{type}}",
     "entityTypes": {
@@ -621,7 +647,7 @@
     "distinct": "Registros distintos",
     "dismiss": "Ignorar",
     "later": "Depois",
-    "openPatient": "Abrir prontuário",
+    "openPatient": "Abrir perfil",
     "resolveFailed": "Não foi possível salvar: {{message}}",
     "pendingBannerTitle": "{{count}} duplicatas pendentes no prontuário",
     "pendingBannerBody": "Vacinas ou exames repetidos aguardam sua confirmação. Clique em Revisar para unificar ou manter separados.",
@@ -686,18 +712,18 @@
       "title": "Por dentro da plataforma",
       "subtitle": "Telas reais do AiyraCare — histórico, agenda, exames e conversa com a Ava.",
       "items": [
-        { "key": "dashboard", "title": "Família no dashboard", "altKey": "landing.screenshots.dashboard" },
+        { "key": "dashboard", "title": "Sua família no início", "altKey": "landing.screenshots.dashboard" },
         { "key": "agenda", "title": "Agenda e lembretes", "altKey": "landing.screenshots.agenda" },
         { "key": "avaChat", "title": "Conversa com a Ava", "altKey": "landing.screenshots.avaChat" }
       ]
     },
     "screenshots": {
-      "dashboard": "Dashboard — perfis da família",
-      "patientOverview": "Perfil do paciente — visão clínica",
+      "dashboard": "Início — perfis da família",
+      "patientOverview": "Perfil de saúde — visão clínica",
       "timeline": "Linha do tempo clínica",
       "agenda": "Agenda e calendário",
       "exams": "Exames e marcadores",
-      "avaChat": "Ava — conversa com contexto do prontuário"
+      "avaChat": "Ava — conversa com contexto do histórico"
     },
     "avaDisclaimer": "Ava orienta com base no seu prontuário e nas dúvidas do dia a dia. Ela não realiza exames, não emite diagnósticos e não substitui avaliação médica ou emergência (SAMU 192).",
     "useCases": {
@@ -1067,12 +1093,12 @@
   },
   "emergency": {
     "title": "Emergência",
-    "subtitle": "Canais oficiais e contatos pessoais do paciente",
+    "subtitle": "Canais oficiais e contatos pessoais de quem você cuida",
     "disclaimer": "Em risco de vida, ligue 192 (SAMU) ou 193 (Bombeiros). Esta página organiza números oficiais — não substitui atendimento de emergência.",
     "officialDirectory": "Canais oficiais no Brasil",
-    "patientContacts": "Contatos de emergência do paciente",
-    "selectPatient": "Selecionar paciente",
-    "selectPatientHint": "Escolha um paciente para ver ou cadastrar contatos (pediatra, plano, família).",
+    "patientContacts": "Contatos de emergência",
+    "selectPatient": "Quem ver hoje",
+    "selectPatientHint": "Escolha a pessoa para ver ou cadastrar contatos (pediatra, plano, família).",
     "addContact": "Adicionar contato",
     "editContact": "Editar contato",
     "save": "Salvar",
@@ -1085,7 +1111,7 @@
     "contactUpdated": "Contato atualizado",
     "contactRemoved": "Contato removido",
     "error": "Não foi possível salvar",
-    "noContacts": "Nenhum contato cadastrado para este paciente.",
+    "noContacts": "Nenhum contato cadastrado para esta pessoa.",
     "filterState": "Filtrar por UF (canais estaduais)",
     "stateHint": "Inclui canais nacionais + entradas do estado selecionado.",
     "available24h": "24h",
@@ -1125,7 +1151,7 @@
       "descriptionReadyWithDate": "Última importação: {{date}}. Reimportar traz vacinas novas do SUS sem duplicar o que já está aqui.",
       "guidedImport": "Primeira importação",
       "reimportNow": "Reimportar vacinas",
-      "cpfWarning": "Cadastre o CPF do paciente para importar vacinas do SUS."
+      "cpfWarning": "Cadastre o CPF do perfil para importar vacinas do SUS."
     }
   },
   "medication": {
@@ -1272,9 +1298,12 @@
     "deleteSuccess": "Documento excluído",
     "uploadHint": "Foto ou PDF nítido (JPEG, PNG ou PDF, até 20 MB)",
     "identityReviewTitle": "Dados detectados no documento",
-    "identityReviewHint": "Marque os campos que deseja aplicar ao cadastro do paciente.",
-    "applyToPatient": "Aplicar no paciente",
-    "identityApplied": "Dados aplicados ao cadastro do paciente"
+    "identityReviewHint": "Marque os campos que deseja aplicar ao perfil de saúde.",
+    "applyToPatient": "Aplicar no perfil",
+    "identityApplied": "Dados aplicados ao perfil de saúde",
+    "identityDetectedTitle": "Dados detectados para o perfil",
+    "savedAppliedToProfile": "Arquivo salvo e dados aplicados ao perfil",
+    "confirmApplyToProfile": "Confirmar e aplicar no perfil"
   },
   "documentType": {
     "prescription": "Receita",
@@ -1289,6 +1318,7 @@
   },
   "walletToday": {
     "title": "Hoje",
+    "lensLabel": "Quem ver hoje",
     "subtitle": "{{date}}",
     "empty": "Nada registrado ainda hoje",
     "emptyCta": "Registrar o primeiro evento",
@@ -1333,10 +1363,10 @@
   "quickCapture": {
     "trigger": "Registro rápido",
     "title": "Registro rápido",
-    "patientLabel": "Paciente",
+    "patientLabel": "Quem ver hoje",
     "typeLabel": "Tipo",
-    "noPatients": "Nenhum paciente disponível",
-    "pickPatient": "Selecione um paciente",
+    "noPatients": "Nenhum perfil disponível",
+    "pickPatient": "Selecione quem ver hoje",
     "saved": "Registro salvo",
     "error": "Não foi possível salvar",
     "threadRequired": "Selecione um acompanhamento ou deixe apenas um ativo",

@@ -55,7 +55,7 @@ export function Dashboard() {
       .catch((err) => {
         setPatients([])
         setCircleGroups([])
-        setLoadError(err instanceof Error ? err.message : 'Falha ao carregar pacientes')
+        setLoadError(err instanceof Error ? err.message : t('patient.loadListFailed'))
       })
   }
   useEffect(() => {
@@ -82,7 +82,7 @@ export function Dashboard() {
         cns: values.cns?.replace(/\D/g, '') || undefined,
         markAsSelf: showMarkAsSelf && Boolean(values.markAsSelf),
       })
-      message.success('Paciente cadastrado com sucesso')
+      message.success(t('patient.createSuccess'))
       setModalOpen(false)
       form.resetFields()
       load()
@@ -160,9 +160,9 @@ export function Dashboard() {
         <Alert
           type="error"
           showIcon
-          message="Não foi possível carregar os pacientes"
+          message={t('patient.loadListErrorTitle')}
           description={loadError}
-          action={<Button size="small" onClick={() => { setLoading(true); load().finally(() => setLoading(false)) }}>Tentar novamente</Button>}
+          action={<Button size="small" onClick={() => { setLoading(true); load().finally(() => setLoading(false)) }}>{t('patient.loadListRetry')}</Button>}
           style={{ marginBottom: 16 }}
         />
       )}

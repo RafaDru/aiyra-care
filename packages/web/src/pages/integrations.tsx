@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, Row, Col, Typography, Tag, Select, Button } from 'antd'
 import { CloudDownloadOutlined, MedicineBoxOutlined, SafetyCertificateOutlined, GlobalOutlined, UserOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { PageHeader } from '../components/ui/PageHeader.js'
 import { DismissibleHint } from '../components/ui/DismissibleHint.js'
 import { ImportInsuranceModal } from '../components/scraper/ImportInsuranceModal.js'
@@ -51,6 +52,7 @@ const integrations = [
 ]
 
 export function IntegrationsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
   const [patients, setPatients] = useState<Patient[]>([])
@@ -74,7 +76,7 @@ export function IntegrationsPage() {
 
   return (
     <div>
-      <PageHeader title="Integrações" subtitle="Conecte portais de saúde ao cadastro de um paciente" />
+      <PageHeader title={t('nav.integrations')} subtitle={t('integrationsHub.subtitle')} />
 
       <DismissibleHint
         hintId="integrations.per-patient"
@@ -82,16 +84,16 @@ export function IntegrationsPage() {
         showIcon
         icon={<UserOutlined />}
         style={{ marginBottom: 20 }}
-        message="Integrações são por paciente"
-        description="Selecione o paciente e depois o portal. Você também pode gerenciar vínculos na ficha do paciente."
+        message={t('integrationsHub.perPatientTitle')}
+        description={t('integrationsHub.perPatientDescription')}
       />
 
       <div style={{ marginBottom: 20, maxWidth: 420 }}>
-        <Text strong style={{ display: 'block', marginBottom: 8 }}>Paciente</Text>
+        <Text strong style={{ display: 'block', marginBottom: 8 }}>{t('integrationsHub.personLabel')}</Text>
         <Select
           showSearch
           optionFilterProp="label"
-          placeholder="Selecione o paciente"
+          placeholder={t('integrationsHub.selectPlaceholder')}
           style={{ width: '100%' }}
           value={patientId}
           onChange={setPatientId}
@@ -99,7 +101,7 @@ export function IntegrationsPage() {
         />
         {patientId && (
           <Button type="link" style={{ paddingLeft: 0, marginTop: 4 }} onClick={() => navigate(`/patients/${patientId}`)}>
-            Abrir ficha do paciente
+            {t('integrationsHub.openProfile')}
           </Button>
         )}
       </div>
@@ -124,8 +126,8 @@ export function IntegrationsPage() {
                 <Typography.Title level={5} style={{ margin: 0 }}>{int.name}</Typography.Title>
                 <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>{int.description}</Text>
                 <div style={{ marginTop: 12 }}>
-                  {!patientId ? <Tag>Selecione um paciente</Tag>
-                    : int.available ? <Tag color="green">Disponível</Tag> : <Tag>Em breve</Tag>}
+                  {!patientId ? <Tag>{t('integrationsHub.selectPersonTag')}</Tag>
+                    : int.available ? <Tag color="green">{t('integrationsHub.available')}</Tag> : <Tag>{t('integrationsHub.comingSoon')}</Tag>}
                 </div>
               </Card>
             </Col>
@@ -141,13 +143,14 @@ export function IntegrationsPage() {
           onClose={() => setPublicHealthPortal(null)}
         />
       )}
+
       {patientId && insuranceOpen && (
         <ImportInsuranceModal
-          open={!!insuranceOpen}
-          onClose={() => setInsuranceOpen(null)}
+          open
           portal={insuranceOpen.portal}
           label={insuranceOpen.label}
           patientId={patientId}
+          onClose={() => setInsuranceOpen(null)}
           usesEmail={insuranceOpen.portal === 'unimed'}
         />
       )}

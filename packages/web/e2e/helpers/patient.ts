@@ -49,7 +49,7 @@ export async function openPatientByName(page: Page, name: string) {
 
 export async function editPatientName(page: Page, newName: string) {
   await page.getByRole('button').filter({ has: page.locator('.anticon-edit') }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Editar Dados do Paciente' })
+  const dialog = page.getByRole('dialog', { name: 'Editar perfil' })
   await dialog.waitFor({ state: 'visible' })
   await dialog.getByLabel('Nome', { exact: true }).fill(newName)
   await dialog.getByRole('button', { name: 'Salvar' }).click()

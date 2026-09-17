@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, Form, Input, App, Select } from 'antd'
 import { MaskedDatePicker } from '../ui/MaskedDatePicker.js'
 import dayjs from 'dayjs'
@@ -40,6 +41,7 @@ export function RegisterAmilDependentModal({
   onClose,
   onRegistered,
 }: Props) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [form] = Form.useForm()
 
@@ -75,7 +77,7 @@ export function RegisterAmilDependentModal({
         cns: values.cns?.replace(/\D/g, '') || undefined,
         parentIds: values.parentIds || [],
       })
-      message.success('Paciente cadastrado. Sincronize novamente para importar guias e carteirinha.')
+      message.success(t('patient.amilDependentSuccess'))
       onRegistered()
       onClose()
     } catch (err) {

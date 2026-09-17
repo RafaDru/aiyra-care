@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Alert, App, Button, Descriptions, List, Modal, Space, Tag, Typography } from 'antd'
 import { BulbOutlined, MedicineBoxOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
@@ -20,6 +21,7 @@ interface Props {
 const { Text, Paragraph } = Typography
 
 export function InterpretHandwritingModal({ document, patientId, open, onClose, onMedicationsCreated }: Props) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const { runLlmTask } = useLlmActivity()
   const [loading, setLoading] = useState(false)
@@ -147,7 +149,7 @@ export function InterpretHandwritingModal({ document, patientId, open, onClose, 
         {interpretation ? (
           <AiInsightCard size="small" title="Análise da IA">
             <Descriptions size="small" column={1} bordered>
-              {interpretation.patientName && <Descriptions.Item label="Paciente">{interpretation.patientName}</Descriptions.Item>}
+              {interpretation.patientName && <Descriptions.Item label={t('family.glossary.healthProfile')}>{interpretation.patientName}</Descriptions.Item>}
               {interpretation.doctorName && <Descriptions.Item label="Médico">{interpretation.doctorName}</Descriptions.Item>}
               {interpretation.doctorCrm && <Descriptions.Item label="CRM">{interpretation.doctorCrm}</Descriptions.Item>}
               {interpretation.issueDate && <Descriptions.Item label="Data">{interpretation.issueDate}</Descriptions.Item>}

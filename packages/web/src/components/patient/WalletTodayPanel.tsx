@@ -189,7 +189,7 @@ export function WalletTodayPanel({
       {showPatientPicker && (
         <div style={{ marginBottom: 12 }}>
           <Text type="secondary" style={{ display: 'block', marginBottom: 6, fontSize: 12 }}>
-            {t('quickCapture.patientLabel')}
+            {t('walletToday.lensLabel')}
           </Text>
           <AvaPatientLensSelect
             patients={lensPatients}
