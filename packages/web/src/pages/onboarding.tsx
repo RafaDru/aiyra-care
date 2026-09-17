@@ -53,7 +53,8 @@ export function OnboardingPage() {
     )
   }
 
-  if (!needsProfile) return <Navigate to="/" replace />
+  // Após completeProfile, needsProfile fica false mas o passo de dependentes ainda deve aparecer.
+  if (!needsProfile && currentStep === 0) return <Navigate to="/" replace />
 
   const goToDependentsStep = () => {
     setCurrentStep(1)
@@ -86,9 +87,9 @@ export function OnboardingPage() {
         weightKg: values.weightKg ? Number(values.weightKg) : undefined,
         heightCm: values.heightCm ? Number(values.heightCm) : undefined,
       })
-      await refreshSync()
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
       goToDependentsStep()
+      await refreshSync()
     } catch (e) {
       setError(e instanceof Error ? e.message : t('onboarding.error'))
     } finally {

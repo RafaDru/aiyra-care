@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import { uniqueQaCpf } from './fixtures'
 import { selectAntOption } from './select'
-import { hideAvaDock } from './ui'
+import { hideAvaDock, dismissFirstVisitTour } from './ui'
 
 export type CreatePatientInput = {
   name: string
@@ -19,6 +19,7 @@ async function fillMaskedDate(page: Page, label: string, value: string) {
 }
 
 export async function openNewPatientModal(page: Page) {
+  await dismissFirstVisitTour(page)
   await page.getByRole('button', { name: 'Adicionar à família' }).click({ force: true })
   await page.getByRole('dialog').waitFor({ state: 'visible' })
 }

@@ -9,6 +9,25 @@ export async function hideAvaDock(page: Page) {
   })
 }
 
+/** Modal de primeiros passos bloqueia cliques no dashboard — dispensar exceto no spec de onboarding. */
+export async function dismissFirstVisitTour(page: Page) {
+  const modal = page.getByTestId('first-visit-tour-modal')
+  const visible = await modal.isVisible({ timeout: 3_000 }).catch(() => false)
+  if (!visible) {
+    await page.evaluate(() => {
+      localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
+    })
+    return
+  }
+  const dismiss = modal.getByRole('button', { name: 'Fechar guia' })
+  if (await dismiss.isVisible().catch(() => false)) {
+    await dismiss.click()
+  } else {
+    await modal.getByRole('button', { name: 'Close' }).click()
+  }
+  await modal.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
+}
+
 /** Banner/modal de higienização bloqueia dashboard — adiar exceto no spec dedicado. */
 export async function dismissHygienePrompt(page: Page) {
   const bannerLater = page.getByRole('alert').filter({ hasText: /duplicatas pendentes/i }).getByRole('button', { name: 'Depois' })

@@ -5,7 +5,7 @@ import { loginViaPassword } from './auth'
 import { requireQaTestCredentials } from './env'
 import { completeOnboardingProfile, dismissCookieBanner } from './onboarding'
 import { uniqueQaCpf } from './fixtures'
-import { hideAvaDock, dismissHygienePrompt } from './ui'
+import { hideAvaDock, dismissHygienePrompt, dismissFirstVisitTour } from './ui'
 
 const repoRoot = resolve(process.cwd(), '..', '..')
 
@@ -44,4 +44,5 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   if (!opts?.keepHygienePrompt) {
     await dismissHygienePrompt(page)
   }
+  await dismissFirstVisitTour(page)
 }
