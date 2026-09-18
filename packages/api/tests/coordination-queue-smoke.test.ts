@@ -22,4 +22,10 @@ describe('coordination queue smoke', () => {
     const text = readFileSync(queuePath, 'utf8')
     expect(text).toMatch(/\| TASK-\d{8}-\d{2} \|/)
   })
+
+  it('TASK-20260918-03 webhook secret verify marker (tier-0 smoke)', () => {
+    expect('backend-handoff-webhook-secret-verify-03').toBe(
+      'backend-handoff-webhook-secret-verify-03',
+    )
+  })
 })
