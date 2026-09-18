@@ -6,7 +6,7 @@ Status: `queued` → `in_progress` → `review` → `done` | `blocked` | `cancel
 
 | ID | Status | Spec | Branch | PR | Notas |
 |----|--------|------|--------|-----|-------|
-| TASK-20260918-02 | review | [Handoff smoke cycle 2](docs/coordination/CURSOR_RETURN_PATH.md) | cursor/handoff-smoke-cycle-2-f954 | — | E2E Actions→webhook→Cursor; vitest 3/3; tier-0. |
+| TASK-20260918-02 | done | [Handoff smoke cycle 2](docs/coordination/CURSOR_RETURN_PATH.md) | cursor/handoff-smoke-cycle-2-f954 | [#35](https://github.com/RafaDru/aiyra-care/pull/35) | Merge 2026-09-18; webhook 2xx (`bc-ed879241`); vitest 3/3; smoke cycle 2 PASS. |
 | TASK-20260918-01 | done | [Smoke fila](docs/CLAUDE_CODE_PARTNERSHIP.md) | task/20260918-01-coordination-queue-smoke | [#32](https://github.com/RafaDru/aiyra-care/pull/32) | Merge 2026-09-18; vitest smoke 1/1. |
 | — | — | — | — | — | *—* |
 
