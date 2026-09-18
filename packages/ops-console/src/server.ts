@@ -51,10 +51,10 @@ const isDev = process.env.NODE_ENV !== 'production'
 const probeIntervalMs = Number(process.env.OPS_PROBE_INTERVAL_MS ?? '60000')
 
 function resolveDeploymentTier(): 'integration' | 'preview' | 'production' {
-  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
-  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   if (port === 3023) return 'preview'
   if (port === 3013) return 'integration'
+  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
+  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   return 'integration'
 }
 

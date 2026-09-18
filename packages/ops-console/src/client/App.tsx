@@ -178,8 +178,15 @@ export function App() {
           runtime={data.runtime}
           onRefresh={refresh}
           stackSlot={
-            <OpsPanel title="Stack Aiyra" description="API :3010 e web :5173 — app monitorado.">
-              <StackControlCard onStackChange={refresh} />
+            <OpsPanel
+              title="Stack Aiyra"
+              description={
+                deploymentTier === 'preview'
+                  ? 'API :3020 e web :5174 — app monitorado (staging local).'
+                  : 'API :3010 e web :5173 — app monitorado (dev local).'
+              }
+            >
+              <StackControlCard deploymentTier={deploymentTier} onStackChange={refresh} />
             </OpsPanel>
           }
         />
