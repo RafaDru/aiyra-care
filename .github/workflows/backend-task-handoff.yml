@@ -24,7 +24,7 @@ jobs:
           WEBHOOK_KEY: ${{ secrets.CURSOR_BACKEND_HANDOFF_WEBHOOK_KEY }}
         run: |
           if [ -z "$WEBHOOK_URL" ] || [ -z "$WEBHOOK_KEY" ]; then
-            echo "Secrets CURSOR_BACKEND_HANDOFF_* not set — skip (configure after Automation import)"
+            echo "Secrets CURSOR_BACKEND_HANDOFF_* not set — skip (configure after creating Automation in Cursor UI)"
             exit 0
           fi
           TASK_ID=$(echo "${{ github.event.pull_request.title }}" | sed -n 's/.*\[\(TASK-[0-9]\{8\}-[0-9]\{2\}\)\].*/\1/p')

@@ -6,4 +6,6 @@ Fila única de trabalho **backend** para o Claude Code:
 
 Contrato geral: [`../CLAUDE_CODE_PARTNERSHIP.md`](../CLAUDE_CODE_PARTNERSHIP.md)
 
-O Cursor Project coordinator **escreve** tarefas `queued`; Claude Code **atualiza** status e liga PRs. Rafael faz merge.
+Volta automatizada (webhook + Automation): [`CURSOR_RETURN_PATH.md`](./CURSOR_RETURN_PATH.md)
+
+O Cursor Project coordinator **escreve** tarefas `queued`; Claude Code **atualiza** status e liga PRs; a Automation «Backend handoff» pode mergear tier-0 sem Rafael na UI.

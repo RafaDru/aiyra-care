@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-18] - Docs Automations: criação manual na UI (sem import JSON)
+
+### Decisão
+- A UI **Cursor → Automations** não oferece import de workflow JSON (confirmado por Rafael). Runbooks passam a descrever **New automation** + colar prompt dos `*.yaml` / playbook; `*.workflow.json` ficam só como referência versionada.
+
+### Realizado
+- `.cursor/automations/README.md`, `docs/coordination/CURSOR_RETURN_PATH.md`, runbooks ops; `backend-task-cursor-handoff.yaml` de referência.
+
 ## [2026-09-18] - Parceria Cursor × Claude Code (backend + fila + gatilhos)
 
 ### Decisão
