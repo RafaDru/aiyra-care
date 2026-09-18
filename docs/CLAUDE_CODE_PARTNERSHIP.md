@@ -23,8 +23,9 @@ Rotas HTTP finas / DTOs que afetam clientes: spec Cursor antes de merge backend.
 ### Cursor → Claude
 
 1. Cursor (ou Rafael) adiciona linha `queued` em `BACKEND_TASK_QUEUE.md`.
-2. **Watcher:** `fs.watch` no arquivo da fila (Monitor no ambiente Claude) — notificação em segundos ao salvar.
+2. **Watcher:** `fs.watch` no arquivo da fila (Monitor no ambiente Claude) — notificação em segundos ao salvar, mas só se o checkout local já tiver a mudança (depende de `git pull`).
 3. **Sessão fechada:** hook de início de sessão Claude relê a fila e processa `queued` pendente.
+4. **GitHub sem pull local:** `.github/workflows/queue-to-claude-routine.yml` dispara uma Claude Code Routine em qualquer push à fila em `main`; a Routine envia uma mensagem cross-session para a sessão `Desenvolvimento Backend` — funciona mesmo se ninguém tocar o checkout local. Ver [`CLAUDE_WAKE_PATH.md`](./coordination/CLAUDE_WAKE_PATH.md) (setup manual único pendente: criar a Routine + secrets no GitHub).
 
 ### Claude → Cursor
 
