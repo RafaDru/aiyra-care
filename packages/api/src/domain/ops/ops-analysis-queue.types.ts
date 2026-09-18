@@ -41,6 +41,17 @@ export interface OpsAnalysisAttentionCounts {
   totalAttention: number
 }
 
+export interface SupportReportAgentPatch {
+  reportId: string
+  suggestedCategory?: string
+  categoryReviewNote?: string
+  taxonomyGapProposal?: string
+  deploymentStatus?: string
+  deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+  analysisSummary?: string
+  analysisArtifactPath?: string
+}
+
 export interface AgentAnalysisCallbackInput {
   /** Chave canônica — `ops_analysis_queue.id` */
   investigationId?: string
@@ -52,4 +63,8 @@ export interface AgentAnalysisCallbackInput {
   analysisArtifactPath?: string
   prUrl?: string
   errorSummary?: string
+  deploymentStatus?: string
+  deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+  /** Atualizações por ticket (batch ou multi-report) */
+  reportPatches?: SupportReportAgentPatch[]
 }

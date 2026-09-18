@@ -8,6 +8,7 @@ import { investigateSupportReportWithQueue } from './ops-analysis-investigation.
 import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
 import type {
   SupportReportAnalysisStatus,
+  SupportReportRecord,
   SupportReportStatus,
 } from '../../domain/support-report/support-report.types.js'
 import {
@@ -37,6 +38,11 @@ export interface SupportReportOpsRow {
   analysisCompletedAt: string | null
   analysisLastError: string | null
   investigationId: string | null
+  suggestedCategory: string | null
+  categoryReviewNote: string | null
+  taxonomyGapProposal: string | null
+  deploymentStatus: string
+  deploymentActions: Array<{ label: string; kind: string; url?: string; done?: boolean }>
 }
 
 function mapOpsRow(
@@ -65,6 +71,11 @@ function mapOpsRow(
     analysisCompletedAt: row.analysisCompletedAt?.toISOString() ?? null,
     analysisLastError: row.analysisLastError,
     investigationId: investigationId ?? null,
+    suggestedCategory: row.suggestedCategory,
+    categoryReviewNote: row.categoryReviewNote,
+    taxonomyGapProposal: row.taxonomyGapProposal,
+    deploymentStatus: row.deploymentStatus,
+    deploymentActions: row.deploymentActions,
   }
 }
 
@@ -162,18 +173,25 @@ export class OpsSupportReportService {
 
   async completeAnalysis(
     id: string,
-    input: { analysisSummary?: string; analysisArtifactPath?: string },
+    input: {
+      analysisSummary?: string
+      analysisArtifactPath?: string
+      deploymentStatus?: string
+      deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+    },
   ): Promise<boolean> {
     const summary = sanitizeAnalysisSummary(input.analysisSummary)
     const artifact = input.analysisArtifactPath?.trim().slice(0, 512) ?? null
-    if (!summary && !artifact) return false
+    const hasDeployment = Boolean(input.deploymentStatus || input.deploymentActions?.length)
+    if (!summary && !artifact && !hasDeployment) return false
 
-    const ok = await this.repo.updateAnalysisStateForOps(id, {
+    const ok = await this.repo.applyAgentOpsPatch(id, {
       analysisStatus: 'completed',
       analysisSummary: summary,
       analysisArtifactPath: artifact,
       analysisCompletedAt: new Date(),
-      analysisLastError: null,
+      deploymentStatus: input.deploymentStatus as SupportReportRecord['deploymentStatus'] | undefined,
+      deploymentActions: input.deploymentActions,
     })
     if (ok && this.queueService) {
       const invId = await this.queueService.findInvestigationIdForSource('support_report', id)
