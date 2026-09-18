@@ -426,30 +426,12 @@ export interface OpsAlertTriageRow {
   reason: string
 }
 
-export interface OpsEnvTarget {
-  id: string
-  label: string
-  apiBase: string
-  port?: number
-  enabled: boolean
-  opsKey?: string
-}
-
-export interface OpsEnvTargetView {
-  id: string
-  label: string
-  apiBase?: string
-  fetchedAt?: string
-  source: 'remote' | 'local'
-}
-
 export interface OpsMetricsResponse {
   metrics: OpsMetricsSnapshot
   alerts: OpsAlert[]
   runtime?: RuntimeDegradedView
   triage?: OpsAlertTriageRow[]
   alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
-  envTarget?: OpsEnvTargetView
 }
 
 export interface ProductLifecycleSnapshot {

@@ -1,6 +1,5 @@
 import type {
   OpsAlertsDispatchResult,
-  OpsEnvTarget,
   OpsMetricsResponse,
   ProductLifecycleSnapshot,
   StackActionResult,
@@ -43,12 +42,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
-  envTargets: () =>
-    request<{ targets: OpsEnvTarget[]; defaultTargetId: string }>('/api/env-targets'),
-  metrics: (targetId?: string) => {
-    const qs = targetId ? `?target=${encodeURIComponent(targetId)}` : ''
-    return request<OpsMetricsResponse>(`/api/metrics${qs}`)
-  },
+  metrics: () => request<OpsMetricsResponse>('/api/metrics'),
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
   dispatchCheck: () =>
     request<OpsAlertsDispatchResult>('/api/alerts/check', { method: 'POST' }),
