@@ -6,7 +6,7 @@ Status: `queued` → `in_progress` → `review` → `done` | `blocked` | `cancel
 
 | ID | Status | Spec | Branch | PR | Notas |
 |----|--------|------|--------|-----|-------|
-| TASK-20260918-01 | queued | [Smoke fila](docs/CLAUDE_CODE_PARTNERSHIP.md) | — | — | Criar `packages/api/tests/coordination-queue-smoke.test.ts`: 1 teste vitest que o arquivo `docs/coordination/BACKEND_TASK_QUEUE.md` existe no monorepo. PR draft `[TASK-20260918-01]` + fila `review` + ping Cursor CLI. |
+| TASK-20260918-01 | in_progress | [Smoke fila](docs/CLAUDE_CODE_PARTNERSHIP.md) | task/20260918-01-coordination-queue-smoke | — | Claude Code detectou via fs.watch e pegou a tarefa (inline, sem conflito de recurso) |
 | — | — | — | — | — | *—* |
 
 ## Regras
