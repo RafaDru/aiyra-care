@@ -1,76 +1,79 @@
 # Parceria Cursor (produto + interfaces) × Claude Code (núcleo backend)
 
-> **Decisor:** Rafael · **2026-09-18** · Modelo operacional **variante A** (ver Project store `docs/multi-agent-dev-split-analysis.md`)
+> **Decisor:** Rafael · **2026-09-18** · Variante A  
+> **Reconciliação:** versão canônica no GitHub após merge deste arquivo; se o checkout local divergir (ex. versão criada no worker Claude antes do push do Cursor), **diff contra `main`** e fundir seções — não duplicar filas.
 
 ## Objetivo
 
-Usar o **Claude Code com capacidades completas** (terminal, multi-arquivo, testes, sessões longas) como **implementador do núcleo servidor**, enquanto o **Cursor Project** coordina produto, contratos HTTP, todas as interfaces (web, app quando retomar, Ava na web, canais futuros), ops ritual e QA.
+**Claude Code** usa capabilities completas (terminal, multi-arquivo, testes, worktrees, subagentes) no **núcleo servidor**. **Cursor Project** coordina produto, interfaces, contrato BFF, ops e QA.
 
-Não é “chat Sonnet avulso”: é **fila de tarefas backend** + handoff via **mesmo monorepo** e **PRs**.
+Handoff: fila [`docs/coordination/BACKEND_TASK_QUEUE.md`](./coordination/BACKEND_TASK_QUEUE.md) + PRs `TASK-*`.
+
+## Guard-rails de pacotes (pivot 2026-09-18, testado)
+
+| Zona | Pacotes | Dono |
+|------|---------|------|
+| **Cursor** (Claude **não** edita) | `packages/web`, `packages/mobile`, `packages/api-sdk`, `packages/design-tokens` | Cursor |
+| **Claude Code** | `packages/api`, `packages/contracts`, `packages/connect`, `packages/connect-worker`, `packages/neo4j-lineage-worker`, `packages/agents/*` | Claude Code |
+
+Rotas HTTP finas / DTOs que afetam clientes: spec Cursor antes de merge backend.
+
+## Gatilhos (tempo quase real)
+
+### Cursor → Claude
+
+1. Cursor (ou Rafael) adiciona linha `queued` em `BACKEND_TASK_QUEUE.md`.
+2. **Watcher:** `fs.watch` no arquivo da fila (Monitor no ambiente Claude) — notificação em segundos ao salvar.
+3. **Sessão fechada:** hook de início de sessão Claude relê a fila e processa `queued` pendente.
+
+### Claude → Cursor
+
+1. Atualizar status na fila (`in_progress` → `review` → `done` | `blocked`).
+2. **PR draft** ao concluir (pré-autorizado; sem pedir confirmação a cada tarefa).
+3. **Notificação ativa** via agent CLI para o coordinator Cursor (mesmo padrão usado em fluxos cpf/cns, direção inversa).
+
+## Checklist Claude ao pegar tarefa
+
+1. Ler linha da fila + spec (`docs/features/…` / issue).
+2. `git status` — contexto atual; não colidir com trabalho em andamento.
+3. Escolher modo:
+   - **inline** — mudança pequena no branch atual;
+   - **subagente + worktree** — tarefa isolada, paralelizável;
+   - **esperar** — só se conflito real de recurso (mesmo arquivo/domínio), marcar `blocked` com motivo.
 
 ## Divisão de responsabilidade
 
-| Dono | Escopo | Pacotes típicos |
-|------|--------|-----------------|
-| **Cursor** | Roadmap, feature cards, DTOs/rotas acordadas, `packages/web`, ops-console, suites QA, reviews segurança/LGPD | `packages/web`, rotas finas em `packages/api` quando contrato muda, `docs/features/*` |
-| **Claude Code** | Domínio, aplicação, infra, migrations, workers, agents Python | `packages/api` (domain/application/infrastructure), `packages/connect*`, `packages/connect-worker`, `packages/neo4j-lineage-worker`, `packages/agents/*` |
-| **Rafael** | Merge, promoção A1→A2, exceções de contrato | — |
+| Dono | Escopo |
+|------|--------|
+| **Cursor** | Roadmap, feature cards, UIs, ops-console, QA, contrato HTTP acordado |
+| **Claude Code** | domain/application/infrastructure, migrations, workers, agents Python |
+| **Rafael** | Merge, ambientes |
 
-**Proibido:** API paralela “só app”; duplicar lógica que já existe para a web sem passar pelo BFF único (`docs/ARCHITECTURE_DATA_LAYERS.md`, princípio BFF no Project store).
+**Proibido:** API paralela só-app; duplicar domínio fora do BFF (`docs/ARCHITECTURE_DATA_LAYERS.md`).
 
-## Fila de tarefas (acionamento ativo)
+## Formato de tarefa
 
-Canal canônico no repo:
+- **Id:** `TASK-YYYYMMDD-NN`
+- **Spec mínima:** objetivo, rotas/contratos, migrations?, testes (`test:critical` / vitest)
 
-- **Fila:** [`docs/coordination/BACKEND_TASK_QUEUE.md`](./coordination/BACKEND_TASK_QUEUE.md)
-- **Formato de id:** `TASK-YYYYMMDD-NN` (ex. `TASK-20260918-01`)
+## Comunicação para o coordinator
 
-### Cursor → Claude (nova tarefa)
+| Evento | Registrar |
+|--------|-----------|
+| Início | `in_progress`, branch |
+| Dúvida produto/contrato | `blocked` + pergunta única |
+| PR | `review` + URL + testes rodados |
+| Merge Rafael | `done` |
+| LGPD/segurança | `blocked` + severidade |
 
-1. Cursor adiciona linha na fila: `queued` + link da spec (feature card / issue / ADR).
-2. Opcional: issue GitHub com label `backend:claude` e mesmo `TASK-*` no título.
-3. Spec mínima: objetivo, rotas/contratos afetados, migrations?, testes esperados (`test:critical` / vitest paths).
+## Referências (sessão)
 
-### Claude Code → Cursor (encerramento / sinalização)
-
-Ao **iniciar:** marcar fila `in_progress` + branch `feat/backend-TASK-…`.
-
-Ao **concluir:** PR draft no GitHub com:
-
-- Título: `[TASK-…] …`
-- Corpo: o que mudou, migrations, como testar, **bloqueios** para web/ops.
-- Atualizar fila: `done` + link PR; ou `blocked` + motivo.
-
-Ao **precisar de decisão de produto/contrato:** fila `blocked` + comentário na issue; Cursor responde na fila ou issue — não inventar contrato.
-
-### Ritmo orgânico
-
-- Claude puxa próxima tarefa `queued` (topo da fila) quando idle.
-- Cursor não implementa o mesmo `TASK-*` em paralelo.
-- Conflito de merge: quem chegou segundo rebase; Cursor ajuda em contrato se necessário.
-
-## Comunicação “ótima” (o que o coordinator precisa saber)
-
-| Evento | Claude Code registra |
-|--------|----------------------|
-| Começou | `in_progress`, branch, estimativa de escopo |
-| Contrato incerto | `blocked` + pergunta concreta |
-| PR aberto | `review` + URL + checklist testes |
-| Merged (Rafael) | `done` — Cursor atualiza web/QA se necessário |
-| Descoberta de segurança/LGPD | `blocked` + severidade; não mergear sem alinhamento |
-
-## Referências obrigatórias (sessão Claude)
-
-1. Este arquivo
-2. [`docs/coordination/BACKEND_TASK_QUEUE.md`](./coordination/BACKEND_TASK_QUEUE.md)
-3. [`docs/AGENT_BOOTSTRAP.md`](./AGENT_BOOTSTRAP.md)
-4. Feature card da tarefa em `docs/features/`
-5. Hexagonal: `packages/api` domain → application → infrastructure
-
-## Mobile
-
-Até decisão contrária de Rafael: `packages/mobile` pode continuar com Claude Code; **mesmo BFF** que a web. Novas rotas servem web + app.
+1. Este arquivo  
+2. [`BACKEND_TASK_QUEUE.md`](./coordination/BACKEND_TASK_QUEUE.md)  
+3. [`AGENT_BOOTSTRAP.md`](./AGENT_BOOTSTRAP.md)  
+4. Feature card da tarefa  
 
 ## Histórico
 
-- 2026-09-18 — modelo fila + variante A (Rafael + Cursor Project)
+- 2026-09-18 — fila + variante A (Cursor Project, commit cloud)
+- 2026-09-18 — guard-rails, `fs.watch`, checklist, notificação CLI (Claude Code, Rafael)
