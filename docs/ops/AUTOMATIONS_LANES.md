@@ -25,7 +25,7 @@ Ambiente (`integration` \| `preview` \| `production`) vai em `environment.deploy
 
 ## Renomear na conta Cursor
 
-Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas ops»), renomeie na UI ou reimporte os JSON em `.cursor/automations/` — as URLs dos webhooks **não mudam** ao renomear.
+Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas ops»), renomeie na UI ou edite o prompt colando o texto atualizado dos YAML/JSON em `.cursor/automations/` — as URLs dos webhooks **não mudam** ao renomear.
 
 ## Fase 1 — Pilha + callback
 
@@ -38,7 +38,7 @@ Se ainda usa nomes antigos («Investigador suporte» / «Investigador alertas op
 
 > Callback em dev: o agente Cursor na nuvem **não alcança** `127.0.0.1:3013` — use preview público ou conclua manualmente até GCP.
 
-Runbook suporte: `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md` · import: `.cursor/automations/README.md`
+Runbook suporte: `docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md` · setup UI: `.cursor/automations/README.md`
 
 ## Correlação (`investigationId`)
 

@@ -59,9 +59,21 @@ Mesmos valores no ambiente Claude (`.env` local) para o CLI na volta.
 
 ## Setup único (Rafael uma vez)
 
-1. Importar `.cursor/automations/backend-task-cursor-handoff.workflow.json` no Cursor → Automations → **Salvar** → copiar URL + key.
-2. GitHub → Settings → Secrets → colocar URL e key.
-3. Claude: apontar script de volta para o mesmo webhook (ver `docs/CLAUDE_CODE_PARTNERSHIP.md`).
+A UI do Cursor **não** tem «Import JSON» — crie a Automation manualmente:
+
+1. **Cursor → Automations → New automation**
+2. **Nome:** `AiCare - Backend handoff (Claude→Cursor)` (ou `AiCare - Backend handoff`)
+3. **Trigger:** **Webhook**
+4. **Repository:** `RafaDru/aiyra-care` · branch **`main`**
+5. **Prompt:** copie o bloco `instructions:` de `.cursor/automations/backend-task-cursor-handoff.yaml`  
+   (espelho legível; o arquivo `backend-task-cursor-handoff.workflow.json` é **só referência**)
+6. **Salvar** → copie a **URL do webhook** e o **auth header** (`crsr_...`)
+7. **GitHub** → Settings → Secrets and variables → Actions:
+   - `CURSOR_BACKEND_HANDOFF_WEBHOOK_URL` = URL do passo 6
+   - `CURSOR_BACKEND_HANDOFF_WEBHOOK_KEY` = token `crsr_...` (Bearer, sem prefixo `Bearer `)
+8. **Claude / `.env` local:** mesmos valores para POST redundante na volta (ver `docs/CLAUDE_CODE_PARTNERSHIP.md`)
+
+Detalhes e outras lanes: `.cursor/automations/README.md`
 
 ## Project coordinator (este chat)
 
