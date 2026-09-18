@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-18] - Worker My Machines: detecção e autostart resilientes
+
+### Realizado
+- `cursor-worker-start.ps1` — corrige falso positivo com `0 workers`; remove `worker.lock` obsoleto; loop de reinício no modo `-Autostart` (tarefa `AiyraCare-CursorMyMachinesWorker`).
+
 ## [2026-09-16] - MVP: épico family-day-to-day fechado; referral billing fora do MVP
 
 ### Decisão
