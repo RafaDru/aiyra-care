@@ -208,6 +208,29 @@ const start = async () => {
       app.log.info('SYNC_SCHEDULED_INTERVAL_MS ignored — CONNECT_WORKER_EXTERNAL=1 (use packages/connect-worker)')
     }
 
+    const supportBatchIntervalMs = Number(process.env.OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS ?? '0')
+    if (supportBatchIntervalMs > 0) {
+      const { isSupportInvestigatorBatchMode } = await import('./domain/ops/support-investigator-mode.js')
+      if (isSupportInvestigatorBatchMode()) {
+        const { pgPool } = await import('./db/postgres.js')
+        const { SupportReportPgRepository } = await import('./infrastructure/persistence/support-report.pg.repository.js')
+        const { OpsAnalysisQueuePgRepository } = await import('./infrastructure/persistence/ops-analysis-queue.pg.repository.js')
+        const { OpsAnalysisQueueService } = await import('./application/ops/ops-analysis-queue.service.js')
+        const { runSupportReportBatchDispatch } = await import('./application/support-report/support-report-batch.js')
+        const supportRepo = new SupportReportPgRepository(pgPool)
+        const queueService = new OpsAnalysisQueueService(new OpsAnalysisQueuePgRepository(pgPool), supportRepo)
+        setInterval(() => {
+          runSupportReportBatchDispatch({ supportRepo, queueService }).catch((err) => {
+            app.log.warn({ err: err instanceof Error ? err.message : String(err) }, 'support report batch failed')
+          })
+        }, supportBatchIntervalMs)
+        app.log.info(
+          { supportBatchIntervalMs },
+          'OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS loop enabled — prefer connect-worker in prod',
+        )
+      }
+    }
+
     const opsAlertsIntervalMs = Number(process.env.OPS_ALERTS_INTERVAL_MS ?? '0')
     if (opsAlertsIntervalMs > 0) {
       const { OpsMetricsService } = await import('./application/ops/ops-metrics.service.js')

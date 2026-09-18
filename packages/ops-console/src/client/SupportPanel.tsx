@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Button,
+  Checkbox,
   Descriptions,
   Input,
   Modal,
@@ -39,6 +40,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const ANALYSIS_LABEL: Record<SupportReportOpsRow['analysisStatus'], string> = {
   none: 'Sem análise',
+  queued: 'Fila batch',
   pending: 'Pendente',
   in_progress: 'Em análise',
   completed: 'Concluída',
@@ -47,10 +49,29 @@ const ANALYSIS_LABEL: Record<SupportReportOpsRow['analysisStatus'], string> = {
 
 const ANALYSIS_COLOR: Record<SupportReportOpsRow['analysisStatus'], string> = {
   none: 'default',
+  queued: 'cyan',
   pending: 'gold',
   in_progress: 'processing',
   completed: 'success',
   failed: 'error',
+}
+
+const DEPLOYMENT_LABEL: Record<string, string> = {
+  none: 'Sem implantar',
+  fix_proposed: 'Fix proposto',
+  awaiting_merge: 'Aguardando merge',
+  awaiting_deploy: 'Aguardando deploy',
+  awaiting_validation: 'Aguardando validação',
+  done: 'Implantado',
+}
+
+const DEPLOYMENT_COLOR: Record<string, string> = {
+  none: 'default',
+  fix_proposed: 'blue',
+  awaiting_merge: 'gold',
+  awaiting_deploy: 'orange',
+  awaiting_validation: 'purple',
+  done: 'success',
 }
 
 type QueueStatus = 'open' | 'triaged' | 'resolved'
@@ -147,6 +168,21 @@ export function SupportPanel({
     setCompleteArtifact(row.analysisArtifactPath ?? '')
   }
 
+  const toggleDeploymentAction = async (reportId: string, index: number, done: boolean) => {
+    const row = rows.find((r) => r.id === reportId)
+    if (!row?.deploymentActions?.length) return
+    const nextActions = row.deploymentActions.map((a, i) => (i === index ? { ...a, done } : a))
+    setUpdatingId(reportId)
+    try {
+      await opsApi.completeSupportAnalysis(reportId, { deploymentActions: nextActions })
+      await load(queueStatus)
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Falha ao atualizar checklist')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   const submitComplete = async () => {
     if (!completeTarget) return
     if (!completeSummary.trim() && !completeArtifact.trim()) {
@@ -239,7 +275,7 @@ export function SupportPanel({
           })}
           expandable={{
             expandedRowRender: (row) => (
-              <SupportReportDetail row={row} />
+              <SupportReportDetail row={row} onToggleAction={toggleDeploymentAction} />
             ),
           }}
           columns={[
@@ -407,7 +443,13 @@ export function SupportPanel({
   )
 }
 
-function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
+function SupportReportDetail({
+  row,
+  onToggleAction,
+}: {
+  row: SupportReportOpsRow
+  onToggleAction?: (reportId: string, index: number, done: boolean) => void
+}) {
   return (
     <div style={{ maxWidth: 720 }}>
       {row.descriptionPreview && (
@@ -453,6 +495,22 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
             <Text type="danger">{row.analysisLastError}</Text>
           </Descriptions.Item>
         )}
+        {row.suggestedCategory && (
+          <Descriptions.Item label="Categoria sugerida">
+            {CATEGORY_LABEL[row.suggestedCategory] ?? row.suggestedCategory}
+          </Descriptions.Item>
+        )}
+        {row.categoryReviewNote && (
+          <Descriptions.Item label="Revisão categoria">{row.categoryReviewNote}</Descriptions.Item>
+        )}
+        {row.taxonomyGapProposal && (
+          <Descriptions.Item label="Lacuna taxonomia">{row.taxonomyGapProposal}</Descriptions.Item>
+        )}
+        <Descriptions.Item label="Implantar">
+          <Tag color={DEPLOYMENT_COLOR[row.deploymentStatus] ?? 'default'}>
+            {DEPLOYMENT_LABEL[row.deploymentStatus] ?? row.deploymentStatus}
+          </Tag>
+        </Descriptions.Item>
         <Descriptions.Item label="Conta">
           <Text code>{row.accountId}</Text>
         </Descriptions.Item>
@@ -461,6 +519,30 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
           {new Date(row.expiresAt).toLocaleString('pt-BR')}
         </Descriptions.Item>
       </Descriptions>
+      {row.deploymentActions?.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <Text strong>Checklist implantar</Text>
+          <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+            {row.deploymentActions.map((action, index) => (
+              <li key={`${action.kind}-${index}`}>
+                <Space size={8}>
+                  <Checkbox
+                    checked={Boolean(action.done)}
+                    disabled={!onToggleAction}
+                    onChange={(e) => onToggleAction?.(row.id, index, e.target.checked)}
+                  />
+                  <span>{action.label}</span>
+                  {action.url && (
+                    <a href={action.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                      abrir
+                    </a>
+                  )}
+                </Space>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {row.consentTechnical && Object.keys(row.diagnosticContext).length > 0 && (
         <pre style={{ marginTop: 12, fontSize: 11, maxHeight: 240, overflow: 'auto' }}>
           {JSON.stringify(row.diagnosticContext, null, 2)}
