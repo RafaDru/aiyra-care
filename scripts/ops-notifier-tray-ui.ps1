@@ -171,6 +171,9 @@ function Normalize-OpsLocalServiceUrl {
   try {
     $parsed = [Uri]$u
     $port = if ($parsed.Port -gt 0) { $parsed.Port } else { $FallbackPort }
+    if ($FallbackPort -eq 5174 -and ($port -eq 5173 -or $port -eq 3010 -or $port -eq 3013)) {
+      $port = $FallbackPort
+    }
     if ($parsed.Host -eq 'localhost' -or $parsed.Host -eq '127.0.0.1' -or $parsed.Host -like '*.aiyracare.test') {
       return "http://127.0.0.1:$port$($parsed.PathAndQuery)"
     }

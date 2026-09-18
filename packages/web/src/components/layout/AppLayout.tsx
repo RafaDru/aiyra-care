@@ -18,6 +18,7 @@ import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 import { FirstVisitTourDrawer } from '../onboarding/FirstVisitTourDrawer.js'
+import { DeploymentEnvironmentBadge } from './DeploymentEnvironmentBadge.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -154,7 +155,7 @@ export function AppLayout() {
             borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: collapsed ? 'space-between' : 'flex-end',
+            justifyContent: 'flex-end',
             height: 64,
             gap: 16,
             flexShrink: 0,
@@ -163,7 +164,10 @@ export function AppLayout() {
             zIndex: 100,
           }}
         >
-          {collapsed && <AppLogo variant="wordmark" height={38} />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto' }}>
+            {collapsed && <AppLogo variant="wordmark" height={38} />}
+            <DeploymentEnvironmentBadge />
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {configured && user && <QuickCaptureGlobal />}
             {configured && user && (
