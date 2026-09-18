@@ -30,10 +30,14 @@ Rotas HTTP finas / DTOs que afetam clientes: spec Cursor antes de merge backend.
 
 1. Atualizar status na fila (`in_progress` → `review` → `done` | `blocked`).
 2. **PR draft** ao concluir (pré-autorizado; sem pedir confirmação a cada tarefa).
+<<<<<<< HEAD
 3. **Volta automatizada** (Rafael não opera GitHub):
    - GitHub Actions dispara webhook `backend_task_handoff` em PR `task/*` ou push da fila em `review` — ver [`CURSOR_RETURN_PATH.md`](./coordination/CURSOR_RETURN_PATH.md).
    - **Opcional redundante:** POST o mesmo JSON via CLI (`CURSOR_BACKEND_HANDOFF_WEBHOOK_*` = secrets do repo).
 4. Cursor Automation «Backend handoff» revisa CI, merge tier-0, atualiza fila `done`.
+=======
+3. **Notificação ativa** via agent CLI para o coordinator Cursor (mesmo padrão usado em fluxos cpf/cns, direção inversa).
+>>>>>>> origin/main
 
 ## Checklist Claude ao pegar tarefa
 
