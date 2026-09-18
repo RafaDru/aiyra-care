@@ -16,7 +16,15 @@ O Cursor **não** carrega estes arquivos automaticamente ao abrir ou reiniciar o
 
 Hub: `docs/ops/AUTOMATIONS_LANES.md`
 
-## Duas lanes (nomes finais no Cursor)
+## Três lanes (nomes finais no Cursor)
+
+| Lane | Nome na UI | JSON |
+|------|------------|------|
+| Backend handoff | **AiCare - Backend handoff (Claude→Cursor)** | `backend-task-cursor-handoff.workflow.json` |
+
+Secrets GitHub: `CURSOR_BACKEND_HANDOFF_WEBHOOK_URL`, `CURSOR_BACKEND_HANDOFF_WEBHOOK_KEY`. Runbook: `docs/coordination/CURSOR_RETURN_PATH.md`.
+
+## Duas lanes ops investigador
 
 | Lane | Nome na UI | JSON |
 |------|------------|------|
