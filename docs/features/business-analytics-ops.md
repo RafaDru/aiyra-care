@@ -42,6 +42,13 @@ KPIs agregados sem PHI no console ops (aba **Negócio**) e relatório semanal em
 - API: `packages/api/tests/ops-business-analytics.test.ts`, `business-weekly-report.test.ts`
 - UI ops: validação manual na aba Negócio (`:3013`)
 
-## Próximo
+## Agendamento
 
-- Relatório semanal agendado (connect-worker ou cron GCP)
+| Modo | Como |
+|------|------|
+| Script raiz | `npm run ops:business-weekly` (`packages/api`) |
+| Worker loop | `OPS_BUSINESS_WEEKLY_INTERVAL_MS=604800000` + `npm run connect-worker` |
+| One-shot | `cd packages/connect-worker && npm run ops-business-weekly:once` |
+| Cloud Run Job | `CONNECT_WORKER_JOB_MODE=business-weekly npm run job` (scheduler sugerido: segunda 09:00 UTC) |
+
+Detalhe: [`docs/ops/README.md`](../ops/README.md#relatório-semanal-de-negócio-agendamento).

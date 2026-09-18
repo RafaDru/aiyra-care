@@ -3,7 +3,7 @@ import type pg from 'pg'
 /** Heartbeat do connect-worker em product_events (account_id null). */
 export async function recordOpsWorkerTick(
   pool: pg.Pool,
-  kind: 'ops_alerts' | 'scheduled_sync',
+  kind: 'ops_alerts' | 'scheduled_sync' | 'hygiene_scan' | 'business_weekly',
 ): Promise<void> {
   try {
     await pool.query(
