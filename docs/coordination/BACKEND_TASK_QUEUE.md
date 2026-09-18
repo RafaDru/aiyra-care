@@ -6,7 +6,7 @@ Status: `queued` → `in_progress` → `review` → `done` | `blocked` | `cancel
 
 | ID | Status | Spec | Branch | PR | Notas |
 |----|--------|------|--------|-----|-------|
-| TASK-20260918-01 | in_progress | [Smoke fila](docs/CLAUDE_CODE_PARTNERSHIP.md) | task/20260918-01-coordination-queue-smoke | — | Claude Code detectou via fs.watch e pegou a tarefa (inline, sem conflito de recurso) |
+| TASK-20260918-01 | review | [Smoke fila](docs/CLAUDE_CODE_PARTNERSHIP.md) | task/20260918-01-coordination-queue-smoke | [#32](https://github.com/RafaDru/aiyra-care/pull/32) | Teste vitest passou (1/1). PR draft aberto — aguardando review/merge do Rafael. |
 | — | — | — | — | — | *—* |
 
 ## Regras
