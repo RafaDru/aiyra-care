@@ -2260,6 +2260,13 @@
           "reviewBadge": ["design"]
         },
         {
+          "id": "ops-strategy-advisory-tab",
+          "title": "Aba «Estratégia» no Command Hub (advisory)",
+          "status": "done",
+          "detail": "packages/ops-console/content/strategy + StrategyPanel (Marketing, Financeiro, CX); manifest updatedAt; alinhamento Command Hub F2 leitura estratégica.",
+          "reviewBadge": ["business"]
+        },
+        {
           "id": "biz-analytics-weekly-report",
           "title": "Relatório semanal automático (interno)",
           "status": "done",

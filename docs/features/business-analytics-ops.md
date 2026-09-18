@@ -42,6 +42,10 @@ KPIs agregados sem PHI no console ops (aba **Negócio**) e relatório semanal em
 - API: `packages/api/tests/ops-business-analytics.test.ts`, `business-weekly-report.test.ts`
 - UI ops: validação manual na aba Negócio (`:3013`)
 
+## Relacionado
+
+- Aba **Estratégia** (advisory markdown): [`ops-strategy-advisory.md`](./ops-strategy-advisory.md)
+
 ## Próximo
 
 - Relatório semanal agendado (connect-worker ou cron GCP)
