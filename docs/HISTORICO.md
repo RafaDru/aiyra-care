@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-18] - Parceria Cursor × Claude Code (backend + fila + gatilhos)
+
+### Decisão
+- **Variante A:** Cursor = produto, interfaces, contrato BFF, QA; Claude Code = núcleo servidor com capabilities completas.
+- Fila `docs/coordination/BACKEND_TASK_QUEUE.md`; guard-rails de pacotes; `fs.watch` + notificação CLI Claude→Cursor.
+
+### Realizado
+- `docs/CLAUDE_CODE_PARTNERSHIP.md`, `docs/coordination/*` (reconciliar com cópia local Claude após merge).
+
+### Próximo
+- PR docs → `main`; piloto `TASK-*` na fila.
+
 ## [2026-09-18] - Worker My Machines: detecção e autostart resilientes
 
 ### Realizado
