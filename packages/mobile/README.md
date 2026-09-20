@@ -1,5 +1,7 @@
 # App mobile (React Native + Expo)
 
+**Expo SDK 57** (React Native 0.86, React 19) — compatível com **Expo Go** atual (App Store / Play Store). Projeto anterior em SDK 52 não abria no Expo Go 57.
+
 Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:3010`, navegação por tabs + perfil paciente (seções overview/clinical/plan/files).
 
 ## Dev rápido (notebook / máquina nova)
@@ -12,8 +14,8 @@ Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:30
 
 ## Expo Go (dispositivo)
 
-1. Instale **Expo Go** (iOS/Android) na mesma rede Wi‑Fi da máquina de dev.
-2. Na raiz: `npm run mobile:start` → escaneie o QR.
+1. Instale **Expo Go** (iOS/Android) — versão **SDK 57** (padrão nas lojas em 2026).
+2. Na raiz: `npm install` → `npm run mobile:start` (ou `npx expo start --tunnel` se o celular não alcançar a LAN) → escaneie o QR.
 3. **API em dispositivo físico:** `EXPO_PUBLIC_API_URL` deve usar o **IP LAN** da máquina (ex. `http://192.168.1.10:3010`), não `127.0.0.1`.
 4. Smoke manual: suite [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile`
 

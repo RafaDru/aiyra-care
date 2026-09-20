@@ -97,5 +97,11 @@
   "workspaces": [
     "packages/*",
     "packages/agents/*"
-  ]
+  ],
+  "overrides": {
+    "expo": "57.0.24",
+    "expo-constants": "57.0.19",
+    "expo-linking": "57.0.10",
+    "expo-modules-core": "57.0.18"
+  }
 }
