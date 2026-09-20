@@ -36,6 +36,11 @@ import {
   isStackControlEnabled,
 } from './stack-control.js'
 import { loadProductLifecycle } from './product-lifecycle.js'
+import {
+  loadStrategyContent,
+  loadStrategyManifest,
+  type StrategySectionId,
+} from './strategy-content.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -148,6 +153,21 @@ async function main() {
   fastify.get('/api/product-lifecycle', async () => {
     productLifecycleCache = loadProductLifecycle(monorepoRoot)
     return productLifecycleCache
+  })
+
+  fastify.get('/api/strategy/manifest', async () => loadStrategyManifest())
+
+  fastify.get<{ Params: { section: string } }>('/api/strategy/content/:section', async (req, reply) => {
+    const section = req.params.section?.trim() as StrategySectionId
+    if (section !== 'mkt' && section !== 'finance' && section !== 'cx') {
+      return reply.status(400).send({ error: 'invalid_strategy_section' })
+    }
+    try {
+      return loadStrategyContent(section)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'strategy_load_failed'
+      return reply.status(500).send({ error: message })
+    }
   })
 
   fastify.get('/api/metrics', async () => {

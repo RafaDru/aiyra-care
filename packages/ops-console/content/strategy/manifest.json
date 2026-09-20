@@ -1,0 +1,22 @@
+{
+  "updatedAt": "2026-09-18",
+  "source": "Project store snapshot — refresh via coordinator",
+  "sections": {
+    "mkt": {
+      "title": "Marketing",
+      "primaryFile": "marketing-strategy-round1.md",
+      "advisorSkill": "docs/skills/marketing-advisor.md (Project store)"
+    },
+    "finance": {
+      "title": "Financeiro",
+      "primaryFile": "finance-strategy-round1.md",
+      "advisorSkill": "docs/skills/finance-advisor.md (Project store)"
+    },
+    "cx": {
+      "title": "Experiência (CX)",
+      "primaryFile": "experience-cx-round1.md",
+      "secondaryFile": "experience-simulation-round2-plan.md",
+      "advisorSkill": "docs/skills/experience-advisor.md (Project store)"
+    }
+  }
+}

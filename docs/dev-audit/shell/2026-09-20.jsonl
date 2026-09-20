@@ -15,3 +15,7 @@
 {"ts":"2026-09-20T03:20:51.436Z","event":"beforeShellExecution","command":"cd /workspace && git fetch origin cursor/tray-staging-env-badge-5568 && git checkout cursor/tray-staging-env-badge-5568 && git merge origin/main -m \"merge main into cursor/tray-staging-env-badge-5568\""}
 {"ts":"2026-09-20T03:20:51.437Z","event":"beforeShellExecution","command":"gh pr diff 29 --name-only 2>/dev/null | head -40"}
 {"ts":"2026-09-20T03:20:57.456Z","event":"beforeShellExecution","command":"cd /workspace && git checkout origin/main -- docs/dev-audit/edits/2026-09-18.jsonl docs/dev-audit/shell/2026-09-18.jsonl docs/dev-audit/tools/2026-09-18.jsonl && git add docs/dev-audit/ && git commit -m \"merge main into cursor/tray-staging-env-badge-5568 (resolve dev-audit conflicts)\""}
+{"ts":"2026-09-20T03:44:18.237Z","event":"beforeShellExecution","command":"cd /workspace/packages/ops-console && npm run build 2>&1 | tail -40"}
+{"ts":"2026-09-20T03:44:21.426Z","event":"beforeShellExecution","command":"cd /workspace && npm ci 2>&1 | tail -5"}
+{"ts":"2026-09-20T03:44:21.433Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git commit -m \"merge main into cursor/ops-strategy-advisory-7eab (resolve ops-console server conflicts)\""}
+{"ts":"2026-09-20T03:47:40.240Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git commit -m \"merge main after #27 (resolve business-analytics-ops doc)\" && git push origin cursor/ops-strategy-advisory-7eab 2>&1"}

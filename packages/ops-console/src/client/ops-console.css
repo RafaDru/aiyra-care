@@ -411,6 +411,81 @@ body {
   background: rgba(56, 189, 248, 0.12) !important;
 }
 
+.ops-strategy-subtabs {
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-border);
+  border-radius: 10px;
+  padding: 0 12px;
+  box-shadow: var(--ops-shadow);
+}
+
+.ops-strategy-markdown {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #334155;
+  max-width: 960px;
+}
+
+.ops-strategy-markdown h1 {
+  font-size: 1.5rem;
+  margin-top: 0;
+  color: #0f172a;
+}
+
+.ops-strategy-markdown h2 {
+  font-size: 1.15rem;
+  margin-top: 1.75rem;
+  color: #1e293b;
+  border-bottom: 1px solid var(--ops-border);
+  padding-bottom: 6px;
+}
+
+.ops-strategy-markdown h3 {
+  font-size: 1rem;
+  margin-top: 1.25rem;
+}
+
+.ops-strategy-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 12px 0;
+}
+
+.ops-strategy-markdown th,
+.ops-strategy-markdown td {
+  border: 1px solid var(--ops-border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ops-strategy-markdown th {
+  background: var(--ops-surface-muted);
+  font-weight: 600;
+}
+
+.ops-strategy-markdown blockquote {
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-left: 3px solid #9333ea;
+  background: #faf5ff;
+  color: #4c1d95;
+}
+
+.ops-strategy-markdown code {
+  font-size: 12px;
+  background: #f1f5f9;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.ops-strategy-footnotes {
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ops-border);
+}
+
 @media (max-width: 768px) {
   .ops-header,
   .ops-status-strip,
