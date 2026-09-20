@@ -124,6 +124,20 @@
       "tags": ["captura", "dia a dia", "família", "medidas", "agenda"]
     },
     {
+      "id": "patient-wallet",
+      "epicId": "connect-silencioso",
+      "title": "Carteira — planos e sync silencioso",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P0",
+      "doc": "docs/features/patient-wallet.md",
+      "domainDoc": "docs/SYNC_DELTA.md",
+      "routes": ["/patients/:id?tab=wallet"],
+      "api": ["POST /integration-links/:id/sync?silent=1", "GET /integration-links/:id/sync-status"],
+      "helpTopics": [],
+      "tags": ["carteira", "connect", "sync silencioso", "convênio"]
+    },
+    {
       "id": "family-day-timeline",
       "epicId": "family-day-to-day",
       "title": "Bloco «Hoje» na Carteira",

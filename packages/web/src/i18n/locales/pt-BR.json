@@ -1328,6 +1328,11 @@
     "reminderTag": "Lembrete",
     "snooze": "Adiar 30 min"
   },
+  "walletSyncBanner": {
+    "failed": "A última sincronização falhou ({{names}}). Os dados da carteira podem estar desatualizados. Tente Sincronizar em Integrações.",
+    "stale": "Dados de {{names}} podem estar desatualizados. A atualização automática ocorre em segundo plano quando há sessão válida.",
+    "noSession": "Para atualizar {{names}}, use Sincronizar em Integrações (primeiro login no portal)."
+  },
   "walletCards": {
     "title": "Carteira de {{name}}",
     "subtitle": "Cartões e credenciais para consulta e atendimento. Sincronização em Integrações.",
@@ -1347,6 +1352,7 @@
     "qrToken": "QR / Token",
     "updatedAt": "Atualizado {{when}}",
     "syncFirstTime": "Sincronize em Integrações na primeira vez",
+    "staleHint": "Pode estar desatualizado",
     "failed": "Falhou",
     "dentalPlan": "Plano odontológico",
     "noDentalPlan": "Nenhum plano odontológico vinculado",

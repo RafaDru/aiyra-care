@@ -22,7 +22,12 @@ import {
   formatCountdown,
   remainingSeconds,
 } from './wallet-shared.js'
-import { buildWalletSyncBanners, walletSyncBannerMessage } from '../../../lib/wallet-sync-banner.js'
+import {
+  buildWalletSyncBanners,
+  isWalletLinkDataStale,
+  walletSyncBannerMessage,
+} from '../../../lib/wallet-sync-banner.js'
+import { isLinkSessionReady } from '../../../lib/silent-sync.js'
 import { saveWalletLinkCache, getWalletLinkCache } from '../../../lib/wallet-link-cache.js'
 import { WalletTodayPanel } from '../../../components/patient/WalletTodayPanel.js'
 
@@ -89,7 +94,7 @@ export function WalletCardsTab({
   usePatientSyncCompletions(patient.id, bumpSyncRefresh)
 
   const syncMeta = useWalletLinkSyncStatus(insuranceLinks, syncRefreshKey, false)
-  const walletBanner = walletSyncBannerMessage(buildWalletSyncBanners(insuranceLinks, syncMeta))
+  const walletBanner = walletSyncBannerMessage(t, buildWalletSyncBanners(insuranceLinks, syncMeta))
 
   useEffect(() => {
     api.planMemberships.list(patient.id)
@@ -225,6 +230,7 @@ export function WalletCardsTab({
           <Alert
             type="warning"
             showIcon
+            data-testid="wallet-sync-banner"
             style={{ marginBottom: 12 }}
             message={walletBanner}
           />
@@ -275,7 +281,14 @@ export function WalletCardsTab({
                           <Tag color="success" style={{ margin: 0, fontSize: 11 }}>{meta.noveltyText}</Tag>
                         </Tooltip>
                       ) : meta?.lastSyncLabel ? (
-                        <Text type="secondary" style={{ fontSize: 11 }}>{t('walletCards.updatedAt', { when: meta.lastSyncLabel })}</Text>
+                        <Space size={4} wrap>
+                          <Text type="secondary" style={{ fontSize: 11 }}>{t('walletCards.updatedAt', { when: meta.lastSyncLabel })}</Text>
+                          {isWalletLinkDataStale(link) && isLinkSessionReady(link) && (
+                            <Tag color="warning" data-testid="wallet-card-stale-hint" style={{ margin: 0, fontSize: 10 }}>
+                              {t('walletCards.staleHint')}
+                            </Tag>
+                          )}
+                        </Space>
                       ) : (
                         <Text type="secondary" style={{ fontSize: 11 }}>{t('walletCards.syncFirstTime')}</Text>
                       )}
