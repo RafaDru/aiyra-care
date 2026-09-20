@@ -84,7 +84,7 @@ export function useWalletLinkSyncStatus(
     }
 
     void poll()
-    const id = window.setInterval(poll, 30_000)
+    const id = window.setInterval(poll, 15_000)
     return () => {
       cancelled = true
       window.clearInterval(id)

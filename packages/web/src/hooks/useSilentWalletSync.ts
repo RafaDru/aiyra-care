@@ -48,7 +48,10 @@ export function useSilentWalletSync(links: IntegrationLink[], onUpdated?: () => 
             trackSyncJobSkipped(link.portalType, r.reason ?? 'skipped', 'silent')
             continue
           }
-          if (r.jobId) trackSyncJobStarted(link.portalType, 'silent')
+          if (r.jobId) {
+            trackSyncJobStarted(link.portalType, 'silent')
+            onUpdated?.()
+          }
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e)
           if (SILENT_FAIL_RE.test(msg)) {

@@ -33,7 +33,8 @@ Fora de escopo: validar QR Unimed, WAF Amil/Unimed, import ConecteSUS guiado.
 | 6 | Verificar bloco **Hoje** (`walletToday`) | Painel «Hoje» visível (ver `family-day-timeline`) | |
 | 7 | (Com link demo + `sessionReady`) Abrir Carteira novamente | Sem modal de sync; status «Atualizado» ou spinner breve — silent sync dispara | |
 | 8 | Sem sessão válida | Empty ou hint «Sincronize em Integrações na primeira vez» — **sem** erro de portal | |
-| 9 | (Opcional) Link com `sessionReady` e `lastSyncAt` >6h | Banner `[data-testid=wallet-sync-banner]` **ou** tag «Pode estar desatualizado» na carteirinha | |
+| 9 | (Opcional) Link com `sessionReady` e `lastSyncAt` >6h | Banner `[data-testid=wallet-sync-banner]` **ou** tag «Pode estar desatualizado» na carteirinha; banner stale some enquanto spinner «Sincronizando» ativo | |
+| 10 | Link sem `sessionReady` (primeira vez) | Banner com CTA `[data-testid=wallet-sync-banner-cta]` → aba Integrações do paciente | |
 
 ## Pós-condições / cleanup
 
@@ -50,6 +51,7 @@ Fora de escopo: validar QR Unimed, WAF Amil/Unimed, import ConecteSUS guiado.
 | Empty planos | texto `Nenhuma carteirinha` |
 | Grid carteirinhas | `[id^="wallet-card-"]` (exceto conectesus/caderneta) |
 | Banner sync | `[data-testid="wallet-sync-banner"]` |
+| CTA Integrações | `[data-testid="wallet-sync-banner-cta"]` |
 | Tag stale (cartão) | `[data-testid="wallet-card-stale-hint"]` |
 
 ## Notas

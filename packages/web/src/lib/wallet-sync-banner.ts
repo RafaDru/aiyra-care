@@ -70,6 +70,20 @@ export function buildWalletSyncBanners(
 
 type WalletBannerT = (key: string, opts?: { names?: string }) => string
 
+/** CTA para Integrações quando o usuário precisa agir (falha ou primeira sessão). */
+export function walletSyncBannerNeedsIntegrationsCta(items: WalletSyncBannerItem[]): boolean {
+  return items.some((i) => i.kind === 'failed' || i.kind === 'no_session')
+}
+
+/** Oculta aviso «stale» enquanto algum vínculo está sincronizando (silent ou manual). */
+export function filterWalletSyncBannersForActiveSync(
+  items: WalletSyncBannerItem[],
+  anyLinkSyncActive: boolean,
+): WalletSyncBannerItem[] {
+  if (!anyLinkSyncActive) return items
+  return items.filter((i) => i.kind !== 'stale')
+}
+
 export function walletSyncBannerMessage(
   t: WalletBannerT,
   items: WalletSyncBannerItem[],

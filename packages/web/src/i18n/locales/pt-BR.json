@@ -1370,7 +1370,8 @@
   "walletSyncBanner": {
     "failed": "A última sincronização falhou ({{names}}). Os dados da carteira podem estar desatualizados. Tente Sincronizar em Integrações.",
     "stale": "Dados de {{names}} podem estar desatualizados. A atualização automática ocorre em segundo plano quando há sessão válida.",
-    "noSession": "Para atualizar {{names}}, use Sincronizar em Integrações (primeiro login no portal)."
+    "noSession": "Para atualizar {{names}}, use Sincronizar em Integrações (primeiro login no portal).",
+    "openIntegrations": "Ir para Integrações"
   },
   "walletCards": {
     "title": "Carteira de {{name}}",
