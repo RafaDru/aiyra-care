@@ -259,10 +259,13 @@
         "GET/POST /family-access/invites",
         "POST /family-access/invites/accept",
         "GET/POST/DELETE /family-access/profile-shares",
-        "GET/POST/PATCH /care-circles"
+        "GET/POST/PATCH /care-circles",
+        "POST /patients/:id/ava/chat",
+        "GET /llm/usage/quota",
+        "GET /ava/conversations"
       ],
       "helpTopics": [],
-      "tags": ["mobile", "expo", "paridade"]
+      "tags": ["mobile", "expo", "paridade", "ava"]
     },
     {
       "id": "documentation-knowledge-base",

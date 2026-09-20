@@ -12,6 +12,8 @@ import type {
   Patient,
   ProfileShare,
 } from './api.types'
+import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from './api.types'
+import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream'
 import { ensureAccessToken, supabaseConfigured } from './supabase'
 
 const extra = Constants.expoConfig?.extra as Record<string, string | undefined> | undefined
@@ -137,6 +139,29 @@ export const api = {
       request<void>(`/family-access/profile-shares/${id}/decline`, { method: 'POST' }),
     revokeProfileShare: (id: string) =>
       request<void>(`/family-access/profile-shares/${id}`, { method: 'DELETE' }),
+  },
+  llm: {
+    quota: () => request<LlmUsageQuota>('/llm/usage/quota'),
+  },
+  ava: {
+    listConversations: (patientId?: string) => {
+      const qs = patientId ? `?patientId=${encodeURIComponent(patientId)}` : ''
+      return request<{ items: AvaConversation[] }>(`/ava/conversations${qs}`)
+    },
+    chat: (
+      patientId: string,
+      body: AvaChatRequestBody,
+    ) =>
+      request<AvaChatResponse>(`/patients/${patientId}/ava/chat`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    chatWithActivity: (
+      patientId: string,
+      body: Omit<AvaChatRequestBody, 'streamActivity'>,
+      onActivity: (event: AvaActivityEvent) => void,
+      onReplyDelta?: (chunk: string) => void,
+    ) => avaChatWithActivityStream(patientId, body, onActivity, onReplyDelta),
   },
 }
 

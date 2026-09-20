@@ -37,3 +37,9 @@ Plano de paridade: Project store `docs/mobile-parity-plan.md` · feature `docs/f
 ## Compliance (gate)
 
 Após login, o app chama `GET /compliance/status` (como web `RequireCompliance`) e redireciona para `/(app)/compliance/accept` quando há pendência — independente de `COMPLIANCE_GATE_ENABLED` na API.
+
+## Ava (M5)
+
+- FAB **Ava** em todas as telas autenticadas (`AvaGlobalDock`).
+- Chat usa o mesmo endpoint do web com SSE de atividade (`docs/AVA_OPERATIONAL.md`).
+- Para abrir o chat com paciente/mensagem pré-definidos (aceleradores futuros): `requestAvaOpen` em `src/lib/ava-dock-bus.ts`.
