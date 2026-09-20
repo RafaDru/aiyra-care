@@ -13,6 +13,7 @@ export type SupportReportStatus = typeof SUPPORT_REPORT_STATUSES[number]
 
 export const SUPPORT_REPORT_ANALYSIS_STATUSES = [
   'none',
+  'queued',
   'pending',
   'in_progress',
   'completed',
@@ -20,6 +21,24 @@ export const SUPPORT_REPORT_ANALYSIS_STATUSES = [
 ] as const
 
 export type SupportReportAnalysisStatus = typeof SUPPORT_REPORT_ANALYSIS_STATUSES[number]
+
+export const SUPPORT_DEPLOYMENT_STATUSES = [
+  'none',
+  'fix_proposed',
+  'awaiting_merge',
+  'awaiting_deploy',
+  'awaiting_validation',
+  'done',
+] as const
+
+export type SupportDeploymentStatus = typeof SUPPORT_DEPLOYMENT_STATUSES[number]
+
+export interface SupportDeploymentAction {
+  label: string
+  kind: string
+  url?: string
+  done?: boolean
+}
 
 export const MAX_OPERATOR_NOTES_LENGTH = 2000
 export const MAX_ANALYSIS_SUMMARY_LENGTH = 4000
@@ -72,6 +91,11 @@ export interface SupportReportRecord {
   analysisRequestedAt: Date | null
   analysisCompletedAt: Date | null
   analysisLastError: string | null
+  suggestedCategory: string | null
+  categoryReviewNote: string | null
+  taxonomyGapProposal: string | null
+  deploymentStatus: SupportDeploymentStatus
+  deploymentActions: SupportDeploymentAction[]
   createdAt: Date
   updatedAt: Date
 }

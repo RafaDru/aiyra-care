@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Drawer, Space, Steps, Typography } from 'antd'
+import { Button, Modal, Space, Steps, Typography } from 'antd'
 import {
   TeamOutlined,
   UserAddOutlined,
@@ -38,7 +38,7 @@ function isBlockedRoute(pathname: string): boolean {
   return BLOCKED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
 }
 
-/** Guia leve de primeiros passos — drawer dismissível após onboarding. */
+/** Guia leve de primeiros passos — modal central dismissível após onboarding. */
 export function FirstVisitTourDrawer() {
   const { t } = useTranslation()
   const { configured, user } = useAuth()
@@ -74,7 +74,7 @@ export function FirstVisitTourDrawer() {
   const runStepAction = useCallback((key: StepKey) => {
     switch (key) {
       case 'family':
-        navigate('/')
+        navigate('/family')
         break
       case 'addPerson':
         navigate('/')
@@ -104,47 +104,52 @@ export function FirstVisitTourDrawer() {
   const currentKey = STEP_KEYS[step]
   const isLastStep = step >= STEP_KEYS.length - 1
 
+  const footer = (
+    <Space style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+      <Button
+        disabled={step === 0}
+        onClick={() => setStep((s) => Math.max(0, s - 1))}
+      >
+        {t('firstVisitTour.back')}
+      </Button>
+      <Space wrap>
+        <Button onClick={() => runStepAction(currentKey)}>
+          {t(`firstVisitTour.actions.${currentKey}`)}
+        </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            if (isLastStep) {
+              completeTour('finished')
+              return
+            }
+            setStep((s) => Math.min(STEP_KEYS.length - 1, s + 1))
+          }}
+        >
+          {isLastStep ? t('firstVisitTour.complete') : t('firstVisitTour.next')}
+        </Button>
+      </Space>
+    </Space>
+  )
+
   return (
-    <Drawer
+    <Modal
       title={t('firstVisitTour.title')}
-      placement="right"
-      width={360}
       open={open}
-      onClose={() => completeTour('dismissed')}
-      data-testid="first-visit-tour-drawer"
-      extra={
+      centered
+      width={480}
+      style={{ maxWidth: 'calc(100vw - 32px)' }}
+      onCancel={() => completeTour('dismissed')}
+      footer={footer}
+      data-testid="first-visit-tour-modal"
+      destroyOnClose
+      styles={{ body: { maxHeight: 'min(70vh, 520px)', overflowY: 'auto' } }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -8, marginBottom: 8 }}>
         <Button type="link" size="small" onClick={() => completeTour('dismissed')}>
           {t('firstVisitTour.dismiss')}
         </Button>
-      }
-      footer={(
-        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-          <Button
-            disabled={step === 0}
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-          >
-            {t('firstVisitTour.back')}
-          </Button>
-          <Space>
-            <Button onClick={() => runStepAction(currentKey)}>
-              {t(`firstVisitTour.actions.${currentKey}`)}
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => {
-                if (isLastStep) {
-                  completeTour('finished')
-                  return
-                }
-                setStep((s) => Math.min(STEP_KEYS.length - 1, s + 1))
-              }}
-            >
-              {isLastStep ? t('firstVisitTour.complete') : t('firstVisitTour.next')}
-            </Button>
-          </Space>
-        </Space>
-      )}
-    >
+      </div>
       <Paragraph type="secondary" style={{ marginTop: 0 }}>
         {t('firstVisitTour.subtitle')}
       </Paragraph>
@@ -165,6 +170,6 @@ export function FirstVisitTourDrawer() {
           disabled: item.disabled,
         }))}
       />
-    </Drawer>
+    </Modal>
   )
 }

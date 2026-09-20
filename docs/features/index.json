@@ -12,7 +12,7 @@
       "priority": "P1",
       "doc": "docs/features/family-access-model.md",
       "domainDoc": "docs/FAMILY_ACCESS_MODEL.md",
-      "routes": ["/", "/patients/:id", "/settings/family", "/settings/account", "/invite/accept"],
+      "routes": ["/", "/family", "/patients/:id", "/settings/account", "/invite/accept"],
       "api": [
         "GET /patients/:id/access-grants",
         "POST /patients/:id/access-grants",
@@ -212,6 +212,19 @@
       "api": ["GET /patients/:id/family-support/insights"],
       "helpTopics": [],
       "tags": ["onboarding", "ux", "ava", "i18n"]
+    },
+    {
+      "id": "mobile-app-shell",
+      "epicId": "plat-mobile",
+      "title": "App mobile — shell Expo (paridade web)",
+      "status": "in_progress",
+      "category": "tecnico",
+      "priority": "P2",
+      "doc": "docs/features/mobile-app-shell.md",
+      "routes": [],
+      "api": ["GET /patients", "GET /patients/:id", "POST /auth/sync"],
+      "helpTopics": [],
+      "tags": ["mobile", "expo", "paridade"]
     },
     {
       "id": "documentation-knowledge-base",

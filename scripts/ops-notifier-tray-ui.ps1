@@ -171,6 +171,9 @@ function Normalize-OpsLocalServiceUrl {
   try {
     $parsed = [Uri]$u
     $port = if ($parsed.Port -gt 0) { $parsed.Port } else { $FallbackPort }
+    if ($FallbackPort -eq 5174 -and ($port -eq 5173 -or $port -eq 3010 -or $port -eq 3013)) {
+      $port = $FallbackPort
+    }
     if ($parsed.Host -eq 'localhost' -or $parsed.Host -eq '127.0.0.1' -or $parsed.Host -like '*.aiyracare.test') {
       return "http://127.0.0.1:$port$($parsed.PathAndQuery)"
     }
@@ -181,7 +184,28 @@ function Normalize-OpsLocalServiceUrl {
 }
 
 function Start-OpsTrayUrl {
-  param([string]$Url)
+  param(
+    [string]$Url,
+    [switch]$Force
+  )
+  if (-not (Get-Command Start-OpsBrowserUrlIfNeeded -ErrorAction SilentlyContinue)) {
+    $browserScript = Join-Path $PSScriptRoot 'ops-notifier-browser.ps1'
+    if (Test-Path -LiteralPath $browserScript) {
+      . $browserScript
+    }
+  }
+  if (Get-Command Start-OpsBrowserUrlIfNeeded -ErrorAction SilentlyContinue) {
+    $result = Start-OpsBrowserUrlIfNeeded -Url $Url -Force:$Force
+    if (-not $result.opened -and $result.reason -eq 'already_open') {
+      return
+    }
+    if (-not $result.opened -and $result.reason -eq 'debounce') {
+      return
+    }
+    if ($result.opened) {
+      return
+    }
+  }
   $u = Normalize-OpsTrayUrl $Url
   if (-not $u) { throw 'URL vazia' }
   $psi = New-Object System.Diagnostics.ProcessStartInfo

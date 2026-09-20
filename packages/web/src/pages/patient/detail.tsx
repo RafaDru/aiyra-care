@@ -674,7 +674,7 @@ export function PatientDetail() {
               linkPortal === 'hermes_pardini'
                 ? 'Portal unificado: CPF e código SMS/WhatsApp no Chrome. Senha do protocolo como alternativa.'
                 : CPF_LOGIN_PORTALS.has(linkPortal) && patient?.cpf
-                  ? 'Pré-preenchido com o CPF do paciente'
+                  ? t('patient.cpfPrefillHint')
                   : undefined
             }
           >
@@ -708,7 +708,7 @@ export function PatientDetail() {
         }}
       />
 
-      <Modal title="Editar Dados do Paciente" open={editOpen} onOk={handleEditSave} onCancel={() => setEditOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')} width={560}>
+      <Modal title={t('patient.editModalTitle')} open={editOpen} onOk={handleEditSave} onCancel={() => setEditOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')} width={560}>
         <Form form={editForm} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="name" label="Nome" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="birthDate" label="Data de Nascimento" rules={[{ required: true }]}>

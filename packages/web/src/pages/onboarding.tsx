@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.js'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
-import { AuthPageLayout } from '../layouts/AuthPageLayout.js'
+import { OnboardingLayout } from '../layouts/OnboardingLayout.js'
 import { api } from '../lib/api.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
 import { trackProductEvent } from '../lib/product-events.js'
@@ -22,13 +22,20 @@ type DependentDraft = {
   name: string
 }
 
+const ONBOARDING_WIZARD_STEP_KEY = 'aiyracare.onboarding_wizard_step'
+
+function readOnboardingWizardStep(): number {
+  if (typeof window === 'undefined') return 0
+  return sessionStorage.getItem(ONBOARDING_WIZARD_STEP_KEY) === '1' ? 1 : 0
+}
+
 export function OnboardingPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { configured, loading, needsProfile, refreshSync } = useAuth()
   const [profileForm] = Form.useForm()
   const [dependentForm] = Form.useForm()
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(readOnboardingWizardStep)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dependents, setDependents] = useState<DependentDraft[]>([])
@@ -45,22 +52,25 @@ export function OnboardingPage() {
 
   if (loading) {
     return (
-      <AuthPageLayout>
+      <OnboardingLayout>
         <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
           <Spin size="large" />
         </div>
-      </AuthPageLayout>
+      </OnboardingLayout>
     )
   }
 
-  if (!needsProfile) return <Navigate to="/" replace />
+  // Após completeProfile, needsProfile fica false mas o passo de dependentes ainda deve aparecer.
+  if (!needsProfile && currentStep === 0) return <Navigate to="/" replace />
 
   const goToDependentsStep = () => {
+    sessionStorage.setItem(ONBOARDING_WIZARD_STEP_KEY, '1')
     setCurrentStep(1)
     trackProductEvent('onboarding_step', { step: 'step_2_viewed' })
   }
 
   const finishOnboarding = (eventStep: 'dependents_skipped' | 'dependents_complete') => {
+    sessionStorage.removeItem(ONBOARDING_WIZARD_STEP_KEY)
     trackProductEvent('onboarding_step', { step: eventStep })
     navigate('/')
   }
@@ -86,9 +96,9 @@ export function OnboardingPage() {
         weightKg: values.weightKg ? Number(values.weightKg) : undefined,
         heightCm: values.heightCm ? Number(values.heightCm) : undefined,
       })
-      await refreshSync()
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
       goToDependentsStep()
+      await refreshSync()
     } catch (e) {
       setError(e instanceof Error ? e.message : t('onboarding.error'))
     } finally {
@@ -131,17 +141,18 @@ export function OnboardingPage() {
   }
 
   return (
-    <AuthPageLayout>
-      <Card>
-        <Steps
-          current={currentStep}
-          style={{ marginBottom: 24 }}
-          items={[
-            { title: t('onboarding.steps.profile') },
-            { title: t('onboarding.steps.dependents') },
-          ]}
-        />
+    <OnboardingLayout>
+      <Steps
+        current={currentStep}
+        style={{ marginBottom: 24 }}
+        responsive
+        items={[
+          { title: t('onboarding.steps.profile') },
+          { title: t('onboarding.steps.dependents') },
+        ]}
+      />
 
+      <Card variant="borderless" styles={{ body: { padding: 0 } }}>
         {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
 
         {currentStep === 0 ? (
@@ -274,6 +285,6 @@ export function OnboardingPage() {
           </>
         )}
       </Card>
-    </AuthPageLayout>
+    </OnboardingLayout>
   )
 }

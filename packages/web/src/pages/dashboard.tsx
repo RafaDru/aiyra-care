@@ -11,6 +11,7 @@ import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
+import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
 import { useAuth } from '../contexts/AuthContext.js'
 
 const { Title, Text } = Typography
@@ -55,7 +56,7 @@ export function Dashboard() {
       .catch((err) => {
         setPatients([])
         setCircleGroups([])
-        setLoadError(err instanceof Error ? err.message : 'Falha ao carregar pacientes')
+        setLoadError(err instanceof Error ? err.message : t('patient.loadListFailed'))
       })
   }
   useEffect(() => {
@@ -82,7 +83,7 @@ export function Dashboard() {
         cns: values.cns?.replace(/\D/g, '') || undefined,
         markAsSelf: showMarkAsSelf && Boolean(values.markAsSelf),
       })
-      message.success('Paciente cadastrado com sucesso')
+      message.success(t('patient.createSuccess'))
       setModalOpen(false)
       form.resetFields()
       load()
@@ -154,15 +155,16 @@ export function Dashboard() {
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
 
+      {patients.length > 0 && <DashboardFamilyShortcut />}
       {patients.length > 0 && <DashboardDayToDaySection />}
 
       {loadError && (
         <Alert
           type="error"
           showIcon
-          message="Não foi possível carregar os pacientes"
+          message={t('patient.loadListErrorTitle')}
           description={loadError}
-          action={<Button size="small" onClick={() => { setLoading(true); load().finally(() => setLoading(false)) }}>Tentar novamente</Button>}
+          action={<Button size="small" onClick={() => { setLoading(true); load().finally(() => setLoading(false)) }}>{t('patient.loadListRetry')}</Button>}
           style={{ marginBottom: 16 }}
         />
       )}

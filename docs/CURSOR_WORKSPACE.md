@@ -1,6 +1,6 @@
 # Cursor — workspace AiyraCare
 
-> **Última atualização:** 2026-09-16  
+> **Última atualização:** 2026-09-18  
 > **Status:** pasta canônica única em `workspace\aiyra-care`.
 
 ## Caminho canônico
@@ -70,6 +70,15 @@ Após `agent update`, o worker pode falhar com `better-sqlite3` / `NODE_MODULE_V
 
 ```powershell
 powershell -File scripts/cursor-worker-repair.ps1
+```
+
+O modo `-Autostart` (tarefa no logon) **reinicia o worker** a cada 30s se o processo cair (comum após sessões cloud). Remove `worker.lock` obsoleto quando a nuvem mostra `0 workers`.
+
+Diagnóstico rápido:
+
+```powershell
+agent worker debug   # deve listar Non-privacy: 1 worker
+Get-Content $env:LOCALAPPDATA\cursor-agent\worker-autostart.log -Tail 15
 ```
 
 Alternativa estável (se o bug voltar): worker dentro de **WSL Ubuntu** com repo em `~/workspace/aiyra-care` (não em `/mnt/c`).
