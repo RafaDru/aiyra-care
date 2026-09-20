@@ -1348,6 +1348,11 @@
     "reminderTag": "Reminder",
     "snooze": "Snooze 30 min"
   },
+  "walletSyncBanner": {
+    "failed": "Last sync failed ({{names}}). Wallet data may be outdated. Try Sync in Integrations.",
+    "stale": "{{names}} data may be outdated. Background refresh runs when a valid session exists.",
+    "noSession": "To refresh {{names}}, use Sync in Integrations (first-time portal login)."
+  },
   "walletCards": {
     "title": "{{name}}'s wallet",
     "subtitle": "Cards and credentials for visits and care. Sync in Integrations.",
@@ -1367,6 +1372,7 @@
     "qrToken": "QR / Token",
     "updatedAt": "Updated {{when}}",
     "syncFirstTime": "Sync once in Integrations first",
+    "staleHint": "May be outdated",
     "failed": "Failed",
     "dentalPlan": "Dental plan",
     "noDentalPlan": "No dental plan linked",
