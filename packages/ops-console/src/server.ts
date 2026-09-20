@@ -273,13 +273,20 @@ async function main() {
 
   fastify.post<{
     Params: { id: string }
-    Body: { analysisSummary?: string; analysisArtifactPath?: string }
+    Body: {
+      analysisSummary?: string
+      analysisArtifactPath?: string
+      deploymentStatus?: string
+      deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+    }
   }>(
     '/api/support-reports/:id/complete-analysis',
     async (req, reply) => {
       const ok = await supportReportService.completeAnalysis(req.params.id, {
         analysisSummary: req.body?.analysisSummary,
         analysisArtifactPath: req.body?.analysisArtifactPath,
+        deploymentStatus: req.body?.deploymentStatus,
+        deploymentActions: req.body?.deploymentActions,
       })
       if (!ok) return reply.status(400).send({ error: 'invalid_payload' })
       return { ok: true }

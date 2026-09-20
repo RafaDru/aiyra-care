@@ -1,10 +1,10 @@
-{"ts":"2026-09-18T12:32:32.211Z","event":"beforeShellExecution","command":"cd /workspace && git fetch origin main && git checkout -b cursor/tray-staging-env-badge-5568 main 2>/dev/null || git checkout -b cursor/tray-staging-env-badge-5568"}
-{"ts":"2026-09-18T12:34:03.052Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1"}
-{"ts":"2026-09-18T12:34:03.053Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/ops-deployment-tier.test.ts 2>&1"}
-{"ts":"2026-09-18T12:34:03.076Z","event":"beforeShellExecution","command":"cd /workspace/packages/ops-console && npm run build 2>&1"}
-{"ts":"2026-09-18T12:34:14.510Z","event":"beforeShellExecution","command":"cd /workspace && npm install 2>&1 | tail -20"}
-{"ts":"2026-09-18T12:34:30.907Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1"}
-{"ts":"2026-09-18T12:34:30.907Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/ops-deployment-tier.test.ts 2>&1"}
-{"ts":"2026-09-18T12:34:30.910Z","event":"beforeShellExecution","command":"cd /workspace/packages/ops-console && npm run build 2>&1"}
-{"ts":"2026-09-18T12:34:48.948Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/ops-deployment-tier.test.ts 2>&1"}
-{"ts":"2026-09-18T12:35:06.732Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"fix(ops): staging tray URLs, web env badge, ops tier ports\n\n- Resolve tray app/dashboard URLs from Get-OpsNotifierTierPorts on :3022\n- Ignore dev LANDING_CAPTURE/OPS_ALERT URLs for staging notifier\n- Web header DeploymentEnvironmentBadge (Dev/Staging) via VITE tier or ports\n- Ops console: port wins over DEPLOYMENT_TIER; stack control uses preview ports\n- Tests: normalizeOpsDeploymentTier; ops-console and web builds pass\""}
+{"ts":"2026-09-18T14:09:59.245Z","event":"beforeShellExecution","command":"cd /workspace && git fetch origin main && git checkout main && git pull origin main && git checkout -b cursor/ops-support-batch-6h"}
+{"ts":"2026-09-18T14:12:59.579Z","event":"beforeShellExecution","command":"cd /workspace && npm run test:critical 2>&1"}
+{"ts":"2026-09-18T14:13:05.191Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npm run test:critical 2>&1 | tail -40"}
+{"ts":"2026-09-18T14:13:05.191Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/support-report-batch.test.ts tests/support-report-dispatch.test.ts tests/ops-analysis-queue.service.test.ts tests/ops-support-report.service.test.ts 2>&1"}
+{"ts":"2026-09-18T14:13:16.802Z","event":"beforeShellExecution","command":"cd /workspace && npm install 2>&1 | tail -15"}
+{"ts":"2026-09-18T14:13:33.328Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npm run test:critical 2>&1 | tail -25"}
+{"ts":"2026-09-18T14:13:33.328Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/support-report-batch.test.ts tests/support-report-dispatch.test.ts tests/ops-support-report.service.test.ts 2>&1"}
+{"ts":"2026-09-18T14:13:38.716Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npm run build 2>&1 | tail -30"}
+{"ts":"2026-09-18T14:13:54.307Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npm run build 2>&1 | tail -10"}
+{"ts":"2026-09-18T14:14:08.910Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"feat(ops): support report investigator batch (6h) + deployment cycle\n\n- OPS_SUPPORT_INVESTIGATOR_MODE=batch defers auto dispatch; toast unchanged\n- Batch scheduler in connect-worker/API via OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS\n- Migration 069: taxonomy review fields, deployment_status/actions, analysis queued\n- Batch webhook payload support_report_batch; callback reportPatches + deployment\n- Ops console SupportPanel: implantar checklist and status badges\n- Playbook + feature QA notes; vitest batch grouper and payload shape\""}

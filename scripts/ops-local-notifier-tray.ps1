@@ -454,7 +454,7 @@ function Invoke-LayerControl {
 
 function Open-ObservabilityIssues {
   $url = "http://127.0.0.1:$opsConsolePort/?tab=issues"
-  Start-Process $url
+  Start-OpsTrayUrl $url
 }
 
 function Refresh-TrayAttention {

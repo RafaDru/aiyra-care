@@ -885,8 +885,8 @@
         {
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
-          "status": "planned",
-          "detail": "Fora do web atual."
+          "status": "in_progress",
+          "detail": "Shell Expo + auth Supabase + navegação perfil (M1). Plano: Project store docs/mobile-parity-plan.md."
         },
         {
           "id": "plat-microservices",
