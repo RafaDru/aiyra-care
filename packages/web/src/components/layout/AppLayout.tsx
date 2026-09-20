@@ -19,6 +19,8 @@ import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 import { FirstVisitTourDrawer } from '../onboarding/FirstVisitTourDrawer.js'
 import { DeploymentEnvironmentBadge } from './DeploymentEnvironmentBadge.js'
+import { ActiveCareCircleProvider } from '../../contexts/ActiveCareCircleContext.js'
+import { CareCircleGlobalSelector } from '../family/CareCircleGlobalSelector.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -56,7 +58,7 @@ export function AppLayout() {
 
   const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
-  return (
+  const layout = (
     <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
       <Sider
         className="app-sider"
@@ -167,8 +169,9 @@ export function AppLayout() {
             zIndex: 100,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap' }}>
             {collapsed && <AppLogo variant="wordmark" height={38} />}
+            {configured && user && <CareCircleGlobalSelector />}
             <DeploymentEnvironmentBadge />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -205,4 +208,10 @@ export function AppLayout() {
       <SupportReportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
     </Layout>
   )
+
+  if (configured && user) {
+    return <ActiveCareCircleProvider>{layout}</ActiveCareCircleProvider>
+  }
+
+  return layout
 }
