@@ -8,6 +8,8 @@
     "web:dev": "cd packages/web && npm run dev",
     "mobile:start": "cd packages/mobile && npx expo start",
     "mobile:web": "cd packages/mobile && npm run web",
+    "mobile:check": "cd packages/mobile && npm run typecheck && npx expo export --platform web",
+    "qa:run:mobile": "npm run qa:run -- --suite mobile-shell-smoke",
     "agent:pediatria": "cd packages/agents/pediatria && python -m uvicorn main:app --reload",
     "agent:integracao": "cd packages/agents/integracao && python -m uvicorn main:app --reload",
     "agent:farmaceutico": "cd packages/agents/farmaceutico && python -m uvicorn main:app --reload",

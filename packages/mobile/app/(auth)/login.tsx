@@ -16,12 +16,13 @@ import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export default function LoginScreen() {
   const { redirect, token: inviteToken } = useLocalSearchParams<{ redirect?: string; token?: string }>()
-  const { configured, loading, session, signInWithPassword } = useAuth()
+  const { configured, loading, session, signInWithPassword, signInWithGoogle } = useAuth()
   const { tokens } = useAiyraTheme()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [oauthSubmitting, setOauthSubmitting] = useState(false)
 
   if (loading) {
     return (
@@ -60,6 +61,27 @@ export default function LoginScreen() {
       setError(e instanceof Error ? e.message : 'Falha no login')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function onGoogle() {
+    if (!configured) {
+      setError('Copie packages/mobile/.env.example para .env e preencha as chaves Supabase.')
+      return
+    }
+    setError(null)
+    setOauthSubmitting(true)
+    try {
+      await signInWithGoogle()
+      if (redirect === 'invite' && typeof inviteToken === 'string' && inviteToken) {
+        router.replace(`/invite/accept?token=${encodeURIComponent(inviteToken)}`)
+      } else {
+        router.replace('/(app)/(tabs)')
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Falha no login com Google')
+    } finally {
+      setOauthSubmitting(false)
     }
   }
 
@@ -102,13 +124,38 @@ export default function LoginScreen() {
         ) : null}
         <Pressable
           onPress={onSubmit}
-          disabled={submitting}
+          disabled={submitting || oauthSubmitting}
           style={[styles.button, { backgroundColor: tokens.colorPrimary, opacity: submitting ? 0.7 : 1 }]}
         >
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.buttonText}>Entrar</Text>
+          )}
+        </Pressable>
+
+        <View style={styles.dividerRow}>
+          <View style={[styles.dividerLine, { backgroundColor: tokens.colorBorder }]} />
+          <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>ou</Text>
+          <View style={[styles.dividerLine, { backgroundColor: tokens.colorBorder }]} />
+        </View>
+
+        <Pressable
+          onPress={() => void onGoogle()}
+          disabled={submitting || oauthSubmitting}
+          style={[
+            styles.oauthButton,
+            {
+              borderColor: tokens.colorBorder,
+              backgroundColor: tokens.colorBgLayout,
+              opacity: oauthSubmitting ? 0.7 : 1,
+            },
+          ]}
+        >
+          {oauthSubmitting ? (
+            <ActivityIndicator color={tokens.colorPrimary} />
+          ) : (
+            <Text style={[styles.oauthButtonText, { color: tokens.colorTextBase }]}>Continuar com Google</Text>
           )}
         </Pressable>
       </View>
@@ -125,4 +172,13 @@ const styles = StyleSheet.create({
   error: { fontSize: 14 },
   button: { borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 8 },
   buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
+  dividerLine: { flex: 1, height: 1 },
+  oauthButton: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  oauthButtonText: { fontWeight: '600', fontSize: 15 },
 })

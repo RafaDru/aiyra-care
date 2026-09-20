@@ -8,6 +8,7 @@ import type {
   InvitePreview,
   LegalDocumentKind,
   LegalDocumentWithContent,
+  Exam,
   IntegrationLink,
   IntegrationLinkSyncStatus,
   OwnedPatient,
@@ -155,6 +156,10 @@ export const api = {
   planMemberships: {
     list: (patientId: string) =>
       request<PlanMembershipWithPlan[]>(`/plan-memberships?patientId=${encodeURIComponent(patientId)}`),
+  },
+  exams: {
+    list: (patientId: string) =>
+      request<Exam[]>(`/exams?patientId=${encodeURIComponent(patientId)}`),
   },
   ava: {
     listConversations: (patientId?: string) => {

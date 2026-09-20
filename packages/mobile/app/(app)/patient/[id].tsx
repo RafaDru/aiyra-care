@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { PatientExamsTab } from '@/components/clinical/PatientExamsTab'
 import { PatientIntegrationsPanel } from '@/components/integrations/PatientIntegrationsPanel'
 import { PatientWalletTab } from '@/components/wallet/PatientWalletTab'
 import { PatientNavPicker } from '@/components/PatientNavPicker'
@@ -75,6 +76,23 @@ export default function PatientDetailScreen() {
           />
         </View>
         <PatientWalletTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'exams' && patientId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <View style={styles.header}>
+          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
+          <PatientNavPicker
+            section={section}
+            tab={tab}
+            onSectionChange={onSectionChange}
+            onTabChange={setTab}
+          />
+        </View>
+        <PatientExamsTab patientId={patientId} />
       </View>
     )
   }

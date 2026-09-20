@@ -218,6 +218,21 @@ export interface OwnedPatient {
   name: string
 }
 
+export interface Exam {
+  id: string
+  patientId: string
+  medicalRecordId: string | null
+  examOrderId: string | null
+  examType: string
+  examDate: string
+  resultSummary: string | null
+  resultFileUrl: string | null
+  laboratory: string | null
+  notes: string | null
+  source: string
+  createdAt: string
+}
+
 export interface IntegrationLink {
   id: string
   patientId: string
