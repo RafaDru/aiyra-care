@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import {
   Typography, Button, Space, Tag, Empty, Modal, App, QRCode, Spin, Alert, Descriptions, Tooltip,
 } from 'antd'
@@ -24,10 +25,13 @@ import {
 } from './wallet-shared.js'
 import {
   buildWalletSyncBanners,
-  isWalletLinkDataStale,
+  filterWalletSyncBannersForActiveSync,
   walletSyncBannerMessage,
+  walletSyncBannerNeedsIntegrationsCta,
 } from '../../../lib/wallet-sync-banner.js'
+import { buildPatientTabHref } from '../../../lib/patient-navigation.js'
 import { isLinkSessionReady } from '../../../lib/silent-sync.js'
+import { isWalletLinkDataStale } from '../../../lib/wallet-sync-banner.js'
 import { saveWalletLinkCache, getWalletLinkCache } from '../../../lib/wallet-link-cache.js'
 import { WalletTodayPanel } from '../../../components/patient/WalletTodayPanel.js'
 
@@ -94,7 +98,17 @@ export function WalletCardsTab({
   usePatientSyncCompletions(patient.id, bumpSyncRefresh)
 
   const syncMeta = useWalletLinkSyncStatus(insuranceLinks, syncRefreshKey, false)
-  const walletBanner = walletSyncBannerMessage(t, buildWalletSyncBanners(insuranceLinks, syncMeta))
+  const anyLinkSyncActive = useMemo(
+    () => insuranceLinks.some((l) => syncMeta[l.id]?.active),
+    [insuranceLinks, syncMeta],
+  )
+  const walletBannerItems = filterWalletSyncBannersForActiveSync(
+    buildWalletSyncBanners(insuranceLinks, syncMeta),
+    anyLinkSyncActive,
+  )
+  const walletBanner = walletSyncBannerMessage(t, walletBannerItems)
+  const walletBannerCta = walletSyncBannerNeedsIntegrationsCta(walletBannerItems)
+  const integrationsHref = buildPatientTabHref(patient.id, 'integrations')
 
   useEffect(() => {
     api.planMemberships.list(patient.id)
@@ -233,6 +247,15 @@ export function WalletCardsTab({
             data-testid="wallet-sync-banner"
             style={{ marginBottom: 12 }}
             message={walletBanner}
+            action={
+              walletBannerCta ? (
+                <Link to={integrationsHref} data-testid="wallet-sync-banner-cta">
+                  <Button size="small" type="primary">
+                    {t('walletSyncBanner.openIntegrations')}
+                  </Button>
+                </Link>
+              ) : undefined
+            }
           />
         )}
         {insuranceLinks.length === 0 ? (

@@ -1366,7 +1366,8 @@
   "walletSyncBanner": {
     "failed": "Last sync failed ({{names}}). Wallet data may be outdated. Try Sync in Integrations.",
     "stale": "{{names}} data may be outdated. Background refresh runs when a valid session exists.",
-    "noSession": "To refresh {{names}}, use Sync in Integrations (first-time portal login)."
+    "noSession": "To refresh {{names}}, use Sync in Integrations (first-time portal login).",
+    "openIntegrations": "Open Integrations"
   },
   "walletCards": {
     "title": "{{name}}'s wallet",

@@ -17,8 +17,9 @@ Aba **Carteira** no perfil do paciente: CNS, carteirinhas de convênio, bloco **
 1. Abre perfil → aba **Carteira** (`?section=plan&tab=wallet`)
 2. Vê cartões do sistema público e planos vinculados em Integrações
 3. Com sessão válida e dados antigos (>6h padrão), o app dispara sync em segundo plano
-4. Banner de aviso quando sync falhou, dados desatualizados ou falta primeira sessão; tag **Pode estar desatualizado** na carteirinha quando aplicável
+4. Banner de aviso quando sync falhou, dados desatualizados ou falta primeira sessão; botão **Ir para Integrações** quando é preciso sincronizar manualmente; tag **Pode estar desatualizado** na carteirinha quando aplicável
 5. Primeiro login no portal continua via **Sincronizar** em Integrações
+6. Enquanto um sync roda (silencioso ou manual), o banner «dados desatualizados» some até o job terminar
 
 ## Superfície técnica
 
