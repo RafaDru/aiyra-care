@@ -1,5 +1,6 @@
 import { useAvaPatientLens } from '../ava/useAvaPatientLens.js'
 import { WalletTodayPanel } from '../patient/WalletTodayPanel.js'
+import { DayToDayDiscoveryHub } from './DayToDayDiscoveryHub.js'
 
 /** Bloco «Hoje» no dashboard — mesma lente Ava do registro rápido. */
 export function DashboardDayToDaySection() {
@@ -9,6 +10,7 @@ export function DashboardDayToDaySection() {
 
   return (
     <div style={{ marginBottom: 24 }}>
+      <DayToDayDiscoveryHub patientId={patientId} hasPatients />
       <WalletTodayPanel
         patientId={patientId}
         patients={patients}

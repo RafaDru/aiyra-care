@@ -156,6 +156,20 @@
       "tags": ["carteira", "timeline", "dia a dia", "agenda"]
     },
     {
+      "id": "family-day-to-day-discovery",
+      "epicId": "family-day-to-day",
+      "title": "Guia discovery — dia a dia no Início",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/family-day-to-day-discovery.md",
+      "domainDoc": "docs/discovery/day-to-day-clinician-access.md",
+      "routes": ["/"],
+      "api": [],
+      "helpTopics": [],
+      "tags": ["discovery", "dia a dia", "onboarding", "dashboard"]
+    },
+    {
       "id": "patient-health-thread",
       "epicId": "family-day-to-day",
       "title": "Health thread — investigação e acompanhamento",

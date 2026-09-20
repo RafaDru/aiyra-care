@@ -1338,6 +1338,19 @@
     "cpf_card": "CPF Card",
     "cnh": "Driver License"
   },
+  "dayToDayDiscovery": {
+    "title": "Family day to day",
+    "subtitle": "Capture, follow today, and bring context to the visit",
+    "bodyWithPatients": "Three shortcuts for daily care — what you need before seeing the doctor.",
+    "bodyNoPatients": "Add someone you care for to use quick capture, the Today block, and the clinician package.",
+    "dismiss": "Close guide",
+    "actions": {
+      "capture": "Log now",
+      "today": "Go to Today block",
+      "consult": "Prepare visit (link, QR, PDF)"
+    },
+    "footerHint": "Under 30 seconds to log a symptom or medication."
+  },
   "walletToday": {
     "title": "Today",
     "lensLabel": "Who to view today",
