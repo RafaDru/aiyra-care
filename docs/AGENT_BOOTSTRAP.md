@@ -43,6 +43,7 @@ Ver `.cursor/rules/qa-delivery.mdc` e `docs/testing/QA_PROCESS.md`.
 - Roadmap UI: `GET /roadmap`
 - Contexto LLM: `GET /project/context` (inclui catálogo `features`)
 - Hub docs: `docs/README.md`
+- Parceria backend Claude Code + fila: `docs/CLAUDE_CODE_PARTNERSHIP.md` · `docs/coordination/BACKEND_TASK_QUEUE.md`
 
 ## Sessão «Aiyra: Ops» (observabilidade)
 

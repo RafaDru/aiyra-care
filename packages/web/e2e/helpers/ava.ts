@@ -10,12 +10,8 @@ function isAvaChatPostUrl(method: string, url: string) {
   }
 }
 
-function isAvaChatPostRequest(req: { method: () => string; url: () => string }) {
-  return isAvaChatPostUrl(req.method(), req.url())
-}
-
-function avaAssistantBubbleBody(page: Page) {
-  return page.locator('.ava-chat-bubble-row--ava').last().locator('.ava-chat-bubble__body')
+function avaAssistantBubbleBodies(page: Page) {
+  return page.locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
 }
 
 async function waitAvaComposerReady(page: Page, timeout = 90_000) {
@@ -41,23 +37,43 @@ async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
   await waitAvaComposerReady(page, timeout)
 }
 
-export async function openAvaDock(page: Page) {
-  await dismissFirstVisitTour(page)
+async function waitForAvaFab(page: Page, timeout = 60_000) {
+  await page
+    .waitForResponse(
+      (r) => {
+        try {
+          return new URL(r.url()).pathname === '/patients' && r.request().method() === 'GET' && r.ok()
+        } catch {
+          return false
+        }
+      },
+      { timeout },
+    )
+    .catch(() => undefined)
   await page.getByRole('button', { name: 'Abrir conversa com Ava' }).waitFor({
     state: 'visible',
-    timeout: 45_000,
+    timeout,
   })
-  const convoList = page
-    .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 30_000 })
-    .catch(() => null)
+}
 
-  await page.getByRole('button', { name: 'Abrir conversa com Ava' }).click({ force: true })
-  await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 30_000 })
-  await convoList
-  await waitForAvaDockSettled(page)
+export async function openAvaDock(page: Page) {
+  await dismissFirstVisitTour(page)
+  await waitForAvaFab(page)
   if (process.env.CI) {
-    await page.waitForTimeout(6_500)
+    // useAvaDockIntro: greeting + settling (~6.4s) antes do dock ficar estável no CI.
+    await page.waitForTimeout(7_000)
   }
+
+  await expect(async () => {
+    const convoList = page
+      .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 25_000 })
+      .catch(() => null)
+    await page.getByRole('button', { name: 'Abrir conversa com Ava' }).click({ force: true })
+    await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 25_000 })
+    await convoList
+  }).toPass({ timeout: 60_000 })
+
+  await waitForAvaDockSettled(page)
 }
 
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
@@ -76,21 +92,39 @@ export async function startFreshAvaConversation(page: Page) {
   await waitAvaComposerReady(page)
 }
 
-/** Aguarda texto na última bolha da Ava (SSE pode atrasar no CI). */
+/** Aguarda texto na última bolha da Ava com conteúdo (SSE / streaming). */
 export async function waitForAvaAssistantReply(
   page: Page,
   pattern: RegExp,
   timeout = 90_000,
 ) {
-  const body = avaAssistantBubbleBody(page)
-  await expect(body).toBeVisible({ timeout })
-  // Ignora só a tag "Ava" — bolha streaming aparece vazia antes do SSE.
+  const send = page.getByRole('button', { name: 'Enviar' })
+  await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout })
+
   await expect(async () => {
-    const text = (await body.innerText()).replace(/^Ava\s*/i, '').trim()
-    expect(text.length).toBeGreaterThan(0)
+    const bodies = avaAssistantBubbleBodies(page)
+    const count = await bodies.count()
+    expect(count).toBeGreaterThan(0)
+    let matched = false
+    for (let i = count - 1; i >= 0; i--) {
+      const body = bodies.nth(i)
+      const text = (await body.innerText()).replace(/^Ava\s*/i, '').trim()
+      if (text.length === 0) continue
+      await expect(body).toContainText(pattern)
+      matched = true
+      break
+    }
+    expect(matched).toBe(true)
   }).toPass({ timeout })
-  await expect(body).toContainText(pattern, { timeout })
-  return body
+
+  const bodies = avaAssistantBubbleBodies(page)
+  const count = await bodies.count()
+  for (let i = count - 1; i >= 0; i--) {
+    const body = bodies.nth(i)
+    const text = (await body.innerText()).replace(/^Ava\s*/i, '').trim()
+    if (text.length > 0) return body
+  }
+  return bodies.last()
 }
 
 export async function submitAvaMessage(page: Page, text: string) {
@@ -99,7 +133,10 @@ export async function submitAvaMessage(page: Page, text: string) {
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
-  const chatStarted = page.waitForRequest((r) => isAvaChatPostRequest(r), { timeout: 30_000 })
+  const chatStarted = page.waitForRequest(
+    (r) => isAvaChatPostUrl(r.method(), r.url()),
+    { timeout: 45_000 },
+  )
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
@@ -108,6 +145,7 @@ export async function submitAvaMessage(page: Page, text: string) {
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
     timeout: 90_000,
   })
+  await waitAvaComposerReady(page)
 }
 
 export async function sendAvaMessage(page: Page, text: string) {

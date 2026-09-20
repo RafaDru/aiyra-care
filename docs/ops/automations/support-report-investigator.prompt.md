@@ -20,8 +20,29 @@ Use apenas estes campos do payload:
 | `investigation.trigger` | `auto` (submit) ou `manual` (botão Analisar) |
 | `analysisQueue.id` | ID na pilha — cite no callback |
 | `analysisQueue.callbackUrl` | POST ao finalizar (ver «Callback» abaixo) |
+| `type: support_report_batch` | Vários `reports[]` no mesmo grupo (categoria + tier) — investigar em lote |
+| `reports[].reportId` / `route` / `descriptionExcerpt` / `diagnosticSummary` | Entrada batch (sem PHI) |
 
 **Proibido:** buscar descrição livre do usuário, `accountId`, `patientId`, dados clínicos, screenshots.
+
+## Revisão de categoria (obrigatória)
+
+Antes de fechar a investigação, valide se a categoria do usuário (`category`) ainda faz sentido:
+
+1. Se **adequada** — registre no callback `categoryReviewNote` curto (ex.: «categoria confirmada»).
+2. Se **deveria ser outra** do enum (`technical_bug`, `incorrect_data`, `ux_confusion`, `other`) — preencha `suggestedCategory` + `categoryReviewNote` explicando o porquê (sem PHI).
+3. Se **falta categoria no produto** — preencha `taxonomyGapProposal` com nome sugerido + justificativa; **não** invente enum novo no código nesta execução.
+
+No callback, use `reportPatches` (um objeto por `reportId`) em batch, ou campos no patch do ticket único.
+
+## Ciclo implantar (ticket)
+
+Após proposta de fix, atualize o ticket via callback:
+
+- `deploymentStatus`: `fix_proposed` | `awaiting_merge` | `awaiting_deploy` | `awaiting_validation` | `done`
+- `deploymentActions`: checklist `[{ "label": "…", "kind": "pr|deploy|qa|docs", "url": "…", "done": false }]`
+
+Instruções para o operador no console (aba Suporte → detalhe → **Implantar**): marcar itens concluídos; quando tudo validado, `deploymentStatus: done`.
 
 ## Objetivo (Tier 0)
 
@@ -87,7 +108,19 @@ Ver `docs/ops/INVESTIGATION_CORRELATION.md`.
 {
   "investigationId": "<investigationId>",
   "remediationSummary": "Resumo em até 5 linhas: hipótese + o que foi feito",
-  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<8chars>-support.md"
+  "analysisArtifactPath": "docs/ops/investigations/YYYY-MM-DD-<8chars>-support.md",
+  "deploymentStatus": "fix_proposed",
+  "deploymentActions": [
+    { "label": "Revisar PR draft", "kind": "pr", "url": "https://github.com/…/pull/NNN", "done": false }
+  ],
+  "reportPatches": [
+    {
+      "reportId": "<reportId>",
+      "suggestedCategory": "technical_bug",
+      "categoryReviewNote": "…",
+      "taxonomyGapProposal": null
+    }
+  ]
 }
 ```
 

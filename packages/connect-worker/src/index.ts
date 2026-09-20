@@ -4,7 +4,7 @@ import { runOpsAlertsCheck } from './ops-alerts.js'
 import { runOpsProbeCheck } from './ops-probe.js'
 import { recordOpsWorkerTick } from './ops-worker-tick.js'
 
-loadMonorepoEnv()
+const monorepoRoot = loadMonorepoEnv()
 
 const intervalMs = Number(
   process.env.CONNECT_WORKER_INTERVAL_MS ?? process.env.SYNC_SCHEDULED_INTERVAL_MS ?? '1800000',
@@ -25,7 +25,9 @@ const worker = startConnectWorkerLoop(pool, intervalMs, {
 console.log(`[connect-worker] running scheduled sync every ${intervalMs}ms`)
 
 const opsAlertsIntervalMs = Number(process.env.OPS_ALERTS_INTERVAL_MS ?? '0')
+const supportBatchIntervalMs = Number(process.env.OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS ?? '0')
 let opsAlertsTimer: ReturnType<typeof setInterval> | undefined
+let supportBatchTimer: ReturnType<typeof setInterval> | undefined
 
 if (Number.isFinite(opsAlertsIntervalMs) && opsAlertsIntervalMs > 0) {
   const tick = () => {
@@ -45,6 +47,23 @@ if (Number.isFinite(opsAlertsIntervalMs) && opsAlertsIntervalMs > 0) {
 const hygieneScanIntervalMs = Number(process.env.HYGIENE_SCAN_INTERVAL_MS ?? '0')
 let hygieneScanTimer: ReturnType<typeof setInterval> | undefined
 
+if (Number.isFinite(supportBatchIntervalMs) && supportBatchIntervalMs > 0) {
+  void import('./support-report-batch.js').then(({ runSupportReportBatchCheck }) => {
+    const tickBatch = () => {
+      recordOpsWorkerTick(pool, 'support_report_batch').catch(() => {})
+      runSupportReportBatchCheck(pool)
+        .then((r) => console.log('[connect-worker] support-report-batch', JSON.stringify(r)))
+        .catch((err) => console.error(
+          '[connect-worker] support-report-batch failed',
+          err instanceof Error ? err.message : err,
+        ))
+    }
+    supportBatchTimer = setInterval(tickBatch, supportBatchIntervalMs)
+    setTimeout(tickBatch, 120_000)
+    console.log(`[connect-worker] support report batch every ${supportBatchIntervalMs}ms`)
+  })
+}
+
 if (Number.isFinite(hygieneScanIntervalMs) && hygieneScanIntervalMs > 0) {
   void import('./hygiene-scan.js').then(({ runHygieneScanBatch }) => {
     const tickHygiene = () => {
@@ -59,10 +78,36 @@ if (Number.isFinite(hygieneScanIntervalMs) && hygieneScanIntervalMs > 0) {
   })
 }
 
+const opsBusinessWeeklyIntervalMs = Number(process.env.OPS_BUSINESS_WEEKLY_INTERVAL_MS ?? '0')
+let opsBusinessWeeklyTimer: ReturnType<typeof setInterval> | undefined
+
+if (Number.isFinite(opsBusinessWeeklyIntervalMs) && opsBusinessWeeklyIntervalMs > 0) {
+  void import('./ops-business-weekly.js').then(({ runOpsBusinessWeeklyReport }) => {
+    const tickBusinessWeekly = () => {
+      recordOpsWorkerTick(pool, 'business_weekly').catch(() => {})
+      runOpsBusinessWeeklyReport(pool, monorepoRoot)
+        .then((r) => console.log('[connect-worker] business-weekly', JSON.stringify(r)))
+        .catch((err) =>
+          console.error(
+            '[connect-worker] business-weekly failed',
+            err instanceof Error ? err.message : err,
+          ),
+        )
+    }
+    opsBusinessWeeklyTimer = setInterval(tickBusinessWeekly, opsBusinessWeeklyIntervalMs)
+    setTimeout(tickBusinessWeekly, 120_000)
+    console.log(
+      `[connect-worker] business weekly report every ${opsBusinessWeeklyIntervalMs}ms`,
+    )
+  })
+}
+
 async function shutdown(signal: string) {
   console.log(`[connect-worker] ${signal} — stopping`)
   if (opsAlertsTimer) clearInterval(opsAlertsTimer)
+  if (supportBatchTimer) clearInterval(supportBatchTimer)
   if (hygieneScanTimer) clearInterval(hygieneScanTimer)
+  if (opsBusinessWeeklyTimer) clearInterval(opsBusinessWeeklyTimer)
   worker.stop()
   await pool.end()
   process.exit(0)

@@ -35,17 +35,17 @@ Canais **independentes**: o notificador local e a Automation recebem o mesmo pay
 
 | Caminho | Papel |
 |---------|--------|
-| `.cursor/automations/support-report-investigator.workflow.json` | Import no editor |
-| `.cursor/automations/support-report-investigator.yaml` | Referência legível |
+| `.cursor/automations/support-report-investigator.yaml` | **Prompt para colar** na UI |
+| `.cursor/automations/support-report-investigator.workflow.json` | Referência — criar manualmente na UI |
 | `docs/ops/automations/support-report-investigator.prompt.md` | Playbook do agente |
 
-**Import único:**
+**Criação única (sem import JSON — a UI não oferece import):**
 
 1. Abra **Automations** no Cursor (`Ctrl+Shift+P` → «Automations»).
-2. Create → importe `.cursor/automations/support-report-investigator.workflow.json`  
-   ou peça ao agente no chat: «abre a automation investigador suporte».
-3. Confira trigger webhook + repo + prompt.
-4. **Salvar** → copie a URL do webhook.
+2. **New automation** → nome **AiCare - Suporte ao Desenvolvimento**.
+3. Trigger **Webhook** · repo `RafaDru/aiyra-care` · branch `main`.
+4. Cole o bloco `instructions:` de `support-report-investigator.yaml` no campo de prompt.
+5. **Salvar** → copie a URL do webhook e o auth header (`crsr_...`).
 
 ---
 
@@ -139,7 +139,7 @@ Runbook: [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md)
 | Arquivo | Papel |
 |---------|--------|
 | `docs/ops/automations/support-report-investigator.prompt.md` | Playbook do agente |
-| `docs/ops/automations/support-report-investigator.workflow.json` | Prefill Automation |
+| `.cursor/automations/support-report-investigator.workflow.json` | Referência (espelho da UI) |
 | `scripts/support-investigator-simulate.mjs` | Simulação local |
 | `docs/ops/investigations/` | Saída das investigações |
 

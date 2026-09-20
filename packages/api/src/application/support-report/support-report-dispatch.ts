@@ -21,6 +21,31 @@ const CATEGORY_LABEL: Record<string, string> = {
   other: 'Outro',
 }
 
+export interface SupportReportBatchReportEntry {
+  reportId: string
+  route: string | null
+  descriptionExcerpt: string | null
+  diagnosticSummary: string | null
+}
+
+export interface SupportReportBatchDispatchPayload {
+  type: 'support_report_batch'
+  investigationId?: string
+  category: string
+  environment: InvestigatorEnvironmentContext
+  reports: SupportReportBatchReportEntry[]
+  text: string
+  toast: { title: string; body: string; icon: 'info' | 'warning' }
+  dashboardUrl: string
+  investigation: { tier: 0 | 1; playbook: string; trigger: 'scheduled' }
+  analysisQueue: { id: string; callbackUrl: string; lane: 'development_support' | 'sre_support' }
+}
+
+export type SupportReportBatchDispatchResult =
+  | { outcome: 'sent' }
+  | { outcome: 'skipped'; reason: 'webhook_not_configured' | 'webhook_key_missing' }
+  | { outcome: 'failed'; error: string }
+
 export interface SupportReportDispatchPayload {
   type: 'support_report'
   /** Chave canônica — `ops_analysis_queue.id` quando enfileirado */
@@ -160,7 +185,7 @@ export function buildSupportReportDispatchPayload(
 
 export async function postSupportReportWebhook(
   url: string,
-  payload: SupportReportDispatchPayload,
+  payload: SupportReportDispatchPayload | SupportReportBatchDispatchPayload,
   options?: { bearerKey?: string },
 ): Promise<void> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -259,6 +284,56 @@ export function analysisErrorFromInvestigatorResult(
       : 'CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
   }
   return null
+}
+
+export async function dispatchSupportReportBatchInvestigator(input: {
+  category: string
+  deploymentTier: string
+  records: SupportReportBatchReportEntry[]
+  investigationTier: InvestigationTier
+  analysisQueue: { id: string; callbackUrl: string }
+}): Promise<SupportReportBatchDispatchResult> {
+  const webhook = resolveSupportInvestigatorWebhookUrl()
+  if (!webhook) {
+    return { outcome: 'skipped', reason: 'webhook_not_configured' }
+  }
+  const bearerKey = resolveSupportInvestigatorWebhookKey()
+  if (!bearerKey) {
+    return { outcome: 'skipped', reason: 'webhook_key_missing' }
+  }
+  const tier = input.investigationTier
+  const label = categoryLabel(input.category)
+  const payload: SupportReportBatchDispatchPayload = {
+    type: 'support_report_batch',
+    investigationId: input.analysisQueue.id,
+    category: input.category,
+    environment: resolveInvestigatorEnvironmentContext(),
+    reports: input.records,
+    dashboardUrl: resolveSupportReportOpsConsoleUrl({ investigationId: input.analysisQueue.id }),
+    text: `Batch suporte: ${input.records.length} chamado(s) — ${label}`,
+    toast: {
+      title: '[Suporte] Batch investigação',
+      body: `${input.records.length} chamado(s) · ${label}\nConsole → aba Suporte`,
+      icon: 'info',
+    },
+    investigation: {
+      tier,
+      playbook: tier === 1 ? tier1PlaybookId('development_support') : 'support-report-tier0',
+      trigger: 'scheduled',
+    },
+    analysisQueue: {
+      id: input.analysisQueue.id,
+      callbackUrl: input.analysisQueue.callbackUrl,
+      lane: 'development_support',
+    },
+  }
+  try {
+    await postSupportReportWebhook(webhook, payload, { bearerKey })
+    return { outcome: 'sent' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'batch_investigator_dispatch_failed'
+    return { outcome: 'failed', error: message }
+  }
 }
 
 export async function dispatchSupportReportNotifications(

@@ -885,8 +885,8 @@
         {
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
-          "status": "planned",
-          "detail": "Fora do web atual."
+          "status": "in_progress",
+          "detail": "M5: Ava FAB + chat SSE + lente paciente. M4 done. Plano: Project store docs/mobile-parity-plan.md."
         },
         {
           "id": "plat-microservices",
@@ -2258,6 +2258,13 @@
           "status": "done",
           "detail": "BusinessPanel.tsx + tab Negócio no OpsMetricsDashboard; KPIs ativação, engajamento, suporte, billing, integrações.",
           "reviewBadge": ["design"]
+        },
+        {
+          "id": "ops-strategy-advisory-tab",
+          "title": "Aba «Estratégia» no Command Hub (advisory)",
+          "status": "done",
+          "detail": "packages/ops-console/content/strategy + StrategyPanel (Marketing, Financeiro, CX); manifest updatedAt; alinhamento Command Hub F2 leitura estratégica.",
+          "reviewBadge": ["business"]
         },
         {
           "id": "biz-analytics-weekly-report",

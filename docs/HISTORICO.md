@@ -1,5 +1,25 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-18] - Docs Automations: criação manual na UI (sem import JSON)
+
+### Decisão
+- A UI **Cursor → Automations** não oferece import de workflow JSON (confirmado por Rafael). Runbooks passam a descrever **New automation** + colar prompt dos `*.yaml` / playbook; `*.workflow.json` ficam só como referência versionada.
+
+### Realizado
+- `.cursor/automations/README.md`, `docs/coordination/CURSOR_RETURN_PATH.md`, runbooks ops; `backend-task-cursor-handoff.yaml` de referência.
+
+## [2026-09-18] - Parceria Cursor × Claude Code (backend + fila + gatilhos)
+
+### Decisão
+- **Variante A:** Cursor = produto, interfaces, contrato BFF, QA; Claude Code = núcleo servidor com capabilities completas.
+- Fila `docs/coordination/BACKEND_TASK_QUEUE.md`; guard-rails de pacotes; `fs.watch` + notificação CLI Claude→Cursor.
+
+### Realizado
+- `docs/CLAUDE_CODE_PARTNERSHIP.md`, `docs/coordination/*` (reconciliar com cópia local Claude após merge).
+
+### Próximo
+- PR docs → `main`; piloto `TASK-*` na fila.
+
 ## [2026-09-18] - Worker My Machines: detecção e autostart resilientes
 
 ### Realizado

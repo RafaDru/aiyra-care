@@ -28,6 +28,11 @@ const baseRow = {
   analysisRequestedAt: null,
   analysisCompletedAt: null,
   analysisLastError: null,
+  suggestedCategory: null,
+  categoryReviewNote: null,
+  taxonomyGapProposal: null,
+  deploymentStatus: 'none' as const,
+  deploymentActions: [],
   createdAt: new Date('2026-09-04'),
   updatedAt: new Date('2026-09-04'),
 }
