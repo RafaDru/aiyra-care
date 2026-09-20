@@ -181,7 +181,28 @@ function Normalize-OpsLocalServiceUrl {
 }
 
 function Start-OpsTrayUrl {
-  param([string]$Url)
+  param(
+    [string]$Url,
+    [switch]$Force
+  )
+  if (-not (Get-Command Start-OpsBrowserUrlIfNeeded -ErrorAction SilentlyContinue)) {
+    $browserScript = Join-Path $PSScriptRoot 'ops-notifier-browser.ps1'
+    if (Test-Path -LiteralPath $browserScript) {
+      . $browserScript
+    }
+  }
+  if (Get-Command Start-OpsBrowserUrlIfNeeded -ErrorAction SilentlyContinue) {
+    $result = Start-OpsBrowserUrlIfNeeded -Url $Url -Force:$Force
+    if (-not $result.opened -and $result.reason -eq 'already_open') {
+      return
+    }
+    if (-not $result.opened -and $result.reason -eq 'debounce') {
+      return
+    }
+    if ($result.opened) {
+      return
+    }
+  }
   $u = Normalize-OpsTrayUrl $Url
   if (-not $u) { throw 'URL vazia' }
   $psi = New-Object System.Diagnostics.ProcessStartInfo
