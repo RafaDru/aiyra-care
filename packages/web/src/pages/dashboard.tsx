@@ -164,7 +164,7 @@ export function Dashboard() {
     <div>
       <PageHeader
         title={t('patient.title')}
-        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
+        extra={<Button type="primary" icon={<PlusOutlined />} data-testid="dashboard-add-family" onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
 
       {patients.length > 0 && <DashboardFamilyShortcut />}
