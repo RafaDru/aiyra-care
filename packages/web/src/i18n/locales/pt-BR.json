@@ -273,11 +273,21 @@
       "caregiver": "Cuidador",
       "healthProfile": "Perfil de saúde",
       "you": "Você",
-      "familyCircle": "Família"
+      "familyCircle": "Família",
+      "panelTitle": "Como funciona família e acesso",
+      "panelIntro": "Separamos login, agrupamento familiar e histórico clínico para você convidar outras pessoas com segurança (LGPD).",
+      "accountTitle": "Conta",
+      "accountBody": "Seu login e assinatura. Cada adulto deve ter a própria conta — não compartilhe senha.",
+      "familyCircleTitle": "Família (círculo de cuidado)",
+      "familyCircleBody": "Agrupa perfis de saúde e cuidadores. Você pode ter mais de uma família (ex.: núcleos diferentes).",
+      "healthProfileTitle": "Perfil de saúde",
+      "healthProfileBody": "Histórico clínico de uma pessoa (exames, consultas, carteira). Pode ser você ou quem você cuida.",
+      "caregiverTitle": "Cuidador",
+      "caregiverBody": "Outra conta que você autoriza a ver perfis específicos — por convite, com nível de acesso definido."
     },
     "invite": {
       "title": "Convidar cuidador",
-      "subtitle": "Compartilhe perfis de saúde com outra conta — cada pessoa entra com login próprio.",
+      "subtitle": "Convide um cuidador para perfis de saúde escolhidos — cada pessoa usa a própria conta.",
       "action": "Novo convite",
       "modalTitle": "Convite de cuidador",
       "emailLabel": "E-mail do cuidador",

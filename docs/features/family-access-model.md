@@ -21,7 +21,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 ## Comportamento (usuário) — entregue (MVP)
 
 1. Titular cria perfis de saúde e recebe círculo padrão **«Minha família»** (backfill 059).
-2. **Configurações → Família e cuidadores** (`/settings/family`): gerenciar famílias, vincular perfis, convidar cuidadores.
+2. **Configurações → Família e cuidadores** (`/settings/family`): glossário (conta × família × perfil × cuidador), gerenciar famílias, vincular perfis, convidar cuidadores.
 3. Convite escolhe **família** + **perfis**; ao aceitar, cria grants (057) e membro no círculo (060).
 4. **Dashboard** agrupa por família; só exibe perfis aos quais o usuário tem grant (ou é titular).
 5. No perfil de saúde: **Quem tem acesso** — lista cuidadores; titular pode revogar.

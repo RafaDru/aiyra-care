@@ -273,7 +273,17 @@
       "caregiver": "Caregiver",
       "healthProfile": "Health profile",
       "you": "You",
-      "familyCircle": "Family"
+      "familyCircle": "Family",
+      "panelTitle": "How family access works",
+      "panelIntro": "We separate sign-in, family groups, and clinical records so you can invite others safely (LGPD).",
+      "accountTitle": "Account",
+      "accountBody": "Your sign-in and subscription. Each adult should have their own account — do not share passwords.",
+      "familyCircleTitle": "Family (care circle)",
+      "familyCircleBody": "Groups health profiles and caregivers. You can have more than one family (e.g. different households).",
+      "healthProfileTitle": "Health profile",
+      "healthProfileBody": "One person’s clinical history (exams, visits, wallet). It can be you or someone you care for.",
+      "caregiverTitle": "Caregiver",
+      "caregiverBody": "Another account you authorize to see specific profiles — by invite, with a defined access level."
     },
     "invite": {
       "title": "Invite caregiver",

@@ -32,7 +32,7 @@
 |---|------|-------------------|-------|
 | 1 | Login como João | Dashboard carrega | |
 | 2 | Verificar pacientes | Pedro, Lucas, Mariana listados | |
-| 3 | `/settings/family` | Círculo Família A visível; João owner | |
+| 3 | `/settings/family` | Card glossário «Como funciona família e acesso» visível; círculo Família A; João owner | |
 | 4 | Convitar Maria (se não existir) | Convite criado; e-mail ou link pendente | |
 | 5 | Login Maria → aceitar convite | Maria entra no círculo | |
 | 6 | Login Maria → dashboard | Pedro e Lucas sim; **Mariana não** | |
