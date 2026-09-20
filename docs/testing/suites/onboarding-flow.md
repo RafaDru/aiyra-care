@@ -7,7 +7,7 @@
 | **Lane** | `regression`, `business-full` |
 | **Fixture** | [`qa-onboarding`](../fixtures/qa-onboarding.json) |
 
-Fluxo completo de **primeiro acesso**: compliance (quando pendente) → formulário de onboarding → dashboard com perfil titular (`self`).
+Fluxo completo de **primeiro acesso**: compliance (quando pendente) → wizard de onboarding (perfil titular + dependentes opcionais) → dashboard «Sua família» com perfil titular (`self`).
 
 ## Pré-requisitos
 
@@ -28,7 +28,8 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 2 | Login e-mail/senha | Redireciona para `/compliance/accept` ou `/onboarding` | |
 | 3 | Aceitar termos (se gate) | Avança para `/onboarding` | |
 | 4 | Preencher nome, nascimento ≥18, sexo, CPF | Validação OK | |
-| 5 | **Concluir cadastro** | Dashboard `/` com card do titular | |
+| 5 | **Continuar** → passo dependentes | «Quem você acompanha?» | |
+| 6 | **Pular por agora** (ou adicionar dependente) | Dashboard `/` com heading «Sua família» | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)
 

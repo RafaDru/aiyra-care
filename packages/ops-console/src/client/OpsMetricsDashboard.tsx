@@ -15,11 +15,41 @@ import {
 import { SupportPanel } from './SupportPanel.js'
 import { BusinessPanel } from './BusinessPanel.js'
 import { IssuesPanel } from './IssuesPanel.js'
+import { ProdutoLifecyclePanel } from './ProdutoLifecyclePanel.js'
+import {
+  readStoredStrategySection,
+  readStrategySectionFromUrl,
+  StrategyPanel,
+} from './StrategyPanel.js'
 import { OpsDrillDownProvider } from './ops-drill-down.js'
+import type { StrategySectionId } from './ops.types.js'
 
 const TAB_STORAGE_KEY = 'ops-console-active-tab'
 
-type TabKey = 'overview' | 'business' | 'issues' | 'product' | 'support' | 'sync' | 'ava' | 'infra' | 'cost'
+type TabKey =
+  | 'overview'
+  | 'business'
+  | 'strategy'
+  | 'issues'
+  | 'produto'
+  | 'product'
+  | 'support'
+  | 'sync'
+  | 'ava'
+  | 'infra'
+  | 'cost'
+
+const TAB_KEYS: TabKey[] = [
+  'overview', 'business', 'strategy', 'issues', 'produto', 'product', 'support', 'sync', 'ava', 'infra', 'cost',
+]
+
+function isTabKey(value: string | null): value is TabKey {
+  return value != null && TAB_KEYS.includes(value as TabKey)
+}
+
+function resolveInitialStrategySection(): StrategySectionId {
+  return readStrategySectionFromUrl() ?? readStoredStrategySection() ?? 'mkt'
+}
 
 function TabLabel({ text, count, alert }: { text: string; count?: number; alert?: boolean }) {
   return (
@@ -50,23 +80,13 @@ export function OpsMetricsDashboard({
     [],
   )
 
+  const [strategySection, setStrategySection] = useState<StrategySectionId>(resolveInitialStrategySection)
+
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const fromUrl = new URLSearchParams(window.location.search).get('tab')
-    if (
-      fromUrl === 'overview' || fromUrl === 'business' || fromUrl === 'issues' || fromUrl === 'product'
-      || fromUrl === 'support' || fromUrl === 'sync' || fromUrl === 'ava' || fromUrl === 'infra'
-      || fromUrl === 'cost'
-    ) {
-      return fromUrl
-    }
+    if (isTabKey(fromUrl)) return fromUrl
     const saved = localStorage.getItem(TAB_STORAGE_KEY)
-    if (
-      saved === 'overview' || saved === 'business' || saved === 'issues' || saved === 'product'
-      || saved === 'support' || saved === 'sync' || saved === 'ava' || saved === 'infra'
-      || saved === 'cost'
-    ) {
-      return saved
-    }
+    if (isTabKey(saved)) return saved
     return 'overview'
   })
 
@@ -92,10 +112,29 @@ export function OpsMetricsDashboard({
     cost: metrics.internalLlm?.exhausted ? 1 : metrics.internalLlm?.budgetExhausted ?? 0,
   }), [data.alerts, metrics])
 
+  const syncUrl = (tab: TabKey, strategy?: StrategySectionId) => {
+    const params = new URLSearchParams(window.location.search)
+    params.set('tab', tab)
+    if (tab === 'strategy') {
+      params.set('strategy', strategy ?? strategySection)
+    } else {
+      params.delete('strategy')
+    }
+    const qs = params.toString()
+    const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
+    window.history.replaceState(null, '', next)
+  }
+
   const onTabChange = (key: string) => {
     const tab = key as TabKey
     setActiveTab(tab)
     localStorage.setItem(TAB_STORAGE_KEY, tab)
+    syncUrl(tab)
+  }
+
+  const onStrategySectionChange = (section: StrategySectionId) => {
+    setStrategySection(section)
+    syncUrl('strategy', section)
   }
 
   const items = [
@@ -118,6 +157,15 @@ export function OpsMetricsDashboard({
       ),
     },
     {
+      key: 'strategy',
+      label: <TabLabel text="Estratégia" />,
+      children: (
+        <div className="ops-tab-panel">
+          <StrategyPanel section={strategySection} onSectionChange={onStrategySectionChange} />
+        </div>
+      ),
+    },
+    {
       key: 'issues',
       label: <TabLabel text="Issues" count={issueAttention} alert={issueAttention > 0} />,
       children: (
@@ -126,6 +174,15 @@ export function OpsMetricsDashboard({
             onRefresh={onRefresh}
             highlightInvestigationId={highlightInvestigationId}
           />
+        </div>
+      ),
+    },
+    {
+      key: 'produto',
+      label: <TabLabel text="Produto" />,
+      children: (
+        <div className="ops-tab-panel">
+          <ProdutoLifecyclePanel />
         </div>
       ),
     },
@@ -146,6 +203,7 @@ export function OpsMetricsDashboard({
           <SupportPanel
             openCount={metrics.supportReports?.openCount ?? 0}
             submitted24h={metrics.supportReports?.submitted24h ?? 0}
+            submittedSparkline={metrics.timeSeries24h.supportReportsSubmitted?.map((r) => r.count)}
             onQueueChange={onRefresh}
           />
         </div>

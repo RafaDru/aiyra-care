@@ -1,5 +1,43 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-18] - Docs Automations: criação manual na UI (sem import JSON)
+
+### Decisão
+- A UI **Cursor → Automations** não oferece import de workflow JSON (confirmado por Rafael). Runbooks passam a descrever **New automation** + colar prompt dos `*.yaml` / playbook; `*.workflow.json` ficam só como referência versionada.
+
+### Realizado
+- `.cursor/automations/README.md`, `docs/coordination/CURSOR_RETURN_PATH.md`, runbooks ops; `backend-task-cursor-handoff.yaml` de referência.
+
+## [2026-09-18] - Parceria Cursor × Claude Code (backend + fila + gatilhos)
+
+### Decisão
+- **Variante A:** Cursor = produto, interfaces, contrato BFF, QA; Claude Code = núcleo servidor com capabilities completas.
+- Fila `docs/coordination/BACKEND_TASK_QUEUE.md`; guard-rails de pacotes; `fs.watch` + notificação CLI Claude→Cursor.
+
+### Realizado
+- `docs/CLAUDE_CODE_PARTNERSHIP.md`, `docs/coordination/*` (reconciliar com cópia local Claude após merge).
+
+### Próximo
+- PR docs → `main`; piloto `TASK-*` na fila.
+
+## [2026-09-18] - Worker My Machines: detecção e autostart resilientes
+
+### Realizado
+- `cursor-worker-start.ps1` — corrige falso positivo com `0 workers`; remove `worker.lock` obsoleto; loop de reinício no modo `-Autostart` (tarefa `AiyraCare-CursorMyMachinesWorker`).
+
+## [2026-09-16] - MVP: épico family-day-to-day fechado; referral billing fora do MVP
+
+### Decisão
+- Épico `family-day-to-day` marcado **done** no `roadmap.json` (D1–D5 + suites QA). Atribuição referral no share (D4) permanece sem billing.
+- **Programa de indicação bilateral com descontos** permanece **fora do MVP** — debate em `docs/discovery/referral-growth-loop.md`; depende de parecer jurídico formal antes de qualquer cobrança/desconto.
+
+### Realizado
+- Suite QA `patient-wallet` (smoke Carteira) + correção `docs/testing/suites/index.json` (entradas integrations/hygiene/support/ava desaninhadas).
+- i18n Batch S3: `i18n:check` + strings Ava report/lite mode.
+
+### Próximo
+- Merge drafts #4, #13, #18 + Ava stabilize; Rafael valida Staging `:5174`.
+
 ## [2026-09-16] - Cursor Projects + My Machines (execução local)
 
 ### Decisão

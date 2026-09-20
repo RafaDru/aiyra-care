@@ -51,7 +51,8 @@ Apenas **duas** frentes ativas — não abrir terceira lane sem fechar ou pausar
 - **D4** E-mail ao médico + código referral no link — **entregue** (MVP atribuição; sem billing)
 - **D5** Portal médico leve (página pública) — **entregue**
 - Programa de indicação bilateral (descontos) — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
-- Suites QA dia a dia: `patient-clinical-export`, `family-quick-capture`, `family-day-timeline`, `patient-health-thread` — **todas com spec**
+- Suites QA dia a dia: `patient-clinical-export`, `family-quick-capture`, `family-day-timeline`, `patient-health-thread`, `patient-wallet` — **todas com spec**
+- Referral billing bilateral — **fora do MVP** (atribuição D4 ok; descontos aguardam jurídico)
 
 ### 2 — Consolidação Ava parceira
 
@@ -65,6 +66,7 @@ Apenas **duas** frentes ativas — não abrir terceira lane sem fechar ou pausar
 - **G4:** tool calling mutável amplo (`agent-runtime` — parcial)
 - Expressão visual + narrativa (`AVA_EXPRESSIONS.md`)
 - Não julgar qualidade LLM em QA — só comportamento determinístico (`AVA_QA_SCOPE.md`)
+- Estabilizar flake Ava no `business-full` (composer idle + retries) — draft `cursor/ava-smoke-stabilize-cde2`
 
 ### 3 — Ambiente profissional da medicina
 

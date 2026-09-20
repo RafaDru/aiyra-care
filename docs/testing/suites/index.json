@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-08",
+  "updatedAt": "2026-09-16",
   "description": "Catálogo de suites QA — CRUD de negócio via UI. Ver docs/testing/BUSINESS_ACTION_MATRIX.md",
   "suites": [
     {
@@ -30,6 +30,21 @@
       "coverage": "partial",
       "businessActions": ["onboarding.complete", "compliance.accept"],
       "automation": { "status": "partial", "spec": "packages/web/e2e/onboarding.spec.ts" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "auth-entry-flow",
+      "domain": "conta",
+      "title": "Entrada auth — landing, login/signup e onboarding guiado",
+      "lane": "regression",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "requiredForMain": true,
+      "order": 2,
+      "doc": "docs/testing/suites/auth-entry-flow.md",
+      "coverage": "partial",
+      "businessActions": ["auth.login", "auth.signup_mode", "onboarding.complete"],
+      "automation": { "status": "partial", "spec": "packages/web/e2e/suites/auth-entry-flow.spec.ts" },
       "estimatedMinutes": 10
     },
     {
@@ -100,6 +115,10 @@
       "coverage": "planned",
       "businessActions": ["medication.create", "medication.update", "medication.deactivate"],
       "automation": { "status": "done", "spec": "packages/web/e2e/suites/patient-medications-crud.spec.ts" },
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "integrations-link-sync",
       "domain": "integracoes",
       "title": "Integrações — vincular e sincronizar (UI)",
       "lane": "business-full",
@@ -109,6 +128,10 @@
       "coverage": "planned",
       "businessActions": ["integration_link.create", "sync.start"],
       "automation": { "status": "done", "spec": "packages/web/e2e/suites/integrations-link-sync.spec.ts" },
+      "estimatedMinutes": 20
+    },
+    {
+      "id": "hygiene-dedup-ui",
       "domain": "higienizacao",
       "title": "Higienização — resolver duplicata",
       "featureId": "hygiene-neo4j-candidate",
@@ -118,6 +141,10 @@
       "doc": "docs/testing/suites/hygiene-dedup-ui.md",
       "coverage": "partial",
       "automation": { "status": "done", "spec": "packages/web/e2e/suites/hygiene-dedup-ui.spec.ts" },
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "support-user-report",
       "domain": "suporte",
       "title": "Reportar problema",
       "featureId": "support-user-reports",
@@ -125,8 +152,12 @@
       "parallelSafe": true,
       "fixtureId": "core-demo",
       "doc": "docs/testing/suites/support-user-report.md",
-      "coverage": "partial",
+      "coverage": "done",
       "automation": { "status": "done", "spec": "packages/web/e2e/suites/support-user-report.spec.ts" },
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "ava-companion-smoke",
       "domain": "ava",
       "title": "Ava — dock, lente, mensagem simples",
       "lane": "ava",
@@ -136,6 +167,19 @@
       "coverage": "planned",
       "automation": { "status": "planned" },
       "estimatedMinutes": 10
+    },
+    {
+      "id": "patient-wallet",
+      "domain": "perfil-carteira",
+      "title": "Carteira — planos e sync silencioso (smoke)",
+      "lane": "business-full",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/patient-wallet.md",
+      "coverage": "partial",
+      "businessActions": ["wallet.view", "wallet.silent_sync_smoke"],
+      "automation": { "status": "partial", "spec": "packages/web/e2e/suites/patient-wallet.spec.ts" },
+      "estimatedMinutes": 5
     },
     {
       "id": "ava-guardrail-smoke",
@@ -247,7 +291,7 @@
     "regression": {
       "title": "Gate pré-main (rápido)",
       "description": "Sequencial — smoke + onboarding + paciente CRUD",
-      "suiteIds": ["regression-smoke", "onboarding-flow", "core-patient-crud"]
+      "suiteIds": ["regression-smoke", "onboarding-flow", "auth-entry-flow", "core-patient-crud"]
     },
     "business-full": {
       "title": "Teste completo de negócio via UI",
@@ -255,6 +299,7 @@
       "suiteIds": [
         "regression-smoke",
         "onboarding-flow",
+        "auth-entry-flow",
         "core-patient-crud",
         "family-access-matrix",
         "patient-exams-crud",
@@ -266,6 +311,7 @@
         "patient-clinical-export",
         "family-quick-capture",
         "family-day-timeline",
+        "patient-wallet",
         "patient-health-thread",
         "ava-companion-smoke",
         "ava-guardrail-smoke",

@@ -25,16 +25,19 @@ export function buildTimeSeries24h(
   avaEventRows: Array<{ hour: Date | string; completed: number; failed: number; quotaBlocked: number }>,
   clientErrorRows: Array<{ hour: Date | string; count: number }>,
   avaTokenRows: Array<{ hour: Date | string; turns: number; tokens: number }>,
+  supportReportRows: Array<{ hour: Date | string; count: number }> = [],
 ): {
   syncJobs: OpsHourlySyncBucket[]
   avaEvents: OpsHourlyAvaEventBucket[]
   clientErrors: OpsHourlyCountBucket[]
   avaTokens: OpsHourlyAvaTokensBucket[]
+  supportReportsSubmitted: OpsHourlyCountBucket[]
 } {
   return {
     syncJobs: syncRows.map((r) => mapHourBucket(r)),
     avaEvents: avaEventRows.map((r) => mapHourBucket(r)),
     clientErrors: clientErrorRows.map((r) => mapHourBucket(r)),
     avaTokens: avaTokenRows.map((r) => mapHourBucket(r)),
+    supportReportsSubmitted: supportReportRows.map((r) => mapHourBucket(r)),
   }
 }

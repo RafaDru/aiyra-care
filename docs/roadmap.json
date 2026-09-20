@@ -885,8 +885,8 @@
         {
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
-          "status": "planned",
-          "detail": "Fora do web atual."
+          "status": "in_progress",
+          "detail": "M4: família ACL + compliance gate + deep link invite/accept. Plano: Project store docs/mobile-parity-plan.md."
         },
         {
           "id": "plat-microservices",
@@ -2218,8 +2218,8 @@
       "priority": "P2",
       "title": "Analytics de negócio (agregados, sem PHI)",
       "summary": "Visão executiva e operacional: funis de ativação, retenção, uso por feature, volume de suporte, billing e saúde de integrações — cruzando product_events, support_reports, client_errors e Stripe. Complementa observability-platform (técnico) e product-analytics-optin (NLP opt-in). Primeira superfície: aba Negócio no console ops ou relatórios semanais.",
-      "status": "in_progress",
-      "statusLabel": "MVP aba Negócio no ops",
+      "status": "done",
+      "statusLabel": "MVP aba Negócio + guardrails LGPD",
       "reviewBadge": ["legal", "business"],
       "items": [
         {
@@ -2260,6 +2260,13 @@
           "reviewBadge": ["design"]
         },
         {
+          "id": "ops-strategy-advisory-tab",
+          "title": "Aba «Estratégia» no Command Hub (advisory)",
+          "status": "done",
+          "detail": "packages/ops-console/content/strategy + StrategyPanel (Marketing, Financeiro, CX); manifest updatedAt; alinhamento Command Hub F2 leitura estratégica.",
+          "reviewBadge": ["business"]
+        },
+        {
           "id": "biz-analytics-weekly-report",
           "title": "Relatório semanal automático (interno)",
           "status": "done",
@@ -2268,8 +2275,8 @@
         {
           "id": "biz-analytics-lgpd-guardrails",
           "title": "Guardrails LGPD analytics negócio",
-          "status": "planned",
-          "detail": "Documentar finalidade, minimização e retenção em docs/legal/ + DATA_PROCESSING_MAP; revisão jurídica antes de métricas novas.",
+          "status": "done",
+          "detail": "DATA_PROCESSING_MAP + feature card business-analytics-ops (finalidade, minimização, retenção); novas métricas exigem review legal.",
           "reviewBadge": ["legal"]
         }
       ]
@@ -2385,6 +2392,36 @@
           "title": "FAQ + contato comercial / suporte",
           "status": "planned",
           "detail": "Link compliance/contact API; formulário lead opcional."
+        }
+      ]
+    },
+    {
+      "id": "landing-page-refresh",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Landing — reavaliação visual e narrativa",
+      "summary": "Reavaliação visual da landing pública: animações, carrossel de dores (consulta sem exames/histórico), jornada emocional e prova social — além dos CTAs auth já corrigidos.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "reviewBadge": ["content"],
+      "items": [
+        {
+          "id": "landing-refresh-hero-motion",
+          "title": "Hero com animação leve e hierarquia visual",
+          "status": "planned",
+          "detail": "Motion CSS/Lottie sutil; manter performance mobile."
+        },
+        {
+          "id": "landing-refresh-pain-carousel",
+          "title": "Carrossel «consulta sem exames/histórico»",
+          "status": "planned",
+          "detail": "Narrativa dor → solução em slides; track landing_cta_click por slide."
+        },
+        {
+          "id": "landing-refresh-social-proof",
+          "title": "Prova social e métricas reais",
+          "status": "planned",
+          "detail": "Testemunhos, números de uso — alinhar com marketing e jurídico."
         }
       ]
     },

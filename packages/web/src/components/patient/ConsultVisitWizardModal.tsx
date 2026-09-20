@@ -13,6 +13,7 @@ import { CLINICAL_EXPORT_COPY } from './clinical-export-copy.js'
 import { PatientClinicalExportSheet, printClinicalExportSheet } from './PatientClinicalExportSheet.js'
 import { requestClinicalExportOpen } from '../../lib/clinical-export-bus.js'
 import { trackProductEvent } from '../../lib/product-events.js'
+import { useTranslation } from 'react-i18next'
 
 const { Text, Paragraph } = Typography
 
@@ -31,6 +32,7 @@ export function ConsultVisitWizardModal({
   context,
   onClose,
 }: ConsultVisitWizardModalProps) {
+  const { t } = useTranslation()
   const sheetRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'summary' | 'full'>('summary')
   const [shareUrl, setShareUrl] = useState<string | null>(null)
@@ -100,7 +102,7 @@ export function ConsultVisitWizardModal({
 
   const handleWhatsapp = () => {
     if (!shareUrl) return
-    const name = patientName ?? activeContext?.identity.name ?? 'paciente'
+    const name = patientName ?? activeContext?.identity.name ?? t('patient.personFallback')
     const text = `Olá! Resumo de saúde de ${name} para nossa consulta:\n${shareUrl}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
     trackProductEvent('consult_visit_whatsapp', { mode }, { patientId })

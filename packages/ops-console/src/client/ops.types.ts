@@ -143,6 +143,7 @@ export interface OpsTimeSeries24h {
   avaEvents: OpsHourlyAvaEventBucket[]
   clientErrors: OpsHourlyCountBucket[]
   avaTokens: OpsHourlyAvaTokensBucket[]
+  supportReportsSubmitted: OpsHourlyCountBucket[]
 }
 
 export interface ErrorFingerprintRow {
@@ -397,7 +398,7 @@ export interface SupportReportOpsRow {
   createdAt: string
   expiresAt: string
   diagnosticContext: Record<string, unknown>
-  analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'
+  analysisStatus: 'none' | 'queued' | 'pending' | 'in_progress' | 'completed' | 'failed'
   operatorNotes: string | null
   analysisSummary: string | null
   analysisArtifactPath: string | null
@@ -405,6 +406,11 @@ export interface SupportReportOpsRow {
   analysisCompletedAt: string | null
   analysisLastError: string | null
   investigationId: string | null
+  suggestedCategory: string | null
+  categoryReviewNote: string | null
+  taxonomyGapProposal: string | null
+  deploymentStatus: string
+  deploymentActions: Array<{ label: string; kind: string; url?: string; done?: boolean }>
 }
 
 export interface RuntimeDegradedView {
@@ -431,6 +437,33 @@ export interface OpsMetricsResponse {
   runtime?: RuntimeDegradedView
   triage?: OpsAlertTriageRow[]
   alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
+}
+
+export interface ProductLifecycleSnapshot {
+  loadedAt: string
+  roadmapUpdatedAt?: string
+  featuresUpdatedAt?: string
+  epicsInProgress: Array<{
+    id: string
+    title: string
+    priority: string
+    category: string
+    status: string
+    statusLabel?: string
+    summary?: string
+    inProgressItems: number
+  }>
+  features: Array<{
+    id: string
+    epicId?: string
+    title: string
+    status: string
+    priority: string
+    category: string
+    doc: string
+    suiteId?: string
+    suiteDoc?: string
+  }>
 }
 
 export interface OpsAlertsDispatchResult {
@@ -467,4 +500,30 @@ export interface StackActionResult {
   status: StackStatusSnapshot
   platform?: string
   error?: string
+}
+
+export type StrategySectionId = 'mkt' | 'finance' | 'cx'
+
+export type StrategyManifestResponse = {
+  updatedAt: string
+  source?: string
+  sections: Record<
+    StrategySectionId,
+    {
+      title: string
+      primaryFile: string
+      secondaryFile?: string
+      advisorSkill: string
+    }
+  >
+}
+
+export type StrategyContentPayload = {
+  section: StrategySectionId
+  title: string
+  updatedAt: string
+  advisorSkill: string
+  primaryMarkdown: string
+  secondaryMarkdown?: string
+  secondaryTitle?: string
 }

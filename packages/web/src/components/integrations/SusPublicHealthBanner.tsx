@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Space, Typography } from 'antd'
 import { CloudDownloadOutlined, SyncOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { GovBrSessionView } from '../../lib/api.types.js'
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function SusPublicHealthBanner({ patientId, patientCpf, onReimport, onImported }: Props) {
+  const { t } = useTranslation()
   const [govbr, setGovbr] = useState<GovBrSessionView | null>(null)
   const [syncing, setSyncing] = useState(false)
 
@@ -25,7 +27,7 @@ export function SusPublicHealthBanner({ patientId, patientCpf, onReimport, onImp
 
   const lastFetch = govbr?.conectesusLastFetchAt
   const lastLabel = lastFetch
-    ? new Date(lastFetch).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+    ? new Date(lastFetch).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
     : null
 
   const handleQuickSync = async () => {
@@ -44,23 +46,23 @@ export function SusPublicHealthBanner({ patientId, patientCpf, onReimport, onImp
     }
   }
 
+  const description = govbr?.sessionReady
+    ? lastLabel
+      ? t('vaccine.conecteSus.descriptionReadyWithDate', { date: lastLabel })
+      : t('vaccine.conecteSus.descriptionReady')
+    : t('vaccine.conecteSus.descriptionFirstTime')
+
   return (
     <Alert
       type="info"
       showIcon
       style={{ marginBottom: 16 }}
-      message="ConecteSUS (gov.br)"
+      message={t('vaccine.conecteSus.title')}
       description={
         <Space direction="vertical" size={4} style={{ width: '100%' }}>
-          <Text type="secondary">
-            {govbr?.sessionReady
-              ? lastLabel
-                ? `Última busca no SUS: ${lastLabel}. Reimportar traz vacinas e exames novos (sem duplicar o que já existe).`
-                : 'Sessão gov.br ativa — busque ou reimporte vacinas e exames do SUS.'
-              : 'Primeira importação abre gov.br para login; depois, reimport sem browser.'}
-          </Text>
+          <Text type="secondary">{description}</Text>
           {!patientCpf && (
-            <Text type="warning">Cadastre o CPF do paciente para importar do ConecteSUS.</Text>
+            <Text type="warning">{t('vaccine.conecteSus.cpfWarning')}</Text>
           )}
           <Space wrap>
             <Button
@@ -69,7 +71,7 @@ export function SusPublicHealthBanner({ patientId, patientCpf, onReimport, onImp
               onClick={onReimport}
               disabled={!patientCpf}
             >
-              Importação guiada
+              {t('vaccine.conecteSus.guidedImport')}
             </Button>
             {govbr?.sessionReady && patientCpf && (
               <Button
@@ -78,7 +80,7 @@ export function SusPublicHealthBanner({ patientId, patientCpf, onReimport, onImp
                 loading={syncing}
                 onClick={() => void handleQuickSync()}
               >
-                Reimportar agora
+                {t('vaccine.conecteSus.reimportNow')}
               </Button>
             )}
           </Space>

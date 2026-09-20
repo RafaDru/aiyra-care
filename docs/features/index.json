@@ -12,7 +12,7 @@
       "priority": "P1",
       "doc": "docs/features/family-access-model.md",
       "domainDoc": "docs/FAMILY_ACCESS_MODEL.md",
-      "routes": ["/", "/patients/:id", "/settings/family", "/settings/account", "/invite/accept"],
+      "routes": ["/", "/family", "/patients/:id", "/settings/account", "/invite/accept"],
       "api": [
         "GET /patients/:id/access-grants",
         "POST /patients/:id/access-grants",
@@ -75,7 +75,7 @@
       "id": "support-user-reports",
       "epicId": "prod-run-intelligence",
       "title": "Reportar problema — suporte com consentimento",
-      "status": "in_progress",
+      "status": "done",
       "category": "tecnico",
       "priority": "P1",
       "doc": "docs/features/support-user-reports.md",
@@ -124,6 +124,20 @@
       "tags": ["captura", "dia a dia", "família", "medidas", "agenda"]
     },
     {
+      "id": "patient-wallet",
+      "epicId": "connect-silencioso",
+      "title": "Carteira — planos e sync silencioso",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P0",
+      "doc": "docs/features/patient-wallet.md",
+      "domainDoc": "docs/SYNC_DELTA.md",
+      "routes": ["/patients/:id?tab=wallet"],
+      "api": ["POST /integration-links/:id/sync?silent=1", "GET /integration-links/:id/sync-status"],
+      "helpTopics": [],
+      "tags": ["carteira", "connect", "sync silencioso", "convênio"]
+    },
+    {
       "id": "family-day-timeline",
       "epicId": "family-day-to-day",
       "title": "Bloco «Hoje» na Carteira",
@@ -163,7 +177,7 @@
       "id": "business-analytics-ops",
       "epicId": "business-analytics",
       "title": "Analytics de negócio (console ops)",
-      "status": "in_progress",
+      "status": "done",
       "category": "negocio",
       "priority": "P2",
       "doc": "docs/features/business-analytics-ops.md",
@@ -172,6 +186,46 @@
       "api": ["GET /ops/metrics"],
       "helpTopics": [],
       "tags": ["ops", "analytics", "negócio", "sem-phi"]
+    },
+    {
+      "id": "ops-strategy-advisory",
+      "epicId": "business-analytics",
+      "title": "Estratégia advisory (console ops)",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/ops-strategy-advisory.md",
+      "domainDoc": "docs/OBSERVABILITY.md",
+      "routes": [],
+      "api": [],
+      "helpTopics": [],
+      "tags": ["ops", "estratégia", "marketing", "cx", "sem-phi"]
+    },
+    {
+      "id": "auth-entry-onboarding",
+      "epicId": "institutional-landing",
+      "title": "Entrada auth e onboarding guiado",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/auth-entry-onboarding.md",
+      "routes": ["/home", "/login", "/onboarding"],
+      "api": ["POST /auth/complete-profile", "POST /patients"],
+      "helpTopics": [],
+      "tags": ["conta", "onboarding", "b2c", "família"]
+    },
+    {
+      "id": "landing-marketing",
+      "epicId": "landing-page-refresh",
+      "title": "Landing pública — marketing e funil",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/landing-marketing.md",
+      "routes": ["/home"],
+      "api": ["POST /telemetry/public-events"],
+      "helpTopics": [],
+      "tags": ["marketing", "landing", "funil"]
     },
     {
       "id": "first-visit-guided-ux",
@@ -186,6 +240,29 @@
       "api": ["GET /patients/:id/family-support/insights"],
       "helpTopics": [],
       "tags": ["onboarding", "ux", "ava", "i18n"]
+    },
+    {
+      "id": "mobile-app-shell",
+      "epicId": "plat-mobile",
+      "title": "App mobile — shell Expo (paridade web)",
+      "status": "in_progress",
+      "category": "tecnico",
+      "priority": "P2",
+      "doc": "docs/features/mobile-app-shell.md",
+      "routes": ["/(app)/settings/family", "/invite/accept", "/(app)/compliance/accept"],
+      "api": [
+        "GET /patients",
+        "GET /patients/:id",
+        "POST /auth/sync",
+        "GET /compliance/status",
+        "POST /compliance/accept",
+        "GET/POST /family-access/invites",
+        "POST /family-access/invites/accept",
+        "GET/POST/DELETE /family-access/profile-shares",
+        "GET/POST/PATCH /care-circles"
+      ],
+      "helpTopics": [],
+      "tags": ["mobile", "expo", "paridade"]
     },
     {
       "id": "documentation-knowledge-base",

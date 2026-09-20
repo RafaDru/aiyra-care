@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import { trackProductEvent } from '../../lib/product-events.js'
 import { reportApiClientError } from '../../lib/client-errors.js'
+import { useActiveCareCircle } from '../../contexts/ActiveCareCircleContext.js'
 
 const { Text, Paragraph } = Typography
 
@@ -45,10 +46,10 @@ interface InviteCircle {
 
 export function FamilyInviteCard() {
   const { t } = useTranslation()
+  const { activeCircleId, setActiveCircleId, hasMultipleCircles } = useActiveCareCircle()
   const [invites, setInvites] = useState<FamilyInvite[]>([])
   const [circles, setCircles] = useState<InviteCircle[]>([])
   const [ownedPatients, setOwnedPatients] = useState<OwnedPatient[]>([])
-  const [selectedCircleId, setSelectedCircleId] = useState<string | undefined>()
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -67,10 +68,9 @@ export function FamilyInviteCard() {
         (c) => c.memberRole === 'owner' || c.memberRole === 'admin',
       )
       setCircles(manageable)
-      const defaultCircle = manageable[0]?.id
-      setSelectedCircleId((prev) => prev ?? defaultCircle)
-      if (defaultCircle) {
-        const owned = await api.familyAccess.listOwnedPatients(defaultCircle)
+      const circleForPatients = activeCircleId ?? manageable[0]?.id
+      if (circleForPatients) {
+        const owned = await api.familyAccess.listOwnedPatients(circleForPatients)
         setOwnedPatients(owned)
       } else {
         const owned = await api.familyAccess.listOwnedPatients()
@@ -81,7 +81,14 @@ export function FamilyInviteCard() {
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, activeCircleId])
+
+  useEffect(() => {
+    if (activeCircleId) {
+      void loadPatientsForCircle(activeCircleId)
+      form.setFieldValue('careCircleId', activeCircleId)
+    }
+  }, [activeCircleId])
 
   const loadPatientsForCircle = async (circleId?: string) => {
     try {
@@ -104,7 +111,7 @@ export function FamilyInviteCard() {
         inviteeEmail: values.email,
         patientIds: values.patientIds,
         accessLevel: values.accessLevel ?? 'full',
-        careCircleId: values.careCircleId ?? selectedCircleId,
+        careCircleId: values.careCircleId ?? activeCircleId,
         legitimacyAck: true,
       })
       setLastAcceptUrl(result.acceptUrl)
@@ -223,11 +230,12 @@ export function FamilyInviteCard() {
       >
         <Form form={form} layout="vertical" initialValues={{ accessLevel: 'full' }}>
           {circles.length > 0 && (
-            <Form.Item name="careCircleId" label={t('family.invite.circleLabel')} initialValue={selectedCircleId}>
+            <Form.Item name="careCircleId" label={t('family.invite.circleLabel')} initialValue={activeCircleId}>
               <Select
                 options={circles.map((c) => ({ value: c.id, label: c.name }))}
+                disabled={hasMultipleCircles}
                 onChange={(id: string) => {
-                  setSelectedCircleId(id)
+                  setActiveCircleId(id)
                   form.setFieldValue('patientIds', [])
                   void loadPatientsForCircle(id)
                 }}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Space, Spin, Tag } from 'antd'
+import { Alert, Button, Spin, Tag } from 'antd'
 import { ReloadOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { OpsMetricsResponse } from './ops.types.js'
 import { OpsMetricsDashboard } from './OpsMetricsDashboard.js'
@@ -29,7 +29,10 @@ export function App() {
   const load = useCallback(async () => {
     setError(null)
     try {
-      const [health, result] = await Promise.all([opsApi.health(), opsApi.metrics()])
+      const [health, result] = await Promise.all([
+        opsApi.health(),
+        opsApi.metrics(),
+      ])
       setDeploymentTier(normalizeOpsDeploymentTier(health.deploymentTier, health.port))
       setData(result)
     } catch (err) {
@@ -41,13 +44,13 @@ export function App() {
     }
   }, [])
 
+  useEffect(() => {
+    load()
+  }, [load])
+
   const refresh = useCallback(async () => {
     setLoading(true)
     await load()
-  }, [load])
-
-  useEffect(() => {
-    load()
   }, [load])
 
   useEffect(() => {
@@ -83,8 +86,8 @@ export function App() {
 
   return (
     <OpsShell
-      title="Observabilidade"
-      subtitle={`${OPS_SUBTITLES[deploymentTier]} · docs/ops/README.md`}
+      title="Command Hub"
+      subtitle={`${OPS_SUBTITLES[deploymentTier]} · métricas: Postgres local`}
       deploymentTier={deploymentTier}
       actions={
         <>
@@ -136,8 +139,15 @@ export function App() {
           runtime={data.runtime}
           onRefresh={refresh}
           stackSlot={
-            <OpsPanel title="Stack Aiyra" description="API :3010 e web :5173 — app monitorado.">
-              <StackControlCard onStackChange={refresh} />
+            <OpsPanel
+              title="Stack Aiyra"
+              description={
+                deploymentTier === 'preview'
+                  ? 'API :3020 e web :5174 — app monitorado (staging local).'
+                  : 'API :3010 e web :5173 — app monitorado (dev local).'
+              }
+            >
+              <StackControlCard deploymentTier={deploymentTier} onStackChange={refresh} />
             </OpsPanel>
           }
         />

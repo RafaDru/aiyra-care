@@ -29,6 +29,30 @@ const types = [
     active: true,
   }),
   MeasurementType.restore({
+    code: 'weight',
+    category: 'anthropometry',
+    labelKey: 'measurement.type.weight',
+    defaultUnit: 'kg',
+    valueKind: 'scalar',
+    precision: 2,
+    normalRange: null,
+    chartConfig: { enabled: true, chartKind: 'line' },
+    sortOrder: 1,
+    active: true,
+  }),
+  MeasurementType.restore({
+    code: 'height',
+    category: 'anthropometry',
+    labelKey: 'measurement.type.height',
+    defaultUnit: 'cm',
+    valueKind: 'scalar',
+    precision: 1,
+    normalRange: null,
+    chartConfig: { enabled: true, chartKind: 'line' },
+    sortOrder: 2,
+    active: true,
+  }),
+  MeasurementType.restore({
     code: 'vomit',
     category: 'symptom',
     labelKey: 'measurement.type.vomit',
@@ -68,6 +92,13 @@ describe('MeasurementService', () => {
   beforeEach(() => {
     repo = makeRepo()
     service = new MeasurementService(repo as never)
+  })
+
+  it('seedInitialAnthropometry creates weight and height observations', async () => {
+    const at = new Date('2026-08-14T10:00:00Z')
+    const saved = await service.seedInitialAnthropometry('patient-1', { weightKg: 10.2, heightCm: 75 }, { observedAt: at })
+    expect(saved.length).toBe(2)
+    expect(repo.saveObservation).toHaveBeenCalledTimes(2)
   })
 
   it('createObservationBatch saves multiple vitals', async () => {

@@ -49,13 +49,13 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 
 | Ação UI | CRUD | Suite | Cobertura |
 |---------|------|-------|-----------|
-| **Carteira** — visualizar plano / sync silencioso | R | `patient-wallet` | ⬜ |
+| **Carteira** — visualizar plano / sync silencioso | R | `patient-wallet` | 🟡 |
 | **Exames** — adicionar manual, editar, excluir | CRUD | `patient-exams-crud` | ⬜ |
 | **Exames** — marcadores / dashboard | R | `patient-exam-markers` | ⬜ |
 | **Documentos** — upload, visualizar, excluir | CRU(D) | `patient-documents-crud` | ⬜ |
 | **Medicamentos** — adicionar, editar, desativar | CRUD | `patient-medications-crud` | ⬜ |
 | **Vacinas** — registrar, editar, excluir | CRUD | `patient-vaccines-crud` | ⬜ |
-| **Medidas / crescimento** — lançar, editar | CRU | `patient-measurements-crud` | ⬜ |
+| **Registros** (sintomas + medidas clínicas) — lançar, editar | CRU | `patient-measurements-crud` | ⬜ |
 | **Timeline** — filtrar, agrupar | R | `patient-timeline` | ⬜ |
 | **Linha do tempo / Encadeamento** (Neo4j) | R | `patient-graph-paths` | ⬜ |
 | **Investigação / health thread** — wizard criar | C | `patient-health-thread` | ✅ |
@@ -87,7 +87,7 @@ Ver [`AVA_QA_SCOPE.md`](./AVA_QA_SCOPE.md).
 
 | Ação UI | CRUD | Suite | Cobertura |
 |---------|------|-------|-----------|
-| Reportar problema | C | `support-user-report` | 🟡 |
+| Reportar problema | C | `support-user-report` | ✅ |
 | Roadmap `/roadmap` | R | `regression-smoke` | ✅ |
 | Ops console (interno) | R | `ops-health` | 🟡 |
 

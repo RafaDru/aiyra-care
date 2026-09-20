@@ -1,14 +1,15 @@
 /**
  * Entrada única para Cloud Run Job (preview/prod).
- * CONNECT_WORKER_JOB_MODE=sync | ops
+ * CONNECT_WORKER_JOB_MODE=sync | ops | business-weekly
  */
 import { createWorkerPool, loadMonorepoEnv } from './env.js'
 import { runConnectWorkerBatch } from '../../api/src/infrastructure/sync/connect-worker.runner.js'
 import { runOpsProbeCheck } from './ops-probe.js'
 import { runOpsAlertsCheck } from './ops-alerts.js'
+import { runOpsBusinessWeeklyReport } from './ops-business-weekly.js'
 import { recordOpsWorkerTick } from './ops-worker-tick.js'
 
-loadMonorepoEnv()
+const monorepoRoot = loadMonorepoEnv()
 
 const mode = (process.env.CONNECT_WORKER_JOB_MODE ?? 'ops').trim().toLowerCase()
 const pool = createWorkerPool()
@@ -24,8 +25,12 @@ try {
     console.log('[connect-worker/job] probe', JSON.stringify(probe))
     const alerts = await runOpsAlertsCheck(pool)
     console.log('[connect-worker/job] alerts', JSON.stringify(alerts))
+  } else if (mode === 'business-weekly') {
+    await recordOpsWorkerTick(pool, 'business_weekly')
+    const report = await runOpsBusinessWeeklyReport(pool, monorepoRoot)
+    console.log('[connect-worker/job] business-weekly', JSON.stringify(report))
   } else {
-    console.error(`CONNECT_WORKER_JOB_MODE inválido: ${mode} (use sync ou ops)`)
+    console.error(`CONNECT_WORKER_JOB_MODE inválido: ${mode} (use sync, ops ou business-weekly)`)
     process.exit(1)
   }
 } catch (err) {

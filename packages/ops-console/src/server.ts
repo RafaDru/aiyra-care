@@ -35,6 +35,12 @@ import {
   runStackAction,
   isStackControlEnabled,
 } from './stack-control.js'
+import { loadProductLifecycle } from './product-lifecycle.js'
+import {
+  loadStrategyContent,
+  loadStrategyManifest,
+  type StrategySectionId,
+} from './strategy-content.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -48,10 +54,10 @@ const isDev = process.env.NODE_ENV !== 'production'
 const probeIntervalMs = Number(process.env.OPS_PROBE_INTERVAL_MS ?? '60000')
 
 function resolveDeploymentTier(): 'integration' | 'preview' | 'production' {
-  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
-  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   if (port === 3023) return 'preview'
   if (port === 3013) return 'integration'
+  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
+  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   return 'integration'
 }
 
@@ -139,14 +145,42 @@ async function main() {
     status: 'ok',
     port,
     deploymentTier,
+    commandHub: true,
   }))
+
+  let productLifecycleCache: ReturnType<typeof loadProductLifecycle> | undefined
+
+  fastify.get('/api/product-lifecycle', async () => {
+    productLifecycleCache = loadProductLifecycle(monorepoRoot)
+    return productLifecycleCache
+  })
+
+  fastify.get('/api/strategy/manifest', async () => loadStrategyManifest())
+
+  fastify.get<{ Params: { section: string } }>('/api/strategy/content/:section', async (req, reply) => {
+    const section = req.params.section?.trim() as StrategySectionId
+    if (section !== 'mkt' && section !== 'finance' && section !== 'cx') {
+      return reply.status(400).send({ error: 'invalid_strategy_section' })
+    }
+    try {
+      return loadStrategyContent(section)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'strategy_load_failed'
+      return reply.status(500).send({ error: message })
+    }
+  })
 
   fastify.get('/api/metrics', async () => {
     const payload = await metricsService.getMetrics()
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
     const alertAnalysis = await alertAnalysisService.getAll()
-    return { ...payload, runtime, triage, alertAnalysis }
+    return {
+      ...payload,
+      runtime,
+      triage,
+      alertAnalysis,
+    }
   })
 
   fastify.post('/api/alerts/check', async () => {
@@ -259,13 +293,20 @@ async function main() {
 
   fastify.post<{
     Params: { id: string }
-    Body: { analysisSummary?: string; analysisArtifactPath?: string }
+    Body: {
+      analysisSummary?: string
+      analysisArtifactPath?: string
+      deploymentStatus?: string
+      deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+    }
   }>(
     '/api/support-reports/:id/complete-analysis',
     async (req, reply) => {
       const ok = await supportReportService.completeAnalysis(req.params.id, {
         analysisSummary: req.body?.analysisSummary,
         analysisArtifactPath: req.body?.analysisArtifactPath,
+        deploymentStatus: req.body?.deploymentStatus,
+        deploymentActions: req.body?.deploymentActions,
       })
       if (!ok) return reply.status(400).send({ error: 'invalid_payload' })
       return { ok: true }
@@ -344,7 +385,8 @@ async function main() {
     throw err
   }
 
-  console.log(`[ops-console] http://${host}:${port} (independent observability console)`)
+  productLifecycleCache = loadProductLifecycle(monorepoRoot)
+  console.log(`[ops-console] http://${host}:${port} (command hub · ${deploymentTier})`)
 
   await runProbeCycle()
   probeTimer = setInterval(() => runProbeCycle(), probeIntervalMs)

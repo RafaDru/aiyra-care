@@ -43,6 +43,7 @@ export function emptyOpsMetricsSnapshot(): OpsMetricsSnapshot {
       avaEvents: [],
       clientErrors: [],
       avaTokens: [],
+      supportReportsSubmitted: [],
     },
   }
 }

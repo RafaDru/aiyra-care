@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined, CustomerServiceOutlined } from '@ant-design/icons'
+import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined, CustomerServiceOutlined, TeamOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -18,6 +18,9 @@ import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 import { FirstVisitTourDrawer } from '../onboarding/FirstVisitTourDrawer.js'
+import { DeploymentEnvironmentBadge } from './DeploymentEnvironmentBadge.js'
+import { ActiveCareCircleProvider } from '../../contexts/ActiveCareCircleContext.js'
+import { CareCircleGlobalSelector } from '../family/CareCircleGlobalSelector.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -45,15 +48,17 @@ export function AppLayout() {
   const mainSelectedKey =
     location.pathname === '/' || location.pathname.startsWith('/patients')
       ? '/'
-      : location.pathname.startsWith('/emergency')
-        ? '/emergency'
-        : location.pathname.startsWith('/settings')
-          ? '/settings'
-          : ''
+      : location.pathname.startsWith('/family')
+        ? '/family'
+        : location.pathname.startsWith('/emergency')
+          ? '/emergency'
+          : location.pathname.startsWith('/settings')
+            ? '/settings'
+            : ''
 
   const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
-  return (
+  const layout = (
     <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
       <Sider
         className="app-sider"
@@ -91,6 +96,7 @@ export function AppLayout() {
             selectedKeys={[mainSelectedKey]}
             items={[
               { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
+              { key: '/family', icon: <TeamOutlined />, label: t('nav.yourFamily') },
               {
                 key: '/emergency',
                 icon: <PhoneOutlined />,
@@ -154,7 +160,7 @@ export function AppLayout() {
             borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: collapsed ? 'space-between' : 'flex-end',
+            justifyContent: 'flex-end',
             height: 64,
             gap: 16,
             flexShrink: 0,
@@ -163,7 +169,11 @@ export function AppLayout() {
             zIndex: 100,
           }}
         >
-          {collapsed && <AppLogo variant="wordmark" height={38} />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap' }}>
+            {collapsed && <AppLogo variant="wordmark" height={38} />}
+            {configured && user && <CareCircleGlobalSelector />}
+            <DeploymentEnvironmentBadge />
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {configured && user && <QuickCaptureGlobal />}
             {configured && user && (
@@ -198,4 +208,10 @@ export function AppLayout() {
       <SupportReportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
     </Layout>
   )
+
+  if (configured && user) {
+    return <ActiveCareCircleProvider>{layout}</ActiveCareCircleProvider>
+  }
+
+  return layout
 }

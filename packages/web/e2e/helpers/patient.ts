@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import { uniqueQaCpf } from './fixtures'
 import { selectAntOption } from './select'
-import { hideAvaDock } from './ui'
+import { hideAvaDock, dismissFirstVisitTour } from './ui'
 
 export type CreatePatientInput = {
   name: string
@@ -18,14 +18,18 @@ async function fillMaskedDate(page: Page, label: string, value: string) {
   await input.press('Tab')
 }
 
+const newPatientDialog = (page: Page) =>
+  page.getByRole('dialog', { name: 'Adicionar à família' })
+
 export async function openNewPatientModal(page: Page) {
-  await page.getByRole('button', { name: 'Novo Paciente' }).click({ force: true })
-  await page.getByRole('dialog').waitFor({ state: 'visible' })
+  await dismissFirstVisitTour(page)
+  await page.getByRole('button', { name: 'Adicionar à família' }).click({ force: true })
+  await newPatientDialog(page).waitFor({ state: 'visible' })
 }
 
 export async function createPatientFromDashboard(page: Page, input: CreatePatientInput) {
   await openNewPatientModal(page)
-  const dialog = page.getByRole('dialog')
+  const dialog = newPatientDialog(page)
   await dialog.getByLabel('Nome', { exact: true }).fill(input.name)
   await fillMaskedDate(page, 'Data de Nascimento', input.birthDate)
   if (input.genderLabel) {
@@ -37,7 +41,7 @@ export async function createPatientFromDashboard(page: Page, input: CreatePatien
     await dialog.locator('.ant-checkbox-wrapper').filter({ hasText: /responsável legal/i }).click()
   }
   await dialog.getByRole('button', { name: 'Salvar' }).click()
-  await page.getByRole('dialog').waitFor({ state: 'hidden', timeout: 15_000 })
+  await dialog.waitFor({ state: 'hidden', timeout: 15_000 })
   await page.getByText(input.name).first().waitFor({ state: 'visible', timeout: 15_000 })
 }
 
@@ -49,7 +53,7 @@ export async function openPatientByName(page: Page, name: string) {
 
 export async function editPatientName(page: Page, newName: string) {
   await page.getByRole('button').filter({ has: page.locator('.anticon-edit') }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Editar Dados do Paciente' })
+  const dialog = page.getByRole('dialog', { name: 'Editar perfil' })
   await dialog.waitFor({ state: 'visible' })
   await dialog.getByLabel('Nome', { exact: true }).fill(newName)
   await dialog.getByRole('button', { name: 'Salvar' }).click()
