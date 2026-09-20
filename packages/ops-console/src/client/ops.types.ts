@@ -501,3 +501,29 @@ export interface StackActionResult {
   platform?: string
   error?: string
 }
+
+export type StrategySectionId = 'mkt' | 'finance' | 'cx'
+
+export type StrategyManifestResponse = {
+  updatedAt: string
+  source?: string
+  sections: Record<
+    StrategySectionId,
+    {
+      title: string
+      primaryFile: string
+      secondaryFile?: string
+      advisorSkill: string
+    }
+  >
+}
+
+export type StrategyContentPayload = {
+  section: StrategySectionId
+  title: string
+  updatedAt: string
+  advisorSkill: string
+  primaryMarkdown: string
+  secondaryMarkdown?: string
+  secondaryTitle?: string
+}

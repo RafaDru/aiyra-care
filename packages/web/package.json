@@ -12,6 +12,7 @@
     "clean:stale-js": "node -e \"const fs=require('fs');const p=require('path');function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory())walk(f);else if(e.name.endsWith('.js'))fs.unlinkSync(f);}}walk('src');\""
   },
   "dependencies": {
+    "@aiyra-care/design-tokens": "*",
     "@ant-design/icons": "^6.3.2",
     "@supabase/supabase-js": "^2.111.0",
     "antd": "^6.5.1",

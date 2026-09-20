@@ -3,6 +3,9 @@ import type {
   OpsMetricsResponse,
   ProductLifecycleSnapshot,
   StackActionResult,
+  StrategyContentPayload,
+  StrategyManifestResponse,
+  StrategySectionId,
 } from './ops.types.js'
 import type { OpsDeploymentTier } from './theme/ops-environment.js'
 
@@ -44,6 +47,9 @@ export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
+  strategyManifest: () => request<StrategyManifestResponse>('/api/strategy/manifest'),
+  strategyContent: (section: StrategySectionId) =>
+    request<StrategyContentPayload>(`/api/strategy/content/${encodeURIComponent(section)}`),
   dispatchCheck: () =>
     request<OpsAlertsDispatchResult>('/api/alerts/check', { method: 'POST' }),
   analyzeOpsAlert: (id: string, operatorNotes?: string) =>

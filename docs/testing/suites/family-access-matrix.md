@@ -32,7 +32,11 @@
 |---|------|-------------------|-------|
 | 1 | Login como João | Dashboard carrega | |
 | 2 | Verificar pacientes | Pedro, Lucas, Mariana listados | |
+<<<<<<< HEAD
 | 3 | `/family` (menu «Sua família») | Glossário visível; círculo Família A; João owner; com 2+ famílias, seletor global no topo | |
+=======
+| 3 | `/family` (menu «Sua família») | Círculo Família A visível; João owner | |
+>>>>>>> origin/main
 | 4 | Convitar Maria (se não existir) | Convite criado; e-mail ou link pendente | |
 | 5 | Login Maria → aceitar convite | Maria entra no círculo | |
 | 6 | Login Maria → dashboard | Pedro e Lucas sim; **Mariana não** | |
