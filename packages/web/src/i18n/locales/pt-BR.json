@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "Início",
+    "yourFamily": "Sua família",
     "emergency": "Emergência",
     "integrations": "Integrações",
     "roadmap": "Roadmap",
@@ -269,6 +270,14 @@
     "legalAcceptSubtitle": "Versões vigentes dos termos e políticas vinculadas à sua conta."
   },
   "family": {
+    "hub": {
+      "subtitle": "Círculos de cuidado, convites e quem acessa cada perfil de saúde."
+    },
+    "dashboardCard": {
+      "description": "Convites, círculos e cuidadores — em um só lugar.",
+      "pending": "{{count}} pendência(s)",
+      "action": "Abrir"
+    },
     "glossary": {
       "caregiver": "Cuidador",
       "healthProfile": "Perfil de saúde",

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined, CustomerServiceOutlined } from '@ant-design/icons'
+import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, ProjectOutlined, PhoneOutlined, RadarChartOutlined, CustomerServiceOutlined, TeamOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -45,11 +45,13 @@ export function AppLayout() {
   const mainSelectedKey =
     location.pathname === '/' || location.pathname.startsWith('/patients')
       ? '/'
-      : location.pathname.startsWith('/emergency')
-        ? '/emergency'
-        : location.pathname.startsWith('/settings')
-          ? '/settings'
-          : ''
+      : location.pathname.startsWith('/family')
+        ? '/family'
+        : location.pathname.startsWith('/emergency')
+          ? '/emergency'
+          : location.pathname.startsWith('/settings')
+            ? '/settings'
+            : ''
 
   const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
@@ -91,6 +93,7 @@ export function AppLayout() {
             selectedKeys={[mainSelectedKey]}
             items={[
               { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
+              { key: '/family', icon: <TeamOutlined />, label: t('nav.yourFamily') },
               {
                 key: '/emergency',
                 icon: <PhoneOutlined />,
