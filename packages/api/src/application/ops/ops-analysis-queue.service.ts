@@ -53,6 +53,32 @@ export class OpsAnalysisQueueService {
     private readonly alertStore?: OpsAlertAnalysisStore,
   ) {}
 
+  async enqueueSupportReportBatch(input: {
+    batchSourceId: string
+    deploymentTier: string
+    category: string
+    reportIds: string[]
+    records: SupportReportRecord[]
+  }): Promise<OpsAnalysisQueueRecord> {
+    const title = `[batch:${input.category}] ${input.reportIds.length} chamado(s)`
+    return this.repo.upsertQueued({
+      sourceType: 'support_report',
+      sourceId: input.batchSourceId,
+      lane: 'development_support',
+      deploymentTier: input.deploymentTier,
+      title,
+      errorSummary: null,
+      contextSnapshot: {
+        batch: true,
+        category: input.category,
+        reportIds: input.reportIds,
+        routes: input.records.map((r) => r.route).filter(Boolean),
+      },
+      investigationTrigger: 'auto',
+      priority: input.category === 'technical_bug' ? 'high' : 'normal',
+    })
+  }
+
   async enqueueSupportReport(
     record: SupportReportRecord,
     options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
@@ -139,23 +165,88 @@ export class OpsAnalysisQueueService {
     }
     if (!record) return null
 
-    await this.syncLegacyAnalysis(record, summary, input.analysisArtifactPath)
+    await this.syncLegacyAnalysis(record, summary, input)
+    await this.applySupportReportPatches(record, input)
     return record
+  }
+
+  private isBatchSupportRecord(record: OpsAnalysisQueueRecord): boolean {
+    return Boolean(record.contextSnapshot?.batch) || record.sourceId.startsWith('batch:')
+  }
+
+  private batchReportIds(record: OpsAnalysisQueueRecord): string[] {
+    const ids = record.contextSnapshot?.reportIds
+    if (!Array.isArray(ids)) return []
+    return ids.filter((id): id is string => typeof id === 'string')
+  }
+
+  private async applySupportReportPatches(
+    record: OpsAnalysisQueueRecord,
+    input: AgentAnalysisCallbackInput,
+  ): Promise<void> {
+    if (!this.supportRepo || record.sourceType !== 'support_report') return
+    const patches = input.reportPatches ?? []
+
+    for (const patch of patches) {
+      await this.supportRepo.applyAgentOpsPatch(patch.reportId, {
+        suggestedCategory: patch.suggestedCategory ?? null,
+        categoryReviewNote: patch.categoryReviewNote ?? null,
+        taxonomyGapProposal: patch.taxonomyGapProposal ?? null,
+        deploymentStatus: patch.deploymentStatus as SupportReportRecord['deploymentStatus'] | undefined,
+        deploymentActions: patch.deploymentActions,
+        analysisSummary: patch.analysisSummary ?? null,
+        analysisArtifactPath: patch.analysisArtifactPath ?? null,
+        analysisStatus: 'in_progress',
+      }).catch(() => undefined)
+    }
+
+    if (patches.length > 0) return
+
+    const sharedPatch = {
+      deploymentStatus: input.deploymentStatus as SupportReportRecord['deploymentStatus'] | undefined,
+      deploymentActions: input.deploymentActions,
+      analysisSummary: input.remediationSummary,
+      analysisArtifactPath: input.analysisArtifactPath ?? null,
+      analysisStatus: 'in_progress' as const,
+    }
+
+    if (this.isBatchSupportRecord(record)) {
+      for (const reportId of this.batchReportIds(record)) {
+        await this.supportRepo.applyAgentOpsPatch(reportId, sharedPatch).catch(() => undefined)
+      }
+      return
+    }
+
+    await this.supportRepo.applyAgentOpsPatch(record.sourceId, {
+      ...sharedPatch,
+      deploymentStatus: sharedPatch.deploymentStatus ?? 'fix_proposed',
+    }).catch(() => undefined)
   }
 
   private async syncLegacyAnalysis(
     record: OpsAnalysisQueueRecord,
     summary: string,
-    artifactPath?: string,
+    input: AgentAnalysisCallbackInput,
   ): Promise<void> {
-    const artifact = artifactPath?.trim().slice(0, 512) ?? null
+    const artifact = input.analysisArtifactPath?.trim().slice(0, 512) ?? null
     if (record.sourceType === 'support_report' && this.supportRepo) {
-      await this.supportRepo.updateAnalysisStateForOps(record.sourceId, {
-        analysisStatus: 'in_progress',
-        analysisSummary: summary,
-        analysisArtifactPath: artifact,
-        analysisLastError: null,
-      }).catch(() => undefined)
+      if (this.isBatchSupportRecord(record)) {
+        for (const reportId of this.batchReportIds(record)) {
+          await this.supportRepo.updateAnalysisStateForOps(reportId, {
+            analysisStatus: 'in_progress',
+            analysisSummary: summary,
+            analysisArtifactPath: artifact,
+            analysisLastError: null,
+          }).catch(() => undefined)
+        }
+      } else {
+        await this.supportRepo.updateAnalysisStateForOps(record.sourceId, {
+          analysisStatus: 'in_progress',
+          analysisSummary: summary,
+          analysisArtifactPath: artifact,
+          analysisLastError: null,
+        }).catch(() => undefined)
+      }
     }
     if (record.sourceType === 'ops_alert' && this.alertStore) {
       const existing = await this.alertStore.get(record.sourceId)
@@ -177,10 +268,15 @@ export class OpsAnalysisQueueService {
     if (!ok) return false
 
     if (record.sourceType === 'support_report' && this.supportRepo) {
-      await this.supportRepo.updateAnalysisStateForOps(record.sourceId, {
-        analysisStatus: 'completed',
-        analysisCompletedAt: new Date(),
-      }).catch(() => undefined)
+      const reportIds = this.isBatchSupportRecord(record)
+        ? this.batchReportIds(record)
+        : [record.sourceId]
+      for (const reportId of reportIds) {
+        await this.supportRepo.updateAnalysisStateForOps(reportId, {
+          analysisStatus: 'completed',
+          analysisCompletedAt: new Date(),
+        }).catch(() => undefined)
+      }
     }
     if (record.sourceType === 'ops_alert' && this.alertStore) {
       const existing = await this.alertStore.get(record.sourceId)
