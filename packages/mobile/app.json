@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "AiyraCare",
+    "slug": "aiyracare",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "aiyracare",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": ["expo-router"]
+  }
+}

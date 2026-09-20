@@ -214,6 +214,19 @@
       "tags": ["onboarding", "ux", "ava", "i18n"]
     },
     {
+      "id": "mobile-app-shell",
+      "epicId": "plat-mobile",
+      "title": "App mobile — shell Expo (paridade web)",
+      "status": "in_progress",
+      "category": "tecnico",
+      "priority": "P2",
+      "doc": "docs/features/mobile-app-shell.md",
+      "routes": [],
+      "api": ["GET /patients", "GET /patients/:id", "POST /auth/sync"],
+      "helpTopics": [],
+      "tags": ["mobile", "expo", "paridade"]
+    },
+    {
       "id": "documentation-knowledge-base",
       "epicId": "documentation-knowledge-base",
       "title": "Base de conhecimento — features, ajuda e tracking",
