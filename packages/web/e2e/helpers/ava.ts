@@ -37,19 +37,8 @@ async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
   await waitAvaComposerReady(page, timeout)
 }
 
-async function waitForAvaFab(page: Page, timeout = 60_000) {
-  await page
-    .waitForResponse(
-      (r) => {
-        try {
-          return new URL(r.url()).pathname === '/patients' && r.request().method() === 'GET' && r.ok()
-        } catch {
-          return false
-        }
-      },
-      { timeout },
-    )
-    .catch(() => undefined)
+async function waitForAvaFab(page: Page, timeout = 45_000) {
+  // ensureQaE2eSession já hidratou pacientes — só aguardar o FAB (evita stall de 60s no CI).
   await page.getByRole('button', { name: 'Abrir conversa com Ava' }).waitFor({
     state: 'visible',
     timeout,
