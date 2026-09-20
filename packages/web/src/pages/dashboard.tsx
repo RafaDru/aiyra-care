@@ -11,6 +11,7 @@ import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
+import { DayToDayDiscoveryHub } from '../components/dashboard/DayToDayDiscoveryHub.js'
 import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
 import { useAuth } from '../contexts/AuthContext.js'
 import { useActiveCareCircle } from '../contexts/ActiveCareCircleContext.js'
@@ -168,6 +169,7 @@ export function Dashboard() {
       />
 
       {patients.length > 0 && <DashboardFamilyShortcut />}
+      {patients.length === 0 && !loadError && <DayToDayDiscoveryHub hasPatients={false} />}
       {patients.length > 0 && <DashboardDayToDaySection />}
 
       {loadError && (

@@ -247,6 +247,20 @@
       "estimatedMinutes": 5
     },
     {
+      "id": "family-day-to-day-discovery",
+      "domain": "clinico",
+      "title": "Dashboard — guia discovery dia a dia",
+      "featureId": "family-day-to-day-discovery",
+      "lane": "business-full",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/family-day-to-day-discovery.md",
+      "coverage": "partial",
+      "businessActions": ["dashboard.day_to_day_discovery"],
+      "automation": { "status": "done", "spec": "packages/web/e2e/suites/family-day-to-day-discovery.spec.ts" },
+      "estimatedMinutes": 4
+    },
+    {
       "id": "family-day-timeline",
       "domain": "clinico",
       "title": "Carteira — bloco Hoje",

@@ -1342,6 +1342,19 @@
     "cpf_card": "Cartão / Comprovante CPF",
     "cnh": "CNH"
   },
+  "dayToDayDiscovery": {
+    "title": "Dia a dia da família",
+    "subtitle": "Registre, acompanhe e leve contexto na consulta",
+    "bodyWithPatients": "Três atalhos para o cotidiano — alinhados ao que você precisa antes de ir ao médico.",
+    "bodyNoPatients": "Adicione quem você cuida para usar registro rápido, o bloco Hoje e o pacote para o médico.",
+    "dismiss": "Fechar guia",
+    "actions": {
+      "capture": "Registrar agora",
+      "today": "Ver o bloco Hoje",
+      "consult": "Preparar consulta (link, QR, PDF)"
+    },
+    "footerHint": "Menos de 30 segundos para anotar um sintoma ou medicação."
+  },
   "walletToday": {
     "title": "Hoje",
     "lensLabel": "Quem ver hoje",
