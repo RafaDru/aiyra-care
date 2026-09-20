@@ -5,6 +5,14 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "aiyracare",
+    "linking": {
+      "prefixes": ["aiyracare://", "https://app.aiyracare.com.br"],
+      "config": {
+        "screens": {
+          "invite/accept": "invite/accept"
+        }
+      }
+    },
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "web": {

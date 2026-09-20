@@ -27,9 +27,9 @@ Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesm
 | Auth | `EXPO_PUBLIC_SUPABASE_*` + AsyncStorage — ver `packages/mobile/.env.example` |
 | Plano | Project store `docs/mobile-parity-plan.md` |
 
-## QA
+## QA (M1–M3)
 
-Estrutural — sem ações CRUD novas nesta fase. Smoke manual: login → lista → abrir paciente → tab Carteira. Suite automatizada: **pendente** (`mobile-shell-smoke`).
+Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira. Suite automatizada: **pendente** (`mobile-shell-smoke`).
 
 **Env local:** copiar `packages/mobile/.env.example` → `.env` (não commitar).
 
@@ -44,9 +44,22 @@ Estrutural — sem ações CRUD novas nesta fase. Smoke manual: login → lista 
 - Web importa `@aiyra-care/design-tokens` via `packages/web/src/theme/aiyracare-tokens.ts` (re-export + `SIDEBAR_SURFACE` / `AI_INSIGHT_STYLE` web-only)
 - Ant Design `ThemeProvider` inalterado na forma — mapeamento continua em `ThemeProvider.tsx`
 
+## Marco M4 (família + compliance)
+
+- Hub **Família e cuidadores** (`/(app)/settings/family`) — círculos, convites e profile-shares via mesmas rotas do web (`/family-access/*`, `/care-circles`).
+- Deep link **`invite/accept`** (`aiyracare://invite/accept?token=…`) com login prévio.
+- Gate **`RequireComplianceGate`** + tela `/(app)/compliance/accept` (`GET/POST /compliance/*`).
+
+## QA
+
+| Escopo | Comando |
+|--------|---------|
+| Tipo mobile | `cd packages/mobile && npm run typecheck` |
+| Export web smoke | `cd packages/mobile && npx expo export --platform web` |
+| API inalterada | Sem suite web nova — smoke manual família + convite |
+
 ## Pendente
 
-- Compliance gate (`RequireCompliance`)
 - Onboarding mobile
 - Ava FAB + chat (G1)
 - Port de tabs clínicas (ExamsTab, WalletCardsTab, IntegrationsTab)
