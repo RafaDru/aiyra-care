@@ -32,6 +32,14 @@ export type ProductLifecycleSnapshot = {
   features: FeatureCardSummary[]
 }
 
+type RoadmapItem = {
+  id: string
+  title: string
+  status?: string
+  detail?: string
+  reviewBadge?: string
+}
+
 type RoadmapFile = {
   updatedAt?: string
   epics?: Array<{
@@ -42,7 +50,7 @@ type RoadmapFile = {
     status: string
     statusLabel?: string
     summary?: string
-    items?: Array<{ status?: string }>
+    items?: RoadmapItem[]
   }>
 }
 
@@ -101,6 +109,78 @@ function resolveSuiteForFeature(
   }
 
   return {}
+}
+
+const ALLOWED_MARKDOWN_PREFIXES = ['docs/features/', 'docs/testing/suites/']
+
+export type EpicDetailPayload = {
+  id: string
+  title: string
+  priority: string
+  category: string
+  status: string
+  statusLabel?: string
+  summary?: string
+  items: Array<{
+    id: string
+    title: string
+    status: string
+    detail?: string
+    reviewBadge?: string
+  }>
+}
+
+export type FeatureMarkdownPayload = {
+  id: string
+  title: string
+  doc: string
+  markdown: string
+}
+
+export function loadEpicDetail(monorepoRoot: string, epicId: string): EpicDetailPayload | null {
+  const roadmapPath = resolve(monorepoRoot, 'docs/roadmap.json')
+  const roadmap = readJsonFile<RoadmapFile>(roadmapPath)
+  const epic = roadmap?.epics?.find((e) => e.id === epicId)
+  if (!epic) return null
+  return {
+    id: epic.id,
+    title: epic.title,
+    priority: epic.priority,
+    category: epic.category,
+    status: epic.status,
+    statusLabel: epic.statusLabel,
+    summary: epic.summary,
+    items: (epic.items ?? []).map((item) => ({
+      id: item.id,
+      title: item.title,
+      status: item.status ?? 'planned',
+      detail: item.detail,
+      reviewBadge: item.reviewBadge,
+    })),
+  }
+}
+
+export function loadFeatureMarkdown(monorepoRoot: string, featureId: string): FeatureMarkdownPayload | null {
+  const featuresPath = resolve(monorepoRoot, 'docs/features/index.json')
+  const featuresIndex = readJsonFile<FeaturesIndexFile>(featuresPath)
+  const feature = featuresIndex?.features?.find((f) => f.id === featureId)
+  if (!feature) return null
+  const abs = resolve(monorepoRoot, feature.doc)
+  if (!existsSync(abs)) {
+    return { id: feature.id, title: feature.title, doc: feature.doc, markdown: `_Arquivo não encontrado: \`${feature.doc}\`_` }
+  }
+  const markdown = readFileSync(abs, 'utf8')
+  return { id: feature.id, title: feature.title, doc: feature.doc, markdown }
+}
+
+export function loadRepoMarkdown(monorepoRoot: string, relativePath: string): { path: string; markdown: string } | null {
+  const normalized = relativePath.replace(/\\/g, '/').replace(/^\/+/, '')
+  if (!ALLOWED_MARKDOWN_PREFIXES.some((p) => normalized.startsWith(p)) || normalized.includes('..')) {
+    return null
+  }
+  const abs = resolve(monorepoRoot, normalized)
+  if (!existsSync(abs)) return null
+  return { path: normalized, markdown: readFileSync(abs, 'utf8') }
 }
 
 export function loadProductLifecycle(monorepoRoot: string): ProductLifecycleSnapshot {

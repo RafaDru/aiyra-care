@@ -18,6 +18,6 @@ Métricas Postgres/API, negócio, **Estratégia** (snapshots markdown em `conten
 
 Relatórios Marketing / Financeiro / CX copiados do Project store. Ver `content/strategy/README.md` para refresh via coordinator.
 
-URL: `?tab=strategy&strategy=mkt|finance|cx`
+URL: `?tab=strategy&strategy=mkt|finance|cx` (grupo Produto) · L1: `?group=produto|analytics|ops&tab=…`
 
 Feature card: [`docs/features/ops-strategy-advisory.md`](../../docs/features/ops-strategy-advisory.md)

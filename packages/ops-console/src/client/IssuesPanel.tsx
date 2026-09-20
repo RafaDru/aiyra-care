@@ -30,12 +30,30 @@ const LANE_LABEL: Record<OpsAnalysisQueueItem['lane'], string> = {
   sre_support: 'Suporte SRE',
 }
 
+function sourceAction(
+  row: OpsAnalysisQueueItem,
+  onNavigateTab?: (tab: 'support' | 'overview') => void,
+): { label: string; onClick?: () => void } {
+  if (row.sourceType === 'support_report') {
+    return {
+      label: 'Chamado suporte',
+      onClick: () => onNavigateTab?.('support'),
+    }
+  }
+  return {
+    label: `Alerta ${row.sourceId}`,
+    onClick: () => onNavigateTab?.('overview'),
+  }
+}
+
 export function IssuesPanel({
   onRefresh,
   highlightInvestigationId,
+  onNavigateTab,
 }: {
   onRefresh?: () => void
   highlightInvestigationId?: string | null
+  onNavigateTab?: (tab: 'support' | 'overview') => void
 }) {
   const [items, setItems] = useState<OpsAnalysisQueueItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,15 +91,28 @@ export function IssuesPanel({
 
   return (
     <OpsPanel
-      title="Issues"
-      description="Pilha unificada — chave investigationId correlaciona console, toast, webhook e Automations."
+      title="Investigações (agente)"
+      description="Uma linha = um job na fila ops_analysis_queue — não é o inventário de todos os erros do produto."
     >
       <Alert
         type="info"
         showIcon
         style={{ marginBottom: 12 }}
+        message="O que não aparece aqui"
+        description={
+          <>
+            Erros automáticos (<Text code>client_errors</Text>) → aba <strong>Produto & UX</strong>.
+            Reportes novos → <strong>Suporte</strong> até enfileirar investigação.
+            Alertas na visão geral só entram aqui após «Analisar» ou auto-investigação.
+          </>
+        }
+      />
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 12 }}
         message="Ciclo"
-        description="queued → investigating → fix_proposed (agente) → completed (você revisa)."
+        description="queued → investigating → fix_proposed (agente) → completed (você revisa). investigationId correlaciona console, toast e webhook."
       />
       {items.length === 0 && !loading ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma issue aberta" />
@@ -121,6 +152,21 @@ export function IssuesPanel({
               ),
             },
             { title: 'Título', dataIndex: 'title', ellipsis: true },
+            {
+              title: 'Origem',
+              key: 'source',
+              width: 140,
+              render: (_: unknown, row) => {
+                const action = sourceAction(row, onNavigateTab)
+                return action.onClick ? (
+                  <Button type="link" size="small" style={{ padding: 0 }} onClick={action.onClick}>
+                    {action.label}
+                  </Button>
+                ) : (
+                  <Text type="secondary">{action.label}</Text>
+                )
+              },
+            },
             {
               title: 'Ambiente',
               dataIndex: 'deploymentTier',

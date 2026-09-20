@@ -47,6 +47,18 @@ export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
+  productLifecycleEpic: (id: string) =>
+    request<import('./ops.types.js').EpicDetailPayload>(
+      `/api/product-lifecycle/epic/${encodeURIComponent(id)}`,
+    ),
+  productLifecycleFeature: (id: string) =>
+    request<import('./ops.types.js').FeatureMarkdownPayload>(
+      `/api/product-lifecycle/feature/${encodeURIComponent(id)}`,
+    ),
+  productLifecycleMarkdown: (path: string) =>
+    request<{ path: string; markdown: string }>(
+      `/api/product-lifecycle/markdown?path=${encodeURIComponent(path)}`,
+    ),
   strategyManifest: () => request<StrategyManifestResponse>('/api/strategy/manifest'),
   strategyContent: (section: StrategySectionId) =>
     request<StrategyContentPayload>(`/api/strategy/content/${encodeURIComponent(section)}`),
