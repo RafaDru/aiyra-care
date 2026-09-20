@@ -7,7 +7,10 @@ import { getSupabase, supabaseConfigured } from '@/lib/supabase'
 type AuthContextValue = {
   configured: boolean
   loading: boolean
+  syncing: boolean
   session: Session | null
+  /** Estável para effects de carga (espelho web). */
+  authUserId: string | null
   user: User | null
   account: AppAccount | null
   needsProfile: boolean
@@ -20,9 +23,12 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
+  const [syncing, setSyncing] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
   const [account, setAccount] = useState<AppAccount | null>(null)
   const [needsProfile, setNeedsProfile] = useState(false)
+
+  const authUserId = session?.user?.id ?? null
 
   const syncAccount = useCallback(async (accessToken: string | undefined) => {
     if (!accessToken || !supabaseConfigured) {
@@ -35,9 +41,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setNeedsProfile(result.needsProfile)
   }, [])
 
+  const runSync = useCallback(
+    async (accessToken: string | undefined) => {
+      if (!supabaseConfigured) return
+      setSyncing(true)
+      try {
+        await syncAccount(accessToken)
+      } catch {
+        setAccount(null)
+        setNeedsProfile(false)
+      } finally {
+        setSyncing(false)
+      }
+    },
+    [syncAccount],
+  )
+
   const refreshSync = useCallback(async () => {
-    await syncAccount(session?.access_token)
-  }, [session?.access_token, syncAccount])
+    await runSync(session?.access_token)
+  }, [session?.access_token, runSync])
 
   useEffect(() => {
     const client = getSupabase()
@@ -45,17 +67,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
       return
     }
-    client.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      return syncAccount(data.session?.access_token)
-    }).finally(() => setLoading(false))
+    client.auth
+      .getSession()
+      .then(({ data }) => {
+        setSession(data.session)
+        return runSync(data.session?.access_token)
+      })
+      .finally(() => setLoading(false))
 
     const { data: sub } = client.auth.onAuthStateChange((_event, next) => {
       setSession(next)
-      void syncAccount(next?.access_token)
+      void runSync(next?.access_token)
     })
     return () => sub.subscription.unsubscribe()
-  }, [syncAccount])
+  }, [runSync])
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = getSupabase()
@@ -76,7 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (): AuthContextValue => ({
       configured: supabaseConfigured,
       loading,
+      syncing,
       session,
+      authUserId,
       user: session?.user ?? null,
       account,
       needsProfile,
@@ -84,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       refreshSync,
     }),
-    [loading, session, account, needsProfile, signInWithPassword, signOut, refreshSync],
+    [loading, syncing, session, authUserId, account, needsProfile, signInWithPassword, signOut, refreshSync],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
