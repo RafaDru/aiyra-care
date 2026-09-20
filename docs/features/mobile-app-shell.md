@@ -39,6 +39,11 @@ Estrutural — sem ações CRUD novas nesta fase. Smoke manual: login → lista 
 - Lista de pacientes via `GET /patients`, agrupada por faixa etária (espelho dashboard web)
 - Loading, erro com retry e pull-to-refresh na aba Início
 
+## Marco M3 (tokens compartilhados)
+
+- Web importa `@aiyra-care/design-tokens` via `packages/web/src/theme/aiyracare-tokens.ts` (re-export + `SIDEBAR_SURFACE` / `AI_INSIGHT_STYLE` web-only)
+- Ant Design `ThemeProvider` inalterado na forma — mapeamento continua em `ThemeProvider.tsx`
+
 ## Pendente
 
 - Compliance gate (`RequireCompliance`)
@@ -46,4 +51,3 @@ Estrutural — sem ações CRUD novas nesta fase. Smoke manual: login → lista 
 - Ava FAB + chat (G1)
 - Port de tabs clínicas (ExamsTab, WalletCardsTab, IntegrationsTab)
 - OAuth Google deep links
-- Refactor web para importar `@aiyra-care/design-tokens`
