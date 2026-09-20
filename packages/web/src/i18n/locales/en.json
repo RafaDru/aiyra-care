@@ -10,6 +10,7 @@
   },
   "nav": {
     "dashboard": "Home",
+    "yourFamily": "Your family",
     "emergency": "Emergency",
     "integrations": "Integrations",
     "roadmap": "Roadmap",
@@ -274,6 +275,14 @@
     "legalAcceptSubtitle": "Current versions of terms and policies linked to your account."
   },
   "family": {
+    "hub": {
+      "subtitle": "Care circles, invites, and who can access each health profile."
+    },
+    "dashboardCard": {
+      "description": "Invites, circles, and caregivers — in one place.",
+      "pending": "{{count}} pending",
+      "action": "Open"
+    },
     "glossary": {
       "caregiver": "Caregiver",
       "healthProfile": "Health profile",

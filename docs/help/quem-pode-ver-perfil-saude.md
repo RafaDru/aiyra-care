@@ -25,4 +25,4 @@ Menores: o responsável legal declara consentimento no cadastro. Em caso de dúv
 
 - [`docs/LEGAL_COMPLIANCE.md`](../LEGAL_COMPLIANCE.md)
 - [`docs/FAMILY_ACCESS_MODEL.md`](../FAMILY_ACCESS_MODEL.md)
-- Configurações → **Família e cuidadores** (`/settings/family`)
+- Menu lateral **Sua família** (`/family`) — convites e círculos
