@@ -8,7 +8,8 @@
     "start": "tsx src/index.ts",
     "once": "tsx src/run-once.ts",
     "job": "tsx src/job.ts",
-    "ops-alerts:once": "tsx src/ops-alerts-once.ts"
+    "ops-alerts:once": "tsx src/ops-alerts-once.ts",
+    "ops-business-weekly:once": "tsx src/ops-business-weekly-once.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

@@ -4,7 +4,7 @@ import { runOpsAlertsCheck } from './ops-alerts.js'
 import { runOpsProbeCheck } from './ops-probe.js'
 import { recordOpsWorkerTick } from './ops-worker-tick.js'
 
-loadMonorepoEnv()
+const monorepoRoot = loadMonorepoEnv()
 
 const intervalMs = Number(
   process.env.CONNECT_WORKER_INTERVAL_MS ?? process.env.SYNC_SCHEDULED_INTERVAL_MS ?? '1800000',
@@ -78,11 +78,36 @@ if (Number.isFinite(hygieneScanIntervalMs) && hygieneScanIntervalMs > 0) {
   })
 }
 
+const opsBusinessWeeklyIntervalMs = Number(process.env.OPS_BUSINESS_WEEKLY_INTERVAL_MS ?? '0')
+let opsBusinessWeeklyTimer: ReturnType<typeof setInterval> | undefined
+
+if (Number.isFinite(opsBusinessWeeklyIntervalMs) && opsBusinessWeeklyIntervalMs > 0) {
+  void import('./ops-business-weekly.js').then(({ runOpsBusinessWeeklyReport }) => {
+    const tickBusinessWeekly = () => {
+      recordOpsWorkerTick(pool, 'business_weekly').catch(() => {})
+      runOpsBusinessWeeklyReport(pool, monorepoRoot)
+        .then((r) => console.log('[connect-worker] business-weekly', JSON.stringify(r)))
+        .catch((err) =>
+          console.error(
+            '[connect-worker] business-weekly failed',
+            err instanceof Error ? err.message : err,
+          ),
+        )
+    }
+    opsBusinessWeeklyTimer = setInterval(tickBusinessWeekly, opsBusinessWeeklyIntervalMs)
+    setTimeout(tickBusinessWeekly, 120_000)
+    console.log(
+      `[connect-worker] business weekly report every ${opsBusinessWeeklyIntervalMs}ms`,
+    )
+  })
+}
+
 async function shutdown(signal: string) {
   console.log(`[connect-worker] ${signal} — stopping`)
   if (opsAlertsTimer) clearInterval(opsAlertsTimer)
   if (supportBatchTimer) clearInterval(supportBatchTimer)
   if (hygieneScanTimer) clearInterval(hygieneScanTimer)
+  if (opsBusinessWeeklyTimer) clearInterval(opsBusinessWeeklyTimer)
   worker.stop()
   await pool.end()
   process.exit(0)

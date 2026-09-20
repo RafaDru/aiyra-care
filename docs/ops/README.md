@@ -61,8 +61,32 @@ npm run env:status
 | `npm run test:ops` | Suite vitest ops |
 | `npm run dev-audit:bridge` | Correlação hooks Cursor × `product_events` |
 | `npm run llm:internal-usage` | Orçamento LLM interno (classificador) |
+| `npm run ops:business-weekly` | Relatório markdown em `docs/ops/reports/` (API script) |
+| `packages/connect-worker` → `npm run ops-business-weekly:once` | Mesmo relatório via worker (cron / job) |
 
 Header API ops: `x-internal-ops-key: $OPS_METRICS_KEY`
+
+### Relatório semanal de negócio (agendamento)
+
+Agregados sem PHI — mesmo conteúdo que `GET /ops/metrics` → `metrics.business`.
+
+| Variável | Default | Efeito |
+|----------|---------|--------|
+| `OPS_BUSINESS_WEEKLY_INTERVAL_MS` | `0` | No connect-worker contínuo, intervalo do loop (ex. `604800000` = 7 dias) |
+| `OPS_WEEKLY_REPORT_WEBHOOK_URL` | — | Slack-compatible (preview das primeiras linhas) |
+| `OPS_BUSINESS_WEEKLY_OUT_DIR` | `docs/ops/reports/` | Override do diretório de saída |
+
+**VM / dev (worker contínuo):** `OPS_BUSINESS_WEEKLY_INTERVAL_MS=604800000 npm run connect-worker`
+
+**Cron Linux (segunda 09:00 UTC):**
+
+```cron
+0 9 * * 1 cd /opt/aiyra-care/packages/connect-worker && npm run ops-business-weekly:once >> /var/log/aiyracare-business-weekly.log 2>&1
+```
+
+**GCP Cloud Run Job:** `CONNECT_WORKER_JOB_MODE=business-weekly npm run job` — em Run, `OPS_BUSINESS_WEEKLY_OUT_DIR=/tmp/reports` se o filesystem for efêmero; confiar no webhook ou artefato externo.
+
+Ver também [`reports/README.md`](./reports/README.md) e [`business-analytics-ops.md`](../features/business-analytics-ops.md).
 
 ---
 
