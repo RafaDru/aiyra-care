@@ -276,7 +276,9 @@
   },
   "family": {
     "hub": {
-      "subtitle": "Care circles, invites, and who can access each health profile."
+      "subtitle": "Care circles, invites, and who can access each health profile.",
+      "activeCircleLabel": "Family in focus",
+      "selectorAria": "Select family (care circle)"
     },
     "dashboardCard": {
       "description": "Invites, circles, and caregivers — in one place.",

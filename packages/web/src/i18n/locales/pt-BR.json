@@ -276,7 +276,9 @@
   },
   "family": {
     "hub": {
-      "subtitle": "Círculos de cuidado, convites e quem acessa cada perfil de saúde."
+      "subtitle": "Círculos de cuidado, convites e quem acessa cada perfil de saúde.",
+      "activeCircleLabel": "Família em foco",
+      "selectorAria": "Selecionar família (círculo de cuidado)"
     },
     "dashboardCard": {
       "description": "Convites, círculos e cuidadores — em um só lugar.",
