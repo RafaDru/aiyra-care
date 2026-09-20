@@ -58,6 +58,13 @@ Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira
 - API client: `api.ava.*`, `api.llm.quota`; bus interno `requestAvaOpen` para aceleradores futuros.
 - Referência operacional: `docs/AVA_OPERATIONAL.md` (G1 lente + G4 activity trace).
 
+## Marco M6 (integrações / sync — sem Playwright)
+
+- Aba **Integrações** do paciente: lista `GET /integration-links`, status via polling `GET /integration-links/:id/sync-status` (`useIntegrationLinkSyncStatus`).
+- **Sem** `POST /integration-links/:id/sync` no mobile — login browser e scrapers só no web.
+- CTAs **Abrir integrações / Carteira no navegador** (`EXPO_PUBLIC_WEB_APP_URL`, deep link `?section=plan&tab=integrations|wallet`).
+- Banner resumido na aba **Carteira** (`PatientWalletSyncBanner`).
+
 ## QA
 
 | Escopo | Comando |
@@ -65,6 +72,7 @@ Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira
 | Tipo mobile | `cd packages/mobile && npm run typecheck` |
 | Export web smoke | `cd packages/mobile && npx expo export --platform web` |
 | M5 Ava | Smoke manual: login → FAB Ava → trocar lente → enviar pergunta (API local) |
+| M6 Integrações | Smoke manual: paciente → Plano → Integrações → ver status → link web |
 | API inalterada | Sem suite web nova — smoke estrutural mobile |
 
 ## Pendente
@@ -72,5 +80,5 @@ Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira
 - Onboarding mobile
 - Aceleradores «Pergunte à Ava» em entidades (pins G1)
 - Ações G3 com confirmação no mobile
-- Port de tabs clínicas (ExamsTab, WalletCardsTab, IntegrationsTab)
+- Port de tabs clínicas (ExamsTab, WalletCardsTab UI completa)
 - OAuth Google deep links

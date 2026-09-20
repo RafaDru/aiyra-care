@@ -43,3 +43,9 @@ Após login, o app chama `GET /compliance/status` (como web `RequireCompliance`)
 - FAB **Ava** em todas as telas autenticadas (`AvaGlobalDock`).
 - Chat usa o mesmo endpoint do web com SSE de atividade (`docs/AVA_OPERATIONAL.md`).
 - Para abrir o chat com paciente/mensagem pré-definidos (aceleradores futuros): `requestAvaOpen` em `src/lib/ava-dock-bus.ts`.
+
+## Integrações / sync (M6)
+
+- Aba **Integrações** no perfil do paciente: status via `GET /integration-links/:id/sync-status` (polling).
+- O app **não** chama `POST …/sync` — login nos portais e Playwright ficam no **app web**.
+- Defina `EXPO_PUBLIC_WEB_APP_URL` (default `http://localhost:5173`) para os links «Sincronizar no navegador».
