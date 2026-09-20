@@ -27,13 +27,14 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 5. No perfil de saúde: **Quem tem acesso** — lista cuidadores; titular pode revogar.
 6. Limite: **2 co-admins** com acesso `full` por perfil (titular excluído da contagem).
 7. **Compartilhar perfil entre famílias** (caso Mariana): titular convida outra conta; ao aceitar, perfil aparece no círculo receptor com tag «Compartilhado»; grants continuam independentes por cuidador.
+8. **Excluir perfil** — só o titular (`owner_account_id`). Cuidadores convidados veem o perfil, mas não o botão de exclusão nem `DELETE /patients/:id` (403).
 
 ## Superfície técnica
 
 | Camada | Referência |
 |--------|------------|
 | Design | [`docs/FAMILY_ACCESS_MODEL.md`](../FAMILY_ACCESS_MODEL.md) |
-| Migrations | `057_patient_access_grants`, `058_patient_access_invites`, `059_care_circles`, `060_invite_care_circle`, `063_patient_profile_shares` |
+| Migrations | `057_patient_access_grants`, `058_patient_access_invites`, `059_care_circles`, `060_invite_care_circle`, `062_patient_access_audit`, `063_patient_profile_shares`, `070_patient_owner_backfill` |
 | ACL | `patient-access.service.ts`, `patient-access-grant.pg.repository.ts`, `patient-access.guard.ts` |
 | Convites | `patient-access-invite.service.ts`, `/family-access/invites`, `/invite/accept` |
 | E-mail transacional | `family-access-email.service.ts`, Resend (`RESEND_API_KEY`) |
@@ -66,6 +67,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 | Campo | Valor |
 |-------|--------|
 | **Suite** | [`docs/testing/suites/family-access-matrix.md`](../testing/suites/family-access-matrix.md) |
+| **Cobertura crítica** | Matriz de visibilidade + passos **15–17** (exclusão só titular; API 403 para cuidador) |
 | **Fixture** | [`docs/testing/fixtures/family-matrix.json`](../testing/fixtures/family-matrix.json) |
 | **Comando** | `npm run qa:run -- --suite family-access-matrix` |
 | **Automação** | `planned` — aguarda `seed-qa-family-matrix.mjs` |

@@ -23,3 +23,12 @@
 {"ts":"2026-09-20T04:10:38.448Z","event":"beforeShellExecution","command":"cd /workspace && npm ci 2>&1 | tail -3 && cd packages/web && npm run build 2>&1 | tail -5"}
 {"ts":"2026-09-20T04:11:04.723Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"chore: merge main into first-visit guided UX (post #49 family selector)\" && git push origin HEAD:cursor/first-visit-guided-ux-83e2"}
 {"ts":"2026-09-20T04:11:04.744Z","event":"beforeShellExecution","command":"gh pr view 22 --repo RafaDru/aiyra-care --json isDraft,state"}
+{"ts":"2026-09-20T05:05:46.394Z","event":"beforeShellExecution","command":"cd /workspace && git show origin/main:packages/api/scripts/apply-migration-061.mjs"}
+{"ts":"2026-09-20T05:05:49.736Z","event":"beforeShellExecution","command":"cd /workspace && mv database/relational/061_patient_owner_backfill.sql database/relational/070_patient_owner_backfill.sql"}
+{"ts":"2026-09-20T05:06:17.124Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git rebase --continue"}
+{"ts":"2026-09-20T05:06:21.369Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && node scripts/validate-migrations.mjs && npx vitest run tests/patient-delete-owner.test.ts tests/care-circle.service.test.ts 2>&1"}
+{"ts":"2026-09-20T05:06:21.373Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npm run build 2>&1 && cd /workspace/packages/web && npm run build 2>&1"}
+{"ts":"2026-09-20T05:06:30.782Z","event":"beforeShellExecution","command":"cd /workspace && npm install 2>&1 | tail -20"}
+{"ts":"2026-09-20T05:06:52.403Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/patient-delete-owner.test.ts tests/care-circle.service.test.ts 2>&1 && npm run build 2>&1 && cd /workspace/packages/web && npm run build 2>&1 | tail -30"}
+{"ts":"2026-09-20T05:07:44.720Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"fix(family): rebase on main; migration 070 owner backfill; QA matrix steps\""}
+{"ts":"2026-09-20T05:07:44.720Z","event":"beforeShellExecution","command":"cd /workspace && npm run qa:run -- --suite family-access-matrix 2>&1 | tail -25"}

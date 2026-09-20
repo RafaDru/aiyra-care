@@ -13,7 +13,7 @@ Quem tem acesso aos dados de saúde do meu filho?
 - **Cuidadores convidados**: contas com **concessão ativa** (`patient_access_grants`) — criada ao aceitar convite ou manualmente pelo titular.
 - **Você mesmo**: se o perfil é marcado como **Você** (adulto cuidando de si).
 
-No perfil de saúde, use **Quem tem acesso** para ver a lista de cuidadores. O titular pode **revogar** o acesso de um cuidador.
+No perfil de saúde, use **Quem tem acesso** para ver a lista de cuidadores. O titular pode **revogar** o acesso de um cuidador. **Somente o titular** pode excluir o perfil de saúde.
 
 Ninguém fora dessas permissões acessa via app. Exportações e links de compartilhamento são ações separadas, com prazo e controle.
 

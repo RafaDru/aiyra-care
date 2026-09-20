@@ -37,9 +37,23 @@ export class PatientService {
     return this.repo.update(updated)
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, actorAccountId?: string): Promise<void> {
     await this.findById(id)
+    if (actorAccountId) {
+      const ownerId = await this.repo.getOwnerAccountId(id)
+      if (!ownerId || ownerId !== actorAccountId) {
+        throw new Error('PATIENT_DELETE_FORBIDDEN')
+      }
+    }
     await this.repo.delete(id)
+  }
+
+  getOwnerAccountId(patientId: string): Promise<string | null> {
+    return this.repo.getOwnerAccountId(patientId)
+  }
+
+  listOwnerAccountIds(patientIds: readonly string[]): Promise<Map<string, string>> {
+    return this.repo.listOwnerAccountIds(patientIds)
   }
 
   async setOwnerAccountId(patientId: string, accountId: string): Promise<void> {

@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-20] - Família: exclusão de perfil só pelo titular (PR #8)
+
+### Realizado
+- **DELETE /patients/:id** — apenas `owner_account_id` (cuidador convidado recebia 204 e o CASCADE apagava o histórico).
+- **POST /patients** — grava `owner_account_id` (antes só `completeProfile` gravava; filhos criados no dashboard ficavam sem titular).
+- **Migration 070** — backfill de `owner_account_id` a partir de grants/memberships.
+- **Care circles** — `addMember` não rebaixa o titular (`ON CONFLICT` upsert de role).
+- **UI** — botão excluir só para o titular (`isOwner`).
+
 ## [2026-09-18] - Docs Automations: criação manual na UI (sem import JSON)
 
 ### Decisão

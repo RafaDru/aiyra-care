@@ -10,3 +10,15 @@
 {"ts":"2026-09-20T04:10:22.873Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/index.json"}
 {"ts":"2026-09-20T04:10:23.847Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/index.json"}
 {"ts":"2026-09-20T04:10:33.133Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/web/src/components/onboarding/FirstVisitTourDrawer.tsx"}
+{"ts":"2026-09-20T05:06:03.235Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/scripts/apply-migration-070.mjs"}
+{"ts":"2026-09-20T05:06:03.544Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/project-context.json"}
+{"ts":"2026-09-20T05:06:03.554Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/family-access-model.md"}
+{"ts":"2026-09-20T05:06:03.582Z","event":"preToolUse","tool":"Write","path":"/workspace/AGENTS.md"}
+{"ts":"2026-09-20T05:06:04.842Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/family-access-model.md"}
+{"ts":"2026-09-20T05:06:09.328Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/HISTORICO.md"}
+{"ts":"2026-09-20T05:06:10.407Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/HISTORICO.md"}
+{"ts":"2026-09-20T05:06:14.028Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/FAMILY_ACCESS_MODEL.md"}
+{"ts":"2026-09-20T05:07:36.630Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/testing/suites/family-access-matrix.md"}
+{"ts":"2026-09-20T05:07:41.299Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/family-access-model.md"}
+{"ts":"2026-09-20T05:07:41.317Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/testing/suites/family-access-matrix.md"}
+{"ts":"2026-09-20T05:07:41.449Z","event":"preToolUse","tool":"Write","path":"/cursor/stores/bc-0a0af590-d3d8-48bf-a56e-a19021352d4a/workflows/product-features-auto.md"}

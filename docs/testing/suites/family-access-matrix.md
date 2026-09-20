@@ -11,7 +11,7 @@
 
 ## Pré-requisitos
 
-- [ ] Migrations 057–063 + 062 audit aplicadas no banco ativo
+- [ ] Migrations 057–063 + 062 audit + **070** owner backfill aplicadas no banco ativo
 - [ ] `npm run seed:qa-family-matrix`
 - [ ] `npm run qa:verify-family-matrix` → 4× OK
 - [ ] `npm run qa:link-persona -- --persona=joao --sub=<seu-supabase-uuid>` (repetir persona por login)
@@ -59,6 +59,14 @@
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
 | 14 | Após grant/revoke | Entrada em audit log (API ou UI se exposta) | |
+
+## Passos — Exclusão de perfil (titular only, PR #8)
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 15 | Login Maria (cuidadora) → perfil Pedro | **Sem** botão «Excluir perfil» | |
+| 16 | `DELETE /patients/:id` como Maria (API) | **403**; paciente intacto | |
+| 17 | Login João (titular) → excluir perfil de teste | 204; perfil removido | |
 
 ## Notas
 
