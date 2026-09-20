@@ -153,12 +153,12 @@ export function Dashboard() {
     })
   }
 
-  if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
-
   const useCircleLayout = useMemo(() => {
     if (hasMultipleCircles && circleSections.length > 0) return true
     return groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0
   }, [hasMultipleCircles, circleSections.length, groupedByCircle.sections.length, groupedByCircle.other.length])
+
+  if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
 
   return (
     <div>

@@ -225,40 +225,6 @@
       "ava": "Meet Ava"
     }
   },
-  "firstVisitTour": {
-    "title": "First steps",
-    "subtitle": "A quick guide to start organizing your family's care.",
-    "dismiss": "Close guide",
-    "back": "Back",
-    "next": "Next",
-    "complete": "Finish",
-    "noPatientsHint": "Start by adding someone you care for — then quick capture and Ava work better.",
-    "avaSeedMessage": "Hi! Help me understand how you can support my family's care.",
-    "steps": {
-      "family": {
-        "title": "Your family",
-        "description": "The dashboard brings together everyone you care for — yourself, children, and other health profiles."
-      },
-      "addPerson": {
-        "title": "Add a person",
-        "description": "Register a family member or create a health profile. You can mark the account holder as «you»."
-      },
-      "today": {
-        "title": "Today & quick capture",
-        "description": "Log vitals, medications, or daily notes — without opening the full record."
-      },
-      "ava": {
-        "title": "Ava, your companion",
-        "description": "Ava is always nearby to organize context and help you prepare for conversations with your doctor."
-      }
-    },
-    "actions": {
-      "family": "Go to your family",
-      "addPerson": "Add a person",
-      "today": "Open quick capture",
-      "ava": "Meet Ava"
-    }
-  },
   "settings": {
     "subtitle": "Application preferences",
     "appearance": "Appearance",

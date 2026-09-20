@@ -225,40 +225,6 @@
       "ava": "Conhecer a Ava"
     }
   },
-  "firstVisitTour": {
-    "title": "Primeiros passos",
-    "subtitle": "Um guia rápido para começar a organizar o cuidado da sua família.",
-    "dismiss": "Fechar guia",
-    "back": "Voltar",
-    "next": "Próximo",
-    "complete": "Concluir",
-    "noPatientsHint": "Comece adicionando quem você cuida — depois fica mais fácil usar o registro rápido e a Ava.",
-    "avaSeedMessage": "Olá! Me ajude a entender como posso apoiar o cuidado da minha família.",
-    "steps": {
-      "family": {
-        "title": "Sua família",
-        "description": "O painel reúne quem você cuida — titular, filhos e outros perfis de saúde."
-      },
-      "addPerson": {
-        "title": "Adicionar pessoa",
-        "description": "Cadastre um familiar ou crie um perfil de saúde. Você pode marcar o titular como «você»."
-      },
-      "today": {
-        "title": "Hoje e registro rápido",
-        "description": "Registre medidas, medicações ou notas do dia — sem precisar abrir o prontuário completo."
-      },
-      "ava": {
-        "title": "Ava, sua companheira",
-        "description": "A Ava está sempre à mão para organizar contexto e ajudar a preparar a conversa com o médico."
-      }
-    },
-    "actions": {
-      "family": "Ver sua família",
-      "addPerson": "Adicionar pessoa",
-      "today": "Abrir registro rápido",
-      "ava": "Conhecer a Ava"
-    }
-  },
   "settings": {
     "subtitle": "Preferências do aplicativo",
     "appearance": "Aparência",

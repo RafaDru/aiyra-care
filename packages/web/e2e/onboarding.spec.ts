@@ -5,6 +5,7 @@ import { requireOnboardingCredentials } from './helpers/env'
 import { loginViaPassword } from './helpers/auth'
 import { completeOnboardingProfile } from './helpers/onboarding'
 import { uniqueQaCpf } from './helpers/fixtures'
+import { waitForDashboardReady } from './helpers/dashboard'
 
 const repoRoot = resolve(process.cwd(), '..', '..')
 
@@ -30,6 +31,8 @@ test.describe('onboarding', () => {
       genderLabel: 'Masculino',
       cpf: uniqueQaCpf(),
     })
+
+    await waitForDashboardReady(page)
 
     await expect(page.getByRole('heading', { name: 'QA Onboarding Titular' })).toBeVisible({
       timeout: 30_000,
