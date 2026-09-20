@@ -59,17 +59,21 @@ async function waitForAvaFab(page: Page, timeout = 60_000) {
 export async function openAvaDock(page: Page) {
   await dismissFirstVisitTour(page)
   await waitForAvaFab(page)
-  const convoList = page
-    .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 30_000 })
-    .catch(() => null)
-
-  await page.getByRole('button', { name: 'Abrir conversa com Ava' }).click({ force: true })
-  await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 30_000 })
-  await convoList
-  await waitForAvaDockSettled(page)
   if (process.env.CI) {
-    await page.waitForTimeout(6_500)
+    // useAvaDockIntro: greeting + settling (~6.4s) antes do dock ficar estável no CI.
+    await page.waitForTimeout(7_000)
   }
+
+  await expect(async () => {
+    const convoList = page
+      .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 25_000 })
+      .catch(() => null)
+    await page.getByRole('button', { name: 'Abrir conversa com Ava' }).click({ force: true })
+    await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 25_000 })
+    await convoList
+  }).toPass({ timeout: 60_000 })
+
+  await waitForAvaDockSettled(page)
 }
 
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
@@ -129,15 +133,19 @@ export async function submitAvaMessage(page: Page, text: string) {
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
-  const chatFinished = page.waitForResponse(
-    (r) => isAvaChatPostUrl(r.request().method(), r.url()) && r.ok(),
+  const chatResponse = page.waitForResponse(
+    (r) => isAvaChatPostUrl(r.request().method(), r.url()),
     { timeout: 90_000 },
   )
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
 
-  await chatFinished
+  const response = await chatResponse
+  if (!response.ok()) {
+    const body = await response.text().catch(() => '')
+    throw new Error(`Ava chat HTTP ${response.status()}: ${body.slice(0, 240)}`)
+  }
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
     timeout: 90_000,
   })
