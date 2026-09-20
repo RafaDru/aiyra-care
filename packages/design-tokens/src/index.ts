@@ -1,4 +1,4 @@
-/** Shared AiyraCare design tokens — keep in sync with web theme/aiyracare-tokens.ts */
+/** Shared AiyraCare design tokens — consumed by web, mobile, and future clients. */
 export const AIYRACARE_TOKENS = {
   colorPrimary: '#9333EA',
   colorPrimaryHover: '#A855F7',

@@ -18,3 +18,4 @@
 {"ts":"2026-09-20T03:44:18.237Z","event":"beforeShellExecution","command":"cd /workspace/packages/ops-console && npm run build 2>&1 | tail -40"}
 {"ts":"2026-09-20T03:44:21.426Z","event":"beforeShellExecution","command":"cd /workspace && npm ci 2>&1 | tail -5"}
 {"ts":"2026-09-20T03:44:21.433Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git commit -m \"merge main into cursor/ops-strategy-advisory-7eab (resolve ops-console server conflicts)\""}
+{"ts":"2026-09-20T03:47:40.240Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git commit -m \"merge main after #27 (resolve business-analytics-ops doc)\" && git push origin cursor/ops-strategy-advisory-7eab 2>&1"}
