@@ -76,6 +76,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 - Suite: [`support-user-report`](../testing/suites/support-user-report.md)
 - Comando: `npm run qa:run -- --suite support-user-report`
 - Automação: `packages/web/e2e/suites/support-user-report.spec.ts`
+- **Batch investigator (ops):** com `OPS_SUPPORT_INVESTIGATOR_MODE=batch`, `POST /support/reports` mantém toast e deixa `analysis_status=queued` até o job (`OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS`, padrão 6h no connect-worker). Botão **Analisar** no console continua imediato. Vitest: `support-report-batch.test.ts`, `support-report-dispatch.test.ts`.
 
 ## Ver também
 

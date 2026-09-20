@@ -21,7 +21,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 ## Comportamento (usuário) — entregue (MVP)
 
 1. Titular cria perfis de saúde e recebe círculo padrão **«Minha família»** (backfill 059).
-2. **Configurações → Família e cuidadores** (`/settings/family`): gerenciar famílias, vincular perfis, convidar cuidadores.
+2. **Menu «Sua família»** (`/family`) e atalho no Início: glossário (conta × família × perfil × cuidador), gerenciar famílias, vincular perfis, convidar cuidadores. URL legada `/settings/family` redireciona.
 3. Convite escolhe **família** + **perfis**; ao aceitar, cria grants (057) e membro no círculo (060).
 4. **Dashboard** agrupa por família; só exibe perfis aos quais o usuário tem grant (ou é titular).
 5. No perfil de saúde: **Quem tem acesso** — lista cuidadores; titular pode revogar.
@@ -39,7 +39,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 | E-mail transacional | `family-access-email.service.ts`, Resend (`RESEND_API_KEY`) |
 | Compartilhamento cross-família | `patient-profile-share.service.ts`, `/family-access/profile-shares` |
 | Círculos | `care-circle.service.ts`, `/care-circles`, `/care-circles/dashboard` |
-| UI | `/settings/family`, dashboard agrupado, `PatientAccessGrantsDrawer` no perfil |
+| UI | `/family` (menu lateral, glossário + círculos), atalho no Início, dashboard agrupado, `PatientAccessGrantsDrawer` no perfil |
 | Billing | `account_entitlements` (1 pagador por conta) |
 
 ### Rotas API
