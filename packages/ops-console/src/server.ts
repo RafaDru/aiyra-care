@@ -35,8 +35,6 @@ import {
   runStackAction,
   isStackControlEnabled,
 } from './stack-control.js'
-import { parseOpsEnvTargets, resolveOpsEnvTarget } from './ops-env-targets.js'
-import { fetchRemoteOpsMetrics } from './ops-remote-metrics.js'
 import { loadProductLifecycle } from './product-lifecycle.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -51,10 +49,10 @@ const isDev = process.env.NODE_ENV !== 'production'
 const probeIntervalMs = Number(process.env.OPS_PROBE_INTERVAL_MS ?? '60000')
 
 function resolveDeploymentTier(): 'integration' | 'preview' | 'production' {
-  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
-  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   if (port === 3023) return 'preview'
   if (port === 3013) return 'integration'
+  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
+  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   return 'integration'
 }
 
@@ -145,11 +143,6 @@ async function main() {
     commandHub: true,
   }))
 
-  fastify.get('/api/env-targets', async () => ({
-    targets: parseOpsEnvTargets(),
-    defaultTargetId: parseOpsEnvTargets().find((t) => t.enabled)?.id ?? 'dev',
-  }))
-
   let productLifecycleCache: ReturnType<typeof loadProductLifecycle> | undefined
 
   fastify.get('/api/product-lifecycle', async () => {
@@ -157,34 +150,7 @@ async function main() {
     return productLifecycleCache
   })
 
-  fastify.get<{ Querystring: { target?: string } }>('/api/metrics', async (req, reply) => {
-    const targetId = req.query.target?.trim()
-    const target = resolveOpsEnvTarget(targetId)
-
-    if (target && target.enabled && target.apiBase) {
-      const remote = await fetchRemoteOpsMetrics(target)
-      if (remote.ok) {
-        const data = remote.data as Record<string, unknown>
-        return {
-          ...data,
-          envTarget: {
-            id: target.id,
-            label: target.label,
-            apiBase: target.apiBase,
-            fetchedAt: remote.fetchedAt,
-            source: 'remote',
-          },
-        }
-      }
-      if (targetId) {
-        return reply.status(502).send({
-          error: 'remote_metrics_failed',
-          message: remote.error,
-          targetId: target.id,
-        })
-      }
-    }
-
+  fastify.get('/api/metrics', async () => {
     const payload = await metricsService.getMetrics()
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
@@ -194,9 +160,6 @@ async function main() {
       runtime,
       triage,
       alertAnalysis,
-      envTarget: target
-        ? { id: target.id, label: target.label, source: 'local' }
-        : { id: 'local', label: 'Local PG', source: 'local' },
     }
   })
 
@@ -403,7 +366,7 @@ async function main() {
   }
 
   productLifecycleCache = loadProductLifecycle(monorepoRoot)
-  console.log(`[ops-console] http://${host}:${port} (command hub · ${parseOpsEnvTargets().length} env targets)`)
+  console.log(`[ops-console] http://${host}:${port} (command hub · ${deploymentTier})`)
 
   await runProbeCycle()
   probeTimer = setInterval(() => runProbeCycle(), probeIntervalMs)

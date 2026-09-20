@@ -6,6 +6,20 @@ import type { FastifyRequest } from 'fastify'
 const monorepoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const stackScript = resolve(monorepoRoot, 'scripts', 'aiyracare-stack.ps1')
 
+const opsConsolePort = Number(process.env.OPS_CONSOLE_PORT ?? '3013')
+
+function resolveStackApiPort(): number {
+  if (opsConsolePort === 3023) return 3020
+  const fromEnv = Number(process.env.PORT ?? '3010')
+  return Number.isFinite(fromEnv) ? fromEnv : 3010
+}
+
+function resolveStackWebPort(): number {
+  if (opsConsolePort === 3023) return 5174
+  const fromEnv = Number(process.env.AIYRA_STACK_WEB_PORT ?? '5173')
+  return Number.isFinite(fromEnv) ? fromEnv : 5173
+}
+
 export type StackAction = 'status' | 'start' | 'stop' | 'restart'
 
 export interface StackServiceStatus {
@@ -52,8 +66,8 @@ function runStackScript(action: StackAction): Promise<StackActionResult> {
       error: 'Controle do stack disponível apenas em Windows (dev local)',
       status: {
         checkedAt: new Date().toISOString(),
-        apiPort: Number(process.env.PORT ?? 3010),
-        webPort: 5173,
+        apiPort: resolveStackApiPort(),
+        webPort: resolveStackWebPort(),
         api: { up: false, status: null, error: 'unsupported_platform' },
         web: { up: false, status: null, error: 'unsupported_platform' },
       },
@@ -74,7 +88,15 @@ function runStackScript(action: StackAction): Promise<StackActionResult> {
         action,
         '-Json',
       ],
-      { windowsHide: true },
+      {
+        windowsHide: true,
+        env: {
+          ...process.env,
+          PORT: String(resolveStackApiPort()),
+          AIYRA_STACK_WEB_PORT: String(resolveStackWebPort()),
+          DEPLOYMENT_TIER: opsConsolePort === 3023 ? 'preview' : (process.env.DEPLOYMENT_TIER ?? 'integration'),
+        },
+      },
     )
 
     let stdout = ''

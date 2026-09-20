@@ -20,6 +20,67 @@ function Get-OpsNotifierTierPorts {
   }
 }
 
+function Test-OpsTrayUrlPointsToDevStack {
+  param([string]$Url)
+  if ([string]::IsNullOrWhiteSpace($Url)) { return $false }
+  $u = $Url.Trim()
+  if ($u -match ':5173/ops$') { return $true }
+  return ($u -match ':(3010|3013|5173)(/|$|\?)')
+}
+
+function Resolve-OpsTrayTierAppUrl {
+  param(
+    [int]$NotifierPort,
+    [string]$PreferredUrl = $null
+  )
+  $ports = Get-OpsNotifierTierPorts -NotifierPort $NotifierPort
+  $base = "http://localhost:$($ports.webPort)"
+  if ($NotifierPort -eq 3022) {
+    if ($PreferredUrl -and $PreferredUrl.Trim() -and -not (Test-OpsTrayUrlPointsToDevStack $PreferredUrl)) {
+      return $PreferredUrl.Trim().TrimEnd('/')
+    }
+    return $base
+  }
+  if ($PreferredUrl -and $PreferredUrl.Trim()) {
+    return $PreferredUrl.Trim().TrimEnd('/')
+  }
+  return $base
+}
+
+function Resolve-OpsTrayTierObservabilityUrl {
+  param(
+    [int]$NotifierPort,
+    [string]$PreferredUrl = $null
+  )
+  $ports = Get-OpsNotifierTierPorts -NotifierPort $NotifierPort
+  $base = "http://127.0.0.1:$($ports.opsConsolePort)"
+  if ($PreferredUrl -and $PreferredUrl.Trim()) {
+    $url = $PreferredUrl.Trim().TrimEnd('/')
+    if ($url -match ':5173/ops$') { return $base }
+    if ($NotifierPort -eq 3022 -and (Test-OpsTrayUrlPointsToDevStack $url)) {
+      return $base
+    }
+    return $url
+  }
+  return $base
+}
+
+function Resolve-OpsTrayTierAlertDashboardUrl {
+  param(
+    [int]$NotifierPort,
+    [string]$Url
+  )
+  if ([string]::IsNullOrWhiteSpace($Url)) { return $null }
+  $ports = Get-OpsNotifierTierPorts -NotifierPort $NotifierPort
+  $base = "http://127.0.0.1:$($ports.opsConsolePort)"
+  $trim = $Url.Trim().TrimEnd('/')
+  if ($trim -match ':5173/ops$') { return $base }
+  if ($NotifierPort -eq 3022 -and (Test-OpsTrayUrlPointsToDevStack $trim)) {
+    return $base
+  }
+  return $trim
+}
+
 function Test-PortListening {
   param([int]$Port)
   try {

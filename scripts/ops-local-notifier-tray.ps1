@@ -81,34 +81,21 @@ function Write-NotifierLog([string]$Message) {
 }
 
 function Resolve-ObservabilityUrl {
-  $consolePort = if ($env:OPS_CONSOLE_PORT -and $env:OPS_CONSOLE_PORT.Trim()) {
-    $env:OPS_CONSOLE_PORT.Trim()
-  } elseif ($port -eq '3022') {
-    '3023'
-  } else {
-    '3013'
-  }
   $explicit = $env:OPS_ALERT_DASHBOARD_URL
-  if ($explicit -and $explicit.Trim()) {
-    $url = $explicit.Trim()
-    if ($url.EndsWith('/')) { $url = $url.Substring(0, $url.Length - 1) }
-    if ($url -match ':5173/ops$') {
-      Write-NotifierLog "legacy dashboard URL ignored: $url"
-      return "http://127.0.0.1:$consolePort"
-    }
-    return Normalize-OpsLocalServiceUrl -Url $url -FallbackPort ([int]$consolePort)
+  $resolved = Resolve-OpsTrayTierObservabilityUrl -NotifierPort $portInt -PreferredUrl $explicit
+  if ($explicit -and $explicit.Trim() -and $resolved -ne $explicit.Trim().TrimEnd('/')) {
+    Write-NotifierLog "dashboard URL remapped for tier :$port -> $resolved (was $($explicit.Trim()))"
   }
-  return "http://127.0.0.1:$consolePort"
+  return Normalize-OpsLocalServiceUrl -Url $resolved -FallbackPort ([int]$opsConsolePort)
 }
 
 function Resolve-AiyraAppUrl {
-  $web = $env:LANDING_CAPTURE_WEB_URL
-  if ($web -and $web.Trim()) {
-    $url = $web.Trim()
-    if ($url.EndsWith('/')) { $url = $url.Substring(0, $url.Length - 1) }
-    return $url
+  $preferred = $env:LANDING_CAPTURE_WEB_URL
+  $resolved = Resolve-OpsTrayTierAppUrl -NotifierPort $portInt -PreferredUrl $preferred
+  if ($preferred -and $preferred.Trim() -and $resolved -ne $preferred.Trim().TrimEnd('/')) {
+    Write-NotifierLog "app URL remapped for tier :$port -> $resolved (was $($preferred.Trim()))"
   }
-  return "http://localhost:$webPort"
+  return $resolved
 }
 
 $observabilityUrl = Resolve-ObservabilityUrl
@@ -676,7 +663,7 @@ $timer.Add_Tick({
       $toast = Resolve-OpsToastFromPayload -Json $json
       Show-OpsTrayBalloon -Kind $toast.Kind -Headline $toast.Headline -Body $toast.Body -ContextLine $toast.ContextLine -IconName $toast.IconName -NotifyIcon $icon -TimeoutMs 12000
       $profile = Get-OpsToastKindProfile $toast.Kind
-      $url = [string]$json.dashboardUrl
+      $url = Resolve-OpsTrayTierAlertDashboardUrl -NotifierPort $portInt -Url ([string]$json.dashboardUrl)
       if ($openBrowser -and $profile.opensBrowser) {
         if ($url) {
           try {

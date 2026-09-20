@@ -9,7 +9,6 @@ export function OpsShell({
   title,
   subtitle,
   deploymentTier,
-  envSelector,
   actions,
   statusStrip,
   children,
@@ -17,7 +16,6 @@ export function OpsShell({
   title: string
   subtitle: string
   deploymentTier?: OpsDeploymentTier
-  envSelector?: ReactNode
   actions?: ReactNode
   statusStrip?: ReactNode
   children: ReactNode
@@ -36,7 +34,6 @@ export function OpsShell({
           </div>
         </div>
         <Space wrap align="center">
-          {envSelector}
           {actions}
         </Space>
       </header>
