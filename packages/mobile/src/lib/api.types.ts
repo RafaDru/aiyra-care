@@ -4,10 +4,37 @@ export interface Patient {
   birthDate: string
   gender: 'male' | 'female' | null
   bloodType: string | null
+  cpf?: string | null
+  cns?: string | null
   ageCategory: 'children' | 'adolescents' | 'adults'
   isSelf?: boolean
   createdAt: string
   updatedAt: string
+}
+
+export interface InsurancePlan {
+  id: string
+  operator: string
+  operatorName: string | null
+  planName: string
+  productCode: string | null
+  networkName: string | null
+}
+
+export interface PlanMembership {
+  id: string
+  patientId: string
+  insurancePlanId: string
+  integrationLinkId: string | null
+  memberNumber: string | null
+  role: string
+  status: string
+  source: string
+  lastSyncedAt: string | null
+}
+
+export interface PlanMembershipWithPlan extends PlanMembership {
+  plan: InsurancePlan | null
 }
 
 export type LlmQuotaStatus = 'ok' | 'warn' | 'exhausted'

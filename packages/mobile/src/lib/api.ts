@@ -12,6 +12,7 @@ import type {
   IntegrationLinkSyncStatus,
   OwnedPatient,
   Patient,
+  PlanMembershipWithPlan,
   ProfileShare,
 } from './api.types'
 import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from './api.types'
@@ -150,6 +151,10 @@ export const api = {
       request<IntegrationLink[]>(`/integration-links?patientId=${encodeURIComponent(patientId)}`),
     syncStatus: (id: string) =>
       request<IntegrationLinkSyncStatus>(`/integration-links/${encodeURIComponent(id)}/sync-status`),
+  },
+  planMemberships: {
+    list: (patientId: string) =>
+      request<PlanMembershipWithPlan[]>(`/plan-memberships?patientId=${encodeURIComponent(patientId)}`),
   },
   ava: {
     listConversations: (patientId?: string) => {
