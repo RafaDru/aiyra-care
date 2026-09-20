@@ -19,3 +19,7 @@
 {"ts":"2026-09-20T03:44:21.426Z","event":"beforeShellExecution","command":"cd /workspace && npm ci 2>&1 | tail -5"}
 {"ts":"2026-09-20T03:44:21.433Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git commit -m \"merge main into cursor/ops-strategy-advisory-7eab (resolve ops-console server conflicts)\""}
 {"ts":"2026-09-20T03:47:40.240Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git commit -m \"merge main after #27 (resolve business-analytics-ops doc)\" && git push origin cursor/ops-strategy-advisory-7eab 2>&1"}
+{"ts":"2026-09-20T04:10:35.454Z","event":"beforeShellExecution","command":"cd /workspace && node -e \"JSON.parse(require('fs').readFileSync('docs/features/index.json'))\" && cd packages/web && npm run build 2>&1 | tail -8"}
+{"ts":"2026-09-20T04:10:38.448Z","event":"beforeShellExecution","command":"cd /workspace && npm ci 2>&1 | tail -3 && cd packages/web && npm run build 2>&1 | tail -5"}
+{"ts":"2026-09-20T04:11:04.723Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"chore: merge main into first-visit guided UX (post #49 family selector)\" && git push origin HEAD:cursor/first-visit-guided-ux-83e2"}
+{"ts":"2026-09-20T04:11:04.744Z","event":"beforeShellExecution","command":"gh pr view 22 --repo RafaDru/aiyra-care --json isDraft,state"}

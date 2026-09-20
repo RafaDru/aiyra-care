@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 import { uniqueQaCpf } from './fixtures'
 import { selectAntOption } from './select'
 import { hideAvaDock, dismissFirstVisitTour } from './ui'
+import { dashboardAddFamilyButton } from './dashboard'
 
 export type CreatePatientInput = {
   name: string
@@ -23,7 +24,7 @@ const newPatientDialog = (page: Page) =>
 
 export async function openNewPatientModal(page: Page) {
   await dismissFirstVisitTour(page)
-  await page.getByRole('button', { name: 'Adicionar à família' }).click({ force: true })
+  await dashboardAddFamilyButton(page).click({ force: true })
   await newPatientDialog(page).waitFor({ state: 'visible' })
 }
 

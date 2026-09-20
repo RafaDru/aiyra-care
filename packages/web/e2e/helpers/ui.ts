@@ -14,6 +14,17 @@ export async function dismissFirstVisitTour(page: Page) {
   await page.evaluate(() => {
     localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
   })
+  const drawer = page.getByTestId('first-visit-tour-drawer')
+  if (await drawer.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    const dismissDrawer = drawer.getByRole('button', { name: /Fechar guia|Close guide/i })
+    if (await dismissDrawer.isVisible().catch(() => false)) {
+      await dismissDrawer.click()
+    } else {
+      await drawer.getByRole('button', { name: 'Close' }).click()
+    }
+    await drawer.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
+    return
+  }
   const dialog = page.getByRole('dialog', { name: /Primeiros passos|First steps/i })
   const modal = page.getByTestId('first-visit-tour-modal')
   const tour = dialog.or(modal)

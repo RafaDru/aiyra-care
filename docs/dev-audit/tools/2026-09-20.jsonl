@@ -1,3 +1,12 @@
 {"ts":"2026-09-20T03:44:15.091Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/ops-console/src/server.ts"}
 {"ts":"2026-09-20T03:44:15.092Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/testing/suites/family-access-matrix.md"}
 {"ts":"2026-09-20T03:47:35.786Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/business-analytics-ops.md"}
+{"ts":"2026-09-20T04:10:20.338Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/web/e2e/onboarding.spec.ts"}
+{"ts":"2026-09-20T04:10:20.340Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/index.json"}
+{"ts":"2026-09-20T04:10:20.341Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/testing/suites/family-access-matrix.md"}
+{"ts":"2026-09-20T04:10:20.345Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/web/src/components/layout/AppLayout.tsx"}
+{"ts":"2026-09-20T04:10:20.370Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/testing/suites/onboarding-flow.md"}
+{"ts":"2026-09-20T04:10:21.893Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/index.json"}
+{"ts":"2026-09-20T04:10:22.873Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/index.json"}
+{"ts":"2026-09-20T04:10:23.847Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/index.json"}
+{"ts":"2026-09-20T04:10:33.133Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/web/src/components/onboarding/FirstVisitTourDrawer.tsx"}

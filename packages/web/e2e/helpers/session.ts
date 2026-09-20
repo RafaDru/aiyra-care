@@ -6,6 +6,7 @@ import { requireQaTestCredentials } from './env'
 import { completeOnboardingProfile, dismissCookieBanner } from './onboarding'
 import { uniqueQaCpf } from './fixtures'
 import { hideAvaDock, dismissHygienePrompt, dismissFirstVisitTour } from './ui'
+import { dashboardAddFamilyButton, waitForDashboardReady } from './dashboard'
 
 const repoRoot = resolve(process.cwd(), '..', '..')
 
@@ -37,7 +38,7 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   await waitForSupabaseSession(page)
   await dismissCookieBanner(page)
 
-  const novoPaciente = page.getByRole('button', { name: 'Adicionar à família' })
+  const novoPaciente = dashboardAddFamilyButton(page)
   const onboardingHeading = page.getByRole('heading', { name: 'Bem-vindo ao AiyraCare' })
 
   await Promise.race([
@@ -57,7 +58,7 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
 
   await dismissFirstVisitTour(page)
   await waitForPatientList(page)
-  await novoPaciente.waitFor({ state: 'visible', timeout: 15_000 })
+  await waitForDashboardReady(page)
   if (!opts?.keepAvaDock) {
     await hideAvaDock(page)
   }
