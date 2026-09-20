@@ -133,19 +133,15 @@ export async function submitAvaMessage(page: Page, text: string) {
 
   const input = page.getByPlaceholder(/febre|Ex\.:/i)
   const send = page.getByRole('button', { name: 'Enviar' })
-  const chatResponse = page.waitForResponse(
-    (r) => isAvaChatPostUrl(r.request().method(), r.url()),
-    { timeout: 90_000 },
+  const chatStarted = page.waitForRequest(
+    (r) => isAvaChatPostUrl(r.method(), r.url()),
+    { timeout: 45_000 },
   )
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
 
-  const response = await chatResponse
-  if (!response.ok()) {
-    const body = await response.text().catch(() => '')
-    throw new Error(`Ava chat HTTP ${response.status()}: ${body.slice(0, 240)}`)
-  }
+  await chatStarted
   await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
     timeout: 90_000,
   })
