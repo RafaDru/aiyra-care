@@ -398,7 +398,7 @@ export interface SupportReportOpsRow {
   createdAt: string
   expiresAt: string
   diagnosticContext: Record<string, unknown>
-  analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'
+  analysisStatus: 'none' | 'queued' | 'pending' | 'in_progress' | 'completed' | 'failed'
   operatorNotes: string | null
   analysisSummary: string | null
   analysisArtifactPath: string | null
@@ -406,6 +406,11 @@ export interface SupportReportOpsRow {
   analysisCompletedAt: string | null
   analysisLastError: string | null
   investigationId: string | null
+  suggestedCategory: string | null
+  categoryReviewNote: string | null
+  taxonomyGapProposal: string | null
+  deploymentStatus: string
+  deploymentActions: Array<{ label: string; kind: string; url?: string; done?: boolean }>
 }
 
 export interface RuntimeDegradedView {

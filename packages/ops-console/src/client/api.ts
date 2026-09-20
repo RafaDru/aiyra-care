@@ -94,7 +94,12 @@ export const opsApi = {
     ),
   completeSupportAnalysis: (
     id: string,
-    payload: { analysisSummary?: string; analysisArtifactPath?: string },
+    payload: {
+      analysisSummary?: string
+      analysisArtifactPath?: string
+      deploymentStatus?: string
+      deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+    },
   ) =>
     request<{ ok: boolean }>(`/api/support-reports/${id}/complete-analysis`, {
       method: 'POST',
