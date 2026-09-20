@@ -2,6 +2,8 @@
 
 Webhook `backend_task_handoff` — lane **integração pós-backend**.
 
+**Setup na conta Cursor (uma vez):** não há import JSON — cole o prompt de `.cursor/automations/backend-task-cursor-handoff.yaml` numa Automation webhook; secrets `CURSOR_BACKEND_HANDOFF_WEBHOOK_*` — ver `docs/coordination/CURSOR_RETURN_PATH.md`.
+
 ## Entrada
 
 JSON com `taskId`, `prUrl`, `prNumber`, `branch`, `queueStatus`, `trigger`.
