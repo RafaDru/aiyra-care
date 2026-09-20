@@ -190,3 +190,59 @@ export interface OwnedPatient {
   id: string
   name: string
 }
+
+export interface IntegrationLink {
+  id: string
+  patientId: string
+  portalType: string
+  email: string | null
+  cardNumber: string | null
+  active: boolean
+  lastSyncAt: string | null
+  sessionExpiresAt?: string | null
+  createdAt: string
+  updatedAt: string
+  syncAuthority?: 'self' | 'titular'
+  effectiveSyncLinkId?: string
+  managedByPatientId?: string
+  managedByPatientName?: string
+  effectiveLastSyncAt?: string | null
+  effectiveSessionExpiresAt?: string | null
+  sessionReady?: boolean
+  syncDegraded?: boolean
+  authAttention?: 'none' | 'credentials' | 'session'
+}
+
+export interface SyncNoveltySummary {
+  portalExams?: number
+  portalAttendances?: number
+  portalMedicalRecords?: number
+  portalAuthorizations?: number
+  newExamRecords?: number
+  skippedExamRecords?: number
+  skippedMedicalRecords?: number
+  skippedAuthorizations?: number
+  filesDownloaded?: number
+  filesSkipped?: number
+  newAuthorizations?: number
+  updatedAuthorizations?: number
+  newMedicalRecords?: number
+}
+
+export interface SyncJobStatusPayload {
+  id: string
+  status: 'pending' | 'running' | 'success' | 'failed'
+  step: string | null
+  message: string | null
+  result: { novelty?: SyncNoveltySummary } | null
+  novelty: SyncNoveltySummary | null
+  error: string | null
+  startedAt: string
+  finishedAt: string | null
+  portalType: string
+}
+
+export interface IntegrationLinkSyncStatus {
+  activeJob: SyncJobStatusPayload | null
+  lastJob: SyncJobStatusPayload | null
+}

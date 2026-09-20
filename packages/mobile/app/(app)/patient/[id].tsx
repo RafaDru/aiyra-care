@@ -1,6 +1,8 @@
 import { useLocalSearchParams } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { PatientIntegrationsPanel } from '@/components/integrations/PatientIntegrationsPanel'
+import { PatientWalletSyncBanner } from '@/components/integrations/PatientWalletSyncBanner'
 import { PatientNavPicker } from '@/components/PatientNavPicker'
 import { PlaceholderTab } from '@/components/PlaceholderTab'
 import {
@@ -23,11 +25,6 @@ function tabContent(tab: PatientTabKey): { title: string; subtitle: string } {
         title: 'Convênios',
         subtitle: 'Planos vinculados e elegibilidade.',
       }
-    case 'integrations':
-      return {
-        title: 'Integrações',
-        subtitle: 'Portais conectados; sincronização completa continua no web (fase M6).',
-      }
     case 'exams':
       return {
         title: 'Exames',
@@ -49,6 +46,7 @@ export default function PatientDetailScreen() {
     section?: string
     tab?: string
   }>()
+  const patientId = typeof id === 'string' ? id : id?.[0] ?? ''
   const { tokens } = useAiyraTheme()
   const initial = useMemo(
     () => resolvePatientNav(sectionParam ?? null, tabParam ?? null),
@@ -64,35 +62,50 @@ export default function PatientDetailScreen() {
 
   const content = tabContent(tab)
 
+  if (tab === 'integrations' && patientId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <View style={styles.header}>
+          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
+          <PatientNavPicker
+            section={section}
+            tab={tab}
+            onSectionChange={onSectionChange}
+            onTabChange={setTab}
+          />
+        </View>
+        <View style={styles.integrationsBody}>
+          <PatientIntegrationsPanel patientId={patientId} />
+        </View>
+      </View>
+    )
+  }
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}
       contentContainerStyle={styles.content}
     >
-      <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {id}</Text>
+      <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
       <PatientNavPicker
         section={section}
         tab={tab}
         onSectionChange={onSectionChange}
         onTabChange={setTab}
       />
+      {tab === 'wallet' && patientId ? <PatientWalletSyncBanner patientId={patientId} /> : null}
       <PlaceholderTab
         title={content.title}
         subtitle={content.subtitle}
         note="Navegação alinhada a packages/web/src/lib/patient-navigation.ts"
       />
-      <View style={[styles.avaHint, { borderColor: tokens.colorWarning }]}>
-        <Text style={{ color: tokens.colorTextBase, fontWeight: '600' }}>Ava (placeholder)</Text>
-        <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>
-          FAB global como no web — fase M5 (AVA_OPERATIONAL G1).
-        </Text>
-      </View>
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16, paddingBottom: 48 },
+  header: { padding: 16, gap: 12, paddingBottom: 0 },
+  integrationsBody: { flex: 1, paddingHorizontal: 16 },
   patientId: { fontSize: 12 },
-  avaHint: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 4 },
 })

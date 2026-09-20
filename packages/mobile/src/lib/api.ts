@@ -8,6 +8,8 @@ import type {
   InvitePreview,
   LegalDocumentKind,
   LegalDocumentWithContent,
+  IntegrationLink,
+  IntegrationLinkSyncStatus,
   OwnedPatient,
   Patient,
   ProfileShare,
@@ -142,6 +144,12 @@ export const api = {
   },
   llm: {
     quota: () => request<LlmUsageQuota>('/llm/usage/quota'),
+  },
+  integrationLinks: {
+    list: (patientId: string) =>
+      request<IntegrationLink[]>(`/integration-links?patientId=${encodeURIComponent(patientId)}`),
+    syncStatus: (id: string) =>
+      request<IntegrationLinkSyncStatus>(`/integration-links/${encodeURIComponent(id)}/sync-status`),
   },
   ava: {
     listConversations: (patientId?: string) => {
