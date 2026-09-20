@@ -152,6 +152,27 @@ npm run ops:notifier:simulate -- --scenario=llm_cascade
 
 ---
 
+## Suporte — investigador Cursor (não é alerta infra)
+
+Chamados «Reportar problema» usam webhook separado (`SUPPORT_REPORT_WEBHOOK_URL` / lane AiCare Desenvolvimento). Toast local permanece **imediato** no `POST /support/reports`; o **agente** pode ser imediato ou em **batch**.
+
+| Config | Default | Efeito |
+|--------|---------|--------|
+| `OPS_SUPPORT_INVESTIGATOR_MODE` | `immediate` | `immediate` dispara automation após enfileirar; `batch` deixa `analysis_status=queued` até o job |
+| `OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS` | `21600000` (6h) | Loop no **connect-worker** (preferido) ou tick equivalente na API |
+
+**Modo batch (preview / reduzir ruído):**
+
+1. Definir `OPS_SUPPORT_INVESTIGATOR_MODE=batch` no worker (+ API se dispatch roda na API).
+2. Confirmar worker ativo (`worker_stale` ausente no console).
+3. Tickets novos: toast OK; aba **Suporte** / **Issues** mostra fila `queued`.
+4. **Analisar** no console continua disparo **imediato** (single ou grupo de 1).
+5. Payload agendado: `type: support_report_batch` — ver [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) e playbook `docs/ops/automations/support-report-investigator.prompt.md`.
+
+**Verificar:** `npm run test:ops` inclui `support-report-batch.test.ts` e dispatch; console `:3013` → aba Suporte → badge `deployment_status` após callback.
+
+---
+
 ## Matriz pager (produção padrão)
 
 | Config | Valor |

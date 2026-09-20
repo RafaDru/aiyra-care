@@ -1,7 +1,7 @@
 # Aiyra: Ops — hub da sessão
 
 > **Sessão Cursor:** use este arquivo como ponto de entrada ao trabalhar observabilidade, alertas, suporte e console `:3013`.  
-> **Última atualização:** 2026-09-16
+> **Última atualização:** 2026-09-20
 
 Este diretório é a **fonte de verdade operacional** do épico `prod-run-intelligence` e complementa [`docs/OBSERVABILITY.md`](../OBSERVABILITY.md) (visão arquitetural) com runbooks, queries e backlog executável.
 
@@ -132,6 +132,15 @@ Detalhe: [`CONSOLE.md`](./CONSOLE.md).
 | **Ops doc** | [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) |
 
 **Fase atual:** ingest + fila **Issues** + agente Cursor (Tier 0/1) + `investigationId` para correlacionar com Automations.
+
+### Investigador — imediato vs batch (6h)
+
+| Variável | Default | Efeito |
+|----------|---------|--------|
+| `OPS_SUPPORT_INVESTIGATOR_MODE` | `immediate` | `batch` adia automation automática; toast no POST inalterado |
+| `OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS` | `21600000` | Agrupa por `(deployment_tier, category)` no connect-worker |
+
+Runbook operacional: [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) § Suporte — investigador Cursor. Vitest: `support-report-batch.test.ts`.
 
 ---
 
