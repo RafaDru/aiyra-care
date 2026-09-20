@@ -15,14 +15,16 @@ export async function dismissFirstVisitTour(page: Page) {
     localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
   })
   const dialog = page.getByRole('dialog', { name: /Primeiros passos|First steps/i })
-  if (await dialog.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    const dismiss = dialog.getByRole('button', { name: /Fechar guia|Close guide/i })
+  const modal = page.getByTestId('first-visit-tour-modal')
+  const tour = dialog.or(modal)
+  if (await tour.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    const dismiss = tour.getByRole('button', { name: /Fechar guia|Close guide/i })
     if (await dismiss.isVisible().catch(() => false)) {
       await dismiss.click()
     } else {
-      await dialog.getByRole('button', { name: 'Close' }).click()
+      await tour.getByRole('button', { name: 'Close' }).click()
     }
-    await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
+    await tour.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
   }
 }
 
