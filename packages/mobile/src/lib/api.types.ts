@@ -5,8 +5,93 @@ export interface Patient {
   gender: 'male' | 'female' | null
   bloodType: string | null
   ageCategory: 'children' | 'adolescents' | 'adults'
+  isSelf?: boolean
   createdAt: string
   updatedAt: string
+}
+
+export type LlmQuotaStatus = 'ok' | 'warn' | 'exhausted'
+
+export interface LlmUsageQuota {
+  scopeId: string
+  tokensPerCredit: number
+  monthlyTokenAllowance: number
+  monthlyTokensUsed: number
+  monthlyTokensRemaining: number
+  packageTokenBalance: number
+  totalTokensRemaining: number
+  creditsEquivalentRemaining: number
+  warnAtPercent: number
+  usagePercent: number
+  status: LlmQuotaStatus
+  monthlyPeriod: string
+  handwritingCredits: {
+    monthlyFreeRemaining: number
+    packageCredits: number
+    totalAvailable: number
+  }
+  llmEnabled: boolean
+  quotaBypassed?: boolean
+}
+
+export interface AvaReflectionOutcome {
+  satisfactory: boolean
+  issues: string[]
+  severity: 'ok' | 'minor' | 'critical'
+  revised: boolean
+  attempts: number
+  steps: string[]
+}
+
+export type AvaActivityKind = 'context' | 'tool' | 'llm' | 'reflection'
+export type AvaActivityStatus = 'start' | 'done' | 'skip'
+
+export interface AvaActivityEvent {
+  code: string
+  kind: AvaActivityKind
+  status: AvaActivityStatus
+  label: string
+  ts: number
+}
+
+export interface AvaProposedAction {
+  id: string
+  type: string
+  label: string
+  description?: string
+  payload: Record<string, unknown>
+}
+
+export interface AvaConversation {
+  id: string
+  accountId: string
+  patientId: string
+  healthThreadId: string | null
+  title: string | null
+  status: 'active' | 'archived'
+  lastActivityAt: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AvaChatResponse {
+  reply: string
+  provider: string
+  model: string
+  tier: 'free' | 'premium'
+  conversationId?: string
+  proposedActions?: AvaProposedAction[]
+  usage: {
+    tokensIn: number
+    tokensOut: number
+    tokensTotal: number
+    usageSource: string
+  }
+  quota: LlmUsageQuota
+  disclaimer: string
+  insightsIncluded: number
+  reflection: AvaReflectionOutcome
+  activityTrace?: AvaActivityEvent[]
 }
 
 export interface AppAccount {
