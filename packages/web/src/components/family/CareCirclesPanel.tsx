@@ -16,6 +16,7 @@ import {
 import { EditOutlined, LinkOutlined, PlusOutlined, TeamOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
+import { useActiveCareCircle } from '../../contexts/ActiveCareCircleContext.js'
 
 const { Text, Paragraph } = Typography
 
@@ -33,6 +34,7 @@ interface CircleDetail extends CircleSummary {
 
 export function CareCirclesPanel() {
   const { t } = useTranslation()
+  const { activeCircleId, setActiveCircleId, hasMultipleCircles, refreshCircles } = useActiveCareCircle()
   const [circles, setCircles] = useState<CircleSummary[]>([])
   const [details, setDetails] = useState<Record<string, CircleDetail>>({})
   const [loading, setLoading] = useState(true)
@@ -83,6 +85,7 @@ export function CareCirclesPanel() {
       setCreateOpen(false)
       form.resetFields()
       void load()
+      void refreshCircles()
     } catch (e) {
       message.error(e instanceof Error ? e.message : t('family.circles.createError'))
     }
@@ -97,6 +100,7 @@ export function CareCirclesPanel() {
       setRenameOpen(null)
       renameForm.resetFields()
       void load()
+      void refreshCircles()
       void refreshDetail(renameOpen)
     } catch (e) {
       message.error(e instanceof Error ? e.message : t('family.circles.renameError'))
@@ -146,6 +150,17 @@ export function CareCirclesPanel() {
 
   const canManage = (role: string) => role === 'owner' || role === 'admin'
 
+  const visibleCircles =
+    hasMultipleCircles && activeCircleId
+      ? circles.filter((c) => c.id === activeCircleId)
+      : circles
+
+  useEffect(() => {
+    if (hasMultipleCircles && activeCircleId) {
+      void loadDetail(activeCircleId)
+    }
+  }, [hasMultipleCircles, activeCircleId])
+
   return (
     <Card loading={loading}>
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
@@ -168,11 +183,15 @@ export function CareCirclesPanel() {
         ) : (
           <Collapse
             accordion
+            activeKey={hasMultipleCircles ? activeCircleId : undefined}
             onChange={(key) => {
               const id = Array.isArray(key) ? key[0] : key
-              if (id) void loadDetail(id)
+              if (id) {
+                setActiveCircleId(id)
+                void loadDetail(id)
+              }
             }}
-            items={circles.map((c) => ({
+            items={visibleCircles.map((c) => ({
               key: c.id,
               label: c.name,
               children: details[c.id] ? (

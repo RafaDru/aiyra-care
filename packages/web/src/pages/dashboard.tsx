@@ -13,6 +13,7 @@ import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
 import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
 import { useAuth } from '../contexts/AuthContext.js'
+import { useActiveCareCircle } from '../contexts/ActiveCareCircleContext.js'
 
 const { Title, Text } = Typography
 
@@ -26,6 +27,7 @@ export function Dashboard() {
   const { t } = useTranslation()
   const { message } = App.useApp()
   const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
+  const { hasMultipleCircles, activeCircleId } = useActiveCareCircle()
   const [patients, setPatients] = useState<Patient[]>([])
   const [circleGroups, setCircleGroups] = useState<Array<{ id: string; name: string; patientIds: string[] }>>([])
   const [loading, setLoading] = useState(true)
@@ -113,6 +115,13 @@ export function Dashboard() {
     return { sections, other }
   }, [patients, circleGroups])
 
+  const circleSections = useMemo(() => {
+    if (hasMultipleCircles && activeCircleId) {
+      return groupedByCircle.sections.filter((s) => s.id === activeCircleId)
+    }
+    return groupedByCircle.sections
+  }, [groupedByCircle.sections, hasMultipleCircles, activeCircleId])
+
   const renderPatientGrid = (list: Patient[]) => (
     <Row gutter={[20, 20]}>
       {list.map((p) => (
@@ -146,7 +155,10 @@ export function Dashboard() {
 
   if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
 
-  const useCircleLayout = groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0
+  const useCircleLayout = useMemo(() => {
+    if (hasMultipleCircles && circleSections.length > 0) return true
+    return groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0
+  }, [hasMultipleCircles, circleSections.length, groupedByCircle.sections.length, groupedByCircle.other.length])
 
   return (
     <div>
@@ -184,7 +196,7 @@ export function Dashboard() {
         />
       ) : useCircleLayout ? (
         <>
-          {groupedByCircle.sections.map((section) => (
+          {circleSections.map((section) => (
             <div key={section.id} style={{ marginBottom: 40 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                 <TeamOutlined style={{ fontSize: 22, color: '#4F46E5' }} />
