@@ -8,6 +8,8 @@ export function useAiyraTheme() {
   return { dark, tokens }
 }
 
+export type AiyraThemeTokens = ReturnType<typeof useAiyraTheme>['tokens']
+
 export function spacing(tokens: typeof AIYRACARE_TOKENS) {
   return {
     screen: tokens.padding,

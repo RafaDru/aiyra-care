@@ -23,13 +23,21 @@ Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesm
 | Package | `packages/mobile` (Expo Router) |
 | Tokens | `packages/design-tokens` (`@aiyra-care/design-tokens`) |
 | Navegação paciente | Espelho de `packages/web/src/lib/patient-navigation.ts` |
-| API | `packages/mobile/src/lib/api.ts` (subset `patients` + `auth/sync`) |
-| Auth | `EXPO_PUBLIC_SUPABASE_*` + AsyncStorage |
+| API / env | `packages/mobile/src/lib/api.ts`; `EXPO_PUBLIC_API_URL` (default `:3010`) — ver `.env.example` |
+| Auth | `EXPO_PUBLIC_SUPABASE_*` + AsyncStorage — ver `packages/mobile/.env.example` |
 | Plano | Project store `docs/mobile-parity-plan.md` |
 
 ## QA
 
 Estrutural — sem ações CRUD novas nesta fase. Smoke manual: login → lista → abrir paciente → tab Carteira. Suite automatizada: **pendente** (`mobile-shell-smoke`).
+
+**Env local:** copiar `packages/mobile/.env.example` → `.env` (não commitar).
+
+## Marco M2 (login + início)
+
+- `.env.example` com `EXPO_PUBLIC_SUPABASE_*` e `EXPO_PUBLIC_API_URL`
+- Lista de pacientes via `GET /patients`, agrupada por faixa etária (espelho dashboard web)
+- Loading, erro com retry e pull-to-refresh na aba Início
 
 ## Pendente
 

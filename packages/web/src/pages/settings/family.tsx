@@ -1,16 +1,7 @@
-import { Space } from 'antd'
-import { CareCirclesPanel } from '../../components/family/CareCirclesPanel.js'
-import { FamilyGlossaryCard } from '../../components/family/FamilyGlossaryCard.js'
-import { FamilyInviteCard } from '../../components/family/FamilyInviteCard.js'
-import { ProfileShareCard } from '../../components/family/ProfileShareCard.js'
+import { Navigate } from 'react-router-dom'
+import { FAMILY_HUB_PATH } from '../../lib/family-paths.js'
 
+/** Legado — família saiu de Configurações; manter URL antiga. */
 export function SettingsFamilyPage() {
-  return (
-    <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      <FamilyGlossaryCard />
-      <CareCirclesPanel />
-      <ProfileShareCard />
-      <FamilyInviteCard />
-    </Space>
-  )
+  return <Navigate to={FAMILY_HUB_PATH} replace />
 }

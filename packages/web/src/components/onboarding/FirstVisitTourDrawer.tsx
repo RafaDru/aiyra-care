@@ -74,7 +74,7 @@ export function FirstVisitTourDrawer() {
   const runStepAction = useCallback((key: StepKey) => {
     switch (key) {
       case 'family':
-        navigate('/')
+        navigate('/family')
         break
       case 'addPerson':
         navigate('/')

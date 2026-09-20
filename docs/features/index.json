@@ -12,7 +12,7 @@
       "priority": "P1",
       "doc": "docs/features/family-access-model.md",
       "domainDoc": "docs/FAMILY_ACCESS_MODEL.md",
-      "routes": ["/", "/patients/:id", "/settings/family", "/settings/account", "/invite/accept"],
+      "routes": ["/", "/family", "/patients/:id", "/settings/account", "/invite/accept"],
       "api": [
         "GET /patients/:id/access-grants",
         "POST /patients/:id/access-grants",

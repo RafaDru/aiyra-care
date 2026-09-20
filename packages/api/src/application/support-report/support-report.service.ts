@@ -77,12 +77,25 @@ export class SupportReportService {
       analysisStatusFromInvestigatorResult,
       analysisErrorFromInvestigatorResult,
     }) => {
+      const { isSupportInvestigatorBatchMode } = await import(
+        '../../domain/ops/support-investigator-mode.js'
+      )
       const { investigateSupportReportWithQueue } = await import(
         '../ops/ops-analysis-investigation.helper.js'
       )
       let investigator: Awaited<ReturnType<typeof dispatchSupportReportInvestigator>>
       let notifier = false
       try {
+        if (isSupportInvestigatorBatchMode()) {
+          notifier = await dispatchSupportReport(record)
+          investigator = { outcome: 'skipped', reason: 'pre_screen' }
+          await this.repo.updateAnalysisStateForOps(record.id, {
+            analysisStatus: 'queued',
+            analysisLastError: null,
+            analysisRequestedAt: null,
+          }).catch(() => undefined)
+          return
+        }
         if (this.queueService) {
           const { queueId, dispatch } = await investigateSupportReportWithQueue(
             this.queueService,

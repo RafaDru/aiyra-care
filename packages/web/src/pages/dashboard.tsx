@@ -11,6 +11,7 @@ import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
+import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
 import { useAuth } from '../contexts/AuthContext.js'
 
 const { Title, Text } = Typography
@@ -154,6 +155,7 @@ export function Dashboard() {
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
 
+      {patients.length > 0 && <DashboardFamilyShortcut />}
       {patients.length > 0 && <DashboardDayToDaySection />}
 
       {loadError && (
