@@ -886,7 +886,7 @@
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
           "status": "in_progress",
-          "detail": "Shell Expo + auth Supabase + navegação perfil (M1). Plano: Project store docs/mobile-parity-plan.md."
+          "detail": "M4: família ACL + compliance gate + deep link invite/accept. Plano: Project store docs/mobile-parity-plan.md."
         },
         {
           "id": "plat-microservices",

@@ -9,12 +9,13 @@ import {
   TextInput,
   View,
 } from 'react-native'
-import { Redirect, router } from 'expo-router'
+import { Redirect, router, useLocalSearchParams } from 'expo-router'
 import { StatePanel } from '@/components/StatePanel'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export default function LoginScreen() {
+  const { redirect, token: inviteToken } = useLocalSearchParams<{ redirect?: string; token?: string }>()
   const { configured, loading, session, signInWithPassword } = useAuth()
   const { tokens } = useAiyraTheme()
   const [email, setEmail] = useState('')
@@ -31,6 +32,9 @@ export default function LoginScreen() {
   }
 
   if (session) {
+    if (redirect === 'invite' && typeof inviteToken === 'string' && inviteToken) {
+      return <Redirect href={`/invite/accept?token=${encodeURIComponent(inviteToken)}`} />
+    }
     return <Redirect href="/(app)/(tabs)" />
   }
 
@@ -47,7 +51,11 @@ export default function LoginScreen() {
     setSubmitting(true)
     try {
       await signInWithPassword(email.trim(), password)
-      router.replace('/(app)/(tabs)')
+      if (redirect === 'invite' && typeof inviteToken === 'string' && inviteToken) {
+        router.replace(`/invite/accept?token=${encodeURIComponent(inviteToken)}`)
+      } else {
+        router.replace('/(app)/(tabs)')
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Falha no login')
     } finally {

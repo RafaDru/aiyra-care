@@ -1,5 +1,6 @@
 import { Redirect, Stack } from 'expo-router'
 import { ActivityIndicator, View } from 'react-native'
+import { RequireComplianceGate } from '@/components/auth/RequireComplianceGate'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
@@ -20,10 +21,13 @@ export default function AppShellLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerTintColor: tokens.colorPrimary }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="patient/[id]" options={{ title: 'Perfil' }} />
-      <Stack.Screen name="settings/family" options={{ title: 'Família e cuidadores' }} />
-    </Stack>
+    <RequireComplianceGate>
+      <Stack screenOptions={{ headerTintColor: tokens.colorPrimary }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="patient/[id]" options={{ title: 'Perfil' }} />
+        <Stack.Screen name="settings/family" options={{ title: 'Família e cuidadores' }} />
+        <Stack.Screen name="compliance/accept" options={{ title: 'Termos e privacidade', headerBackVisible: false }} />
+      </Stack>
+    </RequireComplianceGate>
   )
 }

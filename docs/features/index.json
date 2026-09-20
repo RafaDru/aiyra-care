@@ -249,8 +249,18 @@
       "category": "tecnico",
       "priority": "P2",
       "doc": "docs/features/mobile-app-shell.md",
-      "routes": [],
-      "api": ["GET /patients", "GET /patients/:id", "POST /auth/sync"],
+      "routes": ["/(app)/settings/family", "/invite/accept", "/(app)/compliance/accept"],
+      "api": [
+        "GET /patients",
+        "GET /patients/:id",
+        "POST /auth/sync",
+        "GET /compliance/status",
+        "POST /compliance/accept",
+        "GET/POST /family-access/invites",
+        "POST /family-access/invites/accept",
+        "GET/POST/DELETE /family-access/profile-shares",
+        "GET/POST/PATCH /care-circles"
+      ],
       "helpTopics": [],
       "tags": ["mobile", "expo", "paridade"]
     },

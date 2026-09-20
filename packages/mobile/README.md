@@ -20,3 +20,20 @@ npx expo export --platform web   # build estático web (smoke / screenshots)
 ```
 
 Plano de paridade: Project store `docs/mobile-parity-plan.md` · feature `docs/features/mobile-app-shell.md`
+
+## Deep links e OAuth (M4)
+
+| Rota | Uso |
+|------|-----|
+| `aiyracare://invite/accept?token=…` | Aceitar convite de família (espelho web `/invite/accept`) |
+| Expo Web | `http://localhost:8081/invite/accept?token=…` (porta do Metro) |
+
+**Google OAuth:** fase 1 continua **e-mail/senha** (`signInWithPassword`). Para OAuth nativo:
+
+1. Configurar redirect URLs no Supabase: `exp://**`, `aiyracare://**` e URL do Expo web em dev.
+2. Usar `expo-auth-session` + `supabase.auth.signInWithOAuth` (M5+ ou PR dedicado).
+3. Em dispositivo físico, `EXPO_PUBLIC_API_URL` deve apontar para IP LAN da API (`:3010`), não `127.0.0.1`.
+
+## Compliance (gate)
+
+Após login, o app chama `GET /compliance/status` (como web `RequireCompliance`) e redireciona para `/(app)/compliance/accept` quando há pendência — independente de `COMPLIANCE_GATE_ENABLED` na API.
