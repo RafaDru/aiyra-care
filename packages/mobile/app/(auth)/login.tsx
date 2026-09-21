@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -10,12 +8,16 @@ import {
   View,
 } from 'react-native'
 import { Redirect, router, useLocalSearchParams } from 'expo-router'
+import { AuthScreen } from '@/components/auth/AuthScreen'
+import { PasswordField } from '@/components/auth/PasswordField'
 import { AppLogo } from '@/components/brand/AppLogo'
 import { LegalDocumentModal } from '@/components/legal/LegalDocumentModal'
 import { StatePanel } from '@/components/StatePanel'
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/lib/api'
+import { AUTH_PASSWORD_HINT, AUTH_PASSWORD_MIN_LENGTH } from '@/lib/auth-policy'
 import type { LegalDocumentKind } from '@/lib/api.types'
+import { reportAuthClientError } from '@/lib/client-errors'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 type AuthMode = 'login' | 'signup'
@@ -49,9 +51,11 @@ export default function LoginScreen() {
   }, [modeParam])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
   const [legalAccept, setLegalAccept] = useState(false)
   const [legalModalKind, setLegalModalKind] = useState<LegalDocumentKind | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [oauthSubmitting, setOauthSubmitting] = useState(false)
 
@@ -59,6 +63,8 @@ export default function LoginScreen() {
     setMode(next)
     setLegalAccept(false)
     setError(null)
+    setInfo(null)
+    setPasswordConfirm('')
   }
 
   if (loading) {
@@ -93,27 +99,43 @@ export default function LoginScreen() {
       setError('Informe e-mail e senha.')
       return
     }
-    if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres.')
+    if (password.length < AUTH_PASSWORD_MIN_LENGTH) {
+      setError(`A senha deve ter pelo menos ${AUTH_PASSWORD_MIN_LENGTH} caracteres.`)
       return
     }
-    if (mode === 'signup' && !legalAccept) {
-      setError('Aceite os termos e a política de privacidade para criar sua conta.')
-      return
+    if (mode === 'signup') {
+      if (password !== passwordConfirm) {
+        setError('As senhas não coincidem.')
+        return
+      }
+      if (!legalAccept) {
+        setError('Aceite os termos e a política de privacidade para criar sua conta.')
+        return
+      }
     }
     setError(null)
+    setInfo(null)
     setSubmitting(true)
     try {
       if (mode === 'login') {
         await signInWithPassword(email.trim(), password)
       } else {
-        await signUpWithPassword(email.trim(), password)
+        const result = await signUpWithPassword(email.trim(), password)
+        if (result.kind === 'email_confirmation') {
+          setInfo(
+            'Conta criada. Se o ambiente exige confirmação, abra o link no e-mail e depois use Entrar. Caso já tenha sessão ativa, tente Entrar agora.',
+          )
+          setAuthMode('login')
+          return
+        }
         await refreshSync()
         await api.compliance.accept()
       }
       await afterAuthSuccess()
     } catch (e) {
-      setError(e instanceof Error ? e.message : mode === 'login' ? 'Falha no login' : 'Falha ao criar conta')
+      const message = e instanceof Error ? e.message : mode === 'login' ? 'Falha no login' : 'Falha ao criar conta'
+      setError(message)
+      void reportAuthClientError(mode, message)
     } finally {
       setSubmitting(false)
     }
@@ -130,17 +152,16 @@ export default function LoginScreen() {
       await signInWithGoogle()
       await afterAuthSuccess()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Falha no login com Google')
+      const message = e instanceof Error ? e.message : 'Falha no login com Google'
+      setError(message)
+      void reportAuthClientError('google', message)
     } finally {
       setOauthSubmitting(false)
     }
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.screen, { backgroundColor: tokens.colorBgLayout }]}
-    >
+    <AuthScreen>
       <LegalDocumentModal
         kind={legalModalKind}
         visible={legalModalKind !== null}
@@ -157,17 +178,14 @@ export default function LoginScreen() {
           {configured
             ? mode === 'login'
               ? 'Use a mesma conta do web.'
-              : 'Cadastro com e-mail e senha; confirme o e-mail se o Supabase exigir.'
+              : 'Cadastro com e-mail e senha.'
             : 'Configure EXPO_PUBLIC_SUPABASE_* no .env (ver .env.example).'}
         </Text>
 
         <View style={[styles.segmentRow, { backgroundColor: tokens.colorBgLayout, borderColor: tokens.colorBorder }]}>
           <Pressable
             onPress={() => setAuthMode('login')}
-            style={[
-              styles.segment,
-              mode === 'login' && { backgroundColor: tokens.colorBgContainer },
-            ]}
+            style={[styles.segment, mode === 'login' && { backgroundColor: tokens.colorBgContainer }]}
             accessibilityRole="button"
             accessibilityState={{ selected: mode === 'login' }}
           >
@@ -182,10 +200,7 @@ export default function LoginScreen() {
           </Pressable>
           <Pressable
             onPress={() => setAuthMode('signup')}
-            style={[
-              styles.segment,
-              mode === 'signup' && { backgroundColor: tokens.colorBgContainer },
-            ]}
+            style={[styles.segment, mode === 'signup' && { backgroundColor: tokens.colorBgContainer }]}
             accessibilityRole="button"
             accessibilityState={{ selected: mode === 'signup' }}
           >
@@ -236,17 +251,27 @@ export default function LoginScreen() {
           editable={!submitting && !oauthSubmitting}
           style={[styles.input, { borderColor: tokens.colorBorder, color: tokens.colorTextBase }]}
         />
-        <TextInput
-          secureTextEntry
-          autoComplete={mode === 'login' ? 'password' : 'password-new'}
-          placeholder="Senha"
-          placeholderTextColor={tokens.colorTextSecondary}
+        <PasswordField
+          tokens={tokens}
           value={password}
           onChangeText={setPassword}
+          autoComplete={mode === 'login' ? 'password' : 'password-new'}
           editable={!submitting && !oauthSubmitting}
           onSubmitEditing={() => void onSubmit()}
-          style={[styles.input, { borderColor: tokens.colorBorder, color: tokens.colorTextBase }]}
         />
+        {mode === 'signup' ? (
+          <>
+            <Text style={[styles.policy, { color: tokens.colorTextSecondary }]}>{AUTH_PASSWORD_HINT}</Text>
+            <PasswordField
+              tokens={tokens}
+              value={passwordConfirm}
+              onChangeText={setPasswordConfirm}
+              placeholder="Confirmar senha"
+              autoComplete="password-new"
+              editable={!submitting && !oauthSubmitting}
+            />
+          </>
+        ) : null}
 
         {mode === 'signup' ? (
           <Pressable
@@ -280,6 +305,11 @@ export default function LoginScreen() {
           </Pressable>
         ) : null}
 
+        {info ? (
+          <Text style={[styles.info, { color: tokens.colorPrimary }]} accessibilityRole="text">
+            {info}
+          </Text>
+        ) : null}
         {error ? (
           <Text style={[styles.error, { color: tokens.colorError }]} accessibilityRole="alert">
             {error}
@@ -297,7 +327,7 @@ export default function LoginScreen() {
           )}
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </AuthScreen>
   )
 }
 
@@ -307,6 +337,7 @@ const styles = StyleSheet.create({
   logoWrap: { alignItems: 'center', marginBottom: 4 },
   title: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
   hint: { fontSize: 14, textAlign: 'center', marginBottom: 4 },
+  policy: { fontSize: 12, lineHeight: 18 },
   segmentRow: {
     flexDirection: 'row',
     borderWidth: 1,
@@ -322,6 +353,7 @@ const styles = StyleSheet.create({
   },
   input: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
   error: { fontSize: 14 },
+  info: { fontSize: 14, lineHeight: 20 },
   button: { borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
   buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 4 },

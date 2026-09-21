@@ -3,11 +3,20 @@ import { Link, router } from 'expo-router'
 import { AppLogo } from '@/components/brand/AppLogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { webAppBaseUrl } from '@/lib/web-app-url'
+import type { AppearancePreference } from '@/theme/AppearancePreferenceContext'
+import { useAppearancePreference } from '@/theme/AppearancePreferenceContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export default function SettingsScreen() {
   const { account, signOut } = useAuth()
   const { tokens } = useAiyraTheme()
+  const { preference, setPreference } = useAppearancePreference()
+
+  const appearanceOptions: { key: AppearancePreference; label: string }[] = [
+    { key: 'light', label: 'Claro' },
+    { key: 'dark', label: 'Escuro' },
+    { key: 'system', label: 'Sistema' },
+  ]
 
   const webBase = webAppBaseUrl()
 
@@ -18,6 +27,30 @@ export default function SettingsScreen() {
       </View>
       <Text style={[styles.title, { color: tokens.colorTextBase }]}>Configurações</Text>
       <Text style={{ color: tokens.colorTextSecondary, marginBottom: 16 }}>{account?.email ?? '—'}</Text>
+
+      <Text style={[styles.sectionLabel, { color: tokens.colorTextSecondary }]}>Aparência</Text>
+      <View style={[styles.segmentRow, { borderColor: tokens.colorBorder, backgroundColor: tokens.colorBgContainer }]}>
+        {appearanceOptions.map((opt) => (
+          <Pressable
+            key={opt.key}
+            onPress={() => setPreference(opt.key)}
+            style={[
+              styles.segment,
+              preference === opt.key && { backgroundColor: tokens.colorBgLayout },
+            ]}
+          >
+            <Text
+              style={{
+                fontWeight: preference === opt.key ? '700' : '500',
+                color: preference === opt.key ? tokens.colorPrimary : tokens.colorTextSecondary,
+                fontSize: 13,
+              }}
+            >
+              {opt.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
 
       <Link href="/(app)/settings/family" asChild>
         <Pressable style={[styles.row, { borderColor: tokens.colorBorder, backgroundColor: tokens.colorBgContainer }]}>
@@ -53,6 +86,16 @@ const styles = StyleSheet.create({
   screen: { flex: 1, padding: 16 },
   logoRow: { alignItems: 'center', marginBottom: 12 },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 4 },
+  sectionLabel: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 8 },
+  segmentRow: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 4,
+    gap: 4,
+    marginBottom: 16,
+  },
+  segment: { flex: 1, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',

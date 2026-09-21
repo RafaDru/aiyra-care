@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { Link, router } from 'expo-router'
+import { AuthScreen } from '@/components/auth/AuthScreen'
 import { AppLogo } from '@/components/brand/AppLogo'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
@@ -7,9 +8,10 @@ export default function WelcomeScreen() {
   const { tokens } = useAiyraTheme()
 
   return (
-    <View style={[styles.screen, { backgroundColor: tokens.colorBgLayout }]}>
+    <AuthScreen>
+      <View style={styles.heroBlock}>
       <View style={styles.hero}>
-        <AppLogo height={48} />
+        <AppLogo height={52} />
         <Text style={[styles.title, { color: tokens.colorTextBase }]}>
           Saúde da família, em um só lugar
         </Text>
@@ -42,12 +44,13 @@ export default function WelcomeScreen() {
         </Link>
         .
       </Text>
-    </View>
+      </View>
+    </AuthScreen>
   )
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 28, justifyContent: 'center', gap: 32 },
+  heroBlock: { gap: 32 },
   hero: { alignItems: 'center', gap: 16 },
   title: { fontSize: 24, fontWeight: '700', textAlign: 'center', lineHeight: 30 },
   subtitle: { fontSize: 16, textAlign: 'center', lineHeight: 24, maxWidth: 340 },

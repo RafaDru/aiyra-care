@@ -5,7 +5,10 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "aiyracare",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
+    "android": {
+      "softwareKeyboardLayoutMode": "resize"
+    },
     "web": {
       "bundler": "metro",
       "output": "single"

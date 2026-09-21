@@ -4,7 +4,9 @@ import type { Session, User } from '@supabase/supabase-js'
 import type { AppAccount } from '@/lib/api.types'
 import { api } from '@/lib/api'
 import { createSessionFromOAuthUrl, signInWithOAuthProvider } from '@/lib/supabase-oauth'
-import { getSupabase, supabaseConfigured } from '@/lib/supabase'
+import { getAccessToken, getSupabase, setMemoryAccessToken, supabaseConfigured } from '@/lib/supabase'
+
+export type SignUpResult = { kind: 'session' } | { kind: 'email_confirmation' }
 
 type AuthContextValue = {
   configured: boolean
@@ -17,7 +19,7 @@ type AuthContextValue = {
   account: AppAccount | null
   needsProfile: boolean
   signInWithPassword: (email: string, password: string) => Promise<void>
-  signUpWithPassword: (email: string, password: string) => Promise<void>
+  signUpWithPassword: (email: string, password: string) => Promise<SignUpResult>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   refreshSync: () => Promise<void>
@@ -62,7 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const refreshSync = useCallback(async () => {
-    await runSync(session?.access_token)
+    const token = (await getAccessToken()) ?? session?.access_token
+    await runSync(token)
   }, [session?.access_token, runSync])
 
   useEffect(() => {
@@ -104,11 +107,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }, [])
 
-  const signUpWithPassword = useCallback(async (email: string, password: string) => {
+  const signUpWithPassword = useCallback(async (email: string, password: string): Promise<SignUpResult> => {
     const client = getSupabase()
     if (!client) throw new Error('Auth não configurado')
-    const { error } = await client.auth.signUp({ email, password })
+    const { data, error } = await client.auth.signUp({ email, password })
     if (error) throw error
+    if (data.session) {
+      setMemoryAccessToken(data.session.access_token)
+      setSession(data.session)
+      return { kind: 'session' }
+    }
+    return { kind: 'email_confirmation' }
   }, [])
 
   const signInWithGoogle = useCallback(async () => {

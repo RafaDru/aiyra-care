@@ -1,11 +1,11 @@
 import { Stack } from 'expo-router'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { AppearancePreferenceProvider } from '@/theme/AppearancePreferenceContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
-export default function RootLayout() {
+function RootStack() {
   const { tokens } = useAiyraTheme()
   return (
-    <AuthProvider>
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: tokens.colorBgContainer },
@@ -18,6 +18,15 @@ export default function RootLayout() {
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="invite/accept" options={{ title: 'Convite de família', presentation: 'modal' }} />
       </Stack>
-    </AuthProvider>
+  )
+}
+
+export default function RootLayout() {
+  return (
+    <AppearancePreferenceProvider>
+      <AuthProvider>
+        <RootStack />
+      </AuthProvider>
+    </AppearancePreferenceProvider>
   )
 }

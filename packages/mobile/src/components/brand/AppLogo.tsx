@@ -1,46 +1,36 @@
-import { Image, Platform, StyleSheet, Text, View } from 'react-native'
+import { Image, StyleSheet, Text, View } from 'react-native'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
-const WEB_BRAND = {
-  light: '/brand/logo-horizontal.svg',
-  dark: '/brand/logo-horizontal-dark.svg',
-} as const
+const LOGO_LIGHT = require('../../../assets/brand/logo-horizontal.png')
+const LOGO_DARK = require('../../../assets/brand/logo-horizontal-dark.png')
 
 type Props = {
   height?: number
 }
 
-/**
- * Marca horizontal alinhada ao web (`AppLogo` variant horizontal).
- * Web: SVG servido pelo Vite em `EXPO_PUBLIC_WEB_APP_URL`.
- * Nativo: ícone gradiente + wordmark até assets PNG dedicados no bundle.
- */
 export function AppLogo({ height = 40 }: Props) {
-  const { dark, tokens } = useAiyraTheme()
-  const webBase = process.env.EXPO_PUBLIC_WEB_APP_URL?.replace(/\/$/, '')
+  const { dark } = useAiyraTheme()
+  const source = dark ? LOGO_DARK : LOGO_LIGHT
 
-  if (Platform.OS === 'web' && webBase) {
-    const uri = `${webBase}${dark ? WEB_BRAND.dark : WEB_BRAND.light}`
-    return (
-      <Image
-        source={{ uri }}
-        accessibilityLabel="Aiyra Care"
-        style={{ height, width: height * 3.85, maxWidth: '100%' }}
-        resizeMode="contain"
-      />
-    )
-  }
+  return (
+    <Image
+      source={source}
+      accessibilityLabel="Aiyra Care"
+      style={{ height, width: height * 3.85, maxWidth: '100%' }}
+      resizeMode="contain"
+    />
+  )
+}
 
+/** Fallback textual — use só se assets ausentes em dev. */
+export function AppLogoFallback({ height = 40 }: Props) {
+  const { tokens } = useAiyraTheme()
   return (
     <View style={styles.row} accessibilityLabel="Aiyra Care">
       <View
         style={[
           styles.icon,
-          {
-            height: height * 0.85,
-            width: height * 0.85,
-            backgroundColor: tokens.colorPrimary,
-          },
+          { height: height * 0.85, width: height * 0.85, backgroundColor: tokens.colorPrimary },
         ]}
       />
       <Text style={[styles.wordmark, { color: tokens.colorTextBase, fontSize: height * 0.55 }]}>
