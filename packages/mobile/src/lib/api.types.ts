@@ -137,6 +137,16 @@ export interface AuthSyncResponse {
   needsProfile: boolean
 }
 
+export interface CompleteProfileInput {
+  name: string
+  birthDate: string
+  gender: 'male' | 'female'
+  cpf: string
+  cns?: string
+  weightKg?: number
+  heightCm?: number
+}
+
 export type LegalDocumentKind = 'terms_of_use' | 'privacy_policy' | 'cookie_policy' | 'minor_guardian_consent'
 
 export interface ComplianceStatus {

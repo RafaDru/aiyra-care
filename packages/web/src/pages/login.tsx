@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { Alert, Button, Card, Checkbox, Divider, Form, Input, Segmented, Space, Spin, Typography } from 'antd'
+import { Alert, Button, Card, Checkbox, Divider, Form, Input, Segmented, Space, Spin, Typography, message } from 'antd'
 import { GoogleOutlined, WindowsOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.js'
@@ -122,10 +122,12 @@ export function LoginPage() {
         const result = await signUpWithPassword(values.email, values.password, rememberMe)
         if (result.kind === 'email_confirmation') {
           const msg = t('auth.emailConfirmHint')
+          const toastMsg = t('auth.emailConfirmToast')
           setMode('login')
           setLegalAccept(false)
           setError(null)
           setInfo(msg)
+          message.success(toastMsg, 8)
           setSearchParams({ mode: 'login' }, { replace: true })
           return
         }

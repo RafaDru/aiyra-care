@@ -1,13 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Redirect, router, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { AuthPreferenceRow } from '@/components/auth/AuthPreferenceRow'
@@ -17,6 +9,7 @@ import { useAppLock, useRequiresBiometricUnlock } from '@/contexts/AppLockContex
 import { AppLogo } from '@/components/brand/AppLogo'
 import { LegalDocumentModal } from '@/components/legal/LegalDocumentModal'
 import { StatePanel } from '@/components/StatePanel'
+import { NoticeBanner } from '@/components/ui/NoticeBanner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
 import { api } from '@/lib/api'
@@ -36,8 +29,8 @@ function parseAuthMode(value: string | undefined): AuthMode {
 export default function LoginScreen() {
   const { t } = useTranslation()
   const toast = useToast()
-  const scrollRef = useRef<ScrollView>(null)
   const scrollFocusedRef = useRef<(() => void) | null>(null)
+  const [postSignupNotice, setPostSignupNotice] = useState<string | null>(null)
   const { redirect, token: inviteToken, mode: modeParam } = useLocalSearchParams<{
     redirect?: string
     token?: string
@@ -91,6 +84,7 @@ export default function LoginScreen() {
     setError(null)
     setInfo(null)
     setPasswordConfirm('')
+    if (next === 'signup') setPostSignupNotice(null)
   }
 
   const focusField = () => {
@@ -178,6 +172,7 @@ export default function LoginScreen() {
     }
     setError(null)
     setInfo(null)
+    setPostSignupNotice(null)
     setSubmitting(true)
     try {
       await setRememberMe(mode === 'login' ? rememberMe : true)
@@ -187,12 +182,15 @@ export default function LoginScreen() {
         const result = await signUpWithPassword(email.trim(), password)
         if (result.kind === 'email_confirmation') {
           const msg = t('auth.emailConfirmSuccess')
+          const toastMsg = t('auth.emailConfirmToast')
           setMode('login')
           setLegalAccept(false)
           setPasswordConfirm('')
           setError(null)
           setInfo(msg)
-          toast.success(msg, 7000)
+          setPostSignupNotice(toastMsg)
+          toast.success(toastMsg, { durationMs: 10000, position: 'bottom' })
+          router.replace({ pathname: '/(auth)/login', params: { mode: 'login' } })
           return
         }
         await refreshSync()
@@ -239,14 +237,16 @@ export default function LoginScreen() {
 
   return (
     <AuthScreen
-      scrollRef={scrollRef}
+      header={<AppLogo variant="square" height={112} />}
       onScrollReady={(fn) => {
         scrollFocusedRef.current = fn
       }}
     >
-      <View style={styles.logoAbove}>
-        <AppLogo variant="square" height={112} />
-      </View>
+      {postSignupNotice ? (
+        <NoticeBanner tokens={tokens} tone="success">
+          {postSignupNotice}
+        </NoticeBanner>
+      ) : null}
 
       <LegalDocumentModal
         kind={legalModalKind}
@@ -420,9 +420,9 @@ export default function LoginScreen() {
         ) : null}
 
         {info ? (
-          <Text style={[styles.info, { color: tokens.colorPrimary }]} accessibilityRole="text">
+          <NoticeBanner tokens={tokens} tone="success">
             {info}
-          </Text>
+          </NoticeBanner>
         ) : null}
         {error ? (
           <Text style={[styles.error, { color: tokens.colorError }]} accessibilityRole="alert">
@@ -447,7 +447,6 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, justifyContent: 'center', padding: 24 },
-  logoAbove: { alignItems: 'center', marginBottom: 4 },
   card: { borderWidth: 1, borderRadius: 16, padding: 24, gap: 12 },
   title: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
   hint: { fontSize: 14, textAlign: 'center', marginBottom: 4 },

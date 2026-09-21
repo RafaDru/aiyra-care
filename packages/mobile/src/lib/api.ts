@@ -1,6 +1,7 @@
 import Constants from 'expo-constants'
 import type {
   AuthSyncResponse,
+  CompleteProfileInput,
   CareCircleDetail,
   CareCircleSummary,
   ComplianceStatus,
@@ -67,6 +68,11 @@ export const api = {
   },
   auth: {
     sync: () => request<AuthSyncResponse>('/auth/sync', { method: 'POST' }),
+    completeProfile: (data: CompleteProfileInput) =>
+      request<{ patient: Patient; needsProfile: false }>('/auth/complete-profile', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
   },
   compliance: {
     status: () => request<ComplianceStatus>('/compliance/status'),

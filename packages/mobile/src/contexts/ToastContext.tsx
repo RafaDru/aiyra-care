@@ -14,22 +14,35 @@ import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export type ToastKind = 'success' | 'error' | 'info'
 
+type ToastPosition = 'top' | 'bottom'
+
 type ToastPayload = {
   id: number
   kind: ToastKind
   message: string
+  position: ToastPosition
+}
+
+type ToastOptions = {
+  durationMs?: number
+  position?: ToastPosition
 }
 
 type ToastContextValue = {
-  show: (kind: ToastKind, message: string, durationMs?: number) => void
-  success: (message: string, durationMs?: number) => void
-  error: (message: string, durationMs?: number) => void
-  info: (message: string, durationMs?: number) => void
+  show: (kind: ToastKind, message: string, options?: number | ToastOptions) => void
+  success: (message: string, options?: number | ToastOptions) => void
+  error: (message: string, options?: number | ToastOptions) => void
+  info: (message: string, options?: number | ToastOptions) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
 const DEFAULT_DURATION = 4500
+
+function normalizeOptions(options?: number | ToastOptions): ToastOptions {
+  if (typeof options === 'number') return { durationMs: options }
+  return options ?? {}
+}
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { tokens } = useAiyraTheme()
@@ -46,10 +59,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [opacity])
 
   const show = useCallback(
-    (kind: ToastKind, message: string, durationMs = DEFAULT_DURATION) => {
+    (kind: ToastKind, message: string, options?: number | ToastOptions) => {
+      const { durationMs = DEFAULT_DURATION, position = 'top' } = normalizeOptions(options)
       if (hideTimer.current) clearTimeout(hideTimer.current)
       idRef.current += 1
-      setToast({ id: idRef.current, kind, message })
+      setToast({ id: idRef.current, kind, message, position })
       opacity.setValue(0)
       Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start()
       hideTimer.current = setTimeout(() => dismiss(), durationMs)
@@ -67,9 +81,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       show,
-      success: (message: string, durationMs?: number) => show('success', message, durationMs),
-      error: (message: string, durationMs?: number) => show('error', message, durationMs),
-      info: (message: string, durationMs?: number) => show('info', message, durationMs),
+      success: (message: string, options?: number | ToastOptions) => show('success', message, options),
+      error: (message: string, options?: number | ToastOptions) => show('error', message, options),
+      info: (message: string, options?: number | ToastOptions) => show('info', message, options),
     }),
     [show],
   )
@@ -81,14 +95,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         ? tokens.colorSuccess ?? tokens.colorPrimary
         : tokens.colorPrimary
 
+  const hostStyle =
+    toast?.position === 'bottom'
+      ? { bottom: insets.bottom + 16, top: undefined }
+      : { top: insets.top + 8, bottom: undefined }
+
   return (
     <ToastContext.Provider value={value}>
       {children}
       {toast ? (
-        <Animated.View
-          pointerEvents="box-none"
-          style={[styles.host, { top: insets.top + 8, opacity }]}
-        >
+        <Animated.View pointerEvents="box-none" style={[styles.host, hostStyle, { opacity }]}>
           <Pressable
             onPress={dismiss}
             style={[

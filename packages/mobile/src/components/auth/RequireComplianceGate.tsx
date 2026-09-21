@@ -62,7 +62,7 @@ export function RequireComplianceGate({ children }: { children: ReactNode }) {
   }
 
   if (compliant && needsProfile && !pathname.includes('onboarding')) {
-    // Onboarding mobile ainda não implementado — não bloquear M4.
+    return <Redirect href="/(app)/onboarding" />
   }
 
   return children

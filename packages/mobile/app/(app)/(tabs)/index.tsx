@@ -9,10 +9,12 @@ import {
   View,
 } from 'react-native'
 import { router } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 import type { Patient } from '@/lib/api.types'
 import { api } from '@/lib/api'
 import { groupPatientsByAgeCategory } from '@/lib/patient-list-labels'
 import { StatePanel } from '@/components/StatePanel'
+import { NoticeBanner } from '@/components/ui/NoticeBanner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
@@ -21,6 +23,7 @@ type Row =
   | { type: 'patient'; key: string; patient: Patient }
 
 export default function HomeScreen() {
+  const { t } = useTranslation()
   const { configured, loading: authLoading, syncing, authUserId, account, needsProfile } = useAuth()
   const { tokens } = useAiyraTheme()
   const [patients, setPatients] = useState<Patient[]>([])
@@ -81,9 +84,14 @@ export default function HomeScreen() {
       ) : null}
 
       {configured && needsProfile ? (
-        <Text style={[styles.banner, { color: tokens.colorWarning, borderColor: tokens.colorWarning }]}>
-          Complete o onboarding no web antes de usar o app.
-        </Text>
+        <NoticeBanner
+          tokens={tokens}
+          tone="warning"
+          actionLabel={t('onboarding.bannerAction')}
+          onAction={() => router.push('/(app)/onboarding')}
+        >
+          {`${t('onboarding.bannerTitle')}\n${t('onboarding.bannerBody')}`}
+        </NoticeBanner>
       ) : null}
 
       {configured && !authLoading && !authUserId ? (
@@ -148,7 +156,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1, padding: 16 },
   greeting: { fontSize: 22, fontWeight: '700' },
   subtitle: { fontSize: 14, marginBottom: 12, marginTop: 4 },
-  banner: { borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 12, fontSize: 13 },
   sectionTitle: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', marginTop: 8, marginBottom: 2 },
   card: { borderWidth: 1, borderRadius: 12, padding: 14 },
   name: { fontSize: 17, fontWeight: '600' },

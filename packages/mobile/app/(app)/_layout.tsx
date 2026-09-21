@@ -35,6 +35,7 @@ export default function AppShellLayout() {
           <Stack.Screen name="patient/[id]" options={{ title: 'Perfil' }} />
           <Stack.Screen name="settings/family" options={{ title: 'Família e cuidadores' }} />
           <Stack.Screen name="compliance/accept" options={{ title: 'Termos e privacidade', headerBackVisible: false }} />
+          <Stack.Screen name="onboarding" options={{ title: 'Complete seu cadastro', headerBackVisible: false }} />
         </Stack>
         <AvaGlobalDock />
       </View>
