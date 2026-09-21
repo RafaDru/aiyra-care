@@ -1,21 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native'
 import { Redirect, router, useLocalSearchParams } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 import { AuthScreen } from '@/components/auth/AuthScreen'
 import { PasswordField } from '@/components/auth/PasswordField'
 import { AppLogo } from '@/components/brand/AppLogo'
 import { LegalDocumentModal } from '@/components/legal/LegalDocumentModal'
 import { StatePanel } from '@/components/StatePanel'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/contexts/ToastContext'
 import { api } from '@/lib/api'
 import { AUTH_PASSWORD_HINT, AUTH_PASSWORD_MIN_LENGTH } from '@/lib/auth-policy'
+import { formatAuthError } from '@/lib/auth-errors'
 import type { LegalDocumentKind } from '@/lib/api.types'
 import { reportAuthClientError } from '@/lib/client-errors'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
@@ -27,6 +31,10 @@ function parseAuthMode(value: string | undefined): AuthMode {
 }
 
 export default function LoginScreen() {
+  const { t } = useTranslation()
+  const toast = useToast()
+  const scrollRef = useRef<ScrollView>(null)
+  const scrollFocusedRef = useRef<(() => void) | null>(null)
   const { redirect, token: inviteToken, mode: modeParam } = useLocalSearchParams<{
     redirect?: string
     token?: string
@@ -49,6 +57,7 @@ export default function LoginScreen() {
       setMode(parseAuthMode(modeParam))
     }
   }, [modeParam])
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -65,6 +74,10 @@ export default function LoginScreen() {
     setError(null)
     setInfo(null)
     setPasswordConfirm('')
+  }
+
+  const focusField = () => {
+    scrollFocusedRef.current?.()
   }
 
   if (loading) {
@@ -92,24 +105,34 @@ export default function LoginScreen() {
 
   async function onSubmit() {
     if (!configured) {
-      setError('Copie packages/mobile/.env.example para .env e preencha as chaves Supabase.')
+      const msg = t('auth.envHint')
+      setError(msg)
+      toast.error(msg)
       return
     }
     if (!email.trim() || !password) {
-      setError('Informe e-mail e senha.')
+      const msg = t('auth.missingEmailPassword')
+      setError(msg)
+      toast.error(msg)
       return
     }
     if (password.length < AUTH_PASSWORD_MIN_LENGTH) {
-      setError(`A senha deve ter pelo menos ${AUTH_PASSWORD_MIN_LENGTH} caracteres.`)
+      const msg = t('auth.passwordMin', { min: AUTH_PASSWORD_MIN_LENGTH })
+      setError(msg)
+      toast.error(msg)
       return
     }
     if (mode === 'signup') {
       if (password !== passwordConfirm) {
-        setError('As senhas não coincidem.')
+        const msg = t('auth.passwordMismatch')
+        setError(msg)
+        toast.error(msg)
         return
       }
       if (!legalAccept) {
-        setError('Aceite os termos e a política de privacidade para criar sua conta.')
+        const msg = t('auth.legalRequired')
+        setError(msg)
+        toast.error(msg)
         return
       }
     }
@@ -122,10 +145,13 @@ export default function LoginScreen() {
       } else {
         const result = await signUpWithPassword(email.trim(), password)
         if (result.kind === 'email_confirmation') {
-          setInfo(
-            'Conta criada. Se o ambiente exige confirmação, abra o link no e-mail e depois use Entrar. Caso já tenha sessão ativa, tente Entrar agora.',
-          )
-          setAuthMode('login')
+          const msg = t('auth.emailConfirmSuccess')
+          setMode('login')
+          setLegalAccept(false)
+          setPasswordConfirm('')
+          setError(null)
+          setInfo(msg)
+          toast.success(msg, 7000)
           return
         }
         await refreshSync()
@@ -133,9 +159,15 @@ export default function LoginScreen() {
       }
       await afterAuthSuccess()
     } catch (e) {
-      const message = e instanceof Error ? e.message : mode === 'login' ? 'Falha no login' : 'Falha ao criar conta'
-      setError(message)
-      void reportAuthClientError(mode, message)
+      const message = formatAuthError(
+        e,
+        t,
+      )
+      const fallback = mode === 'login' ? t('auth.loginFailed') : t('auth.signupFailed')
+      const display = message || fallback
+      setError(display)
+      toast.error(display)
+      void reportAuthClientError(mode, display)
     } finally {
       setSubmitting(false)
     }
@@ -143,7 +175,9 @@ export default function LoginScreen() {
 
   async function onGoogle() {
     if (!configured) {
-      setError('Copie packages/mobile/.env.example para .env e preencha as chaves Supabase.')
+      const msg = t('auth.envHint')
+      setError(msg)
+      toast.error(msg)
       return
     }
     setError(null)
@@ -152,8 +186,9 @@ export default function LoginScreen() {
       await signInWithGoogle()
       await afterAuthSuccess()
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Falha no login com Google'
+      const message = formatAuthError(e, t) || t('auth.googleFailed')
       setError(message)
+      toast.error(message)
       void reportAuthClientError('google', message)
     } finally {
       setOauthSubmitting(false)
@@ -161,25 +196,31 @@ export default function LoginScreen() {
   }
 
   return (
-    <AuthScreen>
+    <AuthScreen
+      scrollRef={scrollRef}
+      onScrollReady={(fn) => {
+        scrollFocusedRef.current = fn
+      }}
+    >
+      <View style={styles.logoAbove}>
+        <AppLogo variant="square" height={112} />
+      </View>
+
       <LegalDocumentModal
         kind={legalModalKind}
         visible={legalModalKind !== null}
         onClose={() => setLegalModalKind(null)}
       />
       <View style={[styles.card, { backgroundColor: tokens.colorBgContainer, borderColor: tokens.colorBorder }]}>
-        <View style={styles.logoWrap}>
-          <AppLogo height={36} />
-        </View>
         <Text style={[styles.title, { color: tokens.colorTextBase }]}>
-          {mode === 'login' ? 'Entrar na sua conta' : 'Criar conta'}
+          {mode === 'login' ? t('auth.titleLogin') : t('auth.titleSignup')}
         </Text>
         <Text style={[styles.hint, { color: tokens.colorTextSecondary }]}>
           {configured
             ? mode === 'login'
-              ? 'Use a mesma conta do web.'
-              : 'Cadastro com e-mail e senha.'
-            : 'Configure EXPO_PUBLIC_SUPABASE_* no .env (ver .env.example).'}
+              ? t('auth.subtitleLogin')
+              : t('auth.subtitleSignup')
+            : t('auth.notConfigured')}
         </Text>
 
         <View style={[styles.segmentRow, { backgroundColor: tokens.colorBgLayout, borderColor: tokens.colorBorder }]}>
@@ -195,7 +236,7 @@ export default function LoginScreen() {
                 color: mode === 'login' ? tokens.colorPrimary : tokens.colorTextSecondary,
               }}
             >
-              Entrar
+              {t('auth.modeLogin')}
             </Text>
           </Pressable>
           <Pressable
@@ -210,7 +251,7 @@ export default function LoginScreen() {
                 color: mode === 'signup' ? tokens.colorPrimary : tokens.colorTextSecondary,
               }}
             >
-              Criar conta
+              {t('auth.modeSignup')}
             </Text>
           </Pressable>
         </View>
@@ -230,13 +271,13 @@ export default function LoginScreen() {
           {oauthSubmitting ? (
             <ActivityIndicator color={tokens.colorPrimary} />
           ) : (
-            <Text style={[styles.oauthButtonText, { color: tokens.colorTextBase }]}>Continuar com Google</Text>
+            <Text style={[styles.oauthButtonText, { color: tokens.colorTextBase }]}>{t('auth.google')}</Text>
           )}
         </Pressable>
 
         <View style={styles.dividerRow}>
           <View style={[styles.dividerLine, { backgroundColor: tokens.colorBorder }]} />
-          <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>ou e-mail</Text>
+          <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>{t('auth.emailDivider')}</Text>
           <View style={[styles.dividerLine, { backgroundColor: tokens.colorBorder }]} />
         </View>
 
@@ -244,11 +285,12 @@ export default function LoginScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"
-          placeholder="E-mail"
+          placeholder={t('auth.email')}
           placeholderTextColor={tokens.colorTextSecondary}
           value={email}
           onChangeText={setEmail}
           editable={!submitting && !oauthSubmitting}
+          onFocus={focusField}
           style={[styles.input, { borderColor: tokens.colorBorder, color: tokens.colorTextBase }]}
         />
         <PasswordField
@@ -258,6 +300,7 @@ export default function LoginScreen() {
           autoComplete={mode === 'login' ? 'password' : 'password-new'}
           editable={!submitting && !oauthSubmitting}
           onSubmitEditing={() => void onSubmit()}
+          onFocus={focusField}
         />
         {mode === 'signup' ? (
           <>
@@ -266,9 +309,10 @@ export default function LoginScreen() {
               tokens={tokens}
               value={passwordConfirm}
               onChangeText={setPasswordConfirm}
-              placeholder="Confirmar senha"
+              placeholder={t('auth.passwordConfirm')}
               autoComplete="password-new"
               editable={!submitting && !oauthSubmitting}
+              onFocus={focusField}
             />
           </>
         ) : null}
@@ -292,13 +336,13 @@ export default function LoginScreen() {
               {legalAccept ? <Text style={styles.checkMark}>✓</Text> : null}
             </View>
             <Text style={[styles.legalText, { color: tokens.colorTextSecondary }]}>
-              Li e aceito os{' '}
+              {t('auth.legalPrefix')}{' '}
               <Text style={{ color: tokens.colorPrimary }} onPress={() => setLegalModalKind('terms_of_use')}>
-                Termos de uso
+                {t('auth.termsLink')}
               </Text>
-              {' e a '}
+              {' · '}
               <Text style={{ color: tokens.colorPrimary }} onPress={() => setLegalModalKind('privacy_policy')}>
-                Política de privacidade
+                {t('auth.privacyLink')}
               </Text>
               .
             </Text>
@@ -323,7 +367,7 @@ export default function LoginScreen() {
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>{mode === 'login' ? 'Entrar' : 'Criar conta'}</Text>
+            <Text style={styles.buttonText}>{mode === 'login' ? t('auth.signIn') : t('auth.signUp')}</Text>
           )}
         </Pressable>
       </View>
@@ -333,8 +377,8 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, justifyContent: 'center', padding: 24 },
+  logoAbove: { alignItems: 'center', marginBottom: 4 },
   card: { borderWidth: 1, borderRadius: 16, padding: 24, gap: 12 },
-  logoWrap: { alignItems: 'center', marginBottom: 4 },
   title: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
   hint: { fontSize: 14, textAlign: 'center', marginBottom: 4 },
   policy: { fontSize: 12, lineHeight: 18 },

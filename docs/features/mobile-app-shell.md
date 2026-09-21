@@ -44,7 +44,9 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 ## Marco M2 (login + início)
 
 - Tela **`(auth)/welcome`** — apresentação + Entrar / Criar conta
-- Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo`, Google OAuth
+- Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo` (variante **square**, paridade `AuthPageLayout` web), Google OAuth
+- **i18n** — `packages/mobile/src/i18n` (`pt-BR` / `en`, chave `aiyra-care-lang` igual ao web); idioma em Configurações
+- **Toast** — `ToastProvider` + `useToast()` para feedback padronizado (auth e fluxos futuros)
 - Lista de pacientes via `GET /patients`, agrupada por faixa etária
 - Loading, erro com retry e pull-to-refresh na aba Início
 
@@ -73,7 +75,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 ## Pendente
 
-- Logomarca SVG no bundle nativo (hoje: wordmark no Expo Go; SVG via `EXPO_PUBLIC_WEB_APP_URL` no Expo web)
+- Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail) — ver `client-errors.ts`
 - Onboarding de perfil (web `/onboarding`) — mobile não bloqueia; mensagem na lista
 - Demais tabs clínicas (medicamentos, vacinas, …) e Convênios UI completa
 - Microsoft OAuth no mobile

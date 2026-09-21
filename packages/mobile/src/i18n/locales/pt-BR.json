@@ -1,0 +1,68 @@
+{
+  "auth": {
+    "titleLogin": "Entrar na sua conta",
+    "titleSignup": "Criar conta",
+    "subtitleLogin": "Use a mesma conta do web.",
+    "subtitleSignup": "Cadastro com e-mail e senha.",
+    "modeLogin": "Entrar",
+    "modeSignup": "Criar conta",
+    "google": "Continuar com Google",
+    "emailDivider": "ou e-mail",
+    "email": "E-mail",
+    "password": "Senha",
+    "passwordConfirm": "Confirmar senha",
+    "passwordShow": "Mostrar",
+    "passwordHide": "Ocultar",
+    "passwordShowA11y": "Mostrar senha",
+    "passwordHideA11y": "Ocultar senha",
+    "signIn": "Entrar",
+    "signUp": "Criar conta",
+    "emailConfirmSuccess": "Conta criada. Se o ambiente exige confirmação, abra o link no e-mail e depois toque em Entrar.",
+    "notConfigured": "Configure EXPO_PUBLIC_SUPABASE_* no .env (ver .env.example).",
+    "missingEmailPassword": "Informe e-mail e senha.",
+    "passwordMin": "A senha deve ter pelo menos {{min}} caracteres.",
+    "passwordMismatch": "As senhas não coincidem.",
+    "legalRequired": "Aceite os termos e a política de privacidade para criar sua conta.",
+    "legalPrefix": "Li e aceito os",
+    "termsLink": "Termos de uso",
+    "privacyLink": "Política de privacidade",
+    "loginFailed": "Falha no login",
+    "signupFailed": "Falha ao criar conta",
+    "googleFailed": "Falha no login com Google",
+    "envHint": "Copie packages/mobile/.env.example para .env e preencha as chaves Supabase."
+  },
+  "authErrors": {
+    "invalidCredentials": "E-mail ou senha incorretos. Se você acabou de se cadastrar, confirme o e-mail antes de entrar.",
+    "emailNotConfirmed": "Confirme seu e-mail pelo link que enviamos antes de entrar.",
+    "userAlreadyRegistered": "Este e-mail já está cadastrado. Use Entrar ou recupere a senha no web.",
+    "microsoftDisabled": "Login com Microsoft não está habilitado neste ambiente.",
+    "socialDisabled": "Login social não está habilitado neste ambiente."
+  },
+  "welcome": {
+    "title": "Saúde da família, em um só lugar",
+    "subtitle": "Acompanhe carteira, exames e cuidado diário — no celular ou no computador, com a mesma conta.",
+    "signIn": "Entrar",
+    "signUp": "Criar conta",
+    "footPrefix": "Versão web com recursos avançados (integrações e sync)",
+    "footLink": "após o login"
+  },
+  "settings": {
+    "title": "Configurações",
+    "appearance": "Aparência",
+    "appearanceLight": "Claro",
+    "appearanceDark": "Escuro",
+    "appearanceSystem": "Sistema",
+    "language": "Idioma",
+    "languagePt": "Português (BR)",
+    "languageEn": "English",
+    "family": "Família e cuidadores",
+    "openWeb": "Abrir versão web",
+    "openWebHint": "Integrações, sync e edição avançada",
+    "signOut": "Sair"
+  },
+  "toast": {
+    "success": "Sucesso",
+    "error": "Erro",
+    "info": "Aviso"
+  }
+}
