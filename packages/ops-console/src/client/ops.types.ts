@@ -500,6 +500,25 @@ export interface StackActionResult {
   status: StackStatusSnapshot
   platform?: string
   error?: string
+  operationInProgress?: boolean
+}
+
+export interface StackLogFileTail {
+  file: string
+  lines: string[]
+  missing?: boolean
+  error?: string
+}
+
+export interface StackLogsSnapshot {
+  checkedAt: string
+  operationInProgress: boolean
+  deploymentTier: 'integration' | 'preview'
+  monorepoRoot: string
+  ops: StackLogFileTail
+  api: StackLogFileTail
+  web: StackLogFileTail
+  mobileExpo: StackLogFileTail
 }
 
 export type StrategySectionId = 'mkt' | 'finance' | 'cx'
