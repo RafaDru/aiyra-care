@@ -17,6 +17,7 @@ type AuthContextValue = {
   account: AppAccount | null
   needsProfile: boolean
   signInWithPassword: (email: string, password: string) => Promise<void>
+  signUpWithPassword: (email: string, password: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   refreshSync: () => Promise<void>
@@ -103,6 +104,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }, [])
 
+  const signUpWithPassword = useCallback(async (email: string, password: string) => {
+    const client = getSupabase()
+    if (!client) throw new Error('Auth não configurado')
+    const { error } = await client.auth.signUp({ email, password })
+    if (error) throw error
+  }, [])
+
   const signInWithGoogle = useCallback(async () => {
     await signInWithOAuthProvider('google')
   }, [])
@@ -126,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       account,
       needsProfile,
       signInWithPassword,
+      signUpWithPassword,
       signInWithGoogle,
       signOut,
       refreshSync,
@@ -138,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       account,
       needsProfile,
       signInWithPassword,
+      signUpWithPassword,
       signInWithGoogle,
       signOut,
       refreshSync,
