@@ -886,7 +886,7 @@
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
           "status": "in_progress",
-          "detail": "M5: Ava FAB + chat SSE + lente paciente. M4 done. Plano: Project store docs/mobile-parity-plan.md."
+          "detail": "Entrega dual 80/20 (docs/MOBILE_WEB_DUAL_DELIVERY.md). M2: welcome + convênios read-only. M5 Ava. Plano: Project store docs/mobile-parity-plan.md."
         },
         {
           "id": "plat-microservices",

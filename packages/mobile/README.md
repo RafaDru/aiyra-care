@@ -4,6 +4,8 @@
 
 Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:3010`, navegação por tabs + perfil paciente (seções overview/clinical/plan/files).
 
+**Entrega dual:** ver [`docs/MOBILE_WEB_DUAL_DELIVERY.md`](../../docs/MOBILE_WEB_DUAL_DELIVERY.md) — regra 80/20 web + mobile na mesma entrega de produto.
+
 ## Dev rápido (notebook / máquina nova)
 
 1. **Atualizar código:** `git pull origin main`

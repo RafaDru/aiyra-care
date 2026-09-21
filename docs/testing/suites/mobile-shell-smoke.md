@@ -30,10 +30,12 @@ Registrar PASS/FAIL antes do smoke manual.
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
 | 1 | `cd packages/mobile && npm run web` (ou `npm run mobile:web` na raiz) | Metro sobe sem erro | |
+| 1b | Abrir app sem sessão | Tela **welcome** → Entrar ou Criar conta | |
 | 2a | Alternar **Criar conta** → cadastro e-mail/senha + aceite legal | Conta criada ou e-mail de confirmação (Supabase) | |
 | 2b | Login **e-mail/senha** (conta QA) | Lista Início com pacientes | |
 | 3 | Abrir um paciente | Seletor de seção/tab visível | |
 | 4 | Seção **Plano** → tab **Carteira** | Cartões CNS/convênio ou empty state; pull-to-refresh recarrega | |
+| 4b | Seção **Plano** → tab **Convênios** | Lista de planos ou empty state; link web | |
 | 5 | Seção **Clínico** → tab **Exames** | Lista de exames (data, laboratório, origem) ou empty state; pull-to-refresh | |
 | 6 | Link «Abrir … no navegador» (Carteira ou Exames) | Abre web no tab correto | |
 | 7 | Logout → **Continuar com Google** (opcional se Google habilitado no Supabase) | Retorna autenticado; lista carrega | |

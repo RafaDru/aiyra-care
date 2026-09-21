@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -41,6 +41,12 @@ export default function LoginScreen() {
   } = useAuth()
   const { tokens } = useAiyraTheme()
   const [mode, setMode] = useState<AuthMode>(() => parseAuthMode(modeParam))
+
+  useEffect(() => {
+    if (modeParam === 'signup' || modeParam === 'login') {
+      setMode(parseAuthMode(modeParam))
+    }
+  }, [modeParam])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [legalAccept, setLegalAccept] = useState(false)

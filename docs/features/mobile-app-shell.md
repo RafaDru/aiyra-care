@@ -16,6 +16,10 @@ Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Su
 
 Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesmo BFF FastAPI em `:3010`.
 
+## Entrega dual (80/20)
+
+Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma entrega, salvo exceções documentadas — ver [`MOBILE_WEB_DUAL_DELIVERY.md`](../MOBILE_WEB_DUAL_DELIVERY.md).
+
 ## Superfície técnica
 
 | Camada | Referência |
@@ -25,6 +29,7 @@ Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesm
 | Navegação paciente | Espelho de `packages/web/src/lib/patient-navigation.ts` |
 | API / env | `packages/mobile/src/lib/api.ts`; `EXPO_PUBLIC_*` — ver `packages/mobile/README.md` |
 | Auth | Supabase + AsyncStorage; OAuth Google → `src/lib/supabase-oauth.ts` |
+| Ops | Command Hub → contexto **Produto** → aba **Mobile** (`docs/ops/CONSOLE.md`) |
 | Plano | Project store `docs/mobile-parity-plan.md` |
 
 ## Conteúdo (paridade fila 2026-09)
@@ -32,11 +37,13 @@ Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesm
 | Tab | Mobile | Web-only |
 |-----|--------|----------|
 | **Carteira** | `PatientWalletTab` — CNS, convênios, link web | QR token, sync modal, copay detalhada |
+| **Convênios** | `PatientCoverageTab` — planos/carteirinha read-only + link web | Vincular plano, cartão virtual |
 | **Exames** | `PatientExamsTab` — lista resumo, pull-to-refresh | CRUD, marcadores, laudos PDF |
 | **Integrações** | Status + link web | Login portal, `POST …/sync` |
 
 ## Marco M2 (login + início)
 
+- Tela **`(auth)/welcome`** — apresentação + Entrar / Criar conta
 - Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo`, Google OAuth
 - Lista de pacientes via `GET /patients`, agrupada por faixa etária
 - Loading, erro com retry e pull-to-refresh na aba Início
@@ -66,7 +73,6 @@ Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesm
 
 ## Pendente
 
-- Tela de apresentação / onboarding visual (primeira navegação)
 - Logomarca SVG no bundle nativo (hoje: wordmark no Expo Go; SVG via `EXPO_PUBLIC_WEB_APP_URL` no Expo web)
 - Onboarding de perfil (web `/onboarding`) — mobile não bloqueia; mensagem na lista
 - Demais tabs clínicas (medicamentos, vacinas, …) e Convênios UI completa

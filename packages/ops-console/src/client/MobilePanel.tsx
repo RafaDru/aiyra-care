@@ -8,7 +8,7 @@ const { Text, Link } = Typography
 const PARITY_ROWS = [
   { area: 'Auth', mobile: 'E-mail/senha, Google OAuth, criar conta', web: 'Completo (+ Microsoft)', status: 'partial' },
   { area: 'Pacientes / Início', mobile: 'Lista + perfil read-only', web: 'CRUD completo', status: 'partial' },
-  { area: 'Carteira / Exames', mobile: 'Leitura + link web', web: 'Sync, QR, marcadores', status: 'partial' },
+  { area: 'Carteira / Convênios / Exames', mobile: 'Leitura + link web', web: 'Sync, QR, marcadores, vincular plano', status: 'partial' },
   { area: 'Integrações', mobile: 'Status + abrir web', web: 'Login portal + sync', status: 'web-only' },
   { area: 'Ava companion', mobile: 'FAB + chat SSE', web: 'Dock global', status: 'partial' },
   { area: 'Família / compliance', mobile: 'Hub + convites + gate legal', web: 'Paridade', status: 'ok' },
