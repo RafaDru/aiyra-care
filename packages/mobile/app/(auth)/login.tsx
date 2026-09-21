@@ -10,8 +10,10 @@ import {
 } from 'react-native'
 import { Redirect, router, useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { AuthPreferenceRow } from '@/components/auth/AuthPreferenceRow'
 import { AuthScreen } from '@/components/auth/AuthScreen'
 import { PasswordField } from '@/components/auth/PasswordField'
+import { useAppLock, useRequiresBiometricUnlock } from '@/contexts/AppLockContext'
 import { AppLogo } from '@/components/brand/AppLogo'
 import { LegalDocumentModal } from '@/components/legal/LegalDocumentModal'
 import { StatePanel } from '@/components/StatePanel'
@@ -22,6 +24,7 @@ import { AUTH_PASSWORD_HINT, AUTH_PASSWORD_MIN_LENGTH } from '@/lib/auth-policy'
 import { formatAuthError } from '@/lib/auth-errors'
 import type { LegalDocumentKind } from '@/lib/api.types'
 import { reportAuthClientError } from '@/lib/client-errors'
+import { loadLastEmail, saveLastEmail } from '@/lib/remember-me'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 type AuthMode = 'login' | 'signup'
@@ -48,7 +51,14 @@ export default function LoginScreen() {
     signUpWithPassword,
     signInWithGoogle,
     refreshSync,
+    rememberMe,
+    setRememberMe,
   } = useAuth()
+  const {
+    biometricSupport,
+    setBiometricUnlockEnabled,
+    unlock: unlockApp,
+  } = useAppLock()
   const { tokens } = useAiyraTheme()
   const [mode, setMode] = useState<AuthMode>(() => parseAuthMode(modeParam))
 
@@ -67,6 +77,13 @@ export default function LoginScreen() {
   const [info, setInfo] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [oauthSubmitting, setOauthSubmitting] = useState(false)
+  const [enableBiometric, setEnableBiometric] = useState(false)
+
+  useEffect(() => {
+    void loadLastEmail().then((saved) => {
+      if (saved) setEmail(saved)
+    })
+  }, [])
 
   const setAuthMode = (next: AuthMode) => {
     setMode(next)
@@ -80,6 +97,8 @@ export default function LoginScreen() {
     scrollFocusedRef.current?.()
   }
 
+  const needsUnlock = useRequiresBiometricUnlock(Boolean(session))
+
   if (loading) {
     return (
       <View style={[styles.screen, { backgroundColor: tokens.colorBgLayout }]}>
@@ -92,10 +111,31 @@ export default function LoginScreen() {
     if (redirect === 'invite' && typeof inviteToken === 'string' && inviteToken) {
       return <Redirect href={`/invite/accept?token=${encodeURIComponent(inviteToken)}`} />
     }
+    if (needsUnlock) {
+      return <Redirect href="/(auth)/unlock" />
+    }
     return <Redirect href="/(app)/(tabs)" />
   }
 
+  async function finalizeSessionOptions() {
+    if (rememberMe) {
+      await saveLastEmail(email.trim())
+    }
+    if (mode === 'login' && enableBiometric && rememberMe) {
+      if (!biometricSupport.available) {
+        toast.info(t('appLock.notAvailable'))
+      } else {
+        const ok = await setBiometricUnlockEnabled(true, t('appLock.prompt'))
+        if (ok) toast.success(t('appLock.enabled'))
+        else setEnableBiometric(false)
+      }
+    } else {
+      unlockApp()
+    }
+  }
+
   async function afterAuthSuccess() {
+    await finalizeSessionOptions()
     if (redirect === 'invite' && typeof inviteToken === 'string' && inviteToken) {
       router.replace(`/invite/accept?token=${encodeURIComponent(inviteToken)}`)
       return
@@ -140,6 +180,7 @@ export default function LoginScreen() {
     setInfo(null)
     setSubmitting(true)
     try {
+      await setRememberMe(mode === 'login' ? rememberMe : true)
       if (mode === 'login') {
         await signInWithPassword(email.trim(), password)
       } else {
@@ -183,6 +224,7 @@ export default function LoginScreen() {
     setError(null)
     setOauthSubmitting(true)
     try {
+      await setRememberMe(rememberMe)
       await signInWithGoogle()
       await afterAuthSuccess()
     } catch (e) {
@@ -347,6 +389,34 @@ export default function LoginScreen() {
               .
             </Text>
           </Pressable>
+        ) : null}
+
+        {mode === 'login' ? (
+          <>
+            <AuthPreferenceRow
+              tokens={tokens}
+              checked={rememberMe}
+              onToggle={() => {
+                const next = !rememberMe
+                void setRememberMe(next)
+                if (!next) setEnableBiometric(false)
+              }}
+              label={t('auth.rememberMe')}
+              hint={t('auth.rememberMeHint')}
+            />
+            <AuthPreferenceRow
+              tokens={tokens}
+              checked={enableBiometric}
+              onToggle={() => setEnableBiometric((v) => !v)}
+              label={t('auth.biometricUnlock')}
+              hint={
+                rememberMe
+                  ? t('auth.biometricUnlockHint')
+                  : t('auth.biometricNeedsRemember')
+              }
+              disabled={!rememberMe || !biometricSupport.available}
+            />
+          </>
         ) : null}
 
         {info ? (

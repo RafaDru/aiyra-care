@@ -29,7 +29,24 @@
     "loginFailed": "Sign-in failed",
     "signupFailed": "Could not create account",
     "googleFailed": "Google sign-in failed",
-    "envHint": "Copy packages/mobile/.env.example to .env and add Supabase keys."
+    "envHint": "Copy packages/mobile/.env.example to .env and add Supabase keys.",
+    "rememberMe": "Keep me signed in",
+    "rememberMeHint": "When off, you will need to sign in again after closing the app.",
+    "biometricUnlock": "Unlock with biometrics",
+    "biometricUnlockHint": "Requires keep signed in. When reopening the app, use Face ID or fingerprint.",
+    "biometricNeedsRemember": "Turn on \"Keep me signed in\" to use biometrics."
+  },
+  "appLock": {
+    "title": "Unlock AiyraCare",
+    "subtitle": "Use your device biometrics to continue.",
+    "subtitleWithEmail": "Account {{email}}",
+    "prompt": "Unlock AiyraCare",
+    "unlockWith": "Use {{method}}",
+    "usePassword": "Sign in with password",
+    "cancelled": "Biometric unlock cancelled.",
+    "enabled": "Biometric unlock enabled.",
+    "disabled": "Biometric unlock disabled.",
+    "notAvailable": "Biometrics are not available on this device."
   },
   "authErrors": {
     "invalidCredentials": "Incorrect email or password. If you just signed up, confirm your email before signing in.",
@@ -58,7 +75,12 @@
     "family": "Family and caregivers",
     "openWeb": "Open web app",
     "openWebHint": "Integrations, sync, and advanced editing",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "security": "Security and sign-in",
+    "rememberMe": "Keep me signed in",
+    "rememberMeHint": "Persistent session on this device.",
+    "biometricUnlock": "Biometric unlock",
+    "biometricUnlockHint": "When returning to the app, asks for Face ID or fingerprint."
   },
   "toast": {
     "success": "Success",

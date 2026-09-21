@@ -47,6 +47,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 - Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo` (variante **square**, paridade `AuthPageLayout` web), Google OAuth
 - **i18n** — `packages/mobile/src/i18n` (`pt-BR` / `en`, chave `aiyra-care-lang` igual ao web); idioma em Configurações
 - **Toast** — `ToastProvider` + `useToast()` para feedback padronizado (auth e fluxos futuros)
+- **Manter conectado** — mesma chave `aiyra-care-remember-me` do web; sessão Supabase em memória se desligado (perde ao fechar o app)
+- **Biometria** — `expo-local-authentication`; tela `/(auth)/unlock`; re-lock ao ir para background; toggle no login e em Configurações
 - Lista de pacientes via `GET /patients`, agrupada por faixa etária
 - Loading, erro com retry e pull-to-refresh na aba Início
 

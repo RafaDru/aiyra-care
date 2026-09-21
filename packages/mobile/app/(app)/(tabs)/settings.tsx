@@ -1,8 +1,11 @@
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
 import { Link, router } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { AuthPreferenceRow } from '@/components/auth/AuthPreferenceRow'
 import { AppLogo } from '@/components/brand/AppLogo'
+import { useAppLock } from '@/contexts/AppLockContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/contexts/ToastContext'
 import { setAppLanguage, type AppLanguage } from '@/i18n'
 import { webAppBaseUrl } from '@/lib/web-app-url'
 import type { AppearancePreference } from '@/theme/AppearancePreferenceContext'
@@ -11,7 +14,9 @@ import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation()
-  const { account, signOut } = useAuth()
+  const toast = useToast()
+  const { account, signOut, rememberMe, setRememberMe } = useAuth()
+  const { biometricUnlockEnabled, biometricSupport, setBiometricUnlockEnabled } = useAppLock()
   const { tokens } = useAiyraTheme()
   const { preference, setPreference } = useAppearancePreference()
 
@@ -36,6 +41,43 @@ export default function SettingsScreen() {
       </View>
       <Text style={[styles.title, { color: tokens.colorTextBase }]}>{t('settings.title')}</Text>
       <Text style={{ color: tokens.colorTextSecondary, marginBottom: 16 }}>{account?.email ?? '—'}</Text>
+
+      <Text style={[styles.sectionLabel, { color: tokens.colorTextSecondary }]}>{t('settings.security')}</Text>
+      <View style={[styles.prefsCard, { borderColor: tokens.colorBorder, backgroundColor: tokens.colorBgContainer }]}>
+        <AuthPreferenceRow
+          tokens={tokens}
+          checked={rememberMe}
+          onToggle={() => void setRememberMe(!rememberMe)}
+          label={t('settings.rememberMe')}
+          hint={t('settings.rememberMeHint')}
+        />
+        <AuthPreferenceRow
+          tokens={tokens}
+          checked={biometricUnlockEnabled}
+          onToggle={() => {
+            void (async () => {
+              if (biometricUnlockEnabled) {
+                const ok = await setBiometricUnlockEnabled(false)
+                if (ok) toast.info(t('appLock.disabled'))
+                return
+              }
+              if (!rememberMe) {
+                toast.info(t('auth.biometricNeedsRemember'))
+                return
+              }
+              if (!biometricSupport.available) {
+                toast.info(t('appLock.notAvailable'))
+                return
+              }
+              const ok = await setBiometricUnlockEnabled(true, t('appLock.prompt'))
+              if (ok) toast.success(t('appLock.enabled'))
+            })()
+          }}
+          label={t('settings.biometricUnlock')}
+          hint={t('settings.biometricUnlockHint')}
+          disabled={!biometricSupport.available}
+        />
+      </View>
 
       <Text style={[styles.sectionLabel, { color: tokens.colorTextSecondary }]}>{t('settings.language')}</Text>
       <View style={[styles.segmentRow, { borderColor: tokens.colorBorder, backgroundColor: tokens.colorBgContainer }]}>
@@ -114,6 +156,7 @@ const styles = StyleSheet.create({
   logoRow: { alignItems: 'center', marginBottom: 12 },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 4 },
   sectionLabel: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 8 },
+  prefsCard: { borderWidth: 1, borderRadius: 12, padding: 14, gap: 14, marginBottom: 8 },
   segmentRow: {
     flexDirection: 'row',
     borderWidth: 1,

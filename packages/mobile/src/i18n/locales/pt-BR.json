@@ -29,7 +29,24 @@
     "loginFailed": "Falha no login",
     "signupFailed": "Falha ao criar conta",
     "googleFailed": "Falha no login com Google",
-    "envHint": "Copie packages/mobile/.env.example para .env e preencha as chaves Supabase."
+    "envHint": "Copie packages/mobile/.env.example para .env e preencha as chaves Supabase.",
+    "rememberMe": "Manter conectado",
+    "rememberMeHint": "Desligado: você precisará entrar de novo ao fechar o app.",
+    "biometricUnlock": "Desbloquear com biometria",
+    "biometricUnlockHint": "Exige manter conectado. Ao reabrir o app, use Face ID ou digital.",
+    "biometricNeedsRemember": "Ative \"Manter conectado\" para usar biometria."
+  },
+  "appLock": {
+    "title": "Desbloquear AiyraCare",
+    "subtitle": "Use a biometria do dispositivo para continuar.",
+    "subtitleWithEmail": "Conta {{email}}",
+    "prompt": "Desbloquear o AiyraCare",
+    "unlockWith": "Usar {{method}}",
+    "usePassword": "Entrar com senha",
+    "cancelled": "Biometria cancelada.",
+    "enabled": "Desbloqueio biométrico ativado.",
+    "disabled": "Desbloqueio biométrico desativado.",
+    "notAvailable": "Biometria não disponível neste dispositivo."
   },
   "authErrors": {
     "invalidCredentials": "E-mail ou senha incorretos. Se você acabou de se cadastrar, confirme o e-mail antes de entrar.",
@@ -58,7 +75,12 @@
     "family": "Família e cuidadores",
     "openWeb": "Abrir versão web",
     "openWebHint": "Integrações, sync e edição avançada",
-    "signOut": "Sair"
+    "signOut": "Sair",
+    "security": "Segurança e login",
+    "rememberMe": "Manter conectado",
+    "rememberMeHint": "Sessão persistente neste aparelho.",
+    "biometricUnlock": "Desbloqueio biométrico",
+    "biometricUnlockHint": "Ao voltar ao app, pede Face ID ou digital."
   },
   "toast": {
     "success": "Sucesso",

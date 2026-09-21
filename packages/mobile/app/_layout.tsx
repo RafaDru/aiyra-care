@@ -3,6 +3,7 @@ import { ActivityIndicator, View } from 'react-native'
 import { Stack } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { I18nextProvider } from 'react-i18next'
+import { AppLockProvider } from '@/contexts/AppLockContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import i18n, { initI18n } from '@/i18n'
@@ -31,9 +32,11 @@ function AppProviders() {
   return (
     <AppearancePreferenceProvider>
       <AuthProvider>
-        <ToastProvider>
-          <RootStack />
-        </ToastProvider>
+        <AppLockProvider>
+          <ToastProvider>
+            <RootStack />
+          </ToastProvider>
+        </AppLockProvider>
       </AuthProvider>
     </AppearancePreferenceProvider>
   )
