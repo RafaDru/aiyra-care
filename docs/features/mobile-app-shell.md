@@ -37,6 +37,7 @@ Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesm
 
 ## Marco M2 (login + início)
 
+- Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo`, Google OAuth
 - Lista de pacientes via `GET /patients`, agrupada por faixa etária
 - Loading, erro com retry e pull-to-refresh na aba Início
 
@@ -65,7 +66,9 @@ Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesm
 
 ## Pendente
 
-- Onboarding mobile
+- Tela de apresentação / onboarding visual (primeira navegação)
+- Logomarca SVG no bundle nativo (hoje: wordmark no Expo Go; SVG via `EXPO_PUBLIC_WEB_APP_URL` no Expo web)
+- Onboarding de perfil (web `/onboarding`) — mobile não bloqueia; mensagem na lista
 - Demais tabs clínicas (medicamentos, vacinas, …) e Convênios UI completa
 - Microsoft OAuth no mobile
 - Suite Playwright mobile (CI)
