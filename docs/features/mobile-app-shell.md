@@ -50,6 +50,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 - **Manter conectado** — mesma chave `aiyra-care-remember-me` do web; sessão Supabase em memória se desligado (perde ao fechar o app)
 - **Biometria** — `expo-local-authentication`; tela `/(auth)/unlock`; re-lock ao ir para background; toggle no login e em Configurações
 - **Logo PNG** — `npm run brand:sync-png` (mobile) rasteriza SVG do web com **Inter 600** (`@expo-google-fonts/inter`); rodar após mudar `packages/web/public/brand/*.svg`
+- **Rotas de paciente** — URL usa ref opaca `p_*` (mapa em memória no app); API continua com UUID. **Roadmap:** refs de sessão no BFF (estilo «handle» por login) para não expor IDs em tráfego de cliente — padrão comum em fintech; não substitui autorização no servidor.
 - Lista de pacientes via `GET /patients`, agrupada por faixa etária
 - Loading, erro com retry e pull-to-refresh na aba Início
 
@@ -79,7 +80,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 ## Pendente
 
 - Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail) — ver `client-errors.ts`
-- Onboarding de perfil (web `/onboarding`) — mobile não bloqueia; mensagem na lista
+- Onboarding mobile — passo 1 (perfil titular) em `/(app)/onboarding`; dependentes ainda web
 - Demais tabs clínicas (medicamentos, vacinas, …) e Convênios UI completa
 - Microsoft OAuth no mobile
 - Suite Playwright mobile (CI)

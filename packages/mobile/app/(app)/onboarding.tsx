@@ -2,33 +2,29 @@ import { useState } from 'react'
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { Redirect, router } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { MaskedField } from '@/components/form/MaskedField'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
 import { api } from '@/lib/api'
+import {
+  digitsOnly,
+  formatCpfInput,
+  formatDateBrInput,
+  parseDateBrToIso,
+} from '@/lib/input-masks'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
-function parseBirthDateInput(raw: string): Date | null {
-  const trimmed = raw.trim()
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    const d = new Date(`${trimmed}T12:00:00`)
-    return Number.isNaN(d.getTime()) ? null : d
-  }
-  const m = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
-  if (!m) return null
-  const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 12)
-  return Number.isNaN(d.getTime()) ? null : d
-}
-
-function isAdult(birthDate: Date): boolean {
-  const age = (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+function isAdultIso(iso: string): boolean {
+  const birth = new Date(iso)
+  const age = (Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
   return age >= 18
 }
 
@@ -51,12 +47,12 @@ export default function OnboardingScreen() {
       toast.error(t('onboarding.nameRequired'))
       return
     }
-    const parsed = parseBirthDateInput(birthDate)
-    if (!parsed) {
+    const birthIso = parseDateBrToIso(birthDate)
+    if (!birthIso) {
       toast.error(t('onboarding.birthDateRequired'))
       return
     }
-    if (!isAdult(parsed)) {
+    if (!isAdultIso(birthIso)) {
       toast.error(t('onboarding.adultOnly'))
       return
     }
@@ -64,7 +60,7 @@ export default function OnboardingScreen() {
       toast.error(t('onboarding.genderRequired'))
       return
     }
-    const cpfDigits = cpf.replace(/\D/g, '')
+    const cpfDigits = digitsOnly(cpf)
     if (cpfDigits.length !== 11) {
       toast.error(t('onboarding.cpfInvalid'))
       return
@@ -73,7 +69,7 @@ export default function OnboardingScreen() {
     try {
       await api.auth.completeProfile({
         name: name.trim(),
-        birthDate: parsed.toISOString(),
+        birthDate: birthIso,
         gender,
         cpf: cpfDigits,
       })
@@ -96,10 +92,12 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}
       contentContainerStyle={styles.scroll}
       keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={24}
     >
       <Text style={[styles.title, { color: tokens.colorTextBase }]}>{t('onboarding.welcomeTitle')}</Text>
       <Text style={[styles.subtitle, { color: tokens.colorTextSecondary }]}>{t('onboarding.welcomeSubtitle')}</Text>
@@ -109,15 +107,16 @@ export default function OnboardingScreen() {
         placeholderTextColor={tokens.colorTextSecondary}
         value={name}
         onChangeText={setName}
+        autoComplete="name"
         style={[styles.input, { borderColor: tokens.colorBorder, color: tokens.colorTextBase }]}
       />
-      <TextInput
+      <MaskedField
+        tokens={tokens}
         placeholder={`${t('onboarding.birthDate')} (DD/MM/AAAA)`}
-        placeholderTextColor={tokens.colorTextSecondary}
         value={birthDate}
         onChangeText={setBirthDate}
-        keyboardType="numbers-and-punctuation"
-        style={[styles.input, { borderColor: tokens.colorBorder, color: tokens.colorTextBase }]}
+        format={formatDateBrInput}
+        keyboardType="number-pad"
       />
       <View style={styles.genderRow}>
         {(['female', 'male'] as const).map((g) => (
@@ -138,13 +137,13 @@ export default function OnboardingScreen() {
           </Pressable>
         ))}
       </View>
-      <TextInput
+      <MaskedField
+        tokens={tokens}
         placeholder={t('onboarding.cpf')}
-        placeholderTextColor={tokens.colorTextSecondary}
         value={cpf}
         onChangeText={setCpf}
+        format={formatCpfInput}
         keyboardType="number-pad"
-        style={[styles.input, { borderColor: tokens.colorBorder, color: tokens.colorTextBase }]}
       />
 
       <Pressable
@@ -158,7 +157,7 @@ export default function OnboardingScreen() {
           <Text style={styles.primaryText}>{t('onboarding.continue')}</Text>
         )}
       </Pressable>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   )
 }
 

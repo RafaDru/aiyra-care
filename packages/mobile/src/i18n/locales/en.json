@@ -76,6 +76,13 @@
     "bannerBody": "Complete your holder profile to access coverage, exams, and family.",
     "bannerAction": "Complete now"
   },
+  "home": {
+    "greeting": "Hello, {{name}}",
+    "greetingGeneric": "Hello"
+  },
+  "patient": {
+    "you": "You"
+  },
   "welcome": {
     "title": "Family health in one place",
     "subtitle": "Track coverage, exams, and daily care — on your phone or computer, with one account.",

@@ -8,6 +8,7 @@ export interface Patient {
   cns?: string | null
   ageCategory: 'children' | 'adolescents' | 'adults'
   isSelf?: boolean
+  membershipRole?: 'self' | 'guardian' | string
   createdAt: string
   updatedAt: string
 }

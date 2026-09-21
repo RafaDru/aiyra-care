@@ -76,6 +76,13 @@
     "bannerBody": "Complete seu perfil de titular para acessar carteira, exames e família.",
     "bannerAction": "Completar agora"
   },
+  "home": {
+    "greeting": "Olá, {{name}}",
+    "greetingGeneric": "Olá"
+  },
+  "patient": {
+    "you": "Você"
+  },
   "welcome": {
     "title": "Saúde da família, em um só lugar",
     "subtitle": "Acompanhe carteira, exames e cuidado diário — no celular ou no computador, com a mesma conta.",

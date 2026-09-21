@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { PatientExamsTab } from '@/components/clinical/PatientExamsTab'
 import { PatientIntegrationsPanel } from '@/components/integrations/PatientIntegrationsPanel'
@@ -7,12 +7,14 @@ import { PatientCoverageTab } from '@/components/wallet/PatientCoverageTab'
 import { PatientWalletTab } from '@/components/wallet/PatientWalletTab'
 import { PatientNavPicker } from '@/components/PatientNavPicker'
 import { PlaceholderTab } from '@/components/PlaceholderTab'
+import { api } from '@/lib/api'
 import {
   defaultTabForSection,
   resolvePatientNav,
   type PatientSection,
   type PatientTabKey,
 } from '@/lib/patient-navigation'
+import { patientIdFromRouteParam } from '@/lib/patient-route-ref'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 function tabContent(tab: PatientTabKey): { title: string; subtitle: string } {
@@ -42,20 +44,57 @@ function tabContent(tab: PatientTabKey): { title: string; subtitle: string } {
   }
 }
 
+function PatientHeader({
+  title,
+  section,
+  tab,
+  onSectionChange,
+  onTabChange,
+}: {
+  title: string
+  section: PatientSection
+  tab: PatientTabKey
+  onSectionChange: (s: PatientSection) => void
+  onTabChange: (t: PatientTabKey) => void
+}) {
+  const { tokens } = useAiyraTheme()
+  return (
+    <View style={styles.header}>
+      <Text style={[styles.patientTitle, { color: tokens.colorTextBase }]}>{title}</Text>
+      <PatientNavPicker
+        section={section}
+        tab={tab}
+        onSectionChange={onSectionChange}
+        onTabChange={onTabChange}
+      />
+    </View>
+  )
+}
+
 export default function PatientDetailScreen() {
   const { id, section: sectionParam, tab: tabParam } = useLocalSearchParams<{
     id: string
     section?: string
     tab?: string
   }>()
-  const patientId = typeof id === 'string' ? id : id?.[0] ?? ''
+  const routeParam = typeof id === 'string' ? id : id?.[0] ?? ''
+  const patientId = patientIdFromRouteParam(routeParam) ?? ''
   const { tokens } = useAiyraTheme()
+  const [patientName, setPatientName] = useState<string>('Perfil')
   const initial = useMemo(
     () => resolvePatientNav(sectionParam ?? null, tabParam ?? null),
     [sectionParam, tabParam],
   )
   const [section, setSection] = useState<PatientSection>(initial.section)
   const [tab, setTab] = useState<PatientTabKey>(initial.tab)
+
+  useEffect(() => {
+    if (!patientId) return
+    void api.patients
+      .get(patientId)
+      .then((p) => setPatientName(p.name))
+      .catch(() => setPatientName('Perfil'))
+  }, [patientId])
 
   const onSectionChange = (next: PatientSection) => {
     setSection(next)
@@ -64,69 +103,69 @@ export default function PatientDetailScreen() {
 
   const content = tabContent(tab)
 
-  if (tab === 'coverage' && patientId) {
+  if (!patientId) {
+    return (
+      <View style={{ flex: 1, padding: 16, backgroundColor: tokens.colorBgLayout }}>
+        <Text style={{ color: tokens.colorTextSecondary }}>Perfil não encontrado.</Text>
+      </View>
+    )
+  }
+
+  if (tab === 'coverage') {
     return (
       <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
-        <View style={styles.header}>
-          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
-          <PatientNavPicker
-            section={section}
-            tab={tab}
-            onSectionChange={onSectionChange}
-            onTabChange={setTab}
-          />
-        </View>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
         <PatientCoverageTab patientId={patientId} />
       </View>
     )
   }
 
-  if (tab === 'wallet' && patientId) {
+  if (tab === 'wallet') {
     return (
       <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
-        <View style={styles.header}>
-          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
-          <PatientNavPicker
-            section={section}
-            tab={tab}
-            onSectionChange={onSectionChange}
-            onTabChange={setTab}
-          />
-        </View>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
         <PatientWalletTab patientId={patientId} />
       </View>
     )
   }
 
-  if (tab === 'exams' && patientId) {
+  if (tab === 'exams') {
     return (
       <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
-        <View style={styles.header}>
-          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
-          <PatientNavPicker
-            section={section}
-            tab={tab}
-            onSectionChange={onSectionChange}
-            onTabChange={setTab}
-          />
-        </View>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
         <PatientExamsTab patientId={patientId} />
       </View>
     )
   }
 
-  if (tab === 'integrations' && patientId) {
+  if (tab === 'integrations') {
     return (
       <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
-        <View style={styles.header}>
-          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
-          <PatientNavPicker
-            section={section}
-            tab={tab}
-            onSectionChange={onSectionChange}
-            onTabChange={setTab}
-          />
-        </View>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
         <View style={styles.integrationsBody}>
           <PatientIntegrationsPanel patientId={patientId} />
         </View>
@@ -139,7 +178,7 @@ export default function PatientDetailScreen() {
       style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}
       contentContainerStyle={styles.content}
     >
-      <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
+      <Text style={[styles.patientTitle, { color: tokens.colorTextBase }]}>{patientName}</Text>
       <PatientNavPicker
         section={section}
         tab={tab}
@@ -160,5 +199,5 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 16, paddingBottom: 48 },
   header: { padding: 16, gap: 12, paddingBottom: 0 },
   integrationsBody: { flex: 1, paddingHorizontal: 16 },
-  patientId: { fontSize: 12 },
+  patientTitle: { fontSize: 20, fontWeight: '700' },
 })

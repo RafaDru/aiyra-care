@@ -12,7 +12,9 @@ import { router } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import type { Patient } from '@/lib/api.types'
 import { api } from '@/lib/api'
+import { resolveHomeGreetingName } from '@/lib/input-masks'
 import { groupPatientsByAgeCategory } from '@/lib/patient-list-labels'
+import { primePatientRefs, refForPatient } from '@/lib/patient-route-ref'
 import { StatePanel } from '@/components/StatePanel'
 import { NoticeBanner } from '@/components/ui/NoticeBanner'
 import { useAuth } from '@/contexts/AuthContext'
@@ -37,6 +39,7 @@ export default function HomeScreen() {
     setError(null)
     try {
       const list = await api.patients.list()
+      primePatientRefs(list)
       setPatients(list)
     } catch (e) {
       setPatients([])
@@ -69,10 +72,15 @@ export default function HomeScreen() {
 
   const showListLoader = configured && (authLoading || syncing || (loading && !refreshing))
 
+  const greetingName = useMemo(() => {
+    const self = patients.find((p) => p.isSelf || p.membershipRole === 'self')
+    return resolveHomeGreetingName(account?.displayName, self?.name)
+  }, [account?.displayName, patients])
+
   return (
     <View style={[styles.screen, { backgroundColor: tokens.colorBgLayout }]}>
       <Text style={[styles.greeting, { color: tokens.colorTextBase }]}>
-        Olá{account?.displayName ? `, ${account.displayName}` : ''}
+        {greetingName ? t('home.greeting', { name: greetingName }) : t('home.greetingGeneric')}
       </Text>
       <Text style={[styles.subtitle, { color: tokens.colorTextSecondary }]}>Perfis de saúde</Text>
 
@@ -129,10 +137,17 @@ export default function HomeScreen() {
               const p = item.patient
               return (
                 <Pressable
-                  onPress={() => router.push(`/(app)/patient/${p.id}`)}
+                  onPress={() => router.push(`/(app)/patient/${refForPatient(p.id)}`)}
                   style={[styles.card, { backgroundColor: tokens.colorBgContainer, borderColor: tokens.colorBorder }]}
                 >
-                  <Text style={[styles.name, { color: tokens.colorTextBase }]}>{p.name}</Text>
+                  <View style={styles.cardTitleRow}>
+                    <Text style={[styles.name, { color: tokens.colorTextBase, flex: 1 }]}>{p.name}</Text>
+                    {p.isSelf || p.membershipRole === 'self' ? (
+                      <View style={[styles.youTag, { backgroundColor: tokens.colorPrimary }]}>
+                        <Text style={styles.youTagText}>{t('patient.you')}</Text>
+                      </View>
+                    ) : null}
+                  </View>
                   <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>
                     {p.gender === 'female' ? 'Feminino' : p.gender === 'male' ? 'Masculino' : 'Perfil'}
                   </Text>
@@ -158,6 +173,9 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, marginBottom: 12, marginTop: 4 },
   sectionTitle: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', marginTop: 8, marginBottom: 2 },
   card: { borderWidth: 1, borderRadius: 12, padding: 14 },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   name: { fontSize: 17, fontWeight: '600' },
+  youTag: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  youTagText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   inlineLoader: { marginTop: 24, alignItems: 'center' },
 })
