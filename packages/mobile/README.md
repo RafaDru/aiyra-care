@@ -17,9 +17,12 @@ Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:30
 ## Expo Go (dispositivo)
 
 1. Instale **Expo Go** (iOS/Android) — versão **SDK 57** (padrão nas lojas em 2026).
-2. Na raiz: `npm install` → `npm run mobile:start` (ou `npx expo start --tunnel` se o celular não alcançar a LAN) → escaneie o QR.
-3. **API em dispositivo físico:** `EXPO_PUBLIC_API_URL` deve usar o **IP LAN** da máquina (ex. `http://192.168.1.10:3010`), não `127.0.0.1`.
-4. Smoke manual: suite [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile`
+2. **Mesmo Wi‑Fi:** `npm run mobile:lan` — define `EXPO_PUBLIC_API_URL` com IP LAN + `expo start --lan --clear`.
+3. **Na rua (4G):** API no PC + `npm run mobile:street` — túnel **localtunnel** na `:3010` + Metro **Expo tunnel**; escaneie o QR. O notebook precisa ficar ligado com internet.
+4. Dev simples (só emulador/web): `npm run mobile:start`.
+5. Smoke manual: suite [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile`
+
+**App “igual ao de antes”?** Feche o Expo Go, use `--clear` (já nos scripts acima) e confira o branch (`git pull` em `cursor/mobile-auth-ux-i18n-a5c1` ou `main` após merge).
 
 ## Comandos
 
