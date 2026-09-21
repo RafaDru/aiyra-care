@@ -4,6 +4,8 @@ import { Redirect, usePathname } from 'expo-router'
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/lib/api'
 import { onComplianceAccepted } from '@/lib/compliance-events'
+import { getOnboardingWizardStep } from '@/lib/onboarding-wizard'
+import { onOnboardingWizardChanged } from '@/lib/onboarding-events'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 const COMPLIANCE_ACCEPT_PATH = '/compliance/accept'
@@ -18,6 +20,7 @@ export function RequireComplianceGate({ children }: { children: ReactNode }) {
   const { tokens } = useAiyraTheme()
   const [checking, setChecking] = useState(true)
   const [compliant, setCompliant] = useState(true)
+  const [wizardStep, setWizardStep] = useState<0 | 1>(0)
 
   useEffect(() => {
     if (!configured || !authUserId) {
@@ -45,6 +48,21 @@ export function RequireComplianceGate({ children }: { children: ReactNode }) {
 
   useEffect(() => onComplianceAccepted(() => setCompliant(true)), [])
 
+  useEffect(() => {
+    if (!configured || !authUserId) {
+      setWizardStep(0)
+      return
+    }
+    let cancelled = false
+    const load = () => {
+      void getOnboardingWizardStep().then((s) => {
+        if (!cancelled) setWizardStep(s)
+      })
+    }
+    load()
+    return onOnboardingWizardChanged(load)
+  }, [configured, authUserId, needsProfile])
+
   if (!configured) return children
 
   if (authLoading || checking) {
@@ -61,7 +79,8 @@ export function RequireComplianceGate({ children }: { children: ReactNode }) {
     return <Redirect href="/(app)/compliance/accept" />
   }
 
-  if (compliant && needsProfile && !pathname.includes('onboarding')) {
+  const needsOnboarding = needsProfile || wizardStep === 1
+  if (compliant && needsOnboarding && !pathname.includes('onboarding')) {
     return <Redirect href="/(app)/onboarding" />
   }
 

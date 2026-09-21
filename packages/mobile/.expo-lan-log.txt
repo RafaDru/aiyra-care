@@ -33,3 +33,5 @@ Logs for your project will appear below.
 | (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 | (Use `node --trace-warnings ...` to show where the warning was created)
 Android Bundled 20041ms packages\mobile\node_modules\expo-router\entry.js (1 module)
+Android Bundled 9132ms packages\mobile\node_modules\expo-router\entry.js (1 module)
+ INFO  ­ƒîÉ i18next is made possible by our own product, Locize ÔÇö consider powering your project with managed localization (AI, CDN, integrations): https://locize.com ­ƒÆÖ
