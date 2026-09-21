@@ -121,8 +121,12 @@ export function LoginPage() {
       } else {
         const result = await signUpWithPassword(values.email, values.password, rememberMe)
         if (result.kind === 'email_confirmation') {
-          setInfo(t('auth.emailConfirmHint'))
-          setAuthMode('login')
+          const msg = t('auth.emailConfirmHint')
+          setMode('login')
+          setLegalAccept(false)
+          setError(null)
+          setInfo(msg)
+          setSearchParams({ mode: 'login' }, { replace: true })
           return
         }
         await refreshSync()
