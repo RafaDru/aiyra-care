@@ -6,6 +6,10 @@ import { getSupabase } from '@/lib/supabase'
 WebBrowser.maybeCompleteAuthSession()
 
 export function getSupabaseOAuthRedirectUri(): string {
+  const explicit = process.env.EXPO_PUBLIC_OAUTH_REDIRECT_URI?.trim()
+  if (explicit) return explicit
+  const webBase = process.env.EXPO_PUBLIC_WEB_APP_URL?.replace(/\/$/, '')
+  if (webBase) return `${webBase}/mobile-oauth-return`
   return makeRedirectUri({
     scheme: 'aiyracare',
     path: 'auth/callback',

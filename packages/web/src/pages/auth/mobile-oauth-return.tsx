@@ -6,9 +6,10 @@ import { useEffect } from 'react'
  */
 export function MobileOAuthReturnPage() {
   useEffect(() => {
+    const host = window.location.hostname || '127.0.0.1'
     const exp =
       import.meta.env.VITE_MOBILE_OAUTH_DEEP_LINK?.trim() ||
-      'exp://192.168.18.77:8081/--/auth/callback'
+      `exp://${host}:8081/--/auth/callback`
     const suffix = window.location.hash || window.location.search
     if (suffix && exp) {
       window.location.replace(`${exp}${suffix}`)
