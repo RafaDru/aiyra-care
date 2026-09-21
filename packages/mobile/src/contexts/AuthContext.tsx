@@ -4,6 +4,11 @@ import type { Session, User } from '@supabase/supabase-js'
 import type { AppAccount } from '@/lib/api.types'
 import { api } from '@/lib/api'
 import { createSessionFromOAuthUrl, signInWithOAuthProvider } from '@/lib/supabase-oauth'
+import { setBiometricUnlockEnabled } from '@/lib/biometric-unlock'
+import {
+  isRememberMeEnabled,
+  setRememberMePreference,
+} from '@/lib/remember-me'
 import { getAccessToken, getSupabase, setMemoryAccessToken, supabaseConfigured } from '@/lib/supabase'
 
 export type SignUpResult = { kind: 'session' } | { kind: 'email_confirmation' }
@@ -18,6 +23,8 @@ type AuthContextValue = {
   user: User | null
   account: AppAccount | null
   needsProfile: boolean
+  rememberMe: boolean
+  setRememberMe: (remember: boolean) => Promise<void>
   signInWithPassword: (email: string, password: string) => Promise<void>
   signUpWithPassword: (email: string, password: string) => Promise<SignUpResult>
   signInWithGoogle: () => Promise<void>
@@ -33,8 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [account, setAccount] = useState<AppAccount | null>(null)
   const [needsProfile, setNeedsProfile] = useState(false)
+  const [rememberMe, setRememberMeState] = useState(true)
 
   const authUserId = session?.user?.id ?? null
+
+  useEffect(() => {
+    void isRememberMeEnabled().then(setRememberMeState)
+  }, [])
+
+  const setRememberMe = useCallback(async (remember: boolean) => {
+    await setRememberMePreference(remember)
+    setRememberMeState(remember)
+  }, [])
 
   const syncAccount = useCallback(async (accessToken: string | undefined) => {
     if (!accessToken || !supabaseConfigured) {
@@ -128,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const client = getSupabase()
     if (!client) return
     await client.auth.signOut()
+    await setBiometricUnlockEnabled(false)
     setAccount(null)
     setNeedsProfile(false)
   }, [])
@@ -142,6 +160,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       account,
       needsProfile,
+      rememberMe,
+      setRememberMe,
       signInWithPassword,
       signUpWithPassword,
       signInWithGoogle,
@@ -155,6 +175,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authUserId,
       account,
       needsProfile,
+      rememberMe,
+      setRememberMe,
       signInWithPassword,
       signUpWithPassword,
       signInWithGoogle,

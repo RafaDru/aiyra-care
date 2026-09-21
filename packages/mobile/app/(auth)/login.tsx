@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Redirect, router, useLocalSearchParams } from 'expo-router'
+import { useTranslation } from 'react-i18next'
+import { AuthPreferenceRow } from '@/components/auth/AuthPreferenceRow'
 import { AuthScreen } from '@/components/auth/AuthScreen'
 import { PasswordField } from '@/components/auth/PasswordField'
+import { useAppLock, useRequiresBiometricUnlock } from '@/contexts/AppLockContext'
 import { AppLogo } from '@/components/brand/AppLogo'
 import { LegalDocumentModal } from '@/components/legal/LegalDocumentModal'
 import { StatePanel } from '@/components/StatePanel'
+import { NoticeBanner } from '@/components/ui/NoticeBanner'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/contexts/ToastContext'
 import { api } from '@/lib/api'
 import { AUTH_PASSWORD_HINT, AUTH_PASSWORD_MIN_LENGTH } from '@/lib/auth-policy'
+import { formatAuthError } from '@/lib/auth-errors'
 import type { LegalDocumentKind } from '@/lib/api.types'
 import { reportAuthClientError } from '@/lib/client-errors'
+import { loadLastEmail, saveLastEmail } from '@/lib/remember-me'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 type AuthMode = 'login' | 'signup'
@@ -27,6 +27,10 @@ function parseAuthMode(value: string | undefined): AuthMode {
 }
 
 export default function LoginScreen() {
+  const { t } = useTranslation()
+  const toast = useToast()
+  const scrollFocusedRef = useRef<(() => void) | null>(null)
+  const [postSignupNotice, setPostSignupNotice] = useState<string | null>(null)
   const { redirect, token: inviteToken, mode: modeParam } = useLocalSearchParams<{
     redirect?: string
     token?: string
@@ -40,7 +44,14 @@ export default function LoginScreen() {
     signUpWithPassword,
     signInWithGoogle,
     refreshSync,
+    rememberMe,
+    setRememberMe,
   } = useAuth()
+  const {
+    biometricSupport,
+    setBiometricUnlockEnabled,
+    unlock: unlockApp,
+  } = useAppLock()
   const { tokens } = useAiyraTheme()
   const [mode, setMode] = useState<AuthMode>(() => parseAuthMode(modeParam))
 
@@ -49,6 +60,7 @@ export default function LoginScreen() {
       setMode(parseAuthMode(modeParam))
     }
   }, [modeParam])
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -58,6 +70,13 @@ export default function LoginScreen() {
   const [info, setInfo] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [oauthSubmitting, setOauthSubmitting] = useState(false)
+  const [enableBiometric, setEnableBiometric] = useState(false)
+
+  useEffect(() => {
+    void loadLastEmail().then((saved) => {
+      if (saved) setEmail(saved)
+    })
+  }, [])
 
   const setAuthMode = (next: AuthMode) => {
     setMode(next)
@@ -65,7 +84,14 @@ export default function LoginScreen() {
     setError(null)
     setInfo(null)
     setPasswordConfirm('')
+    if (next === 'signup') setPostSignupNotice(null)
   }
+
+  const focusField = () => {
+    scrollFocusedRef.current?.()
+  }
+
+  const needsUnlock = useRequiresBiometricUnlock(Boolean(session))
 
   if (loading) {
     return (
@@ -79,10 +105,31 @@ export default function LoginScreen() {
     if (redirect === 'invite' && typeof inviteToken === 'string' && inviteToken) {
       return <Redirect href={`/invite/accept?token=${encodeURIComponent(inviteToken)}`} />
     }
+    if (needsUnlock) {
+      return <Redirect href="/(auth)/unlock" />
+    }
     return <Redirect href="/(app)/(tabs)" />
   }
 
+  async function finalizeSessionOptions() {
+    if (rememberMe) {
+      await saveLastEmail(email.trim())
+    }
+    if (mode === 'login' && enableBiometric && rememberMe) {
+      if (!biometricSupport.available) {
+        toast.info(t('appLock.notAvailable'))
+      } else {
+        const ok = await setBiometricUnlockEnabled(true, t('appLock.prompt'))
+        if (ok) toast.success(t('appLock.enabled'))
+        else setEnableBiometric(false)
+      }
+    } else {
+      unlockApp()
+    }
+  }
+
   async function afterAuthSuccess() {
+    await finalizeSessionOptions()
     if (redirect === 'invite' && typeof inviteToken === 'string' && inviteToken) {
       router.replace(`/invite/accept?token=${encodeURIComponent(inviteToken)}`)
       return
@@ -92,40 +139,58 @@ export default function LoginScreen() {
 
   async function onSubmit() {
     if (!configured) {
-      setError('Copie packages/mobile/.env.example para .env e preencha as chaves Supabase.')
+      const msg = t('auth.envHint')
+      setError(msg)
+      toast.error(msg)
       return
     }
     if (!email.trim() || !password) {
-      setError('Informe e-mail e senha.')
+      const msg = t('auth.missingEmailPassword')
+      setError(msg)
+      toast.error(msg)
       return
     }
     if (password.length < AUTH_PASSWORD_MIN_LENGTH) {
-      setError(`A senha deve ter pelo menos ${AUTH_PASSWORD_MIN_LENGTH} caracteres.`)
+      const msg = t('auth.passwordMin', { min: AUTH_PASSWORD_MIN_LENGTH })
+      setError(msg)
+      toast.error(msg)
       return
     }
     if (mode === 'signup') {
       if (password !== passwordConfirm) {
-        setError('As senhas não coincidem.')
+        const msg = t('auth.passwordMismatch')
+        setError(msg)
+        toast.error(msg)
         return
       }
       if (!legalAccept) {
-        setError('Aceite os termos e a política de privacidade para criar sua conta.')
+        const msg = t('auth.legalRequired')
+        setError(msg)
+        toast.error(msg)
         return
       }
     }
     setError(null)
     setInfo(null)
+    setPostSignupNotice(null)
     setSubmitting(true)
     try {
+      await setRememberMe(mode === 'login' ? rememberMe : true)
       if (mode === 'login') {
         await signInWithPassword(email.trim(), password)
       } else {
         const result = await signUpWithPassword(email.trim(), password)
         if (result.kind === 'email_confirmation') {
-          setInfo(
-            'Conta criada. Se o ambiente exige confirmação, abra o link no e-mail e depois use Entrar. Caso já tenha sessão ativa, tente Entrar agora.',
-          )
-          setAuthMode('login')
+          const msg = t('auth.emailConfirmSuccess')
+          const toastMsg = t('auth.emailConfirmToast')
+          setMode('login')
+          setLegalAccept(false)
+          setPasswordConfirm('')
+          setError(null)
+          setInfo(msg)
+          setPostSignupNotice(toastMsg)
+          toast.success(toastMsg, { durationMs: 10000, position: 'bottom' })
+          router.replace({ pathname: '/(auth)/login', params: { mode: 'login' } })
           return
         }
         await refreshSync()
@@ -133,9 +198,15 @@ export default function LoginScreen() {
       }
       await afterAuthSuccess()
     } catch (e) {
-      const message = e instanceof Error ? e.message : mode === 'login' ? 'Falha no login' : 'Falha ao criar conta'
-      setError(message)
-      void reportAuthClientError(mode, message)
+      const message = formatAuthError(
+        e,
+        t,
+      )
+      const fallback = mode === 'login' ? t('auth.loginFailed') : t('auth.signupFailed')
+      const display = message || fallback
+      setError(display)
+      toast.error(display)
+      void reportAuthClientError(mode, display)
     } finally {
       setSubmitting(false)
     }
@@ -143,17 +214,21 @@ export default function LoginScreen() {
 
   async function onGoogle() {
     if (!configured) {
-      setError('Copie packages/mobile/.env.example para .env e preencha as chaves Supabase.')
+      const msg = t('auth.envHint')
+      setError(msg)
+      toast.error(msg)
       return
     }
     setError(null)
     setOauthSubmitting(true)
     try {
+      await setRememberMe(rememberMe)
       await signInWithGoogle()
       await afterAuthSuccess()
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Falha no login com Google'
+      const message = formatAuthError(e, t) || t('auth.googleFailed')
       setError(message)
+      toast.error(message)
       void reportAuthClientError('google', message)
     } finally {
       setOauthSubmitting(false)
@@ -161,25 +236,33 @@ export default function LoginScreen() {
   }
 
   return (
-    <AuthScreen>
+    <AuthScreen
+      header={<AppLogo variant="square" height={112} />}
+      onScrollReady={(fn) => {
+        scrollFocusedRef.current = fn
+      }}
+    >
+      {postSignupNotice ? (
+        <NoticeBanner tokens={tokens} tone="success">
+          {postSignupNotice}
+        </NoticeBanner>
+      ) : null}
+
       <LegalDocumentModal
         kind={legalModalKind}
         visible={legalModalKind !== null}
         onClose={() => setLegalModalKind(null)}
       />
       <View style={[styles.card, { backgroundColor: tokens.colorBgContainer, borderColor: tokens.colorBorder }]}>
-        <View style={styles.logoWrap}>
-          <AppLogo height={36} />
-        </View>
         <Text style={[styles.title, { color: tokens.colorTextBase }]}>
-          {mode === 'login' ? 'Entrar na sua conta' : 'Criar conta'}
+          {mode === 'login' ? t('auth.titleLogin') : t('auth.titleSignup')}
         </Text>
         <Text style={[styles.hint, { color: tokens.colorTextSecondary }]}>
           {configured
             ? mode === 'login'
-              ? 'Use a mesma conta do web.'
-              : 'Cadastro com e-mail e senha.'
-            : 'Configure EXPO_PUBLIC_SUPABASE_* no .env (ver .env.example).'}
+              ? t('auth.subtitleLogin')
+              : t('auth.subtitleSignup')
+            : t('auth.notConfigured')}
         </Text>
 
         <View style={[styles.segmentRow, { backgroundColor: tokens.colorBgLayout, borderColor: tokens.colorBorder }]}>
@@ -195,7 +278,7 @@ export default function LoginScreen() {
                 color: mode === 'login' ? tokens.colorPrimary : tokens.colorTextSecondary,
               }}
             >
-              Entrar
+              {t('auth.modeLogin')}
             </Text>
           </Pressable>
           <Pressable
@@ -210,7 +293,7 @@ export default function LoginScreen() {
                 color: mode === 'signup' ? tokens.colorPrimary : tokens.colorTextSecondary,
               }}
             >
-              Criar conta
+              {t('auth.modeSignup')}
             </Text>
           </Pressable>
         </View>
@@ -230,13 +313,13 @@ export default function LoginScreen() {
           {oauthSubmitting ? (
             <ActivityIndicator color={tokens.colorPrimary} />
           ) : (
-            <Text style={[styles.oauthButtonText, { color: tokens.colorTextBase }]}>Continuar com Google</Text>
+            <Text style={[styles.oauthButtonText, { color: tokens.colorTextBase }]}>{t('auth.google')}</Text>
           )}
         </Pressable>
 
         <View style={styles.dividerRow}>
           <View style={[styles.dividerLine, { backgroundColor: tokens.colorBorder }]} />
-          <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>ou e-mail</Text>
+          <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>{t('auth.emailDivider')}</Text>
           <View style={[styles.dividerLine, { backgroundColor: tokens.colorBorder }]} />
         </View>
 
@@ -244,11 +327,12 @@ export default function LoginScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"
-          placeholder="E-mail"
+          placeholder={t('auth.email')}
           placeholderTextColor={tokens.colorTextSecondary}
           value={email}
           onChangeText={setEmail}
           editable={!submitting && !oauthSubmitting}
+          onFocus={focusField}
           style={[styles.input, { borderColor: tokens.colorBorder, color: tokens.colorTextBase }]}
         />
         <PasswordField
@@ -258,6 +342,7 @@ export default function LoginScreen() {
           autoComplete={mode === 'login' ? 'password' : 'password-new'}
           editable={!submitting && !oauthSubmitting}
           onSubmitEditing={() => void onSubmit()}
+          onFocus={focusField}
         />
         {mode === 'signup' ? (
           <>
@@ -266,9 +351,10 @@ export default function LoginScreen() {
               tokens={tokens}
               value={passwordConfirm}
               onChangeText={setPasswordConfirm}
-              placeholder="Confirmar senha"
+              placeholder={t('auth.passwordConfirm')}
               autoComplete="password-new"
               editable={!submitting && !oauthSubmitting}
+              onFocus={focusField}
             />
           </>
         ) : null}
@@ -292,23 +378,51 @@ export default function LoginScreen() {
               {legalAccept ? <Text style={styles.checkMark}>✓</Text> : null}
             </View>
             <Text style={[styles.legalText, { color: tokens.colorTextSecondary }]}>
-              Li e aceito os{' '}
+              {t('auth.legalPrefix')}{' '}
               <Text style={{ color: tokens.colorPrimary }} onPress={() => setLegalModalKind('terms_of_use')}>
-                Termos de uso
+                {t('auth.termsLink')}
               </Text>
-              {' e a '}
+              {' · '}
               <Text style={{ color: tokens.colorPrimary }} onPress={() => setLegalModalKind('privacy_policy')}>
-                Política de privacidade
+                {t('auth.privacyLink')}
               </Text>
               .
             </Text>
           </Pressable>
         ) : null}
 
+        {mode === 'login' ? (
+          <>
+            <AuthPreferenceRow
+              tokens={tokens}
+              checked={rememberMe}
+              onToggle={() => {
+                const next = !rememberMe
+                void setRememberMe(next)
+                if (!next) setEnableBiometric(false)
+              }}
+              label={t('auth.rememberMe')}
+              hint={t('auth.rememberMeHint')}
+            />
+            <AuthPreferenceRow
+              tokens={tokens}
+              checked={enableBiometric}
+              onToggle={() => setEnableBiometric((v) => !v)}
+              label={t('auth.biometricUnlock')}
+              hint={
+                rememberMe
+                  ? t('auth.biometricUnlockHint')
+                  : t('auth.biometricNeedsRemember')
+              }
+              disabled={!rememberMe || !biometricSupport.available}
+            />
+          </>
+        ) : null}
+
         {info ? (
-          <Text style={[styles.info, { color: tokens.colorPrimary }]} accessibilityRole="text">
+          <NoticeBanner tokens={tokens} tone="success">
             {info}
-          </Text>
+          </NoticeBanner>
         ) : null}
         {error ? (
           <Text style={[styles.error, { color: tokens.colorError }]} accessibilityRole="alert">
@@ -323,7 +437,7 @@ export default function LoginScreen() {
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>{mode === 'login' ? 'Entrar' : 'Criar conta'}</Text>
+            <Text style={styles.buttonText}>{mode === 'login' ? t('auth.signIn') : t('auth.signUp')}</Text>
           )}
         </Pressable>
       </View>
@@ -334,7 +448,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, justifyContent: 'center', padding: 24 },
   card: { borderWidth: 1, borderRadius: 16, padding: 24, gap: 12 },
-  logoWrap: { alignItems: 'center', marginBottom: 4 },
   title: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
   hint: { fontSize: 14, textAlign: 'center', marginBottom: 4 },
   policy: { fontSize: 12, lineHeight: 18 },

@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-21] - Mobile: onboarding família + saudação por nome
+
+### Realizado
+- Onboarding mobile **passo 2** (dependentes), paridade com web; wizard persistido em AsyncStorage até concluir ou pular.
+- Máscaras CPF/data, tag «Você», refs `p_*` na navegação; API não sobrescreve `display_name` com e-mail do Supabase no sync.
+
+## [2026-09-21] - Mobile: correção cadastro + UX auth
+
+### Realizado
+- **Bug cadastro:** após `signUp` sem sessão JWT, o app chamava `api.compliance.accept()` e exibia «Sessão não disponível» — fluxo corrigido (mensagem de confirmação de e-mail).
+- Logo PNG no bundle, aparência (claro/escuro/sistema), teclado em telas auth, mostrar senha, confirmação de senha (web + mobile).
+
 ## [2026-09-21] - Mobile: entrega dual 80/20 + paridade Convênios e welcome
 
 ### Decisão

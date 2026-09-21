@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import type { AiyraThemeTokens } from '@/theme/useAiyraTheme'
 
 type Props = {
@@ -10,17 +11,20 @@ type Props = {
   autoComplete?: 'password' | 'password-new'
   editable?: boolean
   onSubmitEditing?: () => void
+  onFocus?: () => void
 }
 
 export function PasswordField({
   tokens,
   value,
   onChangeText,
-  placeholder = 'Senha',
+  placeholder,
   autoComplete = 'password',
   editable = true,
   onSubmitEditing,
+  onFocus,
 }: Props) {
+  const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
 
   return (
@@ -28,23 +32,24 @@ export function PasswordField({
       <TextInput
         secureTextEntry={!visible}
         autoComplete={autoComplete}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('auth.password')}
         placeholderTextColor={tokens.colorTextSecondary}
         value={value}
         onChangeText={onChangeText}
         editable={editable}
         onSubmitEditing={onSubmitEditing}
+        onFocus={onFocus}
         style={[styles.input, { color: tokens.colorTextBase }]}
       />
       <Pressable
         onPress={() => setVisible((v) => !v)}
         accessibilityRole="button"
-        accessibilityLabel={visible ? 'Ocultar senha' : 'Mostrar senha'}
+        accessibilityLabel={visible ? t('auth.passwordHideA11y') : t('auth.passwordShowA11y')}
         hitSlop={8}
         style={styles.toggle}
       >
         <Text style={{ color: tokens.colorPrimary, fontSize: 13, fontWeight: '600' }}>
-          {visible ? 'Ocultar' : 'Mostrar'}
+          {visible ? t('auth.passwordHide') : t('auth.passwordShow')}
         </Text>
       </Pressable>
     </View>

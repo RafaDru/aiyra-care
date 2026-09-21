@@ -44,7 +44,13 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 ## Marco M2 (login + início)
 
 - Tela **`(auth)/welcome`** — apresentação + Entrar / Criar conta
-- Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo`, Google OAuth
+- Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo` (variante **square**, paridade `AuthPageLayout` web), Google OAuth
+- **i18n** — `packages/mobile/src/i18n` (`pt-BR` / `en`, chave `aiyra-care-lang` igual ao web); idioma em Configurações
+- **Toast** — `ToastProvider` + `useToast()` para feedback padronizado (auth e fluxos futuros)
+- **Manter conectado** — mesma chave `aiyra-care-remember-me` do web; sessão Supabase em memória se desligado (perde ao fechar o app)
+- **Biometria** — `expo-local-authentication`; tela `/(auth)/unlock`; re-lock ao ir para background; toggle no login e em Configurações
+- **Logo PNG** — `npm run brand:sync-png` (mobile) rasteriza SVG do web com **Inter 600** (`@expo-google-fonts/inter`); rodar após mudar `packages/web/public/brand/*.svg`
+- **Rotas de paciente** — URL usa ref opaca `p_*` (mapa em memória no app); API continua com UUID. **Roadmap:** refs de sessão no BFF (estilo «handle» por login) para não expor IDs em tráfego de cliente — padrão comum em fintech; não substitui autorização no servidor.
 - Lista de pacientes via `GET /patients`, agrupada por faixa etária
 - Loading, erro com retry e pull-to-refresh na aba Início
 
@@ -73,8 +79,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 ## Pendente
 
-- Logomarca SVG no bundle nativo (hoje: wordmark no Expo Go; SVG via `EXPO_PUBLIC_WEB_APP_URL` no Expo web)
-- Onboarding de perfil (web `/onboarding`) — mobile não bloqueia; mensagem na lista
+- Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail) — ver `client-errors.ts`
+- Onboarding mobile — passos 1–2 (titular + dependentes) em `/(app)/onboarding`, paridade com web
 - Demais tabs clínicas (medicamentos, vacinas, …) e Convênios UI completa
 - Microsoft OAuth no mobile
 - Suite Playwright mobile (CI)

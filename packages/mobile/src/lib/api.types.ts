@@ -8,6 +8,7 @@ export interface Patient {
   cns?: string | null
   ageCategory: 'children' | 'adolescents' | 'adults'
   isSelf?: boolean
+  membershipRole?: 'self' | 'guardian' | string
   createdAt: string
   updatedAt: string
 }
@@ -135,6 +136,26 @@ export interface AuthSyncResponse {
   account: AppAccount
   isNew: boolean
   needsProfile: boolean
+}
+
+export interface CompleteProfileInput {
+  name: string
+  birthDate: string
+  gender: 'male' | 'female'
+  cpf: string
+  cns?: string
+  weightKg?: number
+  heightCm?: number
+}
+
+export interface CreatePatientInput {
+  name: string
+  birthDate: string
+  gender?: 'male' | 'female'
+  cpf?: string
+  cns?: string
+  weightKg?: number
+  heightCm?: number
 }
 
 export type LegalDocumentKind = 'terms_of_use' | 'privacy_policy' | 'cookie_policy' | 'minor_guardian_consent'

@@ -2,3 +2,9 @@
 dist/
 web-build/
 .screenshot-fixtures/
+.api-tunnel-url
+.api-tunnel.log
+.expo-lan-log.txt
+.expo-lan-log.txt.err
+.expo-tunnel-log.txt
+.expo-url.txt

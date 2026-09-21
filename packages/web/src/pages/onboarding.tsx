@@ -8,6 +8,7 @@ import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianC
 import { OnboardingLayout } from '../layouts/OnboardingLayout.js'
 import { api } from '../lib/api.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
+import { formatCpfInput } from '../lib/input-masks.js'
 import { trackProductEvent } from '../lib/product-events.js'
 
 const { Title, Text } = Typography
@@ -197,7 +198,11 @@ export function OnboardingPage() {
                   { validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('onboarding.cpfInvalid')) },
                 ]}
               >
-                <Input placeholder="000.000.000-00" maxLength={14} />
+                <Input
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                  onChange={(e) => profileForm.setFieldValue('cpf', formatCpfInput(e.target.value))}
+                />
               </Form.Item>
               <Form.Item
                 name="cns"

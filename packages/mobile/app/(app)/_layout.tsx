@@ -2,12 +2,14 @@ import { Redirect, Stack } from 'expo-router'
 import { ActivityIndicator, View } from 'react-native'
 import { AvaGlobalDock } from '@/components/ava/AvaGlobalDock'
 import { RequireComplianceGate } from '@/components/auth/RequireComplianceGate'
+import { useRequiresBiometricUnlock } from '@/contexts/AppLockContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export default function AppShellLayout() {
   const { loading, session, configured } = useAuth()
   const { tokens } = useAiyraTheme()
+  const needsUnlock = useRequiresBiometricUnlock(Boolean(session))
 
   if (loading) {
     return (
@@ -21,6 +23,10 @@ export default function AppShellLayout() {
     return <Redirect href="/(auth)/login" />
   }
 
+  if (needsUnlock) {
+    return <Redirect href="/(auth)/unlock" />
+  }
+
   return (
     <RequireComplianceGate>
       <View style={{ flex: 1 }}>
@@ -29,6 +35,7 @@ export default function AppShellLayout() {
           <Stack.Screen name="patient/[id]" options={{ title: 'Perfil' }} />
           <Stack.Screen name="settings/family" options={{ title: 'Família e cuidadores' }} />
           <Stack.Screen name="compliance/accept" options={{ title: 'Termos e privacidade', headerBackVisible: false }} />
+          <Stack.Screen name="onboarding" options={{ title: 'Complete seu cadastro', headerBackVisible: false }} />
         </Stack>
         <AvaGlobalDock />
       </View>

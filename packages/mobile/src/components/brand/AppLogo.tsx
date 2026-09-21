@@ -1,29 +1,49 @@
 import { Image, StyleSheet, Text, View } from 'react-native'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
-const LOGO_LIGHT = require('../../../assets/brand/logo-horizontal.png')
-const LOGO_DARK = require('../../../assets/brand/logo-horizontal-dark.png')
+export type AppLogoVariant = 'horizontal' | 'square'
+
+const ASSETS: Record<AppLogoVariant, { light: number; dark: number; aspect: number }> = {
+  horizontal: {
+    light: require('../../../assets/brand/logo-horizontal.png'),
+    dark: require('../../../assets/brand/logo-horizontal-dark.png'),
+    aspect: 400 / 104,
+  },
+  square: {
+    light: require('../../../assets/brand/logo-square.png'),
+    dark: require('../../../assets/brand/logo-square-dark.png'),
+    aspect: 1,
+  },
+}
+
+const DEFAULT_HEIGHT: Record<AppLogoVariant, number> = {
+  horizontal: 40,
+  square: 120,
+}
 
 type Props = {
+  variant?: AppLogoVariant
   height?: number
 }
 
-export function AppLogo({ height = 40 }: Props) {
+export function AppLogo({ variant = 'horizontal', height }: Props) {
   const { dark } = useAiyraTheme()
-  const source = dark ? LOGO_DARK : LOGO_LIGHT
+  const meta = ASSETS[variant]
+  const source = dark ? meta.dark : meta.light
+  const h = height ?? DEFAULT_HEIGHT[variant]
 
   return (
     <Image
       source={source}
       accessibilityLabel="Aiyra Care"
-      style={{ height, width: height * 3.85, maxWidth: '100%' }}
+      style={{ height: h, width: h * meta.aspect, maxWidth: '100%' }}
       resizeMode="contain"
     />
   )
 }
 
 /** Fallback textual — use só se assets ausentes em dev. */
-export function AppLogoFallback({ height = 40 }: Props) {
+export function AppLogoFallback({ height = 40 }: { height?: number }) {
   const { tokens } = useAiyraTheme()
   return (
     <View style={styles.row} accessibilityLabel="Aiyra Care">
