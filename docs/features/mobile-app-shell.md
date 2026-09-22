@@ -16,6 +16,8 @@ Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Su
 
 Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesmo BFF FastAPI em `:3010`.
 
+**Plano em quatro blocos (sequência fixa):** transacional → gráficos → Ava → estética — ver [`MOBILE_EVOLUTION_BLOCKS.md`](../MOBILE_EVOLUTION_BLOCKS.md). Status atual: fim do shell **leitura**; **Bloco 1 (transacional)** é o próximo.
+
 ## Entrega dual (80/20)
 
 Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma entrega, salvo exceções documentadas — ver [`MOBILE_WEB_DUAL_DELIVERY.md`](../MOBILE_WEB_DUAL_DELIVERY.md).
