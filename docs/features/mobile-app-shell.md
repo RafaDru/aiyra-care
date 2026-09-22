@@ -41,6 +41,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Carteira** | `PatientWalletTab` — CNS, convênios, link web | QR token, sync modal, copay detalhada |
 | **Convênios** | `PatientCoverageTab` — planos/carteirinha read-only + link web | Vincular plano, cartão virtual |
 | **Exames** | `PatientExamsTab` — **CRUD manual** + sub-aba **Marcadores** (`PatientExamMarkersPanel`, SVG) | Laudos PDF/OCR |
+| **Crescimento** | `PatientGrowthTab` — curvas **WHO** + gráficos `chart-series` (vitals + antropometria), read-only | Lançar medidas / monitoramento TX |
 | **Medicamentos** | `PatientMedicationsTab` — **CRUD** + em uso/encerrado | Administração, lembretes |
 | **Vacinas** | `PatientVaccinesTab` — **CRUD** + pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
 | **Alergias** | `PatientAllergiesTab` — **CRUD** + pull-to-refresh | — |
@@ -90,6 +91,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Bloco 1 — documentos** | [`mobile-documents-tx`](../../docs/testing/suites/mobile-documents-tx.md) · `npm run qa:run -- --suite mobile-documents-tx` |
 | **Bloco 1 — família TX** | [`mobile-family-tx`](../../docs/testing/suites/mobile-family-tx.md) · `npm run qa:run -- --suite mobile-family-tx` |
 | **Bloco 2 — marcadores (gráfico)** | [`mobile-exam-markers-chart`](../../docs/testing/suites/mobile-exam-markers-chart.md) · `npm run qa:run -- --suite mobile-exam-markers-chart` |
+| **Bloco 2 — WHO** | [`mobile-who-growth-chart`](../../docs/testing/suites/mobile-who-growth-chart.md) · `npm run qa:run -- --suite mobile-who-growth-chart` |
+| **Bloco 2 — medidas** | [`mobile-measurements-chart`](../../docs/testing/suites/mobile-measurements-chart.md) · `npm run qa:run -- --suite mobile-measurements-chart` |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |

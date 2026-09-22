@@ -467,6 +467,34 @@
       "businessActions": ["mobile.exam_markers_chart"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 8
+    },
+    {
+      "id": "mobile-who-growth-chart",
+      "domain": "mobile",
+      "title": "Mobile — curvas WHO (Bloco 2)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-who-growth-chart.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.who_growth_chart"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "mobile-measurements-chart",
+      "domain": "mobile",
+      "title": "Mobile — gráficos de medidas chart-series (Bloco 2)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-measurements-chart.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.measurements_chart"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 8
     }
   ],
   "lanes": {
@@ -512,7 +540,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud", "mobile-agenda-crud", "mobile-diagnoses-crud", "mobile-patient-tx", "mobile-documents-tx", "mobile-family-tx", "mobile-exam-markers-chart"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud", "mobile-agenda-crud", "mobile-diagnoses-crud", "mobile-patient-tx", "mobile-documents-tx", "mobile-family-tx", "mobile-exam-markers-chart", "mobile-who-growth-chart", "mobile-measurements-chart"]
     }
   }
 }

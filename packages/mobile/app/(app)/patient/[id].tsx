@@ -5,6 +5,7 @@ import { PatientAllergiesTab } from '@/components/clinical/PatientAllergiesTab'
 import { PatientAuthorizationsTab } from '@/components/clinical/PatientAuthorizationsTab'
 import { PatientDiagnosesTab } from '@/components/clinical/PatientDiagnosesTab'
 import { PatientExamsTab } from '@/components/clinical/PatientExamsTab'
+import { PatientGrowthTab } from '@/components/clinical/PatientGrowthTab'
 import { PatientMedicalRecordsTab } from '@/components/clinical/PatientMedicalRecordsTab'
 import { PatientMedicationsTab } from '@/components/clinical/PatientMedicationsTab'
 import { PatientVaccinesTab } from '@/components/clinical/PatientVaccinesTab'
@@ -241,6 +242,21 @@ export default function PatientDetailScreen() {
           onTabChange={setTab}
         />
         <PatientExamsTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'growth') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientGrowthTab patientId={patientId} />
       </View>
     )
   }

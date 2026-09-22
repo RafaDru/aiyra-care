@@ -44,6 +44,8 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Mobile** — vacinas CRUD | CRUD | `mobile-vaccines-crud` | 🟡 |
 | **Mobile** — exames CRUD (manual) | CRUD | `mobile-exams-crud` | 🟡 |
 | **Mobile** — marcadores de exame (gráfico) | Leitura | `mobile-exam-markers-chart` | 🟡 |
+| **Mobile** — curvas WHO | Leitura | `mobile-who-growth-chart` | 🟡 |
+| **Mobile** — gráficos de medidas | Leitura | `mobile-measurements-chart` | 🟡 |
 | **Mobile** — agenda (eventos) | CRUD | `mobile-agenda-crud` | 🟡 |
 | **Mobile** — diagnósticos CRUD | CRUD | `mobile-diagnoses-crud` | 🟡 |
 | **Mobile** — paciente / onboarding TX | CRUD | `mobile-patient-tx` | 🟡 |

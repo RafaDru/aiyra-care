@@ -210,6 +210,30 @@
     "error": "Error",
     "info": "Notice"
   },
+  "measurement": {
+    "whoTitle": "WHO growth curves (age)",
+    "whoP3": "P3",
+    "whoP50": "P50",
+    "whoP97": "P97",
+    "whoLastPercentile": "Latest measurement: ~{{value}} percentile",
+    "noChartData": "No measurements to chart in this period",
+    "vitalsSection": "Vital signs",
+    "tabAnthropometry": "Anthropometry",
+    "component": {
+      "systolic": "Systolic",
+      "diastolic": "Diastolic"
+    },
+    "type": {
+      "weight": "Weight",
+      "height": "Height",
+      "head_circumference": "Head circumference",
+      "temperature": "Temperature",
+      "heart_rate": "Heart rate (bpm)",
+      "spo2": "SpO₂",
+      "blood_pressure": "Blood pressure",
+      "glucose": "Glucose"
+    }
+  },
   "clinical": {
     "listTitle": "List",
     "source": "Source: {{source}}",
@@ -257,6 +281,14 @@
       "statusCritical": "Critical",
       "statusAltered": "Altered",
       "statusNormal": "Normal"
+    },
+    "growth": {
+      "title": "Growth and measurements",
+      "subtitle": "Read-only charts — WHO curves and measurement trends (same API as web).",
+      "webHint": "Log measurements, monitoring, and export: use your browser.",
+      "openWeb": "Open Growth in browser",
+      "whoProfileHint": "Add birth date and sex under Basic info to show WHO curves.",
+      "loadError": "Could not load growth charts"
     },
     "medications": {
       "title": "Medications",

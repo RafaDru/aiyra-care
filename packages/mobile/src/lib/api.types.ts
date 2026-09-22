@@ -287,6 +287,48 @@ export interface OwnedPatient {
   name: string
 }
 
+export interface MeasurementChartPoint {
+  id?: string
+  observedAt: string
+  value: number | null
+  valueSecondary: number | null
+  notes: string | null
+  healthThreadId: string | null
+  source?: string
+  sourceRef?: string | null
+}
+
+export interface MeasurementChartSeries {
+  typeCode: string
+  labelKey: string
+  category: string
+  unit: string | null
+  valueKind: string
+  chartConfig: {
+    enabled?: boolean
+    chartKind?: 'line' | 'area' | 'dual-line' | 'dual-axis'
+    color?: string
+    components?: { code: string; color?: string }[]
+  }
+  normalRange: { min?: number; max?: number; criticalLow?: number; criticalHigh?: number } | null
+  points: MeasurementChartPoint[]
+}
+
+export interface WhoGrowthPayload {
+  typeCode: 'weight' | 'height' | 'head_circumference'
+  unit: string
+  gender: 'male' | 'female'
+  percentilesAvailable: true
+  patientPoints: Array<{
+    ageMonths: number
+    value: number
+    observedAt: string
+    percentile: number | null
+    observationId?: string
+  }>
+  referenceCurve: Array<{ ageMonths: number; p3: number; p50: number; p97: number }>
+}
+
 export interface MarkerTrendPoint {
   collectedAt: string
   numericValue: number | null
