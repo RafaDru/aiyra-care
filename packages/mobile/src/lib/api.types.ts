@@ -290,6 +290,38 @@ export interface Medication {
   createdAt: string
 }
 
+export interface Allergy {
+  id: string
+  patientId: string
+  allergen: string
+  reaction: string | null
+  severity: string | null
+  diagnosedDate: string | null
+  notes: string | null
+  createdAt: string
+}
+
+export interface MedicalRecord {
+  id: string
+  patientId: string
+  recordDate: string
+  recordType: string
+  description: string | null
+  doctorName: string | null
+  doctorCrm: string | null
+  specialty: string | null
+  clinicName: string | null
+  notes: string | null
+  source: string
+  invoiceNumber: string | null
+  chargedAmount: number | null
+  copartCompanyAmount: number | null
+  copartBaseAmount: number | null
+  providerExternalId: string | null
+  procedureExternalId: string | null
+  createdAt: string
+}
+
 export interface Vaccine {
   id: string
   patientId: string

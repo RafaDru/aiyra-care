@@ -42,3 +42,5 @@ Cada exceção precisa de linha na tabela **Web-only** em `docs/features/mobile-
 ## Roadmap
 
 Épico `plat-mobile` em `docs/roadmap.json` — status `in_progress`; itens de feature devem citar paridade mobile quando tier ≥ 1.
+
+**Sequência de produto (app):** [`MOBILE_EVOLUTION_BLOCKS.md`](./MOBILE_EVOLUTION_BLOCKS.md) — Bloco 1 transacional antes de gráficos, Ava avançada ou redesign.

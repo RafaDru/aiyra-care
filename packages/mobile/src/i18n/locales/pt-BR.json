@@ -163,6 +163,31 @@
       "nextDose": "Próxima dose: {{date}}",
       "batch": "Lote: {{batch}}",
       "appliedBy": "Aplicador: {{name}}"
+    },
+    "allergies": {
+      "title": "Alergias",
+      "subtitle": "Resumo somente leitura — cadastro e edição no app web.",
+      "webHint": "Registrar ou editar alergias: use o navegador.",
+      "openWeb": "Abrir Alergias no navegador",
+      "empty": "Nenhuma alergia registrada para este perfil.",
+      "listCount_one": "{{count}} alergia",
+      "listCount_other": "{{count}} alergias",
+      "loadError": "Erro ao carregar alergias",
+      "reaction": "Reação: {{text}}",
+      "diagnosed": "Diagnóstico: {{date}}",
+      "severity_mild": "Leve",
+      "severity_moderate": "Moderada",
+      "severity_severe": "Grave"
+    },
+    "records": {
+      "title": "Atendimentos",
+      "subtitle": "Resumo somente leitura — sequência clínica e vínculos no web.",
+      "webHint": "Cadastrar atendimento ou ver encadeamento: use o navegador.",
+      "openWeb": "Abrir Atendimentos no navegador",
+      "empty": "Nenhum atendimento registrado para este perfil.",
+      "listCount_one": "{{count}} atendimento",
+      "listCount_other": "{{count}} atendimentos",
+      "loadError": "Erro ao carregar atendimentos"
     }
   }
 }

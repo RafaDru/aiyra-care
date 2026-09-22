@@ -886,7 +886,7 @@
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
           "status": "in_progress",
-          "detail": "Entrega dual 80/20 (docs/MOBILE_WEB_DUAL_DELIVERY.md). M2: welcome + convênios read-only. M5 Ava. Plano: Project store docs/mobile-parity-plan.md."
+          "detail": "Entrega dual 80/20. Shell leitura (M2–M6) em curso. Sequência: docs/MOBILE_EVOLUTION_BLOCKS.md — Bloco 1 transacional → gráficos → Ava → UX."
         },
         {
           "id": "plat-microservices",
