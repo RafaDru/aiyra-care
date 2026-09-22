@@ -11,6 +11,13 @@ $mobileDir = Join-Path $root 'packages\mobile'
 $envFile = Join-Path $mobileDir '.env'
 $urlFile = Join-Path $mobileDir '.api-tunnel-url'
 $tunnelLog = Join-Path $mobileDir '.api-tunnel.log'
+$expoUrlFile = Join-Path $mobileDir '.expo-url.txt'
+
+# Metro em CI desliga watch/reload e quebra QR no Expo Go — nunca herdar CI do agente/terminal.
+function Clear-ExpoDevCiEnv {
+  Remove-Item Env:CI -ErrorAction SilentlyContinue
+}
+Clear-ExpoDevCiEnv
 
 function Get-LanIPv4 {
   $addrs = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
@@ -107,14 +114,21 @@ try {
       exit 1
     }
     $env:EXPO_PUBLIC_API_URL = "http://${lan}:3010"
+    $env:REACT_NATIVE_PACKAGER_HOSTNAME = $lan
+    $expoLanUrl = "exp://${lan}:8081"
+    Set-Content -Path $expoUrlFile -Value $expoLanUrl -Encoding UTF8
     Write-Host "EXPO_PUBLIC_API_URL = $($env:EXPO_PUBLIC_API_URL)" -ForegroundColor Green
+    Write-Host "REACT_NATIVE_PACKAGER_HOSTNAME = $lan" -ForegroundColor Green
+    Write-Host "Expo Go (manual): $expoLanUrl  (tambem em packages/mobile/.expo-url.txt)" -ForegroundColor Green
     Write-Host "Metro: expo start --lan --clear (mesmo Wi-Fi que o celular)" -ForegroundColor Green
   }
 
   Write-Host ""
   Write-Host "Se o app parecer igual ao de antes: force fechar o Expo Go e escaneie de novo (--clear)." -ForegroundColor Yellow
-  Write-Host "Branch com UX recente: cursor/mobile-auth-ux-i18n-a5c1 (git pull + este script)." -ForegroundColor Yellow
+  Write-Host "Branch atual: $branch (git pull antes de testar)." -ForegroundColor Yellow
   Write-Host ""
+
+  Clear-ExpoDevCiEnv
 
   Push-Location $mobileDir
   try {

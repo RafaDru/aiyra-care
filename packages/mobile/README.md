@@ -17,7 +17,7 @@ Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:30
 ## Expo Go (dispositivo)
 
 1. Instale **Expo Go** (iOS/Android) — versão **SDK 57** (padrão nas lojas em 2026).
-2. **Mesmo Wi‑Fi:** `npm run mobile:lan` — define `EXPO_PUBLIC_API_URL` com IP LAN + `expo start --lan --clear`.
+2. **Mesmo Wi‑Fi:** `npm run mobile:lan` — define `EXPO_PUBLIC_API_URL` + `REACT_NATIVE_PACKAGER_HOSTNAME` (IP LAN), grava `exp://<IP>:8081` em `.expo-url.txt`, `expo start --lan --clear` (sem `CI=1`).
 3. **Na rua (4G):** API no PC + `npm run mobile:street` — túnel **localtunnel** na `:3010` + Metro **Expo tunnel**; escaneie o QR. O notebook precisa ficar ligado com internet.
 4. Dev simples (só emulador/web): `npm run mobile:start`.
 5. Smoke manual: suite [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile`
