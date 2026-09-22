@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { bindClientErrorToast } from '@/lib/client-error-notify-bridge'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export type ToastKind = 'success' | 'error' | 'info'
@@ -87,6 +88,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }),
     [show],
   )
+
+  useEffect(() => {
+    bindClientErrorToast(value)
+    return () => bindClientErrorToast(null)
+  }, [value])
 
   const accent =
     toast?.kind === 'error'

@@ -7,6 +7,8 @@ import { AppLockProvider } from '@/contexts/AppLockContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import i18n, { initI18n } from '@/i18n'
+import { AppErrorBoundary } from '@/components/errors/AppErrorBoundary'
+import { MobileTelemetryRoute } from '@/components/telemetry/MobileTelemetryRoute'
 import { AppearancePreferenceProvider } from '@/theme/AppearancePreferenceContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
@@ -34,7 +36,10 @@ function AppProviders() {
       <AuthProvider>
         <AppLockProvider>
           <ToastProvider>
-            <RootStack />
+            <AppErrorBoundary feature="mobile_shell">
+              <MobileTelemetryRoute />
+              <RootStack />
+            </AppErrorBoundary>
           </ToastProvider>
         </AppLockProvider>
       </AuthProvider>

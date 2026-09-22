@@ -1,8 +1,9 @@
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
-import { Link, router } from 'expo-router'
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { router } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { AuthPreferenceRow } from '@/components/auth/AuthPreferenceRow'
 import { AppLogo } from '@/components/brand/AppLogo'
+import { AppErrorBoundary } from '@/components/errors/AppErrorBoundary'
 import { useAppLock } from '@/contexts/AppLockContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
@@ -12,7 +13,7 @@ import type { AppearancePreference } from '@/theme/AppearancePreferenceContext'
 import { useAppearancePreference } from '@/theme/AppearancePreferenceContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
-export default function SettingsScreen() {
+function SettingsScreenContent() {
   const { t, i18n } = useTranslation()
   const toast = useToast()
   const { account, signOut, rememberMe, setRememberMe } = useAuth()
@@ -35,7 +36,11 @@ export default function SettingsScreen() {
   const currentLang: AppLanguage = i18n.language === 'en' ? 'en' : 'pt-BR'
 
   return (
-    <View style={[styles.screen, { backgroundColor: tokens.colorBgLayout }]}>
+    <ScrollView
+      style={[styles.screen, { backgroundColor: tokens.colorBgLayout }]}
+      contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.logoRow}>
         <AppLogo variant="horizontal" height={32} />
       </View>
@@ -121,12 +126,13 @@ export default function SettingsScreen() {
         ))}
       </View>
 
-      <Link href="/(app)/settings/family" asChild>
-        <Pressable style={[styles.row, { borderColor: tokens.colorBorder, backgroundColor: tokens.colorBgContainer }]}>
-          <Text style={{ color: tokens.colorTextBase, fontWeight: '600' }}>{t('settings.family')}</Text>
-          <Text style={{ color: tokens.colorTextSecondary }}>›</Text>
-        </Pressable>
-      </Link>
+      <Pressable
+        onPress={() => router.push('/(app)/settings/family')}
+        style={[styles.row, { borderColor: tokens.colorBorder, backgroundColor: tokens.colorBgContainer }]}
+      >
+        <Text style={{ color: tokens.colorTextBase, fontWeight: '600' }}>{t('settings.family')}</Text>
+        <Text style={{ color: tokens.colorTextSecondary }}>›</Text>
+      </Pressable>
 
       {webBase ? (
         <Pressable
@@ -147,12 +153,21 @@ export default function SettingsScreen() {
       >
         <Text style={{ color: tokens.colorError, fontWeight: '600' }}>{t('settings.signOut')}</Text>
       </Pressable>
-    </View>
+    </ScrollView>
+  )
+}
+
+export default function SettingsScreen() {
+  return (
+    <AppErrorBoundary feature="settings" route="/(app)/(tabs)/settings">
+      <SettingsScreenContent />
+    </AppErrorBoundary>
   )
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 16 },
+  screen: { flex: 1 },
+  scrollContent: { padding: 16, paddingBottom: 32 },
   logoRow: { alignItems: 'center', marginBottom: 12 },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 4 },
   sectionLabel: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 8 },
