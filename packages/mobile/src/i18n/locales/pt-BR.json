@@ -343,5 +343,51 @@
       "loadError": "Erro ao carregar diagnósticos",
       "chronic": "Crônico"
     }
+  },
+  "overview": {
+    "agenda": {
+      "title": "Agenda",
+      "subtitle": "Próximos compromissos — calendário completo e edição no app web.",
+      "subtitleTx": "Crie e edite consultas, lembretes e tarefas neste aparelho. Calendário, ICS e Google/Outlook no web.",
+      "listTitle": "Eventos",
+      "add": "Novo evento",
+      "addTitle": "Novo evento",
+      "editTitle": "Editar evento",
+      "tapToEdit": "Toque para editar",
+      "fieldTitle": "Título",
+      "fieldKind": "Tipo",
+      "fieldWhen": "Data e hora",
+      "fieldDescription": "Descrição",
+      "fieldStatus": "Situação",
+      "titleRequired": "Informe o título.",
+      "titleTooLong": "Título deve ter no máximo 500 caracteres.",
+      "invalidWhen": "Data ou hora inválida (DD/MM/AAAA e HH:MM).",
+      "created": "Evento criado.",
+      "updated": "Evento atualizado.",
+      "deleted": "Evento removido.",
+      "markedDone": "Marcado como concluído.",
+      "markDone": "Concluir",
+      "saveError": "Não foi possível salvar o evento.",
+      "deleteTitle": "Excluir evento?",
+      "deleteMessage": "Esta ação não pode ser desfeita.",
+      "deleteConfirm": "Excluir",
+      "cancel": "Cancelar",
+      "webHintTx": "Calendário mensal, importar/exportar ICS e sincronizar Google ou Outlook: use o navegador.",
+      "openWeb": "Abrir agenda no navegador",
+      "empty": "Nenhum evento na agenda. Toque em Novo evento ou use o web.",
+      "listCount_one": "{{count}} evento",
+      "listCount_other": "{{count}} eventos",
+      "loadError": "Erro ao carregar agenda",
+      "kind": {
+        "appointment": "Consulta",
+        "reminder": "Lembrete",
+        "task": "Tarefa"
+      },
+      "status": {
+        "planned": "Planejado",
+        "done": "Concluído",
+        "cancelled": "Cancelado"
+      }
+    }
   }
 }

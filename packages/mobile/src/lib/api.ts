@@ -361,6 +361,32 @@ export const api = {
   scheduledEvents: {
     list: (patientId: string) =>
       request<ScheduledEvent[]>(`/scheduled-events?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      title: string
+      scheduledAt: string
+      description?: string
+      endAt?: string
+      kind?: ScheduledEvent['kind']
+      status?: ScheduledEvent['status']
+    }) => request<ScheduledEvent>('/scheduled-events', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        title: string
+        description: string
+        scheduledAt: string
+        endAt: string | null
+        kind: ScheduledEvent['kind']
+        status: ScheduledEvent['status']
+      }>,
+    ) =>
+      request<ScheduledEvent>(`/scheduled-events/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<void>(`/scheduled-events/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   ava: {
     listConversations: (patientId?: string) => {

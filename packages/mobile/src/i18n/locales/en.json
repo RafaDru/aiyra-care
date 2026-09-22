@@ -343,5 +343,51 @@
       "loadError": "Could not load diagnoses",
       "chronic": "Chronic"
     }
+  },
+  "overview": {
+    "agenda": {
+      "title": "Agenda",
+      "subtitle": "Upcoming items — full calendar and editing on the web app.",
+      "subtitleTx": "Create and edit appointments, reminders, and tasks on this device. Calendar, ICS, and Google/Outlook on the web.",
+      "listTitle": "Events",
+      "add": "New event",
+      "addTitle": "New event",
+      "editTitle": "Edit event",
+      "tapToEdit": "Tap to edit",
+      "fieldTitle": "Title",
+      "fieldKind": "Type",
+      "fieldWhen": "Date and time",
+      "fieldDescription": "Description",
+      "fieldStatus": "Status",
+      "titleRequired": "Enter a title.",
+      "titleTooLong": "Title must be at most 500 characters.",
+      "invalidWhen": "Invalid date or time (DD/MM/YYYY and HH:MM).",
+      "created": "Event created.",
+      "updated": "Event updated.",
+      "deleted": "Event removed.",
+      "markedDone": "Marked as done.",
+      "markDone": "Mark done",
+      "saveError": "Could not save event.",
+      "deleteTitle": "Delete event?",
+      "deleteMessage": "This cannot be undone.",
+      "deleteConfirm": "Delete",
+      "cancel": "Cancel",
+      "webHintTx": "Month calendar, ICS import/export, and Google or Outlook sync: use your browser.",
+      "openWeb": "Open agenda in browser",
+      "empty": "No events yet. Tap New event or use the web app.",
+      "listCount_one": "{{count}} event",
+      "listCount_other": "{{count}} events",
+      "loadError": "Could not load agenda",
+      "kind": {
+        "appointment": "Appointment",
+        "reminder": "Reminder",
+        "task": "Task"
+      },
+      "status": {
+        "planned": "Planned",
+        "done": "Done",
+        "cancelled": "Cancelled"
+      }
+    }
   }
 }
