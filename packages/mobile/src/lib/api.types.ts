@@ -6,11 +6,43 @@ export interface Patient {
   bloodType: string | null
   cpf?: string | null
   cns?: string | null
+  weightKg?: number | null
+  heightCm?: number | null
   ageCategory: 'children' | 'adolescents' | 'adults'
   isSelf?: boolean
   membershipRole?: 'self' | 'guardian' | string
   createdAt: string
   updatedAt: string
+}
+
+export type PatientDocumentType =
+  | 'prescription'
+  | 'exam'
+  | 'report'
+  | 'vaccine_card'
+  | 'other'
+  | 'certidao_nascimento'
+  | 'rg'
+  | 'cpf_card'
+  | 'cnh'
+
+export interface PatientDocument {
+  id: string
+  patientId: string
+  documentType: PatientDocumentType
+  originalFilename: string
+  fileSizeBytes: number | null
+  mimeType: string | null
+  createdAt: string
+}
+
+export interface PatientAccessGrant {
+  id: string
+  accountId: string
+  accessLevel: string
+  membershipRole: string
+  email?: string | null
+  displayName?: string | null
 }
 
 export interface InsurancePlan {

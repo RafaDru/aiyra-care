@@ -24,6 +24,8 @@ import type {
   Patient,
   PlanMembershipWithPlan,
   ProfileShare,
+  PatientDocument,
+  PatientAccessGrant,
 } from './api.types'
 import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from './api.types'
 import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream'
@@ -89,6 +91,60 @@ export const api = {
     get: (id: string) => request<Patient>(`/patients/${id}`),
     create: (data: CreatePatientInput) =>
       request<Patient>('/patients', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        name: string
+        birthDate: string
+        gender: 'male' | 'female'
+        bloodType: string
+        weightKg: number
+        heightCm: number
+        cpf: string
+        cns: string
+      }>,
+    ) =>
+      request<Patient>(`/patients/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/patients/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    createClinicalExportShare: (
+      id: string,
+      body: { mode?: 'summary' | 'full'; ttlHours?: number } = {},
+    ) =>
+      request<{ token: string; expiresAt: string; shareUrl: string; referralCode: string | null }>(
+        `/patients/${encodeURIComponent(id)}/clinical-export/shares`,
+        { method: 'POST', body: JSON.stringify(body) },
+      ),
+  },
+  documents: {
+    list: (patientId: string) =>
+      request<PatientDocument[]>(`/documents?patientId=${encodeURIComponent(patientId)}`),
+    delete: (id: string) => request<void>(`/documents/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    upload: async (
+      patientId: string,
+      documentType: PatientDocument['documentType'],
+      file: { uri: string; name: string; mimeType?: string | null },
+    ) => {
+      const form = new FormData()
+      form.append('patientId', patientId)
+      form.append('documentType', documentType)
+      form.append('file', {
+        uri: file.uri,
+        name: file.name,
+        type: file.mimeType ?? 'application/octet-stream',
+      } as unknown as Blob)
+      return request<PatientDocument>('/documents/upload', { method: 'POST', body: form })
+    },
+  },
+  patientAccess: {
+    listGrants: (patientId: string) =>
+      request<PatientAccessGrant[]>(`/patients/${encodeURIComponent(patientId)}/access-grants`),
+    revokeGrant: (patientId: string, grantId: string) =>
+      request<void>(`/patients/${encodeURIComponent(patientId)}/access-grants/${encodeURIComponent(grantId)}`, {
+        method: 'DELETE',
+      }),
   },
   auth: {
     sync: () => request<AuthSyncResponse>('/auth/sync', { method: 'POST' }),

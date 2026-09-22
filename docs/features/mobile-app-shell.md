@@ -86,6 +86,9 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Bloco 1 — exames CRUD** | [`mobile-exams-crud`](../../docs/testing/suites/mobile-exams-crud.md) · `npm run qa:run -- --suite mobile-exams-crud` |
 | **Bloco 1 — agenda transacional** | [`mobile-agenda-crud`](../../docs/testing/suites/mobile-agenda-crud.md) · `npm run qa:run -- --suite mobile-agenda-crud` |
 | **Bloco 1 — diagnósticos CRUD** | [`mobile-diagnoses-crud`](../../docs/testing/suites/mobile-diagnoses-crud.md) · `npm run qa:run -- --suite mobile-diagnoses-crud` |
+| **Bloco 1 — paciente / onboarding TX** | [`mobile-patient-tx`](../../docs/testing/suites/mobile-patient-tx.md) · `npm run qa:run -- --suite mobile-patient-tx` |
+| **Bloco 1 — documentos** | [`mobile-documents-tx`](../../docs/testing/suites/mobile-documents-tx.md) · `npm run qa:run -- --suite mobile-documents-tx` |
+| **Bloco 1 — família TX** | [`mobile-family-tx`](../../docs/testing/suites/mobile-family-tx.md) · `npm run qa:run -- --suite mobile-family-tx` |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |
@@ -101,7 +104,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 ## Pendente
 
 - Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail)
-- Onboarding mobile — passos 1–2 (titular + dependentes) em `/(app)/onboarding`, paridade com web
+- Onboarding mobile — titular + dependentes; **CRUD perfil** em Dados básicos + Início (Adicionar perfil)
 - **Agenda** — CRUD eventos (consulta/lembrete/tarefa) em `PatientAgendaTab`; calendário/ICS/sync no web
 - Demais tabs clínicas (autorizações, diagnósticos, crescimento, …) e Convênios UI completa
 - Microsoft OAuth no mobile

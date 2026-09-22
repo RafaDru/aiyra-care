@@ -45,6 +45,9 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Mobile** — exames CRUD (manual) | CRUD | `mobile-exams-crud` | 🟡 |
 | **Mobile** — agenda (eventos) | CRUD | `mobile-agenda-crud` | 🟡 |
 | **Mobile** — diagnósticos CRUD | CRUD | `mobile-diagnoses-crud` | 🟡 |
+| **Mobile** — paciente / onboarding TX | CRUD | `mobile-patient-tx` | 🟡 |
+| **Mobile** — documentos upload | CU | `mobile-documents-tx` | 🟡 |
+| **Mobile** — família (hub TX) | CRUD | `mobile-family-tx` | 🟡 |
 | Onboarding + perfil titular (`self`) | C | `onboarding-flow` | 🟡 |
 | Compliance gate (aceite termos) | C | `onboarding-flow` | 🟡 |
 | Dashboard listar pacientes | R | `core-patient-crud` | 🟡 |

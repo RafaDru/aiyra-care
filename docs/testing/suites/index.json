@@ -411,6 +411,48 @@
       "businessActions": ["mobile.diagnoses_crud"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-patient-tx",
+      "domain": "mobile",
+      "title": "Mobile — paciente / onboarding transacional",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-patient-tx.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.patient_tx"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "mobile-documents-tx",
+      "domain": "mobile",
+      "title": "Mobile — documentos upload/export",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-documents-tx.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.documents_tx"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-family-tx",
+      "domain": "mobile",
+      "title": "Mobile — família transacional",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-family-tx.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.family_tx"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
     }
   ],
   "lanes": {
@@ -456,7 +498,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud", "mobile-agenda-crud", "mobile-diagnoses-crud"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud", "mobile-agenda-crud", "mobile-diagnoses-crud", "mobile-patient-tx", "mobile-documents-tx", "mobile-family-tx"]
     }
   }
 }

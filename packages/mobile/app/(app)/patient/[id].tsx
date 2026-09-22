@@ -9,6 +9,8 @@ import { PatientMedicalRecordsTab } from '@/components/clinical/PatientMedicalRe
 import { PatientMedicationsTab } from '@/components/clinical/PatientMedicationsTab'
 import { PatientVaccinesTab } from '@/components/clinical/PatientVaccinesTab'
 import { PatientAgendaTab } from '@/components/overview/PatientAgendaTab'
+import { PatientDocumentsPanel } from '@/components/documents/PatientDocumentsPanel'
+import { PatientBasicTab } from '@/components/patient/PatientBasicTab'
 import { PatientIntegrationsPanel } from '@/components/integrations/PatientIntegrationsPanel'
 import { PatientCoverageTab } from '@/components/wallet/PatientCoverageTab'
 import { PatientWalletTab } from '@/components/wallet/PatientWalletTab'
@@ -134,6 +136,51 @@ export default function PatientDetailScreen() {
     return (
       <View style={{ flex: 1, padding: 16, backgroundColor: tokens.colorBgLayout }}>
         <Text style={{ color: tokens.colorTextSecondary }}>Perfil não encontrado.</Text>
+      </View>
+    )
+  }
+
+  if (tab === 'basic') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientBasicTab patientId={patientId} onPatientUpdated={setPatientName} />
+      </View>
+    )
+  }
+
+  if (tab === 'personal-documents') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientDocumentsPanel patientId={patientId} mode="personal" />
+      </View>
+    )
+  }
+
+  if (tab === 'documents') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientDocumentsPanel patientId={patientId} mode="clinical" />
       </View>
     )
   }
