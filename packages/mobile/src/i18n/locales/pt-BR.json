@@ -210,13 +210,39 @@
     "error": "Erro",
     "info": "Aviso"
   },
+  "measurement": {
+    "whoTitle": "Curvas WHO (idade)",
+    "whoP3": "P3",
+    "whoP50": "P50",
+    "whoP97": "P97",
+    "whoLastPercentile": "Última medição: percentil ~{{value}}",
+    "noChartData": "Sem medições para gráfico neste período",
+    "vitalsSection": "Sinais vitais",
+    "tabAnthropometry": "Antropometria",
+    "component": {
+      "systolic": "Sistólica",
+      "diastolic": "Diastólica"
+    },
+    "type": {
+      "weight": "Peso",
+      "height": "Altura",
+      "head_circumference": "Perímetro cefálico",
+      "temperature": "Temperatura",
+      "heart_rate": "Batimentos (bpm)",
+      "spo2": "Saturação (SpO₂)",
+      "blood_pressure": "Pressão arterial",
+      "glucose": "Glicemia"
+    }
+  },
   "clinical": {
     "listTitle": "Lista",
     "source": "Origem: {{source}}",
     "exams": {
       "title": "Exames",
       "subtitle": "Resumo somente leitura — laudos, marcadores e upload ficam no app web.",
-      "subtitleTx": "Cadastre e edite exames manuais neste aparelho. Laudo PDF, OCR e marcadores no web.",
+      "subtitleTx": "Cadastre exames manuais e veja tendências de marcadores. Laudo PDF e OCR no web.",
+      "subviewList": "Lista",
+      "subviewMarkers": "Marcadores",
       "add": "Adicionar exame",
       "addTitle": "Novo exame",
       "editTitle": "Editar exame",
@@ -237,7 +263,7 @@
       "deleteMessage": "Esta ação não pode ser desfeita. Laudos anexados no web podem ficar órfãos.",
       "deleteConfirm": "Excluir",
       "cancel": "Cancelar",
-      "webHintTx": "Upload de laudo PDF, OCR e dashboard de marcadores: use o navegador.",
+      "webHintTx": "Upload de laudo PDF e OCR: use o navegador.",
       "webHint": "Adicionar exame, PDF e dashboard de marcadores: use o navegador.",
       "openWeb": "Abrir Exames no navegador",
       "empty": "Nenhum exame registrado para este perfil. Cadastre manualmente ou sincronize integrações.",
@@ -245,6 +271,24 @@
       "listCount_other": "{{count}} exames",
       "loadError": "Erro ao carregar exames",
       "hasResultFile": "Laudo anexado (ver no web)"
+    },
+    "examMarkers": {
+      "subtitle": "Tendências somente leitura — mesma API do dashboard web.",
+      "searchPlaceholder": "Buscar marcador…",
+      "emptyTitle": "Marcadores",
+      "empty": "Nenhum marcador numérico importado ainda. Sincronize exames ou cadastre no web.",
+      "loadError": "Erro ao carregar marcadores",
+      "statusCritical": "Crítico",
+      "statusAltered": "Alterado",
+      "statusNormal": "Normal"
+    },
+    "growth": {
+      "title": "Crescimento e medidas",
+      "subtitle": "Gráficos somente leitura — curvas WHO e evolução de medidas (mesma API do web).",
+      "webHint": "Registrar medidas, monitoramento e exportação: use o navegador.",
+      "openWeb": "Abrir Crescimento no navegador",
+      "whoProfileHint": "Informe data de nascimento e sexo em Dados básicos para exibir as curvas WHO.",
+      "loadError": "Erro ao carregar gráficos de crescimento"
     },
     "medications": {
       "title": "Medicamentos",

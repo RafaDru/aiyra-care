@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { PatientExamMarkersPanel } from '@/components/charts/PatientExamMarkersPanel'
 import {
   Alert,
   Linking,
@@ -26,6 +27,47 @@ import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 type Props = { patientId: string }
 
+type ExamsSubview = 'list' | 'markers'
+
+function SubviewToggle({
+  value,
+  onChange,
+  tokens,
+  labels,
+}: {
+  value: ExamsSubview
+  onChange: (v: ExamsSubview) => void
+  tokens: import('@/theme/useAiyraTheme').AiyraThemeTokens
+  labels: { list: string; markers: string }
+}) {
+  const item = (key: ExamsSubview, label: string): ReactNode => {
+    const on = value === key
+    return (
+      <Pressable
+        key={key}
+        onPress={() => onChange(key)}
+        style={[
+          styles.toggleBtn,
+          {
+            backgroundColor: on ? tokens.colorPrimary : tokens.colorBgContainer,
+            borderColor: tokens.colorBorder,
+          },
+        ]}
+      >
+        <Text style={{ color: on ? '#fff' : tokens.colorTextBase, fontWeight: '600', fontSize: 14 }}>
+          {label}
+        </Text>
+      </Pressable>
+    )
+  }
+  return (
+    <View style={styles.toggleRow}>
+      {item('list', labels.list)}
+      {item('markers', labels.markers)}
+    </View>
+  )
+}
+
 function sortExamsNewestFirst(rows: Exam[]): Exam[] {
   return [...rows].sort((a, b) => {
     const ta = new Date(a.examDate).getTime()
@@ -38,6 +80,7 @@ export function PatientExamsTab({ patientId }: Props) {
   const { t, i18n } = useTranslation()
   const toast = useToast()
   const { tokens } = useAiyraTheme()
+  const [subview, setSubview] = useState<ExamsSubview>('list')
   const [exams, setExams] = useState<Exam[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -167,6 +210,26 @@ export function PatientExamsTab({ patientId }: Props) {
     ])
   }
 
+  if (subview === 'markers') {
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={styles.subviewHeader}>
+          <Text style={[styles.title, { color: tokens.colorTextBase }]}>{t('clinical.exams.title')}</Text>
+          <SubviewToggle
+            value={subview}
+            onChange={setSubview}
+            tokens={tokens}
+            labels={{
+              list: t('clinical.exams.subviewList'),
+              markers: t('clinical.exams.subviewMarkers'),
+            }}
+          />
+        </View>
+        <PatientExamMarkersPanel patientId={patientId} />
+      </View>
+    )
+  }
+
   if (loading && exams.length === 0 && !error) return <StatePanel tokens={tokens} loading />
   if (error && exams.length === 0) return <StatePanel tokens={tokens} error={error} onRetry={() => void load()} />
 
@@ -188,6 +251,15 @@ export function PatientExamsTab({ patientId }: Props) {
         <View>
           <Text style={[styles.title, { color: tokens.colorTextBase }]}>{t('clinical.exams.title')}</Text>
           <Text style={{ color: tokens.colorTextSecondary, fontSize: 14 }}>{t('clinical.exams.subtitleTx')}</Text>
+          <SubviewToggle
+            value={subview}
+            onChange={setSubview}
+            tokens={tokens}
+            labels={{
+              list: t('clinical.exams.subviewList'),
+              markers: t('clinical.exams.subviewMarkers'),
+            }}
+          />
         </View>
 
         <Pressable onPress={openCreate} style={[styles.primaryBtn, { backgroundColor: tokens.colorPrimary }]}>
@@ -300,6 +372,9 @@ export function PatientExamsTab({ patientId }: Props) {
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16, paddingBottom: 48 },
+  subviewHeader: { padding: 16, paddingBottom: 0, gap: 8 },
+  toggleRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  toggleBtn: { flex: 1, borderWidth: 1, borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
   title: { fontSize: 18, fontWeight: '700', marginBottom: 4 },
   primaryBtn: { borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
   primaryBtnLabel: { color: '#fff', fontWeight: '700', fontSize: 16 },

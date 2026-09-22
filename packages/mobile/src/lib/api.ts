@@ -14,6 +14,9 @@ import type {
   Authorization,
   Diagnosis,
   Exam,
+  MarkerTrendGroup,
+  MeasurementChartSeries,
+  WhoGrowthPayload,
   MedicalRecord,
   Medication,
   Vaccine,
@@ -271,6 +274,32 @@ export const api = {
         body: JSON.stringify(data),
       }),
     delete: (id: string) => request<void>(`/exams/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  },
+  examMarkers: {
+    getTrends: (patientId: string) =>
+      request<MarkerTrendGroup[]>(
+        `/patients/${encodeURIComponent(patientId)}/exam-markers/trends`,
+      ),
+  },
+  measurements: {
+    chartSeries: (params: {
+      patientId: string
+      healthThreadId?: string
+      categories?: string
+      from?: string
+      to?: string
+    }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId })
+      if (params.healthThreadId) qs.set('healthThreadId', params.healthThreadId)
+      if (params.categories) qs.set('categories', params.categories)
+      if (params.from) qs.set('from', params.from)
+      if (params.to) qs.set('to', params.to)
+      return request<{ series: MeasurementChartSeries[] }>(`/measurements/chart-series?${qs}`)
+    },
+    whoGrowth: (params: { patientId: string; typeCode: 'weight' | 'height' | 'head_circumference' }) => {
+      const qs = new URLSearchParams({ patientId: params.patientId, typeCode: params.typeCode })
+      return request<WhoGrowthPayload>(`/measurements/who-growth?${qs}`)
+    },
   },
   medications: {
     list: (patientId: string) =>

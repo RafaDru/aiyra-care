@@ -210,13 +210,39 @@
     "error": "Error",
     "info": "Notice"
   },
+  "measurement": {
+    "whoTitle": "WHO growth curves (age)",
+    "whoP3": "P3",
+    "whoP50": "P50",
+    "whoP97": "P97",
+    "whoLastPercentile": "Latest measurement: ~{{value}} percentile",
+    "noChartData": "No measurements to chart in this period",
+    "vitalsSection": "Vital signs",
+    "tabAnthropometry": "Anthropometry",
+    "component": {
+      "systolic": "Systolic",
+      "diastolic": "Diastolic"
+    },
+    "type": {
+      "weight": "Weight",
+      "height": "Height",
+      "head_circumference": "Head circumference",
+      "temperature": "Temperature",
+      "heart_rate": "Heart rate (bpm)",
+      "spo2": "SpO₂",
+      "blood_pressure": "Blood pressure",
+      "glucose": "Glucose"
+    }
+  },
   "clinical": {
     "listTitle": "List",
     "source": "Source: {{source}}",
     "exams": {
       "title": "Exams",
       "subtitle": "Read-only summary — reports, markers, and upload are on the web app.",
-      "subtitleTx": "Add and edit manual exams on this device. PDF reports, OCR, and markers on the web.",
+      "subtitleTx": "Manual exams and marker trends on this device. PDF reports and OCR on the web.",
+      "subviewList": "List",
+      "subviewMarkers": "Markers",
       "add": "Add exam",
       "addTitle": "New exam",
       "editTitle": "Edit exam",
@@ -237,7 +263,7 @@
       "deleteMessage": "This cannot be undone. Reports attached on the web may be orphaned.",
       "deleteConfirm": "Delete",
       "cancel": "Cancel",
-      "webHintTx": "PDF upload, OCR, and marker dashboard: use your browser.",
+      "webHintTx": "PDF upload and OCR: use your browser.",
       "webHint": "Add exams, PDFs, and marker dashboard in your browser.",
       "openWeb": "Open Exams in browser",
       "empty": "No exams for this profile. Add manually or sync integrations.",
@@ -245,6 +271,24 @@
       "listCount_other": "{{count}} exams",
       "loadError": "Could not load exams",
       "hasResultFile": "Report attached (see on web)"
+    },
+    "examMarkers": {
+      "subtitle": "Read-only trends — same API as the web dashboard.",
+      "searchPlaceholder": "Search marker…",
+      "emptyTitle": "Markers",
+      "empty": "No numeric markers yet. Sync labs or add results on the web.",
+      "loadError": "Could not load markers",
+      "statusCritical": "Critical",
+      "statusAltered": "Altered",
+      "statusNormal": "Normal"
+    },
+    "growth": {
+      "title": "Growth and measurements",
+      "subtitle": "Read-only charts — WHO curves and measurement trends (same API as web).",
+      "webHint": "Log measurements, monitoring, and export: use your browser.",
+      "openWeb": "Open Growth in browser",
+      "whoProfileHint": "Add birth date and sex under Basic info to show WHO curves.",
+      "loadError": "Could not load growth charts"
     },
     "medications": {
       "title": "Medications",
