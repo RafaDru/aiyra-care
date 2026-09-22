@@ -132,5 +132,37 @@
     "success": "Success",
     "error": "Error",
     "info": "Notice"
+  },
+  "clinical": {
+    "listTitle": "List",
+    "source": "Source: {{source}}",
+    "medications": {
+      "title": "Medications",
+      "subtitle": "Read-only summary — dosing, reminders, and editing are on the web app.",
+      "webHint": "Add, edit, or log administrations in your browser.",
+      "openWeb": "Open Medications in browser",
+      "empty": "No medications for this profile. Add them manually or import visits on the web.",
+      "listCount_one": "{{count}} medication",
+      "listCount_other": "{{count}} medications",
+      "loadError": "Could not load medications",
+      "active": "Active",
+      "inactive": "Ended",
+      "projected": "projected",
+      "prescriber": "Prescriber: {{name}}"
+    },
+    "vaccines": {
+      "title": "Vaccines",
+      "subtitle": "Read-only summary — schedule, ConecteSUS, and card OCR are on the web app.",
+      "webHint": "Add doses, calendar, and ConecteSUS import in your browser.",
+      "openWeb": "Open Vaccines in browser",
+      "empty": "No vaccines for this profile. Add them manually or import from ConecteSUS on the web.",
+      "listCount_one": "{{count}} vaccine",
+      "listCount_other": "{{count}} vaccines",
+      "loadError": "Could not load vaccines",
+      "doseShort": "dose {{dose}}",
+      "nextDose": "Next dose: {{date}}",
+      "batch": "Batch: {{batch}}",
+      "appliedBy": "Given by: {{name}}"
+    }
   }
 }

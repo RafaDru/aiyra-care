@@ -39,6 +39,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Carteira** | `PatientWalletTab` — CNS, convênios, link web | QR token, sync modal, copay detalhada |
 | **Convênios** | `PatientCoverageTab` — planos/carteirinha read-only + link web | Vincular plano, cartão virtual |
 | **Exames** | `PatientExamsTab` — lista resumo, pull-to-refresh | CRUD, marcadores, laudos PDF |
+| **Medicamentos** | `PatientMedicationsTab` — lista resumo (ativo/encerrado), pull-to-refresh, link web | CRUD, administração, lembretes |
+| **Vacinas** | `PatientVaccinesTab` — doses aplicadas, pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
 | **Integrações** | Status + link web | Login portal, `POST …/sync` |
 
 ## Marco M2 (login + início)
@@ -75,13 +77,13 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |
 
-**Passos resumidos:** login → lista → paciente → Plano/Carteira + Clínico/Exames → (opcional) Google OAuth.
+**Passos resumidos:** login → lista → paciente → Plano/Carteira + Clínico/Exames/Medicamentos/Vacinas → (opcional) Google OAuth.
 
 ## Pendente
 
 - Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail) — ver `client-errors.ts`
 - Onboarding mobile — passos 1–2 (titular + dependentes) em `/(app)/onboarding`, paridade com web
 - **Agenda** — lista read-only com ícones por tipo + link web (`PatientAgendaTab`)
-- Demais tabs clínicas (medicamentos, vacinas, …) e Convênios UI completa
+- Demais tabs clínicas (alergias, atendimentos, …) e Convênios UI completa
 - Microsoft OAuth no mobile
 - Suite Playwright mobile (CI)

@@ -11,6 +11,8 @@ import type {
   LegalDocumentKind,
   LegalDocumentWithContent,
   Exam,
+  Medication,
+  Vaccine,
   ScheduledEvent,
   IntegrationLink,
   IntegrationLinkSyncStatus,
@@ -170,6 +172,14 @@ export const api = {
   exams: {
     list: (patientId: string) =>
       request<Exam[]>(`/exams?patientId=${encodeURIComponent(patientId)}`),
+  },
+  medications: {
+    list: (patientId: string) =>
+      request<Medication[]>(`/medications?patientId=${encodeURIComponent(patientId)}`),
+  },
+  vaccines: {
+    list: (patientId: string) =>
+      request<Vaccine[]>(`/vaccines?patientId=${encodeURIComponent(patientId)}`),
   },
   scheduledEvents: {
     list: (patientId: string) =>

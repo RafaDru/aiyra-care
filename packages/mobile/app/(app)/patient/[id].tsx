@@ -2,6 +2,8 @@ import { useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { PatientExamsTab } from '@/components/clinical/PatientExamsTab'
+import { PatientMedicationsTab } from '@/components/clinical/PatientMedicationsTab'
+import { PatientVaccinesTab } from '@/components/clinical/PatientVaccinesTab'
 import { PatientAgendaTab } from '@/components/overview/PatientAgendaTab'
 import { PatientIntegrationsPanel } from '@/components/integrations/PatientIntegrationsPanel'
 import { PatientCoverageTab } from '@/components/wallet/PatientCoverageTab'
@@ -34,6 +36,16 @@ function tabContent(tab: PatientTabKey): { title: string; subtitle: string } {
       return {
         title: 'Exames',
         subtitle: 'Lista, marcadores e laudos — portar de ExamsTab.tsx.',
+      }
+    case 'medications':
+      return {
+        title: 'Medicamentos',
+        subtitle: 'Lista somente leitura — cadastro e lembretes no web.',
+      }
+    case 'vaccines':
+      return {
+        title: 'Vacinas',
+        subtitle: 'Carteira vacinal resumida — calendário e OCR no web.',
       }
     case 'basic':
       return { title: 'Dados básicos', subtitle: 'Identidade e medidas do perfil.' }
@@ -170,6 +182,36 @@ export default function PatientDetailScreen() {
           onTabChange={setTab}
         />
         <PatientExamsTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'medications') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientMedicationsTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'vaccines') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientVaccinesTab patientId={patientId} />
       </View>
     )
   }

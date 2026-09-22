@@ -132,5 +132,37 @@
     "success": "Sucesso",
     "error": "Erro",
     "info": "Aviso"
+  },
+  "clinical": {
+    "listTitle": "Lista",
+    "source": "Origem: {{source}}",
+    "medications": {
+      "title": "Medicamentos",
+      "subtitle": "Resumo somente leitura — cadastro, posologia e lembretes ficam no app web.",
+      "webHint": "Adicionar, editar ou registrar administração: use o navegador.",
+      "openWeb": "Abrir Medicamentos no navegador",
+      "empty": "Nenhum medicamento registrado para este perfil. Cadastre manualmente ou importe atendimentos no web.",
+      "listCount_one": "{{count}} medicamento",
+      "listCount_other": "{{count}} medicamentos",
+      "loadError": "Erro ao carregar medicamentos",
+      "active": "Em uso",
+      "inactive": "Encerrado",
+      "projected": "previsto",
+      "prescriber": "Prescritor: {{name}}"
+    },
+    "vaccines": {
+      "title": "Vacinas",
+      "subtitle": "Resumo somente leitura — calendário PNI, ConecteSUS e leitura de carteira ficam no web.",
+      "webHint": "Adicionar dose, calendário e importar ConecteSUS: use o navegador.",
+      "openWeb": "Abrir Vacinas no navegador",
+      "empty": "Nenhuma vacina registrada para este perfil. Cadastre manualmente ou importe do ConecteSUS no web.",
+      "listCount_one": "{{count}} vacina",
+      "listCount_other": "{{count}} vacinas",
+      "loadError": "Erro ao carregar vacinas",
+      "doseShort": "dose {{dose}}",
+      "nextDose": "Próxima dose: {{date}}",
+      "batch": "Lote: {{batch}}",
+      "appliedBy": "Aplicador: {{name}}"
+    }
   }
 }
