@@ -9,7 +9,7 @@
 | Fase concluída / em curso | Conteúdo |
 |---------------------------|----------|
 | **Shell M2–M6 (leitura)** | Auth, lista, perfil, tabs read-only (carteira, exames, meds, vacinas, alergias, atendimentos, agenda, integrações status), família/compliance, Ava chat básico + dock |
-| **Em PR** | [#68](https://github.com/RafaDru/aiyra-care/pull/68) Bloco 1 TX · [#69](https://github.com/RafaDru/aiyra-care/pull/69) Bloco 2 gráficos (draft) |
+| **Em PR** | [#68](https://github.com/RafaDru/aiyra-care/pull/68) Bloco 1 TX · [#70](https://github.com/RafaDru/aiyra-care/pull/70) Bloco 2 gráficos (draft) |
 | **Bloco 1** | Branch `cursor/mobile-bloco1-tx-a5c1` — CRUD clínico + paciente/documentos/família TX |
 | **Bloco 2 em curso** | Branch `cursor/mobile-bloco2-charts-a5c1` — **marcadores de exame** (gráfico read-only); próximo: WHO crescimento, medidas chart-series |
 
