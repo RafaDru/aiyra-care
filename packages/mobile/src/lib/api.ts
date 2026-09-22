@@ -23,6 +23,9 @@ import type {
 } from './api.types'
 import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from './api.types'
 import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream'
+import { getClientErrorToast } from './client-error-notify-bridge'
+import { reportApiClientError, reportNetworkClientError } from './client-errors'
+import { notifyServiceFailure } from './service-failure-notify'
 import { ensureAccessToken, supabaseConfigured } from './supabase'
 
 const extra = Constants.expoConfig?.extra as Record<string, string | undefined> | undefined
@@ -31,7 +34,7 @@ const BASE_URL =
   extra?.apiUrl ??
   'http://127.0.0.1:3010'
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit & { skipErrorReport?: boolean }): Promise<T> {
   const headers: Record<string, string> =
     options?.body && !(options.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}
   const token = await ensureAccessToken()
@@ -40,6 +43,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   }
   if (token) headers.Authorization = `Bearer ${token}`
 
+  const skipReport = options?.skipErrorReport || path.startsWith('/telemetry/')
   let res: Response
   try {
     res = await fetch(`${BASE_URL}${path}`, {
@@ -47,11 +51,21 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       ...options,
     })
   } catch {
+    if (!skipReport) {
+      reportNetworkClientError(path)
+      notifyServiceFailure(getClientErrorToast(), 'api', 'NETWORK')
+    }
     throw new Error('Sem conexão com o servidor')
   }
 
   const contentType = res.headers.get('content-type') ?? ''
   if (!res.ok) {
+    if (!skipReport) {
+      reportApiClientError(path, res.status)
+      if (res.status >= 500 || res.status === 503) {
+        notifyServiceFailure(getClientErrorToast(), 'api', `HTTP_${res.status}`)
+      }
+    }
     if (contentType.includes('application/json')) {
       const body = (await res.json().catch(() => ({}))) as { message?: string }
       throw new Error(body.message || `HTTP ${res.status}`)

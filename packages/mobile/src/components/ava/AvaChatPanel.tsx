@@ -15,6 +15,7 @@ import { api } from '@/lib/api'
 import type { AvaActivityEvent, AvaChatResponse, LlmUsageQuota } from '@/lib/api.types'
 import type { AvaEntityPin } from '@/lib/ava-entity-pin'
 import { isLlmQuotaExhausted } from '@/lib/llm-quota'
+import { AvaMarkdown } from '@/components/ava/AvaMarkdown'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 interface ChatMessage {
@@ -181,10 +182,18 @@ export function AvaChatPanel({ patientId, initialMessage, entityPin, autoSend }:
                 : { alignSelf: 'flex-start', backgroundColor: tokens.colorBgContainer, borderColor: tokens.colorBorder, borderWidth: 1 },
             ]}
           >
-            <Text style={{ color: tokens.colorTextBase }}>
-              {item.text || (item.streaming ? '…' : '')}
-              {item.revised ? '\n\n(resposta revisada pela Ava)' : ''}
-            </Text>
+            {item.role === 'assistant' && item.text && !item.streaming ? (
+              <AvaMarkdown content={item.text} />
+            ) : (
+              <Text style={{ color: tokens.colorTextBase }}>
+                {item.text || (item.streaming ? '…' : '')}
+              </Text>
+            )}
+            {item.revised ? (
+              <Text style={{ color: tokens.colorTextSecondary, fontSize: 12, marginTop: 8 }}>
+                (resposta revisada pela Ava)
+              </Text>
+            ) : null}
           </View>
         )}
         ListEmptyComponent={

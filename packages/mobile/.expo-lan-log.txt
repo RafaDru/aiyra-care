@@ -35,3 +35,9 @@ Logs for your project will appear below.
 Android Bundled 20041ms packages\mobile\node_modules\expo-router\entry.js (1 module)
 Android Bundled 9132ms packages\mobile\node_modules\expo-router\entry.js (1 module)
  INFO  ­ƒîÉ i18next is made possible by our own product, Locize ÔÇö consider powering your project with managed localization (AI, CDN, integrations): https://locize.com ­ƒÆÖ
+Android Bundled 244159ms packages\mobile\node_modules\expo-router\entry.js (1 module)
+Android Bundled 6832ms packages\mobile\node_modules\expo-router\entry.js (1 module)
+ INFO  ­ƒîÉ i18next is made possible by our own product, Locize ÔÇö consider powering your project with managed localization (AI, CDN, integrations): https://locize.com ­ƒÆÖ
+ ERROR  [Error: [expo-router]: You are passing an array of styles to a child of <Slot>. Consider flattening the styles with StyleSheet.flatten before passing them to the child component.]
+Android Bundled 84ms packages\mobile\node_modules\expo-router\entry.js (1 module)
+ INFO  ­ƒîÉ i18next is made possible by our own product, Locize ÔÇö consider powering your project with managed localization (AI, CDN, integrations): https://locize.com ­ƒÆÖ

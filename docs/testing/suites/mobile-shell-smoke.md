@@ -42,6 +42,8 @@ Registrar PASS/FAIL antes do smoke manual.
 | 6 | Link «Abrir … no navegador» (Carteira, Exames, Medicamentos ou Vacinas) | Abre web no tab correto | |
 | 7 | Logout → **Continuar com Google** (opcional se Google habilitado no Supabase) | Retorna autenticado; lista carrega | |
 | 8 | Repetir passos 4–5b após login Google | Mesmo comportamento | |
+| 9 | Tab **Configurações** | Tela abre (sem crash); idioma/aparência/família visíveis | |
+| 10 | Ava → pergunta que gere lista ou negrito | Resposta com formatação markdown (não texto cru com `**`) | |
 
 ## Notas
 

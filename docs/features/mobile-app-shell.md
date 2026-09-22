@@ -79,9 +79,15 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 **Passos resumidos:** login → lista → paciente → Plano/Carteira + Clínico/Exames/Medicamentos/Vacinas → (opcional) Google OAuth.
 
+## Telemetria (paridade web)
+
+- `POST /telemetry/client-errors` com JWT — `packages/mobile/src/lib/client-errors.ts` (API/network, `ui_boundary`, auth pós-login)
+- `AppErrorBoundary` + toast em falhas 5xx/rede (`service-failure-notify.ts`)
+- Command Hub → Produto → Mobile — feature `mobile_shell` / `settings`
+
 ## Pendente
 
-- Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail) — ver `client-errors.ts`
+- Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail)
 - Onboarding mobile — passos 1–2 (titular + dependentes) em `/(app)/onboarding`, paridade com web
 - **Agenda** — lista read-only com ícones por tipo + link web (`PatientAgendaTab`)
 - Demais tabs clínicas (alergias, atendimentos, …) e Convênios UI completa
