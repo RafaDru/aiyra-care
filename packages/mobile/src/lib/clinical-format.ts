@@ -28,6 +28,31 @@ export function medicationDisplayName(genericName: string, brandName: string | n
   return `${genericName} (${brand})`
 }
 
+const ALLERGY_SEVERITY_KEYS = new Set(['mild', 'moderate', 'severe'])
+
+export function allergySeverityKey(severity: string | null | undefined): string | null {
+  if (!severity) return null
+  const s = severity.toLowerCase()
+  return ALLERGY_SEVERITY_KEYS.has(s) ? s : null
+}
+
+const RECORD_SOURCE_LABELS: Record<string, string> = {
+  manual: 'Manual',
+  unimed_bh: 'Unimed BH',
+  amil: 'Amil',
+  portal: 'Portal',
+}
+
+export function formatRecordSource(source: string | null | undefined): string {
+  if (!source) return '—'
+  return RECORD_SOURCE_LABELS[source] ?? source.replace(/_/g, ' ')
+}
+
+export function formatCurrencyBrl(value: number | null | undefined): string | null {
+  if (value == null || Number.isNaN(value)) return null
+  return `R$ ${value.toFixed(2)}`
+}
+
 export function medicationSubtitle(med: {
   dosage: string | null
   frequency: string | null

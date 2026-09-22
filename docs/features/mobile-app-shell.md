@@ -41,6 +41,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Exames** | `PatientExamsTab` — lista resumo, pull-to-refresh | CRUD, marcadores, laudos PDF |
 | **Medicamentos** | `PatientMedicationsTab` — lista resumo (ativo/encerrado), pull-to-refresh, link web | CRUD, administração, lembretes |
 | **Vacinas** | `PatientVaccinesTab` — doses aplicadas, pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
+| **Alergias** | `PatientAllergiesTab` — lista read-only, pull-to-refresh, link web | CRUD |
+| **Atendimentos** | `PatientMedicalRecordsTab` — histórico resumido, link web | Sequência clínica, vínculos |
 | **Integrações** | Status + link web | Login portal, `POST …/sync` |
 
 ## Marco M2 (login + início)
@@ -90,6 +92,6 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 - Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail)
 - Onboarding mobile — passos 1–2 (titular + dependentes) em `/(app)/onboarding`, paridade com web
 - **Agenda** — lista read-only com ícones por tipo + link web (`PatientAgendaTab`)
-- Demais tabs clínicas (alergias, atendimentos, …) e Convênios UI completa
+- Demais tabs clínicas (autorizações, diagnósticos, crescimento, …) e Convênios UI completa
 - Microsoft OAuth no mobile
 - Suite Playwright mobile (CI)

@@ -39,6 +39,8 @@ Registrar PASS/FAIL antes do smoke manual.
 | 5 | Seção **Clínico** → tab **Exames** | Lista de exames (data, laboratório, origem) ou empty state; pull-to-refresh | |
 | 5a | Seção **Clínico** → tab **Medicamentos** | Lista (posologia, em uso/encerrado) ou empty state; link web | |
 | 5b | Seção **Clínico** → tab **Vacinas** | Lista (dose, data, origem) ou empty state; link web | |
+| 5c | Seção **Clínico** → tab **Alergias** | Lista (alérgeno, gravidade) ou empty state; link web | |
+| 5d | Seção **Clínico** → tab **Atendimentos** | Lista (data, tipo, médico) ou empty state; link web | |
 | 6 | Link «Abrir … no navegador» (Carteira, Exames, Medicamentos ou Vacinas) | Abre web no tab correto | |
 | 7 | Logout → **Continuar com Google** (opcional se Google habilitado no Supabase) | Retorna autenticado; lista carrega | |
 | 8 | Repetir passos 4–5b após login Google | Mesmo comportamento | |

@@ -163,6 +163,31 @@
       "nextDose": "Next dose: {{date}}",
       "batch": "Batch: {{batch}}",
       "appliedBy": "Given by: {{name}}"
+    },
+    "allergies": {
+      "title": "Allergies",
+      "subtitle": "Read-only summary — add and edit on the web app.",
+      "webHint": "Register or edit allergies in your browser.",
+      "openWeb": "Open Allergies in browser",
+      "empty": "No allergies recorded for this profile.",
+      "listCount_one": "{{count}} allergy",
+      "listCount_other": "{{count}} allergies",
+      "loadError": "Could not load allergies",
+      "reaction": "Reaction: {{text}}",
+      "diagnosed": "Diagnosed: {{date}}",
+      "severity_mild": "Mild",
+      "severity_moderate": "Moderate",
+      "severity_severe": "Severe"
+    },
+    "records": {
+      "title": "Medical visits",
+      "subtitle": "Read-only summary — clinical links and editing on the web.",
+      "webHint": "Add visits or open clinical sequence in your browser.",
+      "openWeb": "Open visits in browser",
+      "empty": "No visits recorded for this profile.",
+      "listCount_one": "{{count}} visit",
+      "listCount_other": "{{count}} visits",
+      "loadError": "Could not load visits"
     }
   }
 }

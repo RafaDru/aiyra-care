@@ -10,7 +10,9 @@ import type {
   InvitePreview,
   LegalDocumentKind,
   LegalDocumentWithContent,
+  Allergy,
   Exam,
+  MedicalRecord,
   Medication,
   Vaccine,
   ScheduledEvent,
@@ -194,6 +196,14 @@ export const api = {
   vaccines: {
     list: (patientId: string) =>
       request<Vaccine[]>(`/vaccines?patientId=${encodeURIComponent(patientId)}`),
+  },
+  allergies: {
+    list: (patientId: string) =>
+      request<Allergy[]>(`/allergies?patientId=${encodeURIComponent(patientId)}`),
+  },
+  medicalRecords: {
+    list: (patientId: string) =>
+      request<MedicalRecord[]>(`/medical-records?patientId=${encodeURIComponent(patientId)}`),
   },
   scheduledEvents: {
     list: (patientId: string) =>
