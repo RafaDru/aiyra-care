@@ -167,6 +167,26 @@
     "allergies": {
       "title": "Alergias",
       "subtitle": "Resumo somente leitura — cadastro e edição no app web.",
+      "subtitleTx": "Cadastre e edite alergias neste aparelho. Sincronização com o web via mesma API.",
+      "add": "Adicionar alergia",
+      "addTitle": "Nova alergia",
+      "editTitle": "Editar alergia",
+      "tapToEdit": "Toque para editar",
+      "fieldAllergen": "Alérgeno",
+      "fieldReaction": "Reação",
+      "fieldSeverity": "Gravidade",
+      "fieldDiagnosed": "Data do diagnóstico",
+      "fieldNotes": "Observações",
+      "allergenRequired": "Informe o alérgeno.",
+      "invalidDate": "Data inválida (use DD/MM/AAAA).",
+      "created": "Alergia registrada.",
+      "updated": "Alergia atualizada.",
+      "deleted": "Alergia removida.",
+      "saveError": "Não foi possível salvar a alergia.",
+      "deleteTitle": "Excluir alergia?",
+      "deleteMessage": "Esta ação não pode ser desfeita.",
+      "deleteConfirm": "Excluir",
+      "cancel": "Cancelar",
       "webHint": "Registrar ou editar alergias: use o navegador.",
       "openWeb": "Abrir Alergias no navegador",
       "empty": "Nenhuma alergia registrada para este perfil.",
@@ -188,6 +208,27 @@
       "listCount_one": "{{count}} atendimento",
       "listCount_other": "{{count}} atendimentos",
       "loadError": "Erro ao carregar atendimentos"
+    },
+    "authorizations": {
+      "title": "Autorizações",
+      "subtitle": "Resumo de guias e pedidos — detalhes e PDF no web.",
+      "webHint": "Abrir sequência clínica e documentos no navegador.",
+      "openWeb": "Abrir Autorizações no navegador",
+      "empty": "Nenhuma autorização registrada.",
+      "listCount_one": "{{count}} autorização",
+      "listCount_other": "{{count}} autorizações",
+      "loadError": "Erro ao carregar autorizações"
+    },
+    "diagnoses": {
+      "title": "Diagnósticos",
+      "subtitle": "Lista clínica — cadastro completo no web (em breve no app).",
+      "webHint": "Adicionar ou editar diagnósticos no navegador.",
+      "openWeb": "Abrir Diagnósticos no navegador",
+      "empty": "Nenhum diagnóstico registrado.",
+      "listCount_one": "{{count}} diagnóstico",
+      "listCount_other": "{{count}} diagnósticos",
+      "loadError": "Erro ao carregar diagnósticos",
+      "chronic": "Crônico"
     }
   }
 }

@@ -2,6 +2,8 @@ import { useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { PatientAllergiesTab } from '@/components/clinical/PatientAllergiesTab'
+import { PatientAuthorizationsTab } from '@/components/clinical/PatientAuthorizationsTab'
+import { PatientDiagnosesTab } from '@/components/clinical/PatientDiagnosesTab'
 import { PatientExamsTab } from '@/components/clinical/PatientExamsTab'
 import { PatientMedicalRecordsTab } from '@/components/clinical/PatientMedicalRecordsTab'
 import { PatientMedicationsTab } from '@/components/clinical/PatientMedicationsTab'
@@ -53,6 +55,10 @@ function tabContent(tab: PatientTabKey): { title: string; subtitle: string } {
       return { title: 'Alergias', subtitle: 'Lista somente leitura — cadastro no web.' }
     case 'records':
       return { title: 'Atendimentos', subtitle: 'Histórico resumido — vínculos clínicos no web.' }
+    case 'authorizations':
+      return { title: 'Autorizações', subtitle: 'Guias e pedidos — detalhe no web.' }
+    case 'diagnoses':
+      return { title: 'Diagnósticos', subtitle: 'Lista clínica — cadastro no web.' }
     case 'basic':
       return { title: 'Dados básicos', subtitle: 'Identidade e medidas do perfil.' }
     case 'agenda':
@@ -248,6 +254,36 @@ export default function PatientDetailScreen() {
           onTabChange={setTab}
         />
         <PatientMedicalRecordsTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'authorizations') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientAuthorizationsTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'diagnoses') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientDiagnosesTab patientId={patientId} />
       </View>
     )
   }

@@ -44,7 +44,12 @@ OpenCode MCP já aponta ao projeto: `~/.config/opencode/opencode.json` → `proj
    - Authorized redirect URI: `https://lyljosprzmtapkocmxxa.supabase.co/auth/v1/callback`
 3. **Supabase** → Authentication → URL Configuration
    - Site URL: `http://localhost:5173` (dev)
-   - Redirect URLs: `http://localhost:5173/**`, `http://127.0.0.1:5173/**`
+   - Redirect URLs (web): `http://localhost:5173/**`, `http://127.0.0.1:5173/**`
+   - Redirect URLs (**mobile / Expo Go** — obrigatório para Google OAuth no app):
+     - `exp://**` (LAN / tunnel do Metro)
+     - `aiyracare://**` e `aiyracare://auth/callback` (dev build / deep link)
+   - Sem essas entradas, o Supabase ignora o `redirectTo` do mobile e cai no **Site URL** (`localhost:5173` no celular → login quebrado).
+   - Script (com PAT): `SUPABASE_ACCESS_TOKEN=sbp_... node scripts/patch-supabase-auth-redirect-urls.mjs`
 
 ### Erro: `Unsupported provider: provider is not enabled`
 

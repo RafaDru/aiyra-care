@@ -11,6 +11,8 @@ import type {
   LegalDocumentKind,
   LegalDocumentWithContent,
   Allergy,
+  Authorization,
+  Diagnosis,
   Exam,
   MedicalRecord,
   Medication,
@@ -200,6 +202,33 @@ export const api = {
   allergies: {
     list: (patientId: string) =>
       request<Allergy[]>(`/allergies?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      allergen: string
+      reaction?: string
+      severity?: string
+      diagnosedDate?: string
+      notes?: string
+    }) => request<Allergy>('/allergies', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        allergen: string
+        reaction: string
+        severity: string
+        diagnosedDate: string
+        notes: string
+      }>,
+    ) => request<Allergy>(`/allergies/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/allergies/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  },
+  diagnoses: {
+    list: (patientId: string) =>
+      request<Diagnosis[]>(`/diagnoses?patientId=${encodeURIComponent(patientId)}`),
+  },
+  authorizations: {
+    list: (patientId: string) =>
+      request<Authorization[]>(`/authorizations?patientId=${encodeURIComponent(patientId)}`),
   },
   medicalRecords: {
     list: (patientId: string) =>

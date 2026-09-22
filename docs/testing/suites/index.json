@@ -313,6 +313,20 @@
       "businessActions": ["mobile.login", "mobile.wallet_read", "mobile.exams_read", "mobile.medications_read", "mobile.vaccines_read", "mobile.oauth_google"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 15
+    },
+    {
+      "id": "mobile-allergies-crud",
+      "domain": "mobile",
+      "title": "Mobile — alergias CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-allergies-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.allergies_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 8
     }
   ],
   "lanes": {
@@ -358,7 +372,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud"]
     }
   }
 }

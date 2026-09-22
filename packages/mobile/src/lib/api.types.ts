@@ -301,6 +301,37 @@ export interface Allergy {
   createdAt: string
 }
 
+export interface Diagnosis {
+  id: string
+  patientId: string
+  medicalRecordId: string | null
+  diagnosisCode: string | null
+  diagnosisName: string
+  description: string | null
+  isChronic: boolean
+  diagnosedDate: string | null
+  status: string | null
+  createdAt: string
+}
+
+export interface Authorization {
+  id: string
+  patientId: string
+  procedureCode: string | null
+  procedureDescription: string | null
+  doctorName: string | null
+  clinicName: string | null
+  authorizationDate: string | null
+  validityDate: string | null
+  status: string
+  guideNumber: string | null
+  solicitationNumber: string | null
+  specialty: string | null
+  classification: string | null
+  source: string
+  notes: string | null
+}
+
 export interface MedicalRecord {
   id: string
   patientId: string

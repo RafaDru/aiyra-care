@@ -167,6 +167,26 @@
     "allergies": {
       "title": "Allergies",
       "subtitle": "Read-only summary — add and edit on the web app.",
+      "subtitleTx": "Add and edit allergies on this device. Same API as the web app.",
+      "add": "Add allergy",
+      "addTitle": "New allergy",
+      "editTitle": "Edit allergy",
+      "tapToEdit": "Tap to edit",
+      "fieldAllergen": "Allergen",
+      "fieldReaction": "Reaction",
+      "fieldSeverity": "Severity",
+      "fieldDiagnosed": "Diagnosed date",
+      "fieldNotes": "Notes",
+      "allergenRequired": "Enter an allergen.",
+      "invalidDate": "Invalid date (use DD/MM/YYYY).",
+      "created": "Allergy saved.",
+      "updated": "Allergy updated.",
+      "deleted": "Allergy removed.",
+      "saveError": "Could not save allergy.",
+      "deleteTitle": "Delete allergy?",
+      "deleteMessage": "This cannot be undone.",
+      "deleteConfirm": "Delete",
+      "cancel": "Cancel",
       "webHint": "Register or edit allergies in your browser.",
       "openWeb": "Open Allergies in browser",
       "empty": "No allergies recorded for this profile.",
@@ -188,6 +208,27 @@
       "listCount_one": "{{count}} visit",
       "listCount_other": "{{count}} visits",
       "loadError": "Could not load visits"
+    },
+    "authorizations": {
+      "title": "Authorizations",
+      "subtitle": "Summary of guides and requests — details on the web.",
+      "webHint": "Open clinical sequence and documents in the browser.",
+      "openWeb": "Open Authorizations in browser",
+      "empty": "No authorizations recorded.",
+      "listCount_one": "{{count}} authorization",
+      "listCount_other": "{{count}} authorizations",
+      "loadError": "Could not load authorizations"
+    },
+    "diagnoses": {
+      "title": "Diagnoses",
+      "subtitle": "Clinical list — full editing on web (mobile forms coming soon).",
+      "webHint": "Add or edit diagnoses in the browser.",
+      "openWeb": "Open Diagnoses in browser",
+      "empty": "No diagnoses recorded.",
+      "listCount_one": "{{count}} diagnosis",
+      "listCount_other": "{{count}} diagnoses",
+      "loadError": "Could not load diagnoses",
+      "chronic": "Chronic"
     }
   }
 }
