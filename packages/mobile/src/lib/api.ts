@@ -194,6 +194,42 @@ export const api = {
   medications: {
     list: (patientId: string) =>
       request<Medication[]>(`/medications?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      genericName: string
+      brandName?: string
+      dosage?: string
+      frequency?: string
+      route?: string
+      duration?: string
+      startDate?: string
+      startedAt?: string
+      endDate?: string
+      endDateIsProjected?: boolean
+      prescribingDoctor?: string
+      notes?: string
+      isActive?: boolean
+    }) => request<Medication>('/medications', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: Partial<{
+      genericName: string
+      brandName: string
+      dosage: string
+      frequency: string
+      route: string
+      duration: string
+      startDate: string
+      startedAt: string
+      endDate: string
+      endDateIsProjected: boolean
+      prescribingDoctor: string
+      notes: string
+      isActive: boolean
+    }>) =>
+      request<Medication>(`/medications/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/medications/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   vaccines: {
     list: (patientId: string) =>

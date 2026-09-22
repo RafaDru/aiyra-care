@@ -341,6 +341,20 @@
       "businessActions": ["mobile.medical_records_crud"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-medications-crud",
+      "domain": "mobile",
+      "title": "Mobile — medicamentos CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-medications-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.medications_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
     }
   ],
   "lanes": {
@@ -386,7 +400,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud"]
     }
   }
 }
