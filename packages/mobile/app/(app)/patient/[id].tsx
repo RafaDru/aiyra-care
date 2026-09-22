@@ -2,6 +2,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { PatientExamsTab } from '@/components/clinical/PatientExamsTab'
+import { PatientAgendaTab } from '@/components/overview/PatientAgendaTab'
 import { PatientIntegrationsPanel } from '@/components/integrations/PatientIntegrationsPanel'
 import { PatientCoverageTab } from '@/components/wallet/PatientCoverageTab'
 import { PatientWalletTab } from '@/components/wallet/PatientWalletTab'
@@ -36,6 +37,8 @@ function tabContent(tab: PatientTabKey): { title: string; subtitle: string } {
       }
     case 'basic':
       return { title: 'Dados básicos', subtitle: 'Identidade e medidas do perfil.' }
+    case 'agenda':
+      return { title: 'Agenda', subtitle: 'Lembretes, consultas e tarefas.' }
     default:
       return {
         title: 'Em breve',
@@ -137,6 +140,21 @@ export default function PatientDetailScreen() {
           onTabChange={setTab}
         />
         <PatientWalletTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'agenda') {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <PatientHeader
+          title={patientName}
+          section={section}
+          tab={tab}
+          onSectionChange={onSectionChange}
+          onTabChange={setTab}
+        />
+        <PatientAgendaTab patientId={patientId} />
       </View>
     )
   }

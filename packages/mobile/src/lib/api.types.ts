@@ -148,6 +148,22 @@ export interface CompleteProfileInput {
   heightCm?: number
 }
 
+export type ScheduledEventKind = 'appointment' | 'reminder' | 'task'
+export type ScheduledEventStatus = 'planned' | 'done' | 'cancelled'
+
+export interface ScheduledEvent {
+  id: string
+  patientId: string
+  title: string
+  description: string | null
+  scheduledAt: string
+  endAt: string | null
+  kind: ScheduledEventKind
+  status: ScheduledEventStatus
+  source: string
+  sourceLabel: string | null
+}
+
 export interface CreatePatientInput {
   name: string
   birthDate: string

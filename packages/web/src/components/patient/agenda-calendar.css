@@ -106,8 +106,12 @@
   padding: 8px 0;
 }
 
+.agenda-calendar-card .ant-picker-cell:has(.agenda-cal-cell--skip) {
+  display: none;
+}
+
 .agenda-cal-cell {
-  min-height: 76px;
+  min-height: 96px;
   height: 100%;
   padding: 4px 6px 6px;
   border-radius: 8px;
@@ -155,36 +159,66 @@
   opacity: 1;
 }
 
-.agenda-cal-marks {
+.agenda-cal-events {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.agenda-cal-event-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: filter 0.12s, box-shadow 0.12s;
+}
+
+.agenda-cal-event-chip:hover {
+  filter: brightness(0.97);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.agenda-cal-event-chip__icon {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  min-height: 14px;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.agenda-cal-event-chip__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
   flex: 1;
 }
 
-.agenda-cal-mark {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  padding: 0;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.1s, box-shadow 0.15s;
+.agenda-cal-event-chip__time {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ant-color-text-secondary);
+  line-height: 1.1;
 }
 
-.agenda-cal-mark:hover {
-  transform: scale(1.2);
-}
-
-.agenda-cal-mark--active {
-  box-shadow: 0 0 0 2px var(--ant-color-bg-container, #fff), 0 0 0 3px var(--ant-color-primary, #2563eb);
-}
-
-.agenda-cal-mark--muted {
-  opacity: 0.45;
+.agenda-cal-event-chip__title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .agenda-cal-day {
@@ -225,10 +259,14 @@
   border-color: var(--ant-color-primary-border, #91caff);
 }
 
-.agenda-day-list__mark {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.agenda-day-list__kind-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
@@ -260,10 +298,6 @@
   font-size: 12px;
   margin-bottom: 6px;
   color: var(--ant-color-text-secondary);
-}
-
-.agenda-cal-mark--kind {
-  min-width: 10px;
 }
 
 .agenda-cal-cell:hover {

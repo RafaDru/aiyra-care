@@ -11,6 +11,7 @@ import type {
   LegalDocumentKind,
   LegalDocumentWithContent,
   Exam,
+  ScheduledEvent,
   IntegrationLink,
   IntegrationLinkSyncStatus,
   OwnedPatient,
@@ -169,6 +170,10 @@ export const api = {
   exams: {
     list: (patientId: string) =>
       request<Exam[]>(`/exams?patientId=${encodeURIComponent(patientId)}`),
+  },
+  scheduledEvents: {
+    list: (patientId: string) =>
+      request<ScheduledEvent[]>(`/scheduled-events?patientId=${encodeURIComponent(patientId)}`),
   },
   ava: {
     listConversations: (patientId?: string) => {

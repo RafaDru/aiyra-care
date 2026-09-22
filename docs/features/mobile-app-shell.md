@@ -81,6 +81,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 - Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail) — ver `client-errors.ts`
 - Onboarding mobile — passos 1–2 (titular + dependentes) em `/(app)/onboarding`, paridade com web
+- **Agenda** — lista read-only com ícones por tipo + link web (`PatientAgendaTab`)
 - Demais tabs clínicas (medicamentos, vacinas, …) e Convênios UI completa
 - Microsoft OAuth no mobile
 - Suite Playwright mobile (CI)

@@ -930,6 +930,7 @@
     "pickEventHint": "Clique numa marcação no calendário ou escolha abaixo:",
     "eventPanel": "Detalhes",
     "dayEvents": "Eventos do dia",
+    "moreEvents": "mais",
     "newOnDay": "Nova entrada neste dia",
     "exportError": "Erro ao exportar agenda",
     "timelineTitle": "Linha do tempo",
