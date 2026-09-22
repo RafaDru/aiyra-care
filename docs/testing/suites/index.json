@@ -369,6 +369,20 @@
       "businessActions": ["mobile.vaccines_crud"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-exams-crud",
+      "domain": "mobile",
+      "title": "Mobile — exames CRUD manual (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-exams-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.exams_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
     }
   ],
   "lanes": {
@@ -414,7 +428,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud"]
     }
   }
 }

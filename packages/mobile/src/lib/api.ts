@@ -190,6 +190,31 @@ export const api = {
   exams: {
     list: (patientId: string) =>
       request<Exam[]>(`/exams?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      examType: string
+      examDate: string
+      resultSummary?: string
+      laboratory?: string
+      notes?: string
+      source?: string
+    }) => request<Exam>('/exams', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        examType: string
+        examDate: string
+        resultSummary: string
+        laboratory: string
+        notes: string
+        source: string
+      }>,
+    ) =>
+      request<Exam>(`/exams/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/exams/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   medications: {
     list: (patientId: string) =>

@@ -40,7 +40,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 |-----|--------|----------|
 | **Carteira** | `PatientWalletTab` — CNS, convênios, link web | QR token, sync modal, copay detalhada |
 | **Convênios** | `PatientCoverageTab` — planos/carteirinha read-only + link web | Vincular plano, cartão virtual |
-| **Exames** | `PatientExamsTab` — lista resumo, pull-to-refresh | CRUD, marcadores, laudos PDF |
+| **Exames** | `PatientExamsTab` — **CRUD manual** + pull-to-refresh, link web | Marcadores, laudos PDF/OCR |
 | **Medicamentos** | `PatientMedicationsTab` — **CRUD** + em uso/encerrado | Administração, lembretes |
 | **Vacinas** | `PatientVaccinesTab` — **CRUD** + pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
 | **Alergias** | `PatientAllergiesTab` — **CRUD** + pull-to-refresh | — |
@@ -83,6 +83,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Bloco 1 — atendimentos CRUD** | [`mobile-medical-records-crud`](../../docs/testing/suites/mobile-medical-records-crud.md) · `npm run qa:run -- --suite mobile-medical-records-crud` |
 | **Bloco 1 — medicamentos CRUD** | [`mobile-medications-crud`](../../docs/testing/suites/mobile-medications-crud.md) · `npm run qa:run -- --suite mobile-medications-crud` |
 | **Bloco 1 — vacinas CRUD** | [`mobile-vaccines-crud`](../../docs/testing/suites/mobile-vaccines-crud.md) · `npm run qa:run -- --suite mobile-vaccines-crud` |
+| **Bloco 1 — exames CRUD** | [`mobile-exams-crud`](../../docs/testing/suites/mobile-exams-crud.md) · `npm run qa:run -- --suite mobile-exams-crud` |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |
