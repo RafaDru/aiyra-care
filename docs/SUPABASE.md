@@ -100,7 +100,7 @@ O Postgres do projeto Supabase (`lyljosprzmtapkocmxxa`) expõe o schema `public`
 
 **Migration `071_clinical_tables_rls.sql`** (aplicar no cloud pelo Rafael):
 
-- `ENABLE ROW LEVEL SECURITY` em: `patients`, `medical_records`, `diagnoses`, `medications`, `vaccines`, `allergies`, `exams`, `growth_records`, `documents`, `app_accounts`, `patient_memberships`.
+- `ENABLE ROW LEVEL SECURITY` em: `patients`, `medical_records`, `diagnoses`, `medications`, `vaccines`, `allergies`, `exams`, `growth_records`, `documents`, e em `app_accounts` / `patient_memberships` **quando existirem** (`to_regclass` — cloud parcial sem 018 não falha).
 - **Sem policies** para `anon` / `authenticated` → negação por padrão no PostgREST.
 - `REVOKE ALL` dessas tabelas para `anon` e `authenticated` (camada extra além do RLS).
 - **Não** altera o caminho da API: conexão direta e `service_role` no Auth/admin continuam fora do PostgREST clínico.
