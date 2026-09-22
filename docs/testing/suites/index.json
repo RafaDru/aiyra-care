@@ -355,6 +355,20 @@
       "businessActions": ["mobile.medications_crud"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 12
+    },
+    {
+      "id": "mobile-vaccines-crud",
+      "domain": "mobile",
+      "title": "Mobile — vacinas CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-vaccines-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.vaccines_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
     }
   ],
   "lanes": {
@@ -400,7 +414,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud"]
     }
   }
 }

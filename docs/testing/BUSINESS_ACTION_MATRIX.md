@@ -41,6 +41,7 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Mobile** — alergias CRUD | CRUD | `mobile-allergies-crud` | 🟡 |
 | **Mobile** — atendimentos CRUD | CRUD | `mobile-medical-records-crud` | 🟡 |
 | **Mobile** — medicamentos CRUD | CRUD | `mobile-medications-crud` | 🟡 |
+| **Mobile** — vacinas CRUD | CRUD | `mobile-vaccines-crud` | 🟡 |
 | Onboarding + perfil titular (`self`) | C | `onboarding-flow` | 🟡 |
 | Compliance gate (aceite termos) | C | `onboarding-flow` | 🟡 |
 | Dashboard listar pacientes | R | `core-patient-crud` | 🟡 |
