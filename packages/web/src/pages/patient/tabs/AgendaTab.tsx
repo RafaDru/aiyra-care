@@ -4,7 +4,17 @@ import {
 } from 'antd'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
-import { PlusOutlined, CheckOutlined, DeleteOutlined, DownloadOutlined, UploadOutlined, CalendarOutlined, UnorderedListOutlined } from '@ant-design/icons'
+import {
+  PlusOutlined,
+  CheckOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+  UploadOutlined,
+  CalendarOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons'
+import { agendaScheduledKindMeta } from '../../../components/patient/agenda-scheduled-kind-meta.js'
+import { shouldHideAgendaOverflowDay } from '../../../lib/agenda-calendar-cell.js'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../../lib/api.js'
@@ -32,7 +42,7 @@ const KIND_COLORS: Record<string, string> = {
   task: '#7c3aed',
 }
 
-const MAX_MARKS_PER_CELL = 6
+const MAX_EVENTS_PER_CELL = 3
 
 function eventFormValues(event: ScheduledEvent) {
   return {
@@ -119,13 +129,6 @@ export function AgendaTab({ patientId }: Props) {
     () => groupAgendaEventsByKind(selectedDayEvents),
     [selectedDayEvents],
   )
-
-  const kindMarksForDay = (items: ScheduledEvent[]) => {
-    const byKind = groupAgendaEventsByKind(items)
-    return AGENDA_KIND_DISPLAY_ORDER
-      .map((kind) => ({ kind, items: byKind.get(kind) ?? [] }))
-      .filter((mark) => mark.items.length > 0)
-  }
 
   const selectedEvent = useMemo(
     () => data.find((e) => e.id === selectedEventId) ?? null,
@@ -361,10 +364,13 @@ export function AgendaTab({ patientId }: Props) {
   )
 
   const fullCellRender = (date: Dayjs) => {
+    if (shouldHideAgendaOverflowDay(date, calendarValue)) {
+      return <div className="agenda-cal-cell agenda-cal-cell--skip" aria-hidden />
+    }
+
     const key = date.format('YYYY-MM-DD')
     const items = eventsByDay.get(key) ?? []
-    const kindMarks = kindMarksForDay(items)
-    const visibleMarks = kindMarks.slice(0, MAX_MARKS_PER_CELL)
+    const visibleEvents = items.slice(0, MAX_EVENTS_PER_CELL)
     const isToday = date.isSame(dayjs(), 'day')
     const isSelected = date.isSame(selectedDate, 'day')
     const isCurrentMonth = date.isSame(calendarValue, 'month')
@@ -395,30 +401,37 @@ export function AgendaTab({ patientId }: Props) {
             <PlusOutlined />
           </button>
         </div>
-        <div className="agenda-cal-marks" role="list" aria-label={t('agenda.dayEvents')}>
-          {visibleMarks.map((mark) => (
-            <button
-              key={mark.kind}
-              type="button"
-              role="listitem"
-              className="agenda-cal-mark agenda-cal-mark--kind"
-              style={{ background: KIND_COLORS[mark.kind] }}
-              title={t('agenda.kindGroupCount', {
-                kind: t(`agenda.kind.${mark.kind}`),
-                count: mark.items.length,
-              })}
-              aria-label={t('agenda.kindGroupCount', {
-                kind: t(`agenda.kind.${mark.kind}`),
-                count: mark.items.length,
-              })}
-              onClick={(ev) => {
-                ev.stopPropagation()
-                selectDay(date)
-              }}
-            />
-          ))}
-          {kindMarks.length > MAX_MARKS_PER_CELL && (
-            <span className="agenda-cal-more">+{kindMarks.length - MAX_MARKS_PER_CELL}</span>
+        <div className="agenda-cal-events" role="list" aria-label={t('agenda.dayEvents')}>
+          {visibleEvents.map((event) => {
+            const meta = agendaScheduledKindMeta(event.kind)
+            const { Icon } = meta
+            return (
+              <button
+                key={event.id}
+                type="button"
+                role="listitem"
+                className="agenda-cal-event-chip"
+                style={{ background: meta.bg, borderColor: `${meta.color}40` }}
+                title={event.title}
+                onClick={(ev) => {
+                  ev.stopPropagation()
+                  selectEvent(date, event)
+                }}
+              >
+                <span className="agenda-cal-event-chip__icon" style={{ color: meta.color }}>
+                  <Icon />
+                </span>
+                <span className="agenda-cal-event-chip__body">
+                  <span className="agenda-cal-event-chip__time">{formatEventTime(event.scheduledAt)}</span>
+                  <span className="agenda-cal-event-chip__title">{event.title}</span>
+                </span>
+              </button>
+            )
+          })}
+          {items.length > MAX_EVENTS_PER_CELL && (
+            <span className="agenda-cal-more">
+              +{items.length - MAX_EVENTS_PER_CELL} {t('agenda.moreEvents')}
+            </span>
           )}
         </div>
       </div>
@@ -549,11 +562,19 @@ export function AgendaTab({ patientId }: Props) {
                           ].filter(Boolean).join(' ')}
                           onClick={() => selectEvent(selectedDate, e)}
                         >
-                          <span
-                            className="agenda-day-list__mark"
-                            style={{ background: KIND_COLORS[e.kind] }}
-                            aria-hidden
-                          />
+                          {(() => {
+                            const meta = agendaScheduledKindMeta(e.kind)
+                            const { Icon } = meta
+                            return (
+                              <span
+                                className="agenda-day-list__kind-icon"
+                                style={{ color: meta.color, background: meta.bg }}
+                                aria-hidden
+                              >
+                                <Icon />
+                              </span>
+                            )
+                          })()}
                           <span className="agenda-day-list__time">{formatEventTime(e.scheduledAt)}</span>
                           <span className="agenda-day-list__title">{e.title}</span>
                         </button>

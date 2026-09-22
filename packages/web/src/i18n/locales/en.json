@@ -930,6 +930,7 @@
     "pickEventHint": "Click a mark on the calendar or pick below:",
     "eventPanel": "Details",
     "dayEvents": "Day events",
+    "moreEvents": "more",
     "newOnDay": "New entry on this day",
     "exportError": "Could not export calendar",
     "timelineTitle": "Timeline",

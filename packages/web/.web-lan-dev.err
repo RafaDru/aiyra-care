@@ -1,0 +1,1683 @@
+Error:   Failed to scan for dependencies from entries:
+  C:/Users/rafae/Workspace/aiyra-care/packages/web/index.html
+
+  [31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/lib/clinical-entity-navigation.ts:2:49:
+[37m      2 │ ...{ tabToSection, type PatientTabKey } from [32m'./patient-navigation.js'[37m
+        ╵                                              [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/hooks/useIntegrationSyncHistory.ts:4:32:
+[37m      4 │ import { brandOrFallback } from [32m'../components/brands/brand-config.js'[37m
+        ╵                                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/vaccine/vaccine-view-utils.ts:2:35:
+[37m      2 │ import { getAllCatalogSlots } from [32m'./vaccine-catalog.js'[37m
+        ╵                                    [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/brands/FleuryLaboratoryCell.tsx:3:32:
+[37m      3 │ import { FleuryGroupSeal } from [32m'./FleuryGroupSeal.js'[37m
+        ╵                                 [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ava/AvaChatPanel.tsx:31:44:
+[37m      31 │ ...countFreshnessSnapshot } from [32m'../../hooks/useAccountFreshness.js'[37m
+         ╵                                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/vaccine/vaccine-view-utils.ts:8:7:
+[37m      8 │ } from [32m'./vaccine-conference.js'[37m
+        ╵        [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/brands/FleuryLaboratoryCell.tsx:8:7:
+[37m      8 │ } from [32m'../../lib/fleury-laboratory.js'[37m
+        ╵        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/measurements/MeasurementChartRenderer.tsx:16:40:
+[37m      16 │ ...rt { MeasurementChartTooltip } from [32m'./MeasurementChartTooltip.js'[37m
+         ╵                                        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/vaccine/vaccine-view-utils.ts:17:7:
+[37m      17 │ } from [32m'./vaccine-display-helpers.js'[37m
+         ╵        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/EntityClinicalLinkModal.tsx:7:41:
+[37m      7 │ ...{ pickClinicalRelationCode } from [32m'./entity-clinical-link-utils.js'[37m
+        ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/ClinicalEntityFlow.tsx:5:38:
+[37m      5 │ ...rt { sortClinicalFlowNodes } from [32m'./entity-clinical-link-utils.js'[37m
+        ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/vaccine/VaccineAlphabeticalList.tsx:5:34:
+[37m      5 │ import { DOSE_STATUS_COLOR } from [32m'./vaccine-display-helpers.js'[37m
+        ╵                                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ava/AvaChatPanel.tsx:32:36:
+[37m      32 │ import { isLlmQuotaExhausted } from [32m'../../lib/llm-quota.js'[37m
+         ╵                                     [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/EntityClinicalLinkModal.tsx:8:49:
+[37m      8 │ ...calEntityTargetOptions } from [32m'./clinical-entity-target-options.js'[37m
+        ╵                                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ava/AvaChatPanel.tsx:34:30:
+[37m      34 │ import { AvaChatBubble } from [32m'./AvaChatBubble.js'[37m
+         ╵                               [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/vaccine/VaccineScheduleCarousel.tsx:5:59:
+[37m      5 │ ...OLOR, formatCalendarMonthYear } from [32m'./vaccine-display-helpers.js'[37m
+        ╵                                         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/vaccine/VaccineAlphabeticalList.tsx:7:33:
+[37m      7 │ import { AIYRACARE_TOKENS } from [32m'../../theme/aiyracare-tokens.js'[37m
+        ╵                                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/integrations/NewIntegrationModal.tsx:10:43:
+[37m      10 │ ...leuryGroupIntegrationCard } from [32m'./FleuryGroupIntegrationCard.js'[37m
+         ╵                                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/EntityClinicalLinkModal.tsx:9:43:
+[37m      9 │ ...ClinicalEntityTargetPicker } from [32m'./ClinicalEntityTargetPicker.js'[37m
+        ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/HealthThreadArtifactActions.tsx:7:38:
+[37m      7 │ import { CarePlaceAutocomplete } from [32m'../ui/CarePlaceAutocomplete.js'[37m
+        ╵                                       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ui/AiInsightCard.tsx:3:33:
+[37m      3 │ import { AI_INSIGHT_STYLE } from [32m'../../theme/aiyracare-tokens.js'[37m
+        ╵                                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/vaccine/VaccineScheduleCarousel.tsx:7:33:
+[37m      7 │ import { AIYRACARE_TOKENS } from [32m'../../theme/aiyracare-tokens.js'[37m
+        ╵                                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/ClinicalLinkModal.tsx:11:7:
+[37m      11 │ } from [32m'./entity-clinical-link-utils.js'[37m
+         ╵        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ava/AvaChatPanel.tsx:35:31:
+[37m      35 │ import { AvaReportModal } from [32m'./AvaReportModal.js'[37m
+         ╵                                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/InlineExamMarkersList.tsx:3:37:
+[37m      3 │ import { AvaAcceleratorButton } from [32m'../ava/AvaAcceleratorButton.js'[37m
+        ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/EntityClinicalLinkModal.tsx:10:42:
+[37m      10 │ ... ClinicalRelationTypeField } from [32m'./ClinicalRelationTypeField.js'[37m
+         ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ava/AvaChatPanel.tsx:36:32:
+[37m      36 │ import { AvaContextChips } from [32m'./AvaContextChips.js'[37m
+         ╵                                 [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/HealthThreadArtifactActions.tsx:14:54:
+[37m      14 │ ...kRoleHelpButton, LinkRoleHelpModal } from [32m'./LinkRoleHelpModal.js'[37m
+         ╵                                              [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/EntityClinicalLinkModal.tsx:11:41:
+[37m      11 │ ... { useClinicalRelationTypes } from [32m'./useClinicalRelationTypes.js'[37m
+         ╵                                       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/scraper/SyncJobCardView.tsx:3:57:
+[37m      3 │ ...Chip, SYNC_CHIP_LOGO_MAX } from [32m'../brands/BrandIntegrationChip.js'[37m
+        ╵                                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/ClinicalLinkModal.tsx:13:42:
+[37m      13 │ ... ClinicalRelationTypeField } from [32m'./ClinicalRelationTypeField.js'[37m
+         ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ava/AvaChatPanel.tsx:37:39:
+[37m      37 │ import { AvaContextAccelerators } from [32m'./AvaContextAccelerators.js'[37m
+         ╵                                        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/exam/ExamSliceViewer.tsx:11:79:
+[37m      11 │ ...nt, type SliceLoadProgress } from [32m'../../lib/exam-slice-loader.js'[37m
+         ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/ExamMarkersDashboard.tsx:33:37:
+[37m      33 │ import { AvaAcceleratorButton } from [32m'../ava/AvaAcceleratorButton.js'[37m
+         ╵                                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/patient/ClinicalLinkModal.tsx:14:41:
+[37m      14 │ ... { useClinicalRelationTypes } from [32m'./useClinicalRelationTypes.js'[37m
+         ╵                                       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/ava/AvaChatPanel.tsx:38:35:
+[37m      38 │ import { AvaProposedActions } from [32m'./AvaProposedActions.js'[37m
+         ╵                                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1217:27:
+[37m      1217 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42185:15)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42364:9)
+    at resolveId (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14314:40)
+    at resolve (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14325:28)
+    at file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14534:34
+    at requestCallbacks.on-resolve (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1217:28)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../../node_modules/vite/node_modules/esbuild/lib/main.js:1141:20:
+[37m      1141 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14529:13)
+    at handlePlugins (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:14266:24)
+    at async file:///C:/Users/rafae/Workspace/aiyra-care/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:47144:28
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/components/scraper/SyncJobCardView.tsx:6:35:
+[37m      6 │ import { useSyncJobProgress } from [32m'../../hooks/useSyncJobProgress.js'[37m
+        ╵                                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+    at failureErrorWithLog (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1467:15)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:926:25
+    at runOnEndCallbacks (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:1307:45)
+    at buildResponseToResult (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:924:7)
+    at C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:936:9
+    at new Promise (<anonymous>)
+    at requestCallbacks.on-end (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:935:54)
+    at handleRequest (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\rafae\Workspace\aiyra-care\node_modules\vite\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:507:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
