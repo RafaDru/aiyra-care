@@ -14,6 +14,7 @@ import type {
   Authorization,
   Diagnosis,
   Exam,
+  MarkerTrendGroup,
   MedicalRecord,
   Medication,
   Vaccine,
@@ -271,6 +272,12 @@ export const api = {
         body: JSON.stringify(data),
       }),
     delete: (id: string) => request<void>(`/exams/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  },
+  examMarkers: {
+    getTrends: (patientId: string) =>
+      request<MarkerTrendGroup[]>(
+        `/patients/${encodeURIComponent(patientId)}/exam-markers/trends`,
+      ),
   },
   medications: {
     list: (patientId: string) =>

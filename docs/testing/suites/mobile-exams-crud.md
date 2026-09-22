@@ -22,7 +22,7 @@
 ## Fora de escopo (mobile)
 
 - Upload laudo PDF / OCR
-- Dashboard de marcadores
+- Dashboard de marcadores → suite [`mobile-exam-markers-chart`](mobile-exam-markers-chart.md) (Bloco 2)
 
 ## Estrutural
 

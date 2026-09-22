@@ -287,6 +287,28 @@ export interface OwnedPatient {
   name: string
 }
 
+export interface MarkerTrendPoint {
+  collectedAt: string
+  numericValue: number | null
+  displayValue: string
+  unit: string | null
+  status: string
+  examId: string
+}
+
+export interface MarkerTrendGroup {
+  markerName: string
+  technicalName?: string
+  unit?: string
+  referenceRange?: string
+  refLow?: number
+  refHigh?: number
+  latestValue: string
+  latestStatus: string
+  latestCollectedAt: string
+  points: MarkerTrendPoint[]
+}
+
 export interface Exam {
   id: string
   patientId: string

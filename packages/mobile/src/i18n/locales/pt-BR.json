@@ -216,7 +216,9 @@
     "exams": {
       "title": "Exames",
       "subtitle": "Resumo somente leitura — laudos, marcadores e upload ficam no app web.",
-      "subtitleTx": "Cadastre e edite exames manuais neste aparelho. Laudo PDF, OCR e marcadores no web.",
+      "subtitleTx": "Cadastre exames manuais e veja tendências de marcadores. Laudo PDF e OCR no web.",
+      "subviewList": "Lista",
+      "subviewMarkers": "Marcadores",
       "add": "Adicionar exame",
       "addTitle": "Novo exame",
       "editTitle": "Editar exame",
@@ -237,7 +239,7 @@
       "deleteMessage": "Esta ação não pode ser desfeita. Laudos anexados no web podem ficar órfãos.",
       "deleteConfirm": "Excluir",
       "cancel": "Cancelar",
-      "webHintTx": "Upload de laudo PDF, OCR e dashboard de marcadores: use o navegador.",
+      "webHintTx": "Upload de laudo PDF e OCR: use o navegador.",
       "webHint": "Adicionar exame, PDF e dashboard de marcadores: use o navegador.",
       "openWeb": "Abrir Exames no navegador",
       "empty": "Nenhum exame registrado para este perfil. Cadastre manualmente ou sincronize integrações.",
@@ -245,6 +247,16 @@
       "listCount_other": "{{count}} exames",
       "loadError": "Erro ao carregar exames",
       "hasResultFile": "Laudo anexado (ver no web)"
+    },
+    "examMarkers": {
+      "subtitle": "Tendências somente leitura — mesma API do dashboard web.",
+      "searchPlaceholder": "Buscar marcador…",
+      "emptyTitle": "Marcadores",
+      "empty": "Nenhum marcador numérico importado ainda. Sincronize exames ou cadastre no web.",
+      "loadError": "Erro ao carregar marcadores",
+      "statusCritical": "Crítico",
+      "statusAltered": "Alterado",
+      "statusNormal": "Normal"
     },
     "medications": {
       "title": "Medicamentos",

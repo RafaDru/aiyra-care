@@ -16,7 +16,7 @@ Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Su
 
 Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesmo BFF FastAPI em `:3010`.
 
-**Plano em quatro blocos (sequência fixa):** transacional → gráficos → Ava → estética — ver [`MOBILE_EVOLUTION_BLOCKS.md`](../MOBILE_EVOLUTION_BLOCKS.md). Status atual: fim do shell **leitura**; **Bloco 1 (transacional)** é o próximo.
+**Plano em quatro blocos (sequência fixa):** transacional → gráficos → Ava → estética — ver [`MOBILE_EVOLUTION_BLOCKS.md`](../MOBILE_EVOLUTION_BLOCKS.md). **Bloco 1** em PR #68; **Bloco 2** iniciado (marcadores de exame read-only).
 
 ## Entrega dual (80/20)
 
@@ -40,7 +40,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 |-----|--------|----------|
 | **Carteira** | `PatientWalletTab` — CNS, convênios, link web | QR token, sync modal, copay detalhada |
 | **Convênios** | `PatientCoverageTab` — planos/carteirinha read-only + link web | Vincular plano, cartão virtual |
-| **Exames** | `PatientExamsTab` — **CRUD manual** + pull-to-refresh, link web | Marcadores, laudos PDF/OCR |
+| **Exames** | `PatientExamsTab` — **CRUD manual** + sub-aba **Marcadores** (`PatientExamMarkersPanel`, SVG) | Laudos PDF/OCR |
 | **Medicamentos** | `PatientMedicationsTab` — **CRUD** + em uso/encerrado | Administração, lembretes |
 | **Vacinas** | `PatientVaccinesTab` — **CRUD** + pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
 | **Alergias** | `PatientAllergiesTab` — **CRUD** + pull-to-refresh | — |
@@ -89,6 +89,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Bloco 1 — paciente / onboarding TX** | [`mobile-patient-tx`](../../docs/testing/suites/mobile-patient-tx.md) · `npm run qa:run -- --suite mobile-patient-tx` |
 | **Bloco 1 — documentos** | [`mobile-documents-tx`](../../docs/testing/suites/mobile-documents-tx.md) · `npm run qa:run -- --suite mobile-documents-tx` |
 | **Bloco 1 — família TX** | [`mobile-family-tx`](../../docs/testing/suites/mobile-family-tx.md) · `npm run qa:run -- --suite mobile-family-tx` |
+| **Bloco 2 — marcadores (gráfico)** | [`mobile-exam-markers-chart`](../../docs/testing/suites/mobile-exam-markers-chart.md) · `npm run qa:run -- --suite mobile-exam-markers-chart` |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |
