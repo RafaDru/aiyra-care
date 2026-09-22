@@ -233,6 +233,38 @@ export const api = {
   medicalRecords: {
     list: (patientId: string) =>
       request<MedicalRecord[]>(`/medical-records?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      recordDate: string
+      recordType: string
+      description?: string
+      doctorName?: string
+      doctorCrm?: string
+      specialty?: string
+      clinicName?: string
+      notes?: string
+      source?: string
+    }) => request<MedicalRecord>('/medical-records', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        recordDate: string
+        recordType: string
+        description: string
+        doctorName: string
+        doctorCrm: string
+        specialty: string
+        clinicName: string
+        notes: string
+        source: string
+      }>,
+    ) =>
+      request<MedicalRecord>(`/medical-records/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<void>(`/medical-records/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   scheduledEvents: {
     list: (patientId: string) =>

@@ -44,7 +44,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Medicamentos** | `PatientMedicationsTab` — lista resumo (ativo/encerrado), pull-to-refresh, link web | CRUD, administração, lembretes |
 | **Vacinas** | `PatientVaccinesTab` — doses aplicadas, pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
 | **Alergias** | `PatientAllergiesTab` — **CRUD** + pull-to-refresh | — |
-| **Atendimentos** | `PatientMedicalRecordsTab` — histórico resumido, link web | Sequência clínica, vínculos (CRUD mobile em curso) |
+| **Atendimentos** | `PatientMedicalRecordsTab` — **CRUD** + link web (sequência) | Encadeamento Neo4j / vínculos avançados |
 | **Autorizações** | `PatientAuthorizationsTab` — lista read-only | PDF, sequência |
 | **Diagnósticos** | `PatientDiagnosesTab` — lista read-only | CRUD (próximo no Bloco 1) |
 | **Integrações** | Status + link web | Login portal, `POST …/sync` |
@@ -80,6 +80,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 |--------|---------|
 | **Smoke mobile (manual + estrutural)** | [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile` |
 | **Bloco 1 — alergias CRUD** | [`mobile-allergies-crud`](../../docs/testing/suites/mobile-allergies-crud.md) · `npm run qa:run -- --suite mobile-allergies-crud` |
+| **Bloco 1 — atendimentos CRUD** | [`mobile-medical-records-crud`](../../docs/testing/suites/mobile-medical-records-crud.md) · `npm run qa:run -- --suite mobile-medical-records-crud` |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |

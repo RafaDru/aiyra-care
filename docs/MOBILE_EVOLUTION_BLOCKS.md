@@ -12,7 +12,7 @@
 | **Em PR** | [#66](https://github.com/RafaDru/aiyra-care/pull/66) settings/telemetria/Ava markdown · [#67](https://github.com/RafaDru/aiyra-care/pull/67) leitura clínica |
 | **Bloco 1 em curso** | Branch `cursor/mobile-bloco1-tx-a5c1` — autorizações/diagnósticos read-only; **alergias CRUD** + `FormSheet` |
 
-**Próximo passo dentro do Bloco 1:** CRUD atendimentos → medicamentos → vacinas → exames; depois agenda transacional.
+**Próximo passo dentro do Bloco 1:** CRUD medicamentos → vacinas → exames; depois agenda transacional. (Atendimentos CRUD na branch `cursor/mobile-bloco1-tx-a5c1`.)
 
 ---
 

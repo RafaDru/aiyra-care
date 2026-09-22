@@ -327,6 +327,20 @@
       "businessActions": ["mobile.allergies_crud"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 8
+    },
+    {
+      "id": "mobile-medical-records-crud",
+      "domain": "mobile",
+      "title": "Mobile — atendimentos CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-medical-records-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.medical_records_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
     }
   ],
   "lanes": {
@@ -372,7 +386,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud"]
     }
   }
 }

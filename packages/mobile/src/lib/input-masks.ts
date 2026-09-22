@@ -19,6 +19,19 @@ export function formatDateBrInput(value: string): string {
   return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`
 }
 
+export function isoDateToBrInput(iso: string | null | undefined): string {
+  if (!iso) return ''
+  try {
+    const d = new Date(iso)
+    const dd = String(d.getDate()).padStart(2, '0')
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const yyyy = d.getFullYear()
+    return `${dd}/${mm}/${yyyy}`
+  } catch {
+    return ''
+  }
+}
+
 export function parseDateBrToIso(raw: string): string | null {
   const m = raw.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
   if (!m) return null

@@ -43,6 +43,23 @@ const RECORD_SOURCE_LABELS: Record<string, string> = {
   portal: 'Portal',
 }
 
+const RECORD_TYPE_LABELS: Record<string, string> = {
+  consulta: 'Consulta',
+  retorno: 'Retorno',
+  'pronto-socorro': 'Pronto socorro',
+  teleconsulta: 'Teleconsulta',
+  outro: 'Outro',
+}
+
+export const MEDICAL_RECORD_TYPES = ['consulta', 'retorno', 'pronto-socorro', 'teleconsulta', 'outro'] as const
+
+export type MedicalRecordType = (typeof MEDICAL_RECORD_TYPES)[number]
+
+export function formatRecordType(recordType: string | null | undefined): string {
+  if (!recordType) return '—'
+  return RECORD_TYPE_LABELS[recordType] ?? recordType.replace(/-/g, ' ')
+}
+
 export function formatRecordSource(source: string | null | undefined): string {
   if (!source) return '—'
   return RECORD_SOURCE_LABELS[source] ?? source.replace(/_/g, ' ')
