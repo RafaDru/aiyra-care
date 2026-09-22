@@ -93,3 +93,28 @@ ON CONFLICT (account_id, patient_id) DO NOTHING;
 ```
 
 Sem as variáveis Supabase na API, o enforcement fica desligado (dev local aberto).
+
+## RLS / PostgREST
+
+O Postgres do projeto Supabase (`lyljosprzmtapkocmxxa`) expõe o schema `public` via **PostgREST** (roles `anon` e `authenticated`). Dados clínicos e vínculos de conta **não** devem ser lidos pelo cliente Supabase JS: web e mobile usam a **API** (`Authorization: Bearer` + rotas Fastify); a API conecta com `DATABASE_URL` (role `postgres` / pool direto) e valida escopo com `patient_memberships`, `owner_account_id` e guards na aplicação.
+
+**Migration `071_clinical_tables_rls.sql`** (aplicar no cloud pelo Rafael):
+
+- `ENABLE ROW LEVEL SECURITY` em: `patients`, `medical_records`, `diagnoses`, `medications`, `vaccines`, `allergies`, `exams`, `growth_records`, `documents`, `app_accounts`, `patient_memberships`.
+- **Sem policies** para `anon` / `authenticated` → negação por padrão no PostgREST.
+- `REVOKE ALL` dessas tabelas para `anon` e `authenticated` (camada extra além do RLS).
+- **Não** altera o caminho da API: conexão direta e `service_role` no Auth/admin continuam fora do PostgREST clínico.
+
+Aplicar local:
+
+```powershell
+node packages/api/scripts/apply-migration-071.mjs
+```
+
+Cloud (mesmo padrão das outras migrations):
+
+```powershell
+node scripts/apply-sql.mjs database/relational/071_clinical_tables_rls.sql --cloud
+```
+
+Se no futuro algum fluxo precisar de `supabase.from()` em tabela clínica, criar policy explícita (ex.: `patient_id` ∈ membership do `auth.uid()`) — hoje não há esse uso no monorepo.
