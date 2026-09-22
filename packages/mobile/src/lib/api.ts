@@ -11,6 +11,8 @@ import type {
   LegalDocumentKind,
   LegalDocumentWithContent,
   Allergy,
+  Authorization,
+  Diagnosis,
   Exam,
   MedicalRecord,
   Medication,
@@ -22,6 +24,8 @@ import type {
   Patient,
   PlanMembershipWithPlan,
   ProfileShare,
+  PatientDocument,
+  PatientAccessGrant,
 } from './api.types'
 import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from './api.types'
 import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream'
@@ -87,6 +91,60 @@ export const api = {
     get: (id: string) => request<Patient>(`/patients/${id}`),
     create: (data: CreatePatientInput) =>
       request<Patient>('/patients', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        name: string
+        birthDate: string
+        gender: 'male' | 'female'
+        bloodType: string
+        weightKg: number
+        heightCm: number
+        cpf: string
+        cns: string
+      }>,
+    ) =>
+      request<Patient>(`/patients/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/patients/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    createClinicalExportShare: (
+      id: string,
+      body: { mode?: 'summary' | 'full'; ttlHours?: number } = {},
+    ) =>
+      request<{ token: string; expiresAt: string; shareUrl: string; referralCode: string | null }>(
+        `/patients/${encodeURIComponent(id)}/clinical-export/shares`,
+        { method: 'POST', body: JSON.stringify(body) },
+      ),
+  },
+  documents: {
+    list: (patientId: string) =>
+      request<PatientDocument[]>(`/documents?patientId=${encodeURIComponent(patientId)}`),
+    delete: (id: string) => request<void>(`/documents/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    upload: async (
+      patientId: string,
+      documentType: PatientDocument['documentType'],
+      file: { uri: string; name: string; mimeType?: string | null },
+    ) => {
+      const form = new FormData()
+      form.append('patientId', patientId)
+      form.append('documentType', documentType)
+      form.append('file', {
+        uri: file.uri,
+        name: file.name,
+        type: file.mimeType ?? 'application/octet-stream',
+      } as unknown as Blob)
+      return request<PatientDocument>('/documents/upload', { method: 'POST', body: form })
+    },
+  },
+  patientAccess: {
+    listGrants: (patientId: string) =>
+      request<PatientAccessGrant[]>(`/patients/${encodeURIComponent(patientId)}/access-grants`),
+    revokeGrant: (patientId: string, grantId: string) =>
+      request<void>(`/patients/${encodeURIComponent(patientId)}/access-grants/${encodeURIComponent(grantId)}`, {
+        method: 'DELETE',
+      }),
   },
   auth: {
     sync: () => request<AuthSyncResponse>('/auth/sync', { method: 'POST' }),
@@ -188,26 +246,228 @@ export const api = {
   exams: {
     list: (patientId: string) =>
       request<Exam[]>(`/exams?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      examType: string
+      examDate: string
+      resultSummary?: string
+      laboratory?: string
+      notes?: string
+      source?: string
+    }) => request<Exam>('/exams', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        examType: string
+        examDate: string
+        resultSummary: string
+        laboratory: string
+        notes: string
+        source: string
+      }>,
+    ) =>
+      request<Exam>(`/exams/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/exams/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   medications: {
     list: (patientId: string) =>
       request<Medication[]>(`/medications?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      genericName: string
+      brandName?: string
+      dosage?: string
+      frequency?: string
+      route?: string
+      duration?: string
+      startDate?: string
+      startedAt?: string
+      endDate?: string
+      endDateIsProjected?: boolean
+      prescribingDoctor?: string
+      notes?: string
+      isActive?: boolean
+    }) => request<Medication>('/medications', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: Partial<{
+      genericName: string
+      brandName: string
+      dosage: string
+      frequency: string
+      route: string
+      duration: string
+      startDate: string
+      startedAt: string
+      endDate: string
+      endDateIsProjected: boolean
+      prescribingDoctor: string
+      notes: string
+      isActive: boolean
+    }>) =>
+      request<Medication>(`/medications/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/medications/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   vaccines: {
     list: (patientId: string) =>
       request<Vaccine[]>(`/vaccines?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      vaccineName: string
+      applicationDate: string
+      doseNumber?: number
+      batchNumber?: string
+      nextDoseDate?: string
+      appliedBy?: string
+      clinic?: string
+      notes?: string
+      source?: string
+    }) => request<Vaccine>('/vaccines', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        vaccineName: string
+        applicationDate: string
+        doseNumber: number
+        batchNumber: string
+        nextDoseDate: string
+        appliedBy: string
+        clinic: string
+        notes: string
+        source: string
+      }>,
+    ) =>
+      request<Vaccine>(`/vaccines/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/vaccines/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   allergies: {
     list: (patientId: string) =>
       request<Allergy[]>(`/allergies?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      allergen: string
+      reaction?: string
+      severity?: string
+      diagnosedDate?: string
+      notes?: string
+    }) => request<Allergy>('/allergies', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        allergen: string
+        reaction: string
+        severity: string
+        diagnosedDate: string
+        notes: string
+      }>,
+    ) => request<Allergy>(`/allergies/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/allergies/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  },
+  diagnoses: {
+    list: (patientId: string) =>
+      request<Diagnosis[]>(`/diagnoses?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      diagnosisName: string
+      diagnosisCode?: string
+      description?: string
+      isChronic?: boolean
+      diagnosedDate?: string
+      status?: string
+    }) => request<Diagnosis>('/diagnoses', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        diagnosisName: string
+        diagnosisCode: string
+        description: string
+        isChronic: boolean
+        diagnosedDate: string
+        status: string
+      }>,
+    ) =>
+      request<Diagnosis>(`/diagnoses/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/diagnoses/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  },
+  authorizations: {
+    list: (patientId: string) =>
+      request<Authorization[]>(`/authorizations?patientId=${encodeURIComponent(patientId)}`),
   },
   medicalRecords: {
     list: (patientId: string) =>
       request<MedicalRecord[]>(`/medical-records?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      recordDate: string
+      recordType: string
+      description?: string
+      doctorName?: string
+      doctorCrm?: string
+      specialty?: string
+      clinicName?: string
+      notes?: string
+      source?: string
+    }) => request<MedicalRecord>('/medical-records', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        recordDate: string
+        recordType: string
+        description: string
+        doctorName: string
+        doctorCrm: string
+        specialty: string
+        clinicName: string
+        notes: string
+        source: string
+      }>,
+    ) =>
+      request<MedicalRecord>(`/medical-records/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<void>(`/medical-records/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   scheduledEvents: {
     list: (patientId: string) =>
       request<ScheduledEvent[]>(`/scheduled-events?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      title: string
+      scheduledAt: string
+      description?: string
+      endAt?: string
+      kind?: ScheduledEvent['kind']
+      status?: ScheduledEvent['status']
+    }) => request<ScheduledEvent>('/scheduled-events', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        title: string
+        description: string
+        scheduledAt: string
+        endAt: string | null
+        kind: ScheduledEvent['kind']
+        status: ScheduledEvent['status']
+      }>,
+    ) =>
+      request<ScheduledEvent>(`/scheduled-events/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<void>(`/scheduled-events/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   ava: {
     listConversations: (patientId?: string) => {

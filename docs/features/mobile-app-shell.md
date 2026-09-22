@@ -40,11 +40,13 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 |-----|--------|----------|
 | **Carteira** | `PatientWalletTab` — CNS, convênios, link web | QR token, sync modal, copay detalhada |
 | **Convênios** | `PatientCoverageTab` — planos/carteirinha read-only + link web | Vincular plano, cartão virtual |
-| **Exames** | `PatientExamsTab` — lista resumo, pull-to-refresh | CRUD, marcadores, laudos PDF |
-| **Medicamentos** | `PatientMedicationsTab` — lista resumo (ativo/encerrado), pull-to-refresh, link web | CRUD, administração, lembretes |
-| **Vacinas** | `PatientVaccinesTab` — doses aplicadas, pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
-| **Alergias** | `PatientAllergiesTab` — lista read-only, pull-to-refresh, link web | CRUD |
-| **Atendimentos** | `PatientMedicalRecordsTab` — histórico resumido, link web | Sequência clínica, vínculos |
+| **Exames** | `PatientExamsTab` — **CRUD manual** + pull-to-refresh, link web | Marcadores, laudos PDF/OCR |
+| **Medicamentos** | `PatientMedicationsTab` — **CRUD** + em uso/encerrado | Administração, lembretes |
+| **Vacinas** | `PatientVaccinesTab` — **CRUD** + pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
+| **Alergias** | `PatientAllergiesTab` — **CRUD** + pull-to-refresh | — |
+| **Atendimentos** | `PatientMedicalRecordsTab` — **CRUD** + link web (sequência) | Encadeamento Neo4j / vínculos avançados |
+| **Autorizações** | `PatientAuthorizationsTab` — lista read-only | PDF, sequência |
+| **Diagnósticos** | `PatientDiagnosesTab` — **CRUD** + pull-to-refresh | Busca CID avançada (web) |
 | **Integrações** | Status + link web | Login portal, `POST …/sync` |
 
 ## Marco M2 (login + início)
@@ -77,6 +79,16 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | Escopo | Comando |
 |--------|---------|
 | **Smoke mobile (manual + estrutural)** | [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile` |
+| **Bloco 1 — alergias CRUD** | [`mobile-allergies-crud`](../../docs/testing/suites/mobile-allergies-crud.md) · `npm run qa:run -- --suite mobile-allergies-crud` |
+| **Bloco 1 — atendimentos CRUD** | [`mobile-medical-records-crud`](../../docs/testing/suites/mobile-medical-records-crud.md) · `npm run qa:run -- --suite mobile-medical-records-crud` |
+| **Bloco 1 — medicamentos CRUD** | [`mobile-medications-crud`](../../docs/testing/suites/mobile-medications-crud.md) · `npm run qa:run -- --suite mobile-medications-crud` |
+| **Bloco 1 — vacinas CRUD** | [`mobile-vaccines-crud`](../../docs/testing/suites/mobile-vaccines-crud.md) · `npm run qa:run -- --suite mobile-vaccines-crud` |
+| **Bloco 1 — exames CRUD** | [`mobile-exams-crud`](../../docs/testing/suites/mobile-exams-crud.md) · `npm run qa:run -- --suite mobile-exams-crud` |
+| **Bloco 1 — agenda transacional** | [`mobile-agenda-crud`](../../docs/testing/suites/mobile-agenda-crud.md) · `npm run qa:run -- --suite mobile-agenda-crud` |
+| **Bloco 1 — diagnósticos CRUD** | [`mobile-diagnoses-crud`](../../docs/testing/suites/mobile-diagnoses-crud.md) · `npm run qa:run -- --suite mobile-diagnoses-crud` |
+| **Bloco 1 — paciente / onboarding TX** | [`mobile-patient-tx`](../../docs/testing/suites/mobile-patient-tx.md) · `npm run qa:run -- --suite mobile-patient-tx` |
+| **Bloco 1 — documentos** | [`mobile-documents-tx`](../../docs/testing/suites/mobile-documents-tx.md) · `npm run qa:run -- --suite mobile-documents-tx` |
+| **Bloco 1 — família TX** | [`mobile-family-tx`](../../docs/testing/suites/mobile-family-tx.md) · `npm run qa:run -- --suite mobile-family-tx` |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |
@@ -92,8 +104,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 ## Pendente
 
 - Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail)
-- Onboarding mobile — passos 1–2 (titular + dependentes) em `/(app)/onboarding`, paridade com web
-- **Agenda** — lista read-only com ícones por tipo + link web (`PatientAgendaTab`)
+- Onboarding mobile — titular + dependentes; **CRUD perfil** em Dados básicos + Início (Adicionar perfil)
+- **Agenda** — CRUD eventos (consulta/lembrete/tarefa) em `PatientAgendaTab`; calendário/ICS/sync no web
 - Demais tabs clínicas (autorizações, diagnósticos, crescimento, …) e Convênios UI completa
 - Microsoft OAuth no mobile
 - Suite Playwright mobile (CI)

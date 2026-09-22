@@ -313,6 +313,146 @@
       "businessActions": ["mobile.login", "mobile.wallet_read", "mobile.exams_read", "mobile.medications_read", "mobile.vaccines_read", "mobile.oauth_google"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 15
+    },
+    {
+      "id": "mobile-allergies-crud",
+      "domain": "mobile",
+      "title": "Mobile — alergias CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-allergies-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.allergies_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "mobile-medical-records-crud",
+      "domain": "mobile",
+      "title": "Mobile — atendimentos CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-medical-records-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.medical_records_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-medications-crud",
+      "domain": "mobile",
+      "title": "Mobile — medicamentos CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-medications-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.medications_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "mobile-vaccines-crud",
+      "domain": "mobile",
+      "title": "Mobile — vacinas CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-vaccines-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.vaccines_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-exams-crud",
+      "domain": "mobile",
+      "title": "Mobile — exames CRUD manual (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-exams-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.exams_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "mobile-agenda-crud",
+      "domain": "mobile",
+      "title": "Mobile — agenda transacional (Bloco 1)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-agenda-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.agenda_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "mobile-diagnoses-crud",
+      "domain": "mobile",
+      "title": "Mobile — diagnósticos CRUD (Bloco 1 transacional)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-diagnoses-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.diagnoses_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-patient-tx",
+      "domain": "mobile",
+      "title": "Mobile — paciente / onboarding transacional",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-patient-tx.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.patient_tx"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "mobile-documents-tx",
+      "domain": "mobile",
+      "title": "Mobile — documentos upload/export",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-documents-tx.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.documents_tx"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-family-tx",
+      "domain": "mobile",
+      "title": "Mobile — família transacional",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-family-tx.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.family_tx"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 12
     }
   ],
   "lanes": {
@@ -358,7 +498,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud", "mobile-agenda-crud", "mobile-diagnoses-crud", "mobile-patient-tx", "mobile-documents-tx", "mobile-family-tx"]
     }
   }
 }

@@ -9,9 +9,10 @@
 | Fase concluída / em curso | Conteúdo |
 |---------------------------|----------|
 | **Shell M2–M6 (leitura)** | Auth, lista, perfil, tabs read-only (carteira, exames, meds, vacinas, alergias, atendimentos, agenda, integrações status), família/compliance, Ava chat básico + dock |
-| **Em PR** | [#66](https://github.com/RafaDru/aiyra-care/pull/66) settings/telemetria/Ava markdown · [#67](https://github.com/RafaDru/aiyra-care/pull/67) alergias + atendimentos read-only |
+| **Em PR** | [#66](https://github.com/RafaDru/aiyra-care/pull/66) settings/telemetria/Ava markdown · [#67](https://github.com/RafaDru/aiyra-care/pull/67) leitura clínica |
+| **Bloco 1 em curso** | Branch `cursor/mobile-bloco1-tx-a5c1` — autorizações/diagnósticos read-only; **alergias CRUD** + `FormSheet` |
 
-**Próximo passo dentro do plano:** iniciar **Bloco 1** (transacional) — não Bloco 2/3/4.
+**Próximo passo dentro do Bloco 1:** export/registro rápido, integrações (criar link); convênios vinculados seguem via sync/web. (Paciente, documentos, família TX em `cursor/mobile-bloco1-tx-a5c1` / PR #68.)
 
 ---
 

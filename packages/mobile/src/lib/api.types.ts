@@ -6,11 +6,43 @@ export interface Patient {
   bloodType: string | null
   cpf?: string | null
   cns?: string | null
+  weightKg?: number | null
+  heightCm?: number | null
   ageCategory: 'children' | 'adolescents' | 'adults'
   isSelf?: boolean
   membershipRole?: 'self' | 'guardian' | string
   createdAt: string
   updatedAt: string
+}
+
+export type PatientDocumentType =
+  | 'prescription'
+  | 'exam'
+  | 'report'
+  | 'vaccine_card'
+  | 'other'
+  | 'certidao_nascimento'
+  | 'rg'
+  | 'cpf_card'
+  | 'cnh'
+
+export interface PatientDocument {
+  id: string
+  patientId: string
+  documentType: PatientDocumentType
+  originalFilename: string
+  fileSizeBytes: number | null
+  mimeType: string | null
+  createdAt: string
+}
+
+export interface PatientAccessGrant {
+  id: string
+  accountId: string
+  accessLevel: string
+  membershipRole: string
+  email?: string | null
+  displayName?: string | null
 }
 
 export interface InsurancePlan {
@@ -299,6 +331,37 @@ export interface Allergy {
   diagnosedDate: string | null
   notes: string | null
   createdAt: string
+}
+
+export interface Diagnosis {
+  id: string
+  patientId: string
+  medicalRecordId: string | null
+  diagnosisCode: string | null
+  diagnosisName: string
+  description: string | null
+  isChronic: boolean
+  diagnosedDate: string | null
+  status: string | null
+  createdAt: string
+}
+
+export interface Authorization {
+  id: string
+  patientId: string
+  procedureCode: string | null
+  procedureDescription: string | null
+  doctorName: string | null
+  clinicName: string | null
+  authorizationDate: string | null
+  validityDate: string | null
+  status: string
+  guideNumber: string | null
+  solicitationNumber: string | null
+  specialty: string | null
+  classification: string | null
+  source: string
+  notes: string | null
 }
 
 export interface MedicalRecord {

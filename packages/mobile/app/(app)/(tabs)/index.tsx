@@ -17,6 +17,7 @@ import { groupPatientsByAgeCategory } from '@/lib/patient-list-labels'
 import { primePatientRefs, refForPatient } from '@/lib/patient-route-ref'
 import { StatePanel } from '@/components/StatePanel'
 import { NoticeBanner } from '@/components/ui/NoticeBanner'
+import { HomeAddPatientSheet } from '@/components/patient/HomeAddPatientSheet'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
@@ -32,6 +33,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
 
   const load = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
     if (mode === 'refresh') setRefreshing(true)
@@ -82,7 +84,14 @@ export default function HomeScreen() {
       <Text style={[styles.greeting, { color: tokens.colorTextBase }]}>
         {greetingName ? t('home.greeting', { name: greetingName }) : t('home.greetingGeneric')}
       </Text>
-      <Text style={[styles.subtitle, { color: tokens.colorTextSecondary }]}>Perfis de saúde</Text>
+      <View style={styles.titleRow}>
+        <Text style={[styles.subtitle, { color: tokens.colorTextSecondary, marginBottom: 0 }]}>Perfis de saúde</Text>
+        {configured && authUserId ? (
+          <Pressable onPress={() => setAddOpen(true)} style={[styles.addBtn, { borderColor: tokens.colorPrimary }]}>
+            <Text style={{ color: tokens.colorPrimary, fontWeight: '700', fontSize: 14 }}>{t('patient.home.add')}</Text>
+          </Pressable>
+        ) : null}
+      </View>
 
       {!configured ? (
         <StatePanel
@@ -114,7 +123,7 @@ export default function HomeScreen() {
         ) : patients.length === 0 ? (
           <StatePanel
             tokens={tokens}
-            emptyMessage="Nenhum perfil de saúde ainda. Crie um perfil no web para começar."
+            emptyMessage={t('patient.home.empty')}
           />
         ) : (
           <FlatList
@@ -163,6 +172,8 @@ export default function HomeScreen() {
           <ActivityIndicator color={tokens.colorPrimary} />
         </View>
       ) : null}
+
+      <HomeAddPatientSheet visible={addOpen} onClose={() => setAddOpen(false)} onCreated={() => void load('refresh')} />
     </View>
   )
 }
@@ -170,7 +181,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, padding: 16 },
   greeting: { fontSize: 22, fontWeight: '700' },
-  subtitle: { fontSize: 14, marginBottom: 12, marginTop: 4 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, marginBottom: 12 },
+  subtitle: { fontSize: 14, flex: 1 },
+  addBtn: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8 },
   sectionTitle: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', marginTop: 8, marginBottom: 2 },
   card: { borderWidth: 1, borderRadius: 12, padding: 14 },
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

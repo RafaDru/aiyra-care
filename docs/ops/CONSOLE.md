@@ -28,6 +28,18 @@ Abrir: `http://127.0.0.1:3013` ou `http://127.0.0.1:3023`
 
 Auto-refresh: 60s (aba visível).
 
+## Contextos (Produto · Operação · Plataforma)
+
+O Command Hub usa um seletor no topo para separar **análise de negócio** de **operação ao vivo**:
+
+| Contexto | Abas |
+|----------|------|
+| **Produto** | Negócio, Estratégia (CX), Marketing, Finanças, Ciclo de vida, UX & telemetria, **Mobile**, Custos |
+| **Operação** | Incidentes (Issues), Suporte, Sincronismo, Ava |
+| **Plataforma** | Visão geral, Infra (+ logs do stack) |
+
+Query string: `?context=operation&tab=issues` (persistido em `localStorage`).
+
 ---
 
 ## Aba: Visão geral
@@ -125,6 +137,30 @@ Smoke LLM: `npm run test:smoke:llm`
 | Probe API / Postgres / Neo4j | `runOpsProbe` |
 | Card **Stack Aiyra** | start/stop API + web (só local) |
 | `infra_*` alertas | health checks |
+
+### Logs do stack (tail)
+
+Não é um único “log do sistema”: são **arquivos na raiz do monorepo** (ou preview com sufixo `-preview`), lidos por `GET /api/stack/logs`:
+
+| Aba no card | Arquivo | Conteúdo |
+|-------------|---------|----------|
+| **API** | `api.log` / `api-preview.log` | stdout do Fastify (`scripts/aiyracare-stack.ps1`) |
+| **Web** | `web.log` / `web-preview.log` | stdout do Vite (`:5173` / `:5174`) |
+| **Stack ops** | `stack-ops.log` | Start/Stop/Restart pelo console |
+| **Expo / Metro** | `packages/mobile/.expo-lan-log.txt` | opcional — dev mobile `:8081`, não controlado pelo card |
+
+Se API/Web foram iniciados manualmente sem redirecionar para esses arquivos, o painel mostra “arquivo ainda não existe”. **Reinicie o processo do ops-console** após deploy local para ver o UI novo.
+
+---
+
+## Aba: Mobile (Produto)
+
+**Objetivo:** visão ops do shell Expo — paridade com web, checklist de dev e KPIs de erro `mobile_*` no catálogo.
+
+| Bloco | Fonte |
+|-------|--------|
+| Tabela paridade | `docs/features/mobile-app-shell.md` |
+| Erros 24h | `client_errors` feature `mobile_shell` (quando telemetria existir) |
 
 ---
 
