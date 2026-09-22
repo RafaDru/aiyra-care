@@ -46,7 +46,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Alergias** | `PatientAllergiesTab` — **CRUD** + pull-to-refresh | — |
 | **Atendimentos** | `PatientMedicalRecordsTab` — **CRUD** + link web (sequência) | Encadeamento Neo4j / vínculos avançados |
 | **Autorizações** | `PatientAuthorizationsTab` — lista read-only | PDF, sequência |
-| **Diagnósticos** | `PatientDiagnosesTab` — lista read-only | CRUD (próximo no Bloco 1) |
+| **Diagnósticos** | `PatientDiagnosesTab` — **CRUD** + pull-to-refresh | Busca CID avançada (web) |
 | **Integrações** | Status + link web | Login portal, `POST …/sync` |
 
 ## Marco M2 (login + início)
@@ -85,6 +85,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Bloco 1 — vacinas CRUD** | [`mobile-vaccines-crud`](../../docs/testing/suites/mobile-vaccines-crud.md) · `npm run qa:run -- --suite mobile-vaccines-crud` |
 | **Bloco 1 — exames CRUD** | [`mobile-exams-crud`](../../docs/testing/suites/mobile-exams-crud.md) · `npm run qa:run -- --suite mobile-exams-crud` |
 | **Bloco 1 — agenda transacional** | [`mobile-agenda-crud`](../../docs/testing/suites/mobile-agenda-crud.md) · `npm run qa:run -- --suite mobile-agenda-crud` |
+| **Bloco 1 — diagnósticos CRUD** | [`mobile-diagnoses-crud`](../../docs/testing/suites/mobile-diagnoses-crud.md) · `npm run qa:run -- --suite mobile-diagnoses-crud` |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |

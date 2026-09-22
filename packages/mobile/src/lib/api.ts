@@ -317,6 +317,31 @@ export const api = {
   diagnoses: {
     list: (patientId: string) =>
       request<Diagnosis[]>(`/diagnoses?patientId=${encodeURIComponent(patientId)}`),
+    create: (data: {
+      patientId: string
+      diagnosisName: string
+      diagnosisCode?: string
+      description?: string
+      isChronic?: boolean
+      diagnosedDate?: string
+      status?: string
+    }) => request<Diagnosis>('/diagnoses', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: Partial<{
+        diagnosisName: string
+        diagnosisCode: string
+        description: string
+        isChronic: boolean
+        diagnosedDate: string
+        status: string
+      }>,
+    ) =>
+      request<Diagnosis>(`/diagnoses/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) => request<void>(`/diagnoses/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
   authorizations: {
     list: (patientId: string) =>
