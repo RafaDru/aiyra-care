@@ -270,6 +270,41 @@ export interface Exam {
   createdAt: string
 }
 
+export interface Medication {
+  id: string
+  patientId: string
+  medicalRecordId: string | null
+  genericName: string
+  brandName: string | null
+  dosage: string | null
+  frequency: string | null
+  route: string | null
+  duration: string | null
+  startDate: string | null
+  startedAt: string | null
+  endDate: string | null
+  endDateIsProjected: boolean
+  prescribingDoctor: string | null
+  notes: string | null
+  isActive: boolean
+  createdAt: string
+}
+
+export interface Vaccine {
+  id: string
+  patientId: string
+  vaccineName: string
+  doseNumber: number | null
+  batchNumber: string | null
+  applicationDate: string
+  nextDoseDate: string | null
+  appliedBy: string | null
+  clinic: string | null
+  notes: string | null
+  source: string
+  createdAt: string
+}
+
 export interface IntegrationLink {
   id: string
   patientId: string

@@ -37,9 +37,11 @@ Registrar PASS/FAIL antes do smoke manual.
 | 4 | Seção **Plano** → tab **Carteira** | Cartões CNS/convênio ou empty state; pull-to-refresh recarrega | |
 | 4b | Seção **Plano** → tab **Convênios** | Lista de planos ou empty state; link web | |
 | 5 | Seção **Clínico** → tab **Exames** | Lista de exames (data, laboratório, origem) ou empty state; pull-to-refresh | |
-| 6 | Link «Abrir … no navegador» (Carteira ou Exames) | Abre web no tab correto | |
+| 5a | Seção **Clínico** → tab **Medicamentos** | Lista (posologia, em uso/encerrado) ou empty state; link web | |
+| 5b | Seção **Clínico** → tab **Vacinas** | Lista (dose, data, origem) ou empty state; link web | |
+| 6 | Link «Abrir … no navegador» (Carteira, Exames, Medicamentos ou Vacinas) | Abre web no tab correto | |
 | 7 | Logout → **Continuar com Google** (opcional se Google habilitado no Supabase) | Retorna autenticado; lista carrega | |
-| 8 | Repetir passos 4–5 após login Google | Mesmo comportamento | |
+| 8 | Repetir passos 4–5b após login Google | Mesmo comportamento | |
 
 ## Notas
 

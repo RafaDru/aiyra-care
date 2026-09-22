@@ -303,14 +303,14 @@
     {
       "id": "mobile-shell-smoke",
       "domain": "mobile",
-      "title": "Mobile — shell login, Carteira e Exames (read-only)",
+      "title": "Mobile — shell login, Carteira, Exames, Medicamentos e Vacinas (read-only)",
       "featureId": "mobile-app-shell",
       "lane": "mobile",
       "parallelSafe": false,
       "fixtureId": "core-demo",
       "doc": "docs/testing/suites/mobile-shell-smoke.md",
       "coverage": "partial",
-      "businessActions": ["mobile.login", "mobile.wallet_read", "mobile.exams_read", "mobile.oauth_google"],
+      "businessActions": ["mobile.login", "mobile.wallet_read", "mobile.exams_read", "mobile.medications_read", "mobile.vaccines_read", "mobile.oauth_google"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 15
     }
