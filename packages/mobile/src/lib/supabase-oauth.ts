@@ -1,20 +1,12 @@
 import * as QueryParams from 'expo-auth-session/build/QueryParams'
 import * as WebBrowser from 'expo-web-browser'
-import { makeRedirectUri } from 'expo-auth-session'
+import { Platform } from 'react-native'
+import { getSupabaseOAuthRedirectUri, isLoopbackWebUrl } from '@/lib/oauth-redirect-url'
 import { getSupabase } from '@/lib/supabase'
 
 WebBrowser.maybeCompleteAuthSession()
 
-export function getSupabaseOAuthRedirectUri(): string {
-  const explicit = process.env.EXPO_PUBLIC_OAUTH_REDIRECT_URI?.trim()
-  if (explicit) return explicit
-  const webBase = process.env.EXPO_PUBLIC_WEB_APP_URL?.replace(/\/$/, '')
-  if (webBase) return `${webBase}/mobile-oauth-return`
-  return makeRedirectUri({
-    scheme: 'aiyracare',
-    path: 'auth/callback',
-  })
-}
+export { getSupabaseOAuthRedirectUri } from '@/lib/oauth-redirect-url'
 
 /** Troca tokens do redirect Supabase OAuth por sessão persistida (AsyncStorage). */
 export async function createSessionFromOAuthUrl(url: string): Promise<void> {
@@ -47,8 +39,11 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
   if (!client) throw new Error('Supabase não configurado')
 
   const redirectTo = getSupabaseOAuthRedirectUri()
-  if (__DEV__) {
-    console.log('[Aiyra OAuth] getSupabaseOAuthRedirectUri() =>', redirectTo)
+  console.log('[Aiyra OAuth] redirectTo (signInWithOAuth)', redirectTo)
+  if (Platform.OS !== 'web' && isLoopbackWebUrl(redirectTo)) {
+    console.warn(
+      '[Aiyra OAuth] redirectTo usa loopback no dispositivo — ajuste EXPO_PUBLIC_* ou use npm run mobile:lan',
+    )
   }
   const { data, error } = await client.auth.signInWithOAuth({
     provider,

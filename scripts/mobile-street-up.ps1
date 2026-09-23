@@ -114,10 +114,13 @@ try {
       exit 1
     }
     $env:EXPO_PUBLIC_API_URL = "http://${lan}:3010"
+    $env:EXPO_PUBLIC_WEB_APP_URL = "http://${lan}:5173"
+    $env:EXPO_PUBLIC_OAUTH_REDIRECT_URI = "http://${lan}:5173/mobile-oauth-return"
     $env:REACT_NATIVE_PACKAGER_HOSTNAME = $lan
     $expoLanUrl = "exp://${lan}:8081"
     Set-Content -Path $expoUrlFile -Value $expoLanUrl -Encoding UTF8
     Write-Host "EXPO_PUBLIC_API_URL = $($env:EXPO_PUBLIC_API_URL)" -ForegroundColor Green
+    Write-Host "EXPO_PUBLIC_OAUTH_REDIRECT_URI = $($env:EXPO_PUBLIC_OAUTH_REDIRECT_URI)" -ForegroundColor Green
     Write-Host "REACT_NATIVE_PACKAGER_HOSTNAME = $lan" -ForegroundColor Green
     Write-Host "Expo Go (manual): $expoLanUrl  (tambem em packages/mobile/.expo-url.txt)" -ForegroundColor Green
     Write-Host "Metro: expo start --lan --clear (mesmo Wi-Fi que o celular)" -ForegroundColor Green

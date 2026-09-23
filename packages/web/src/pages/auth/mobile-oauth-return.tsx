@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { resolveMobileOAuthExpoDeepLink } from '../../lib/mobile-oauth-deep-link.js'
 
 /**
  * Landing page for Supabase OAuth on physical devices (Expo Go).
@@ -7,9 +8,7 @@ import { useEffect } from 'react'
 export function MobileOAuthReturnPage() {
   useEffect(() => {
     const host = window.location.hostname || '127.0.0.1'
-    const exp =
-      import.meta.env.VITE_MOBILE_OAUTH_DEEP_LINK?.trim() ||
-      `exp://${host}:8081/--/auth/callback`
+    const exp = resolveMobileOAuthExpoDeepLink(host)
     const suffix = window.location.hash || window.location.search
     if (suffix && exp) {
       window.location.replace(`${exp}${suffix}`)
