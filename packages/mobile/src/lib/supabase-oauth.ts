@@ -47,6 +47,9 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
   if (!client) throw new Error('Supabase não configurado')
 
   const redirectTo = getSupabaseOAuthRedirectUri()
+  if (__DEV__) {
+    console.log('[Aiyra OAuth] getSupabaseOAuthRedirectUri() =>', redirectTo)
+  }
   const { data, error } = await client.auth.signInWithOAuth({
     provider,
     options: {
@@ -58,6 +61,13 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
   if (!data?.url) throw new Error('URL de login não retornada')
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
+  if (__DEV__) {
+    const safeUrl =
+      result.type === 'success' && result.url
+        ? result.url.replace(/#.*$/, '#…')
+        : undefined
+    console.log('[Aiyra OAuth] WebBrowser result', result.type, safeUrl ?? '')
+  }
   if (result.type === 'success' && result.url) {
     await createSessionFromOAuthUrl(result.url)
     return
