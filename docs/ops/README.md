@@ -1,9 +1,11 @@
 # Aiyra: Ops — hub da sessão
 
 > **Sessão Cursor:** use este arquivo como ponto de entrada ao trabalhar observabilidade, alertas, suporte e console `:3013`.  
-> **Última atualização:** 2026-09-20
+> **Última atualização:** 2026-09-23
 
 Este diretório é a **fonte de verdade operacional** do épico `prod-run-intelligence` e complementa [`docs/OBSERVABILITY.md`](../OBSERVABILITY.md) (visão arquitetural) com runbooks, queries e backlog executável.
+
+> **Foco atual (2026-09-23):** Preview/staging **pausado**; Ops em **ambiente único** (integração). Escopo MVP: [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md).
 
 ---
 
@@ -12,6 +14,7 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 | # | Documento | Quando usar |
 |---|-----------|-------------|
 | 1 | **Este README** | Contexto da sessão Ops |
+| 1b | [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md) | **Escopo MVP** — o que operar agora vs congelado |
 | 2 | [`CONSOLE.md`](./CONSOLE.md) | Abas do console `:3013`, o que cada uma mede |
 | 3 | [`TELEMETRY.md`](./TELEMETRY.md) | Tabelas PG, LGPD, queries úteis |
 | 4 | [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) | Chamados «Reportar problema» (migration 061) |
@@ -22,17 +25,17 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 
 ---
 
-## Stack ops (dois ambientes não prod)
+## Stack ops (fase MVP — integração apenas)
 
-| | Integração (dev) | Preview (staging local) |
-|---|------------------|-------------------------|
-| **API** | `:3010` | `:3020` |
+| | Integração (ativo) | Preview (pausado) |
+|---|-------------------|-------------------|
+| **API** | `:3010` | `:3020` — não ritualizar |
 | **Web** | `:5173` | `:5174` |
 | **Ops console** | `:3013` | `:3023` |
 | **Postgres** | `aiyracare` | `aiyracare_preview` |
-| **Chave métricas** | `OPS_METRICS_KEY` integration | `OPS_METRICS_KEY` preview (**distinta**) |
+| **Chave métricas** | `OPS_METRICS_KEY` (`setup:ops-alerts`) | segunda key — retomar com staging |
 
-Matriz completa: [`docs/infra/ENVIRONMENTS.md`](../infra/ENVIRONMENTS.md) · [`docs/infra/TWO_ENV_MODEL.md`](../infra/TWO_ENV_MODEL.md).
+Detalhe MVP: [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md). Matriz histórica dois ambientes: [`ENVIRONMENTS.md`](../infra/ENVIRONMENTS.md) · [`TWO_ENV_MODEL.md`](../infra/TWO_ENV_MODEL.md).
 
 ```powershell
 # Console integração

@@ -9,7 +9,7 @@ Use este chat para temas de **observabilidade, alertas, console ops e suporte t�
 
 ## Antes de alterar código ops
 
-1. Ler **`docs/ops/README.md`** (hub da sessão)
+1. Ler **`docs/ops/README.md`** (hub da sessão) e **`docs/ops/OPS_MVP_SCOPE.md`** (escopo ativo; preview pausado)
 2. Console → **`docs/ops/CONSOLE.md`**
 3. Tabelas/queries → **`docs/ops/TELEMETRY.md`**
 4. Chamados usuário → **`docs/ops/SUPPORT_REPORTS.md`**
