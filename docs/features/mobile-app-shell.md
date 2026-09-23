@@ -16,7 +16,7 @@ Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Su
 
 Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesmo BFF FastAPI em `:3010`.
 
-**Plano em quatro blocos (sequência fixa):** transacional → gráficos → Ava → estética — ver [`MOBILE_EVOLUTION_BLOCKS.md`](../MOBILE_EVOLUTION_BLOCKS.md). **Bloco 1** em PR #68; **Bloco 2** iniciado (marcadores de exame read-only).
+**Plano em quatro blocos (sequência fixa):** transacional → gráficos → Ava → estética — ver [`MOBILE_EVOLUTION_BLOCKS.md`](../MOBILE_EVOLUTION_BLOCKS.md). **Bloco 3 Ava** em curso (`cursor/mobile-bloco3-ava-a5c1`): conversas, pins, aceleradores, anexo.
 
 ## Entrega dual (80/20)
 
@@ -93,6 +93,10 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 | **Bloco 2 — marcadores (gráfico)** | [`mobile-exam-markers-chart`](../../docs/testing/suites/mobile-exam-markers-chart.md) · `npm run qa:run -- --suite mobile-exam-markers-chart` |
 | **Bloco 2 — WHO** | [`mobile-who-growth-chart`](../../docs/testing/suites/mobile-who-growth-chart.md) · `npm run qa:run -- --suite mobile-who-growth-chart` |
 | **Bloco 2 — medidas** | [`mobile-measurements-chart`](../../docs/testing/suites/mobile-measurements-chart.md) · `npm run qa:run -- --suite mobile-measurements-chart` |
+| **Bloco 3 — Ava smoke** | [`mobile-ava-companion-smoke`](../../docs/testing/suites/mobile-ava-companion-smoke.md) |
+| **Bloco 3 — conversas** | [`mobile-ava-conversation-crud`](../../docs/testing/suites/mobile-ava-conversation-crud.md) |
+| **Bloco 3 — acelerador G1** | [`mobile-ava-accelerator`](../../docs/testing/suites/mobile-ava-accelerator.md) |
+| **Bloco 3 — anexo** | [`mobile-ava-attachment-smoke`](../../docs/testing/suites/mobile-ava-attachment-smoke.md) |
 | Tipo + export web | `npm run mobile:check` |
 | Tipo isolado | `cd packages/mobile && npm run typecheck` |
 | API inalterada | Sem alteração de contrato nesta entrega |

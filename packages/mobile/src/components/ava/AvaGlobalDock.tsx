@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AvaChatPanel } from './AvaChatPanel'
+import { AvaConversationToolbar } from './AvaConversationToolbar'
 import { AvaPatientLensPicker } from './AvaPatientLensPicker'
 import type { AvaOpenRequest } from '@/lib/ava-entity-pin'
 import { subscribeAvaOpen } from '@/lib/ava-dock-bus'
@@ -26,6 +27,7 @@ export function AvaGlobalDock() {
   const [openRequest, setOpenRequest] = useState<AvaOpenRequest | null>(null)
   const [openRequestEpoch, setOpenRequestEpoch] = useState(0)
   const [chatEpoch, setChatEpoch] = useState(0)
+  const [conversationId, setConversationId] = useState<string | null>(null)
 
   useEffect(() => {
     return subscribeAvaOpen((req) => {
@@ -49,6 +51,11 @@ export function AvaGlobalDock() {
   const handlePatientChange = (id: string) => {
     if (id === patientId) return
     setPatientId(id)
+    setConversationId(null)
+    setChatEpoch((n) => n + 1)
+  }
+
+  const handleNewChatSession = () => {
     setChatEpoch((n) => n + 1)
   }
 
@@ -99,12 +106,22 @@ export function AvaGlobalDock() {
             onSelect={handlePatientChange}
           />
 
-          <View style={styles.chat} key={`${patientId}-${chatEpoch}`}>
+          <AvaConversationToolbar
+            patientId={patientId}
+            conversationId={conversationId}
+            onConversationIdChange={setConversationId}
+            onConversationsChanged={handleNewChatSession}
+          />
+
+          <View style={styles.chat} key={`${patientId}-${chatEpoch}-${conversationId ?? 'new'}`}>
             <AvaChatPanel
               patientId={patientId}
+              conversationId={conversationId}
+              onConversationIdChange={setConversationId}
               initialMessage={initialMessage}
               entityPin={entityPin}
               autoSend={autoSend}
+              onAcceleratorConsumed={() => setOpenRequest(null)}
             />
           </View>
         </View>

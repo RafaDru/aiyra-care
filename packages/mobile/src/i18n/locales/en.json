@@ -205,6 +205,37 @@
     "biometricUnlock": "Biometric unlock",
     "biometricUnlockHint": "When returning to the app, asks for Face ID or fingerprint."
   },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "remove": "Remove"
+  },
+  "ava": {
+    "title": "Ava",
+    "accelerator": "Ask Ava",
+    "acceleratorExam": "What does this exam mean in the context of the medical record?",
+    "acceleratorMarker": "What does this marker mean and how should I interpret the trend?",
+    "openChat": "Open Ava chat",
+    "messagePlaceholder": "Message for Ava…",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "emptyHint": "Ask about the chart, integrations, or next steps. Portal actions with side effects remain on the web app.",
+    "revised": "(reply revised by Ava)",
+    "quotaExhausted": "Usage quota exhausted for this period.",
+    "newConversation": "New conversation",
+    "currentConversation": "Current conversation",
+    "pickConversation": "Choose conversation",
+    "noConversations": "No saved conversations yet.",
+    "untitledConversation": "Untitled conversation",
+    "archiveConversation": "Archive",
+    "archiveConversationConfirm": "Archive this conversation? You can start a new one next.",
+    "deleteConversationTitle": "Delete conversation?",
+    "deleteConversationBody": "This cannot be undone.",
+    "entityPinActive": "Entity context attached to this chat.",
+    "imageAttachFailed": "Could not attach the image.",
+    "imagePermissionDenied": "Allow photo library access to attach images."
+  },
   "toast": {
     "success": "Success",
     "error": "Error",

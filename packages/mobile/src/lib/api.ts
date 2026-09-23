@@ -30,7 +30,14 @@ import type {
   PatientDocument,
   PatientAccessGrant,
 } from './api.types'
-import type { AvaActivityEvent, AvaChatResponse, AvaConversation, LlmUsageQuota } from './api.types'
+import type {
+  AvaActivityEvent,
+  AvaChatResponse,
+  AvaConversation,
+  AvaMessage,
+  AvaSessionPin,
+  LlmUsageQuota,
+} from './api.types'
 import { avaChatWithActivityStream, type AvaChatRequestBody } from './ava-chat-stream'
 import { getClientErrorToast } from './client-error-notify-bridge'
 import { reportApiClientError, reportNetworkClientError } from './client-errors'
@@ -503,6 +510,29 @@ export const api = {
       const qs = patientId ? `?patientId=${encodeURIComponent(patientId)}` : ''
       return request<{ items: AvaConversation[] }>(`/ava/conversations${qs}`)
     },
+    createConversation: (body: { patientId: string; healthThreadId?: string; title?: string }) =>
+      request<AvaConversation>('/ava/conversations', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    getMessages: (conversationId: string) =>
+      request<{ conversation: AvaConversation; messages: AvaMessage[] }>(
+        `/ava/conversations/${encodeURIComponent(conversationId)}/messages`,
+      ),
+    getContext: (conversationId: string) =>
+      request<{ conversationId: string; pins: AvaSessionPin[] }>(
+        `/ava/conversations/${encodeURIComponent(conversationId)}/context`,
+      ),
+    archiveConversation: (conversationId: string) =>
+      request<AvaConversation>(`/ava/conversations/${encodeURIComponent(conversationId)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'archived' }),
+      }),
+    deleteConversation: (conversationId: string) =>
+      request<{ deleted: boolean; conversationId: string }>(
+        `/ava/conversations/${encodeURIComponent(conversationId)}`,
+        { method: 'DELETE' },
+      ),
     chat: (
       patientId: string,
       body: AvaChatRequestBody,
