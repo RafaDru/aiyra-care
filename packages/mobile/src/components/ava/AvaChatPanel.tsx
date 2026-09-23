@@ -12,7 +12,6 @@ import {
   View,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import * as ImagePicker from 'expo-image-picker'
 import { AvaMarkdown } from '@/components/ava/AvaMarkdown'
 import { AvaSessionPinsBar } from '@/components/ava/AvaSessionPinsBar'
 import { api } from '@/lib/api'
@@ -219,6 +218,7 @@ export function AvaChatPanel({
   }, [messages, activityTrace])
 
   const pickImage = async () => {
+    const ImagePicker = await import('expo-image-picker')
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!perm.granted) {
       Alert.alert(t('ava.title'), t('ava.imagePermissionDenied'))
