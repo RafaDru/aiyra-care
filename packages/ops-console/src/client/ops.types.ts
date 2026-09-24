@@ -33,6 +33,15 @@ export interface OpsAnalysisQueueItem {
 
 export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
 
+export interface DefectPrBatchItem {
+  id: string
+  status: 'open' | 'merged' | 'failed'
+  scheduledWindowStart: string
+  mergedPrUrl: string | null
+  defectCount: number
+  createdAt: string
+}
+
 export interface PlatformDefectItem {
   id: string
   title: string

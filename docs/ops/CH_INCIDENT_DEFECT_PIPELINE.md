@@ -87,11 +87,19 @@ SQL canônico: `database/relational/071_platform_defects.sql` … `075_ops_analy
 
 ---
 
-## 4. Outbox + worker (fatias E+)
+## 4. Outbox + worker
 
-Após enqueue: `INSERT outbox` (`pending`) → tentativa webhook síncrona → `forwarded` se 2xx.
+Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → webhook síncrono → `forwarded` + `incident_pipeline_status=forwarded`; falha → `pending` com `attempt_count++`.
 
-Worker: `CH_INCIDENT_DISPATCH_INTERVAL_MS` (default 30s); `CH_INCIDENT_DISPATCH_WORKER=0` = só API síncrona + linhas outbox.
+| Comando | Uso |
+|---------|-----|
+| `npm run ch-incident-dispatch-worker` | Loop standalone (`CH_INCIDENT_DISPATCH_INTERVAL_MS`, default 30s) |
+| `npm run ch-incident-dispatch-worker:once` | Um tick (notebook/CI) |
+| Ops-console `:3013` | Loop embutido se `CH_INCIDENT_DISPATCH_WORKER≠0` (default ligado) |
+
+`CH_INCIDENT_DISPATCH_WORKER=0` — só dispatch síncrono na API + linhas outbox (sem loop no console).
+
+**Lote PR:** `POST /api/defect-pr-batches/run` (ops-console) — UI «Rodar lote agora» em Defeitos.
 
 ---
 
@@ -103,7 +111,7 @@ Worker: `CH_INCIDENT_DISPATCH_INTERVAL_MS` (default 30s); `CH_INCIDENT_DISPATCH_
 | **B** | `PlatformDefectService` + rotas GET/PATCH ops-console + UI 4 estados incidente (**entregue**) |
 | **C** | Callback triagem → defeito + `incident_pipeline_status` (**entregue**) |
 | **D** | `DefeitosPanel` + nav `defeitos` (**entregue**) |
-| **E** | Outbox write + worker + batch run |
+| **E** | Outbox write + worker + batch run (**entregue**) |
 
 Rotas ops-console planejadas: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /api/analysis-queue` com `incidentPipelineStatus`.
 

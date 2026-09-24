@@ -6,6 +6,7 @@ import {
 } from '../support-report/support-report-dispatch.js'
 import { investigateSupportReportWithQueue } from './ops-analysis-investigation.helper.js'
 import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
+import type { IncidentDispatchService } from './incident-dispatch.service.js'
 import type {
   SupportReportAnalysisStatus,
   SupportReportRecord,
@@ -87,6 +88,7 @@ export class OpsSupportReportService {
   constructor(
     private readonly repo: SupportReportPgRepository,
     private readonly queueService?: OpsAnalysisQueueService,
+    private readonly incidentDispatch?: IncidentDispatchService,
   ) {}
 
   async list(status: SupportReportStatus = 'open', limit = 50): Promise<SupportReportOpsRow[]> {
@@ -126,10 +128,12 @@ export class OpsSupportReportService {
     let investigationId: string | undefined
     let dispatch: Awaited<ReturnType<typeof dispatchSupportReportInvestigator>>
     if (this.queueService) {
-      const result = await investigateSupportReportWithQueue(this.queueService, fullRecord, {
-        operatorNotes: notes,
-        trigger: 'manual',
-      })
+      const result = await investigateSupportReportWithQueue(
+        this.queueService,
+        fullRecord,
+        { operatorNotes: notes, trigger: 'manual' },
+        this.incidentDispatch,
+      )
       investigationId = result.investigationId
       dispatch = result.dispatch
     } else {

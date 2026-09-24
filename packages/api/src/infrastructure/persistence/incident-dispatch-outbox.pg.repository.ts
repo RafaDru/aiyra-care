@@ -91,4 +91,27 @@ export class IncidentDispatchOutboxPgRepository {
       [id, error.slice(0, 2000)],
     )
   }
+
+  async bumpAttempt(id: string, error: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE incident_dispatch_outbox SET
+        status = 'pending',
+        attempt_count = attempt_count + 1,
+        last_error = $2,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, error.slice(0, 2000)],
+    )
+  }
+
+  async markDead(id: string, error: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE incident_dispatch_outbox SET
+        status = 'dead',
+        last_error = $2,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, error.slice(0, 2000)],
+    )
+  }
 }

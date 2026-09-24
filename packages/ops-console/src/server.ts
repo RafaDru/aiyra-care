@@ -31,6 +31,8 @@ import {
 } from '../../api/src/application/ops/platform-defect.service.js'
 import { PlatformDefectPgRepository } from '../../api/src/infrastructure/persistence/platform-defect.pg.repository.js'
 import { DefectPrBatchPgRepository } from '../../api/src/infrastructure/persistence/defect-pr-batch.pg.repository.js'
+import { createIncidentDispatchService } from '../../api/src/application/ops/incident-dispatch.service.js'
+import { DefectPrBatchService } from '../../api/src/application/ops/defect-pr-batch.service.js'
 import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
@@ -89,15 +91,25 @@ const supportRepo = new SupportReportPgRepository(pool)
 const platformDefectRepo = new PlatformDefectPgRepository(pool)
 const defectPrBatchRepo = new DefectPrBatchPgRepository(pool)
 const platformDefectService = new PlatformDefectService(platformDefectRepo)
+const incidentDispatchService = createIncidentDispatchService(pool)
+const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
   new OpsAnalysisQueuePgRepository(pool),
   supportRepo,
   alertIncidentRepo,
   platformDefectService,
 )
-const alertAnalysisService = new OpsAlertAnalysisService(alertIncidentRepo, analysisQueueService)
+const alertAnalysisService = new OpsAlertAnalysisService(
+  alertIncidentRepo,
+  analysisQueueService,
+  incidentDispatchService,
+)
 const dispatchService = new OpsAlertDispatchService(metricsService, alertAnalysisService)
-const supportReportService = new OpsSupportReportService(supportRepo, analysisQueueService)
+const supportReportService = new OpsSupportReportService(
+  supportRepo,
+  analysisQueueService,
+  incidentDispatchService,
+)
 
 async function runProbeCycle(): Promise<void> {
   try {
@@ -436,12 +448,14 @@ async function main() {
   )
 
   fastify.get('/api/defect-pr-batches/config', async () => {
-    const intervalMs = Number(process.env.OPS_DEFECT_PR_BATCH_INTERVAL_MS ?? 21_600_000)
-    const readyCount = await defectPrBatchRepo.countReadyWithoutBatch()
-    const nextWindowAt = new Date(
-      Math.ceil(Date.now() / intervalMs) * intervalMs,
-    ).toISOString()
+    const { intervalMs, nextWindowAt } = defectPrBatchService.config()
+    const readyCount = await defectPrBatchService.countReady()
     return { intervalMs, readyCount, nextWindowAt }
+  })
+
+  fastify.post('/api/defect-pr-batches/run', async () => {
+    const result = await defectPrBatchService.runReadyForPrBatch()
+    return { ok: true, ...result }
   })
 
   fastify.post<{ Params: { id: string }; Body: { incidentId?: string; linkedBy?: string } }>(
@@ -476,12 +490,14 @@ async function main() {
   await registerClientRoutes(fastify, vite)
 
   let probeTimer: ReturnType<typeof setInterval> | undefined
+  let dispatchTimer: ReturnType<typeof setInterval> | undefined
   let shuttingDown = false
 
   const shutdown = async () => {
     if (shuttingDown) return
     shuttingDown = true
     if (probeTimer) clearInterval(probeTimer)
+    if (dispatchTimer) clearInterval(dispatchTimer)
     try {
       if (vite) await vite.close()
       await fastify.close()
@@ -511,6 +527,22 @@ async function main() {
   await runProbeCycle()
   probeTimer = setInterval(() => runProbeCycle(), probeIntervalMs)
   probeTimer.unref()
+
+  if (process.env.CH_INCIDENT_DISPATCH_WORKER !== '0') {
+    const dispatchIntervalMs = Number(process.env.CH_INCIDENT_DISPATCH_INTERVAL_MS ?? '30000')
+    const runDispatch = () => {
+      incidentDispatchService.processOutboxBatch(20).catch((err) => {
+        console.error(
+          '[ops-console] incident dispatch worker',
+          err instanceof Error ? err.message : err,
+        )
+      })
+    }
+    runDispatch()
+    dispatchTimer = setInterval(runDispatch, dispatchIntervalMs)
+    dispatchTimer.unref()
+    console.log(`[ops-console] incident dispatch worker every ${dispatchIntervalMs}ms`)
+  }
 }
 
 main().catch(async (err) => {

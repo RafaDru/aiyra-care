@@ -169,4 +169,11 @@ export const opsApi = {
       readyCount: number
       nextWindowAt: string
     }>('/api/defect-pr-batches/config'),
+  runDefectPrBatch: () =>
+    request<{
+      ok: boolean
+      batch: import('./ops.types.js').DefectPrBatchItem | null
+      defectIds: string[]
+      count: number
+    }>('/api/defect-pr-batches/run', { method: 'POST' }),
 }

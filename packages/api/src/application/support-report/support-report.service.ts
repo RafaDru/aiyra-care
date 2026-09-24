@@ -11,6 +11,7 @@ import {
   type SupportReportRecord,
 } from '../../domain/support-report/support-report.types.js'
 import type { OpsAnalysisQueueService } from '../ops/ops-analysis-queue.service.js'
+import type { IncidentDispatchService } from '../ops/incident-dispatch.service.js'
 
 function addDays(date: Date, days: number): Date {
   const out = new Date(date)
@@ -23,6 +24,7 @@ export class SupportReportService {
     private readonly repo: SupportReportRepository,
     private readonly productEvents?: ProductEventService,
     private readonly queueService?: OpsAnalysisQueueService,
+    private readonly incidentDispatch?: IncidentDispatchService,
   ) {}
 
   async create(accountId: string, input: CreateSupportReportInput): Promise<SupportReportRecord> {
@@ -117,9 +119,12 @@ export class SupportReportService {
         return
       }
 
-      const result = await investigateSupportReportWithQueue(this.queueService, record, {
-        trigger: 'auto',
-      })
+      const result = await investigateSupportReportWithQueue(
+        this.queueService,
+        record,
+        { trigger: 'auto' },
+        this.incidentDispatch,
+      )
       investigationId = result.investigationId
       investigator = result.dispatch
       await dispatchSupportReport(record, { investigationId })

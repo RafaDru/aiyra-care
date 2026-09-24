@@ -55,6 +55,7 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
     readyCount: number
     nextWindowAt: string
   } | null>(null)
+  const [batchRunning, setBatchRunning] = useState(false)
   const [branchDraft, setBranchDraft] = useState<Record<string, string>>({})
 
   const load = useCallback(async () => {
@@ -82,6 +83,24 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
 
   const readyCount = useMemo(() => defectReadyForPrCount(items), [items])
   const displayReady = batchConfig?.readyCount ?? readyCount
+
+  const runBatch = async () => {
+    setBatchRunning(true)
+    try {
+      const result = await opsApi.runDefectPrBatch()
+      if (result.count === 0) {
+        message.info('Nenhum defeito ready_for_pr sem lote')
+      } else {
+        message.success(`Lote ${result.batch?.id?.slice(0, 8) ?? ''} — ${result.count} defeito(s)`)
+      }
+      await load()
+      await onRefresh?.()
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Falha ao rodar lote')
+    } finally {
+      setBatchRunning(false)
+    }
+  }
 
   const openDetail = async (id: string) => {
     setExpandedRowKeys((prev) => (prev.includes(id) ? prev : [...prev, id]))
@@ -140,8 +159,16 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
               {new Date(batchConfig.nextWindowAt).toLocaleString('pt-BR')})
             </Text>
           )}
-          <Tooltip title="Lote automático — fatia E (worker)">
-            <Button size="small" disabled icon={<PlayCircleOutlined />}>
+          <Tooltip title="Agrupa defeitos ready_for_pr sem pr_batch_id">
+            <Button
+              size="small"
+              type="primary"
+              ghost
+              icon={<PlayCircleOutlined />}
+              loading={batchRunning}
+              disabled={displayReady === 0}
+              onClick={() => void runBatch()}
+            >
               Rodar lote agora
             </Button>
           </Tooltip>
