@@ -15,13 +15,13 @@ import {
 import { ChLayout } from '../components/ChLayout.js'
 
 const MOCK_TAB_COUNTS: Partial<Record<ChTabKey, boolean>> = {
-  issues: true,
+  incidentes: true,
   infra: true,
   support: true,
 }
 
 const MOCK_COUNTS: Partial<Record<ChTabKey, number>> = {
-  issues: 2,
+  incidentes: 2,
   infra: 1,
   support: 3,
   overview: 1,

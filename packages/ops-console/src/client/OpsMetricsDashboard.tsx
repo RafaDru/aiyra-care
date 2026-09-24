@@ -13,7 +13,7 @@ import {
 } from './ops-panels.js'
 import { SupportPanel } from './SupportPanel.js'
 import { BusinessPanel } from './BusinessPanel.js'
-import { IssuesPanel } from './IssuesPanel.js'
+import { IncidentesPanel } from './IncidentesPanel.js'
 import { ProdutoLifecyclePanel } from './ProdutoLifecyclePanel.js'
 import {
   readStoredStrategySection,
@@ -102,15 +102,15 @@ export function OpsMetricsDashboard({
   useEffect(() => {
     if (highlightInvestigationId) {
       setGroupId('operacao')
-      setActiveTab('issues')
-      persistNav('operacao', 'issues')
-      writeNavToUrl('operacao', 'issues')
+      setActiveTab('incidentes')
+      persistNav('operacao', 'incidentes')
+      writeNavToUrl('operacao', 'incidentes')
     }
   }, [highlightInvestigationId])
 
   const tabCounts = useMemo((): Partial<Record<ChTabKey, number>> => ({
     overview: data.alerts.filter((a) => a.severity === 'critical').length,
-    issues: issueAttention,
+    incidentes: issueAttention,
     product: countHotFeatures(metrics),
     support: metrics.supportReports?.openCount ?? 0,
     sync: metrics.sync.stuckJobs.length,
@@ -121,7 +121,7 @@ export function OpsMetricsDashboard({
 
   const tabAlert = useMemo((): Partial<Record<ChTabKey, boolean>> => ({
     overview: (tabCounts.overview ?? 0) > 0,
-    issues: (tabCounts.issues ?? 0) > 0,
+    incidentes: (tabCounts.incidentes ?? 0) > 0,
     product: (tabCounts.product ?? 0) > 0,
     support: (tabCounts.support ?? 0) > 0,
     sync: (tabCounts.sync ?? 0) > 0,
@@ -174,9 +174,9 @@ export function OpsMetricsDashboard({
         return <BusinessPanel data={data} />
       case 'strategy':
         return <StrategyPanel section={strategySection} onSectionChange={onStrategySectionChange} />
-      case 'issues':
+      case 'incidentes':
         return (
-          <IssuesPanel
+          <IncidentesPanel
             onRefresh={onRefresh}
             highlightInvestigationId={highlightInvestigationId}
           />

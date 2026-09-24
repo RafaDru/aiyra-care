@@ -71,57 +71,69 @@ export class SupportReportService {
       })
     }
 
-    void import('./support-report-dispatch.js').then(async ({
-      dispatchSupportReport,
-      dispatchSupportReportInvestigator,
-      analysisStatusFromInvestigatorResult,
-      analysisErrorFromInvestigatorResult,
-    }) => {
-      const { isSupportInvestigatorBatchMode } = await import(
-        '../../domain/ops/support-investigator-mode.js'
-      )
-      const { investigateSupportReportWithQueue } = await import(
-        '../ops/ops-analysis-investigation.helper.js'
-      )
-      let investigator: Awaited<ReturnType<typeof dispatchSupportReportInvestigator>>
-      let notifier = false
-      try {
-        if (isSupportInvestigatorBatchMode()) {
-          notifier = await dispatchSupportReport(record)
-          investigator = { outcome: 'skipped', reason: 'pre_screen' }
-          await this.repo.updateAnalysisStateForOps(record.id, {
-            analysisStatus: 'queued',
-            analysisLastError: null,
-            analysisRequestedAt: null,
-          }).catch(() => undefined)
-          return
-        }
-        if (this.queueService) {
-          const { queueId, dispatch } = await investigateSupportReportWithQueue(
-            this.queueService,
-            record,
-            { trigger: 'auto' },
-          )
-          investigator = dispatch
-          notifier = await dispatchSupportReport(record, { investigationId: queueId })
-        } else {
-          notifier = await dispatchSupportReport(record)
-          investigator = await dispatchSupportReportInvestigator(record, { trigger: 'auto' })
-        }
-      } catch {
-        investigator = { outcome: 'failed' as const, error: 'dispatch_failed' }
-      }
-      const result = { notifier, investigator }
-      const analysisStatus = analysisStatusFromInvestigatorResult(result.investigator)
-      const analysisError = analysisErrorFromInvestigatorResult(result.investigator)
-      await this.repo.updateAnalysisStateForOps(record.id, {
-        analysisStatus,
-        analysisLastError: analysisError,
-        analysisRequestedAt: result.investigator.outcome === 'sent' ? new Date() : null,
-      }).catch(() => undefined)
-    })
+    void this.enqueueSupportIncidentAndDispatch(record).catch(() => undefined)
 
     return record
+  }
+
+  /** Sempre enfileira incidente (ops_analysis_queue, origem Usuário) + webhook investigador. */
+  private async enqueueSupportIncidentAndDispatch(record: SupportReportRecord): Promise<void> {
+    const {
+      dispatchSupportReport,
+      analysisStatusFromInvestigatorResult,
+      analysisErrorFromInvestigatorResult,
+    } = await import('./support-report-dispatch.js')
+    const { isSupportInvestigatorBatchMode } = await import(
+      '../../domain/ops/support-investigator-mode.js'
+    )
+    const { investigateSupportReportWithQueue } = await import(
+      '../ops/ops-analysis-investigation.helper.js'
+    )
+
+    if (!this.queueService) {
+      await this.repo.updateAnalysisStateForOps(record.id, {
+        analysisStatus: 'pending',
+        analysisLastError: 'incident_queue_unavailable',
+      }).catch(() => undefined)
+      return
+    }
+
+    let investigator: Awaited<ReturnType<typeof investigateSupportReportWithQueue>>['dispatch'] = {
+      outcome: 'failed',
+      error: 'dispatch_failed',
+    }
+    let investigationId: string | undefined
+
+    try {
+      if (isSupportInvestigatorBatchMode()) {
+        const item = await this.queueService.enqueueSupportReport(record, { trigger: 'auto' })
+        investigationId = item.id
+        await dispatchSupportReport(record, { investigationId })
+        await this.repo.updateAnalysisStateForOps(record.id, {
+          analysisStatus: 'queued',
+          analysisLastError: null,
+          analysisRequestedAt: null,
+        }).catch(() => undefined)
+        return
+      }
+
+      const result = await investigateSupportReportWithQueue(this.queueService, record, {
+        trigger: 'auto',
+      })
+      investigationId = result.investigationId
+      investigator = result.dispatch
+      await dispatchSupportReport(record, { investigationId })
+    } catch {
+      investigator = { outcome: 'failed', error: 'dispatch_failed' }
+    }
+
+    const analysisStatus = analysisStatusFromInvestigatorResult(investigator)
+    const analysisError = analysisErrorFromInvestigatorResult(investigator)
+    await this.repo.updateAnalysisStateForOps(record.id, {
+      analysisStatus,
+      analysisLastError: analysisError,
+      analysisRequestedAt: investigator.outcome === 'sent' ? new Date() : null,
+    }).catch(() => undefined)
   }
 
   async listForAccount(accountId: string): Promise<SupportReportRecord[]> {

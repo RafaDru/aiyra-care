@@ -63,15 +63,14 @@ npm run ops:console
 
 Abrir: `http://127.0.0.1:3013` ou `http://127.0.0.1:3023`
 
-## Cabeçalho
+## Cabeçalho — ações
 
 | Controle | Ação |
 |----------|------|
 | **Atualizar** | `GET /api/metrics` + health |
 | **Verificar e acionar** | `POST /api/alerts/check` — triagem + webhook |
-| **Faixa de ambiente** | `integration` / `preview` / `production` (via `DEPLOYMENT_TIER` + porta) |
 
-Auto-refresh: 60s (aba visível).
+Auto-refresh métricas: 60s (aba visível). Status Web/Backend: `GET /api/services/status` (~60s).
 
 ---
 
@@ -114,7 +113,7 @@ Auto-refresh: 60s (aba visível).
 |-------|--------|
 | Fila `queued` → `fix_proposed` | `ops_analysis_queue` (migration 068) |
 | Coluna **investigationId** | UUID canônico — correlaciona toast, webhook e Automations |
-| Deep link | `?tab=issues&investigationId=<uuid>` |
+| Deep link | `?tab=incidentes&investigationId=<uuid>` (alias legado `tab=issues`) |
 
 Ver [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md).
 

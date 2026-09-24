@@ -29,7 +29,7 @@ export function normalizeChGroupId(raw: string | null): ChGroupId | null {
 
 export type ChTabKey =
   | 'overview'
-  | 'issues'
+  | 'incidentes'
   | 'sync'
   | 'infra'
   | 'produto'
@@ -71,9 +71,9 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
         icon: icon(DashboardOutlined),
       },
       {
-        tab: 'issues',
-        label: 'Issues',
-        description: 'Fila de investigação e correlação com automations.',
+        tab: 'incidentes',
+        label: 'Incidentes',
+        description: 'Sinais cru até triagem — origem usuário, alertas, jobs e agente.',
         icon: icon(FlagOutlined),
       },
       {
@@ -111,7 +111,7 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
       {
         tab: 'support',
         label: 'Suporte',
-        description: 'Chamados «Reportar problema» e triagem.',
+        description: 'Chamados «Reportar problema» — status LGPD e resposta ao usuário (não é fila técnica).',
         icon: icon(CustomerServiceOutlined),
       },
     ],
@@ -167,6 +167,13 @@ for (const g of CH_NAV_GROUPS) {
 
 export const CH_TAB_KEYS: ChTabKey[] = [...TAB_TO_GROUP.keys()]
 
+/** Legado `tab=issues` → Incidentes. */
+export function normalizeChTabKey(raw: string | null): ChTabKey | null {
+  if (!raw) return null
+  if (raw === 'issues') return 'incidentes'
+  return isChTabKey(raw) ? raw : null
+}
+
 export function isChTabKey(value: string | null): value is ChTabKey {
   return value != null && TAB_TO_GROUP.has(value as ChTabKey)
 }
@@ -197,21 +204,25 @@ export function readNavFromUrl(): { group: ChGroupId; tab: ChTabKey } {
   const groupParam = normalizeChGroupId(params.get('group'))
 
   if (params.get('investigationId')) {
-    return { group: 'operacao', tab: 'issues' }
+    return { group: 'operacao', tab: 'incidentes' }
   }
 
-  if (isChTabKey(tabParam)) {
+  const normalizedTab = normalizeChTabKey(tabParam)
+  if (normalizedTab) {
     const group = groupParam && CH_NAV_GROUPS.some((g) => g.id === groupParam)
       ? groupParam
-      : tabToGroup(tabParam)
-    return { group, tab: tabParam }
+      : tabToGroup(normalizedTab)
+    return { group, tab: normalizedTab }
   }
 
-  const savedTab = localStorage.getItem(TAB_STORAGE_KEY)
-  if (isChTabKey(savedTab)) {
+  const savedTab = normalizeChTabKey(localStorage.getItem(TAB_STORAGE_KEY))
+  if (savedTab) {
     const storedGroup = normalizeChGroupId(localStorage.getItem(GROUP_STORAGE_KEY))
     const group = storedGroup ?? tabToGroup(savedTab)
-    return { group: CH_NAV_GROUPS.some((g) => g.id === group) ? group : tabToGroup(savedTab), tab: savedTab }
+    return {
+      group: CH_NAV_GROUPS.some((g) => g.id === group) ? group : tabToGroup(savedTab),
+      tab: savedTab,
+    }
   }
 
   return { group: 'operacao', tab: 'overview' }

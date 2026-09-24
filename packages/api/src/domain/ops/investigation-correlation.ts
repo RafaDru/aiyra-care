@@ -24,7 +24,7 @@ export function resolveInvestigationIdFromPayload(input: {
 }
 
 export interface OpsConsoleLinkParams {
-  tab?: 'support' | 'issues' | 'infra' | 'overview'
+  tab?: 'support' | 'incidentes' | 'issues' | 'infra' | 'overview'
   investigationId?: string
   reportId?: string
   alertId?: string

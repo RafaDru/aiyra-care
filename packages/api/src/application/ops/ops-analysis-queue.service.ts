@@ -9,6 +9,10 @@ import type {
 import { resolveDeploymentTier } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigationIdFromCallback } from '../../domain/ops/investigation-correlation.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
+import {
+  inferSupportReportApplication,
+  SUPPORT_INCIDENT_ORIGIN_USUARIO,
+} from '../../domain/support-report/support-report-incident.js'
 import type { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import type { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
 import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
@@ -37,6 +41,8 @@ function supportContext(record: SupportReportRecord): Record<string, unknown> {
     route: record.route,
     consentTechnical: record.consentTechnical,
     appVersion: record.appVersion,
+    incidentOrigin: SUPPORT_INCIDENT_ORIGIN_USUARIO,
+    application: inferSupportReportApplication(record),
   }
 }
 
@@ -111,6 +117,8 @@ export class OpsAnalysisQueueService {
       contextSnapshot: {
         severity: alert.severity,
         category: alert.category,
+        incidentOrigin: 'alerta_ops',
+        application: 'Ops',
         ...(alert.details ?? {}),
       },
       operatorNotes: options.operatorNotes,
