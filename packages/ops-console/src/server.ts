@@ -140,11 +140,16 @@ async function registerClientRoutes(fastify: FastifyInstance, vite?: ViteDevServ
 async function main() {
   const fastify = Fastify({ logger: false })
 
+  fastify.get('/mock/ch-layout', async (_req, reply) => {
+    return reply.redirect('/?mock=ch-layout')
+  })
+
   fastify.get('/health', async () => ({
     service: 'aiyracare-ops-console',
     status: 'ok',
     port,
     deploymentTier,
+    layoutVersion: 'ch-shell-v1',
     commandHub: true,
   }))
 

@@ -241,5 +241,7 @@ export function lastTabForGroup(group: ChGroupId): ChTabKey {
 }
 
 export function isChLayoutMock(): boolean {
+  const path = window.location.pathname.replace(/\/$/, '') || '/'
+  if (path === '/mock/ch-layout') return true
   return new URLSearchParams(window.location.search).get('mock') === 'ch-layout'
 }

@@ -1,3 +1,26 @@
+.ch-mock-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, #4c1d95 0%, #7c3aed 50%, #db2777 100%);
+  color: #fff;
+  font-size: 13px;
+  border-bottom: 2px solid #fbbf24;
+}
+
+.ch-mock-ribbon strong {
+  font-weight: 700;
+}
+
+.ch-mock-ribbon-link {
+  color: #fef08a;
+  font-weight: 600;
+  text-decoration: underline;
+  margin-left: auto;
+}
+
 .ch-layout {
   min-height: 100vh;
   display: flex;

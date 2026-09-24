@@ -13,7 +13,9 @@
 | **Conteúdo** | Context bar (breadcrumb + descrição) + painel |
 | **Rodapé** | Snapshot, probe, alertas, auto-refresh 60s, link docs CH |
 
-**Mock visual (dev):** `http://127.0.0.1:3013/?mock=ch-layout` — layout com dados fictícios.
+**Mock visual (sem métricas):** `http://127.0.0.1:3013/mock/ch-layout` ou `/?mock=ch-layout` — faixa roxa no topo; **console real** (`http://127.0.0.1:3013/`) usa o **mesmo layout** com dados do Postgres (branch/PR com `layoutVersion: ch-shell-v1` em `GET /health`).
+
+> Se ainda aparecerem **11 abas horizontais**, o código antigo está rodando — faça pull da branch `cursor/ch-layout-shell-193e` ou merge do PR #73 e reinicie `npm run ops:console`.
 
 **URLs:** `?group=operacao&tab=overview` (compatível com `?tab=` legado).
 

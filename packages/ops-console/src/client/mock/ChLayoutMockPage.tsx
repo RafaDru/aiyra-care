@@ -78,6 +78,12 @@ export function ChLayoutMockPage() {
   }
 
   return (
+    <>
+    <div className="ch-mock-ribbon" role="status">
+      <strong>Pré-visualização do layout Command Hub</strong>
+      <span>— dados fictícios, sem Postgres. Troque de zona no topo e de tela na barra lateral.</span>
+      <a href="/" className="ch-mock-ribbon-link">Abrir console com métricas reais</a>
+    </div>
     <ChLayout
       group={group}
       item={item}
@@ -133,5 +139,6 @@ export function ChLayoutMockPage() {
         </div>
       </div>
     </ChLayout>
+    </>
   )
 }
