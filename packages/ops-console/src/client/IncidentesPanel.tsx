@@ -1,5 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Empty, Space, Table, Tag, Typography, message } from 'antd'
+import {
+  Alert,
+  Button,
+  Empty,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
+} from 'antd'
+import {
+  CheckOutlined,
+  LinkOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons'
 import {
   incidentApplicationLabel,
   incidentOriginLabel,
@@ -27,6 +42,14 @@ const PIPELINE_STATUS_LABEL: Record<OpsAnalysisQueueItem['status'], string> = {
   failed: 'Falhou',
 }
 
+function buildInvestigationDeepLink(investigationId: string): string {
+  const params = new URLSearchParams()
+  params.set('group', 'operacao')
+  params.set('tab', 'incidentes')
+  params.set('investigationId', investigationId)
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
+}
+
 export function IncidentesPanel({
   onRefresh,
   highlightInvestigationId,
@@ -37,6 +60,7 @@ export function IncidentesPanel({
   const [items, setItems] = useState<OpsAnalysisQueueItem[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -54,6 +78,14 @@ export function IncidentesPanel({
     void load()
   }, [load])
 
+  useEffect(() => {
+    if (highlightInvestigationId) {
+      setExpandedRowKeys((prev) =>
+        prev.includes(highlightInvestigationId) ? prev : [...prev, highlightInvestigationId],
+      )
+    }
+  }, [highlightInvestigationId])
+
   const markComplete = async (id: string) => {
     setUpdatingId(id)
     try {
@@ -68,10 +100,26 @@ export function IncidentesPanel({
     }
   }
 
+  const openDetail = (id: string) => {
+    setExpandedRowKeys((prev) => (prev.includes(id) ? prev : [...prev, id]))
+  }
+
+  const copyInvestigationLink = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(buildInvestigationDeepLink(id))
+      message.success('Link do incidente copiado')
+    } catch {
+      message.error('Não foi possível copiar o link')
+    }
+  }
+
+  const canMarkComplete = (status: OpsAnalysisQueueItem['status']) =>
+    status === 'fix_proposed' || status === 'investigating' || status === 'queued' || status === 'failed'
+
   return (
     <OpsPanel
       title="Incidentes"
-      description="Sinais cru até triagem — reportes de usuário, alertas ops e investigações automáticas."
+      description="Sinais cru até triagem — dados ao vivo via GET /api/analysis-queue (Postgres ops_analysis_queue)."
     >
       <Alert
         type="info"
@@ -84,76 +132,20 @@ export function IncidentesPanel({
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum incidente aberto" />
       ) : (
         <Table<OpsAnalysisQueueItem>
+          className="ops-incidentes-table"
           size="small"
           rowKey="id"
           loading={loading}
           pagination={false}
           dataSource={items}
-          rowClassName={(row) => (
+          rowClassName={(row) =>
             highlightInvestigationId && row.id === highlightInvestigationId
               ? 'ops-row-highlight'
               : ''
-          )}
-          columns={[
-            {
-              title: 'Timestamp',
-              dataIndex: 'queuedAt',
-              width: 150,
-              render: (v: string) => new Date(v).toLocaleString('pt-BR'),
-            },
-            { title: 'Título', dataIndex: 'title', ellipsis: true },
-            {
-              title: 'Aplicação',
-              key: 'application',
-              width: 100,
-              render: (_: unknown, row) => incidentApplicationLabel(row),
-            },
-            {
-              title: 'Origem',
-              key: 'origin',
-              width: 130,
-              render: (_: unknown, row) => <Tag>{incidentOriginLabel(row)}</Tag>,
-            },
-            {
-              title: 'Status',
-              key: 'triageStatus',
-              width: 120,
-              render: (_: unknown, row) => {
-                const triage = incidentTriageStatus(row.status)
-                return (
-                  <Tag color={triage === 'em_triagem' ? 'processing' : 'gold'}>
-                    {incidentTriageLabel(triage)}
-                  </Tag>
-                )
-              },
-            },
-            {
-              title: 'ID',
-              dataIndex: 'id',
-              width: 100,
-              render: (id: string) => <InvestigationIdTag investigationId={id} />,
-            },
-            {
-              title: 'Ações',
-              key: 'actions',
-              width: 120,
-              render: (_: unknown, row) => (
-                <Space size={4} wrap>
-                  {row.status === 'fix_proposed' && (
-                    <Button
-                      size="small"
-                      type="primary"
-                      loading={updatingId === row.id}
-                      onClick={() => void markComplete(row.id)}
-                    >
-                      Revisado
-                    </Button>
-                  )}
-                </Space>
-              ),
-            },
-          ]}
+          }
           expandable={{
+            expandedRowKeys,
+            onExpandedRowsChange: (keys) => setExpandedRowKeys(keys.map(String)),
             expandedRowRender: (row) => (
               <div style={{ maxWidth: 720 }}>
                 <Paragraph type="secondary">
@@ -194,6 +186,102 @@ export function IncidentesPanel({
               </div>
             ),
           }}
+          columns={[
+            {
+              title: 'Timestamp',
+              dataIndex: 'queuedAt',
+              width: 148,
+              render: (v: string) => new Date(v).toLocaleString('pt-BR'),
+            },
+            {
+              title: 'Título',
+              dataIndex: 'title',
+              ellipsis: { showTitle: true },
+            },
+            {
+              title: 'Aplicação',
+              key: 'application',
+              width: 96,
+              align: 'center',
+              render: (_: unknown, row) => incidentApplicationLabel(row),
+            },
+            {
+              title: 'Origem',
+              key: 'origin',
+              width: 120,
+              align: 'center',
+              render: (_: unknown, row) => <Tag>{incidentOriginLabel(row)}</Tag>,
+            },
+            {
+              title: 'Status',
+              key: 'triageStatus',
+              width: 112,
+              render: (_: unknown, row) => {
+                const triage = incidentTriageStatus(row.status)
+                return (
+                  <Tag color={triage === 'em_triagem' ? 'processing' : 'gold'}>
+                    {incidentTriageLabel(triage)}
+                  </Tag>
+                )
+              },
+            },
+            {
+              title: 'ID',
+              dataIndex: 'id',
+              width: 72,
+              align: 'center',
+              render: (id: string) => <InvestigationIdTag investigationId={id} compact />,
+            },
+            {
+              title: 'Ações',
+              key: 'actions',
+              width: 132,
+              align: 'center',
+              render: (_: unknown, row) => (
+                <Space size={0} wrap style={{ justifyContent: 'center' }}>
+                  <Tooltip title="Abrir detalhe">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<UnorderedListOutlined />}
+                      aria-label="Detalhe"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openDetail(row.id)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Copiar link com investigationId">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<LinkOutlined />}
+                      aria-label="Link investigação"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void copyInvestigationLink(row.id)
+                      }}
+                    />
+                  </Tooltip>
+                  {canMarkComplete(row.status) && (
+                    <Tooltip title={row.status === 'fix_proposed' ? 'Revisado' : 'Concluir triagem'}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CheckOutlined />}
+                        aria-label="Concluir"
+                        loading={updatingId === row.id}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          void markComplete(row.id)
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                </Space>
+              ),
+            },
+          ]}
         />
       )}
     </OpsPanel>

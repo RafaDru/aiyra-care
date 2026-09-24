@@ -1,4 +1,4 @@
-import { Button, Space, Typography, message } from 'antd'
+import { Button, Space, Tooltip, Typography, message } from 'antd'
 import { CopyOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
@@ -6,9 +6,12 @@ const { Text } = Typography
 export function InvestigationIdTag({
   investigationId,
   showFull = false,
+  compact = false,
 }: {
   investigationId: string | null | undefined
   showFull?: boolean
+  /** Tabela Incidentes: só prefixo + tooltip, sem botão copiar. */
+  compact?: boolean
 }) {
   if (!investigationId) {
     return <Text type="secondary">—</Text>
@@ -24,6 +27,14 @@ export function InvestigationIdTag({
     } catch {
       message.error('Não foi possível copiar')
     }
+  }
+
+  if (compact) {
+    return (
+      <Tooltip title={investigationId}>
+        <Text code style={{ fontSize: 11, whiteSpace: 'nowrap' }}>{short}…</Text>
+      </Tooltip>
+    )
   }
 
   return (
