@@ -4,6 +4,7 @@ import type {
   AnalysisQueuePriority,
   AnalysisQueueSourceType,
   AnalysisQueueStatus,
+  IncidentPipelineStatus,
   OpsAnalysisAttentionCounts,
   OpsAnalysisQueueRecord,
 } from '../../domain/ops/ops-analysis-queue.types.js'
@@ -15,6 +16,7 @@ function mapRow(row: Record<string, unknown>): OpsAnalysisQueueRecord {
     sourceId: String(row.source_id),
     lane: row.lane as AnalysisQueueLane,
     status: row.status as AnalysisQueueStatus,
+    incidentPipelineStatus: (row.incident_pipeline_status as IncidentPipelineStatus) ?? 'open',
     priority: row.priority as AnalysisQueuePriority,
     deploymentTier: String(row.deployment_tier),
     title: String(row.title),
@@ -90,10 +92,21 @@ export class OpsAnalysisQueuePgRepository {
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
+  async setIncidentPipelineStatus(id: string, status: IncidentPipelineStatus): Promise<void> {
+    await this.pool.query(
+      `UPDATE ops_analysis_queue SET
+        incident_pipeline_status = $2,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, status],
+    )
+  }
+
   async markInvestigating(id: string): Promise<void> {
     await this.pool.query(
       `UPDATE ops_analysis_queue SET
         status = 'investigating',
+        incident_pipeline_status = 'in_triage',
         investigation_requested_at = COALESCE(investigation_requested_at, NOW()),
         analysis_last_error = NULL,
         updated_at = NOW()
@@ -106,6 +119,7 @@ export class OpsAnalysisQueuePgRepository {
     await this.pool.query(
       `UPDATE ops_analysis_queue SET
         status = 'dismissed',
+        incident_pipeline_status = 'dismissed',
         remediation_summary = $2,
         analysis_last_error = NULL,
         updated_at = NOW()

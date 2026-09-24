@@ -9,12 +9,21 @@ export type AnalysisQueueStatus =
   | 'failed'
 export type AnalysisQueuePriority = 'low' | 'normal' | 'high' | 'critical'
 
+export type IncidentPipelineStatus =
+  | 'open'
+  | 'forwarded'
+  | 'queued_worker'
+  | 'in_triage'
+  | 'triaged'
+  | 'dismissed'
+
 export interface OpsAnalysisQueueRecord {
   id: string
   sourceType: AnalysisQueueSourceType
   sourceId: string
   lane: AnalysisQueueLane
   status: AnalysisQueueStatus
+  incidentPipelineStatus: IncidentPipelineStatus
   priority: AnalysisQueuePriority
   deploymentTier: string
   title: string
