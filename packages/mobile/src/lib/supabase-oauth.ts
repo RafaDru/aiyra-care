@@ -9,6 +9,23 @@ WebBrowser.maybeCompleteAuthSession()
 export { getSupabaseOAuthRedirectUri } from '@/lib/oauth-redirect-url'
 
 /** Troca tokens do redirect Supabase OAuth por sessão persistida (AsyncStorage). */
+async function hasPersistedSession(): Promise<boolean> {
+  const client = getSupabase()
+  if (!client) return false
+  const { data } = await client.auth.getSession()
+  return Boolean(data.session?.access_token)
+}
+
+/** Aguarda sessão após deep link (bridge exp:// pode fechar o Custom Tab antes do `success`). */
+async function waitForOAuthSession(maxMs = 4000): Promise<boolean> {
+  const deadline = Date.now() + maxMs
+  while (Date.now() < deadline) {
+    if (await hasPersistedSession()) return true
+    await new Promise((r) => setTimeout(r, 120))
+  }
+  return hasPersistedSession()
+}
+
 export async function createSessionFromOAuthUrl(url: string): Promise<void> {
   const client = getSupabase()
   if (!client) throw new Error('Supabase não configurado')
@@ -71,6 +88,14 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
     return
   }
   if (result.type === 'cancel' || result.type === 'dismiss') {
+    if (await waitForOAuthSession()) {
+      console.log('[Aiyra OAuth] sessão OK após WebBrowser', result.type)
+      return
+    }
     throw new Error('Login cancelado')
+  }
+  if (await waitForOAuthSession(2000)) {
+    console.log('[Aiyra OAuth] sessão OK após WebBrowser tipo', result.type)
+    return
   }
 }

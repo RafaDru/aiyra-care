@@ -1,20 +1,9 @@
-import { useEffect } from 'react'
-import { resolveMobileOAuthExpoDeepLink } from '../../lib/mobile-oauth-deep-link.js'
-
 /**
  * Landing page for Supabase OAuth on physical devices (Expo Go).
- * Supabase redirects here with tokens in the hash/query; WebBrowser returns this URL to the app.
+ * Supabase redirects here with tokens in the hash/query.
+ * Expo `WebBrowser.openAuthSessionAsync` must receive this **http** URL — não redirecionar para exp:// aqui.
  */
 export function MobileOAuthReturnPage() {
-  useEffect(() => {
-    const host = window.location.hostname || '127.0.0.1'
-    const exp = resolveMobileOAuthExpoDeepLink(host)
-    const suffix = window.location.hash || window.location.search
-    if (suffix && exp) {
-      window.location.replace(`${exp}${suffix}`)
-    }
-  }, [])
-
   return (
     <main style={{ padding: 24, fontFamily: 'system-ui, sans-serif' }}>
       <p>Concluindo login no app…</p>

@@ -227,6 +227,14 @@ export default function LoginScreen() {
       await afterAuthSuccess()
     } catch (e) {
       const message = formatAuthError(e, t) || t('auth.googleFailed')
+      if (message.toLowerCase().includes('cancelado')) {
+        try {
+          await afterAuthSuccess()
+          return
+        } catch {
+          /* sessão realmente ausente */
+        }
+      }
       setError(message)
       toast.error(message)
       void reportAuthClientError('google', message)

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, LogBox, View } from 'react-native'
 import { Stack } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { I18nextProvider } from 'react-i18next'
@@ -27,6 +27,7 @@ function RootStack() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(app)" options={{ headerShown: false }} />
+      <Stack.Screen name="auth" options={{ headerShown: false }} />
       <Stack.Screen name="invite/accept" options={{ title: 'Convite de família', presentation: 'modal' }} />
     </Stack>
   )
@@ -53,6 +54,12 @@ export default function RootLayout() {
   const [i18nReady, setI18nReady] = useState(false)
 
   useEffect(() => {
+    if (__DEV__) {
+      LogBox.ignoreLogs([
+        'Cannot connect to Expo CLI',
+        'Expo CLI',
+      ])
+    }
     logMobilePublicEnv()
     console.log(
       '[Aiyra mobile] bundle git',
