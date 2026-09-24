@@ -47,7 +47,7 @@ function Import-MobileEnvFile {
     $val = $line.Substring($idx + 1).Trim()
     if ($val.StartsWith('"') -and $val.EndsWith('"')) { $val = $val.Substring(1, $val.Length - 2) }
     if ($val -match 'localhost|127\.0\.0\.1') {
-      Write-Host "Ignorando $key (loopback no .env — use IP LAN)" -ForegroundColor Yellow
+      Write-Host "Ignorando $key (loopback no .env - use IP LAN)" -ForegroundColor Yellow
       return
     }
     Set-Item -Path "Env:$key" -Value $val
@@ -58,7 +58,7 @@ function Write-ExpoPublicEnvAudit {
   Write-Host 'EXPO_PUBLIC_* (processo Metro):' -ForegroundColor Cyan
   Get-ChildItem Env:EXPO_PUBLIC_* -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
     $v = $_.Value
-    if ($_.Name -match 'KEY|ANON') { $v = if ($v.Length -gt 8) { $v.Substring(0, 8) + '…' } else { '…' } }
+    if ($_.Name -match 'KEY|ANON') { $v = if ($v.Length -gt 8) { $v.Substring(0, 8) + '...' } else { '...' } }
     Write-Host "  $($_.Name)=$v" -ForegroundColor DarkGray
   }
 }
