@@ -46,6 +46,10 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | **Mobile** — marcadores de exame (gráfico) | Leitura | `mobile-exam-markers-chart` | 🟡 |
 | **Mobile** — curvas WHO | Leitura | `mobile-who-growth-chart` | 🟡 |
 | **Mobile** — gráficos de medidas | Leitura | `mobile-measurements-chart` | 🟡 |
+| **Mobile** — Ava companion smoke | Chat | `mobile-ava-companion-smoke` | 🟡 |
+| **Mobile** — Ava conversas | CRUD | `mobile-ava-conversation-crud` | 🟡 |
+| **Mobile** — Ava acelerador G1 | Chat | `mobile-ava-accelerator` | 🟡 |
+| **Mobile** — Ava anexo imagem | Chat | `mobile-ava-attachment-smoke` | 🟡 |
 | **Mobile** — agenda (eventos) | CRUD | `mobile-agenda-crud` | 🟡 |
 | **Mobile** — diagnósticos CRUD | CRUD | `mobile-diagnoses-crud` | 🟡 |
 | **Mobile** — paciente / onboarding TX | CRUD | `mobile-patient-tx` | 🟡 |

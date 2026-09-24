@@ -9,9 +9,10 @@
 | Fase concluída / em curso | Conteúdo |
 |---------------------------|----------|
 | **Shell M2–M6 (leitura)** | Auth, lista, perfil, tabs read-only (carteira, exames, meds, vacinas, alergias, atendimentos, agenda, integrações status), família/compliance, Ava chat básico + dock |
-| **Em PR** | [#68](https://github.com/RafaDru/aiyra-care/pull/68) Bloco 1 TX · [#70](https://github.com/RafaDru/aiyra-care/pull/70) Bloco 2 gráficos (draft) |
-| **Bloco 1** | Branch `cursor/mobile-bloco1-tx-a5c1` — CRUD clínico + paciente/documentos/família TX |
-| **Bloco 2 em curso** | Branch `cursor/mobile-bloco2-charts-a5c1` / #70 — marcadores, **WHO**, **medidas chart-series**; pendente: polish performance, Ava inline charts (fora) |
+| **Em PR** | [#68](https://github.com/RafaDru/aiyra-care/pull/68) Bloco 1 · [#70](https://github.com/RafaDru/aiyra-care/pull/70) Bloco 2 · Bloco 3 Ava em `cursor/mobile-bloco3-ava-a5c1` |
+| **Bloco 1** | `cursor/mobile-bloco1-tx-a5c1` — CRUD + paciente/documentos/família TX |
+| **Bloco 2** | `cursor/mobile-bloco2-charts-a5c1` / #70 — gráficos read-only |
+| **Bloco 3 em curso** | Conversas CRUD, pins, aceleradores G1, anexo imagem; roadmap: guardrail smoke, ações G3, gráficos inline |
 
 **Próximo passo Bloco 1 (paralelo):** export/registro rápido, integrações (criar link); convênios via sync/web.
 

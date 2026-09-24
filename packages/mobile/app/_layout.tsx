@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, LogBox, View } from 'react-native'
 import { Stack } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { I18nextProvider } from 'react-i18next'
@@ -11,6 +11,8 @@ import { AppErrorBoundary } from '@/components/errors/AppErrorBoundary'
 import { MobileTelemetryRoute } from '@/components/telemetry/MobileTelemetryRoute'
 import { AppearancePreferenceProvider } from '@/theme/AppearancePreferenceContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
+import { logMobilePublicEnv } from '@/lib/log-mobile-public-env'
+import { getSupabaseOAuthRedirectUri } from '@/lib/oauth-redirect-url'
 
 function RootStack() {
   const { tokens } = useAiyraTheme()
@@ -25,6 +27,7 @@ function RootStack() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(app)" options={{ headerShown: false }} />
+      <Stack.Screen name="auth" options={{ headerShown: false }} />
       <Stack.Screen name="invite/accept" options={{ title: 'Convite de família', presentation: 'modal' }} />
     </Stack>
   )
@@ -51,7 +54,25 @@ export default function RootLayout() {
   const [i18nReady, setI18nReady] = useState(false)
 
   useEffect(() => {
-    void initI18n().finally(() => setI18nReady(true))
+    if (__DEV__) {
+      LogBox.ignoreLogs([
+        'Cannot connect to Expo CLI',
+        'Expo CLI',
+      ])
+    }
+    logMobilePublicEnv()
+    console.log(
+      '[Aiyra mobile] bundle git',
+      process.env.EXPO_PUBLIC_BUNDLE_GIT_SHA ?? 'unknown',
+    )
+    console.log('[Aiyra OAuth] redirectTo (boot)', getSupabaseOAuthRedirectUri())
+    const bootI18n = Promise.race([
+      initI18n(),
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, 5_000)
+      }),
+    ])
+    void bootI18n.finally(() => setI18nReady(true))
   }, [])
 
   if (!i18nReady) {

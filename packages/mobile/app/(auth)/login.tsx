@@ -17,6 +17,7 @@ import { AUTH_PASSWORD_HINT, AUTH_PASSWORD_MIN_LENGTH } from '@/lib/auth-policy'
 import { formatAuthError } from '@/lib/auth-errors'
 import type { LegalDocumentKind } from '@/lib/api.types'
 import { reportAuthClientError } from '@/lib/client-errors'
+import { waitForOAuthSession } from '@/lib/supabase-oauth'
 import { loadLastEmail, saveLastEmail } from '@/lib/remember-me'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
@@ -227,6 +228,13 @@ export default function LoginScreen() {
       await afterAuthSuccess()
     } catch (e) {
       const message = formatAuthError(e, t) || t('auth.googleFailed')
+      if (message.toLowerCase().includes('cancelado')) {
+        const sessionReady = await waitForOAuthSession(15_000)
+        if (sessionReady) {
+          await afterAuthSuccess()
+          return
+        }
+      }
       setError(message)
       toast.error(message)
       void reportAuthClientError('google', message)

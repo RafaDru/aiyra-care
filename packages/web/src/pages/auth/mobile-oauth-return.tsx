@@ -1,25 +1,62 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { resolveMobileOAuthExpoDeepLink } from '../../lib/mobile-oauth-deep-link.js'
+
+function oauthPayloadInLocation(): boolean {
+  const hash = window.location.hash
+  const search = window.location.search
+  return (
+    hash.includes('access_token') ||
+    hash.includes('code=') ||
+    search.includes('code=') ||
+    search.includes('error=') ||
+    search.includes('error_description=')
+  )
+}
+
+/** Repassa hash/query do Supabase para `exp://…/auth/callback` (Expo Go ingest via Linking). */
+function buildExpoCallbackUrl(): string | null {
+  if (!oauthPayloadInLocation()) return null
+  const base = resolveMobileOAuthExpoDeepLink(window.location.hostname)
+  const hash = window.location.hash
+  const search = window.location.search
+  if (hash.length > 1) return `${base}${hash}`
+  if (search) return `${base}${search}`
+  return null
+}
 
 /**
- * Landing page for Supabase OAuth on physical devices (Expo Go).
- * Supabase redirects here with tokens in the hash/query; WebBrowser returns this URL to the app.
+ * Landing Supabase OAuth no dispositivo (Custom Tabs).
+ * `openAuthSessionAsync` costuma retornar `dismiss` após abrir o app — tokens vão no deep link.
  */
 export function MobileOAuthReturnPage() {
+  const [phase, setPhase] = useState<'opening' | 'fallback'>('opening')
+
   useEffect(() => {
-    const host = window.location.hostname || '127.0.0.1'
-    const exp =
-      import.meta.env.VITE_MOBILE_OAUTH_DEEP_LINK?.trim() ||
-      `exp://${host}:8081/--/auth/callback`
-    const suffix = window.location.hash || window.location.search
-    if (suffix && exp) {
-      window.location.replace(`${exp}${suffix}`)
+    const expoUrl = buildExpoCallbackUrl()
+    if (!expoUrl) {
+      setPhase('fallback')
+      return
     }
+    window.location.replace(expoUrl)
+    const timer = window.setTimeout(() => setPhase('fallback'), 3000)
+    return () => window.clearTimeout(timer)
   }, [])
 
   return (
     <main style={{ padding: 24, fontFamily: 'system-ui, sans-serif' }}>
-      <p>Concluindo login no app…</p>
-      <p style={{ color: '#666', fontSize: 14 }}>Você pode fechar esta aba se o AiyraCare já abriu.</p>
+      {phase === 'opening' ? (
+        <>
+          <p style={{ fontSize: 18, fontWeight: 600 }}>Abrindo o AiyraCare…</p>
+          <p style={{ color: '#666', fontSize: 14 }}>Aguarde — você deve voltar ao app automaticamente.</p>
+        </>
+      ) : (
+        <>
+          <p>Concluindo login no app…</p>
+          <p style={{ color: '#666', fontSize: 14 }}>
+            Se o app não abriu, volte ao Expo Go. O login pode já estar concluído.
+          </p>
+        </>
+      )}
     </main>
   )
 }

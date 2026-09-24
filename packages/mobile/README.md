@@ -10,7 +10,7 @@ Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:30
 
 1. **Atualizar código:** `git pull origin main`
 2. **Dependências (raiz do monorepo):** `npm install`
-3. **Variáveis:** `cd packages/mobile && cp .env.example .env` — preencher `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` (mesmo projeto do web; ver `docs/SUPABASE.md`), `EXPO_PUBLIC_API_URL` (default `http://127.0.0.1:3010`) e opcional `EXPO_PUBLIC_WEB_APP_URL` (`http://localhost:5173`)
+3. **Variáveis:** `cd packages/mobile && cp .env.example .env` — Supabase + **IP LAN** em `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_WEB_APP_URL` e `EXPO_PUBLIC_OAUTH_REDIRECT_URI` (nunca `localhost` no celular). Ver `docs/SUPABASE.md`.
 4. **API local:** subir stack com API em **http://127.0.0.1:3010** (`npm run env:status` na raiz)
 5. **Expo web:** `npm run web` (ou na raiz `npm run mobile:web`)
 
@@ -50,6 +50,14 @@ Plano de paridade: Project store `docs/mobile-parity-plan.md` · feature `docs/f
 ## Google OAuth (mobile)
 
 Fluxo alinhado ao web (`signInWithOAuth({ provider: 'google' })`) via `expo-auth-session` + `expo-web-browser` — ver `src/lib/supabase-oauth.ts`.
+
+### UX alvo (produto)
+
+- **Um toque** em «Continuar com Google» → Custom Tab → conta Google → **volta ao app já logado**.
+- Sem mensagem «Login cancelado» quando o Google concluiu.
+- A bridge web (`/mobile-oauth-return`) só repassa tokens ao app via deep link `exp://…/auth/callback` — o usuário **não** precisa «fechar o browser» manualmente na versão final (hoje pode ver «Abrindo o AiyraCare…» por 1–2s).
+
+Bridge: `packages/web/src/pages/auth/mobile-oauth-return.tsx` · deep link: `packages/web/src/lib/mobile-oauth-deep-link.ts`.
 
 1. **Supabase Dashboard** → Authentication → URL Configuration — adicionar redirect URLs:
    - `aiyracare://auth/callback`

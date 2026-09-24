@@ -134,6 +134,29 @@ export interface AvaConversation {
   updatedAt: string
 }
 
+export interface AvaMessage {
+  id: string
+  conversationId: string
+  role: 'user' | 'assistant'
+  content: string
+  documentId: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface AvaSessionPin {
+  id: string
+  conversationId: string
+  entityType: 'exam' | 'exam_order' | 'exam_result_item' | 'exam_marker'
+  entityId: string
+  patientId: string
+  label: string | null
+  source: 'user' | 'accelerator' | 'auto' | 'inferred'
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export interface AvaChatResponse {
   reply: string
   provider: string

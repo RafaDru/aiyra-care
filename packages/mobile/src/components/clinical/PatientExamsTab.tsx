@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { AvaAcceleratorButton } from '@/components/ava/AvaAcceleratorButton'
 import { PatientExamMarkersPanel } from '@/components/charts/PatientExamMarkersPanel'
 import {
   Alert,
@@ -310,6 +311,12 @@ export function PatientExamsTab({ patientId }: Props) {
                     {t('clinical.source', { source: formatExamSource(exam.source) })}
                   </Text>
                   <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>{t('clinical.exams.tapToEdit')}</Text>
+                  <AvaAcceleratorButton
+                    patientId={patientId}
+                    initialMessage={t('ava.acceleratorExam')}
+                    entityPin={{ entityType: 'exam', entityId: exam.id }}
+                    compact
+                  />
                 </Pressable>
               ))}
             </View>

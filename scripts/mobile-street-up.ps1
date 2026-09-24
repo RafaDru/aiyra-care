@@ -46,7 +46,20 @@ function Import-MobileEnvFile {
     $key = $line.Substring(0, $idx).Trim()
     $val = $line.Substring($idx + 1).Trim()
     if ($val.StartsWith('"') -and $val.EndsWith('"')) { $val = $val.Substring(1, $val.Length - 2) }
+    if ($val -match 'localhost|127\.0\.0\.1') {
+      Write-Host "Ignorando $key (loopback no .env - use IP LAN)" -ForegroundColor Yellow
+      return
+    }
     Set-Item -Path "Env:$key" -Value $val
+  }
+}
+
+function Write-ExpoPublicEnvAudit {
+  Write-Host 'EXPO_PUBLIC_* (processo Metro):' -ForegroundColor Cyan
+  Get-ChildItem Env:EXPO_PUBLIC_* -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+    $v = $_.Value
+    if ($_.Name -match 'KEY|ANON') { $v = if ($v.Length -gt 8) { $v.Substring(0, 8) + '...' } else { '...' } }
+    Write-Host "  $($_.Name)=$v" -ForegroundColor DarkGray
   }
 }
 
@@ -71,10 +84,17 @@ try {
   if (-not (Test-ApiHealth)) {
     Write-Host "API nao responde em http://127.0.0.1:3010/health" -ForegroundColor Red
     Write-Host "Suba a stack: npm run stack:start   (ou scripts/up.ps1 no seu PC)" -ForegroundColor Yellow
-    exit 1
+    if ($Mode -eq 'street') {
+      exit 1
+    }
+    Write-Host "LAN: Metro sobe mesmo assim (Expo Go precisa do bundle; login/sync exigem API)." -ForegroundColor Yellow
   }
 
   Import-MobileEnvFile
+  Remove-Item Env:EXPO_PUBLIC_OAUTH_REDIRECT_URI -ErrorAction SilentlyContinue
+  if ($env:EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE -ne '1') {
+    Remove-Item Env:EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE -ErrorAction SilentlyContinue
+  }
 
   $tunnelProc = $null
   if ($Mode -eq 'street') {
@@ -114,10 +134,14 @@ try {
       exit 1
     }
     $env:EXPO_PUBLIC_API_URL = "http://${lan}:3010"
+    $env:EXPO_PUBLIC_WEB_APP_URL = "http://${lan}:5173"
+    Remove-Item Env:EXPO_PUBLIC_OAUTH_REDIRECT_URI -ErrorAction SilentlyContinue
+    Remove-Item Env:EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE -ErrorAction SilentlyContinue
     $env:REACT_NATIVE_PACKAGER_HOSTNAME = $lan
     $expoLanUrl = "exp://${lan}:8081"
     Set-Content -Path $expoUrlFile -Value $expoLanUrl -Encoding UTF8
     Write-Host "EXPO_PUBLIC_API_URL = $($env:EXPO_PUBLIC_API_URL)" -ForegroundColor Green
+    Write-Host "OAuth redirect: exp://${lan}:8081/--/auth/callback (bridge web desligado)" -ForegroundColor Green
     Write-Host "REACT_NATIVE_PACKAGER_HOSTNAME = $lan" -ForegroundColor Green
     Write-Host "Expo Go (manual): $expoLanUrl  (tambem em packages/mobile/.expo-url.txt)" -ForegroundColor Green
     Write-Host "Metro: expo start --lan --clear (mesmo Wi-Fi que o celular)" -ForegroundColor Green
@@ -129,6 +153,7 @@ try {
   Write-Host ""
 
   Clear-ExpoDevCiEnv
+  Write-ExpoPublicEnvAudit
 
   Push-Location $mobileDir
   try {

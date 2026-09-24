@@ -85,6 +85,7 @@
     "caddy:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1",
     "caddy:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1 -Stop",
     "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/env-status.ps1",
+    "preview:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-preview-local.ps1",
     "up:both": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/up-both.ps1",
     "startup:register": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Register",
     "startup:unregister": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Unregister",

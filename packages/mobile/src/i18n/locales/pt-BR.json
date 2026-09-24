@@ -205,6 +205,37 @@
     "biometricUnlock": "Desbloqueio biométrico",
     "biometricUnlockHint": "Ao voltar ao app, pede Face ID ou digital."
   },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "close": "Fechar",
+    "remove": "Remover"
+  },
+  "ava": {
+    "title": "Ava",
+    "accelerator": "Pergunte à Ava",
+    "acceleratorExam": "O que significa este exame no contexto do histórico de saúde?",
+    "acceleratorMarker": "O que significa este marcador e como interpretar a evolução?",
+    "openChat": "Abrir chat da Ava",
+    "messagePlaceholder": "Mensagem para a Ava…",
+    "send": "Enviar",
+    "thinking": "Pensando…",
+    "emptyHint": "Pergunte sobre o prontuário, integrações ou próximos passos. Ações com efeito no portal continuam no app web.",
+    "revised": "(resposta revisada pela Ava)",
+    "quotaExhausted": "Franquia de uso esgotada neste período.",
+    "newConversation": "Nova conversa",
+    "currentConversation": "Conversa atual",
+    "pickConversation": "Escolher conversa",
+    "noConversations": "Nenhuma conversa salva ainda.",
+    "untitledConversation": "Conversa sem título",
+    "archiveConversation": "Arquivar",
+    "archiveConversationConfirm": "Arquivar esta conversa? Você pode iniciar uma nova em seguida.",
+    "deleteConversationTitle": "Excluir conversa?",
+    "deleteConversationBody": "Esta ação não pode ser desfeita.",
+    "entityPinActive": "Contexto de entidade anexado a esta conversa.",
+    "imageAttachFailed": "Não foi possível anexar a imagem.",
+    "imagePermissionDenied": "Permita acesso à galeria para anexar imagens."
+  },
   "toast": {
     "success": "Sucesso",
     "error": "Erro",

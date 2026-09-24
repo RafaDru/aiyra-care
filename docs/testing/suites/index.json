@@ -495,6 +495,62 @@
       "businessActions": ["mobile.measurements_chart"],
       "automation": { "status": "manual" },
       "estimatedMinutes": 8
+    },
+    {
+      "id": "mobile-ava-companion-smoke",
+      "domain": "mobile",
+      "title": "Mobile — Ava companion smoke (Bloco 3)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-ava-companion-smoke.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.ava_companion_smoke"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "mobile-ava-conversation-crud",
+      "domain": "mobile",
+      "title": "Mobile — Ava conversas CRUD (Bloco 3)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-ava-conversation-crud.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.ava_conversation_crud"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-ava-accelerator",
+      "domain": "mobile",
+      "title": "Mobile — Ava acelerador G1 / entityPin (Bloco 3)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-ava-accelerator.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.ava_accelerator"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "mobile-ava-attachment-smoke",
+      "domain": "mobile",
+      "title": "Mobile — Ava anexo imagem (Bloco 3)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-ava-attachment-smoke.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.ava_attachment_smoke"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 6
     }
   ],
   "lanes": {
@@ -540,7 +596,7 @@
     "mobile": {
       "title": "App mobile (Expo)",
       "description": "Smoke manual shell + checks typecheck/export",
-      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud", "mobile-agenda-crud", "mobile-diagnoses-crud", "mobile-patient-tx", "mobile-documents-tx", "mobile-family-tx", "mobile-exam-markers-chart", "mobile-who-growth-chart", "mobile-measurements-chart"]
+      "suiteIds": ["mobile-shell-smoke", "mobile-allergies-crud", "mobile-medical-records-crud", "mobile-medications-crud", "mobile-vaccines-crud", "mobile-exams-crud", "mobile-agenda-crud", "mobile-diagnoses-crud", "mobile-patient-tx", "mobile-documents-tx", "mobile-family-tx", "mobile-exam-markers-chart", "mobile-who-growth-chart", "mobile-measurements-chart", "mobile-ava-companion-smoke", "mobile-ava-conversation-crud", "mobile-ava-accelerator", "mobile-ava-attachment-smoke"]
     }
   }
 }

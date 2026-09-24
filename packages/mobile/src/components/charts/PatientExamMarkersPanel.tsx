@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { AvaAcceleratorButton } from '@/components/ava/AvaAcceleratorButton'
 import { MarkerTrendLineChart } from '@/components/charts/MarkerTrendLineChart'
 import { SectionCard } from '@/components/family/SectionCard'
 import { StatePanel } from '@/components/StatePanel'
@@ -183,6 +184,11 @@ export function PatientExamMarkersPanel({ patientId }: Props) {
                   {formatClinicalDate(active.latestCollectedAt, locale)}
                 </Text>
               </View>
+              <AvaAcceleratorButton
+                patientId={patientId}
+                initialMessage={t('ava.acceleratorMarker')}
+                entityPin={{ entityType: 'exam_marker', markerName: active.markerName }}
+              />
               <MarkerTrendLineChart group={active} tokens={tokens} locale={locale} />
               <View style={styles.history}>
                 {active.points
