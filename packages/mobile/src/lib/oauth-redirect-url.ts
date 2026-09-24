@@ -1,4 +1,5 @@
 import Constants from 'expo-constants'
+import * as Linking from 'expo-linking'
 import { Platform } from 'react-native'
 import { makeRedirectUri } from 'expo-auth-session'
 
@@ -45,7 +46,7 @@ function rewriteLoopbackWebUrl(url: string, lanHost: string): string {
   return u.toString().replace(/\/$/, '')
 }
 
-/** Base do web dev (`:5173`) — só para CTAs «abrir no navegador», não OAuth nativo por padrão. */
+/** Base do web dev (`:5173`) — CTAs e bridge OAuth. */
 export function deviceWebAppBaseUrl(): string | null {
   const lanHost = lanHostFromApiUrl()
   const raw = process.env.EXPO_PUBLIC_WEB_APP_URL?.replace(/\/$/, '')
@@ -59,17 +60,13 @@ export function deviceWebAppBaseUrl(): string | null {
   return raw ?? null
 }
 
-/** Expo Go / dev build: `exp://<LAN>:8081/--/auth/callback` (nunca localhost). */
+/** Expo Go: deep link alinhado ao Metro (tunnel ou LAN). */
 export function resolveNativeExpoOAuthRedirectUri(): string {
+  const fromLinking = Linking.createURL('auth/callback')
+  if (!isLoopbackWebUrl(fromLinking)) return fromLinking
   const lanHost = metroLanHost()
-  const fromMake = makeRedirectUri({
-    scheme: 'aiyracare',
-    path: 'auth/callback',
-    preferLocalhost: false,
-  })
-  if (!isLoopbackWebUrl(fromMake)) return fromMake
   if (lanHost) return `exp://${lanHost}:8081/--/auth/callback`
-  return fromMake
+  return fromLinking
 }
 
 function resolveWebBridgeOAuthRedirectUri(): string | null {
@@ -87,8 +84,9 @@ function resolveWebBridgeOAuthRedirectUri(): string | null {
 }
 
 /**
- * Native (Expo Go): **exp://** direto — evita bridge web e Site URL localhost do Supabase.
- * Web: bridge `/mobile-oauth-return`. Bridge nativo só com `EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE=1`.
+ * Expo Go (Android): Custom Tabs captura melhor **http LAN** + `/mobile-oauth-return` do que `exp://` puro.
+ * Supabase com `site_url` localhost manda o celular para localhost — patch LAN no projeto (script).
+ * Fallback: `exp://` via `Linking.createURL`.
  */
 export function getSupabaseOAuthRedirectUri(): string {
   if (Platform.OS === 'web') {
@@ -97,8 +95,8 @@ export function getSupabaseOAuthRedirectUri(): string {
     return makeRedirectUri({ path: 'auth/callback', preferLocalhost: true })
   }
 
-  const useWebBridge = process.env.EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE === '1'
-  if (useWebBridge) {
+  const forceExp = process.env.EXPO_PUBLIC_OAUTH_USE_EXP_REDIRECT === '1'
+  if (!forceExp) {
     const bridge = resolveWebBridgeOAuthRedirectUri()
     if (bridge && !isLoopbackWebUrl(bridge)) return bridge
   }

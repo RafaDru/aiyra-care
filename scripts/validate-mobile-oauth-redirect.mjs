@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Valida redirect OAuth nativo (exp://) — espelha oauth-redirect-url.ts (native, sem bridge).
+ * Valida redirect OAuth nativo (bridge LAN por padrão; exp com EXPO_PUBLIC_OAUTH_USE_EXP_REDIRECT=1).
  */
 import { readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
@@ -34,13 +34,14 @@ function lanHostFromApiUrl() {
 }
 
 const lan = lanHostFromApiUrl()
-const useBridge = env.EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE === '1'
+const forceExp = env.EXPO_PUBLIC_OAUTH_USE_EXP_REDIRECT === '1'
 let redirectTo
-if (useBridge) {
-  const explicit = env.EXPO_PUBLIC_OAUTH_REDIRECT_URI?.trim()
-  redirectTo = explicit || (lan ? `http://${lan}:5173/mobile-oauth-return` : null)
+if (forceExp && lan) {
+  redirectTo = `exp://${lan}:8081/--/auth/callback`
+} else if (lan) {
+  redirectTo = `http://${lan}:5173/mobile-oauth-return`
 } else {
-  redirectTo = lan ? `exp://${lan}:8081/--/auth/callback` : null
+  redirectTo = env.EXPO_PUBLIC_OAUTH_REDIRECT_URI?.trim() ?? null
 }
 
 if (!redirectTo) {
@@ -51,10 +52,6 @@ if (!redirectTo) {
 console.log('[Aiyra OAuth] redirectTo (signInWithOAuth)', redirectTo)
 if (redirectTo.includes('localhost') || redirectTo.includes('127.0.0.1')) {
   console.error('FAIL: redirectTo still loopback')
-  process.exit(1)
-}
-if (!redirectTo.startsWith('exp://') && !useBridge) {
-  console.error('FAIL: expected exp:// for native OAuth')
   process.exit(1)
 }
 process.exit(0)

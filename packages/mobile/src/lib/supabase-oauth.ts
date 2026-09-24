@@ -58,12 +58,13 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
   console.log('[Aiyra OAuth] authorize URL', data.url)
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
-  if (__DEV__) {
-    const safeUrl =
-      result.type === 'success' && result.url
-        ? result.url.replace(/#.*$/, '#…')
-        : undefined
-    console.log('[Aiyra OAuth] WebBrowser result', result.type, safeUrl ?? '')
+  const safeResultUrl =
+    result.type === 'success' && result.url
+      ? result.url.replace(/#.*$/, '#…').replace(/\?.*$/, '?…')
+      : ''
+  console.log('[Aiyra OAuth] WebBrowser result', result.type, safeResultUrl)
+  if (result.type !== 'success' && result.type !== 'cancel' && result.type !== 'dismiss') {
+    console.log('[Aiyra OAuth] WebBrowser raw', JSON.stringify(result))
   }
   if (result.type === 'success' && result.url) {
     await createSessionFromOAuthUrl(result.url)

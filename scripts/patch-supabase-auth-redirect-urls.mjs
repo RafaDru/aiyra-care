@@ -47,15 +47,21 @@ for (const entry of ADD) {
   if (!merged.includes(entry)) merged.push(entry)
 }
 
+const siteUrl = `http://${LAN_IP}:5173`
+
 const patchRes = await fetch(base, {
   method: 'PATCH',
   headers,
-  body: JSON.stringify({ uri_allow_list: merged.join(',') }),
+  body: JSON.stringify({
+    uri_allow_list: merged.join(','),
+    site_url: siteUrl,
+  }),
 })
 if (!patchRes.ok) {
   console.error('PATCH auth config failed', patchRes.status, await patchRes.text())
   process.exit(1)
 }
 const out = await patchRes.json()
+console.log('site_url:', out.site_url ?? siteUrl)
 console.log('uri_allow_list updated:')
 console.log(out.uri_allow_list ?? merged.join(','))

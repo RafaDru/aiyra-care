@@ -54,6 +54,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     logMobilePublicEnv()
+    console.log(
+      '[Aiyra mobile] bundle git',
+      process.env.EXPO_PUBLIC_BUNDLE_GIT_SHA ?? 'unknown',
+    )
     console.log('[Aiyra OAuth] redirectTo (boot)', getSupabaseOAuthRedirectUri())
     void initI18n().finally(() => setI18nReady(true))
   }, [])
