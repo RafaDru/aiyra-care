@@ -34,3 +34,6 @@ packages/api/scripts/output/*.json
 
 # Local decision sandbox — contexto de exploração, não versionar
 sandbox/
+
+packages/mobile/.expo-lan-log.txt
+packages/mobile/.expo-lan-log.txt.err
