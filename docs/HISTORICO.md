@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-24] - Nome oficial Command Hub (CH)
+
+### Decisão
+- Plataforma interna (console `:3013`, `/ops/*`, suporte, alertas, telemetria) passa a ser chamada **Command Hub**; acrônimo **CH** na conversa.
+- Paths legados (`docs/ops/`, `packages/ops-console`, `test:ops`) mantidos até pós-MVP.
+
+### Realizado
+- [`docs/ops/COMMAND_HUB.md`](ops/COMMAND_HUB.md); hub e escopo MVP atualizados; rule `.cursor/rules/aiyra-ops-session.mdc`.
+
 ## [2026-09-23] - Preview pausado; Ops MVP em ambiente único
 
 ### Decisão

@@ -13,7 +13,8 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 
 | # | Documento | Quando usar |
 |---|-----------|-------------|
-| 1 | **Este README** | Contexto da sessão Ops |
+| 1 | **Este README** | Contexto da sessão CH |
+| 1a | [`COMMAND_HUB.md`](./COMMAND_HUB.md) | Nome, acrônimo, mapa pacotes |
 | 1b | [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md) | **Escopo MVP** — o que operar agora vs congelado |
 | 2 | [`CONSOLE.md`](./CONSOLE.md) | Abas do console `:3013`, o que cada uma mede |
 | 3 | [`TELEMETRY.md`](./TELEMETRY.md) | Tabelas PG, LGPD, queries úteis |

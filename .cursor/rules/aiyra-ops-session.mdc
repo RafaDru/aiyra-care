@@ -1,15 +1,15 @@
 ---
-description: Sessão Cursor «Aiyra: Ops» — observabilidade, console :3013, alertas, telemetria, support_reports
+description: Sessão Cursor Command Hub (CH) — console :3013, alertas, telemetria, support_reports
 alwaysApply: false
 ---
 
-# Sessão Aiyra: Ops
+# Sessão Aiyra — Command Hub (CH)
 
-Use este chat para temas de **observabilidade, alertas, console ops e suporte técnico**.
+Use este chat para a frente **Command Hub (CH)**: observabilidade, alertas, console `:3013`, suporte técnico e métricas internas.
 
-## Antes de alterar código ops
+## Antes de alterar código CH
 
-1. Ler **`docs/ops/README.md`** (hub da sessão) e **`docs/ops/OPS_MVP_SCOPE.md`** (escopo ativo; preview pausado)
+1. Ler **`docs/ops/COMMAND_HUB.md`** (nome e mapa) · **`docs/ops/README.md`** · **`docs/ops/OPS_MVP_SCOPE.md`** (preview pausado)
 2. Console → **`docs/ops/CONSOLE.md`**
 3. Tabelas/queries → **`docs/ops/TELEMETRY.md`**
 4. Chamados usuário → **`docs/ops/SUPPORT_REPORTS.md`**
@@ -22,14 +22,14 @@ Arquitetura ampla: `docs/OBSERVABILITY.md` · `docs/OPERATION_MODEL.md`.
 
 | Pacote | Papel |
 |--------|--------|
-| `packages/ops-console` | UI `:3013` / `:3023` |
+| `packages/ops-console` | UI Command Hub `:3013` / `:3023` |
 | `packages/api/src/application/ops` | Métricas, alertas, triagem |
 | `packages/api/src/application/telemetry` | `product_events`, `client_errors` |
 | `packages/api/src/application/support-report` | Migration 061 |
 
 ## Regras
 
-- Sem PHI em webhooks, logs ops ou payloads de alerta.
-- `npm run test:ops` após mudanças em ops/alertas.
-- Dois ambientes: chaves e PG **separados** (integração vs preview).
+- Sem PHI em webhooks, logs CH ou payloads de alerta.
+- `npm run test:ops` após mudanças em ops/alertas (nome técnico do script).
+- **MVP:** um ambiente integração — ver `OPS_MVP_SCOPE.md` (preview pausado).
 - Ao entregar: atualizar `docs/ops/` + roadmap `prod-run-intelligence`.

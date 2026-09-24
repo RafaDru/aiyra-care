@@ -1,8 +1,10 @@
-# Ops — escopo MVP (pré-produção)
+# Command Hub (CH) — escopo MVP (pré-produção)
 
-> **Última atualização:** 2026-09-23  
+> **Última atualização:** 2026-09-24  
 > **Status:** fonte de verdade enquanto **Preview (Ambiente 2) está pausado**.  
-> Alinha App + Web + Plataforma + Ops em **um** ambiente de integração antes de staging e produção.
+> Alinha App + Web + Plataforma + **CH** em **um** ambiente de integração antes de staging e produção.
+
+Nomenclatura: [`COMMAND_HUB.md`](./COMMAND_HUB.md).
 
 Decisão registrada em [`HISTORICO.md`](../HISTORICO.md) (2026-09-23). Ambiente Preview: [`ENV_PREVIEW.md`](../infra/ENV_PREVIEW.md).
 
@@ -20,7 +22,7 @@ Operar o AiyraCare com **observabilidade suficiente** para detectar falhas de in
 |------|--------|
 | API | `http://127.0.0.1:3010` |
 | Web | `http://localhost:5173` |
-| Ops console | `http://127.0.0.1:3013` → PG `aiyracare` |
+| **CH console** | `http://127.0.0.1:3013` → PG `aiyracare` |
 | Postgres | `postgresql://…/aiyracare` |
 | `OPS_METRICS_KEY` | Uma chave (integration / `setup:ops-alerts`) |
 | `OPS_WORKER_MONITOR` | **`0` ou unset** — sem pager `worker_stale` sem worker |
@@ -30,7 +32,7 @@ Operar o AiyraCare com **observabilidade suficiente** para detectar falhas de in
 
 ---
 
-## Ops MVP — dentro do escopo
+## CH MVP — dentro do escopo
 
 ### 1. Saúde e sondas
 
