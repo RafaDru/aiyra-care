@@ -66,7 +66,13 @@ export default function RootLayout() {
       process.env.EXPO_PUBLIC_BUNDLE_GIT_SHA ?? 'unknown',
     )
     console.log('[Aiyra OAuth] redirectTo (boot)', getSupabaseOAuthRedirectUri())
-    void initI18n().finally(() => setI18nReady(true))
+    const bootI18n = Promise.race([
+      initI18n(),
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, 5_000)
+      }),
+    ])
+    void bootI18n.finally(() => setI18nReady(true))
   }, [])
 
   if (!i18nReady) {

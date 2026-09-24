@@ -10,6 +10,7 @@ import {
   setRememberMePreference,
 } from '@/lib/remember-me'
 import { getAccessToken, getSupabase, setMemoryAccessToken, supabaseConfigured } from '@/lib/supabase'
+import { withTimeout } from '@/lib/with-timeout'
 
 export type SignUpResult = { kind: 'session' } | { kind: 'email_confirmation' }
 
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setNeedsProfile(false)
       return
     }
-    const result = await api.auth.sync()
+    const result = await withTimeout(api.auth.sync(), 15_000, 'api.auth.sync')
     setAccount(result.account)
     setNeedsProfile(result.needsProfile)
   }, [])
@@ -91,13 +92,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
       return
     }
-    client.auth
-      .getSession()
+    void withTimeout(client.auth.getSession(), 12_000, 'auth.getSession')
       .then(({ data }) => {
         setSession(data.session)
-        return runSync(data.session?.access_token)
+        setLoading(false)
+        void runSync(data.session?.access_token)
       })
-      .finally(() => setLoading(false))
+      .catch(() => {
+        setSession(null)
+        setLoading(false)
+      })
 
     const { data: sub } = client.auth.onAuthStateChange((_event, next) => {
       setSession(next)
