@@ -1,7 +1,30 @@
-# Console ops — guia por aba
+# Command Hub — console (guia por tela)
 
-> Console independente: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
+> UI: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
 > Lê **Postgres direto** + sonda API monitorada — não passa pelo JWT do app.
+
+## Layout (Header + Nav + Conteúdo + Rodapé)
+
+| Zona | Função |
+|------|--------|
+| **Header** | Marca Command Hub, chip de ambiente, **Atualizar** / **Verificar e acionar** |
+| **Top nav** | Quatro áreas: **Operação** · **Produto** · **Negócio** · **Plataforma** (cores e ícones por zona) |
+| **Sidebar** | Telas do grupo ativo (badges de atenção) |
+| **Conteúdo** | Context bar (breadcrumb + descrição) + painel |
+| **Rodapé** | Snapshot, probe, alertas, auto-refresh 60s, link docs CH |
+
+**Mock visual (dev):** `http://127.0.0.1:3013/?mock=ch-layout` — layout com dados fictícios.
+
+**URLs:** `?group=operacao&tab=overview` (compatível com `?tab=` legado).
+
+| Grupo | Telas (`tab`) |
+|-------|----------------|
+| Operação | `overview`, `issues`, `sync`, `infra` |
+| Produto | `produto` (Ciclo de vida), `product`, `support` |
+| Negócio | `business`, `strategy` |
+| Plataforma | `ava`, `cost` |
+
+Mapa de código: `packages/ops-console/src/client/ch-navigation.ts`.
 
 ## Subir
 

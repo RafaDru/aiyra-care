@@ -26,7 +26,7 @@ O termo legado **«Ops»** permanece em paths técnicos (`docs/ops/`, `test:ops`
 |-----|-----|
 | [`README.md`](./README.md) | Hub da sessão Cursor CH |
 | [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md) | Escopo MVP (preview pausado) |
-| [`CONSOLE.md`](./CONSOLE.md) | Abas do console |
+| [`CONSOLE.md`](./CONSOLE.md) | Layout CH + telas por grupo |
 | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | Alertas |
 | [`TELEMETRY.md`](./TELEMETRY.md) | PG / LGPD |
 | [`../OBSERVABILITY.md`](../OBSERVABILITY.md) | Arquitetura |
