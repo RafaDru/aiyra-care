@@ -1,43 +1,19 @@
-env: load .env
-env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_OAUTH_REDIRECT_URI EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_WEB_APP_URL
+
+=== AiyraCare mobile (lan) ===
+Git: cursor/mobile-bloco3-ava-a5c1 @ 5223f46 fix(mobile): app.config loads full EXPO_PUBLIC .env for Metro
+
+EXPO_PUBLIC_API_URL = http://192.168.18.77:3010
+OAuth redirect: exp://192.168.18.77:8081/--/auth/callback (bridge web desligado)
+REACT_NATIVE_PACKAGER_HOSTNAME = 192.168.18.77
+Expo Go (manual): exp://192.168.18.77:8081  (tambem em packages/mobile/.expo-url.txt)
+Metro: expo start --lan --clear (mesmo Wi-Fi que o celular)
+
+Se o app parecer igual ao de antes: force fechar o Expo Go e escaneie de novo (--clear).
+Branch atual: cursor/mobile-bloco3-ava-a5c1 (git pull antes de testar).
+
+EXPO_PUBLIC_* (processo Metro):
+  EXPO_PUBLIC_API_URL=http://192.168.18.77:3010
+  EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publi�?�
+  EXPO_PUBLIC_SUPABASE_URL=https://lyljosprzmtapkocmxxa.supabase.co
+  EXPO_PUBLIC_WEB_APP_URL=http://192.168.18.77:5173
 Starting project at C:\Users\rafae\Workspace\aiyra-care\packages\mobile
-Expo Autolinking module resolution enabled
-Starting Metro Bundler
-
-warning: Bundler cache is empty, rebuilding (this may take a minute)
-Waiting on http://localhost:8081
-
-Logs for your project will appear below.
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-| (node:14272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
-| (Use `node --trace-warnings ...` to show where the warning was created)
-Android Bundled 20041ms packages\mobile\node_modules\expo-router\entry.js (1 module)
-Android Bundled 9132ms packages\mobile\node_modules\expo-router\entry.js (1 module)
- INFO  ­ƒîÉ i18next is made possible by our own product, Locize ÔÇö consider powering your project with managed localization (AI, CDN, integrations): https://locize.com ­ƒÆÖ
-Android Bundled 244159ms packages\mobile\node_modules\expo-router\entry.js (1 module)
-Android Bundled 6832ms packages\mobile\node_modules\expo-router\entry.js (1 module)
- INFO  ­ƒîÉ i18next is made possible by our own product, Locize ÔÇö consider powering your project with managed localization (AI, CDN, integrations): https://locize.com ­ƒÆÖ
- ERROR  [Error: [expo-router]: You are passing an array of styles to a child of <Slot>. Consider flattening the styles with StyleSheet.flatten before passing them to the child component.]
-Android Bundled 84ms packages\mobile\node_modules\expo-router\entry.js (1 module)
- INFO  ­ƒîÉ i18next is made possible by our own product, Locize ÔÇö consider powering your project with managed localization (AI, CDN, integrations): https://locize.com ­ƒÆÖ

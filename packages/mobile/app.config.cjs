@@ -1,9 +1,7 @@
-import { readFileSync, existsSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import appJson from './app.json'
+const { readFileSync, existsSync } = require('node:fs')
+const { join } = require('node:path')
 
-const dir = dirname(fileURLToPath(import.meta.url))
+const dir = __dirname
 const envPath = join(dir, '.env')
 if (existsSync(envPath)) {
   for (const line of readFileSync(envPath, 'utf8').split(/\r?\n/)) {
@@ -19,8 +17,8 @@ if (existsSync(envPath)) {
   }
 }
 
-const expo = appJson.expo ?? appJson
+const appJson = JSON.parse(readFileSync(join(dir, 'app.json'), 'utf8'))
 
-export default () => ({
-  ...expo,
+module.exports = () => ({
+  ...appJson.expo,
 })

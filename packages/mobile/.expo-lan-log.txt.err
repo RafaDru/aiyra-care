@@ -1,0 +1,24 @@
+TypeError [ERR_IMPORT_ATTRIBUTE_MISSING]: Error reading Expo config at C:\Users\rafae\Workspace\aiyra-care\packages\mobile\app.config.js:
+
+Module "file:///C:/Users/rafae/Workspace/aiyra-care/packages/mobile/app.json" needs an import attribute of "type: json"
+TypeError [ERR_IMPORT_ATTRIBUTE_MISSING]: Module "file:///C:/Users/rafae/Workspace/aiyra-care/packages/mobile/app.json" needs an import attribute of "type: json"
+    at validateAttributes (node:internal/modules/esm/assert:88:15)
+    at defaultLoadSync (node:internal/modules/esm/load:153:3)
+    at #loadAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:834:12)
+    at #loadSync (node:internal/modules/esm/loader:856:49)
+    at ModuleLoader.getModuleJobForRequire (node:internal/modules/esm/loader:492:38)
+    at #link (node:internal/modules/esm/module_job:441:34)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:414:17)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:438:11)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1567:24)
+    at Module._compile (node:internal/modules/cjs/loader:1720:5)
+    at compileModule (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\require-utils\build\load.js:237:9)
+    at evalModule (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\require-utils\build\load.js:361:17)
+    at evalModule (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\require-utils\build\load.js:358:12)
+    at loadModuleSync (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\require-utils\build\load.js:424:10)
+    at evalConfig (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\config\build\evalConfig.js:42:50)
+    at readConfigFile (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\config\build\getConfig.js:43:41)
+    at getDynamicConfig (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\config\build\getConfig.js:52:18)
+    at getConfig (C:\Users\rafae\Workspace\aiyra-care\node_modules\@expo\config\build\Config.js:291:43)
+    at startAsync (C:\Users\rafae\Workspace\aiyra-care\node_modules\expo\node_modules\@expo\cli\build\src\start\startAsync.js:138:68)
+    at expoStart (C:\Users\rafae\Workspace\aiyra-care\node_modules\expo\node_modules\@expo\cli\build\src\start\index.js:148:12)
