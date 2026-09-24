@@ -50,7 +50,7 @@ OpenCode MCP já aponta ao projeto: `~/.config/opencode/opencode.json` → `proj
      - `aiyracare://**` e `aiyracare://auth/callback` (dev build / deep link)
    - LAN dev: `http://<IP-LAN>:5173/**` e `http://<IP-LAN>:5173/mobile-oauth-return`
    - Sem allow list **e** sem `redirectTo` LAN no app, o Supabase ignora o mobile e cai no **Site URL** (`localhost:5173` no celular).
-   - App: `packages/mobile/.env` — `EXPO_PUBLIC_OAUTH_REDIRECT_URI` com IP LAN (ou `npm run mobile:lan`). Web bridge: `VITE_MOBILE_LAN_IP` no `.env` raiz se o redirect ainda abrir `localhost:5173` no telefone.
+   - App Expo Go: padrão **`exp://<LAN>:8081/--/auth/callback`** (`EXPO_PUBLIC_API_URL` com IP LAN + `npm run mobile:lan`). Bridge web só com `EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE=1`. Fallback bridge: `VITE_MOBILE_LAN_IP` no `.env` raiz.
    - Script (com PAT): `SUPABASE_ACCESS_TOKEN=sbp_... node scripts/patch-supabase-auth-redirect-urls.mjs`
 
 ### Erro: `Unsupported provider: provider is not enabled`

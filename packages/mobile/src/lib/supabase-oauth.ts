@@ -55,6 +55,8 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
   if (error) throw error
   if (!data?.url) throw new Error('URL de login não retornada')
 
+  console.log('[Aiyra OAuth] authorize URL', data.url)
+
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
   if (__DEV__) {
     const safeUrl =

@@ -11,6 +11,8 @@ import { AppErrorBoundary } from '@/components/errors/AppErrorBoundary'
 import { MobileTelemetryRoute } from '@/components/telemetry/MobileTelemetryRoute'
 import { AppearancePreferenceProvider } from '@/theme/AppearancePreferenceContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
+import { logMobilePublicEnv } from '@/lib/log-mobile-public-env'
+import { getSupabaseOAuthRedirectUri } from '@/lib/oauth-redirect-url'
 
 function RootStack() {
   const { tokens } = useAiyraTheme()
@@ -51,6 +53,8 @@ export default function RootLayout() {
   const [i18nReady, setI18nReady] = useState(false)
 
   useEffect(() => {
+    logMobilePublicEnv()
+    console.log('[Aiyra OAuth] redirectTo (boot)', getSupabaseOAuthRedirectUri())
     void initI18n().finally(() => setI18nReady(true))
   }, [])
 
