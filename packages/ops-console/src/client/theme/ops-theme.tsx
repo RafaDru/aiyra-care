@@ -1,7 +1,7 @@
 import { ConfigProvider, theme } from 'antd'
 import ptBR from 'antd/locale/pt_BR'
 import type { ReactNode } from 'react'
-import { AIYRACARE_TOKENS } from '../../../../web/src/theme/aiyracare-tokens.js'
+import { AIYRACARE_TOKENS } from '@aiyra-care/design-tokens'
 
 const OPS_COMPONENTS = {
   Card: {
