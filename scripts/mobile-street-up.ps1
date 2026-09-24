@@ -84,7 +84,10 @@ try {
   if (-not (Test-ApiHealth)) {
     Write-Host "API nao responde em http://127.0.0.1:3010/health" -ForegroundColor Red
     Write-Host "Suba a stack: npm run stack:start   (ou scripts/up.ps1 no seu PC)" -ForegroundColor Yellow
-    exit 1
+    if ($Mode -eq 'street') {
+      exit 1
+    }
+    Write-Host "LAN: Metro sobe mesmo assim (Expo Go precisa do bundle; login/sync exigem API)." -ForegroundColor Yellow
   }
 
   Import-MobileEnvFile
