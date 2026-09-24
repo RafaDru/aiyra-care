@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  Alert,
   Button,
   Empty,
   Space,
@@ -121,13 +120,6 @@ export function IncidentesPanel({
       title="Incidentes"
       description="Sinais cru até triagem — dados ao vivo via GET /api/analysis-queue (Postgres ops_analysis_queue)."
     >
-      <Alert
-        type="info"
-        showIcon
-        style={{ marginBottom: 12 }}
-        message="Triagem"
-        description="Em aberto → Em triagem → defeito plataforma, falha infra ou encerramento. Chamados em Produto › Suporte geram incidente com origem Usuário."
-      />
       {items.length === 0 && !loading ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum incidente aberto" />
       ) : (
