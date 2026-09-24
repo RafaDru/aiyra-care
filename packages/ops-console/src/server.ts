@@ -85,15 +85,17 @@ const metricsService = new OpsMetricsService(
 const runtimeService = new RuntimeDegradedService(new RuntimeDegradedPgRepository(pool))
 const alertIncidentRepo = new OpsAlertIncidentPgRepository(pool)
 const supportRepo = new SupportReportPgRepository(pool)
+const platformDefectRepo = new PlatformDefectPgRepository(pool)
+const platformDefectService = new PlatformDefectService(platformDefectRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
   new OpsAnalysisQueuePgRepository(pool),
   supportRepo,
   alertIncidentRepo,
+  platformDefectService,
 )
 const alertAnalysisService = new OpsAlertAnalysisService(alertIncidentRepo, analysisQueueService)
 const dispatchService = new OpsAlertDispatchService(metricsService, alertAnalysisService)
 const supportReportService = new OpsSupportReportService(supportRepo, analysisQueueService)
-const platformDefectService = new PlatformDefectService(new PlatformDefectPgRepository(pool))
 
 async function runProbeCycle(): Promise<void> {
   try {

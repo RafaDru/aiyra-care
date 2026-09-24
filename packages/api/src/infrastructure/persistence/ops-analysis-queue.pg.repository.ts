@@ -232,6 +232,7 @@ export class OpsAnalysisQueuePgRepository {
     const res = await this.pool.query(
       `SELECT * FROM ops_analysis_queue
        WHERE status NOT IN ('completed', 'dismissed')
+         AND incident_pipeline_status NOT IN ('triaged', 'dismissed')
        ORDER BY
          CASE priority
            WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3

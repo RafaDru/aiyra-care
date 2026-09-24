@@ -76,4 +76,16 @@ export interface AgentAnalysisCallbackInput {
   deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
   /** Atualizações por ticket (batch ou multi-report) */
   reportPatches?: SupportReportAgentPatch[]
+  triageDecision?: 'new_defect' | 'link_defect' | 'infra_failure' | 'dismiss' | 'resolve_incident_only'
+  defect?: {
+    title: string
+    fingerprint?: string
+    impact?: number
+    applications?: string[]
+  }
+  linkDefectId?: string
+  /** Atualização agente 2 no mesmo endpoint */
+  defectId?: string
+  defectStatus?: 'ready_for_pr' | 'fixed'
+  branchName?: string
 }

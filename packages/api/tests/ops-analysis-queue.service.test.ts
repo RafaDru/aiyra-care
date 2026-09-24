@@ -10,6 +10,7 @@ describe('OpsAnalysisQueueService', () => {
         sourceId: 'rep-1',
         lane: 'development_support',
         status: 'fix_proposed',
+        incidentPipelineStatus: 'in_triage',
         priority: 'normal',
         deploymentTier: 'integration',
         title: 't',
