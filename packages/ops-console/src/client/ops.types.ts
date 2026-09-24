@@ -6,6 +6,13 @@ export interface OpsAnalysisQueueItem {
   sourceId: string
   lane: 'development_support' | 'sre_support'
   status: 'queued' | 'investigating' | 'fix_proposed' | 'completed' | 'dismissed' | 'failed'
+  incidentPipelineStatus?:
+    | 'open'
+    | 'forwarded'
+    | 'queued_worker'
+    | 'in_triage'
+    | 'triaged'
+    | 'dismissed'
   priority: 'low' | 'normal' | 'high' | 'critical'
   deploymentTier: string
   title: string
@@ -22,6 +29,30 @@ export interface OpsAnalysisQueueItem {
   completedAt: string | null
   createdAt: string
   updatedAt: string
+}
+
+export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
+
+export interface PlatformDefectItem {
+  id: string
+  title: string
+  status: PlatformDefectStatus
+  fingerprint: string | null
+  impact: number | null
+  applications: string[]
+  ownerSubject: string | null
+  triageSummary: string | null
+  triageArtifactPath: string | null
+  branchName: string | null
+  prUrl: string | null
+  prBatchId: string | null
+  firstSeenAt: string
+  fixStartedAt: string | null
+  readyForPrAt: string | null
+  fixedAt: string | null
+  createdAt: string
+  updatedAt: string
+  incidentCount?: number
 }
 
 export interface OpsAnalysisAttentionCounts {

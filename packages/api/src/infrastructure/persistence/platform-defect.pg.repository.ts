@@ -60,6 +60,22 @@ export class PlatformDefectPgRepository {
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
+  async findByIdWithIncidents(
+    id: string,
+  ): Promise<{ defect: PlatformDefectRecord; incidents: Array<{ id: string; title: string }> } | null> {
+    const defect = await this.findById(id)
+    if (!defect) return null
+    const res = await this.pool.query<{ id: string; title: string }>(
+      `SELECT q.id::text AS id, q.title
+       FROM platform_defect_incidents pdi
+       JOIN ops_analysis_queue q ON q.id = pdi.incident_id
+       WHERE pdi.defect_id = $1::uuid
+       ORDER BY pdi.linked_at DESC`,
+      [id],
+    )
+    return { defect, incidents: res.rows }
+  }
+
   async findOpenByFingerprint(fingerprint: string): Promise<PlatformDefectRecord | null> {
     const res = await this.pool.query(
       `SELECT * FROM platform_defects

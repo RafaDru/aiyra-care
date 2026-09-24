@@ -127,4 +127,40 @@ export const opsApi = {
     request<{ ok: boolean }>(`/api/analysis-queue/${encodeURIComponent(id)}/complete`, {
       method: 'POST',
     }),
+  platformDefects: (params?: { status?: string; includeFixed?: boolean }) => {
+    const q = new URLSearchParams()
+    if (params?.status) q.set('status', params.status)
+    if (params?.includeFixed) q.set('includeFixed', '1')
+    const suffix = q.toString() ? `?${q.toString()}` : ''
+    return request<{ items: import('./ops.types.js').PlatformDefectItem[] }>(
+      `/api/platform-defects${suffix}`,
+    )
+  },
+  platformDefectDetail: (id: string) =>
+    request<{
+      defect: import('./ops.types.js').PlatformDefectItem
+      incidents: Array<{ id: string; title: string }>
+    }>(`/api/platform-defects/${encodeURIComponent(id)}`),
+  patchPlatformDefectStatus: (
+    id: string,
+    body: {
+      status: import('./ops.types.js').PlatformDefectStatus
+      branchName?: string
+      prUrl?: string
+      skipBatch?: boolean
+    },
+  ) =>
+    request<{ ok: boolean; item: import('./ops.types.js').PlatformDefectItem }>(
+      `/api/platform-defects/${encodeURIComponent(id)}/status`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      },
+    ),
+  startPlatformDefectFix: (id: string) =>
+    request<{ ok: boolean; item: import('./ops.types.js').PlatformDefectItem }>(
+      `/api/platform-defects/${encodeURIComponent(id)}/start-fix`,
+      { method: 'POST' },
+    ),
 }

@@ -17,8 +17,8 @@ import {
 import {
   incidentApplicationLabel,
   incidentOriginLabel,
-  incidentTriageLabel,
-  incidentTriageStatus,
+  incidentPipelineLabel,
+  incidentPipelineTagColor,
 } from './ch-incident-display.js'
 import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsPanel } from './components/OpsPanel.js'
@@ -141,8 +141,14 @@ export function IncidentesPanel({
             expandedRowRender: (row) => (
               <div style={{ maxWidth: 720 }}>
                 <Paragraph type="secondary">
-                  Pipeline: {PIPELINE_STATUS_LABEL[row.status]} · Lane {LANE_LABEL[row.lane]} ·{' '}
-                  {row.deploymentTier}
+                  Pipeline CH: {incidentPipelineLabel(row)} · Fila: {PIPELINE_STATUS_LABEL[row.status]} ·
+                  Lane {LANE_LABEL[row.lane]} · {row.deploymentTier}
+                  {row.incidentPipelineStatus && (
+                    <>
+                      {' '}
+                      · <Text code>{row.incidentPipelineStatus}</Text>
+                    </>
+                  )}
                 </Paragraph>
                 {row.remediationSummary && (
                   <Paragraph>
@@ -206,16 +212,12 @@ export function IncidentesPanel({
             },
             {
               title: 'Status',
-              key: 'triageStatus',
-              width: 112,
-              render: (_: unknown, row) => {
-                const triage = incidentTriageStatus(row.status)
-                return (
-                  <Tag color={triage === 'em_triagem' ? 'processing' : 'gold'}>
-                    {incidentTriageLabel(triage)}
-                  </Tag>
-                )
-              },
+              key: 'pipelineStatus',
+              width: 120,
+              align: 'center',
+              render: (_: unknown, row) => (
+                <Tag color={incidentPipelineTagColor(row)}>{incidentPipelineLabel(row)}</Tag>
+              ),
             },
             {
               title: 'ID',

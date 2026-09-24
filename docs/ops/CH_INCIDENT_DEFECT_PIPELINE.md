@@ -100,7 +100,7 @@ Worker: `CH_INCIDENT_DISPATCH_INTERVAL_MS` (default 30s); `CH_INCIDENT_DISPATCH_
 | Fatia | Entrega |
 |-------|---------|
 | **A** | Migrations + repos PG + testes vitest |
-| **B** | `PlatformDefectService` + rotas GET/PATCH ops-console |
+| **B** | `PlatformDefectService` + rotas GET/PATCH ops-console + UI 4 estados incidente (**entregue**) |
 | **C** | Callback triagem → defeito + `incident_pipeline_status` |
 | **D** | `DefeitosPanel` + nav `defeitos` + UI 4 estados incidente |
 | **E** | Outbox write + worker + batch run |
