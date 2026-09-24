@@ -30,6 +30,7 @@ import {
   PlatformDefectTransitionError,
 } from '../../api/src/application/ops/platform-defect.service.js'
 import { PlatformDefectPgRepository } from '../../api/src/infrastructure/persistence/platform-defect.pg.repository.js'
+import { DefectPrBatchPgRepository } from '../../api/src/infrastructure/persistence/defect-pr-batch.pg.repository.js'
 import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
@@ -86,6 +87,7 @@ const runtimeService = new RuntimeDegradedService(new RuntimeDegradedPgRepositor
 const alertIncidentRepo = new OpsAlertIncidentPgRepository(pool)
 const supportRepo = new SupportReportPgRepository(pool)
 const platformDefectRepo = new PlatformDefectPgRepository(pool)
+const defectPrBatchRepo = new DefectPrBatchPgRepository(pool)
 const platformDefectService = new PlatformDefectService(platformDefectRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
   new OpsAnalysisQueuePgRepository(pool),
@@ -432,6 +434,15 @@ async function main() {
       }
     },
   )
+
+  fastify.get('/api/defect-pr-batches/config', async () => {
+    const intervalMs = Number(process.env.OPS_DEFECT_PR_BATCH_INTERVAL_MS ?? 21_600_000)
+    const readyCount = await defectPrBatchRepo.countReadyWithoutBatch()
+    const nextWindowAt = new Date(
+      Math.ceil(Date.now() / intervalMs) * intervalMs,
+    ).toISOString()
+    return { intervalMs, readyCount, nextWindowAt }
+  })
 
   fastify.post<{ Params: { id: string }; Body: { incidentId?: string; linkedBy?: string } }>(
     '/api/platform-defects/:id/link-incident',

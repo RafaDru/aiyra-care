@@ -9,6 +9,7 @@ import {
   DeploymentUnitOutlined,
   ExperimentOutlined,
   FlagOutlined,
+  BugOutlined,
   FundOutlined,
   ReadOutlined,
   RobotOutlined,
@@ -30,6 +31,7 @@ export function normalizeChGroupId(raw: string | null): ChGroupId | null {
 export type ChTabKey =
   | 'overview'
   | 'incidentes'
+  | 'defeitos'
   | 'sync'
   | 'infra'
   | 'produto'
@@ -75,6 +77,12 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
         label: 'Incidentes',
         description: 'Sinais cru até triagem — origem usuário, alertas, jobs e agente.',
         icon: icon(FlagOutlined),
+      },
+      {
+        tab: 'defeitos',
+        label: 'Defeitos',
+        description: 'Defeitos de plataforma pós-triagem até Pronto para PR / lote.',
+        icon: icon(BugOutlined),
       },
       {
         tab: 'sync',

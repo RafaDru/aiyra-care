@@ -163,4 +163,10 @@ export const opsApi = {
       `/api/platform-defects/${encodeURIComponent(id)}/start-fix`,
       { method: 'POST' },
     ),
+  defectPrBatchConfig: () =>
+    request<{
+      intervalMs: number
+      readyCount: number
+      nextWindowAt: string
+    }>('/api/defect-pr-batches/config'),
 }

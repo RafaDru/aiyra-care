@@ -14,6 +14,7 @@ import {
 import { SupportPanel } from './SupportPanel.js'
 import { BusinessPanel } from './BusinessPanel.js'
 import { IncidentesPanel } from './IncidentesPanel.js'
+import { DefeitosPanel } from './DefeitosPanel.js'
 import { ProdutoLifecyclePanel } from './ProdutoLifecyclePanel.js'
 import {
   readStoredStrategySection,
@@ -61,6 +62,7 @@ export function OpsMetricsDashboard({
 }) {
   const metrics = data.metrics
   const [issueAttention, setIssueAttention] = useState(0)
+  const [defectOpenCount, setDefectOpenCount] = useState(0)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const highlightInvestigationId = useMemo(
     () => new URLSearchParams(window.location.search).get('investigationId'),
@@ -97,6 +99,10 @@ export function OpsMetricsDashboard({
     void opsApi.analysisAttentionCounts().then((c) => {
       setIssueAttention(c.totalAttention)
     }).catch(() => undefined)
+    void opsApi
+      .platformDefects({ status: 'open,in_fix,ready_for_pr' })
+      .then((r) => setDefectOpenCount(r.items.length))
+      .catch(() => undefined)
   }, [data])
 
   useEffect(() => {
@@ -111,6 +117,7 @@ export function OpsMetricsDashboard({
   const tabCounts = useMemo((): Partial<Record<ChTabKey, number>> => ({
     overview: data.alerts.filter((a) => a.severity === 'critical').length,
     incidentes: issueAttention,
+    defeitos: defectOpenCount,
     product: countHotFeatures(metrics),
     support: metrics.supportReports?.openCount ?? 0,
     sync: metrics.sync.stuckJobs.length,
@@ -122,6 +129,7 @@ export function OpsMetricsDashboard({
   const tabAlert = useMemo((): Partial<Record<ChTabKey, boolean>> => ({
     overview: (tabCounts.overview ?? 0) > 0,
     incidentes: (tabCounts.incidentes ?? 0) > 0,
+    defeitos: (tabCounts.defeitos ?? 0) > 0,
     product: (tabCounts.product ?? 0) > 0,
     support: (tabCounts.support ?? 0) > 0,
     sync: (tabCounts.sync ?? 0) > 0,
@@ -181,6 +189,8 @@ export function OpsMetricsDashboard({
             highlightInvestigationId={highlightInvestigationId}
           />
         )
+      case 'defeitos':
+        return <DefeitosPanel onRefresh={onRefresh} />
       case 'produto':
         return <ProdutoLifecyclePanel />
       case 'product':

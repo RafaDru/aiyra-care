@@ -101,8 +101,8 @@ Worker: `CH_INCIDENT_DISPATCH_INTERVAL_MS` (default 30s); `CH_INCIDENT_DISPATCH_
 |-------|---------|
 | **A** | Migrations + repos PG + testes vitest |
 | **B** | `PlatformDefectService` + rotas GET/PATCH ops-console + UI 4 estados incidente (**entregue**) |
-| **C** | Callback triagem → defeito + `incident_pipeline_status` |
-| **D** | `DefeitosPanel` + nav `defeitos` + UI 4 estados incidente |
+| **C** | Callback triagem → defeito + `incident_pipeline_status` (**entregue**) |
+| **D** | `DefeitosPanel` + nav `defeitos` (**em PR**) |
 | **E** | Outbox write + worker + batch run |
 
 Rotas ops-console planejadas: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /api/analysis-queue` com `incidentPipelineStatus`.
