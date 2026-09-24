@@ -28,6 +28,14 @@
   background: var(--ops-surface-muted, #f8fafc);
 }
 
+.ch-header-shell {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ops-surface, #fff);
+  box-shadow: 0 1px 0 var(--ops-border, #e2e8f0);
+}
+
 .ch-header {
   background: var(--ops-surface, #fff);
   border-bottom: 1px solid var(--ops-border, #e2e8f0);
@@ -37,6 +45,107 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.ch-header--command {
+  padding: 6px 16px 8px;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 12px;
+  background: #f8fafc;
+}
+
+.ch-header-title {
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.25;
+  color: #0f172a;
+}
+
+.ch-header-subtitle {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.ch-header-command-label {
+  flex-shrink: 0;
+  align-self: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #64748b;
+  padding-right: 8px;
+  border-right: 1px solid var(--ops-border, #e2e8f0);
+}
+
+.ch-service-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ch-service-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--ops-border, #e2e8f0);
+  background: #f8fafc;
+  color: #475569;
+}
+
+.ch-service-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.ch-service-pill--up {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.ch-service-pill--up .ch-service-pill-dot {
+  background: #22c55e;
+}
+
+.ch-service-pill--degraded {
+  border-color: #fcd34d;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.ch-service-pill--degraded .ch-service-pill-dot {
+  background: #f59e0b;
+}
+
+.ch-service-pill--down {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.ch-service-pill--down .ch-service-pill-dot {
+  background: #ef4444;
+}
+
+.ch-service-pill--unknown .ch-service-pill-dot {
+  background: #cbd5e1;
+}
+
+.ch-topnav--embedded {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border-bottom: none;
+  padding: 0;
 }
 
 .ch-header-brand {

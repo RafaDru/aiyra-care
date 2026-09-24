@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import {
-  ApiOutlined,
   AppstoreOutlined,
   BarChartOutlined,
   CloudServerOutlined,
@@ -18,7 +17,15 @@ import {
 } from '@ant-design/icons'
 import { createElement } from 'react'
 
-export type ChGroupId = 'operacao' | 'produto' | 'negocio' | 'plataforma'
+export type ChGroupId = 'operacao' | 'produto' | 'negocio' | 'ai'
+
+/** Legado URL `group=plataforma` → `ai`. */
+export function normalizeChGroupId(raw: string | null): ChGroupId | null {
+  if (!raw) return null
+  if (raw === 'plataforma') return 'ai'
+  if (raw === 'operacao' || raw === 'produto' || raw === 'negocio' || raw === 'ai') return raw
+  return null
+}
 
 export type ChTabKey =
   | 'overview'
@@ -130,10 +137,10 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
     ],
   },
   {
-    id: 'plataforma',
-    label: 'Plataforma',
+    id: 'ai',
+    label: 'AI',
     accent: '#7C3AED',
-    icon: icon(ApiOutlined),
+    icon: icon(RobotOutlined),
     items: [
       {
         tab: 'ava',
@@ -187,7 +194,7 @@ const GROUP_TAB_SESSION_PREFIX = 'ch-last-tab-'
 export function readNavFromUrl(): { group: ChGroupId; tab: ChTabKey } {
   const params = new URLSearchParams(window.location.search)
   const tabParam = params.get('tab')
-  const groupParam = params.get('group') as ChGroupId | null
+  const groupParam = normalizeChGroupId(params.get('group'))
 
   if (params.get('investigationId')) {
     return { group: 'operacao', tab: 'issues' }
@@ -202,8 +209,8 @@ export function readNavFromUrl(): { group: ChGroupId; tab: ChTabKey } {
 
   const savedTab = localStorage.getItem(TAB_STORAGE_KEY)
   if (isChTabKey(savedTab)) {
-    const group =
-      (localStorage.getItem(GROUP_STORAGE_KEY) as ChGroupId | null) ?? tabToGroup(savedTab)
+    const storedGroup = normalizeChGroupId(localStorage.getItem(GROUP_STORAGE_KEY))
+    const group = storedGroup ?? tabToGroup(savedTab)
     return { group: CH_NAV_GROUPS.some((g) => g.id === group) ? group : tabToGroup(savedTab), tab: savedTab }
   }
 

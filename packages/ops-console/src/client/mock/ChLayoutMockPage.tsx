@@ -6,6 +6,7 @@ import {
   getGroup,
   getNavItem,
   lastTabForGroup,
+  normalizeChGroupId,
   persistNav,
   type ChGroupId,
   type ChTabKey,
@@ -28,7 +29,7 @@ const MOCK_COUNTS: Partial<Record<ChTabKey, number>> = {
 
 function readMockNav() {
   const params = new URLSearchParams(window.location.search)
-  const group = (params.get('group') as ChGroupId) || 'operacao'
+  const group = normalizeChGroupId(params.get('group')) ?? 'operacao'
   const tab = (params.get('tab') as ChTabKey) || 'overview'
   const g = CH_NAV_GROUPS.some((x) => x.id === group) ? group : 'operacao'
   const validTab = getGroup(g).items.some((i) => i.tab === tab) ? tab : getGroup(g).items[0].tab
@@ -80,7 +81,7 @@ export function ChLayoutMockPage() {
   return (
     <>
     <div className="ch-mock-ribbon" role="status">
-      <strong>Pré-visualização do layout Command Hub</strong>
+      <strong>Pré-visualização — Command Hub Care</strong>
       <span>— dados fictícios, sem Postgres. Troque de zona no topo e de tela na barra lateral.</span>
       <a href="/" className="ch-mock-ribbon-link">Abrir console com métricas reais</a>
     </div>
@@ -88,7 +89,9 @@ export function ChLayoutMockPage() {
       group={group}
       item={item}
       activeTab={tab}
-      envChip={<span className="ch-env-chip ch-env-chip--integration">Integração</span>}
+      deploymentTier="integration"
+      webStatus="up"
+      backendStatus="degraded"
       headerActions={
         <>
           <Tag color="blue">Mock visual</Tag>

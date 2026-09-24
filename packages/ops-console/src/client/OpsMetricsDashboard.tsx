@@ -36,11 +36,7 @@ import {
 } from './ch-navigation.js'
 import { ChLayout } from './components/ChLayout.js'
 import type { OpsDeploymentTier } from './theme/ops-environment.js'
-import { OPS_ENVIRONMENT_LABELS } from './theme/ops-environment.js'
-
-function envChipClass(tier: OpsDeploymentTier): string {
-  return `ch-env-chip ch-env-chip--${tier}`
-}
+import { mergeServicesStatus, type ChServiceState } from './ch-service-status.js'
 
 function resolveInitialStrategySection(): StrategySectionId {
   return readStrategySectionFromUrl() ?? readStoredStrategySection() ?? 'mkt'
@@ -76,6 +72,26 @@ export function OpsMetricsDashboard({
   const initialNav = useMemo(() => readNavFromUrl(), [])
   const [groupId, setGroupId] = useState<ChGroupId>(initialNav.group)
   const [activeTab, setActiveTab] = useState<ChTabKey>(initialNav.tab)
+  const [webStatus, setWebStatus] = useState<ChServiceState>('unknown')
+  const [backendStatus, setBackendStatus] = useState<ChServiceState>('unknown')
+
+  useEffect(() => {
+    const loadServices = () => {
+      void opsApi.servicesStatus()
+        .then((s) => {
+          setWebStatus(s.web)
+          setBackendStatus(s.backend)
+        })
+        .catch(() => {
+          const merged = mergeServicesStatus(metrics.probe, null)
+          setBackendStatus(merged.backend)
+          setWebStatus(merged.web)
+        })
+    }
+    loadServices()
+    const id = window.setInterval(loadServices, 60_000)
+    return () => window.clearInterval(id)
+  }, [data, metrics.probe])
 
   useEffect(() => {
     void opsApi.analysisAttentionCounts().then((c) => {
@@ -199,11 +215,9 @@ export function OpsMetricsDashboard({
         group={group}
         item={navItem}
         activeTab={activeTab}
-        envChip={
-          <span className={envChipClass(deploymentTier)} role="status">
-            {OPS_ENVIRONMENT_LABELS[deploymentTier]}
-          </span>
-        }
+        deploymentTier={deploymentTier}
+        webStatus={webStatus}
+        backendStatus={backendStatus}
         headerActions={headerActions}
         footer={
           <>

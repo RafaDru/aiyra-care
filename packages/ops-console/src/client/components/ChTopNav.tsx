@@ -10,7 +10,7 @@ export function ChTopNav({
   onSelectGroup: (group: ChGroupId) => void
 }) {
   return (
-    <nav className="ch-topnav" aria-label="Áreas de comando">
+    <nav className="ch-topnav ch-topnav--embedded" aria-label="Central de comando">
       <ul className="ch-topnav-list">
         {CH_NAV_GROUPS.map((g) => {
           const alertCount = groupAlertCounts?.[g.id] ?? 0

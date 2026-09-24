@@ -41,6 +41,7 @@ import {
   loadStrategyManifest,
   type StrategySectionId,
 } from './strategy-content.js'
+import { fetchServicesStatus } from './services-status.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -149,9 +150,11 @@ async function main() {
     status: 'ok',
     port,
     deploymentTier,
-    layoutVersion: 'ch-shell-v1',
+    layoutVersion: 'ch-shell-v2',
     commandHub: true,
   }))
+
+  fastify.get('/api/services/status', async () => fetchServicesStatus(port))
 
   let productLifecycleCache: ReturnType<typeof loadProductLifecycle> | undefined
 

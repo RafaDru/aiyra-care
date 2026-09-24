@@ -3,30 +3,50 @@
 > UI: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
 > Lê **Postgres direto** + sonda API monitorada — não passa pelo JWT do app.
 
-## Layout (Header + Nav + Conteúdo + Rodapé)
+## Layout — Command Hub Care (shell v2)
+
+Spec: Project store `docs/ch-header-spec-2026-09-24.md` · `layoutVersion: ch-shell-v2` em `GET /health`.
+
+### Header fixo (sticky)
+
+| Bloco | Conteúdo |
+|-------|----------|
+| **Marca** | **Command Hub Care** + ícone gradiente Aiyra (`ChHubCareLogo`) |
+| **Ambiente** | Chip: **Desenvolvimento** \| **Preview** \| **Produção** (`DEPLOYMENT_TIER` + porta `:3013` / `:3023`) |
+| **Status geral** | Pills **Web** e **Backend** — `UP` / `Degraded` / `Down` (`GET /api/services/status`, refresh ~60s) |
+| **Ações** | **Atualizar** · **Verificar e acionar** |
+| **Central de comando** | Faixa abaixo: **Operação** · **Produto** · **Negócio** · **AI** (horizontal) |
+
+### Corpo
 
 | Zona | Função |
 |------|--------|
-| **Header** | Marca Command Hub, chip de ambiente, **Atualizar** / **Verificar e acionar** |
-| **Top nav** | Quatro áreas: **Operação** · **Produto** · **Negócio** · **Plataforma** (cores e ícones por zona) |
-| **Sidebar** | Telas do grupo ativo (badges de atenção) |
-| **Conteúdo** | Context bar (breadcrumb + descrição) + painel |
+| **Sidebar** | Itens da central ativa (vertical); badges de atenção |
+| **Conteúdo** | Context bar + painel |
 | **Rodapé** | Snapshot, probe, alertas, auto-refresh 60s, link docs CH |
 
-**Mock visual (sem métricas):** `http://127.0.0.1:3013/mock/ch-layout` ou `/?mock=ch-layout` — faixa roxa no topo; **console real** (`http://127.0.0.1:3013/`) usa o **mesmo layout** com dados do Postgres (branch/PR com `layoutVersion: ch-shell-v1` em `GET /health`).
+**URLs:** `?group=operacao&tab=overview` (legado `group=plataforma` → `ai`).
 
-> Se ainda aparecerem **11 abas horizontais**, o código antigo está rodando — faça pull da branch `cursor/ch-layout-shell-193e` ou merge do PR #73 e reinicie `npm run ops:console`.
-
-**URLs:** `?group=operacao&tab=overview` (compatível com `?tab=` legado).
-
-| Grupo | Telas (`tab`) |
-|-------|----------------|
+| Central (`group`) | Telas (`tab`) |
+|-------------------|----------------|
 | Operação | `overview`, `issues`, `sync`, `infra` |
 | Produto | `produto` (Ciclo de vida), `product`, `support` |
 | Negócio | `business`, `strategy` |
-| Plataforma | `ava`, `cost` |
+| **AI** | `ava`, `cost` |
 
-Mapa de código: `packages/ops-console/src/client/ch-navigation.ts`.
+**Validação (NotebookRafael):**
+
+```powershell
+git fetch origin
+git checkout cursor/ch-layout-shell-193e
+npm run ops:console
+curl -s http://127.0.0.1:3013/health   # layoutVersion: ch-shell-v2
+```
+
+- Console: http://127.0.0.1:3013/
+- Mock: http://127.0.0.1:3013/mock/ch-layout
+
+Mapa: `packages/ops-console/src/client/ch-navigation.ts` · `ChHeader.tsx`.
 
 ## Subir
 

@@ -1,14 +1,18 @@
 import type { ReactNode } from 'react'
+import type { OpsDeploymentTier } from '../theme/ops-environment.js'
+import type { ChServiceState } from '../ch-service-status.js'
 import type { ChGroupId, ChNavGroup, ChNavItem, ChTabKey } from '../ch-navigation.js'
 import { ChContextBar } from './ChContextBar.js'
+import { ChHeader } from './ChHeader.js'
 import { ChSideNav } from './ChSideNav.js'
-import { ChTopNav } from './ChTopNav.js'
 
 export function ChLayout({
   group,
   item,
   activeTab,
-  envChip,
+  deploymentTier,
+  webStatus,
+  backendStatus,
   headerActions,
   footer,
   tabCounts,
@@ -24,7 +28,9 @@ export function ChLayout({
   group: ChNavGroup
   item: ChNavItem
   activeTab: ChTabKey
-  envChip?: ReactNode
+  deploymentTier: OpsDeploymentTier
+  webStatus: ChServiceState
+  backendStatus: ChServiceState
   headerActions?: ReactNode
   footer?: ReactNode
   tabCounts?: Partial<Record<ChTabKey, number>>
@@ -39,23 +45,13 @@ export function ChLayout({
 }) {
   return (
     <div className="ch-layout">
-      <header className="ch-header">
-        <div className="ch-header-brand">
-          <div className="ops-logo" aria-hidden>A</div>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.3 }}>Command Hub</div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>AiyraCare · plataforma interna</div>
-          </div>
-        </div>
-        <div className="ch-header-meta">
-          {envChip}
-          {headerActions}
-        </div>
-      </header>
-
-      <ChTopNav
+      <ChHeader
+        deploymentTier={deploymentTier}
+        webStatus={webStatus}
+        backendStatus={backendStatus}
         activeGroup={group.id}
         groupAlertCounts={groupAlertCounts}
+        headerActions={headerActions}
         onSelectGroup={onSelectGroup}
       />
 

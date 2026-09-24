@@ -14,6 +14,15 @@ export type OpsConsoleHealth = {
   status: string
   port: number
   deploymentTier: OpsDeploymentTier
+  layoutVersion?: string
+}
+
+export type ChServicesStatusResponse = {
+  checkedAt: string
+  backend: 'up' | 'degraded' | 'down'
+  web: 'up' | 'degraded' | 'down'
+  apiPort: number
+  webPort: number
 }
 
 function stackHeaders(): Record<string, string> {
@@ -45,6 +54,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
+  servicesStatus: () => request<ChServicesStatusResponse>('/api/services/status'),
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
   strategyManifest: () => request<StrategyManifestResponse>('/api/strategy/manifest'),
