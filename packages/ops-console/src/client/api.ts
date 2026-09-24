@@ -42,8 +42,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const text = await res.text().catch(() => '')
     let message = `HTTP ${res.status}`
     try {
-      const body = JSON.parse(text) as { error?: string }
-      if (body.error) message = body.error
+      const body = JSON.parse(text) as { error?: string; message?: string }
+      if (body.message) message = body.message
+      else if (body.error) message = body.error
     } catch {
       if (text) message = `${message}: ${text}`
     }

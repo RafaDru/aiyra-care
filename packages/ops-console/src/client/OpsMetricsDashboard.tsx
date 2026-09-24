@@ -190,7 +190,7 @@ export function OpsMetricsDashboard({
           <SupportPanel
             openCount={metrics.supportReports?.openCount ?? 0}
             submitted24h={metrics.supportReports?.submitted24h ?? 0}
-            submittedSparkline={metrics.timeSeries24h.supportReportsSubmitted?.map((r) => r.count)}
+            submittedSparkline={metrics.timeSeries24h?.supportReportsSubmitted?.map((r) => r.count)}
             onQueueChange={onRefresh}
           />
         )
