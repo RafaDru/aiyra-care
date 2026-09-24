@@ -88,6 +88,10 @@ try {
   }
 
   Import-MobileEnvFile
+  Remove-Item Env:EXPO_PUBLIC_OAUTH_REDIRECT_URI -ErrorAction SilentlyContinue
+  if ($env:EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE -ne '1') {
+    Remove-Item Env:EXPO_PUBLIC_OAUTH_USE_WEB_BRIDGE -ErrorAction SilentlyContinue
+  }
 
   $tunnelProc = $null
   if ($Mode -eq 'street') {
