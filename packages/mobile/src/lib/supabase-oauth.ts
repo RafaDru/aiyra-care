@@ -16,14 +16,39 @@ async function hasPersistedSession(): Promise<boolean> {
   return Boolean(data.session?.access_token)
 }
 
-/** Aguarda sessão após deep link (bridge exp:// pode fechar o Custom Tab antes do `success`). */
-async function waitForOAuthSession(maxMs = 4000): Promise<boolean> {
-  const deadline = Date.now() + maxMs
-  while (Date.now() < deadline) {
-    if (await hasPersistedSession()) return true
-    await new Promise((r) => setTimeout(r, 120))
-  }
-  return hasPersistedSession()
+/**
+ * Após `dismiss` do Custom Tab, a sessão pode chegar via deep link (`auth/callback`) alguns segundos depois.
+ */
+export async function waitForOAuthSession(maxMs = 15_000): Promise<boolean> {
+  const client = getSupabase()
+  if (!client) return false
+  if (await hasPersistedSession()) return true
+
+  return new Promise((resolve) => {
+    let settled = false
+    const finish = async (ok: boolean) => {
+      if (settled) return
+      settled = true
+      sub?.subscription.unsubscribe()
+      clearInterval(poll)
+      clearTimeout(deadline)
+      resolve(ok)
+    }
+
+    const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token) void finish(true)
+    })
+
+    const poll = setInterval(() => {
+      void hasPersistedSession().then((ok) => {
+        if (ok) void finish(true)
+      })
+    }, 120)
+
+    const deadline = setTimeout(() => {
+      void hasPersistedSession().then((ok) => finish(ok))
+    }, maxMs)
+  })
 }
 
 export async function createSessionFromOAuthUrl(url: string): Promise<void> {
@@ -48,6 +73,7 @@ export async function createSessionFromOAuthUrl(url: string): Promise<void> {
   if (code) {
     const { error } = await client.auth.exchangeCodeForSession(code)
     if (error) throw error
+    return
   }
 }
 
@@ -80,13 +106,20 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
       ? result.url.replace(/#.*$/, '#…').replace(/\?.*$/, '?…')
       : ''
   console.log('[Aiyra OAuth] WebBrowser result', result.type, safeResultUrl)
-  if (result.type !== 'success' && result.type !== 'cancel' && result.type !== 'dismiss') {
-    console.log('[Aiyra OAuth] WebBrowser raw', JSON.stringify(result))
-  }
+
   if (result.type === 'success' && result.url) {
-    await createSessionFromOAuthUrl(result.url)
-    return
+    const hasTokens =
+      result.url.includes('access_token') || result.url.includes('code=') || result.url.includes('error=')
+    if (hasTokens) {
+      await createSessionFromOAuthUrl(result.url)
+      return
+    }
+    if (await waitForOAuthSession(12_000)) {
+      console.log('[Aiyra OAuth] sessão OK após success sem tokens na URL (bridge → deep link)')
+      return
+    }
   }
+
   if (result.type === 'cancel' || result.type === 'dismiss') {
     if (await waitForOAuthSession()) {
       console.log('[Aiyra OAuth] sessão OK após WebBrowser', result.type)
@@ -94,7 +127,8 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
     }
     throw new Error('Login cancelado')
   }
-  if (await waitForOAuthSession(2000)) {
+
+  if (await waitForOAuthSession(8_000)) {
     console.log('[Aiyra OAuth] sessão OK após WebBrowser tipo', result.type)
     return
   }
