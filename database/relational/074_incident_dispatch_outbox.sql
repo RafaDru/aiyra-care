@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS incident_dispatch_outbox (
 
 CREATE INDEX IF NOT EXISTS idx_incident_dispatch_outbox_pending
   ON incident_dispatch_outbox (status, created_at)
-  WHERE status IN ('pending', 'forwarded');
+  WHERE status = 'pending';
 
 COMMENT ON TABLE incident_dispatch_outbox IS
   'Outbox PG para webhook investigador — idempotency_key = incident_id:dispatch_kind.';

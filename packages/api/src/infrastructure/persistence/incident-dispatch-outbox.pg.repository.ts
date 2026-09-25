@@ -48,7 +48,7 @@ export class IncidentDispatchOutboxPgRepository {
   async listPending(limit = 20): Promise<IncidentDispatchOutboxRecord[]> {
     const res = await this.pool.query(
       `SELECT * FROM incident_dispatch_outbox
-       WHERE status IN ('pending', 'forwarded')
+       WHERE status = 'pending'
        ORDER BY created_at ASC
        LIMIT $1`,
       [limit],
@@ -73,7 +73,7 @@ export class IncidentDispatchOutboxPgRepository {
         status = 'claimed',
         claimed_at = NOW(),
         updated_at = NOW()
-      WHERE id = $1::uuid AND status IN ('pending', 'forwarded')
+      WHERE id = $1::uuid AND status = 'pending'
       RETURNING id`,
       [id],
     )

@@ -172,6 +172,28 @@ export class IncidentDispatchService {
     }
   }
 
+  private async revertPipelineAfterDispatchFailure(incidentId: string): Promise<void> {
+    const record = await this.queueRepo.findById(incidentId)
+    if (!record) return
+    if (shouldNormalizePipelineAfterDeadOutboxReset(record.incidentPipelineStatus)) {
+      await this.queueRepo.setIncidentPipelineStatus(incidentId, 'open')
+    }
+  }
+
+  private async recordWorkerDispatchFailure(
+    outboxId: string,
+    incidentId: string,
+    error: string,
+  ): Promise<void> {
+    await this.outbox.bumpAttempt(outboxId, error)
+    await this.revertPipelineAfterDispatchFailure(incidentId)
+  }
+
+  private async markOutboxDeadAndRevertPipeline(outboxId: string, incidentId: string): Promise<void> {
+    await this.outbox.markDead(outboxId, 'max_attempts')
+    await this.revertPipelineAfterDispatchFailure(incidentId)
+  }
+
   async buildDispatchPayloadForQueueRecord(
     record: OpsAnalysisQueueRecord,
     options?: { recoverStuckDispatch?: boolean },
@@ -321,7 +343,7 @@ export class IncidentDispatchService {
 
     for (const row of rows) {
       if (row.attemptCount >= MAX_OUTBOX_ATTEMPTS) {
-        await this.outbox.markDead(row.id, 'max_attempts')
+        await this.markOutboxDeadAndRevertPipeline(row.id, row.incidentId)
         console.warn(
           `[incident-dispatch] outbox dead incident=${row.incidentId} attempts=${row.attemptCount}`,
         )
@@ -344,7 +366,7 @@ export class IncidentDispatchService {
         if (kind === 'support_report_triage_v1' && typeof payload.sourceId === 'string') {
           const record = await this.supportRepo.findByIdForOps(payload.sourceId)
           if (!record) {
-            await this.outbox.bumpAttempt(row.id, 'support_report_not_found')
+            await this.recordWorkerDispatchFailure(row.id, row.incidentId, 'support_report_not_found')
             failed += 1
             continue
           }
@@ -371,7 +393,7 @@ export class IncidentDispatchService {
             investigationTier: (payload.investigationTier as 0 | 1) ?? 0,
           })
         } else {
-          await this.outbox.bumpAttempt(row.id, 'unknown_outbox_kind')
+          await this.recordWorkerDispatchFailure(row.id, row.incidentId, 'unknown_outbox_kind')
           failed += 1
           continue
         }
@@ -382,15 +404,15 @@ export class IncidentDispatchService {
           await this.queueRepo.markInvestigating(row.incidentId)
           sent += 1
         } else if (dispatch.outcome === 'failed') {
-          await this.outbox.bumpAttempt(row.id, dispatch.error)
+          await this.recordWorkerDispatchFailure(row.id, row.incidentId, dispatch.error)
           failed += 1
         } else if (dispatch.outcome === 'skipped') {
-          await this.outbox.bumpAttempt(row.id, `skipped:${dispatch.reason}`)
+          await this.recordWorkerDispatchFailure(row.id, row.incidentId, `skipped:${dispatch.reason}`)
           skipped += 1
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'dispatch_error'
-        await this.outbox.bumpAttempt(row.id, message)
+        await this.recordWorkerDispatchFailure(row.id, row.incidentId, message)
         failed += 1
       }
     }

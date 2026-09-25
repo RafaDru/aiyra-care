@@ -53,4 +53,18 @@ describe('IncidentDispatchOutboxPgRepository', () => {
     const loaded = await repo.findByIdempotencyKey('inc-1:triage_v1')
     expect(loaded?.status).toBe('pending')
   })
+
+  it('listPending selects only pending rows (not forwarded)', async () => {
+    const pool = {
+      query: vi.fn(async (sql: string) => {
+        expect(sql).toContain("status = 'pending'")
+        expect(sql).not.toMatch(/status IN \('pending', 'forwarded'\)/)
+        return { rows: [] }
+      }),
+    } as unknown as Pool
+
+    const repo = new IncidentDispatchOutboxPgRepository(pool)
+    await repo.listPending(5)
+    expect(pool.query).toHaveBeenCalled()
+  })
 })

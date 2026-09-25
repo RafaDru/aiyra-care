@@ -108,7 +108,9 @@ SQL canônico: `database/relational/071_platform_defects.sql` … `075_ops_analy
 
 ## 4. Outbox + worker
 
-Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → webhook síncrono → `forwarded` + `incident_pipeline_status=forwarded`; falha → `pending` com `attempt_count++`.
+Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → webhook síncrono → outbox `forwarded` + `incident_pipeline_status=forwarded` → `in_triage`; falha → outbox permanece `pending` com `attempt_count++`.
+
+**Worker batch:** processa **somente** outbox `pending` (não re-dispara linhas já `forwarded` — evita loop até 40x/dead). Falha ou `dead` reverte pipeline `queued_worker`/`forwarded` → `open` para `--reset-dead` e UI coerente.
 
 ### 4.1 Reconciliação + backfill
 
@@ -125,7 +127,9 @@ Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → we
 
 **Max tentativas outbox:** 8 → `status=dead`, log `[incident-dispatch] outbox dead …`; incidente pode permanecer `open` até intervenção ops (ex. webhook Cursor **40x** por `CURSOR_*` ausente no worktree). Recuperação: `npm run ch-incident-dispatch-backfill -- --reset-dead` e corrigir `.env` antes de `ch-incident-dispatch-worker:once`.
 
-`CH_INCIDENT_DISPATCH_WORKER=0` — só dispatch síncrono na API + linhas outbox (**sem** loop embutido no ops-console `:3013`). Evite rodar ao mesmo tempo `npm run ch-incident-dispatch-worker` **e** console com worker ligado (dois loops competindo no mesmo outbox).
+**Um loop por vez (notebook):** defina `CH_INCIDENT_DISPATCH_WORKER=0` no `.env` do worktree se você usa **só** `npm run ch-incident-dispatch-worker` (CLI). Com worker embutido no ops-console `:3013` (default), **não** rode o CLI em paralelo — dois loops competem no mesmo outbox (`claim`/`queued_worker`).
+
+`CH_INCIDENT_DISPATCH_WORKER=0` — dispatch síncrono na API + outbox rows; **sem** loop no console `:3013`.
 
 **SQL manual (se o script não estiver disponível):**
 
