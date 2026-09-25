@@ -155,6 +155,30 @@ describe('IncidentDispatchService reconcile', () => {
     expect(outbox.resetToPending).toHaveBeenCalled()
   })
 
+  it('resetEligibleDeadOutbox revives dead rows stuck in queued_worker', async () => {
+    const deadRow = {
+      id: 'o-dead',
+      incidentId: 'inc-1',
+      idempotencyKey: 'inc-1:triage_v1',
+      payload: { stale: true },
+      status: 'dead' as const,
+      attemptCount: 8,
+      lastError: 'max_attempts',
+      forwardedAt: null,
+      claimedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    outbox.listDeadForEligibleIncidents = vi.fn(async () => [deadRow])
+    queueRepo.findById = vi.fn(async () => queueRow({ incidentPipelineStatus: 'queued_worker' }))
+    queueRepo.setIncidentPipelineStatus = vi.fn(async () => undefined)
+
+    const result = await service.resetEligibleDeadOutbox(10)
+    expect(result.reset).toBe(1)
+    expect(outbox.resetToPending).toHaveBeenCalled()
+    expect(queueRepo.setIncidentPipelineStatus).toHaveBeenCalledWith('inc-1', 'open')
+  })
+
   it('resetEligibleDeadOutbox revives dead rows with fresh payload', async () => {
     const deadRow = {
       id: 'o-dead',

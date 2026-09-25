@@ -24,6 +24,7 @@ import {
   buildOpsAlertDispatchPayload,
   buildSupportReportDispatchPayload,
   isQueueRecordEligibleForDispatchReconcile,
+  shouldNormalizePipelineAfterDeadOutboxReset,
   isSupportBatchQueueRecord,
   opsAlertFromQueueRecord,
   supportDispatchOptionsFromQueue,
@@ -173,8 +174,9 @@ export class IncidentDispatchService {
 
   async buildDispatchPayloadForQueueRecord(
     record: OpsAnalysisQueueRecord,
+    options?: { recoverStuckDispatch?: boolean },
   ): Promise<Record<string, unknown> | null> {
-    if (!isQueueRecordEligibleForDispatchReconcile(record)) return null
+    if (!isQueueRecordEligibleForDispatchReconcile(record, options)) return null
     if (isSupportBatchQueueRecord(record)) return null
 
     if (record.sourceType === 'support_report') {
@@ -195,16 +197,22 @@ export class IncidentDispatchService {
   async ensureOutboxForQueueRecord(
     record: OpsAnalysisQueueRecord,
   ): Promise<'inserted' | 'reset' | 'exists' | 'skipped' | 'terminal_dead'> {
-    if (!isQueueRecordEligibleForDispatchReconcile(record)) return 'skipped'
-
     const idempotencyKey = buildIncidentDispatchIdempotencyKey(record.id, DISPATCH_KIND)
     const existing = await this.outbox.findByIdempotencyKey(idempotencyKey)
+    const recoverStuck =
+      existing != null && (existing.status === 'dead' || existing.status === 'failed')
+
+    if (!isQueueRecordEligibleForDispatchReconcile(record, { recoverStuckDispatch: recoverStuck })) {
+      return 'skipped'
+    }
 
     if (existing && ['pending', 'forwarded', 'claimed'].includes(existing.status)) {
       return 'exists'
     }
 
-    const payload = await this.buildDispatchPayloadForQueueRecord(record)
+    const payload = await this.buildDispatchPayloadForQueueRecord(record, {
+      recoverStuckDispatch: recoverStuck,
+    })
     if (!payload) return 'skipped'
 
     if (!existing) {
@@ -217,6 +225,9 @@ export class IncidentDispatchService {
     }
 
     await this.outbox.resetToPending(existing.id, payload)
+    if (recoverStuck && shouldNormalizePipelineAfterDeadOutboxReset(record.incidentPipelineStatus)) {
+      await this.queueRepo.setIncidentPipelineStatus(record.id, 'open')
+    }
     return 'reset'
   }
 
@@ -264,12 +275,17 @@ export class IncidentDispatchService {
         skipped += 1
         continue
       }
-      const payload = await this.buildDispatchPayloadForQueueRecord(record)
+      const payload = await this.buildDispatchPayloadForQueueRecord(record, {
+        recoverStuckDispatch: true,
+      })
       if (!payload) {
         skipped += 1
         continue
       }
       await this.outbox.resetToPending(row.id, payload)
+      if (shouldNormalizePipelineAfterDeadOutboxReset(record.incidentPipelineStatus)) {
+        await this.queueRepo.setIncidentPipelineStatus(record.id, 'open')
+      }
       reset += 1
     }
 

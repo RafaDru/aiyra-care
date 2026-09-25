@@ -9,10 +9,25 @@ import {
 
 const OPS_ALERT_CATEGORIES = new Set<OpsAlert['category']>(['sync', 'llm', 'product', 'infra'])
 
-export function isQueueRecordEligibleForDispatchReconcile(record: OpsAnalysisQueueRecord): boolean {
-  if (record.incidentPipelineStatus !== 'open') return false
+/** Pipeline states elegíveis para re-dispatch após outbox `dead` / `failed`. */
+export const INCIDENT_PIPELINE_RECOVERABLE_STATUSES = ['open', 'forwarded', 'queued_worker'] as const
+
+export function isQueueRecordEligibleForDispatchReconcile(
+  record: OpsAnalysisQueueRecord,
+  options?: { recoverStuckDispatch?: boolean },
+): boolean {
   if (record.status === 'completed' || record.status === 'dismissed') return false
-  return true
+  const pipeline = record.incidentPipelineStatus
+  if (options?.recoverStuckDispatch) {
+    return (INCIDENT_PIPELINE_RECOVERABLE_STATUSES as readonly string[]).includes(pipeline)
+  }
+  return pipeline === 'open'
+}
+
+export function shouldNormalizePipelineAfterDeadOutboxReset(
+  pipeline: OpsAnalysisQueueRecord['incidentPipelineStatus'],
+): boolean {
+  return pipeline === 'forwarded' || pipeline === 'queued_worker'
 }
 
 export function opsAlertFromQueueRecord(record: OpsAnalysisQueueRecord): OpsAlert | null {

@@ -115,7 +115,7 @@ Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → we
 | Comando | Uso |
 |---------|-----|
 | `npm run ch-incident-dispatch-backfill` | **One-shot:** enfileira todos os `open` elegíveis sem outbox ativo (notebook pós-075) |
-| `npm run ch-incident-dispatch-backfill -- --reset-dead` | Recoloca outbox `dead` → `pending` (`attempt_count=0`) se o incidente ainda não `triaged`/`dismissed`; depois roda o backfill |
+| `npm run ch-incident-dispatch-backfill -- --reset-dead` | Recoloca outbox `dead` → `pending` (`attempt_count=0`) se o incidente ainda não terminal; aceita pipeline `open` / `forwarded` / `queued_worker` (caso worker morreu com outbox `dead`); normaliza `forwarded`/`queued_worker` → `open` antes do próximo dispatch |
 | `npm run ch-incident-dispatch-backfill -- --limit=100` | Limita varredura |
 | `npm run ch-incident-dispatch-worker` | Loop (`CH_INCIDENT_DISPATCH_INTERVAL_MS`, default 30s): reconciliador + outbox batch |
 | `npm run ch-incident-dispatch-worker:once` | Um tick (reconcile se intervalo decorrido + batch) |
