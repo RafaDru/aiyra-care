@@ -35,7 +35,12 @@ import {
   runStackAction,
   isStackControlEnabled,
 } from './stack-control.js'
-import { loadProductLifecycle } from './product-lifecycle.js'
+import {
+  loadEpicDetail,
+  loadFeatureMarkdown,
+  loadProductLifecycle,
+  loadRepoMarkdown,
+} from './product-lifecycle.js'
 import {
   loadStrategyContent,
   loadStrategyManifest,
@@ -153,6 +158,26 @@ async function main() {
   fastify.get('/api/product-lifecycle', async () => {
     productLifecycleCache = loadProductLifecycle(monorepoRoot)
     return productLifecycleCache
+  })
+
+  fastify.get<{ Params: { id: string } }>('/api/product-lifecycle/epic/:id', async (req, reply) => {
+    const epic = loadEpicDetail(monorepoRoot, req.params.id?.trim())
+    if (!epic) return reply.status(404).send({ error: 'not_found' })
+    return epic
+  })
+
+  fastify.get<{ Params: { id: string } }>('/api/product-lifecycle/feature/:id', async (req, reply) => {
+    const feature = loadFeatureMarkdown(monorepoRoot, req.params.id?.trim())
+    if (!feature) return reply.status(404).send({ error: 'not_found' })
+    return feature
+  })
+
+  fastify.get<{ Querystring: { path?: string } }>('/api/product-lifecycle/markdown', async (req, reply) => {
+    const rel = req.query.path?.trim()
+    if (!rel) return reply.status(400).send({ error: 'path_required' })
+    const doc = loadRepoMarkdown(monorepoRoot, rel)
+    if (!doc) return reply.status(404).send({ error: 'not_found' })
+    return doc
   })
 
   fastify.get('/api/strategy/manifest', async () => loadStrategyManifest())

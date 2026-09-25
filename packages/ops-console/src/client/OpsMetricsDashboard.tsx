@@ -22,9 +22,11 @@ import {
   StrategyPanel,
 } from './StrategyPanel.js'
 import { OpsDrillDownProvider } from './ops-drill-down.js'
+import { OpsTabObjective } from './components/OpsTabObjective.js'
 import type { StrategySectionId } from './ops.types.js'
 
 const TAB_STORAGE_KEY = 'ops-console-active-tab'
+const GROUP_STORAGE_KEY = 'ops-console-active-group'
 
 type TabKey =
   | 'overview'
@@ -39,12 +41,66 @@ type TabKey =
   | 'infra'
   | 'cost'
 
+type GroupKey = 'produto' | 'analytics' | 'ops'
+
 const TAB_KEYS: TabKey[] = [
   'overview', 'business', 'strategy', 'issues', 'produto', 'product', 'support', 'sync', 'ava', 'infra', 'cost',
 ]
 
+const GROUP_TABS: Record<GroupKey, TabKey[]> = {
+  produto: ['produto', 'product', 'strategy'],
+  analytics: ['business', 'cost'],
+  ops: ['overview', 'issues', 'support', 'sync', 'ava', 'infra'],
+}
+
+const TAB_OBJECTIVES: Record<TabKey, string> = {
+  produto:
+    'Roadmap e feature cards — priorize o que está in_progress e abra o card para comportamento e QA.',
+  product:
+    'Radar de erros automáticos (client_errors) e saúde por feature — não é a fila de investigação.',
+  strategy:
+    'Financeiro, marketing e CX (advisory round 1) — alinhar narrativa e metas sem PHI.',
+  business:
+    'KPIs de adoção, engajamento, Ava e receita Stripe — números para decisão de produto.',
+  cost:
+    'Orçamento LLM interno (R$) — evitar estouro de custo de inferência em dev/preview.',
+  overview:
+    'Pulse 24h: alertas ativos e dependências — acione «Verificar e acionar» se algo crítico.',
+  issues:
+    'Pilha de investigações com agente (suporte dev + alertas SRE) — não lista todo erro do app.',
+  support:
+    'Inbox humana de reportes — triagem antes ou em paralelo à investigação automática.',
+  sync:
+    'Jobs de integração presos ou falhando — priorize Connect e carteira.',
+  ava:
+    'Operação do companion: falhas de chat, quota e tokens — separado de analytics de negócio.',
+  infra:
+    'Probe API/Postgres/Neo4j e controle de stack local.',
+}
+
+const TAB_LABELS: Record<TabKey, string> = {
+  overview: 'Visão geral',
+  business: 'Negócio',
+  strategy: 'Financeiro & Marketing',
+  issues: 'Investigações',
+  produto: 'Ciclo de vida',
+  product: 'Produto & UX',
+  support: 'Suporte',
+  sync: 'Sync',
+  ava: 'Ava & LLM',
+  infra: 'Infra',
+  cost: 'Custo interno',
+}
+
 function isTabKey(value: string | null): value is TabKey {
   return value != null && TAB_KEYS.includes(value as TabKey)
+}
+
+function tabToGroup(tab: TabKey): GroupKey {
+  for (const group of Object.keys(GROUP_TABS) as GroupKey[]) {
+    if (GROUP_TABS[group].includes(tab)) return group
+  }
+  return 'ops'
 }
 
 function resolveInitialStrategySection(): StrategySectionId {
@@ -59,6 +115,15 @@ function TabLabel({ text, count, alert }: { text: string; count?: number; alert?
         <span className={`ops-tab-count${alert ? ' ops-tab-count--alert' : ''}`}>{count}</span>
       )}
     </span>
+  )
+}
+
+function TabPanelWrap({ tab, children }: { tab: TabKey; children: ReactNode }) {
+  return (
+    <div className="ops-tab-panel">
+      <OpsTabObjective>{TAB_OBJECTIVES[tab]}</OpsTabObjective>
+      {children}
+    </div>
   )
 }
 
@@ -90,6 +155,21 @@ export function OpsMetricsDashboard({
     return 'overview'
   })
 
+  const [activeGroup, setActiveGroup] = useState<GroupKey>(() => {
+    const params = new URLSearchParams(window.location.search)
+    const fromUrlGroup = params.get('group') as GroupKey | null
+    if (fromUrlGroup && GROUP_TABS[fromUrlGroup]) return fromUrlGroup
+    const saved = localStorage.getItem(GROUP_STORAGE_KEY) as GroupKey | null
+    if (saved && GROUP_TABS[saved]) return saved
+    const tabFromUrl = params.get('tab')
+    const tab = isTabKey(tabFromUrl)
+      ? tabFromUrl
+      : isTabKey(localStorage.getItem(TAB_STORAGE_KEY))
+        ? (localStorage.getItem(TAB_STORAGE_KEY) as TabKey)
+        : 'overview'
+    return tabToGroup(tab)
+  })
+
   useEffect(() => {
     void opsApi.analysisAttentionCounts().then((c) => {
       setIssueAttention(c.totalAttention)
@@ -99,6 +179,7 @@ export function OpsMetricsDashboard({
   useEffect(() => {
     if (highlightInvestigationId) {
       setActiveTab('issues')
+      setActiveGroup('ops')
     }
   }, [highlightInvestigationId])
 
@@ -110,11 +191,25 @@ export function OpsMetricsDashboard({
     ava: metrics.productEvents.last5m.avaChatFailed,
     infra: countInfraIssues(metrics),
     cost: metrics.internalLlm?.exhausted ? 1 : metrics.internalLlm?.budgetExhausted ?? 0,
-  }), [data.alerts, metrics])
+    issues: issueAttention,
+  }), [data.alerts, metrics, issueAttention])
 
-  const syncUrl = (tab: TabKey, strategy?: StrategySectionId) => {
+  const groupBadge = useMemo(() => ({
+    produto: 0,
+    analytics: badges.cost > 0 ? 1 : 0,
+    ops:
+      badges.overview +
+      badges.support +
+      badges.sync +
+      badges.ava +
+      badges.infra +
+      badges.issues,
+  }), [badges])
+
+  const syncUrl = (tab: TabKey, group: GroupKey, strategy?: StrategySectionId) => {
     const params = new URLSearchParams(window.location.search)
     params.set('tab', tab)
+    params.set('group', group)
     if (tab === 'strategy') {
       params.set('strategy', strategy ?? strategySection)
     } else {
@@ -125,137 +220,173 @@ export function OpsMetricsDashboard({
     window.history.replaceState(null, '', next)
   }
 
-  const onTabChange = (key: string) => {
+  const onLeafTabChange = (key: string) => {
     const tab = key as TabKey
+    const group = tabToGroup(tab)
     setActiveTab(tab)
+    setActiveGroup(group)
     localStorage.setItem(TAB_STORAGE_KEY, tab)
-    syncUrl(tab)
+    localStorage.setItem(GROUP_STORAGE_KEY, group)
+    syncUrl(tab, group)
+  }
+
+  const onGroupChange = (key: string) => {
+    const group = key as GroupKey
+    const tabs = GROUP_TABS[group]
+    const nextTab = tabs.includes(activeTab) ? activeTab : tabs[0]
+    setActiveGroup(group)
+    setActiveTab(nextTab)
+    localStorage.setItem(GROUP_STORAGE_KEY, group)
+    localStorage.setItem(TAB_STORAGE_KEY, nextTab)
+    syncUrl(nextTab, group)
   }
 
   const onStrategySectionChange = (section: StrategySectionId) => {
     setStrategySection(section)
-    syncUrl('strategy', section)
+    syncUrl('strategy', 'produto', section)
   }
 
-  const items = [
-    {
+  const leafItems: Record<TabKey, { key: TabKey; label: ReactNode; children: ReactNode }> = {
+    overview: {
       key: 'overview',
-      label: <TabLabel text="Visão geral" count={badges.overview} alert />,
+      label: <TabLabel text={TAB_LABELS.overview} count={badges.overview} alert />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="overview">
           <OverviewPanel data={data} onRefresh={onRefresh} />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    business: {
       key: 'business',
-      label: <TabLabel text="Negócio" />,
+      label: <TabLabel text={TAB_LABELS.business} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="business">
           <BusinessPanel data={data} />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    strategy: {
       key: 'strategy',
-      label: <TabLabel text="Estratégia" />,
+      label: <TabLabel text={TAB_LABELS.strategy} />,
       children: (
-        <div className="ops-tab-panel">
-          <StrategyPanel section={strategySection} onSectionChange={onStrategySectionChange} />
-        </div>
+        <TabPanelWrap tab="strategy">
+          <StrategyPanel section={strategySection} onSectionChange={onStrategySectionChange} prominent />
+        </TabPanelWrap>
       ),
     },
-    {
+    issues: {
       key: 'issues',
-      label: <TabLabel text="Issues" count={issueAttention} alert={issueAttention > 0} />,
+      label: <TabLabel text={TAB_LABELS.issues} count={badges.issues} alert={badges.issues > 0} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="issues">
           <IssuesPanel
             onRefresh={onRefresh}
             highlightInvestigationId={highlightInvestigationId}
+            onNavigateTab={(tab) => onLeafTabChange(tab)}
           />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    produto: {
       key: 'produto',
-      label: <TabLabel text="Produto" />,
+      label: <TabLabel text={TAB_LABELS.produto} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="produto">
           <ProdutoLifecyclePanel />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    product: {
       key: 'product',
-      label: <TabLabel text="Produto & UX" count={badges.product} alert={badges.product > 0} />,
+      label: <TabLabel text={TAB_LABELS.product} count={badges.product} alert={badges.product > 0} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="product">
           <ProductPanel data={data} />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    support: {
       key: 'support',
-      label: <TabLabel text="Suporte" count={badges.support} alert={badges.support > 0} />,
+      label: <TabLabel text={TAB_LABELS.support} count={badges.support} alert={badges.support > 0} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="support">
           <SupportPanel
             openCount={metrics.supportReports?.openCount ?? 0}
             submitted24h={metrics.supportReports?.submitted24h ?? 0}
             submittedSparkline={metrics.timeSeries24h.supportReportsSubmitted?.map((r) => r.count)}
             onQueueChange={onRefresh}
           />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    sync: {
       key: 'sync',
-      label: <TabLabel text="Sync" count={badges.sync} alert={badges.sync > 0} />,
+      label: <TabLabel text={TAB_LABELS.sync} count={badges.sync} alert={badges.sync > 0} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="sync">
           <SyncPanel data={data} />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    ava: {
       key: 'ava',
-      label: <TabLabel text="Ava & LLM" count={badges.ava} alert={badges.ava > 0} />,
+      label: <TabLabel text={TAB_LABELS.ava} count={badges.ava} alert={badges.ava > 0} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="ava">
           <AvaPanel data={data} />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    infra: {
       key: 'infra',
-      label: <TabLabel text="Infra" count={badges.infra} alert={badges.infra > 0} />,
+      label: <TabLabel text={TAB_LABELS.infra} count={badges.infra} alert={badges.infra > 0} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="infra">
           <InfraPanel data={data} runtime={runtime} stackSlot={stackSlot} onRefresh={onRefresh} />
-        </div>
+        </TabPanelWrap>
       ),
     },
-    {
+    cost: {
       key: 'cost',
-      label: <TabLabel text="Custo interno" count={badges.cost} alert={badges.cost > 0} />,
+      label: <TabLabel text={TAB_LABELS.cost} count={badges.cost} alert={badges.cost > 0} />,
       children: (
-        <div className="ops-tab-panel">
+        <TabPanelWrap tab="cost">
           <CostPanel data={data} />
-        </div>
+        </TabPanelWrap>
       ),
     },
-  ]
+  }
+
+  const groupItems = (['produto', 'analytics', 'ops'] as GroupKey[]).map((group) => ({
+    key: group,
+    label: (
+      <TabLabel
+        text={group === 'produto' ? 'Produto' : group === 'analytics' ? 'Analytics' : 'Ops'}
+        count={groupBadge[group]}
+        alert={group === 'ops' && groupBadge.ops > 0}
+      />
+    ),
+    children: (
+      <div className="ops-l2-tabs">
+        <Tabs
+          activeKey={activeTab}
+          onChange={onLeafTabChange}
+          items={GROUP_TABS[group].map((tab) => leafItems[tab])}
+          destroyOnHidden={false}
+          size="small"
+        />
+      </div>
+    ),
+  }))
 
   return (
     <OpsDrillDownProvider data={data}>
-      <div className="ops-tabs-card">
+      <div className="ops-tabs-card ops-l1-tabs">
         <Tabs
-          activeKey={activeTab}
-          onChange={onTabChange}
-          items={items}
+          activeKey={activeGroup}
+          onChange={onGroupChange}
+          items={groupItems}
           destroyOnHidden={false}
-          tabBarGutter={0}
           size="middle"
         />
       </div>

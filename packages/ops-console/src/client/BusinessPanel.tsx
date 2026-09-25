@@ -129,8 +129,46 @@ export function BusinessPanel({ data }: { data: OpsMetricsResponse }) {
     integrationHealth7d,
   } = business
 
+  const stripeWebhookRejected = data.metrics.ops?.stripeWebhookRejected1h ?? 0
+  const avgRevenuePerPaidPlan30dCents =
+    billing.paidPlans > 0 ? Math.round(billing.revenueBrlCents30d / billing.paidPlans) : null
+
   return (
     <div className="ops-panel-stack">
+      <OpsPanel
+        title="Stripe & receita"
+        description="Agregados PG (billing_* events + entitlements) — leitura ops, sem dados de cartão."
+      >
+        <div className="ops-kpi-grid ops-kpi-grid--hero">
+          <OpsKpiCard label="Planos pagos" value={billing.paidPlans} hint="entitlements ativos" />
+          <OpsKpiCard
+            label="Receita 30d"
+            value={formatBrl(billing.revenueBrlCents30d)}
+            hint={
+              avgRevenuePerPaidPlan30dCents != null
+                ? `média ${formatBrl(avgRevenuePerPaidPlan30dCents)}/plano·30d`
+                : 'sem planos pagos'
+            }
+          />
+          <OpsKpiCard
+            label="Checkout iniciado 7d"
+            value={billing.checkoutStarted7d}
+            hint={`${billing.checkoutCompleted7d} concluídos`}
+          />
+          <OpsKpiCard
+            label="Checkout 30d"
+            value={billing.checkoutStarted30d}
+            hint={`conv. ${conversionRate(billing.checkoutCompleted30d, billing.checkoutStarted30d)}`}
+          />
+          <OpsKpiCard
+            label="Webhooks rejeitados 1h"
+            value={stripeWebhookRejected}
+            alert={stripeWebhookRejected > 0}
+            hint="product_events stripe_webhook_rejected"
+          />
+        </div>
+      </OpsPanel>
+
       <OpsPanel title="Grandes números" description="Totais acumulados — sem PHI.">
         <div className="ops-kpi-grid ops-kpi-grid--hero">
           <OpsKpiCard

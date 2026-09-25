@@ -381,7 +381,36 @@ export interface OpsMetricsSnapshot {
     openCount: number
     submitted24h: number
   }
+  ops?: {
+    workerLastTickAt: string | null
+    workerStaleMinutes: number | null
+    stripeWebhookRejected1h: number
+  }
   business?: OpsBusinessAnalytics
+}
+
+export interface EpicDetailPayload {
+  id: string
+  title: string
+  priority: string
+  category: string
+  status: string
+  statusLabel?: string
+  summary?: string
+  items: Array<{
+    id: string
+    title: string
+    status: string
+    detail?: string
+    reviewBadge?: string
+  }>
+}
+
+export interface FeatureMarkdownPayload {
+  id: string
+  title: string
+  doc: string
+  markdown: string
 }
 
 export interface SupportReportOpsRow {

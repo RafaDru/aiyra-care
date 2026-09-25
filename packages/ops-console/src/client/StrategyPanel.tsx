@@ -47,9 +47,11 @@ function CxSeverityCallout() {
 export function StrategyPanel({
   section,
   onSectionChange,
+  prominent,
 }: {
   section: StrategySectionId
   onSectionChange: (section: StrategySectionId) => void
+  prominent?: boolean
 }) {
   const [content, setContent] = useState<StrategyContentPayload | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -72,7 +74,11 @@ export function StrategyPanel({
   }
 
   if (loading && !content) {
-    return <OpsPanel title="Estratégia" description="Carregando relatórios…" />
+    return (
+      <OpsPanel title="Financeiro & Marketing" description="Carregando relatórios…">
+        <Text type="secondary">…</Text>
+      </OpsPanel>
+    )
   }
   if (error) {
     return (
@@ -85,13 +91,21 @@ export function StrategyPanel({
 
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
+      {prominent && (
+        <Alert
+          type="success"
+          showIcon
+          message="Financeiro & Marketing (advisory)"
+          description="Relatórios round 1 em content/strategy/ — use as sub-abas MKT, Financeiro e CX abaixo. Atualize os markdown no monorepo ou Project store e recarregue o console."
+        />
+      )}
       <OpsPanel
-        title="Estratégia — advisory interno"
-        description={`Snapshot ${content.updatedAt} · Marketing, Financeiro e CX (sem PHI) · fonte: content/strategy/`}
+        title="Financeiro & Marketing — advisory interno"
+        description={`Snapshot ${content.updatedAt} · sem PHI · fonte: packages/ops-console/content/strategy/`}
       >
         <Text type="secondary">
-          Relatórios round 1 para alinhar Command Hub com advisors do Project store. Não substituem
-          feature cards nem QA de produto.
+          Narrativa de go-to-market, unit economics e jornada CX para o Command Hub. Não substituem
+          feature cards nem métricas live em Negócio.
         </Text>
       </OpsPanel>
 
