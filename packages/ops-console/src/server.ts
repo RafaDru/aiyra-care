@@ -531,7 +531,7 @@ async function main() {
   if (process.env.CH_INCIDENT_DISPATCH_WORKER !== '0') {
     const dispatchIntervalMs = Number(process.env.CH_INCIDENT_DISPATCH_INTERVAL_MS ?? '30000')
     const runDispatch = () => {
-      incidentDispatchService.processOutboxBatch(20).catch((err) => {
+      incidentDispatchService.runWorkerTick(20, 50).catch((err) => {
         console.error(
           '[ops-console] incident dispatch worker',
           err instanceof Error ? err.message : err,

@@ -244,6 +244,35 @@ export class OpsAnalysisQueuePgRepository {
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
+  /** Incidentes `open` sem outbox ativo (pending/forwarded/claimed). */
+  async listOpenNeedingDispatchOutbox(
+    limit: number,
+    options?: { staleMs?: number },
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const staleMs = options?.staleMs
+    const params: unknown[] = [limit]
+    let staleSql = ''
+    if (staleMs != null && staleMs > 0) {
+      params.push(staleMs)
+      staleSql = `AND q.created_at < NOW() - ($2::bigint * interval '1 millisecond')`
+    }
+    const res = await this.pool.query(
+      `SELECT q.* FROM ops_analysis_queue q
+       WHERE q.incident_pipeline_status = 'open'
+         AND q.status NOT IN ('completed', 'dismissed')
+         ${staleSql}
+         AND NOT EXISTS (
+           SELECT 1 FROM incident_dispatch_outbox o
+           WHERE o.incident_id = q.id
+             AND o.status IN ('pending', 'forwarded', 'claimed')
+         )
+       ORDER BY q.created_at ASC
+       LIMIT $1`,
+      params,
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
   async attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
     const res = await this.pool.query<{ status: string; count: string }>(
       deploymentTier

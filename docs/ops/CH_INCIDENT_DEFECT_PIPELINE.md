@@ -40,6 +40,25 @@ Pipeline ops de ponta a ponta:
 
 **Transições:** `open → forwarded → queued_worker → in_triage → triaged | dismissed`
 
+**Anti-caducidade (2026-09-25):** incidente em `open` não pode ficar indefinidamente sem linha de dispatch retryável. Filas criadas antes da migration **075** / sem `INSERT` na outbox são cobertas por **backfill one-shot** + **reconciliador periódico** (ver §4.1).
+
+**Elegibilidade reconciliação / backfill**
+
+| Critério | Regra |
+|----------|--------|
+| Pipeline | `incident_pipeline_status = 'open'` apenas |
+| Legado | `status NOT IN ('completed', 'dismissed')` |
+| Excluídos | `triaged`, `dismissed` no pipeline — **não** re-dispatch |
+| Outbox ativo | Não existe linha com `status IN ('pending', 'forwarded', 'claimed')` para o `incident_id` |
+| Outbox `dead` (≥ max tentativas) | Não re-enfileira — visível no CH (`last_error`, status outbox `dead`) |
+| Outbox `failed` / `dead` abaixo do max | `resetToPending` + payload reconstruído (mesma `idempotency_key`) |
+
+**Idempotência:** `idempotency_key = buildIncidentDispatchIdempotencyKey(incident_id, 'triage_v1')` — `INSERT … ON CONFLICT DO NOTHING`; reconciliador só faz `resetToPending` quando já existe linha não ativa.
+
+**Payload:** reconstruído a partir de `ops_analysis_queue` + fonte (`support_report` via PG; `ops_alert` via `context_snapshot` + `source_id`). Lotes `support_report` (`context_snapshot.batch`) ficam de fora (disparo manual/batch próprio).
+
+**Webhook ausente (`dispatch.outcome === 'skipped'`):** outbox permanece `pending` com `attempt_count++` e `last_error` `skipped:webhook_not_configured` (ou `webhook_key_missing`) — retry no worker; ops deve configurar `CURSOR_*` webhook envs.
+
 ### 2.2 Defeito plataforma
 
 **Tabela:** `platform_defects.status` (migration **071**).
@@ -91,11 +110,19 @@ SQL canônico: `database/relational/071_platform_defects.sql` … `075_ops_analy
 
 Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → webhook síncrono → `forwarded` + `incident_pipeline_status=forwarded`; falha → `pending` com `attempt_count++`.
 
+### 4.1 Reconciliação + backfill
+
 | Comando | Uso |
 |---------|-----|
-| `npm run ch-incident-dispatch-worker` | Loop standalone (`CH_INCIDENT_DISPATCH_INTERVAL_MS`, default 30s) |
-| `npm run ch-incident-dispatch-worker:once` | Um tick (notebook/CI) |
-| Ops-console `:3013` | Loop embutido se `CH_INCIDENT_DISPATCH_WORKER≠0` (default ligado) |
+| `npm run ch-incident-dispatch-backfill` | **One-shot:** enfileira todos os `open` elegíveis sem outbox ativo (notebook pós-075) |
+| `npm run ch-incident-dispatch-backfill -- --limit=100` | Limita varredura |
+| `npm run ch-incident-dispatch-worker` | Loop (`CH_INCIDENT_DISPATCH_INTERVAL_MS`, default 30s): reconciliador + outbox batch |
+| `npm run ch-incident-dispatch-worker:once` | Um tick (reconcile se intervalo decorrido + batch) |
+| Ops-console `:3013` | Mesmo `runWorkerTick` se `CH_INCIDENT_DISPATCH_WORKER≠0` (default ligado) |
+
+**Reconciliador periódico:** em cada `runWorkerTick`, se passou `CH_INCIDENT_RECONCILE_INTERVAL_MS` (default **60s**), varre incidentes `open` com `created_at` anterior a `now − CH_INCIDENT_OPEN_STALE_MS` (default **5 min**) e sem outbox `pending`/`forwarded`/`claimed` — chama a mesma lógica do backfill (`ensureOutboxForQueueRecord`).
+
+**Max tentativas outbox:** 8 → `status=dead`, log `[incident-dispatch] outbox dead …`; incidente pode permanecer `open` até intervenção ops.
 
 `CH_INCIDENT_DISPATCH_WORKER=0` — só dispatch síncrono na API + linhas outbox (sem loop no console).
 
@@ -124,13 +151,15 @@ Rotas ops-console planejadas: `/api/platform-defects`, `/api/defect-pr-batches/*
 | `OPS_DEFECT_PR_BATCH_INTERVAL_MS` | 21600000 | Janela lote CH |
 | `CH_INCIDENT_DISPATCH_INTERVAL_MS` | 30000 | Worker poll |
 | `CH_INCIDENT_DISPATCH_WORKER` | 1 | 0 = só API síncrona |
+| `CH_INCIDENT_RECONCILE_INTERVAL_MS` | 60000 | Mínimo entre varreduras reconciliador no worker |
+| `CH_INCIDENT_OPEN_STALE_MS` | 300000 | Idade mínima do incidente `open` para reconciliar (evita corrida com enqueue síncrono) |
 | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL` | — | Agente 2 |
 
 ---
 
 ## 7. Verificação
 
-- `cd packages/api && npx vitest run platform-defect incident-dispatch-outbox incident-pipeline-status`
+- `cd packages/api && npx vitest run platform-defect incident-dispatch-outbox incident-dispatch-reconcile incident-pipeline-status`
 - `npm run test:ops` (regressão)
 - Suite futura: `docs/testing/suites/ops-ch-defeitos.md`
 

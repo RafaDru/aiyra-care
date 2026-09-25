@@ -1,4 +1,5 @@
 import type { Pool } from 'pg'
+import type { OpsAnalysisQueueRecord } from '../../domain/ops/ops-analysis-queue.types.js'
 import type { OpsAlert } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsAlertTriageRow } from '../../domain/ops/ops-alert-triage.js'
 import { buildIncidentDispatchIdempotencyKey } from '../../domain/ops/incident-pipeline-status.js'
@@ -19,9 +20,40 @@ import {
 import { IncidentDispatchOutboxPgRepository } from '../../infrastructure/persistence/incident-dispatch-outbox.pg.repository.js'
 import { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
+import {
+  buildOpsAlertDispatchPayload,
+  buildSupportReportDispatchPayload,
+  isQueueRecordEligibleForDispatchReconcile,
+  isSupportBatchQueueRecord,
+  opsAlertFromQueueRecord,
+  supportDispatchOptionsFromQueue,
+} from './incident-dispatch-payload.helper.js'
 
 const DISPATCH_KIND = 'triage_v1'
 const MAX_OUTBOX_ATTEMPTS = 8
+
+let lastReconcileAtMs = 0
+
+export function reconcileIntervalMs(): number {
+  const raw = process.env.CH_INCIDENT_RECONCILE_INTERVAL_MS?.trim()
+  const n = raw ? Number(raw) : 60_000
+  return Number.isFinite(n) && n > 0 ? n : 60_000
+}
+
+export function openIncidentStaleMs(): number {
+  const raw = process.env.CH_INCIDENT_OPEN_STALE_MS?.trim()
+  const n = raw ? Number(raw) : 300_000
+  return Number.isFinite(n) && n >= 0 ? n : 300_000
+}
+
+export type ReconcileOpenIncidentsResult = {
+  scanned: number
+  enqueued: number
+  reset: number
+  skipped: number
+}
+
+export type BackfillOpenIncidentsResult = ReconcileOpenIncidentsResult
 
 export function createIncidentDispatchService(pool: Pool): IncidentDispatchService {
   return new IncidentDispatchService(
@@ -128,18 +160,131 @@ export class IncidentDispatchService {
     }
     if (dispatch.outcome === 'failed') {
       await this.outbox.bumpAttempt(outboxId, dispatch.error)
+      return
+    }
+    if (dispatch.outcome === 'skipped') {
+      const reason =
+        'reason' in dispatch && typeof dispatch.reason === 'string'
+          ? dispatch.reason
+          : 'skipped'
+      await this.outbox.bumpAttempt(outboxId, `skipped:${reason}`)
     }
   }
 
-  async processOutboxBatch(limit = 20): Promise<{ processed: number; sent: number; failed: number }> {
+  async buildDispatchPayloadForQueueRecord(
+    record: OpsAnalysisQueueRecord,
+  ): Promise<Record<string, unknown> | null> {
+    if (!isQueueRecordEligibleForDispatchReconcile(record)) return null
+    if (isSupportBatchQueueRecord(record)) return null
+
+    if (record.sourceType === 'support_report') {
+      const support = await this.supportRepo.findByIdForOps(record.sourceId)
+      if (!support) return null
+      return buildSupportReportDispatchPayload(support, supportDispatchOptionsFromQueue(record))
+    }
+
+    if (record.sourceType === 'ops_alert') {
+      const alert = opsAlertFromQueueRecord(record)
+      if (!alert) return null
+      return buildOpsAlertDispatchPayload(record, alert)
+    }
+
+    return null
+  }
+
+  async ensureOutboxForQueueRecord(
+    record: OpsAnalysisQueueRecord,
+  ): Promise<'inserted' | 'reset' | 'exists' | 'skipped' | 'terminal_dead'> {
+    if (!isQueueRecordEligibleForDispatchReconcile(record)) return 'skipped'
+
+    const idempotencyKey = buildIncidentDispatchIdempotencyKey(record.id, DISPATCH_KIND)
+    const existing = await this.outbox.findByIdempotencyKey(idempotencyKey)
+
+    if (existing && ['pending', 'forwarded', 'claimed'].includes(existing.status)) {
+      return 'exists'
+    }
+    if (existing?.status === 'dead' && existing.attemptCount >= MAX_OUTBOX_ATTEMPTS) {
+      return 'terminal_dead'
+    }
+
+    const payload = await this.buildDispatchPayloadForQueueRecord(record)
+    if (!payload) return 'skipped'
+
+    if (!existing) {
+      const inserted = await this.outbox.insertIfAbsent({
+        incidentId: record.id,
+        idempotencyKey,
+        payload,
+      })
+      return inserted ? 'inserted' : 'exists'
+    }
+
+    await this.outbox.resetToPending(existing.id, payload)
+    return 'reset'
+  }
+
+  async reconcileOpenIncidents(
+    limit = 50,
+    options?: { staleOnly?: boolean },
+  ): Promise<ReconcileOpenIncidentsResult> {
+    const staleOnly = options?.staleOnly ?? true
+    const staleMs = staleOnly ? openIncidentStaleMs() : undefined
+    const rows = await this.queueRepo.listOpenNeedingDispatchOutbox(limit, { staleMs })
+    const result: ReconcileOpenIncidentsResult = {
+      scanned: rows.length,
+      enqueued: 0,
+      reset: 0,
+      skipped: 0,
+    }
+
+    for (const row of rows) {
+      const outcome = await this.ensureOutboxForQueueRecord(row)
+      if (outcome === 'inserted') result.enqueued += 1
+      else if (outcome === 'reset') result.reset += 1
+      else result.skipped += 1
+    }
+
+    return result
+  }
+
+  async backfillOpenIncidents(limit = 500): Promise<BackfillOpenIncidentsResult> {
+    return this.reconcileOpenIncidents(limit, { staleOnly: false })
+  }
+
+  async runWorkerTick(
+    batchLimit = 20,
+    reconcileLimit = 50,
+  ): Promise<{
+    reconcile?: ReconcileOpenIncidentsResult
+    batch: { processed: number; sent: number; failed: number; dead: number; skipped: number }
+  }> {
+    const now = Date.now()
+    let reconcile: ReconcileOpenIncidentsResult | undefined
+    if (now - lastReconcileAtMs >= reconcileIntervalMs()) {
+      reconcile = await this.reconcileOpenIncidents(reconcileLimit, { staleOnly: true })
+      lastReconcileAtMs = now
+    }
+    const batch = await this.processOutboxBatch(batchLimit)
+    return { reconcile, batch }
+  }
+
+  async processOutboxBatch(
+    limit = 20,
+  ): Promise<{ processed: number; sent: number; failed: number; dead: number; skipped: number }> {
     const rows = await this.outbox.listPending(limit)
     let processed = 0
     let sent = 0
     let failed = 0
+    let dead = 0
+    let skipped = 0
 
     for (const row of rows) {
       if (row.attemptCount >= MAX_OUTBOX_ATTEMPTS) {
         await this.outbox.markDead(row.id, 'max_attempts')
+        console.warn(
+          `[incident-dispatch] outbox dead incident=${row.incidentId} attempts=${row.attemptCount}`,
+        )
+        dead += 1
         failed += 1
         continue
       }
@@ -198,6 +343,9 @@ export class IncidentDispatchService {
         } else if (dispatch.outcome === 'failed') {
           await this.outbox.bumpAttempt(row.id, dispatch.error)
           failed += 1
+        } else if (dispatch.outcome === 'skipped') {
+          await this.outbox.bumpAttempt(row.id, `skipped:${dispatch.reason}`)
+          skipped += 1
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'dispatch_error'
@@ -206,6 +354,6 @@ export class IncidentDispatchService {
       }
     }
 
-    return { processed, sent, failed }
+    return { processed, sent, failed, dead, skipped }
   }
 }

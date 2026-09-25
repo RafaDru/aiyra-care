@@ -114,4 +114,30 @@ export class IncidentDispatchOutboxPgRepository {
       [id, error.slice(0, 2000)],
     )
   }
+
+  async resetToPending(id: string, payload: Record<string, unknown>): Promise<void> {
+    await this.pool.query(
+      `UPDATE incident_dispatch_outbox SET
+        status = 'pending',
+        payload = $2::jsonb,
+        last_error = NULL,
+        claimed_at = NULL,
+        forwarded_at = NULL,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, JSON.stringify(payload)],
+    )
+  }
+
+  async hasActiveDispatchForIncident(incidentId: string): Promise<boolean> {
+    const res = await this.pool.query<{ exists: boolean }>(
+      `SELECT EXISTS (
+        SELECT 1 FROM incident_dispatch_outbox
+        WHERE incident_id = $1::uuid
+          AND status IN ('pending', 'forwarded', 'claimed')
+      ) AS exists`,
+      [incidentId],
+    )
+    return Boolean(res.rows[0]?.exists)
+  }
 }

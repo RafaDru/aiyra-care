@@ -39,6 +39,7 @@
     "ops:alert-investigator:simulate": "node scripts/ops-alert-investigator-simulate.mjs",
     "ch-incident-dispatch-worker": "cd packages/api && npx tsx scripts/ch-incident-dispatch-worker.mjs",
     "ch-incident-dispatch-worker:once": "cd packages/api && npx tsx scripts/ch-incident-dispatch-worker.mjs --once",
+    "ch-incident-dispatch-backfill": "cd packages/api && npx tsx scripts/ch-incident-dispatch-backfill.mjs",
     "setup:ops-prod": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-ops-prod.ps1",
     "setup:ops-preview": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-ops-preview.ps1",
     "setup:ops-alerts": "powershell -File scripts/setup-ops-alerts.ps1",

@@ -14,7 +14,7 @@ const once = process.argv.includes('--once')
 const intervalMs = Number(process.env.CH_INCIDENT_DISPATCH_INTERVAL_MS ?? '30000')
 
 async function tick() {
-  const result = await dispatch.processOutboxBatch(20)
+  const result = await dispatch.runWorkerTick(20, 50)
   console.log('[ch-incident-dispatch]', JSON.stringify(result))
 }
 
