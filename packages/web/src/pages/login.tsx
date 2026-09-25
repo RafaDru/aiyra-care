@@ -11,6 +11,7 @@ import { LegalDocumentModal } from '../components/legal/LegalDocumentModal.js'
 import { api } from '../lib/api.js'
 import type { LegalDocumentKind } from '../lib/api.types.js'
 import { LOGIN_LEGAL_KINDS, COMPLIANCE_ACCEPT_PATH } from '../lib/legal-paths.js'
+import { AUTH_PASSWORD_HINT, AUTH_PASSWORD_MIN_LENGTH } from '../lib/auth-policy.js'
 
 const { Title, Text } = Typography
 
@@ -51,6 +52,7 @@ export function LoginPage() {
     signUpWithPassword,
   } = useAuth()
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
   const [mode, setMode] = useState<'login' | 'signup'>(() => parseAuthMode(searchParams.get('mode')))
   const [submitting, setSubmitting] = useState(false)
   const [legalAccept, setLegalAccept] = useState(false)
@@ -66,6 +68,7 @@ export function LoginPage() {
     setMode(next)
     setLegalAccept(false)
     setError(null)
+    setInfo(null)
     setSearchParams({ mode: next }, { replace: true })
   }
 
@@ -99,19 +102,29 @@ export function LoginPage() {
     )
   }
 
-  const onFinish = async (values: { email: string; password: string }) => {
+  const onFinish = async (values: { email: string; password: string; passwordConfirm?: string }) => {
     if (mode === 'signup' && !legalAccept) {
       setError(t('compliance.mustAcceptBeforeSignup'))
       return
     }
+    if (mode === 'signup' && values.password !== values.passwordConfirm) {
+      setError(t('auth.passwordMismatch'))
+      return
+    }
     setSubmitting(true)
     setError(null)
+    setInfo(null)
     try {
       if (mode === 'login') {
         await signInWithPassword(values.email, values.password, rememberMe)
         navigate('/')
       } else {
-        await signUpWithPassword(values.email, values.password, rememberMe)
+        const result = await signUpWithPassword(values.email, values.password, rememberMe)
+        if (result.kind === 'email_confirmation') {
+          setInfo(t('auth.emailConfirmHint'))
+          setAuthMode('login')
+          return
+        }
         await refreshSync()
         await api.compliance.accept()
         navigate('/onboarding')
@@ -156,6 +169,7 @@ export function LoginPage() {
             </Text>
           </div>
 
+          {info && <Alert type="info" message={info} showIcon />}
           {error && <Alert type="error" message={error} showIcon />}
 
           <Checkbox
@@ -209,11 +223,32 @@ export function LoginPage() {
             <Form.Item name="email" label={t('auth.email')} rules={[{ required: true, type: 'email' }]}>
               <Input size="large" autoComplete="email" />
             </Form.Item>
-            <Form.Item name="password" label={t('auth.password')} rules={[{ required: true, min: 6 }]}>
+            <Form.Item
+              name="password"
+              label={t('auth.password')}
+              rules={[{ required: true, min: AUTH_PASSWORD_MIN_LENGTH, message: t('auth.passwordMin', { min: AUTH_PASSWORD_MIN_LENGTH }) }]}
+              extra={mode === 'signup' ? AUTH_PASSWORD_HINT : undefined}
+            >
               <Input.Password size="large" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
             </Form.Item>
             {mode === 'signup' && (
               <>
+                <Form.Item
+                  name="passwordConfirm"
+                  label={t('auth.passwordConfirm')}
+                  dependencies={['password']}
+                  rules={[
+                    { required: true, message: t('auth.passwordConfirmRequired') },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue('password') === value) return Promise.resolve()
+                        return Promise.reject(new Error(t('auth.passwordMismatch')))
+                      },
+                    }),
+                  ]}
+                >
+                  <Input.Password size="large" autoComplete="new-password" />
+                </Form.Item>
                 <Form.Item>
                   <Checkbox checked={legalAccept} onChange={(e) => setLegalAccept(e.target.checked)}>
                     {t('compliance.signupCheckbox')}{' '}

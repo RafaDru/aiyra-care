@@ -41,6 +41,10 @@ export async function getAccessToken(): Promise<string | null> {
   return token
 }
 
+export function setMemoryAccessToken(token: string | null): void {
+  memoryAccessToken = token
+}
+
 export async function ensureAccessToken(): Promise<string | null> {
   const token = await getAccessToken()
   if (token) return token

@@ -1,8 +1,10 @@
 import { useLocalSearchParams } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { PatientExamsTab } from '@/components/clinical/PatientExamsTab'
 import { PatientIntegrationsPanel } from '@/components/integrations/PatientIntegrationsPanel'
-import { PatientWalletSyncBanner } from '@/components/integrations/PatientWalletSyncBanner'
+import { PatientCoverageTab } from '@/components/wallet/PatientCoverageTab'
+import { PatientWalletTab } from '@/components/wallet/PatientWalletTab'
 import { PatientNavPicker } from '@/components/PatientNavPicker'
 import { PlaceholderTab } from '@/components/PlaceholderTab'
 import {
@@ -62,6 +64,57 @@ export default function PatientDetailScreen() {
 
   const content = tabContent(tab)
 
+  if (tab === 'coverage' && patientId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <View style={styles.header}>
+          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
+          <PatientNavPicker
+            section={section}
+            tab={tab}
+            onSectionChange={onSectionChange}
+            onTabChange={setTab}
+          />
+        </View>
+        <PatientCoverageTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'wallet' && patientId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <View style={styles.header}>
+          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
+          <PatientNavPicker
+            section={section}
+            tab={tab}
+            onSectionChange={onSectionChange}
+            onTabChange={setTab}
+          />
+        </View>
+        <PatientWalletTab patientId={patientId} />
+      </View>
+    )
+  }
+
+  if (tab === 'exams' && patientId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
+        <View style={styles.header}>
+          <Text style={[styles.patientId, { color: tokens.colorTextSecondary }]}>ID {patientId}</Text>
+          <PatientNavPicker
+            section={section}
+            tab={tab}
+            onSectionChange={onSectionChange}
+            onTabChange={setTab}
+          />
+        </View>
+        <PatientExamsTab patientId={patientId} />
+      </View>
+    )
+  }
+
   if (tab === 'integrations' && patientId) {
     return (
       <View style={{ flex: 1, backgroundColor: tokens.colorBgLayout }}>
@@ -93,7 +146,7 @@ export default function PatientDetailScreen() {
         onSectionChange={onSectionChange}
         onTabChange={setTab}
       />
-      {tab === 'wallet' && patientId ? <PatientWalletSyncBanner patientId={patientId} /> : null}
+
       <PlaceholderTab
         title={content.title}
         subtitle={content.subtitle}

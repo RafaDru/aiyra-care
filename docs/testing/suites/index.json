@@ -299,6 +299,20 @@
       "coverage": "partial",
       "automation": { "status": "partial", "spec": "packages/api/scripts/ops-smoke.ts" },
       "estimatedMinutes": 10
+    },
+    {
+      "id": "mobile-shell-smoke",
+      "domain": "mobile",
+      "title": "Mobile — shell login, Carteira e Exames (read-only)",
+      "featureId": "mobile-app-shell",
+      "lane": "mobile",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/mobile-shell-smoke.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.login", "mobile.wallet_read", "mobile.exams_read", "mobile.oauth_google"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 15
     }
   ],
   "lanes": {
@@ -340,6 +354,11 @@
     },
     "feature": { "title": "Por feature entregue", "parallelSafeDefault": true },
     "integration-portal": { "title": "Portais externos", "parallelSafeDefault": true, "optionalForMain": true },
-    "ops": { "title": "Ops", "parallelSafeDefault": true }
+    "ops": { "title": "Ops", "parallelSafeDefault": true },
+    "mobile": {
+      "title": "App mobile (Expo)",
+      "description": "Smoke manual shell + checks typecheck/export",
+      "suiteIds": ["mobile-shell-smoke"]
+    }
   }
 }

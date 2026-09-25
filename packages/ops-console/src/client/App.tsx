@@ -147,7 +147,11 @@ export function App() {
                   : 'API :3010 e web :5173 — app monitorado (dev local).'
               }
             >
-              <StackControlCard deploymentTier={deploymentTier} onStackChange={refresh} />
+              <StackControlCard
+                deploymentTier={deploymentTier}
+                onStackChange={refresh}
+                defaultLogsOpen
+              />
             </OpsPanel>
           }
         />

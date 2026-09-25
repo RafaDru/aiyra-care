@@ -88,6 +88,14 @@ const ROUTE_FEATURES: OpsFeatureCatalogEntry[] = [
     routeExample: '/onboarding',
   },
   {
+    key: 'mobile_shell',
+    label: 'App mobile (Expo)',
+    area: 'Mobile',
+    section: 'product',
+    routeExample: 'expo-router / (auth)/login',
+    description: 'Shell RN — paridade progressiva com web',
+  },
+  {
     key: 'emergency',
     label: 'Emergência',
     area: 'Clínico',

@@ -1,8 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Linking } from 'react-native'
 import type { Session, User } from '@supabase/supabase-js'
 import type { AppAccount } from '@/lib/api.types'
 import { api } from '@/lib/api'
-import { getSupabase, supabaseConfigured } from '@/lib/supabase'
+import { createSessionFromOAuthUrl, signInWithOAuthProvider } from '@/lib/supabase-oauth'
+import { getAccessToken, getSupabase, setMemoryAccessToken, supabaseConfigured } from '@/lib/supabase'
+
+export type SignUpResult = { kind: 'session' } | { kind: 'email_confirmation' }
 
 type AuthContextValue = {
   configured: boolean
@@ -15,6 +19,8 @@ type AuthContextValue = {
   account: AppAccount | null
   needsProfile: boolean
   signInWithPassword: (email: string, password: string) => Promise<void>
+  signUpWithPassword: (email: string, password: string) => Promise<SignUpResult>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   refreshSync: () => Promise<void>
 }
@@ -58,7 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const refreshSync = useCallback(async () => {
-    await runSync(session?.access_token)
+    const token = (await getAccessToken()) ?? session?.access_token
+    await runSync(token)
   }, [session?.access_token, runSync])
 
   useEffect(() => {
@@ -82,11 +89,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe()
   }, [runSync])
 
+  useEffect(() => {
+    const handleUrl = (url: string | null) => {
+      if (!url) return
+      if (!url.includes('access_token') && !url.includes('code=') && !url.includes('error=')) return
+      void createSessionFromOAuthUrl(url).catch(() => undefined)
+    }
+    const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url))
+    void Linking.getInitialURL().then(handleUrl)
+    return () => sub.remove()
+  }, [])
+
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = getSupabase()
     if (!client) throw new Error('Auth não configurado')
     const { error } = await client.auth.signInWithPassword({ email, password })
     if (error) throw error
+  }, [])
+
+  const signUpWithPassword = useCallback(async (email: string, password: string): Promise<SignUpResult> => {
+    const client = getSupabase()
+    if (!client) throw new Error('Auth não configurado')
+    const { data, error } = await client.auth.signUp({ email, password })
+    if (error) throw error
+    if (data.session) {
+      setMemoryAccessToken(data.session.access_token)
+      setSession(data.session)
+      return { kind: 'session' }
+    }
+    return { kind: 'email_confirmation' }
+  }, [])
+
+  const signInWithGoogle = useCallback(async () => {
+    await signInWithOAuthProvider('google')
   }, [])
 
   const signOut = useCallback(async () => {
@@ -108,10 +143,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       account,
       needsProfile,
       signInWithPassword,
+      signUpWithPassword,
+      signInWithGoogle,
       signOut,
       refreshSync,
     }),
-    [loading, syncing, session, authUserId, account, needsProfile, signInWithPassword, signOut, refreshSync],
+    [
+      loading,
+      syncing,
+      session,
+      authUserId,
+      account,
+      needsProfile,
+      signInWithPassword,
+      signUpWithPassword,
+      signInWithGoogle,
+      signOut,
+      refreshSync,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
