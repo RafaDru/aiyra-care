@@ -3,6 +3,8 @@
 > Complementa [`TWO_ENV_MODEL.md`](./TWO_ENV_MODEL.md) e a Trilha A (`run-ops-prod-channel`).  
 > **Não misturar** keys, webhooks nem `DATABASE_URL` entre camadas.
 
+> **2026-09-23:** Preview ops **pausado** — operar só **Ambiente 1** conforme [`docs/ops/OPS_MVP_SCOPE.md`](../ops/OPS_MVP_SCOPE.md). Este doc permanece referência para quando staging voltar.
+
 ## Mapa rápido
 
 | Camada | Script setup | Worker monitor | Webhook típico | Console |
