@@ -1,7 +1,52 @@
-# Console ops — guia por aba
+# Command Hub — console (guia por tela)
 
-> Console independente: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
+> UI: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
 > Lê **Postgres direto** + sonda API monitorada — não passa pelo JWT do app.
+
+## Layout — Command Hub Care (shell v2)
+
+Spec: Project store `docs/ch-header-spec-2026-09-24.md` · `layoutVersion: ch-shell-v2` em `GET /health`.
+
+### Header fixo (sticky)
+
+| Bloco | Conteúdo |
+|-------|----------|
+| **Marca** | **Command Hub Care** + ícone gradiente Aiyra (`ChHubCareLogo`) |
+| **Ambiente** | Chip: **Desenvolvimento** \| **Preview** \| **Produção** (`DEPLOYMENT_TIER` + porta `:3013` / `:3023`) |
+| **Status geral** | Pills **Web** e **Backend** — `UP` / `Degraded` / `Down` (`GET /api/services/status`, refresh ~60s) |
+| **Ações** | **Atualizar** · **Verificar e acionar** |
+| **Central de comando** | Faixa abaixo: **Operação** · **Produto** · **Negócio** · **AI** (horizontal) |
+
+### Corpo
+
+| Zona | Função |
+|------|--------|
+| **Sidebar** | Itens da central ativa (vertical); badges de atenção |
+| **Conteúdo** | Context bar + painel |
+| **Rodapé** | Snapshot, probe, alertas, auto-refresh 60s, link docs CH |
+
+**URLs:** `?group=operacao&tab=overview` (legado `group=plataforma` → `ai`).
+
+| Central (`group`) | Telas (`tab`) |
+|-------------------|----------------|
+| Operação | `overview`, `issues`, `sync`, `infra` |
+| Produto | `produto` (Ciclo de vida), `product`, `support` |
+| Negócio | `business`, `strategy` |
+| **AI** | `ava`, `cost` |
+
+**Validação (NotebookRafael):**
+
+```powershell
+git fetch origin
+git checkout cursor/ch-layout-shell-193e
+npm run ops:console
+curl -s http://127.0.0.1:3013/health   # layoutVersion: ch-shell-v2
+```
+
+- Console: http://127.0.0.1:3013/
+- Mock: http://127.0.0.1:3013/mock/ch-layout
+
+Mapa: `packages/ops-console/src/client/ch-navigation.ts` · `ChHeader.tsx`.
 
 ## Subir
 

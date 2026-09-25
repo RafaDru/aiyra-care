@@ -20,4 +20,8 @@ Relatórios Marketing / Financeiro / CX copiados do Project store. Ver `content/
 
 URL: `?tab=strategy&strategy=mkt|finance|cx`
 
+## Layout Command Hub
+
+Header + grupos no topo + sidebar + conteúdo + rodapé. Mock: `http://127.0.0.1:3013/?mock=ch-layout`. Ver [`docs/ops/CONSOLE.md`](../../docs/ops/CONSOLE.md).
+
 Feature card: [`docs/features/ops-strategy-advisory.md`](../../docs/features/ops-strategy-advisory.md)

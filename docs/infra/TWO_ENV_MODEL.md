@@ -1,21 +1,31 @@
 # Modelo de dois ambientes não produtivos
 
-> **Última atualização:** 2026-09-02  
+> **Última atualização:** 2026-09-23  
 > Preparação go-live: separar **desenvolvimento + validação agente** do **preview estável** para você testar.
+
+## Status (2026-09-23) — Preview pausado
+
+**Ambiente 2 (Preview/staging)** está **congelado** até o MVP em integração passar gates (`promotion:gates` + lane `regression`). Foco: App + Web + Plataforma + Ops em **Ambiente 1** apenas.
+
+- Não ritualizar: `up:preview`, `preview:validate`, promoção 1→2, ops dual-key preview.
+- Ops MVP: [`docs/ops/OPS_MVP_SCOPE.md`](../ops/OPS_MVP_SCOPE.md).
+- Retomar staging **antes** de produção; ordem: integração verde → staging → prod (CNPJ).
 
 ## Política de hosting (decisão Rafael)
 
 | Ambiente | Agora | Depois |
 |----------|-------|--------|
 | **1 — Integração** | **Local** (`up.ps1`, PG `aiyracare`, `3010/5173`) + CI GitHub | Continua local (+ CI); sem cloud dedicada planejada |
-| **2 — Preview estável** | **Local** (`up:preview`, PG `aiyracare_preview`, `3020/5174`) | **GCP** após ritmo de trabalho funcional (promoção + testes + ops) |
+| **2 — Preview estável** | **Pausado** (scripts permanecem; ver [`ENV_PREVIEW.md`](./ENV_PREVIEW.md)) | **Local/GCP** quando MVP integração estiver verde |
 | **Produção** | — | GCP (ou alinhado ao stack prod), após CNPJ |
 
 **Fora de escopo por hora:** Cursor Cloud, Fly/Railway como Preview — outro debate.
 
-## Fase atual: ambos locais
+## Fase atual: integração apenas (preview pausado)
 
-Os dois ambientes na **mesma máquina**, com **PG e portas distintas**. CI valida Ambiente 1 em cada PR. Promoção Preview = `npm run up:preview` após aprovação.
+CI valida Ambiente 1 em cada PR. Promoção Preview (`npm run up:preview`) **só após** retomada explícita documentada em `HISTORICO.md`.
+
+Quando preview voltar: dois ambientes na **mesma máquina**, PG e portas distintas (tabela abaixo).
 
 | | Integração (1) | Preview (2) |
 |---|----------------|-------------|

@@ -1,9 +1,15 @@
 # Ambiente 2 — Preview estável
 
-> **Última atualização:** 2026-09-03  
+> **Última atualização:** 2026-09-23  
 > Onde Rafael testa continuamente, pede POCs e ajustes — **sem surpresas técnicas**.
 
-## Fase atual: local → GCP
+## ⏸ Pausado (2026-09-23)
+
+Preview **não** faz parte do ritual diário até o MVP em integração estar verde. Scripts (`up:preview`, `preview:validate`, etc.) permanecem no repo para retomada **antes de produção**.
+
+- Decisão: [`HISTORICO.md`](../HISTORICO.md) · Ops MVP: [`docs/ops/OPS_MVP_SCOPE.md`](../ops/OPS_MVP_SCOPE.md) · [`TWO_ENV_MODEL.md`](./TWO_ENV_MODEL.md).
+
+## Fase atual: local → GCP (quando retomado)
 
 **Agora:** Preview na mesma máquina que Integração (PG + portas distintas).  
 **Depois:** host Preview no **GCP**, quando o ritmo local (promoção + seus testes + ops) estiver confortável.

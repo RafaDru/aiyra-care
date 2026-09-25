@@ -1,5 +1,25 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-24] - Nome oficial Command Hub (CH)
+
+### Decisão
+- Plataforma interna (console `:3013`, `/ops/*`, suporte, alertas, telemetria) passa a ser chamada **Command Hub**; acrônimo **CH** na conversa.
+- Paths legados (`docs/ops/`, `packages/ops-console`, `test:ops`) mantidos até pós-MVP.
+
+### Realizado
+- [`docs/ops/COMMAND_HUB.md`](ops/COMMAND_HUB.md); hub e escopo MVP atualizados; rule `.cursor/rules/aiyra-ops-session.mdc`.
+
+## [2026-09-23] - Preview pausado; Ops MVP em ambiente único
+
+### Decisão
+- **Congelar Ambiente 2 (Preview/staging)** na rotina diária até o MVP App + Web + Plataforma passar `promotion:gates` e lane `regression` em integração.
+- **Concentrar Ops** em uma pilha: API `:3010`, web `:5173`, console `:3013`, PG `aiyracare`, uma `OPS_METRICS_KEY`; sem dual-env ops nem `OPS_WORKER_MONITOR=1` sem worker.
+- **Ordem go-live:** integração verde → retomar staging → produção (CNPJ).
+
+### Realizado
+- [`docs/ops/OPS_MVP_SCOPE.md`](ops/OPS_MVP_SCOPE.md) — escopo ops ativo vs congelado.
+- Atualização: [`docs/ops/README.md`](ops/README.md), [`docs/infra/TWO_ENV_MODEL.md`](infra/TWO_ENV_MODEL.md), [`docs/infra/ENV_PREVIEW.md`](infra/ENV_PREVIEW.md), [`docs/infra/OPS_TWO_ENV_SETUP.md`](infra/OPS_TWO_ENV_SETUP.md).
+
 ## [2026-09-20] - Família: exclusão de perfil só pelo titular (PR #8)
 
 ### Realizado

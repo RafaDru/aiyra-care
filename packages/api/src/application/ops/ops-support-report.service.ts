@@ -94,10 +94,16 @@ export class OpsSupportReportService {
     if (!this.queueService || !rows.length) {
       return rows.map((row) => mapOpsRow(row))
     }
-    const invMap = await this.queueService.findInvestigationIdsForSources(
-      'support_report',
-      rows.map((r) => r.id),
-    )
+    let invMap = new Map<string, string>()
+    try {
+      invMap = await this.queueService.findInvestigationIdsForSources(
+        'support_report',
+        rows.map((r) => r.id),
+      )
+    } catch (err) {
+      const code = typeof err === 'object' && err !== null ? (err as { code?: string }).code : undefined
+      if (code !== '42P01') throw err
+    }
     return rows.map((row) => mapOpsRow(row, invMap.get(row.id)))
   }
 

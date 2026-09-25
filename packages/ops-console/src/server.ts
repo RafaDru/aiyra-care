@@ -41,6 +41,7 @@ import {
   loadStrategyManifest,
   type StrategySectionId,
 } from './strategy-content.js'
+import { fetchServicesStatus } from './services-status.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -140,13 +141,20 @@ async function registerClientRoutes(fastify: FastifyInstance, vite?: ViteDevServ
 async function main() {
   const fastify = Fastify({ logger: false })
 
+  fastify.get('/mock/ch-layout', async (_req, reply) => {
+    return reply.redirect('/?mock=ch-layout')
+  })
+
   fastify.get('/health', async () => ({
     service: 'aiyracare-ops-console',
     status: 'ok',
     port,
     deploymentTier,
+    layoutVersion: 'ch-shell-v2',
     commandHub: true,
   }))
+
+  fastify.get('/api/services/status', async () => fetchServicesStatus(port))
 
   let productLifecycleCache: ReturnType<typeof loadProductLifecycle> | undefined
 
@@ -257,10 +265,27 @@ async function main() {
     platform: process.platform,
   }))
 
-  fastify.get<{ Querystring: { status?: string } }>('/api/support-reports', async (req) => {
+  fastify.get<{ Querystring: { status?: string } }>('/api/support-reports', async (req, reply) => {
     const status = (req.query.status ?? 'open') as 'open' | 'triaged' | 'resolved' | 'closed'
-    const rows = await supportReportService.list(status, 50)
-    return { reports: rows }
+    try {
+      const rows = await supportReportService.list(status, 50)
+      return { reports: rows }
+    } catch (err) {
+      const code = typeof err === 'object' && err !== null ? (err as { code?: string }).code : undefined
+      const message = err instanceof Error ? err.message : 'support_reports_query_failed'
+      if (code === '42P01') {
+        return reply.status(503).send({
+          error: 'schema_outdated',
+          message:
+            'Tabela support_reports ou ops_analysis_queue ausente — aplique migrations 061–069 no Postgres de integração.',
+        })
+      }
+      if (code === 'ECONNREFUSED' || code === 'ENOTFOUND') {
+        return reply.status(503).send({ error: 'postgres_unavailable', message })
+      }
+      console.error('[ops-console] support-reports list failed:', message)
+      return reply.status(500).send({ error: 'support_reports_query_failed', message })
+    }
   })
 
   fastify.patch<{ Params: { id: string }; Body: { status?: string } }>(
