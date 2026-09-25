@@ -119,6 +119,8 @@ export const opsApi = {
     }),
   analysisQueue: () =>
     request<{ items: import('./ops.types.js').OpsAnalysisQueueItem[] }>('/api/analysis-queue'),
+  incidentDispatchHealth: () =>
+    request<import('./ops.types.js').IncidentDispatchHealth>('/api/incident-dispatch/health'),
   analysisAttentionCounts: () =>
     request<import('./ops.types.js').OpsAnalysisAttentionCounts>(
       '/api/analysis-queue/attention-counts',

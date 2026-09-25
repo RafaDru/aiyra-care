@@ -144,6 +144,26 @@ export class IncidentDispatchOutboxPgRepository {
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
+  async countByStatus(status: IncidentDispatchOutboxStatus): Promise<number> {
+    const res = await this.pool.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM incident_dispatch_outbox WHERE status = $1`,
+      [status],
+    )
+    return Number(res.rows[0]?.count ?? 0)
+  }
+
+  async listLatestByIncidentIds(incidentIds: string[]): Promise<IncidentDispatchOutboxRecord[]> {
+    if (incidentIds.length === 0) return []
+    const res = await this.pool.query(
+      `SELECT DISTINCT ON (incident_id) *
+       FROM incident_dispatch_outbox
+       WHERE incident_id = ANY($1::uuid[])
+       ORDER BY incident_id, updated_at DESC`,
+      [incidentIds],
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
   async hasActiveDispatchForIncident(incidentId: string): Promise<boolean> {
     const res = await this.pool.query<{ exists: boolean }>(
       `SELECT EXISTS (

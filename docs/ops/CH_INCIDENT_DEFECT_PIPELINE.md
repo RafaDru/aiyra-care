@@ -45,6 +45,30 @@ Pipeline ops de ponta a ponta:
 
 **Nova tentativa (ops):** `POST /api/analysis-queue/:id/retry-dispatch` (ops-console) — idempotente: outbox `dead`/`failed` → `pending` (payload reconstruído), `incident_pipeline_status` → `open`; opcional tick imediato do worker (`runTick: true`). UI: botão só quando `dispatch_failed` (confirmação leve). CLI equivalente: `ch-incident-dispatch-backfill -- --reset-dead` também normaliza `dispatch_failed` → `open` ao resetar outbox.
 
+### 2.2 Anomalias no acionamento agêntico (D1–D13)
+
+Spec completa: [`ch-incident-dispatch-anomaly-signals.md`](./ch-incident-dispatch-anomaly-signals.md).
+
+Cada desvio fora do happy path (`open` → outbox → webhook 2xx → `in_triage` → callback) deve ser **visível no CH** e **auditável** (`last_error` outbox, contexto fila).
+
+| ID | Cenário | Sinalização CH (fatia) |
+|----|---------|------------------------|
+| **D1** | Webhook não configurado | **Falha** / banner webhook ausente; `skipped:webhook_not_configured` |
+| **D2** | Webhook HTTP 4xx/5xx | **Falha** + `last_error` no detalhe Dispatch |
+| **D3** | Esgotou tentativas | **Falha** (`dispatch_failed`); banner `dead` count |
+| **D4** | Pipeline/outbox inconsistente | Detalhe Dispatch (status mismatch); retry / reset-dead |
+| **D5** | Sem outbox (legado) | **Aberto**; banner «abertos >1h sem outbox» |
+| **D6** | Dois workers (corrida) | dead em massa; doc um loop (`CH_INCIDENT_DISPATCH_WORKER`) |
+| **D7** | Pre-screen dismiss/defer | Não re-dispatch; legado dismissed |
+| **D8** | Modo batch suporte | SLA documentado; não é falha de dispatch |
+| **D9** | Encaminhado sem agente | *(F4)* tag Atenção SLA |
+| **D10** | Em triagem sem callback | *(F4)* tag Atenção SLA |
+| **D11** | Callback triagem falhou | `analysisLastError` / logs callback |
+| **D12** | Payload/outbox inválido | **Falha**; `unknown_outbox_kind`, etc. no Dispatch |
+| **D13** | Re-dispatch indevido `forwarded` | Corrigido (`listPending` só `pending`) |
+
+**Fatias entregues:** F1 Falha+retry (076); **F2** bloco Dispatch no detalhe do incidente (`GET /api/analysis-queue` inclui `dispatch`); **F3** `GET /api/incident-dispatch/health` + banner na tab Incidentes. F4 SLA timers e F5 alertas externos — fora desta fatia.
+
 **Anti-caducidade (2026-09-25):** incidente em `open` não pode ficar indefinidamente sem linha de dispatch retryável. Filas criadas antes da migration **075** / sem `INSERT` na outbox são cobertas por **backfill one-shot** + **reconciliador periódico** (ver §4.1).
 
 **Elegibilidade reconciliação / backfill**
@@ -164,7 +188,7 @@ WHERE o.incident_id = q.id AND o.status = 'dead'
 | **D** | `DefeitosPanel` + nav `defeitos` (**entregue**) |
 | **E** | Outbox write + worker + batch run (**entregue**) |
 
-Rotas ops-console planejadas: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /api/analysis-queue` com `incidentPipelineStatus`.
+Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /api/analysis-queue` (com `incidentPipelineStatus` + `dispatch`), `GET /api/incident-dispatch/health`, `POST /api/analysis-queue/:id/retry-dispatch`.
 
 ---
 
@@ -183,7 +207,7 @@ Rotas ops-console planejadas: `/api/platform-defects`, `/api/defect-pr-batches/*
 
 ## 7. Verificação
 
-- `cd packages/api && npx vitest run platform-defect incident-dispatch-outbox incident-dispatch-reconcile incident-pipeline-status`
+- `cd packages/api && npx vitest run platform-defect incident-dispatch-outbox incident-dispatch-reconcile incident-pipeline-status incident-dispatch-display incident-dispatch-health`
 - `npm run test:ops` (regressão)
 - Suite futura: `docs/testing/suites/ops-ch-defeitos.md`
 

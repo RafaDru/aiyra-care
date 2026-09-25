@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
+  Alert,
   Button,
   Empty,
   Popconfirm,
@@ -25,7 +26,7 @@ import {
 import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { opsApi } from './api.js'
-import type { OpsAnalysisQueueItem } from './ops.types.js'
+import type { IncidentDispatchHealth, OpsAnalysisQueueItem } from './ops.types.js'
 
 const { Text, Paragraph } = Typography
 
@@ -62,12 +63,17 @@ export function IncidentesPanel({
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
+  const [dispatchHealth, setDispatchHealth] = useState<IncidentDispatchHealth | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await opsApi.analysisQueue()
+      const [data, health] = await Promise.all([
+        opsApi.analysisQueue(),
+        opsApi.incidentDispatchHealth(),
+      ])
       setItems(data.items)
+      setDispatchHealth(health)
     } catch (err) {
       message.error(err instanceof Error ? err.message : 'Falha ao carregar incidentes')
     } finally {
@@ -131,11 +137,41 @@ export function IncidentesPanel({
   const canMarkComplete = (status: OpsAnalysisQueueItem['status']) =>
     status === 'fix_proposed' || status === 'investigating' || status === 'queued' || status === 'failed'
 
+  const dispatchHealthBanner = (() => {
+    if (!dispatchHealth) return null
+    const parts: string[] = []
+    if (dispatchHealth.deadCount > 0) {
+      parts.push(`${dispatchHealth.deadCount} dispatch(es) em dead`)
+    }
+    if (dispatchHealth.staleOpenWithoutOutboxCount > 0) {
+      parts.push(
+        `${dispatchHealth.staleOpenWithoutOutboxCount} aberto(s) >1h sem outbox`,
+      )
+    }
+    if (dispatchHealth.anyWebhookMissing) {
+      const missing: string[] = []
+      if (!dispatchHealth.webhooks.developmentSupport.ready) missing.push('Dev')
+      if (!dispatchHealth.webhooks.sreSupport.ready) missing.push('SRE')
+      parts.push(`Webhook Cursor ausente (${missing.join(', ')})`)
+    }
+    if (parts.length === 0) return null
+    return (
+      <Alert
+        type="warning"
+        showIcon
+        style={{ marginBottom: 12 }}
+        message="Saúde do dispatch de triagem"
+        description={parts.join(' · ')}
+      />
+    )
+  })()
+
   return (
     <OpsPanel
       title="Incidentes"
       description="Sinais cru até triagem — dados ao vivo via GET /api/analysis-queue (Postgres ops_analysis_queue)."
     >
+      {dispatchHealthBanner}
       {items.length === 0 && !loading ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum incidente aberto" />
       ) : (
@@ -190,6 +226,32 @@ export function IncidentesPanel({
                 {row.analysisLastError && (
                   <Paragraph type="danger">{row.analysisLastError}</Paragraph>
                 )}
+                <Paragraph>
+                  <Text strong>Dispatch</Text>
+                  {row.dispatch ? (
+                    <>
+                      {' '}
+                      — outbox <Text code>{row.dispatch.status ?? '—'}</Text>
+                      {row.dispatch.attemptCount > 0 && (
+                        <> · tentativas {row.dispatch.attemptCount}</>
+                      )}
+                      {row.dispatch.forwardedAt && (
+                        <>
+                          {' '}
+                          · encaminhado{' '}
+                          {new Date(row.dispatch.forwardedAt).toLocaleString('pt-BR')}
+                        </>
+                      )}
+                      {row.dispatch.lastError && (
+                        <div>
+                          <Text type="danger">{row.dispatch.lastError}</Text>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Text type="secondary"> — sem linha outbox</Text>
+                  )}
+                </Paragraph>
                 <Paragraph>
                   <Text strong>investigationId:</Text>{' '}
                   <InvestigationIdTag investigationId={row.id} showFull />

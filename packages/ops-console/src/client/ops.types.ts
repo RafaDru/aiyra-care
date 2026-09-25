@@ -1,5 +1,23 @@
 export type OpsAlertSeverity = 'warning' | 'critical'
 
+export type IncidentDispatchSnapshot = {
+  status: string | null
+  attemptCount: number
+  lastError: string | null
+  forwardedAt: string | null
+  updatedAt: string | null
+}
+
+export type IncidentDispatchHealth = {
+  deadCount: number
+  staleOpenWithoutOutboxCount: number
+  webhooks: {
+    developmentSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+    sreSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+  }
+  anyWebhookMissing: boolean
+}
+
 export interface OpsAnalysisQueueItem {
   id: string
   sourceType: 'support_report' | 'ops_alert'
@@ -30,6 +48,7 @@ export interface OpsAnalysisQueueItem {
   completedAt: string | null
   createdAt: string
   updatedAt: string
+  dispatch?: IncidentDispatchSnapshot | null
 }
 
 export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'

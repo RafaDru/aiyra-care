@@ -273,6 +273,21 @@ export class OpsAnalysisQueuePgRepository {
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
+  /** Incidentes `open` há mais de `staleMs` sem qualquer linha outbox (D5). */
+  async countStaleOpenWithoutOutbox(staleMs: number): Promise<number> {
+    const res = await this.pool.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM ops_analysis_queue q
+       WHERE q.incident_pipeline_status = 'open'
+         AND q.status NOT IN ('completed', 'dismissed')
+         AND q.created_at < NOW() - ($1::bigint * interval '1 millisecond')
+         AND NOT EXISTS (
+           SELECT 1 FROM incident_dispatch_outbox o WHERE o.incident_id = q.id
+         )`,
+      [staleMs],
+    )
+    return Number(res.rows[0]?.count ?? 0)
+  }
+
   async attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
     const res = await this.pool.query<{ status: string; count: string }>(
       deploymentTier

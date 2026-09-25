@@ -17,6 +17,10 @@ import {
   dispatchSupportReportInvestigator,
   type SupportInvestigatorDispatchResult,
 } from '../support-report/support-report-dispatch.js'
+import {
+  sanitizeDispatchLastError,
+  type IncidentDispatchSnapshot,
+} from '../../domain/ops/incident-dispatch-display.js'
 import { IncidentDispatchOutboxPgRepository } from '../../infrastructure/persistence/incident-dispatch-outbox.pg.repository.js'
 import { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
@@ -188,6 +192,23 @@ export class IncidentDispatchService {
   private async markOutboxDeadAndRevertPipeline(outboxId: string, incidentId: string): Promise<void> {
     await this.outbox.markDead(outboxId, 'max_attempts')
     await this.markPipelineDispatchFailed(incidentId)
+  }
+
+  async dispatchSnapshotsForIncidentIds(
+    incidentIds: string[],
+  ): Promise<Map<string, IncidentDispatchSnapshot>> {
+    const rows = await this.outbox.listLatestByIncidentIds(incidentIds)
+    const map = new Map<string, IncidentDispatchSnapshot>()
+    for (const row of rows) {
+      map.set(row.incidentId, {
+        status: row.status,
+        attemptCount: row.attemptCount,
+        lastError: sanitizeDispatchLastError(row.lastError),
+        forwardedAt: row.forwardedAt,
+        updatedAt: row.updatedAt,
+      })
+    }
+    return map
   }
 
   async retryDispatchForIncident(

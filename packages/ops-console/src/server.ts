@@ -32,6 +32,7 @@ import {
 import { PlatformDefectPgRepository } from '../../api/src/infrastructure/persistence/platform-defect.pg.repository.js'
 import { DefectPrBatchPgRepository } from '../../api/src/infrastructure/persistence/defect-pr-batch.pg.repository.js'
 import { createIncidentDispatchService } from '../../api/src/application/ops/incident-dispatch.service.js'
+import { getIncidentDispatchHealth } from '../../api/src/application/ops/incident-dispatch-health.js'
 import { DefectPrBatchService } from '../../api/src/application/ops/defect-pr-batch.service.js'
 import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
@@ -361,9 +362,19 @@ async function main() {
     },
   )
 
-  fastify.get('/api/analysis-queue', async () => ({
-    items: await analysisQueueService.listOpen(100),
-  }))
+  fastify.get('/api/analysis-queue', async () => {
+    const records = await analysisQueueService.listOpen(100)
+    const dispatchMap = await incidentDispatchService.dispatchSnapshotsForIncidentIds(
+      records.map((r) => r.id),
+    )
+    const items = records.map((record) => ({
+      ...record,
+      dispatch: dispatchMap.get(record.id) ?? null,
+    }))
+    return { items }
+  })
+
+  fastify.get('/api/incident-dispatch/health', async () => getIncidentDispatchHealth(pool))
 
   fastify.get('/api/analysis-queue/attention-counts', async () =>
     analysisQueueService.attentionCounts(deploymentTier),
