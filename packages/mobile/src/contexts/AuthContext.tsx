@@ -1,7 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Linking } from 'react-native'
 import type { Session, User } from '@supabase/supabase-js'
 import type { AppAccount } from '@/lib/api.types'
 import { api } from '@/lib/api'
+import { createSessionFromOAuthUrl, signInWithOAuthProvider } from '@/lib/supabase-oauth'
 import { getSupabase, supabaseConfigured } from '@/lib/supabase'
 
 type AuthContextValue = {
@@ -15,6 +17,7 @@ type AuthContextValue = {
   account: AppAccount | null
   needsProfile: boolean
   signInWithPassword: (email: string, password: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   refreshSync: () => Promise<void>
 }
@@ -82,11 +85,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe()
   }, [runSync])
 
+  useEffect(() => {
+    const handleUrl = (url: string | null) => {
+      if (!url) return
+      if (!url.includes('access_token') && !url.includes('code=') && !url.includes('error=')) return
+      void createSessionFromOAuthUrl(url).catch(() => undefined)
+    }
+    const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url))
+    void Linking.getInitialURL().then(handleUrl)
+    return () => sub.remove()
+  }, [])
+
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = getSupabase()
     if (!client) throw new Error('Auth não configurado')
     const { error } = await client.auth.signInWithPassword({ email, password })
     if (error) throw error
+  }, [])
+
+  const signInWithGoogle = useCallback(async () => {
+    await signInWithOAuthProvider('google')
   }, [])
 
   const signOut = useCallback(async () => {
@@ -108,10 +126,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       account,
       needsProfile,
       signInWithPassword,
+      signInWithGoogle,
       signOut,
       refreshSync,
     }),
-    [loading, syncing, session, authUserId, account, needsProfile, signInWithPassword, signOut, refreshSync],
+    [
+      loading,
+      syncing,
+      session,
+      authUserId,
+      account,
+      needsProfile,
+      signInWithPassword,
+      signInWithGoogle,
+      signOut,
+      refreshSync,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-20] - Mobile: Carteira, Exames resumo, OAuth Google
+
+### Realizado
+- **Carteira read-only** no app Expo (`PatientWalletTab`) — cartões CNS/convênio via API.
+- **Exames resumo read-only** (`PatientExamsTab`) — lista `GET /exams?patientId=`, pull-to-refresh, link ao web.
+- **Login Google** no mobile (`expo-auth-session` + Supabase OAuth, scheme `aiyracare://auth/callback`).
+- Suite QA **`mobile-shell-smoke`** e scripts `npm run mobile:check` / `qa:run:mobile`.
+
 ## [2026-09-20] - Família: exclusão de perfil só pelo titular (PR #8)
 
 ### Realizado
