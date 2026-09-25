@@ -18,10 +18,12 @@ Branch típica: `cursor/ch-incidentes-board-193e` (Command Hub / pipeline incide
 
 | Passo | Ação |
 |-------|------|
-| 1 | Na raiz do worktree, symlink `.env` → `..\aiyra-care\.env` (ou cópia) com `DATABASE_URL`, `CURSOR_SUPPORT_INVESTIGATOR_*`, `CURSOR_SRE_*`, `OPS_METRICS_KEY` |
-| 2 | **Reiniciar API `:3010`** após criar o symlink (processo antigo não lê env novo) |
-| 3 | Ops-console `:3013` usa o mesmo `.env` para worker embutido de outbox (`CH_INCIDENT_DISPATCH_WORKER`, default ligado) |
-| 4 | Outbox `dead` por 40x: corrigir env → `npm run ch-incident-dispatch-backfill -- --reset-dead` → `npm run ch-incident-dispatch-worker:once` |
+| 1 | Na raiz do worktree, symlink `.env` → `..\aiyra-care\.env` (ou cópia) com `DATABASE_URL`, `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_*`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_*`, `OPS_METRICS_KEY`, opcional `OPS_INVESTIGATOR_CALLBACK_KEY` |
+| 2 | **Reiniciar API `:3010` e ops-console `:3013`** após criar/alterar o symlink (processos antigos não leem env novo) |
+| 3 | Webhook URL/key: copiar do **painel Cursor** (Automations) — mismatch → HTTP 400/401 no dispatch; ver `docs/ops/AUTOMATIONS_LANES.md` |
+| 4 | Ops-console `:3013` usa o mesmo `.env` para worker embutido de outbox (`CH_INCIDENT_DISPATCH_WORKER`, default ligado) |
+| 5 | Validar: `curl -s http://127.0.0.1:3013/api/incident-dispatch/health` |
+| 6 | Outbox `dead`: corrigir `.env` → `npm run ch-incident-dispatch-backfill -- --reset-dead` → `npm run ch-incident-dispatch-worker:once` |
 
 Ver [`docs/ops/CH_INCIDENT_DEFECT_PIPELINE.md`](ops/CH_INCIDENT_DEFECT_PIPELINE.md) §4.
 

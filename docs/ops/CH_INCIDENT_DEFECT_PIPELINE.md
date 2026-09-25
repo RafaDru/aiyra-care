@@ -194,6 +194,8 @@ Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /ap
 
 ## 6. Variáveis de ambiente
 
+### 6.1 Pipeline CH (worker / lote)
+
 | Variável | Default | Uso |
 |----------|---------|-----|
 | `OPS_DEFECT_PR_BATCH_INTERVAL_MS` | 21600000 | Janela lote CH |
@@ -201,7 +203,35 @@ Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /ap
 | `CH_INCIDENT_DISPATCH_WORKER` | 1 | 0 = só API síncrona |
 | `CH_INCIDENT_RECONCILE_INTERVAL_MS` | 60000 | Mínimo entre varreduras reconciliador no worker |
 | `CH_INCIDENT_OPEN_STALE_MS` | 300000 | Idade mínima do incidente `open` para reconciliar (evita corrida com enqueue síncrono) |
-| `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL` | — | Agente 2 |
+| `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL` | — | Agente 2 (correção) |
+
+### 6.2 Dispatch triagem — Cursor Automations + ops
+
+| Variável | Lane | Uso |
+|----------|------|-----|
+| `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL` | Dev | Webhook lane `support_report` — **igual** à URL no painel Cursor |
+| `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Dev | `crsr_…` do auth header atual da Automation |
+| `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL` | SRE | Webhook lane `ops_alert` |
+| `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY` | SRE | `crsr_…` do auth header SRE |
+| `OPS_METRICS_KEY` | Ops | Protege métricas/alertas; **fallback** do header de callback se `OPS_INVESTIGATOR_CALLBACK_KEY` vazio |
+| `OPS_INVESTIGATOR_CALLBACK_KEY` | Ops | Opcional — dedicada para `POST :3013/api/analysis-queue/callback` (`x-investigator-callback-key`) |
+| `OPS_ALERT_DASHBOARD_URL` | Ops | Link no payload; `:5173/ops` → API reescreve base para ops-console `:3013` |
+
+Tabela completa lanes + troubleshooting key: [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md). Runbook suporte Dev: [`SUPPORT_INVESTIGATOR_AUTOMATION.md`](./SUPPORT_INVESTIGATOR_AUTOMATION.md).
+
+### 6.3 Notebook — worktree `aiyra-care-ch-shell`
+
+O checkout do branch CH **não herda** `.env` do repo principal.
+
+| Passo | Ação |
+|-------|------|
+| 1 | Na raiz do worktree, **symlink** `.env` → `..\aiyra-care\.env` (Windows) ou cópia com `DATABASE_URL`, `CURSOR_*`, `OPS_METRICS_KEY` |
+| 2 | Reiniciar **API `:3010`** e **ops-console `:3013`** após criar/alterar o symlink |
+| 3 | `curl -s http://127.0.0.1:3013/api/incident-dispatch/health` — confirmar `webhooks` `ready` |
+| 4 | Outbox `dead` / incidentes **Falha**: corrigir URL/key → `npm run ch-incident-dispatch-backfill -- --reset-dead` → `npm run ch-incident-dispatch-worker:once` |
+| 5 | **Um loop:** worker embutido no `:3013` (default) **ou** CLI `ch-incident-dispatch-worker` — não os dois (`CH_INCIDENT_DISPATCH_WORKER=0` no worktree se usar só CLI) |
+
+Ver também [`docs/CURSOR_WORKSPACE.md`](../CURSOR_WORKSPACE.md) § worktree CH.
 
 ---
 
