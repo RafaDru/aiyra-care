@@ -203,9 +203,6 @@ export class IncidentDispatchService {
     if (existing && ['pending', 'forwarded', 'claimed'].includes(existing.status)) {
       return 'exists'
     }
-    if (existing?.status === 'dead' && existing.attemptCount >= MAX_OUTBOX_ATTEMPTS) {
-      return 'terminal_dead'
-    }
 
     const payload = await this.buildDispatchPayloadForQueueRecord(record)
     if (!payload) return 'skipped'
@@ -249,6 +246,34 @@ export class IncidentDispatchService {
 
   async backfillOpenIncidents(limit = 500): Promise<BackfillOpenIncidentsResult> {
     return this.reconcileOpenIncidents(limit, { staleOnly: false })
+  }
+
+  /** Recupera linhas `dead` cujo incidente ainda está na fila (ex.: webhook Cursor 40x). */
+  async resetEligibleDeadOutbox(limit = 500): Promise<{
+    scanned: number
+    reset: number
+    skipped: number
+  }> {
+    const rows = await this.outbox.listDeadForEligibleIncidents(limit)
+    let reset = 0
+    let skipped = 0
+
+    for (const row of rows) {
+      const record = await this.queueRepo.findById(row.incidentId)
+      if (!record) {
+        skipped += 1
+        continue
+      }
+      const payload = await this.buildDispatchPayloadForQueueRecord(record)
+      if (!payload) {
+        skipped += 1
+        continue
+      }
+      await this.outbox.resetToPending(row.id, payload)
+      reset += 1
+    }
+
+    return { scanned: rows.length, reset, skipped }
   }
 
   async runWorkerTick(

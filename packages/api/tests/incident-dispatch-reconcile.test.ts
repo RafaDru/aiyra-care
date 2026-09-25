@@ -147,4 +147,33 @@ describe('IncidentDispatchService reconcile', () => {
     expect(outcome).toBe('reset')
     expect(outbox.resetToPending).toHaveBeenCalled()
   })
+
+  it('resets dead outbox row when incident still eligible (not terminal_dead)', async () => {
+    outboxByKey.set('inc-1:triage_v1', { id: 'o-dead', status: 'dead', attemptCount: 8 })
+    const outcome = await service.ensureOutboxForQueueRecord(queueRow())
+    expect(outcome).toBe('reset')
+    expect(outbox.resetToPending).toHaveBeenCalled()
+  })
+
+  it('resetEligibleDeadOutbox revives dead rows with fresh payload', async () => {
+    const deadRow = {
+      id: 'o-dead',
+      incidentId: 'inc-1',
+      idempotencyKey: 'inc-1:triage_v1',
+      payload: { stale: true },
+      status: 'dead' as const,
+      attemptCount: 8,
+      lastError: 'HTTP 401',
+      forwardedAt: null,
+      claimedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    outbox.listDeadForEligibleIncidents = vi.fn(async () => [deadRow])
+    queueRepo.findById = vi.fn(async () => queueRow())
+
+    const result = await service.resetEligibleDeadOutbox(10)
+    expect(result.reset).toBe(1)
+    expect(outbox.resetToPending).toHaveBeenCalledWith('o-dead', expect.objectContaining({ kind: expect.any(String) }))
+  })
 })

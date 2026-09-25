@@ -120,6 +120,7 @@ export class IncidentDispatchOutboxPgRepository {
       `UPDATE incident_dispatch_outbox SET
         status = 'pending',
         payload = $2::jsonb,
+        attempt_count = 0,
         last_error = NULL,
         claimed_at = NULL,
         forwarded_at = NULL,
@@ -127,6 +128,20 @@ export class IncidentDispatchOutboxPgRepository {
       WHERE id = $1::uuid`,
       [id, JSON.stringify(payload)],
     )
+  }
+
+  async listDeadForEligibleIncidents(limit = 500): Promise<IncidentDispatchOutboxRecord[]> {
+    const res = await this.pool.query(
+      `SELECT o.* FROM incident_dispatch_outbox o
+       INNER JOIN ops_analysis_queue q ON q.id = o.incident_id
+       WHERE o.status = 'dead'
+         AND q.incident_pipeline_status NOT IN ('triaged', 'dismissed')
+         AND q.status NOT IN ('completed', 'dismissed')
+       ORDER BY o.updated_at ASC
+       LIMIT $1`,
+      [limit],
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
   async hasActiveDispatchForIncident(incidentId: string): Promise<boolean> {

@@ -12,6 +12,19 @@
 | **npm** | `aiyra-care` (`@aiyra-care/*`) |
 | **Continuar sessão** | `docs/CURSOR_SESSION_CONTINUATION.md` |
 
+### Worktree CH (`aiyra-care-ch-shell`)
+
+Branch típica: `cursor/ch-incidentes-board-193e` (Command Hub / pipeline incidentes). O checkout **não herda** `.env` do repo principal.
+
+| Passo | Ação |
+|-------|------|
+| 1 | Na raiz do worktree, symlink `.env` → `..\aiyra-care\.env` (ou cópia) com `DATABASE_URL`, `CURSOR_SUPPORT_INVESTIGATOR_*`, `CURSOR_SRE_*`, `OPS_METRICS_KEY` |
+| 2 | **Reiniciar API `:3010`** após criar o symlink (processo antigo não lê env novo) |
+| 3 | Ops-console `:3013` usa o mesmo `.env` para worker embutido de outbox (`CH_INCIDENT_DISPATCH_WORKER`, default ligado) |
+| 4 | Outbox `dead` por 40x: corrigir env → `npm run ch-incident-dispatch-backfill -- --reset-dead` → `npm run ch-incident-dispatch-worker:once` |
+
+Ver [`docs/ops/CH_INCIDENT_DEFECT_PIPELINE.md`](ops/CH_INCIDENT_DEFECT_PIPELINE.md) §4.
+
 ## Legado (arquivado)
 
 | Caminho | Status |

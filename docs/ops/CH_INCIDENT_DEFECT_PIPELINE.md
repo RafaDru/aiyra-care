@@ -115,6 +115,7 @@ Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → we
 | Comando | Uso |
 |---------|-----|
 | `npm run ch-incident-dispatch-backfill` | **One-shot:** enfileira todos os `open` elegíveis sem outbox ativo (notebook pós-075) |
+| `npm run ch-incident-dispatch-backfill -- --reset-dead` | Recoloca outbox `dead` → `pending` (`attempt_count=0`) se o incidente ainda não `triaged`/`dismissed`; depois roda o backfill |
 | `npm run ch-incident-dispatch-backfill -- --limit=100` | Limita varredura |
 | `npm run ch-incident-dispatch-worker` | Loop (`CH_INCIDENT_DISPATCH_INTERVAL_MS`, default 30s): reconciliador + outbox batch |
 | `npm run ch-incident-dispatch-worker:once` | Um tick (reconcile se intervalo decorrido + batch) |
@@ -122,9 +123,21 @@ Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → we
 
 **Reconciliador periódico:** em cada `runWorkerTick`, se passou `CH_INCIDENT_RECONCILE_INTERVAL_MS` (default **60s**), varre incidentes `open` com `created_at` anterior a `now − CH_INCIDENT_OPEN_STALE_MS` (default **5 min**) e sem outbox `pending`/`forwarded`/`claimed` — chama a mesma lógica do backfill (`ensureOutboxForQueueRecord`).
 
-**Max tentativas outbox:** 8 → `status=dead`, log `[incident-dispatch] outbox dead …`; incidente pode permanecer `open` até intervenção ops.
+**Max tentativas outbox:** 8 → `status=dead`, log `[incident-dispatch] outbox dead …`; incidente pode permanecer `open` até intervenção ops (ex. webhook Cursor **40x** por `CURSOR_*` ausente no worktree). Recuperação: `npm run ch-incident-dispatch-backfill -- --reset-dead` e corrigir `.env` antes de `ch-incident-dispatch-worker:once`.
 
-`CH_INCIDENT_DISPATCH_WORKER=0` — só dispatch síncrono na API + linhas outbox (sem loop no console).
+`CH_INCIDENT_DISPATCH_WORKER=0` — só dispatch síncrono na API + linhas outbox (**sem** loop embutido no ops-console `:3013`). Evite rodar ao mesmo tempo `npm run ch-incident-dispatch-worker` **e** console com worker ligado (dois loops competindo no mesmo outbox).
+
+**SQL manual (se o script não estiver disponível):**
+
+```sql
+UPDATE incident_dispatch_outbox o SET
+  status = 'pending', attempt_count = 0, last_error = NULL,
+  claimed_at = NULL, forwarded_at = NULL, updated_at = NOW()
+FROM ops_analysis_queue q
+WHERE o.incident_id = q.id AND o.status = 'dead'
+  AND q.incident_pipeline_status NOT IN ('triaged', 'dismissed')
+  AND q.status NOT IN ('completed', 'dismissed');
+```
 
 **Lote PR:** `POST /api/defect-pr-batches/run` (ops-console) — UI «Rodar lote agora» em Defeitos.
 
