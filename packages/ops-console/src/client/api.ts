@@ -71,6 +71,8 @@ export const opsApi = {
       body: JSON.stringify(payload),
     }),
   stackStatus: () => request<StackActionResult>('/api/stack/status'),
+  stackLogs: (lines = 48) =>
+    request<import('./ops.types.js').StackLogsSnapshot>(`/api/stack/logs?lines=${lines}`),
   stackAction: (action: 'start' | 'stop' | 'restart') =>
     request<StackActionResult>(`/api/stack/${action}`, { method: 'POST' }),
   supportReports: (status = 'open') =>

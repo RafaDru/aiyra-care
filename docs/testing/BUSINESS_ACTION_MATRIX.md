@@ -37,6 +37,7 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | Ação UI | CRUD | Suite | Cobertura |
 |---------|------|-------|-----------|
 | Login / logout | — | `regression-smoke` | ✅ |
+| **Mobile shell** — login, Carteira/Exames read-only | R | `mobile-shell-smoke` | 🟡 |
 | Onboarding + perfil titular (`self`) | C | `onboarding-flow` | 🟡 |
 | Compliance gate (aceite termos) | C | `onboarding-flow` | 🟡 |
 | Dashboard listar pacientes | R | `core-patient-crud` | 🟡 |

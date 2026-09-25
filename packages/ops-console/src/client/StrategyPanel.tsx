@@ -47,9 +47,12 @@ function CxSeverityCallout() {
 export function StrategyPanel({
   section,
   onSectionChange,
+  hideSectionTabs = false,
 }: {
   section: StrategySectionId
   onSectionChange: (section: StrategySectionId) => void
+  /** Quando a aba principal já é Marketing/Finanças/Estratégia (CX). */
+  hideSectionTabs?: boolean
 }) {
   const [content, setContent] = useState<StrategyContentPayload | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -95,14 +98,16 @@ export function StrategyPanel({
         </Text>
       </OpsPanel>
 
-      <div className="ops-strategy-subtabs">
-        <Tabs
-          activeKey={section}
-          onChange={onSubTabChange}
-          items={SECTION_ITEMS.map((item) => ({ key: item.key, label: item.label }))}
-          size="small"
-        />
-      </div>
+      {!hideSectionTabs && (
+        <div className="ops-strategy-subtabs">
+          <Tabs
+            activeKey={section}
+            onChange={onSubTabChange}
+            items={SECTION_ITEMS.map((item) => ({ key: item.key, label: item.label }))}
+            size="small"
+          />
+        </div>
+      )}
 
       <OpsPanel title={content.title}>
         {section === 'cx' && <CxSeverityCallout />}

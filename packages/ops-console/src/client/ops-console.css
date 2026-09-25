@@ -136,6 +136,107 @@ body {
   overflow: hidden;
 }
 
+.ops-context-bar {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--ops-border);
+}
+
+.ops-context-bar--product {
+  background: linear-gradient(180deg, #f5f3ff 0%, #faf8ff 55%, #ffffff 100%);
+  border-bottom-color: #c4b5fd;
+}
+
+.ops-context-bar--operation {
+  background: linear-gradient(180deg, #fff7ed 0%, #fffbeb 55%, #ffffff 100%);
+  border-bottom-color: #fdba74;
+}
+
+.ops-context-bar--platform {
+  background: linear-gradient(180deg, #ecfeff 0%, #f0fdfa 55%, #ffffff 100%);
+  border-bottom-color: #5eead4;
+}
+
+.ops-context-segmented {
+  width: 100%;
+  max-width: 920px;
+}
+
+.ops-context-segmented .ant-segmented-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.ops-context-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 2px 0;
+  text-align: left;
+}
+
+.ops-context-option-label {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.ops-context-option-hint {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.75;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.ops-context-kicker {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.ops-context-tabs--product .ant-tabs-nav {
+  background: linear-gradient(180deg, #ede9fe 0%, #ffffff 100%) !important;
+}
+
+.ops-context-tabs--operation .ant-tabs-nav {
+  background: linear-gradient(180deg, #ffedd5 0%, #ffffff 100%) !important;
+}
+
+.ops-context-tabs--platform .ant-tabs-nav {
+  background: linear-gradient(180deg, #ccfbf1 0%, #ffffff 100%) !important;
+}
+
+.ops-tab-panel--product {
+  background: linear-gradient(180deg, #faf5ff 0%, transparent 120px);
+}
+
+.ops-tab-panel--operation {
+  background: linear-gradient(180deg, #fff7ed 0%, transparent 120px);
+}
+
+.ops-tab-panel--platform {
+  background: linear-gradient(180deg, #f0fdfa 0%, transparent 120px);
+}
+
+.ops-stack-logs-section {
+  margin-top: 4px;
+}
+
+.ops-stack-log-legend {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ops-stack-logs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
 .ops-tabs-card .ant-tabs-nav {
   margin: 0;
   padding: 0 20px;
@@ -196,6 +297,23 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.ops-stack-log-block {
+  width: 100%;
+}
+
+.ops-stack-log-pre {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  max-height: 220px;
+  overflow: auto;
+  font-size: 11px;
+  line-height: 1.45;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .ops-panel-stack {

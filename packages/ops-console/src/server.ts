@@ -32,6 +32,7 @@ import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
 import {
   getStackStatus,
+  getStackLogs,
   runStackAction,
   isStackControlEnabled,
 } from './stack-control.js'
@@ -236,6 +237,11 @@ async function main() {
   )
 
   fastify.get('/api/stack/status', async () => getStackStatus())
+
+  fastify.get<{ Querystring: { lines?: string } }>('/api/stack/logs', async (req) => {
+    const lines = Math.min(120, Math.max(8, Number(req.query.lines ?? 48) || 48))
+    return getStackLogs(lines)
+  })
 
   const stackPost = (action: 'start' | 'stop' | 'restart') => async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
     try {

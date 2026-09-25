@@ -11,7 +11,15 @@ export function webAppBaseUrl(): string {
 }
 
 export function webPatientPlanTabUrl(patientId: string, tab: 'wallet' | 'coverage' | 'integrations'): string {
+  return webPatientSectionTabUrl(patientId, 'plan', tab)
+}
+
+export function webPatientSectionTabUrl(
+  patientId: string,
+  section: 'overview' | 'clinical' | 'plan' | 'files',
+  tab: string,
+): string {
   const base = webAppBaseUrl()
-  const params = new URLSearchParams({ section: 'plan', tab })
+  const params = new URLSearchParams({ section, tab })
   return `${base}/patients/${encodeURIComponent(patientId)}?${params.toString()}`
 }
