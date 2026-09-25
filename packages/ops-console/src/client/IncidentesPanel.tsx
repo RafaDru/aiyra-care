@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
   Empty,
+  Popconfirm,
   Space,
   Table,
   Tag,
@@ -12,6 +13,7 @@ import {
 import {
   CheckOutlined,
   LinkOutlined,
+  RedoOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons'
 import {
@@ -94,6 +96,20 @@ export function IncidentesPanel({
       await onRefresh?.()
     } catch (err) {
       message.error(err instanceof Error ? err.message : 'Falha ao concluir')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const retryDispatch = async (id: string) => {
+    setUpdatingId(id)
+    try {
+      await opsApi.retryAnalysisQueueDispatch(id, { runTick: true })
+      message.success('Nova tentativa de dispatch enfileirada')
+      await load()
+      await onRefresh?.()
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Falha ao reenfileirar')
     } finally {
       setUpdatingId(null)
     }
@@ -229,10 +245,30 @@ export function IncidentesPanel({
             {
               title: 'Ações',
               key: 'actions',
-              width: 132,
+              width: 168,
               align: 'center',
               render: (_: unknown, row) => (
                 <Space size={0} wrap style={{ justifyContent: 'center' }}>
+                  {row.incidentPipelineStatus === 'dispatch_failed' && (
+                    <Popconfirm
+                      title="Nova tentativa de dispatch?"
+                      description="Reenfileira o webhook de triagem."
+                      okText="Tentar de novo"
+                      cancelText="Cancelar"
+                      onConfirm={() => retryDispatch(row.id)}
+                    >
+                      <Tooltip title="Nova tentativa">
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<RedoOutlined />}
+                          aria-label="Nova tentativa"
+                          loading={updatingId === row.id}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </Tooltip>
+                    </Popconfirm>
+                  )}
                   <Tooltip title="Abrir detalhe">
                     <Button
                       type="text"

@@ -16,6 +16,7 @@ export type IncidentPipelineStatus =
   | 'in_triage'
   | 'triaged'
   | 'dismissed'
+  | 'dispatch_failed'
 
 export interface OpsAnalysisQueueRecord {
   id: string

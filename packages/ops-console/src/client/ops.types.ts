@@ -13,6 +13,7 @@ export interface OpsAnalysisQueueItem {
     | 'in_triage'
     | 'triaged'
     | 'dismissed'
+    | 'dispatch_failed'
   priority: 'low' | 'normal' | 'high' | 'critical'
   deploymentTier: string
   title: string

@@ -172,12 +172,8 @@ export class IncidentDispatchService {
     }
   }
 
-  private async revertPipelineAfterDispatchFailure(incidentId: string): Promise<void> {
-    const record = await this.queueRepo.findById(incidentId)
-    if (!record) return
-    if (shouldNormalizePipelineAfterDeadOutboxReset(record.incidentPipelineStatus)) {
-      await this.queueRepo.setIncidentPipelineStatus(incidentId, 'open')
-    }
+  private async markPipelineDispatchFailed(incidentId: string): Promise<void> {
+    await this.queueRepo.setIncidentPipelineStatus(incidentId, 'dispatch_failed')
   }
 
   private async recordWorkerDispatchFailure(
@@ -186,12 +182,55 @@ export class IncidentDispatchService {
     error: string,
   ): Promise<void> {
     await this.outbox.bumpAttempt(outboxId, error)
-    await this.revertPipelineAfterDispatchFailure(incidentId)
+    await this.markPipelineDispatchFailed(incidentId)
   }
 
   private async markOutboxDeadAndRevertPipeline(outboxId: string, incidentId: string): Promise<void> {
     await this.outbox.markDead(outboxId, 'max_attempts')
-    await this.revertPipelineAfterDispatchFailure(incidentId)
+    await this.markPipelineDispatchFailed(incidentId)
+  }
+
+  async retryDispatchForIncident(
+    incidentId: string,
+    options?: { runTick?: boolean },
+  ): Promise<{ ok: true } | { ok: false; error: string }> {
+    const record = await this.queueRepo.findById(incidentId)
+    if (!record) return { ok: false, error: 'not_found' }
+    if (record.status === 'completed' || record.status === 'dismissed') {
+      return { ok: false, error: 'not_eligible' }
+    }
+    if (
+      record.incidentPipelineStatus !== 'dispatch_failed' &&
+      record.incidentPipelineStatus !== 'open'
+    ) {
+      return { ok: false, error: 'not_eligible' }
+    }
+
+    const idempotencyKey = buildIncidentDispatchIdempotencyKey(record.id, DISPATCH_KIND)
+    const existing = await this.outbox.findByIdempotencyKey(idempotencyKey)
+    const payload = await this.buildDispatchPayloadForQueueRecord(record, {
+      recoverStuckDispatch: true,
+    })
+    if (!payload) return { ok: false, error: 'not_eligible' }
+
+    if (existing) {
+      if (['pending', 'forwarded', 'claimed'].includes(existing.status)) {
+        await this.queueRepo.setIncidentPipelineStatus(incidentId, 'open')
+        if (options?.runTick) await this.processOutboxBatch(1)
+        return { ok: true }
+      }
+      await this.outbox.resetToPending(existing.id, payload)
+    } else {
+      await this.outbox.insertIfAbsent({
+        incidentId: record.id,
+        idempotencyKey,
+        payload,
+      })
+    }
+
+    await this.queueRepo.setIncidentPipelineStatus(incidentId, 'open')
+    if (options?.runTick) await this.processOutboxBatch(1)
+    return { ok: true }
   }
 
   async buildDispatchPayloadForQueueRecord(

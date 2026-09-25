@@ -3,13 +3,19 @@ import type { AnalysisQueueStatus, IncidentPipelineStatus } from './ops-analysis
 export type { IncidentPipelineStatus }
 
 /** Estados exibidos na UI CH (tab Incidentes). */
-export type IncidentPipelineUiBucket = 'aberto' | 'encaminhado' | 'em_fila' | 'em_triagem'
+export type IncidentPipelineUiBucket =
+  | 'aberto'
+  | 'encaminhado'
+  | 'em_fila'
+  | 'em_triagem'
+  | 'falha'
 
 const UI_LABEL: Record<IncidentPipelineUiBucket, string> = {
   aberto: 'Aberto',
   encaminhado: 'Encaminhado',
   em_fila: 'Em fila',
   em_triagem: 'Em triagem',
+  falha: 'Falha',
 }
 
 export function incidentPipelineUiLabel(bucket: IncidentPipelineUiBucket): string {
@@ -24,6 +30,7 @@ export function incidentPipelineUiBucket(
   if (pipelineStatus === 'queued_worker') return 'em_fila'
   if (pipelineStatus === 'in_triage') return 'em_triagem'
   if (pipelineStatus === 'open') return 'aberto'
+  if (pipelineStatus === 'dispatch_failed') return 'falha'
   if (pipelineStatus === 'triaged' || pipelineStatus === 'dismissed') return 'aberto'
 
   if (legacyStatus === 'investigating' || legacyStatus === 'fix_proposed') {

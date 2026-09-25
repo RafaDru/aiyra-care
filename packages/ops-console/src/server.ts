@@ -393,6 +393,20 @@ async function main() {
     },
   )
 
+  fastify.post<{ Params: { id: string }; Body?: { runTick?: boolean } }>(
+    '/api/analysis-queue/:id/retry-dispatch',
+    async (req, reply) => {
+      const result = await incidentDispatchService.retryDispatchForIncident(req.params.id, {
+        runTick: req.body?.runTick === true,
+      })
+      if (!result.ok) {
+        if (result.error === 'not_found') return reply.status(404).send({ error: result.error })
+        return reply.status(409).send({ error: result.error })
+      }
+      return { ok: true }
+    },
+  )
+
   fastify.get<{ Querystring: { status?: string; includeFixed?: string } }>(
     '/api/platform-defects',
     async (req) => ({

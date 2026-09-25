@@ -33,12 +33,17 @@ Pipeline ops de ponta a ponta:
 | **Encaminhado** | `forwarded` | Webhook investigador HTTP 2xx |
 | **Em fila** | `queued_worker` | Worker local claim do outbox |
 | **Em triagem** | `in_triage` | Agente 1 iniciou (`investigating`) |
+| **Falha** | `dispatch_failed` | Outbox `dead` (max tentativas) ou falha do worker com pipeline em dispatch |
 | *(interno)* Triado | `triaged` | Callback triagem + defeito criado/vinculado |
 | *(interno)* Descartado | `dismissed` | Triagem descarta |
 
+**Canônico «Falha»:** valor PG `dispatch_failed` (migration **076**). Não derivar só do outbox `dead` na UI — o worker / `markDead` grava `dispatch_failed` no incidente para não ficar preso em «Em fila» (`queued_worker`) nem voltar silenciosamente a «Aberto».
+
 **Legado `ops_analysis_queue.status`:** mantido (`queued`, `investigating`, `fix_proposed`, …). UI primária usa `incident_pipeline_status` quando presente; fallback: `queued|failed` → Aberto; `investigating|fix_proposed` → Em triagem.
 
-**Transições:** `open → forwarded → queued_worker → in_triage → triaged | dismissed`
+**Transições:** `open → forwarded → queued_worker → in_triage → triaged | dismissed` · em falha de dispatch: `queued_worker | forwarded → dispatch_failed` (outbox `failed`/`dead` ou `attempt_count` esgotado).
+
+**Nova tentativa (ops):** `POST /api/analysis-queue/:id/retry-dispatch` (ops-console) — idempotente: outbox `dead`/`failed` → `pending` (payload reconstruído), `incident_pipeline_status` → `open`; opcional tick imediato do worker (`runTick: true`). UI: botão só quando `dispatch_failed` (confirmação leve). CLI equivalente: `ch-incident-dispatch-backfill -- --reset-dead` também normaliza `dispatch_failed` → `open` ao resetar outbox.
 
 **Anti-caducidade (2026-09-25):** incidente em `open` não pode ficar indefinidamente sem linha de dispatch retryável. Filas criadas antes da migration **075** / sem `INSERT` na outbox são cobertas por **backfill one-shot** + **reconciliador periódico** (ver §4.1).
 
@@ -50,7 +55,7 @@ Pipeline ops de ponta a ponta:
 | Legado | `status NOT IN ('completed', 'dismissed')` |
 | Excluídos | `triaged`, `dismissed` no pipeline — **não** re-dispatch |
 | Outbox ativo | Não existe linha com `status IN ('pending', 'forwarded', 'claimed')` para o `incident_id` |
-| Outbox `dead` (≥ max tentativas) | Não re-enfileira — visível no CH (`last_error`, status outbox `dead`) |
+| Outbox `dead` (≥ max tentativas) | Pipeline → `dispatch_failed` (UI **Falha**); re-enfileira só via **Nova tentativa** ou `--reset-dead` |
 | Outbox `failed` / `dead` abaixo do max | `resetToPending` + payload reconstruído (mesma `idempotency_key`) |
 
 **Idempotência:** `idempotency_key = buildIncidentDispatchIdempotencyKey(incident_id, 'triage_v1')` — `INSERT … ON CONFLICT DO NOTHING`; reconciliador só faz `resetToPending` quando já existe linha não ativa.
@@ -91,6 +96,7 @@ Pipeline ops de ponta a ponta:
 | **073** | `defect_pr_batches` + FK `platform_defects.pr_batch_id` |
 | **074** | `incident_dispatch_outbox` |
 | **075** | `ops_analysis_queue.incident_pipeline_status` |
+| **076** | `dispatch_failed` no CHECK de `incident_pipeline_status` |
 
 Aplicar (com `DATABASE_URL` no `.env`):
 
@@ -100,9 +106,10 @@ node packages/api/scripts/apply-migration-072.mjs
 node packages/api/scripts/apply-migration-073.mjs
 node packages/api/scripts/apply-migration-074.mjs
 node packages/api/scripts/apply-migration-075.mjs
+node packages/api/scripts/apply-migration-076.mjs
 ```
 
-SQL canônico: `database/relational/071_platform_defects.sql` … `075_ops_analysis_queue_incident_pipeline.sql`.
+SQL canônico: `database/relational/071_platform_defects.sql` … `076_incident_pipeline_dispatch_failed.sql`.
 
 ---
 
@@ -110,14 +117,14 @@ SQL canônico: `database/relational/071_platform_defects.sql` … `075_ops_analy
 
 Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → webhook síncrono → outbox `forwarded` + `incident_pipeline_status=forwarded` → `in_triage`; falha → outbox permanece `pending` com `attempt_count++`.
 
-**Worker batch:** processa **somente** outbox `pending` (não re-dispara linhas já `forwarded` — evita loop até 40x/dead). Falha ou `dead` reverte pipeline `queued_worker`/`forwarded` → `open` para `--reset-dead` e UI coerente.
+**Worker batch:** processa **somente** outbox `pending` (não re-dispara linhas já `forwarded` — evita loop até 40x/dead). Falha do worker ou `markDead` → pipeline `dispatch_failed` (UI **Falha**), não `open` silencioso.
 
 ### 4.1 Reconciliação + backfill
 
 | Comando | Uso |
 |---------|-----|
 | `npm run ch-incident-dispatch-backfill` | **One-shot:** enfileira todos os `open` elegíveis sem outbox ativo (notebook pós-075) |
-| `npm run ch-incident-dispatch-backfill -- --reset-dead` | Recoloca outbox `dead` → `pending` (`attempt_count=0`) se o incidente ainda não terminal; aceita pipeline `open` / `forwarded` / `queued_worker` (caso worker morreu com outbox `dead`); normaliza `forwarded`/`queued_worker` → `open` antes do próximo dispatch |
+| `npm run ch-incident-dispatch-backfill -- --reset-dead` | Recoloca outbox `dead` → `pending` (`attempt_count=0`) se o incidente ainda não terminal; aceita pipeline `open` / `forwarded` / `queued_worker` / `dispatch_failed`; normaliza `forwarded`/`queued_worker`/`dispatch_failed` → `open` antes do próximo dispatch |
 | `npm run ch-incident-dispatch-backfill -- --limit=100` | Limita varredura |
 | `npm run ch-incident-dispatch-worker` | Loop (`CH_INCIDENT_DISPATCH_INTERVAL_MS`, default 30s): reconciliador + outbox batch |
 | `npm run ch-incident-dispatch-worker:once` | Um tick (reconcile se intervalo decorrido + batch) |
@@ -125,7 +132,7 @@ Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → we
 
 **Reconciliador periódico:** em cada `runWorkerTick`, se passou `CH_INCIDENT_RECONCILE_INTERVAL_MS` (default **60s**), varre incidentes `open` com `created_at` anterior a `now − CH_INCIDENT_OPEN_STALE_MS` (default **5 min**) e sem outbox `pending`/`forwarded`/`claimed` — chama a mesma lógica do backfill (`ensureOutboxForQueueRecord`).
 
-**Max tentativas outbox:** 8 → `status=dead`, log `[incident-dispatch] outbox dead …`; incidente pode permanecer `open` até intervenção ops (ex. webhook Cursor **40x** por `CURSOR_*` ausente no worktree). Recuperação: `npm run ch-incident-dispatch-backfill -- --reset-dead` e corrigir `.env` antes de `ch-incident-dispatch-worker:once`.
+**Max tentativas outbox:** 8 → outbox `status=dead` + pipeline `dispatch_failed`, log `[incident-dispatch] outbox dead …`. Recuperação: **Nova tentativa** no CH ou `npm run ch-incident-dispatch-backfill -- --reset-dead` e corrigir `.env` antes de `ch-incident-dispatch-worker:once`.
 
 **Um loop por vez (notebook):** defina `CH_INCIDENT_DISPATCH_WORKER=0` no `.env` do worktree se você usa **só** `npm run ch-incident-dispatch-worker` (CLI). Com worker embutido no ops-console `:3013` (default), **não** rode o CLI em paralelo — dois loops competem no mesmo outbox (`claim`/`queued_worker`).
 

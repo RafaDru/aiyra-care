@@ -10,7 +10,12 @@ import {
 const OPS_ALERT_CATEGORIES = new Set<OpsAlert['category']>(['sync', 'llm', 'product', 'infra'])
 
 /** Pipeline states elegíveis para re-dispatch após outbox `dead` / `failed`. */
-export const INCIDENT_PIPELINE_RECOVERABLE_STATUSES = ['open', 'forwarded', 'queued_worker'] as const
+export const INCIDENT_PIPELINE_RECOVERABLE_STATUSES = [
+  'open',
+  'forwarded',
+  'queued_worker',
+  'dispatch_failed',
+] as const
 
 export function isQueueRecordEligibleForDispatchReconcile(
   record: OpsAnalysisQueueRecord,
@@ -27,7 +32,11 @@ export function isQueueRecordEligibleForDispatchReconcile(
 export function shouldNormalizePipelineAfterDeadOutboxReset(
   pipeline: OpsAnalysisQueueRecord['incidentPipelineStatus'],
 ): boolean {
-  return pipeline === 'forwarded' || pipeline === 'queued_worker'
+  return (
+    pipeline === 'forwarded' ||
+    pipeline === 'queued_worker' ||
+    pipeline === 'dispatch_failed'
+  )
 }
 
 export function opsAlertFromQueueRecord(record: OpsAnalysisQueueRecord): OpsAlert | null {

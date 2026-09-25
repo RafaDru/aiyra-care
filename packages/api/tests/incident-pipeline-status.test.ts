@@ -11,6 +11,7 @@ describe('incidentPipelineUiBucket', () => {
     expect(incidentPipelineUiBucket('queued_worker')).toBe('em_fila')
     expect(incidentPipelineUiBucket('in_triage')).toBe('em_triagem')
     expect(incidentPipelineUiBucket('open')).toBe('aberto')
+    expect(incidentPipelineUiBucket('dispatch_failed')).toBe('falha')
   })
 
   it('falls back to legacy queue status', () => {
@@ -21,6 +22,7 @@ describe('incidentPipelineUiBucket', () => {
 
   it('labels PT', () => {
     expect(incidentPipelineUiLabel('encaminhado')).toBe('Encaminhado')
+    expect(incidentPipelineUiLabel('falha')).toBe('Falha')
   })
 })
 

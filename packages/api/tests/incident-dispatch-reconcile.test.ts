@@ -111,6 +111,7 @@ describe('IncidentDispatchService reconcile', () => {
 
     queueRepo = {
       listOpenNeedingDispatchOutbox: vi.fn(async () => [queueRow()]),
+      findById: vi.fn(async (id: string) => (id === 'inc-1' ? queueRow() : null)),
       setIncidentPipelineStatus: vi.fn(),
       markInvestigating: vi.fn(),
     } as unknown as OpsAnalysisQueuePgRepository
@@ -199,5 +200,44 @@ describe('IncidentDispatchService reconcile', () => {
     const result = await service.resetEligibleDeadOutbox(10)
     expect(result.reset).toBe(1)
     expect(outbox.resetToPending).toHaveBeenCalledWith('o-dead', expect.objectContaining({ kind: expect.any(String) }))
+  })
+
+  it('resetEligibleDeadOutbox normalizes dispatch_failed to open', async () => {
+    const deadRow = {
+      id: 'o-dead',
+      incidentId: 'inc-1',
+      idempotencyKey: 'inc-1:triage_v1',
+      payload: {},
+      status: 'dead' as const,
+      attemptCount: 8,
+      lastError: 'max_attempts',
+      forwardedAt: null,
+      claimedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    outbox.listDeadForEligibleIncidents = vi.fn(async () => [deadRow])
+    queueRepo.findById = vi.fn(async () => queueRow({ incidentPipelineStatus: 'dispatch_failed' }))
+
+    await service.resetEligibleDeadOutbox(10)
+    expect(queueRepo.setIncidentPipelineStatus).toHaveBeenCalledWith('inc-1', 'open')
+  })
+
+  it('retryDispatchForIncident resets dead outbox and sets pipeline open', async () => {
+    outboxByKey.set('inc-1:triage_v1', { id: 'o-dead', status: 'dead', attemptCount: 8 })
+    queueRepo.findById = vi.fn(async () => queueRow({ incidentPipelineStatus: 'dispatch_failed' }))
+
+    const result = await service.retryDispatchForIncident('inc-1')
+    expect(result).toEqual({ ok: true })
+    expect(outbox.resetToPending).toHaveBeenCalled()
+    expect(queueRepo.setIncidentPipelineStatus).toHaveBeenCalledWith('inc-1', 'open')
+  })
+
+  it('retryDispatchForIncident rejects triaged incidents', async () => {
+    queueRepo.findById = vi.fn(async () =>
+      queueRow({ incidentPipelineStatus: 'dispatch_failed', status: 'dismissed' }),
+    )
+    const result = await service.retryDispatchForIncident('inc-1')
+    expect(result).toEqual({ ok: false, error: 'not_eligible' })
   })
 })

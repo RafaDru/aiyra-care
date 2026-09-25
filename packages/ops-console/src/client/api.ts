@@ -127,6 +127,12 @@ export const opsApi = {
     request<{ ok: boolean }>(`/api/analysis-queue/${encodeURIComponent(id)}/complete`, {
       method: 'POST',
     }),
+  retryAnalysisQueueDispatch: (id: string, options?: { runTick?: boolean }) =>
+    request<{ ok: boolean }>(`/api/analysis-queue/${encodeURIComponent(id)}/retry-dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ runTick: options?.runTick === true }),
+    }),
   platformDefects: (params?: { status?: string; includeFixed?: boolean }) => {
     const q = new URLSearchParams()
     if (params?.status) q.set('status', params.status)

@@ -1,6 +1,11 @@
 import type { OpsAnalysisQueueItem } from './ops.types.js'
 
-export type IncidentPipelineUiBucket = 'aberto' | 'encaminhado' | 'em_fila' | 'em_triagem'
+export type IncidentPipelineUiBucket =
+  | 'aberto'
+  | 'encaminhado'
+  | 'em_fila'
+  | 'em_triagem'
+  | 'falha'
 
 export const INCIDENT_ORIGIN_LABEL: Record<string, string> = {
   usuario: 'Usuário',
@@ -18,6 +23,7 @@ const PIPELINE_UI_LABEL: Record<IncidentPipelineUiBucket, string> = {
   encaminhado: 'Encaminhado',
   em_fila: 'Em fila',
   em_triagem: 'Em triagem',
+  falha: 'Falha',
 }
 
 const PIPELINE_TAG_COLOR: Record<IncidentPipelineUiBucket, string> = {
@@ -25,6 +31,7 @@ const PIPELINE_TAG_COLOR: Record<IncidentPipelineUiBucket, string> = {
   encaminhado: 'blue',
   em_fila: 'cyan',
   em_triagem: 'processing',
+  falha: 'error',
 }
 
 export function incidentPipelineUiBucket(row: OpsAnalysisQueueItem): IncidentPipelineUiBucket {
@@ -33,6 +40,7 @@ export function incidentPipelineUiBucket(row: OpsAnalysisQueueItem): IncidentPip
   if (pipeline === 'queued_worker') return 'em_fila'
   if (pipeline === 'in_triage') return 'em_triagem'
   if (pipeline === 'open') return 'aberto'
+  if (pipeline === 'dispatch_failed') return 'falha'
   if (pipeline === 'triaged' || pipeline === 'dismissed') return 'aberto'
 
   if (row.status === 'investigating' || row.status === 'fix_proposed') return 'em_triagem'
