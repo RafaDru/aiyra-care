@@ -10,7 +10,7 @@
 
 ## Resumo
 
-Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Supabase, lista de pacientes, perfil com macro-seções (overview / clinical / plan / files) e tabs **Carteira**, **Convênios**, **Integrações**, **Exames** com placeholders até port UI.
+Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Supabase, lista de pacientes, perfil com macro-seções (overview / clinical / plan / files) e tabs **Carteira** (dados API read-only), **Convênios**, **Integrações**, **Exames** com placeholders onde a UI web ainda não foi portada.
 
 ## Objetivo
 
@@ -63,7 +63,12 @@ Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira
 - Aba **Integrações** do paciente: lista `GET /integration-links`, status via polling `GET /integration-links/:id/sync-status` (`useIntegrationLinkSyncStatus`).
 - **Sem** `POST /integration-links/:id/sync` no mobile — login browser e scrapers só no web.
 - CTAs **Abrir integrações / Carteira no navegador** (`EXPO_PUBLIC_WEB_APP_URL`, deep link `?section=plan&tab=integrations|wallet`).
-- Banner resumido na aba **Carteira** (`PatientWalletSyncBanner`).
+
+## Paridade conteúdo — Carteira (read-only)
+
+- Aba **Carteira** (`PatientWalletTab`): `GET /patients/:id`, `GET /plan-memberships`, `GET /integration-links` — cartões SUS + convênios espelhando `WalletCardsTab` (sem modal QR/sync).
+- Helpers: `wallet-format.ts`, `WalletCardFace.tsx`.
+- Link discreto para funcionalidades completas no web.
 
 ## QA
 
@@ -71,6 +76,7 @@ Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira
 |--------|---------|
 | Tipo mobile | `cd packages/mobile && npm run typecheck` |
 | Export web smoke | `cd packages/mobile && npx expo export --platform web` |
+| Carteira read-only | Smoke manual: paciente → Plano → Carteira → ver cartões ou empty state |
 | M5 Ava | Smoke manual: login → FAB Ava → trocar lente → enviar pergunta (API local) |
 | M6 Integrações | Smoke manual: paciente → Plano → Integrações → ver status → link web |
 | API inalterada | Sem suite web nova — smoke estrutural mobile |
@@ -80,5 +86,5 @@ Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira
 - Onboarding mobile
 - Aceleradores «Pergunte à Ava» em entidades (pins G1)
 - Ações G3 com confirmação no mobile
-- Port de tabs clínicas (ExamsTab, WalletCardsTab UI completa)
+- Port de tabs clínicas (ExamsTab, WalletTodayPanel, QR token)
 - OAuth Google deep links
