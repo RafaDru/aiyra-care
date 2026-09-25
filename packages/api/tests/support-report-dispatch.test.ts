@@ -66,7 +66,7 @@ describe('support-report-dispatch', () => {
       toast: { title: '[Suporte] Novo chamado', icon: 'info' },
       text: 'Novo chamado: Bug técnico — /patients/x',
     })
-    expect(payload.dashboardUrl).toContain('tab=issues')
+    expect(payload.dashboardUrl).toContain('tab=incidentes')
     expect(payload.environment).toEqual({
       deploymentTier: 'integration',
       apiPublicUrl: 'http://127.0.0.1:3010',

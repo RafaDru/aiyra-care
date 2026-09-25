@@ -1,11 +1,37 @@
 export type OpsAlertSeverity = 'warning' | 'critical'
 
+export type IncidentDispatchSnapshot = {
+  status: string | null
+  attemptCount: number
+  lastError: string | null
+  forwardedAt: string | null
+  updatedAt: string | null
+}
+
+export type IncidentDispatchHealth = {
+  deadCount: number
+  staleOpenWithoutOutboxCount: number
+  webhooks: {
+    developmentSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+    sreSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+  }
+  anyWebhookMissing: boolean
+}
+
 export interface OpsAnalysisQueueItem {
   id: string
   sourceType: 'support_report' | 'ops_alert'
   sourceId: string
   lane: 'development_support' | 'sre_support'
   status: 'queued' | 'investigating' | 'fix_proposed' | 'completed' | 'dismissed' | 'failed'
+  incidentPipelineStatus?:
+    | 'open'
+    | 'forwarded'
+    | 'queued_worker'
+    | 'in_triage'
+    | 'triaged'
+    | 'dismissed'
+    | 'dispatch_failed'
   priority: 'low' | 'normal' | 'high' | 'critical'
   deploymentTier: string
   title: string
@@ -22,6 +48,40 @@ export interface OpsAnalysisQueueItem {
   completedAt: string | null
   createdAt: string
   updatedAt: string
+  dispatch?: IncidentDispatchSnapshot | null
+}
+
+export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
+
+export interface DefectPrBatchItem {
+  id: string
+  status: 'open' | 'merged' | 'failed'
+  scheduledWindowStart: string
+  mergedPrUrl: string | null
+  defectCount: number
+  createdAt: string
+}
+
+export interface PlatformDefectItem {
+  id: string
+  title: string
+  status: PlatformDefectStatus
+  fingerprint: string | null
+  impact: number | null
+  applications: string[]
+  ownerSubject: string | null
+  triageSummary: string | null
+  triageArtifactPath: string | null
+  branchName: string | null
+  prUrl: string | null
+  prBatchId: string | null
+  firstSeenAt: string
+  fixStartedAt: string | null
+  readyForPrAt: string | null
+  fixedAt: string | null
+  createdAt: string
+  updatedAt: string
+  incidentCount?: number
 }
 
 export interface OpsAnalysisAttentionCounts {

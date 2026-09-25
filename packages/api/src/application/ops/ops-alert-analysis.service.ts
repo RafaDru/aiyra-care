@@ -14,6 +14,7 @@ import {
 } from './ops-alert-investigator-dispatch.js'
 import { investigateOpsAlertWithQueue } from './ops-analysis-investigation.helper.js'
 import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
+import type { IncidentDispatchService } from './incident-dispatch.service.js'
 import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
 
 const DEFAULT_INVESTIGATOR_COOLDOWN_MS = 30 * 60 * 1000
@@ -47,6 +48,7 @@ export class OpsAlertAnalysisService {
   constructor(
     private readonly store: OpsAlertAnalysisStore,
     private readonly queueService?: OpsAnalysisQueueService,
+    private readonly incidentDispatch?: IncidentDispatchService,
   ) {}
 
   async getAll(): Promise<Record<string, OpsAlertAnalysisRecord>> {
@@ -82,12 +84,17 @@ export class OpsAlertAnalysisService {
     }
 
     const dispatch = this.queueService
-      ? (await investigateOpsAlertWithQueue(this.queueService, alert, {
-        checkedAt: options.checkedAt,
-        triage: options.triage,
-        operatorNotes: notes,
-        trigger: options.trigger,
-      })).dispatch
+      ? (await investigateOpsAlertWithQueue(
+        this.queueService,
+        alert,
+        {
+          checkedAt: options.checkedAt,
+          triage: options.triage,
+          operatorNotes: notes,
+          trigger: options.trigger,
+        },
+        this.incidentDispatch,
+      )).dispatch
       : await dispatchOpsAlertInvestigator(alert, {
         checkedAt: options.checkedAt,
         triage: options.triage,

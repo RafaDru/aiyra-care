@@ -10,6 +10,7 @@ import { SupportReportService } from '../../../application/support-report/suppor
 import { OpsAnalysisQueuePgRepository } from '../../persistence/ops-analysis-queue.pg.repository.js'
 import { SupportReportPgRepository } from '../../persistence/support-report.pg.repository.js'
 import { SupportReportController } from './support-report.controller.js'
+import { createIncidentDispatchService } from '../../../application/ops/incident-dispatch.service.js'
 
 export async function supportReportRoutes(app: FastifyInstance) {
   const authService = getAuthService()
@@ -26,7 +27,8 @@ export async function supportReportRoutes(app: FastifyInstance) {
     new OpsAnalysisQueuePgRepository(pgPool),
     supportRepo,
   )
-  const service = new SupportReportService(supportRepo, productEvents, queueService)
+  const incidentDispatch = createIncidentDispatchService(pgPool)
+  const service = new SupportReportService(supportRepo, productEvents, queueService, incidentDispatch)
   const controller = new SupportReportController(service)
 
   app.addHook('onRequest', requireAuth)

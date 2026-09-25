@@ -1,13 +1,27 @@
 # Lanes — Cursor Automations (ops)
 
-Duas automations, responsabilidades distintas, **mesmo par de webhooks** no `.env` (URLs diferentes por lane).
+Duas automations, responsabilidades distintas, **dois pares** URL + key no `.env` (uma Automation por lane).
 
 | Lane | Automation (nome no Cursor) | Payload `type` | Vars `.env` | Origem típica |
 |------|------------------------------|----------------|-------------|---------------|
-| **Suporte ao Desenvolvimento** | `AiCare - Suporte ao Desenvolvimento` | `support_report` | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_*` | Reporte manual no app |
-| **Suporte SRE** | `AiCare - Suporte SRE` | `ops_alert` | `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_*` | Métricas / alertas ops |
+| **Suporte ao Desenvolvimento** | `AiCare - Suporte ao Desenvolvimento` | `support_report` | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Reporte manual no app |
+| **Suporte SRE** | `AiCare - Suporte SRE` | `ops_alert` | `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Métricas / alertas ops |
 
 Ambiente (`integration` \| `preview` \| `production`) vai em `environment.deploymentTier` no JSON — não duplique Automations por ambiente.
+
+## `.env` ↔ Cursor — fonte da verdade
+
+| Regra | Detalhe |
+|-------|---------|
+| **Painel Cursor** | Webhook URL e auth header (`crsr_…`) exibidos na Automation **após salvar** são a referência — copie para o `.env` do checkout que dispara (API `:3010`). |
+| **URL** | `*_WEBHOOK_URL` no `.env` deve ser **idêntica** à URL do trigger Webhook na UI (sem truncar query string se o painel incluir). |
+| **KEY** | `*_WEBHOOK_KEY` = valor atual do **Generate / Copy auth header**. Se regenerar no Cursor, **atualizar o `.env`** imediatamente; key antiga → HTTP **400** ou **401** no `POST` e outbox em retry/`dead`. |
+| **Legado** | Fallback `CURSOR_SUPPORT_AUTOMATION_*` / `CURSOR_OPS_ALERT_AUTOMATION_*` — preferir nomes `CURSOR_DEVELOPMENT_SUPPORT_*` e `CURSOR_SRE_SUPPORT_*`. |
+| **Callback** | Payload inclui `analysisQueue.callbackUrl` → `POST /api/analysis-queue/callback` no ops-console (`:3013`). Auth: `x-investigator-callback-key` = `OPS_INVESTIGATOR_CALLBACK_KEY` ou, se vazio, `OPS_METRICS_KEY`. |
+| **Dashboard no payload** | `OPS_ALERT_DASHBOARD_URL` — ex. `http://127.0.0.1:5173/ops` é reescrito para `http://127.0.0.1:3013` ao montar links/callback (ver `resolveSupportReportOpsConsoleBaseUrl` na API). |
+| **Reinício** | Após qualquer mudança em `CURSOR_*` ou keys ops: reiniciar **API `:3010`** e **ops-console `:3013`**. |
+| **Saúde** | `curl -s http://127.0.0.1:3013/api/incident-dispatch/health` — `webhooks.*.ready` quando URL+key presentes no processo. |
+| **Dev local** | Agente na nuvem **não** chama `127.0.0.1:3013` — callback manual ou stack com URL pública (preview/GCP). |
 
 ## Suporte Desenvolvimento
 

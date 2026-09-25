@@ -9,9 +9,14 @@ import type {
 import { resolveDeploymentTier } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigationIdFromCallback } from '../../domain/ops/investigation-correlation.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
+import {
+  inferSupportReportApplication,
+  SUPPORT_INCIDENT_ORIGIN_USUARIO,
+} from '../../domain/support-report/support-report-incident.js'
 import type { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import type { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
 import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
+import type { PlatformDefectService } from './platform-defect.service.js'
 import { sanitizeAnalysisSummary } from '../../domain/support-report/support-report.types.js'
 import { sanitizeOpsAlertAnalysisSummary } from '../../domain/ops/ops-alert-analysis.types.js'
 
@@ -37,6 +42,8 @@ function supportContext(record: SupportReportRecord): Record<string, unknown> {
     route: record.route,
     consentTechnical: record.consentTechnical,
     appVersion: record.appVersion,
+    incidentOrigin: SUPPORT_INCIDENT_ORIGIN_USUARIO,
+    application: inferSupportReportApplication(record),
   }
 }
 
@@ -51,6 +58,7 @@ export class OpsAnalysisQueueService {
     private readonly repo: OpsAnalysisQueuePgRepository,
     private readonly supportRepo?: SupportReportPgRepository,
     private readonly alertStore?: OpsAlertAnalysisStore,
+    private readonly platformDefects?: PlatformDefectService,
   ) {}
 
   async enqueueSupportReportBatch(input: {
@@ -111,6 +119,8 @@ export class OpsAnalysisQueueService {
       contextSnapshot: {
         severity: alert.severity,
         category: alert.category,
+        incidentOrigin: 'alerta_ops',
+        application: 'Ops',
         ...(alert.details ?? {}),
       },
       operatorNotes: options.operatorNotes,
@@ -167,7 +177,61 @@ export class OpsAnalysisQueueService {
 
     await this.syncLegacyAnalysis(record, summary, input)
     await this.applySupportReportPatches(record, input)
-    return record
+    await this.applyTriagePipelineOutcome(record, summary, input)
+    const refreshed = await this.repo.findById(record.id)
+    return refreshed ?? record
+  }
+
+  private async applyTriagePipelineOutcome(
+    record: OpsAnalysisQueueRecord,
+    summary: string,
+    input: AgentAnalysisCallbackInput,
+  ): Promise<void> {
+    const decision = input.triageDecision
+
+    if (input.defectId && input.defectStatus && this.platformDefects) {
+      await this.platformDefects
+        .transition(input.defectId, input.defectStatus, {
+          branchName: input.branchName ?? null,
+          prUrl: input.prUrl ?? null,
+        })
+        .catch(() => undefined)
+    }
+
+    if (!decision) return
+
+    if (decision === 'dismiss') {
+      await this.repo.markDismissed(record.id, summary)
+      return
+    }
+
+    if (this.platformDefects) {
+      if (decision === 'new_defect' && input.defect?.title) {
+        await this.platformDefects.createFromTriage(
+          {
+            title: input.defect.title,
+            fingerprint: input.defect.fingerprint ?? null,
+            impact: input.defect.impact ?? null,
+            applications: input.defect.applications ?? [],
+            triageSummary: summary,
+            triageArtifactPath: input.analysisArtifactPath ?? null,
+          },
+          record.id,
+          'agent_triage',
+        )
+      } else if (decision === 'link_defect' && input.linkDefectId) {
+        await this.platformDefects.linkIncident(input.linkDefectId, record.id, 'agent_triage')
+      }
+    }
+
+    if (
+      decision === 'new_defect' ||
+      decision === 'link_defect' ||
+      decision === 'resolve_incident_only' ||
+      decision === 'infra_failure'
+    ) {
+      await this.repo.setIncidentPipelineStatus(record.id, 'triaged')
+    }
   }
 
   private isBatchSupportRecord(record: OpsAnalysisQueueRecord): boolean {

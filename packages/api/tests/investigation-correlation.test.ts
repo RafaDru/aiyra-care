@@ -27,11 +27,11 @@ describe('investigation-correlation', () => {
 
   it('builds console deep links', () => {
     const url = buildOpsConsoleUrl('http://127.0.0.1:3013', {
-      tab: 'issues',
+      tab: 'incidentes',
       investigationId: 'uuid-123',
       reportId: 'rep-1',
     })
-    expect(url).toContain('tab=issues')
+    expect(url).toContain('tab=incidentes')
     expect(url).toContain('investigationId=uuid-123')
     expect(url).toContain('reportId=rep-1')
   })

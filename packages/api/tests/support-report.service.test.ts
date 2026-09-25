@@ -110,4 +110,5 @@ describe('SupportReportService.create', () => {
     expect(repo.fetchRecentProductEvents).toHaveBeenCalledWith('acc-1', 'sess-1', 15)
     expect(repo.fetchRecentClientErrors).toHaveBeenCalled()
   })
+
 })

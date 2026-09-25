@@ -106,7 +106,7 @@ export function resolveSupportReportOpsConsoleUrl(options?: {
   reportId?: string
 }): string {
   return buildOpsConsoleUrl(resolveSupportReportOpsConsoleBaseUrl(), {
-    tab: 'issues',
+    tab: 'incidentes',
     investigationId: options?.investigationId,
     reportId: options?.reportId,
   })
@@ -270,8 +270,8 @@ export function analysisStatusFromInvestigatorResult(
   result: SupportInvestigatorDispatchResult,
 ): 'none' | 'pending' | 'in_progress' | 'failed' {
   if (result.outcome === 'sent') return 'in_progress'
-  if (result.outcome === 'skipped') return 'none'
-  return 'failed'
+  if (result.outcome === 'skipped' || result.outcome === 'failed') return 'pending'
+  return 'none'
 }
 
 export function analysisErrorFromInvestigatorResult(

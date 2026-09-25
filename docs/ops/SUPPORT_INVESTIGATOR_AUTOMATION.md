@@ -66,6 +66,24 @@ Reinicie a API após alterar `.env`.
 
 Implementação: `packages/api/src/application/support-report/support-report-dispatch.ts` → `dispatchSupportReportNotifications()`.
 
+### Checklist `.env` ↔ painel Cursor (lane Dev)
+
+**Fonte da verdade:** URL e auth header (`crsr_…`) vêm do editor da Automation no Cursor (trigger Webhook). O `.env` deve espelhar **exatamente** o que o painel mostra hoje — não use URL/key de print antigo ou de outro dev.
+
+| Passo | Ação |
+|-------|------|
+| 1 | Cursor → **Automations** → `AiCare - Suporte ao Desenvolvimento` → copiar **Webhook URL** → `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL` |
+| 2 | Mesma tela → **Generate / Copy auth header** → só o token `crsr_…` → `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY` |
+| 3 | Opcional callback agente: `OPS_INVESTIGATOR_CALLBACK_KEY` (ou fallback `OPS_METRICS_KEY`) — header `x-investigator-callback-key` em `POST :3013/api/analysis-queue/callback` |
+| 4 | Link no payload: `OPS_ALERT_DASHBOARD_URL` — se usar `http://127.0.0.1:5173/ops`, a API **reescreve** para ops-console `http://127.0.0.1:3013` no `callbackUrl` / `dashboardUrl` |
+| 5 | **Reiniciar** processos que leem `.env`: API `:3010` e ops-console `:3013` (worker de outbox embutido) |
+| 6 | Validar: `curl -s http://127.0.0.1:3013/api/incident-dispatch/health` — lanes `developmentSupport` / `sreSupport` com `ready: true` quando URL+key corretas |
+| 7 | Se outbox ficou `dead` após key errada: corrigir `.env` → reiniciar → `npm run ch-incident-dispatch-backfill -- --reset-dead` → `npm run ch-incident-dispatch-worker:once` (ou **Nova tentativa** no CH) |
+
+Lane SRE (`CURSOR_SRE_SUPPORT_*`, payload `ops_alert`): mesma regra URL/key — ver [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md).
+
+> **Dev local:** agente Cursor na nuvem **não alcança** `127.0.0.1:3013` no callback — use preview público ou conclua manualmente no CH até GCP.
+
 ---
 
 ## 3. Validar comportamento
@@ -152,4 +170,8 @@ Runbook: [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md)
 | Só toast, sem agente | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL` ausente ou API não reiniciada |
 | Automation não dispara | URL expirada/regenerada — copiar nova URL do editor |
 | Agente sem arquivo | Ver Runs da Automation; prompt pode precisar de commit do playbook no `main` |
-| 401 no webhook | Conferir auth configurada no editor da Automation |
+| HTTP **400** / **401** no dispatch (`last_error` outbox) | **Key mismatch:** token no `.env` ≠ auth header atual do painel Cursor. Regenerar/copiar de novo o `crsr_…` na Automation e atualizar `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY`; conferir também URL idêntica à do webhook. Reiniciar API `:3010` + ops `:3013`. |
+| `webhook_key_missing` / skipped | `CURSOR_*_WEBHOOK_KEY` vazio — colar key do painel |
+| `ready: false` no health | Falta URL ou KEY de uma lane — ver `GET :3013/api/incident-dispatch/health` |
+| Outbox `dead` após várias falhas | Corrigir `.env` → `--reset-dead` + worker once — ver [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) §4 |
+| Callback do agente falha | `OPS_INVESTIGATOR_CALLBACK_KEY` ou `OPS_METRICS_KEY` no ops-console; URL pública se agente na nuvem |
