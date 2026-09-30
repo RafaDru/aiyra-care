@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-11",
+  "updatedAt": "2026-09-30",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Fase atual (pré-CNPJ):** estruturar ambientes dev/staging/prod, massas e esteiras enquanto a regularização fiscal permite cobrança live; paralelo: discovery B2B (médicos, planos, labs, farmácias). **Go-live B2C:** código pronto no essencial; pendências com badge 🧑‍⚖️ dependem de revisão humana (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -165,6 +165,110 @@
           "status": "planned",
           "detail": "COMPLIANCE_GATE_ENABLED=1; pentest opcional (FEATURE_REVIEW_FRAMEWORK).",
           "reviewBadge": ["security"]
+        }
+      ]
+    },
+    {
+      "id": "regulatory-adherence",
+      "category": "regulacao",
+      "priority": "P0",
+      "title": "Aderência regulatória e interoperabilidade",
+      "summary": "Trilha até operação regularizada: sociedade (CNPJ/CNAE/e-CNPJ), LGPD go-live, scrapers payer/provider só showcase, SUS cidadão FHIR, RNDS institucional opcional, parcerias B2B. Plano mestre: docs/regulatory-adherence-plan.md · decisão scrape: docs/principles/connect-showcase-not-production.md.",
+      "status": "in_progress",
+      "statusLabel": "Fase 0–2 em paralelo",
+      "reviewBadge": ["legal", "regulatory", "fiscal"],
+      "items": [
+        {
+          "id": "ra-f0-cnpj",
+          "title": "Fase 0 — CNPJ regularizado",
+          "status": "in_progress",
+          "detail": "Situação cadastral, sócios, endereço. Responsável Rafael + contador.",
+          "reviewBadge": ["fiscal"]
+        },
+        {
+          "id": "ra-f0-cnae-objeto",
+          "title": "Fase 0 — CNAEs + objeto social (6203-1/00 + 6311-9/00 hipótese)",
+          "status": "planned",
+          "detail": "Validar com contador; evitar CNAE 86.x enquanto B2C organizador. docs/regulatory-adherence-plan.md §0.",
+          "reviewBadge": ["fiscal", "legal"]
+        },
+        {
+          "id": "ra-f0-ecnpj",
+          "title": "Fase 0 — Certificado e-CNPJ ICP-Brasil",
+          "status": "planned",
+          "detail": "Pré-requisito trilha RNDS institucional (Portal DATASUS).",
+          "reviewBadge": ["fiscal"]
+        },
+        {
+          "id": "ra-f1-ripd-bases",
+          "title": "Fase 1 — RIPD + matriz bases legais por fluxo",
+          "status": "planned",
+          "detail": "Cadastro, saúde sensível, menores, SUS, manual, showcase. Complementa épico legal-lgpd-compliance.",
+          "reviewBadge": ["legal", "regulatory"]
+        },
+        {
+          "id": "ra-f2-prod-gates-scrape",
+          "title": "Fase 2 — Gates prod: scraper privado fora de produção",
+          "status": "planned",
+          "detail": "Env/flags; manter gov.br FHIR + manual + parceria. docs/principles/connect-showcase-not-production.md."
+        },
+        {
+          "id": "ra-f2-showcase-pack",
+          "title": "Fase 2 — Showcase comercial operadora/lab",
+          "status": "planned",
+          "detail": "Demo controlada, disclaimer integração oficial em negociação; roteiro reunião."
+        },
+        {
+          "id": "ra-f2-legal-compliance-sync",
+          "title": "Fase 2 — Atualizar LEGAL_COMPLIANCE + copy SaMD/marketing",
+          "status": "planned",
+          "detail": "Refletir decisão scrape + trilha SUS; não prometer SBIS/PEP.",
+          "reviewBadge": ["legal", "regulatory", "content"]
+        },
+        {
+          "id": "ra-f3-sus-fhir-expand",
+          "title": "Fase 3 — Expandir documentos FHIR cidadão (RNDS perfis)",
+          "status": "planned",
+          "detail": "Mais List/Composition/REL quando expostos ao titular. Complementa épico sus-public-health."
+        },
+        {
+          "id": "ra-f3-sus-consent-ux",
+          "title": "Fase 3 — UX consentimento e transparência SUS",
+          "status": "planned",
+          "detail": "Origem SUS, última importação, reimport, expiração sessão gov.br."
+        },
+        {
+          "id": "ra-f3-govbr-login",
+          "title": "Fase 3 — Regularizar login gov.br (OAuth vs browser)",
+          "status": "planned",
+          "detail": "Evoluir de Playwright 1ª vez para fluxo formal app cidadão; docs/SUS_CONECTESUS.md."
+        },
+        {
+          "id": "ra-f3-ms-contato",
+          "title": "Fase 3 — Contato exploratório MS/DATASUS (app cidadão)",
+          "status": "planned",
+          "detail": "Caminho A (só cidadão) vs B (SIS). Jurídico + Rafael.",
+          "reviewBadge": ["legal", "regulatory"]
+        },
+        {
+          "id": "ra-f4-rnds-decisao",
+          "title": "Fase 4 — Decisão papel RNDS (Caminho A vs B) + CNES",
+          "status": "planned",
+          "detail": "Bloqueado até Fase 0 jurídico. Homologação DATASUS só se Caminho B.",
+          "reviewBadge": ["legal", "regulatory"]
+        },
+        {
+          "id": "ra-f4-datasus-homolog",
+          "title": "Fase 4 — Portal DATASUS + homologação FHIR",
+          "status": "planned",
+          "detail": "CNES, certificado, portfólio REL/RIA/RAC. rnds-fhir.saude.gov.br.",
+          "reviewBadge": ["regulatory"]
+        },
+        {
+          "id": "ra-f5-parceria-piloto",
+          "title": "Fase 5 — Parceria piloto operadora/lab (API/OAuth)",
+          "status": "planned",
+          "detail": "Due diligence LGPD; showcase → contrato. health-data-interoperability-research no Project store."
         }
       ]
     },

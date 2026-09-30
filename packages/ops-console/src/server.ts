@@ -26,7 +26,18 @@ import { OpsAlertIncidentPgRepository } from '../../api/src/infrastructure/persi
 import { OpsAnalysisQueuePgRepository } from '../../api/src/infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import { OpsAnalysisQueueService } from '../../api/src/application/ops/ops-analysis-queue.service.js'
 import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
+import {
+  PlatformDefectService,
+  PlatformDefectTransitionError,
+} from '../../api/src/application/ops/platform-defect.service.js'
+import { PlatformDefectPgRepository } from '../../api/src/infrastructure/persistence/platform-defect.pg.repository.js'
+import {
+  dispatchErrorMessage,
+  startPlatformDefectFixWithDispatch,
+} from '../../api/src/application/ops/platform-defect-fix-dispatch.js'
+import { getIncidentDispatchHealth } from '../../api/src/application/ops/incident-dispatch-health.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
+import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { runOpsProbe } from '../../api/src/application/ops/ops-probe.service.js'
 import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe-artifact.js'
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
@@ -80,6 +91,8 @@ const analysisQueueService = new OpsAnalysisQueueService(
 const alertAnalysisService = new OpsAlertAnalysisService(alertIncidentRepo, analysisQueueService)
 const dispatchService = new OpsAlertDispatchService(metricsService, alertAnalysisService)
 const supportReportService = new OpsSupportReportService(supportRepo, analysisQueueService)
+const platformDefectRepo = new PlatformDefectPgRepository(pool)
+const platformDefectService = new PlatformDefectService(platformDefectRepo)
 
 async function runProbeCycle(): Promise<void> {
   try {
@@ -276,6 +289,8 @@ async function main() {
     items: await analysisQueueService.listOpen(100),
   }))
 
+  fastify.get('/api/incident-dispatch/health', async () => getIncidentDispatchHealth(pool))
+
   fastify.get('/api/analysis-queue/attention-counts', async () =>
     analysisQueueService.attentionCounts(deploymentTier),
   )
@@ -289,7 +304,25 @@ async function main() {
       })) {
         return reply.status(401).send({ error: 'unauthorized' })
       }
-      const record = await analysisQueueService.completeFromAgent(req.body ?? {})
+      const body = req.body ?? {}
+      if (body.defectId && body.defectStatus) {
+        const summary = body.remediationSummary?.trim()
+        if (!summary) return reply.status(400).send({ error: 'invalid_payload' })
+        try {
+          const item = await platformDefectService.transition(body.defectId, body.defectStatus, {
+            branchName: body.branchName ?? null,
+            prUrl: body.prUrl ?? null,
+          })
+          return { ok: true, defect: item }
+        } catch (err) {
+          if (err instanceof PlatformDefectTransitionError) {
+            if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+            return reply.status(409).send({ error: err.code })
+          }
+          throw err
+        }
+      }
+      const record = await analysisQueueService.completeFromAgent(body)
       if (!record) return reply.status(400).send({ error: 'invalid_payload' })
       return { ok: true, item: record }
     },
@@ -301,6 +334,97 @@ async function main() {
       const ok = await analysisQueueService.markHumanCompleted(req.params.id)
       if (!ok) return reply.status(404).send({ error: 'not_found' })
       return { ok: true }
+    },
+  )
+
+  fastify.get<{ Querystring: { status?: string; includeFixed?: string } }>(
+    '/api/platform-defects',
+    async (req) => {
+      const items = await platformDefectService.listForOps({
+        statusFilter: req.query.status,
+        includeFixed: req.query.includeFixed === '1' || req.query.includeFixed === 'true',
+      })
+      return { items }
+    },
+  )
+
+  fastify.get<{ Params: { id: string } }>('/api/platform-defects/:id', async (req, reply) => {
+    const detail = await platformDefectService.getDetail(req.params.id)
+    if (!detail) return reply.status(404).send({ error: 'not_found' })
+    return detail
+  })
+
+  fastify.patch<{
+    Params: { id: string }
+    Body: { status?: PlatformDefectStatus; branchName?: string; prUrl?: string }
+  }>('/api/platform-defects/:id/status', async (req, reply) => {
+    const status = req.body?.status
+    if (!status) return reply.status(400).send({ error: 'invalid_payload' })
+    try {
+      const item = await platformDefectService.transition(req.params.id, status, {
+        branchName: req.body.branchName ?? null,
+        prUrl: req.body.prUrl ?? null,
+      })
+      return { ok: true, item }
+    } catch (err) {
+      if (err instanceof PlatformDefectTransitionError) {
+        if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+        return reply.status(409).send({ error: err.code })
+      }
+      throw err
+    }
+  })
+
+  fastify.post<{ Params: { id: string } }>(
+    '/api/platform-defects/:id/start-fix',
+    async (req, reply) => {
+      try {
+        const { item, dispatch } = await startPlatformDefectFixWithDispatch(
+          platformDefectService,
+          platformDefectRepo,
+          req.params.id,
+        )
+        const dispatchError = dispatchErrorMessage(dispatch)
+        if (dispatchError) {
+          console.warn('[ops-console] platform-defect start-fix dispatch:', dispatchError)
+        }
+        return {
+          ok: true,
+          item,
+          dispatch: {
+            outcome: dispatch.outcome,
+            ...(dispatch.outcome === 'failed' ? { error: dispatch.error } : {}),
+            ...(dispatch.outcome === 'skipped' ? { reason: dispatch.reason } : {}),
+          },
+        }
+      } catch (err) {
+        if (err instanceof PlatformDefectTransitionError) {
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          return reply.status(409).send({ error: err.code })
+        }
+        throw err
+      }
+    },
+  )
+
+  fastify.post<{ Params: { id: string }; Body: { incidentId?: string; linkedBy?: string } }>(
+    '/api/platform-defects/:id/link-incident',
+    async (req, reply) => {
+      const incidentId = req.body?.incidentId?.trim()
+      if (!incidentId) return reply.status(400).send({ error: 'invalid_payload' })
+      try {
+        await platformDefectService.linkIncident(
+          req.params.id,
+          incidentId,
+          req.body.linkedBy?.trim() || 'ops_manual',
+        )
+        return { ok: true }
+      } catch (err) {
+        if (err instanceof PlatformDefectTransitionError && err.code === 'not_found') {
+          return reply.status(404).send({ error: err.code })
+        }
+        throw err
+      }
     },
   )
 

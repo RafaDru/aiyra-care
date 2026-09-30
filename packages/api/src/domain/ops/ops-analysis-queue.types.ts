@@ -42,6 +42,9 @@ export interface OpsAnalysisAttentionCounts {
 }
 
 export interface AgentAnalysisCallbackInput {
+  /** Chave canônica — `ops_analysis_queue.id` */
+  investigationId?: string
+  /** @deprecated use investigationId */
   queueId?: string
   sourceType?: AnalysisQueueSourceType
   sourceId?: string
@@ -49,4 +52,8 @@ export interface AgentAnalysisCallbackInput {
   analysisArtifactPath?: string
   prUrl?: string
   errorSummary?: string
+  /** Agente Correção Dev — atualiza defeito no mesmo endpoint de callback */
+  defectId?: string
+  defectStatus?: 'ready_for_pr' | 'fixed'
+  branchName?: string
 }
