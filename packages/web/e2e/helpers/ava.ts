@@ -3,7 +3,7 @@ import { dismissFirstVisitTour } from './ui'
 
 const AVA_FAB_LABEL = /Abrir conversa com Ava|Open chat with Ava/i
 const AVA_COMPOSER_PLACEHOLDER = /febre|fever|Ex\.:|E\.g\./i
-const AVA_SEND_LABEL = /^(Enviar|Send)$/
+const AVA_SEND_LABEL = /Enviar|Send/
 const AVA_NEW_CONVERSATION = /^(Nova conversa|New conversation)$/
 
 function isAvaChatPostUrl(method: string, url: string) {
@@ -20,16 +20,13 @@ function avaDockTrigger(page: Page) {
   return page.locator('.ava-global-dock .ava-dock-trigger')
 }
 
-function avaChatDrawer(page: Page) {
-  return page.locator('.ava-chat-drawer')
-}
-
+/** Único AvaChatPanel na app (drawer em portal). */
 function avaComposerRoot(page: Page) {
-  return avaChatDrawer(page).locator('.ava-chat-panel__composer')
+  return page.locator('.ava-chat-panel__composer')
 }
 
 function avaAssistantBubbleBodies(page: Page) {
-  return avaChatDrawer(page).locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
+  return page.locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
 }
 
 function avaComposerInput(page: Page) {
@@ -37,7 +34,7 @@ function avaComposerInput(page: Page) {
 }
 
 function avaSendButton(page: Page) {
-  return avaComposerRoot(page).getByRole('button', { name: AVA_SEND_LABEL })
+  return avaComposerRoot(page).locator('.ava-chat-panel__composer-actions button.ant-btn-primary')
 }
 
 async function waitForAvaChatPostComplete(page: Page, timeout = 90_000) {
@@ -99,10 +96,10 @@ export async function openAvaDock(page: Page) {
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
 export async function startFreshAvaConversation(page: Page) {
   await expect(async () => {
-    const avaRows = avaChatDrawer(page).locator('.ava-chat-bubble-row--ava')
+    const avaRows = page.locator('.ava-chat-bubble-row--ava')
     const count = await avaRows.count()
     if (count > 0) {
-      const btn = avaChatDrawer(page).getByRole('button', { name: AVA_NEW_CONVERSATION })
+      const btn = page.getByRole('button', { name: AVA_NEW_CONVERSATION })
       if (await btn.isVisible().catch(() => false)) {
         await btn.click()
       }
@@ -168,7 +165,7 @@ export async function sendAvaMessage(page: Page, text: string) {
 }
 
 export async function waitForAvaAssistantBubble(page: Page, timeout = 45_000) {
-  const bubble = avaChatDrawer(page).locator('.ava-chat-bubble-row--ava').last()
+  const bubble = page.locator('.ava-chat-bubble-row--ava').last()
   await bubble.waitFor({ state: 'visible', timeout })
   return bubble
 }
