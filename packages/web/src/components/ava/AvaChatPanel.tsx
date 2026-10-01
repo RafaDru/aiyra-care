@@ -150,6 +150,7 @@ export function AvaChatPanel({
     api.ava.getMessages(id)
       .then((r) => {
         if (conversationIdRef.current !== id) return
+        if (r.messages.length === 0) return
         setMessages(r.messages.map((m) => ({
           role: m.role,
           text: m.content,
@@ -157,8 +158,8 @@ export function AvaChatPanel({
         })))
       })
       .catch(() => {
+        // Falha transitória de sync não deve apagar bolhas já renderizadas (ex.: corrida pós-turno no CI).
         if (conversationIdRef.current !== id) return
-        setMessages([])
       })
   }, [])
 
@@ -200,7 +201,7 @@ export function AvaChatPanel({
 
   useEffect(() => {
     if (conversationId) {
-      if (!loading) loadConversationMessages(conversationId)
+      if (!loading && messages.length === 0) loadConversationMessages(conversationId)
       return
     }
     if (resumeAttemptedRef.current || initialMessage?.trim() || autoSend || loading) return
@@ -212,7 +213,7 @@ export function AvaChatPanel({
         if (latest) onConversationIdChange?.(latest.id)
       })
       .catch(() => {})
-  }, [conversationId, patientId, initialMessage, autoSend, loading, loadConversationMessages, onConversationIdChange])
+  }, [conversationId, patientId, initialMessage, autoSend, loading, messages.length, loadConversationMessages, onConversationIdChange])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
