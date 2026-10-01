@@ -112,6 +112,10 @@ export function AvaChatPanel({
   const autoSendDoneRef = useRef(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const resumeAttemptedRef = useRef(false)
+  /** Evita que listConversations em voo reative conversa após «Nova conversa». */
+  const userClearedConversationRef = useRef(false)
+  const conversationIdRef = useRef<string | null>(conversationId ?? null)
+  conversationIdRef.current = conversationId ?? null
 
   const thinkingPhrase = useAvaThinkingPhrase(loading)
   const statusLabel = useMemo(() => {
@@ -145,13 +149,17 @@ export function AvaChatPanel({
   const loadConversationMessages = useCallback((id: string) => {
     api.ava.getMessages(id)
       .then((r) => {
+        if (conversationIdRef.current !== id) return
         setMessages(r.messages.map((m) => ({
           role: m.role,
           text: m.content,
           revised: Boolean(m.metadata?.reflection && (m.metadata.reflection as { revised?: boolean }).revised),
         })))
       })
-      .catch(() => setMessages([]))
+      .catch(() => {
+        if (conversationIdRef.current !== id) return
+        setMessages([])
+      })
   }, [])
 
   const loadContextPins = useCallback(() => {
@@ -187,22 +195,24 @@ export function AvaChatPanel({
   useEffect(() => {
     loadConversationList()
     resumeAttemptedRef.current = false
+    userClearedConversationRef.current = false
   }, [patientId, loadConversationList])
 
   useEffect(() => {
     if (conversationId) {
-      loadConversationMessages(conversationId)
+      if (!loading) loadConversationMessages(conversationId)
       return
     }
-    if (resumeAttemptedRef.current || initialMessage?.trim() || autoSend) return
+    if (resumeAttemptedRef.current || initialMessage?.trim() || autoSend || loading) return
     resumeAttemptedRef.current = true
     api.ava.listConversations(patientId)
       .then((r) => {
+        if (userClearedConversationRef.current) return
         const latest = r.items[0]
         if (latest) onConversationIdChange?.(latest.id)
       })
       .catch(() => {})
-  }, [conversationId, patientId, initialMessage, autoSend, loadConversationMessages, onConversationIdChange])
+  }, [conversationId, patientId, initialMessage, autoSend, loading, loadConversationMessages, onConversationIdChange])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -349,6 +359,7 @@ export function AvaChatPanel({
   }
 
   const startNewConversation = () => {
+    userClearedConversationRef.current = true
     onConversationIdChange?.(null)
     setMessages([])
     setAttachment(null)
@@ -429,7 +440,7 @@ export function AvaChatPanel({
       showIcon
       acknowledge={false}
       style={{ marginBottom: 8 }}
-      message="Ava em modo simplificado — respostas sem revisão automática. Confirme informações importantes com o pediatra."
+      message={t('ava.liteModeBanner')}
     />
   ) : null
 

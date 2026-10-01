@@ -18,6 +18,7 @@
 
 ### Produto e negócio
 
+- [`product-terminology.md`](./product-terminology.md) — glossário UI B2C (família × clínico)
 - [`discovery/`](./discovery/) — discovery ativo (dia a dia, médico, indicação)
 - [`ECOSYSTEM.md`](./ECOSYSTEM.md) — personas, monetização
 - [`B2B_PARTNERS.md`](./B2B_PARTNERS.md) — parceiros B2B

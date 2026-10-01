@@ -1,4 +1,4 @@
--- Migration 066: pilha unificada de investigação (Suporte Dev + SRE)
+-- Migration 068: pilha unificada de investigação (Suporte Dev + SRE)
 
 CREATE TABLE IF NOT EXISTS ops_analysis_queue (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

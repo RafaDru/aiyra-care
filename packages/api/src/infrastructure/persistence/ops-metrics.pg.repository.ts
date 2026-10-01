@@ -408,6 +408,23 @@ export class OpsMetricsPgRepository {
     return Number(rows[0]?.count ?? 0)
   }
 
+  async supportReportsSubmittedHourly24h(): Promise<Array<{ hour: Date; count: number }>> {
+    const { rows } = await this.pool.query(
+      `SELECT
+         date_trunc('hour', created_at) AS hour,
+         COUNT(*)::int AS count
+       FROM product_events
+       WHERE event_name = 'support_report_submitted'
+         AND created_at >= NOW() - INTERVAL '24 hours'
+       GROUP BY 1
+       ORDER BY 1`,
+    )
+    return rows.map((row) => ({
+      hour: new Date(row.hour as string),
+      count: Number(row.count),
+    }))
+  }
+
   async businessAnalytics(): Promise<OpsBusinessAnalytics> {
     const [
       totalsRes,

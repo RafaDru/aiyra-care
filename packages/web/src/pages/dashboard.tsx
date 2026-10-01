@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { subscribePatientCreateOpen } from '../lib/patient-create-bus.js'
 import { Row, Col, Card, Avatar, Typography, Spin, Empty, Button, Tag, Modal, Form, Input, Select, App, Alert, Checkbox } from 'antd'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
@@ -10,7 +11,10 @@ import { api } from '../lib/api.js'
 import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
+import { DayToDayDiscoveryHub } from '../components/dashboard/DayToDayDiscoveryHub.js'
+import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
 import { useAuth } from '../contexts/AuthContext.js'
+import { useActiveCareCircle } from '../contexts/ActiveCareCircleContext.js'
 
 const { Title, Text } = Typography
 
@@ -24,6 +28,7 @@ export function Dashboard() {
   const { t } = useTranslation()
   const { message } = App.useApp()
   const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
+  const { hasMultipleCircles, activeCircleId } = useActiveCareCircle()
   const [patients, setPatients] = useState<Patient[]>([])
   const [circleGroups, setCircleGroups] = useState<Array<{ id: string; name: string; patientIds: string[] }>>([])
   const [loading, setLoading] = useState(true)
@@ -54,13 +59,15 @@ export function Dashboard() {
       .catch((err) => {
         setPatients([])
         setCircleGroups([])
-        setLoadError(err instanceof Error ? err.message : 'Falha ao carregar pacientes')
+        setLoadError(err instanceof Error ? err.message : t('patient.loadListFailed'))
       })
   }
   useEffect(() => {
     if (authConfigured && (authLoading || !authUserId)) return
     load().finally(() => setLoading(false))
   }, [authConfigured, authLoading, authUserId])
+
+  useEffect(() => subscribePatientCreateOpen(() => setModalOpen(true)), [])
 
   const handleCreate = async () => {
     try {
@@ -79,7 +86,7 @@ export function Dashboard() {
         cns: values.cns?.replace(/\D/g, '') || undefined,
         markAsSelf: showMarkAsSelf && Boolean(values.markAsSelf),
       })
-      message.success('Paciente cadastrado com sucesso')
+      message.success(t('patient.createSuccess'))
       setModalOpen(false)
       form.resetFields()
       load()
@@ -108,6 +115,13 @@ export function Dashboard() {
     const other = patients.filter((p) => !assigned.has(p.id))
     return { sections, other }
   }, [patients, circleGroups])
+
+  const circleSections = useMemo(() => {
+    if (hasMultipleCircles && activeCircleId) {
+      return groupedByCircle.sections.filter((s) => s.id === activeCircleId)
+    }
+    return groupedByCircle.sections
+  }, [groupedByCircle.sections, hasMultipleCircles, activeCircleId])
 
   const renderPatientGrid = (list: Patient[]) => (
     <Row gutter={[20, 20]}>
@@ -140,26 +154,31 @@ export function Dashboard() {
     })
   }
 
-  if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
+  const useCircleLayout = useMemo(() => {
+    if (hasMultipleCircles && circleSections.length > 0) return true
+    return groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0
+  }, [hasMultipleCircles, circleSections.length, groupedByCircle.sections.length, groupedByCircle.other.length])
 
-  const useCircleLayout = groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0
+  if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
 
   return (
     <div>
       <PageHeader
         title={t('patient.title')}
-        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
+        extra={<Button type="primary" icon={<PlusOutlined />} data-testid="dashboard-add-family" onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
 
+      {patients.length > 0 && <DashboardFamilyShortcut />}
+      {patients.length === 0 && !loadError && <DayToDayDiscoveryHub hasPatients={false} />}
       {patients.length > 0 && <DashboardDayToDaySection />}
 
       {loadError && (
         <Alert
           type="error"
           showIcon
-          message="Não foi possível carregar os pacientes"
+          message={t('patient.loadListErrorTitle')}
           description={loadError}
-          action={<Button size="small" onClick={() => { setLoading(true); load().finally(() => setLoading(false)) }}>Tentar novamente</Button>}
+          action={<Button size="small" onClick={() => { setLoading(true); load().finally(() => setLoading(false)) }}>{t('patient.loadListRetry')}</Button>}
           style={{ marginBottom: 16 }}
         />
       )}
@@ -169,7 +188,7 @@ export function Dashboard() {
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={
             <span>
-              {t('common.empty')}<br />
+              {t('patient.emptyFamily')}<br />
               <Button type="link" icon={<PlusOutlined />} onClick={() => setModalOpen(true)} style={{ marginTop: 8 }}>
                 {t('patient.new')}
               </Button>
@@ -179,7 +198,7 @@ export function Dashboard() {
         />
       ) : useCircleLayout ? (
         <>
-          {groupedByCircle.sections.map((section) => (
+          {circleSections.map((section) => (
             <div key={section.id} style={{ marginBottom: 40 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                 <TeamOutlined style={{ fontSize: 22, color: '#4F46E5' }} />

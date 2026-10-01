@@ -39,6 +39,11 @@ function supportRecord(overrides: Partial<SupportReportRecord> = {}): SupportRep
     analysisRequestedAt: null,
     analysisCompletedAt: null,
     analysisLastError: null,
+    suggestedCategory: null,
+    categoryReviewNote: null,
+    taxonomyGapProposal: null,
+    deploymentStatus: 'none',
+    deploymentActions: [],
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -51,6 +56,7 @@ function opsAlert(overrides: Partial<OpsAlert> = {}): OpsAlert {
     severity: 'critical',
     category: 'infra',
     message: 'API down',
+    detectedAt: new Date().toISOString(),
     ...overrides,
   }
 }

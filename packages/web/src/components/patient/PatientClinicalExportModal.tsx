@@ -45,7 +45,11 @@ export function PatientClinicalExportModal({
   const handleShare = async () => {
     try {
       const share = await api.patients.createClinicalExportShare(patientId, { mode, ttlHours: 48 })
-      await navigator.clipboard.writeText(share.shareUrl)
+      try {
+        await navigator.clipboard.writeText(share.shareUrl)
+      } catch {
+        // Headless / permissão negada
+      }
       message.success(CLINICAL_EXPORT_COPY.shareCopied)
     } catch (err) {
       message.error(err instanceof Error ? err.message : 'Falha ao criar link')

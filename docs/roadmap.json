@@ -989,8 +989,8 @@
         {
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
-          "status": "planned",
-          "detail": "Fora do web atual."
+          "status": "in_progress",
+          "detail": "M5: Ava FAB + chat SSE + lente paciente. M4 done. Plano: Project store docs/mobile-parity-plan.md."
         },
         {
           "id": "plat-microservices",
@@ -1442,8 +1442,8 @@
       "priority": "P1",
       "title": "Dia a dia — captura rápida + levar na consulta",
       "summary": "Registro de eventos em poucos toques; wizard «Levar na consulta» (link/QR/PDF) para o médico. Discovery: docs/discovery/day-to-day-clinician-access.md.",
-      "status": "in_progress",
-      "statusLabel": "D1–D5 entregues — referral billing em debate",
+      "status": "done",
+      "statusLabel": "D1–D5 + suites QA — referral billing aguarda jurídico",
       "items": [
         {
           "id": "family-day-to-day-discovery",
@@ -2035,6 +2035,12 @@
           "detail": "docs/CURSOR_AGENT_OPS.md — skills, hooks, troca de modelo."
         },
         {
+          "id": "del-cursor-my-machines",
+          "title": "Cursor Projects — My Machines worker local",
+          "status": "done",
+          "detail": "Worker NotebookRafael; autostart Windows; scripts/cursor-worker-*.ps1; docs/CURSOR_WORKSPACE.md."
+        },
+        {
           "id": "del-ci-vitest-critical",
           "title": "CI: vitest critical na API",
           "status": "done",
@@ -2244,21 +2250,27 @@
         {
           "id": "run-support-user-reports",
           "title": "Reportar problema — chamado + bundle LGPD",
-          "status": "in_progress",
-          "detail": "Migration 061 + 064 (analysis_status, operator_notes); fila console :3013; Analisar/Concluir + agente Cursor Tier 0; POST/GET /support/reports; docs/ops/SUPPORT_REPORTS.md.",
+          "status": "done",
+          "detail": "Migration 061 + 064; aba Suporte + Issues (068 ops_analysis_queue); investigationId; Analisar/Concluir + agente Cursor; docs/ops/SUPPORT_REPORTS.md + INVESTIGATION_CORRELATION.md.",
           "reviewBadge": ["legal"]
         },
         {
-          "id": "run-ops-alert-investigator",
-          "title": "Investigador Cursor — alertas infra (Tier 0)",
+          "id": "run-ops-analysis-queue",
+          "title": "Pilha Issues + callback agente",
           "status": "done",
-          "detail": "ops-alert-investigator-dispatch; auto critical infra; OpsAlertsTable; migration 065 ops_alert_incidents (PG); playbook docs/ops/automations/ops-alert-investigator.prompt.md."
+          "detail": "Migration 068; ops_analysis_queue; aba Issues :3013; tray contadores; pre-screen OPS_ANALYSIS_PRE_SCREEN; investigationId; docs/ops/INVESTIGATION_CORRELATION.md."
+        },
+        {
+          "id": "run-ops-alert-investigator",
+          "title": "Investigador Cursor — alertas infra (Tier 0–1)",
+          "status": "done",
+          "detail": "Lane AiCare Suporte SRE; ops-alert-investigator-dispatch + investigationId; migration 065; playbook docs/ops/automations/ops-alert-investigator.prompt.md; Tier 1 OPS_INVESTIGATOR_TIER1."
         },
         {
           "id": "run-support-investigator-automation",
-          "title": "Investigador Cursor — chamados suporte (Tier 0)",
+          "title": "Investigador Cursor — chamados suporte (Tier 0–1)",
           "status": "done",
-          "detail": "CURSOR_SUPPORT_AUTOMATION_WEBHOOK_*; dispatch no submit + manual; docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md."
+          "detail": "Lane AiCare Suporte ao Desenvolvimento; CURSOR_DEVELOPMENT_SUPPORT_*; investigationId; docs/ops/SUPPORT_INVESTIGATOR_AUTOMATION.md; Tier 1 TIER1_GATES.md."
         },
         {
           "id": "run-operation-model-doc",
@@ -2310,8 +2322,8 @@
       "priority": "P2",
       "title": "Analytics de negócio (agregados, sem PHI)",
       "summary": "Visão executiva e operacional: funis de ativação, retenção, uso por feature, volume de suporte, billing e saúde de integrações — cruzando product_events, support_reports, client_errors e Stripe. Complementa observability-platform (técnico) e product-analytics-optin (NLP opt-in). Primeira superfície: aba Negócio no console ops ou relatórios semanais.",
-      "status": "in_progress",
-      "statusLabel": "MVP aba Negócio no ops",
+      "status": "done",
+      "statusLabel": "MVP aba Negócio + guardrails LGPD",
       "reviewBadge": ["legal", "business"],
       "items": [
         {
@@ -2352,6 +2364,13 @@
           "reviewBadge": ["design"]
         },
         {
+          "id": "ops-strategy-advisory-tab",
+          "title": "Aba «Estratégia» no Command Hub (advisory)",
+          "status": "done",
+          "detail": "packages/ops-console/content/strategy + StrategyPanel (Marketing, Financeiro, CX); manifest updatedAt; alinhamento Command Hub F2 leitura estratégica.",
+          "reviewBadge": ["business"]
+        },
+        {
           "id": "biz-analytics-weekly-report",
           "title": "Relatório semanal automático (interno)",
           "status": "done",
@@ -2360,8 +2379,8 @@
         {
           "id": "biz-analytics-lgpd-guardrails",
           "title": "Guardrails LGPD analytics negócio",
-          "status": "planned",
-          "detail": "Documentar finalidade, minimização e retenção em docs/legal/ + DATA_PROCESSING_MAP; revisão jurídica antes de métricas novas.",
+          "status": "done",
+          "detail": "DATA_PROCESSING_MAP + feature card business-analytics-ops (finalidade, minimização, retenção); novas métricas exigem review legal.",
           "reviewBadge": ["legal"]
         }
       ]
@@ -2477,6 +2496,36 @@
           "title": "FAQ + contato comercial / suporte",
           "status": "planned",
           "detail": "Link compliance/contact API; formulário lead opcional."
+        }
+      ]
+    },
+    {
+      "id": "landing-page-refresh",
+      "category": "negocio",
+      "priority": "P2",
+      "title": "Landing — reavaliação visual e narrativa",
+      "summary": "Reavaliação visual da landing pública: animações, carrossel de dores (consulta sem exames/histórico), jornada emocional e prova social — além dos CTAs auth já corrigidos.",
+      "status": "planned",
+      "statusLabel": "Planejado",
+      "reviewBadge": ["content"],
+      "items": [
+        {
+          "id": "landing-refresh-hero-motion",
+          "title": "Hero com animação leve e hierarquia visual",
+          "status": "planned",
+          "detail": "Motion CSS/Lottie sutil; manter performance mobile."
+        },
+        {
+          "id": "landing-refresh-pain-carousel",
+          "title": "Carrossel «consulta sem exames/histórico»",
+          "status": "planned",
+          "detail": "Narrativa dor → solução em slides; track landing_cta_click por slide."
+        },
+        {
+          "id": "landing-refresh-social-proof",
+          "title": "Prova social e métricas reais",
+          "status": "planned",
+          "detail": "Testemunhos, números de uso — alinhar com marketing e jurídico."
         }
       ]
     },

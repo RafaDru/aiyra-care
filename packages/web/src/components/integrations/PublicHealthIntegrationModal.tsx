@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Modal, Form, Input, App, Alert, Collapse, Tag, Table, Typography, Spin, List, Space,
 } from 'antd'
@@ -48,6 +49,7 @@ export function PublicHealthIntegrationModal({
   onClose,
   onImported,
 }: Props) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -233,7 +235,7 @@ export function PublicHealthIntegrationModal({
 
   const portalTitle = option?.title ?? 'SUS'
   const okText = hasPreview
-    ? (isCaderneta ? 'Importar para filhos vinculados' : 'Importar para este paciente')
+    ? (isCaderneta ? 'Importar para filhos vinculados' : t('patient.importForProfile'))
     : (isCaderneta ? 'Buscar na Caderneta' : 'Buscar no ConecteSUS')
 
   return (
@@ -267,11 +269,11 @@ export function PublicHealthIntegrationModal({
           showIcon
           icon={<UserOutlined />}
           style={{ marginBottom: 16 }}
-          message={`Paciente: ${patient.name}`}
+          message={t('patient.profileLabel', { name: patient.name })}
           description={
             isCaderneta && linkedChildrenCount > 0
               ? `Login como responsável; os dados serão distribuídos entre ${linkedChildrenCount} filho(s) vinculado(s).`
-              : 'Os dados serão importados neste cadastro.'
+              : t('patient.importHint')
           }
         />
       )}
@@ -282,7 +284,7 @@ export function PublicHealthIntegrationModal({
             <Form form={form} layout="vertical">
               <Form.Item
                 name="cpf"
-                label="CPF do paciente"
+                label={t('patient.cpfFieldLabel')}
                 rules={[
                   { required: true },
                   {
@@ -357,7 +359,7 @@ export function PublicHealthIntegrationModal({
                   </Space>
                 ),
               },
-              { title: 'Paciente no app', dataIndex: 'patientName' },
+              { title: t('patient.inAppProfileColumn'), dataIndex: 'patientName' },
               {
                 title: 'Critério',
                 dataIndex: 'matchReason',

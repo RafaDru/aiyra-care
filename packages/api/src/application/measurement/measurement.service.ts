@@ -2,7 +2,7 @@ import { NotFoundError } from '../../domain/errors.js'
 import type { WhoGrowthService } from './who-growth.service.js'
 import type { MeasurementRepository } from '../../domain/measurement/measurement.repository.js'
 import { MeasurementObservation } from '../../domain/measurement/measurement-observation.entity.js'
-import type { MeasurementObservationProps } from '../../domain/measurement/measurement-observation.entity.js'
+import type { MeasurementObservationProps, MeasurementSource } from '../../domain/measurement/measurement-observation.entity.js'
 import { MedicationAdministration } from '../../domain/measurement/medication-administration.entity.js'
 import type { MedicationAdministrationProps } from '../../domain/measurement/medication-administration.entity.js'
 
@@ -72,7 +72,7 @@ export class MeasurementService {
       notes?: string | null
       context?: Record<string, unknown>
     }>,
-    opts?: { healthThreadId?: string | null },
+    opts?: { healthThreadId?: string | null; source?: MeasurementSource; sourceRef?: string | null },
   ) {
     const saved: MeasurementObservation[] = []
     for (const item of items) {
@@ -87,11 +87,29 @@ export class MeasurementService {
         notes: item.notes,
         context: item.context,
         healthThreadId: opts?.healthThreadId ?? null,
-        source: 'manual',
+        source: opts?.source ?? 'manual',
+        sourceRef: opts?.sourceRef ?? null,
       })
       saved.push(row)
     }
     return saved
+  }
+
+  async seedInitialAnthropometry(
+    patientId: string,
+    data: { weightKg?: number | null; heightCm?: number | null },
+    opts?: { observedAt?: Date; sourceRef?: string | null },
+  ) {
+    const items = [
+      data.weightKg != null ? { typeCode: 'weight', valueNumeric: data.weightKg } : null,
+      data.heightCm != null ? { typeCode: 'height', valueNumeric: data.heightCm } : null,
+    ].filter((i): i is { typeCode: string; valueNumeric: number } => i != null)
+    if (!items.length) return []
+    return this.createObservationBatch(patientId, opts?.observedAt ?? new Date(), items, {
+      healthThreadId: null,
+      source: 'manual',
+      sourceRef: opts?.sourceRef ?? 'profile:onboarding',
+    })
   }
 
   async findObservationById(id: string) {

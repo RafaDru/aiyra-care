@@ -1,5 +1,11 @@
 # Poll contadores da pilha ops_analysis_queue (ops-console).
 
+function Get-IntOrZero {
+  param($Value)
+  if ($null -eq $Value) { return 0 }
+  return [int]$Value
+}
+
 function Get-OpsAttentionCounts {
   param(
     [int]$OpsConsolePort = 3013
@@ -9,11 +15,11 @@ function Get-OpsAttentionCounts {
   try {
     $res = Invoke-RestMethod -Uri $url -Method Get -TimeoutSec 4
     return [pscustomobject]@{
-      queued = [int]($res.queued ?? 0)
-      investigating = [int]($res.investigating ?? 0)
-      fixProposed = [int]($res.fixProposed ?? 0)
-      failed = [int]($res.failed ?? 0)
-      totalAttention = [int]($res.totalAttention ?? 0)
+      queued = Get-IntOrZero $res.queued
+      investigating = Get-IntOrZero $res.investigating
+      fixProposed = Get-IntOrZero $res.fixProposed
+      failed = Get-IntOrZero $res.failed
+      totalAttention = Get-IntOrZero $res.totalAttention
     }
   } catch {
     return $null
@@ -25,8 +31,8 @@ function Format-OpsAttentionMenuLine {
     [string]$Label,
     [int]$Count
   )
-  if ($Count -le 0) { return "$Label: 0" }
-  return "$Label: $Count"
+  if ($Count -le 0) { return "${Label}: 0" }
+  return "${Label}: $Count"
 }
 
 function Update-OpsTrayAttentionMenu {
@@ -40,14 +46,15 @@ function Update-OpsTrayAttentionMenu {
   if (-not $header) { return }
 
   if (-not $counts) {
-    $header.Text = 'Issues — console indisponível'
+    $header.Text = 'Issues - console indisponivel'
     return
   }
 
   if ($counts.totalAttention -le 0) {
-    $header.Text = 'Issues — nenhuma pendente'
+    $header.Text = 'Issues - nenhuma pendente'
   } else {
-    $header.Text = "Issues — $($counts.totalAttention) pendente(s)"
+    $n = $counts.totalAttention
+    $header.Text = "Issues - $n pendente(s)"
   }
 
   $map = @{

@@ -162,4 +162,16 @@ describe('CareCircleService', () => {
     await svc.addMember(circle.id, ownerId, c3, 'admin')
     await expect(svc.addMember(circle.id, ownerId, d4, 'admin')).rejects.toThrow('CARE_CIRCLE_ADMIN_LIMIT')
   })
+
+  it('admin não pode rebaixar o titular via upsert de membro', async () => {
+    const repo = new InMemoryCareCircleRepo()
+    const svc = new CareCircleService(repo, new FakePool() as never)
+    const circle = await svc.create(ownerId, 'Família')
+    await svc.addMember(circle.id, ownerId, adminId, 'admin')
+    await expect(svc.addMember(circle.id, adminId, ownerId, 'member')).rejects.toThrow(
+      'CARE_CIRCLE_CANNOT_REMOVE_OWNER',
+    )
+    const ownerMember = await repo.findMember(circle.id, ownerId)
+    expect(ownerMember?.role).toBe('owner')
+  })
 })

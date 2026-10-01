@@ -89,7 +89,7 @@ export function FamilySupportPanel({ patientId, medicationName, healthThreadId, 
           type="info"
           showIcon
           acknowledge={false}
-          message={bundle.disclaimer}
+          message={t('familySupport.disclaimer')}
           style={{ marginBottom: visibleInsights.length > 0 || showEmergencyLink || showNoInsights ? 12 : 0 }}
           onClose={onDismissed}
         />
@@ -138,7 +138,9 @@ export function FamilySupportPanel({ patientId, medicationName, healthThreadId, 
           type="info"
           acknowledge={false}
           onClose={onDismissed}
-          message={t('familySupport.noInsights')}
+          message={bundle.hasClinicalHistory
+            ? t('familySupport.noInsights')
+            : t('familySupport.noInsightsWelcome')}
           style={{ marginTop: visibleInsights.length > 0 ? 8 : 0 }}
         />
       )}

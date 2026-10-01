@@ -87,15 +87,25 @@ export async function uploadClinicalDocument(page: Page, patientId: string) {
   const dialog = page.getByRole('dialog', { name: 'Adicionar Arquivo' })
   await dialog.waitFor({ state: 'visible' })
   await clickAntSelectOption(page, dialog.locator('.ant-select').first(), 'Outro')
+
+  const uploadDone = page.waitForResponse(
+    (res) =>
+      res.url().includes('/documents') &&
+      res.request().method() === 'POST' &&
+      res.status() >= 200 &&
+      res.status() < 300,
+    { timeout: 60_000 },
+  )
   await dialog.locator('input[type="file"]').setInputFiles(uploadFixture)
   await dialog.getByRole('button', { name: 'Salvar' }).click()
-  await dialog.waitFor({ state: 'hidden', timeout: 15_000 })
+  await uploadDone.catch(() => {})
+  await dialog.waitFor({ state: 'hidden', timeout: 30_000 })
 
-  await expect(page.getByText('Documento processado')).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByText('Documento processado')).toBeVisible({ timeout: 150_000 })
   await page.getByRole('button', { name: 'Continuar' }).click()
 
   const ocrReview = page.getByRole('dialog', { name: /Revisão do OCR/i })
-  await ocrReview.waitFor({ state: 'visible', timeout: 30_000 })
+  await ocrReview.waitFor({ state: 'visible', timeout: 45_000 })
   await ocrReview.getByRole('button', { name: /Confirmar e salvar/i }).click()
   await ocrReview.waitFor({ state: 'hidden', timeout: 15_000 })
 

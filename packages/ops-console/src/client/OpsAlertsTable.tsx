@@ -9,6 +9,7 @@ import {
   Space,
   Table,
   Tag,
+  Tooltip,
   Typography,
 } from 'antd'
 import { RobotOutlined } from '@ant-design/icons'
@@ -16,6 +17,7 @@ import type { OpsAlert, OpsAlertAnalysisRecord, OpsMetricsResponse } from './ops
 import { OpsPanel } from './components/OpsPanel.js'
 import { useOpsDrillDown } from './ops-drill-down.js'
 import { opsApi } from './api.js'
+import { formatDateTimePtBr, formatRelativePtBr } from './ops-format.js'
 
 const { Text, Paragraph } = Typography
 const { TextArea } = Input
@@ -183,6 +185,16 @@ export function OpsAlertsTable({
               render: (s: OpsAlert['severity']) => <Tag color={SEVERITY_COLOR[s]}>{s}</Tag>,
             },
             { title: 'Categoria', dataIndex: 'category', width: 90 },
+            {
+              title: 'Detectado',
+              dataIndex: 'detectedAt',
+              width: 120,
+              render: (detectedAt: string) => (
+                <Tooltip title={formatDateTimePtBr(detectedAt)}>
+                  <span>{formatRelativePtBr(detectedAt)}</span>
+                </Tooltip>
+              ),
+            },
             { title: 'Mensagem', dataIndex: 'message' },
             {
               title: 'ID',

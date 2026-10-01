@@ -3,9 +3,10 @@ description: >
   Webhook support_report → agente investiga o monorepo (sem PHI).
   Saída em docs/ops/investigations/. Tier 0 — sem PR automático.
 
-# Rascunho versionado. O Cursor NÃO importa este arquivo sozinho ao reiniciar.
-# Import único: Automations → Create → importar support-report-investigator.workflow.json
-# ou colar o bloco instructions abaixo. Depois de salvar, copie a URL do webhook para .env:
+# Rascunho versionado. O Cursor NÃO carrega este arquivo ao reiniciar.
+# Criação única: Automations → New automation → colar o bloco instructions abaixo.
+# (support-report-investigator.workflow.json é só referência — não há import JSON na UI.)
+# Depois de salvar, copie a URL do webhook para .env:
 #   CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL=<url>
 
 git:

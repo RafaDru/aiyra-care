@@ -7,6 +7,7 @@ import { tmpdir } from 'os'
 import { randomBytes } from 'crypto'
 import { fileURLToPath } from 'url'
 import { config } from 'dotenv'
+import { buildBrowserMatchNeedles, parseLocalServiceUrl } from './ops-notifier-browser-match.mjs'
 
 /**
  * Receptor local de alertas ops (dev / operador na máquina).
@@ -38,6 +39,8 @@ function resolveObservabilityUrl() {
 
 const defaultDashboardUrl = resolveObservabilityUrl()
 const openBrowser = process.env.OPS_LOCAL_NOTIFIER_OPEN?.trim() !== '0'
+const browserScript = resolve(root, 'scripts/ops-notifier-browser.ps1')
+const lastOpenByPort = new Map()
 
 function openUrl(url) {
   if (!openBrowser) {
@@ -45,10 +48,41 @@ function openUrl(url) {
     return
   }
   if (platform() === 'win32') {
-    execFile('cmd', ['/c', 'start', '', url], { windowsHide: true })
-  } else {
-    execFile('open', [url])
+    execFile(
+      'powershell',
+      [
+        '-NoProfile',
+        '-ExecutionPolicy', 'Bypass',
+        '-File', browserScript,
+        '-Action', 'open-if-needed',
+        '-Url', url,
+      ],
+      { windowsHide: true },
+      (err, stdout) => {
+        const line = String(stdout ?? '').trim()
+        if (line === 'skipped:already_open' || line === 'skipped:debounce') {
+          console.log(`[ops-local-notifier] browser ${line} -> ${url}`)
+        } else if (err) {
+          console.warn('[ops-local-notifier] browser open failed', err.message)
+          execFile('cmd', ['/c', 'start', '', url], { windowsHide: true })
+        }
+      },
+    )
+    return
   }
+  const parsed = parseLocalServiceUrl(url)
+  const portKey = parsed ? String(parsed.port) : url
+  const last = lastOpenByPort.get(portKey)
+  if (last && Date.now() - last < 8000) {
+    console.log(`[ops-local-notifier] browser skipped (debounce) -> ${url}`)
+    return
+  }
+  lastOpenByPort.set(portKey, Date.now())
+  const needles = buildBrowserMatchNeedles(url)
+  if (needles.isOpsConsole) {
+    console.log(`[ops-local-notifier] open (non-Windows, no tab detect) -> ${url}`)
+  }
+  execFile('open', [url])
 }
 
 function mapIconType(icon) {

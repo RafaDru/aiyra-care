@@ -3,7 +3,7 @@ import { triageOpsAlert, triageOpsAlerts, filterAlertsForDispatch } from '../src
 import type { OpsAlert } from '../src/domain/ops/ops-metrics.types.js'
 
 function alert(partial: Partial<OpsAlert> & Pick<OpsAlert, 'id' | 'severity' | 'category' | 'message'>): OpsAlert {
-  return { ...partial }
+  return { detectedAt: new Date().toISOString(), ...partial }
 }
 
 describe('triageOpsAlert', () => {

@@ -110,7 +110,8 @@ function Start-OpsLayerFrontendProcess {
   Wait-OpsLayerPortFree -Port $ctx.webPort | Out-Null
   $viteApiUrl = "http://127.0.0.1:$($ctx.apiPort)"
   $viteOpsConsoleUrl = "http://127.0.0.1:$($ctx.opsConsolePort)"
-  $cmdWeb = "set VITE_API_URL=$viteApiUrl&&set VITE_OPS_CONSOLE_URL=$viteOpsConsoleUrl&&cd /d `"$webDir`"&&npx vite --host 0.0.0.0 --port $($ctx.webPort) >>`"$($ctx.webLog)`" 2>&1"
+  $viteDeploymentTier = if ($ctx.preview) { 'preview' } else { 'integration' }
+  $cmdWeb = "set VITE_API_URL=$viteApiUrl&&set VITE_OPS_CONSOLE_URL=$viteOpsConsoleUrl&&set VITE_DEPLOYMENT_TIER=$viteDeploymentTier&&cd /d `"$webDir`"&&npx vite --host 0.0.0.0 --port $($ctx.webPort) >>`"$($ctx.webLog)`" 2>&1"
   $null = cmd /c "start /B cmd /c `"$cmdWeb`" 2>nul"
 }
 

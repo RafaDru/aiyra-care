@@ -3,6 +3,8 @@ import { buildRuntimeStateFromOps } from '../src/application/ops/runtime-degrade
 import type { OpsAlert } from '../src/domain/ops/ops-metrics.types.js'
 import { PORTAL_DEGRADED_TTL_MS } from '../src/domain/ops/runtime-degraded.types.js'
 
+const DETECTED_AT = '2026-01-01T00:00:00.000Z'
+
 describe('buildRuntimeStateFromOps', () => {
   it('marca portal degraded em fail rate crítico', () => {
     const alerts: OpsAlert[] = [{
@@ -10,6 +12,7 @@ describe('buildRuntimeStateFromOps', () => {
       severity: 'critical',
       category: 'sync',
       message: 'fail',
+      detectedAt: DETECTED_AT,
       details: { portalType: 'amil', failRatePct: 80, total: 5, failed: 4 },
     }]
     const state = buildRuntimeStateFromOps(alerts, undefined, null)
@@ -22,6 +25,7 @@ describe('buildRuntimeStateFromOps', () => {
       severity: 'critical',
       category: 'llm',
       message: 'cascade',
+      detectedAt: DETECTED_AT,
     }]
     const state = buildRuntimeStateFromOps(alerts, undefined, null)
     expect(state.avaLite?.active).toBe(true)
@@ -44,6 +48,7 @@ describe('buildRuntimeStateFromOps', () => {
       severity: 'critical',
       category: 'sync',
       message: 'stuck',
+      detectedAt: DETECTED_AT,
       details: { portalType: 'amil', jobId: 'j1' },
     }]
     const state = buildRuntimeStateFromOps(alerts, undefined, null)
@@ -56,6 +61,7 @@ describe('buildRuntimeStateFromOps', () => {
       severity: 'critical',
       category: 'sync',
       message: 'fail',
+      detectedAt: DETECTED_AT,
       details: { portalType: 'hermes_pardini', failRatePct: 90, total: 6, failed: 5 },
     }]
     const state = buildRuntimeStateFromOps(alerts, undefined, null)

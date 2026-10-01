@@ -230,7 +230,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
           birthDate: suggested.birthDate,
           extractedText: reviewText,
         })
-        message.success('Arquivo salvo e dados aplicados no paciente')
+        message.success(t('personalDocument.savedAppliedToProfile'))
         onPatientUpdated?.()
       } else {
         if (reviewText !== (reviewDoc.extractedText || '')) {
@@ -554,8 +554,8 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
         onOk={handleConfirmReview}
         onCancel={() => { setReviewOpen(false); setReviewDoc(null) }}
         confirmLoading={confirming}
-        okText={identityMode ? 'Confirmar e aplicar no paciente' : 'Confirmar e salvar'}
-        cancelText="Fechar"
+        okText={identityMode ? t('personalDocument.confirmApplyToProfile') : t('common.confirm')}
+        cancelText={t('common.close')}
         width={720}
       >
         {reviewDoc && (
@@ -576,7 +576,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
 
             {identityMode && (
               <div style={{ marginBottom: 16, padding: 12, background: '#fafafa', borderRadius: 8 }}>
-                <Text strong>Dados detectados para o paciente</Text>
+                <Text strong>{t('personalDocument.identityDetectedTitle')}</Text>
                 <Form layout="vertical" style={{ marginTop: 12 }}>
                   <Form.Item label="CPF">
                     <Space>

@@ -1,0 +1,33 @@
+name: AiCare - Backend handoff (Claude→Cursor)
+description: >
+  Webhook backend_task_handoff — PR task/* ou fila em review.
+  Revisão CI, merge tier-0, atualiza docs/coordination/BACKEND_TASK_QUEUE.md.
+
+# Rascunho versionado. O Cursor NÃO carrega este arquivo ao reiniciar.
+# Criação única na UI: Automations → New automation → colar o bloco instructions abaixo.
+# Referência espelho (não importar): backend-task-cursor-handoff.workflow.json
+# Depois de salvar, copie URL + auth header → secrets GitHub:
+#   CURSOR_BACKEND_HANDOFF_WEBHOOK_URL, CURSOR_BACKEND_HANDOFF_WEBHOOK_KEY
+# Runbook: docs/coordination/CURSOR_RETURN_PATH.md
+
+git:
+  repo: RafaDru/aiyra-care
+  branch: main
+
+trigger:
+  type: webhook
+
+model: composer-2.5
+
+instructions: |
+  Handoff backend_task_handoff — integração Claude Code → Cursor.
+
+  1. Parse JSON (taskId, prUrl, prNumber, branch, queueStatus, trigger).
+  2. Playbook: docs/ops/automations/backend-task-cursor-handoff.prompt.md
+  3. Parceria: docs/CLAUDE_CODE_PARTNERSHIP.md
+  4. Fila: docs/coordination/BACKEND_TASK_QUEUE.md
+  5. Smoke/tier-0: merge PR se CI ok. Contrato/web: não mergear — sinalizar na fila.
+  6. Rafael não opera a app — não pedir ação manual salvo blocked legal/segurança.
+
+playbook: docs/ops/automations/backend-task-cursor-handoff.prompt.md
+runbook: docs/coordination/CURSOR_RETURN_PATH.md

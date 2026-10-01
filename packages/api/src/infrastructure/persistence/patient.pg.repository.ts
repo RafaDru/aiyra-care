@@ -93,6 +93,28 @@ export class PatientPgRepository implements PatientRepository {
     return rowToPatient(rows[0])
   }
 
+  async getOwnerAccountId(patientId: string): Promise<string | null> {
+    const { rows } = await this.pool.query(
+      `SELECT owner_account_id::text AS owner_account_id FROM patients WHERE id = $1`,
+      [patientId],
+    )
+    return rows[0]?.owner_account_id ?? null
+  }
+
+  async listOwnerAccountIds(patientIds: readonly string[]): Promise<Map<string, string>> {
+    const map = new Map<string, string>()
+    if (patientIds.length === 0) return map
+    const { rows } = await this.pool.query(
+      `SELECT id::text AS id, owner_account_id::text AS owner_account_id
+       FROM patients WHERE id = ANY($1::uuid[]) AND owner_account_id IS NOT NULL`,
+      [patientIds],
+    )
+    for (const row of rows) {
+      map.set(String(row.id), String(row.owner_account_id))
+    }
+    return map
+  }
+
   async setOwnerAccountId(patientId: string, accountId: string): Promise<void> {
     await this.pool.query(
       `UPDATE patients SET owner_account_id = $2, updated_at = NOW() WHERE id = $1`,

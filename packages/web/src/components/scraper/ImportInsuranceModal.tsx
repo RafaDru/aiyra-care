@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, Form, Input, App, Alert, Collapse, Tag, Table, Typography, Spin } from 'antd'
 import { CloudDownloadOutlined, ChromeOutlined, UserOutlined, KeyOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
@@ -24,6 +25,7 @@ const portalApiMap = {
 export function ImportInsuranceModal({
   open, onClose, portal, label, patientId, usesEmail = false, onImported,
 }: Props) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -145,8 +147,8 @@ export function ImportInsuranceModal({
       onOk={result ? handleImportData : loading ? undefined : handleOk}
       onCancel={handleClose}
       confirmLoading={loading || importing}
-      okText={result ? 'Importar para este paciente' : 'Buscar no portal'}
-      cancelText="Fechar"
+      okText={result ? t('patient.importForProfile') : 'Buscar no portal'}
+      cancelText={t('common.close')}
       width={720}
       okButtonProps={{ disabled: !patientId }}
     >
@@ -157,8 +159,8 @@ export function ImportInsuranceModal({
           showIcon
           icon={<UserOutlined />}
           style={{ marginBottom: 16 }}
-          message={`Paciente: ${patient.name}`}
-          description="Os dados serão importados neste cadastro. Para sync recorrente, vincule o portal no perfil do paciente."
+          message={t('patient.profileLabel', { name: patient.name })}
+          description={t('patient.importHint')}
         />
       )}
 

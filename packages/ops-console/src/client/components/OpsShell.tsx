@@ -33,7 +33,9 @@ export function OpsShell({
             <Text type="secondary" style={{ fontSize: 13 }}>{subtitle}</Text>
           </div>
         </div>
-        {actions && <Space wrap>{actions}</Space>}
+        <Space wrap align="center">
+          {actions}
+        </Space>
       </header>
       {statusStrip && <div className="ops-status-strip">{statusStrip}</div>}
       <main className="ops-main">{children}</main>

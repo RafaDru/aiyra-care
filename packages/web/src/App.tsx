@@ -12,6 +12,7 @@ import { SettingsLayout } from './layouts/SettingsLayout.js'
 import { SettingsGeneralPage } from './pages/settings/general.js'
 import { SettingsAccountPage } from './pages/settings/account.js'
 import { SettingsFamilyPage } from './pages/settings/family.js'
+import { FamilyPage } from './pages/family.js'
 import { SettingsPlanPage } from './pages/settings/plan.js'
 import { SettingsLegalPage } from './pages/settings/legal.js'
 import { RoadmapPage } from './pages/roadmap.js'
@@ -42,6 +43,7 @@ export function App() {
               <Route path="/patients/:id" element={<PatientDetail />} />
               <Route path="/session" element={<Navigate to="/roadmap#dev-sessions" replace />} />
               <Route path="/emergency" element={<EmergencyPage />} />
+              <Route path="/family" element={<FamilyPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />
               <Route path="/invite/accept" element={<InviteAcceptPage />} />

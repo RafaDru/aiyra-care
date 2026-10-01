@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Button,
+  Checkbox,
   Descriptions,
   Input,
   Modal,
@@ -14,6 +15,7 @@ import {
 } from 'antd'
 import { ReloadOutlined, RobotOutlined } from '@ant-design/icons'
 import type { SupportReportOpsRow } from './ops.types.js'
+import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsKpiCard, OpsKpiGrid } from './components/OpsKpiCard.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { useOpsDrillDown } from './ops-drill-down.js'
@@ -38,6 +40,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const ANALYSIS_LABEL: Record<SupportReportOpsRow['analysisStatus'], string> = {
   none: 'Sem análise',
+  queued: 'Fila batch',
   pending: 'Pendente',
   in_progress: 'Em análise',
   completed: 'Concluída',
@@ -46,10 +49,29 @@ const ANALYSIS_LABEL: Record<SupportReportOpsRow['analysisStatus'], string> = {
 
 const ANALYSIS_COLOR: Record<SupportReportOpsRow['analysisStatus'], string> = {
   none: 'default',
+  queued: 'cyan',
   pending: 'gold',
   in_progress: 'processing',
   completed: 'success',
   failed: 'error',
+}
+
+const DEPLOYMENT_LABEL: Record<string, string> = {
+  none: 'Sem implantar',
+  fix_proposed: 'Fix proposto',
+  awaiting_merge: 'Aguardando merge',
+  awaiting_deploy: 'Aguardando deploy',
+  awaiting_validation: 'Aguardando validação',
+  done: 'Implantado',
+}
+
+const DEPLOYMENT_COLOR: Record<string, string> = {
+  none: 'default',
+  fix_proposed: 'blue',
+  awaiting_merge: 'gold',
+  awaiting_deploy: 'orange',
+  awaiting_validation: 'purple',
+  done: 'success',
 }
 
 type QueueStatus = 'open' | 'triaged' | 'resolved'
@@ -57,10 +79,12 @@ type QueueStatus = 'open' | 'triaged' | 'resolved'
 export function SupportPanel({
   openCount,
   submitted24h,
+  submittedSparkline,
   onQueueChange,
 }: {
   openCount: number
   submitted24h: number
+  submittedSparkline?: number[]
   onQueueChange?: () => void
 }) {
   const { open } = useOpsDrillDown()
@@ -144,6 +168,21 @@ export function SupportPanel({
     setCompleteArtifact(row.analysisArtifactPath ?? '')
   }
 
+  const toggleDeploymentAction = async (reportId: string, index: number, done: boolean) => {
+    const row = rows.find((r) => r.id === reportId)
+    if (!row?.deploymentActions?.length) return
+    const nextActions = row.deploymentActions.map((a, i) => (i === index ? { ...a, done } : a))
+    setUpdatingId(reportId)
+    try {
+      await opsApi.completeSupportAnalysis(reportId, { deploymentActions: nextActions })
+      await load(queueStatus)
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Falha ao atualizar checklist')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   const submitComplete = async () => {
     if (!completeTarget) return
     if (!completeSummary.trim() && !completeArtifact.trim()) {
@@ -172,6 +211,7 @@ export function SupportPanel({
       <OpsKpiStrip
         openCount={localOpenCount}
         submitted24h={submitted24h}
+        submittedSparkline={submittedSparkline}
         onOpenClick={() => {
           setQueueStatus('open')
           if (rows[0]) open({ kind: 'support_report', row: rows[0] })
@@ -181,13 +221,14 @@ export function SupportPanel({
       <Alert
         type="info"
         showIcon
-        message="Ciclo de suporte"
+        message="Inbox do usuário (LGPD)"
         description={(
           <>
-            <strong>Triar/Resolver</strong> atualiza a fila humana.{' '}
-            <strong>Analisar</strong> dispara AiCare Suporte ao Desenvolvimento — use notas para contexto
-            extra. Chamados sem webhook configurado ficam «Sem análise» até você analisar manualmente
-            ou concluir com resumo.
+            Esta aba é o <strong>chamado voluntário</strong> e o status percebido pelo usuário — não
+            substitui a fila técnica. Cada novo reporte cria um <strong>incidente</strong> em Operação ›
+            Incidentes (origem Usuário) com investigador automático quando configurado. Use{' '}
+            <strong>Triar/Resolver</strong> para SLA humano; <strong>Analisar</strong> só para reenviar o
+            agente ou notas extras.
           </>
         )}
         style={{ marginBottom: 8 }}
@@ -202,8 +243,8 @@ export function SupportPanel({
       />
 
       <OpsPanel
-        title="Fila de suporte"
-        description="Chamados «Reportar problema» — migration 061 + ciclo de análise 064."
+        title="Chamados ao usuário"
+        description="Consentimento, TTL e resposta — técnica em Operação › Incidentes."
         extra={(
           <Space size={8}>
             <Segmented
@@ -235,15 +276,21 @@ export function SupportPanel({
           })}
           expandable={{
             expandedRowRender: (row) => (
-              <SupportReportDetail row={row} />
+              <SupportReportDetail row={row} onToggleAction={toggleDeploymentAction} />
             ),
           }}
           columns={[
             {
-              title: 'ID',
+              title: 'reportId',
               dataIndex: 'id',
               width: 100,
               render: (id: string) => <Text code>{id.slice(0, 8)}</Text>,
+            },
+            {
+              title: 'investigationId',
+              dataIndex: 'investigationId',
+              width: 120,
+              render: (id: string | null) => <InvestigationIdTag investigationId={id} />,
             },
             {
               title: 'Fila',
@@ -397,7 +444,13 @@ export function SupportPanel({
   )
 }
 
-function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
+function SupportReportDetail({
+  row,
+  onToggleAction,
+}: {
+  row: SupportReportOpsRow
+  onToggleAction?: (reportId: string, index: number, done: boolean) => void
+}) {
   return (
     <div style={{ maxWidth: 720 }}>
       {row.descriptionPreview && (
@@ -408,6 +461,9 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
       <Descriptions size="small" column={1} bordered>
         <Descriptions.Item label="Fila">
           <Tag>{STATUS_LABEL[row.status] ?? row.status}</Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="investigationId">
+          <InvestigationIdTag investigationId={row.investigationId} showFull />
         </Descriptions.Item>
         <Descriptions.Item label="Análise">
           <Tag color={ANALYSIS_COLOR[row.analysisStatus]}>
@@ -440,6 +496,22 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
             <Text type="danger">{row.analysisLastError}</Text>
           </Descriptions.Item>
         )}
+        {row.suggestedCategory && (
+          <Descriptions.Item label="Categoria sugerida">
+            {CATEGORY_LABEL[row.suggestedCategory] ?? row.suggestedCategory}
+          </Descriptions.Item>
+        )}
+        {row.categoryReviewNote && (
+          <Descriptions.Item label="Revisão categoria">{row.categoryReviewNote}</Descriptions.Item>
+        )}
+        {row.taxonomyGapProposal && (
+          <Descriptions.Item label="Lacuna taxonomia">{row.taxonomyGapProposal}</Descriptions.Item>
+        )}
+        <Descriptions.Item label="Implantar">
+          <Tag color={DEPLOYMENT_COLOR[row.deploymentStatus] ?? 'default'}>
+            {DEPLOYMENT_LABEL[row.deploymentStatus] ?? row.deploymentStatus}
+          </Tag>
+        </Descriptions.Item>
         <Descriptions.Item label="Conta">
           <Text code>{row.accountId}</Text>
         </Descriptions.Item>
@@ -448,6 +520,30 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
           {new Date(row.expiresAt).toLocaleString('pt-BR')}
         </Descriptions.Item>
       </Descriptions>
+      {row.deploymentActions?.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <Text strong>Checklist implantar</Text>
+          <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+            {row.deploymentActions.map((action, index) => (
+              <li key={`${action.kind}-${index}`}>
+                <Space size={8}>
+                  <Checkbox
+                    checked={Boolean(action.done)}
+                    disabled={!onToggleAction}
+                    onChange={(e) => onToggleAction?.(row.id, index, e.target.checked)}
+                  />
+                  <span>{action.label}</span>
+                  {action.url && (
+                    <a href={action.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                      abrir
+                    </a>
+                  )}
+                </Space>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {row.consentTechnical && Object.keys(row.diagnosticContext).length > 0 && (
         <pre style={{ marginTop: 12, fontSize: 11, maxHeight: 240, overflow: 'auto' }}>
           {JSON.stringify(row.diagnosticContext, null, 2)}
@@ -460,16 +556,22 @@ function SupportReportDetail({ row }: { row: SupportReportOpsRow }) {
 function OpsKpiStrip({
   openCount,
   submitted24h,
+  submittedSparkline,
   onOpenClick,
 }: {
   openCount: number
   submitted24h: number
+  submittedSparkline?: number[]
   onOpenClick?: () => void
 }) {
   return (
     <OpsKpiGrid>
       <OpsKpiCard label="Abertos" value={openCount} alert={openCount > 0} onClick={onOpenClick} />
-      <OpsKpiCard label="Submetidos (24h)" value={submitted24h} />
+      <OpsKpiCard
+        label="Submetidos (24h)"
+        value={submitted24h}
+        sparkline={submittedSparkline}
+      />
     </OpsKpiGrid>
   )
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { AvaActivityEvent } from '../../lib/api.types.js'
 
 function sizeClass(text: string): string {
@@ -14,6 +15,7 @@ interface Props {
 
 /** Nuvem de pensamento + trilha de status (ferramentas / reflexão). */
 export function AvaThinkingAura({ text, activityTrace = [] }: Props) {
+  const { t } = useTranslation()
   const doneLabels = activityTrace
     .filter((e) => e.status === 'done')
     .map((e) => e.label)
@@ -33,7 +35,7 @@ export function AvaThinkingAura({ text, activityTrace = [] }: Props) {
         </div>
       </div>
       {doneLabels.length > 0 && (
-        <ul className="ava-thinking-aura__steps" aria-label="Status do processamento">
+        <ul className="ava-thinking-aura__steps" aria-label={t('ava.thinkingStatusAriaLabel')}>
           {doneLabels.map((label, i) => (
             <li key={`${label}-${i}`} className="ava-thinking-aura__step">{label}</li>
           ))}

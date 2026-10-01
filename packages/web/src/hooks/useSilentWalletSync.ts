@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { App } from 'antd'
 import { api } from '../lib/api.js'
 import type { IntegrationLink } from '../lib/api.types.js'
@@ -18,6 +19,7 @@ const SILENT_FAIL_RE =
  * Serializa portais; modal só no Sincronizar manual (Integrações).
  */
 export function useSilentWalletSync(links: IntegrationLink[], onUpdated?: () => void) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const { loading: authLoading, authUserId, configured: authConfigured } = useAuth()
   const runningRef = useRef(false)
@@ -46,13 +48,14 @@ export function useSilentWalletSync(links: IntegrationLink[], onUpdated?: () => 
             trackSyncJobSkipped(link.portalType, r.reason ?? 'skipped', 'silent')
             continue
           }
-          if (r.jobId) trackSyncJobStarted(link.portalType, 'silent')
+          if (r.jobId) {
+            trackSyncJobStarted(link.portalType, 'silent')
+            onUpdated?.()
+          }
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e)
           if (SILENT_FAIL_RE.test(msg)) {
-            message.warning(
-              'Atualização silenciosa falhou — use Sincronizar em Integrações se precisar reconectar',
-            )
+            message.warning(t('walletCards.silentSyncFailed'))
           }
           console.warn('Silent wallet sync failed', e)
         }
@@ -65,5 +68,5 @@ export function useSilentWalletSync(links: IntegrationLink[], onUpdated?: () => 
     return () => {
       cancelled = true
     }
-  }, [links, authLoading, authUserId, authConfigured, message, onUpdated])
+  }, [links, authLoading, authUserId, authConfigured, message, onUpdated, t])
 }

@@ -1,0 +1,36 @@
+# Aciona uma Claude Code Routine (cross-session message -> sessão local
+# "Desenvolvimento Backend") quando a fila muda no GitHub, sem depender de
+# `git pull` local nem do fs.watch. Complementar, não substitui os dois.
+# Secrets: CLAUDE_ROUTINE_ID, CLAUDE_ROUTINE_FIRE_TOKEN (ver docs/coordination/CURSOR_RETURN_PATH.md)
+name: Queue change -> Claude Code routine
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/coordination/BACKEND_TASK_QUEUE.md
+
+jobs:
+  fire-routine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fire routine with queue diff
+        env:
+          ROUTINE_ID: ${{ secrets.CLAUDE_ROUTINE_ID }}
+          ROUTINE_TOKEN: ${{ secrets.CLAUDE_ROUTINE_FIRE_TOKEN }}
+        run: |
+          if [ -z "$ROUTINE_ID" ] || [ -z "$ROUTINE_TOKEN" ]; then
+            echo "Secrets CLAUDE_ROUTINE_ID/CLAUDE_ROUTINE_FIRE_TOKEN not set — skip (configure a routine em claude.ai/code/routines primeiro)"
+            exit 0
+          fi
+          QUEUE_CONTENT=$(cat docs/coordination/BACKEND_TASK_QUEUE.md)
+          TEXT="Push em docs/coordination/BACKEND_TASK_QUEUE.md no repo ${{ github.repository }} (commit ${{ github.sha }}). Conteúdo atual do arquivo:
+          $QUEUE_CONTENT"
+          BODY=$(jq -n --arg text "$TEXT" '{text: $text}')
+          curl -fsS -X POST "https://api.anthropic.com/v1/claude_code/routines/${ROUTINE_ID}/fire" \
+            -H "Authorization: Bearer ${ROUTINE_TOKEN}" \
+            -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "Content-Type: application/json" \
+            -d "$BODY"

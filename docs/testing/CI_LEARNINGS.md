@@ -1,6 +1,6 @@
 # CI — aprendizados (build API + E2E)
 
-> **Última atualização:** 2026-09-14
+> **Última atualização:** 2026-09-20
 
 ## O que aconteceu
 
@@ -26,6 +26,11 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | Select flake no onboarding (`.last()` no portal) | Opção de dropdown anterior ainda no DOM | Escopar em `.ant-select-dropdown:not(.ant-select-dropdown-hidden)` |
 | `patient-documents-crud` timeout | Upload OCR + revisão obrigatória; Select antigo no modal | `clickAntSelectOption`, aguardar «Documento processado», confirmar revisão OCR |
 | Ava specs flaky no CI | Bolha visível antes do texto SSE; 2ª mensagem antes do composer liberar | `waitAvaComposerReady` + contagem de bolhas + `toContainText` 90s |
+| `FirstVisitTourDrawer` bloqueia CRUD / dashboard | Máscara Ant Design intercepta cliques | `dismissFirstVisitTour()` em helpers de sessão/paciente/Ava (exceto spec onboarding) |
+| Onboarding E2E passo 2 intermitente | `Continuar` antes de `POST /auth/complete-profile` ou redirect cedo para `/` | `waitForResponse` em complete-profile; ramo «Pular por agora» se ainda em `/onboarding` |
+| Ava FAB lento no CI | `useAvaDockIntro` (~6,4s) após login | `openAvaDock`: `waitForTimeout(7_000)` só em `CI`; retry abrir drawer com `toPass` |
+| Bolha Ava «vazia» no assert | SSE ainda streaming; placeholder sem texto | Ignorar bolhas com `innerText` vazio; aguardar `POST …/ava/chat` + loading do botão Enviar |
+| Spec onboarding tour | `data-testid` vs `role=dialog` | Drawer expõe `first-visit-tour-drawer`; helpers também aceitam «Primeiros passos» / modal |
 | Nightly `createUser: {}` | Supabase intermitente / corrida | `ensure-qa-auth-user.mjs` com retry |
 | `patient-documents` sem «Documento processado» | GCS indisponível no runner + OCR lento | `resolveFileStorage()` local + `OCR_CI_STUB=1` no CI |
 | Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |

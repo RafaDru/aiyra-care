@@ -61,7 +61,7 @@ Legenda **status:** ✅ done · 🟡 partial · ⬜ planned · 🚫 blocked · �
 | **3** | `ava-conversation-crud` | `e2e/suites/ava-conversation-crud.spec.ts` | qa.e2e | — | ⬜ | |
 | **—** | `compliance-gate-ui` | `e2e/suites/compliance-gate.spec.ts` | fresh user | — | 👁 | Checkbox Ant Design — manual |
 | **—** | `settings-account` | `e2e/suites/settings-account.spec.ts` | qa.e2e | — | ⬜ | Perfil cuidador |
-| **—** | `patient-wallet` | `e2e/suites/patient-wallet.spec.ts` | qa.e2e | demo links | ⬜ | |
+| **—** | `patient-wallet` | `e2e/suites/patient-wallet.spec.ts` | qa.e2e | demo links | ✅ | Smoke Carteira + Hoje |
 | **—** | `patient-vaccines-crud` | `e2e/suites/patient-vaccines-crud.spec.ts` | qa.e2e | — | ⬜ | Matriz ⬜ |
 | **—** | `patient-measurements-crud` | `e2e/suites/patient-measurements-crud.spec.ts` | qa.e2e | — | ⬜ | |
 | **—** | `patient-clinical-export` | `e2e/suites/patient-clinical-export.spec.ts` | qa.e2e | — | ✅ | |

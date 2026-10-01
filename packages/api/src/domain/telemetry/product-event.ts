@@ -46,6 +46,7 @@ export const PRODUCT_EVENT_NAMES = [
   'clinician_share_viewed',
   'clinician_share_feedback',
   'clinician_share_cta_click',
+  'first_visit_tour_completed',
 ] as const
 
 export type ProductEventName = typeof PRODUCT_EVENT_NAMES[number]

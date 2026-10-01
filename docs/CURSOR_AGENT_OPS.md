@@ -1,6 +1,6 @@
 # Operação agêntica no Cursor — guard-rails LLM-agnósticos
 
-> **Última atualização:** 2026-08-24  
+> **Última atualização:** 2026-09-16  
 > Objetivo: operação efetiva com **troca de modelo** (Composer, Claude, Gemini, etc.) sem perder segurança de código e processo.
 
 ## O que é estável (não depende do LLM)
@@ -34,6 +34,21 @@ O modelo **interpreta** skills; hooks e CI **executam** independentemente do mod
 Regras always-on: `.cursor/rules/agent-bootstrap.mdc`, **`.cursor/rules/qa-delivery.mdc`**.
 
 Configuração: `.cursor/hooks.json`. Debug: aba **Hooks** no Cursor.
+
+## Cursor Projects + My Machines (execução local)
+
+O modo **Projects** coordena na nuvem; para rodar tool calls no checkout desta máquina (Postgres local, hooks, Playwright, MCP stdio), use **My Machines**.
+
+| Artefato | Função |
+|----------|--------|
+| `docs/CURSOR_WORKSPACE.md` | Runbook completo (setup, verificação, limitações) |
+| `scripts/cursor-worker-start.ps1` | Sobe worker `NotebookRafael` |
+| `scripts/cursor-worker-install-autostart.ps1` | Tarefa Windows `AiyraCare-CursorMyMachinesWorker` no logon |
+| `scripts/cursor-worker-repair.ps1` | Fix `better-sqlite3` após `agent update` (Windows) |
+
+Verificação: `agent worker debug` → `Visibility: 1 worker`. No picker de ambiente: **My Machines** → `NotebookRafael`.
+
+Docs Cursor: [My Machines](https://cursor.com/docs/cloud-agent/my-machines) · [Projects](https://cursor.com/blog/projects).
 
 ## Skills obrigatórias por tipo de mudança
 

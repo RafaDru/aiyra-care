@@ -1,0 +1,9 @@
+{"ts":"2026-09-16T17:49:44.883Z","event":"beforeShellExecution","command":"cd /workspace && git fetch origin main && git checkout main && git pull origin main && git checkout -b cursor/first-visit-guided-ux-83e2"}
+{"ts":"2026-09-16T17:53:36.962Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/product-event.test.ts tests/ava-tools.test.ts 2>&1"}
+{"ts":"2026-09-16T17:53:36.966Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1"}
+{"ts":"2026-09-16T17:53:50.384Z","event":"beforeShellExecution","command":"cd /workspace && npm install 2>&1 | tail -20"}
+{"ts":"2026-09-16T17:54:12.382Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1 | tail -30"}
+{"ts":"2026-09-16T17:54:12.382Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/product-event.test.ts tests/ava-tools.test.ts 2>&1"}
+{"ts":"2026-09-16T17:54:35.377Z","event":"beforeShellExecution","command":"cd /workspace && npm run test:critical 2>&1 | tail -25"}
+{"ts":"2026-09-16T17:54:52.602Z","event":"beforeShellExecution","command":"cd /workspace && npm run qa:run -- --suite onboarding-flow 2>&1 | tail -40"}
+{"ts":"2026-09-16T17:54:59.416Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"feat(web): first-visit guided UX — disclaimer, empty state, tour drawer\n\n- Humanize family support disclaimer (médico, warm tone) with pt/en i18n\n- Show welcoming empty state when patient has no clinical history\n- Add FirstVisitTourDrawer (4 steps) with localStorage + product_events\n- API: hasClinicalHistory on family-support bundle; first_visit_tour_completed event\n- Docs: feature card, onboarding-flow suite scenario D, e2e assert\""}

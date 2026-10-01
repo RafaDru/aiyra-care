@@ -1,25 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Space, Spin, Tag } from 'antd'
+import { Alert, Button, Spin } from 'antd'
 import { ReloadOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { OpsMetricsResponse } from './ops.types.js'
 import { OpsMetricsDashboard } from './OpsMetricsDashboard.js'
-import { OpsShell } from './components/OpsShell.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { StackControlCard } from './StackControlCard.js'
 import { opsApi } from './api.js'
 import { countInfraIssues } from './ops-panels.js'
 import type { OpsDeploymentTier } from './theme/ops-environment.js'
 import { normalizeOpsDeploymentTier } from './theme/ops-environment.js'
+import { isChLayoutMock } from './ch-navigation.js'
+import { ChLayoutMockPage } from './mock/ChLayoutMockPage.js'
 
 const AUTO_REFRESH_MS = 60_000
 
-const OPS_SUBTITLES: Record<OpsDeploymentTier, string> = {
-  integration: 'Console AiyraCare · Postgres direto · dev :3010 / :5173',
-  preview: 'Console AiyraCare · Postgres direto · staging :3020 / :5174',
-  production: 'Console AiyraCare · Postgres direto · produção',
-}
-
-export function App() {
+function AppConsole() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<OpsMetricsResponse | null>(null)
@@ -29,7 +24,10 @@ export function App() {
   const load = useCallback(async () => {
     setError(null)
     try {
-      const [health, result] = await Promise.all([opsApi.health(), opsApi.metrics()])
+      const [health, result] = await Promise.all([
+        opsApi.health(),
+        opsApi.metrics(),
+      ])
       setDeploymentTier(normalizeOpsDeploymentTier(health.deploymentTier, health.port))
       setData(result)
     } catch (err) {
@@ -41,13 +39,13 @@ export function App() {
     }
   }, [])
 
+  useEffect(() => {
+    load()
+  }, [load])
+
   const refresh = useCallback(async () => {
     setLoading(true)
     await load()
-  }, [load])
-
-  useEffect(() => {
-    load()
   }, [load])
 
   useEffect(() => {
@@ -81,67 +79,86 @@ export function App() {
   const metrics = data?.metrics
   const probeOk = metrics?.probe?.api.ok && metrics?.probe?.postgres.ok
 
-  return (
-    <OpsShell
-      title="Observabilidade"
-      subtitle={`${OPS_SUBTITLES[deploymentTier]} · docs/ops/README.md`}
-      deploymentTier={deploymentTier}
-      actions={
-        <>
-          <Button icon={<ReloadOutlined />} onClick={refresh} loading={loading}>
-            Atualizar
-          </Button>
-          <Button
-            type="primary"
-            icon={<ThunderboltOutlined />}
-            onClick={runDispatch}
-            loading={dispatching}
-          >
-            Verificar e acionar
-          </Button>
-        </>
-      }
-      statusStrip={
-        metrics ? (
-          <>
-            <span className="ops-status-pill">
-              Snapshot {new Date(metrics.generatedAt).toLocaleString('pt-BR')}
-            </span>
-            {metrics.probe?.checkedAt && (
-              <span className="ops-status-pill">
-                Probe {new Date(metrics.probe.checkedAt).toLocaleString('pt-BR')}
-              </span>
-            )}
-            <Tag color={probeOk ? 'success' : 'error'}>
-              {probeOk ? 'Dependências ok' : 'Degradado'}
-            </Tag>
-            <Tag>{data?.alerts.length ?? 0} alertas</Tag>
-            {countInfraIssues(metrics) > 0 && (
-              <Tag color="error">{countInfraIssues(metrics)} infra down</Tag>
-            )}
-            <span style={{ color: '#64748b' }}>Auto-refresh 60s</span>
-          </>
-        ) : null
-      }
-    >
-      {error && (
-        <Alert type="error" showIcon message={error} style={{ marginBottom: 16 }} />
-      )}
+  const headerActions = (
+    <>
+      <Button icon={<ReloadOutlined />} onClick={refresh} loading={loading}>
+        Atualizar
+      </Button>
+      <Button
+        type="primary"
+        icon={<ThunderboltOutlined />}
+        onClick={runDispatch}
+        loading={dispatching}
+      >
+        Verificar e acionar
+      </Button>
+    </>
+  )
 
-      {loading && !data ? (
-        <Spin size="large" style={{ display: 'block', margin: '48px auto' }} />
-      ) : !data ? null : (
+  const footerStatus = metrics
+    ? [
+        `Snapshot ${new Date(metrics.generatedAt).toLocaleString('pt-BR')}`,
+        metrics.probe?.checkedAt
+          ? `Probe ${new Date(metrics.probe.checkedAt).toLocaleString('pt-BR')}`
+          : null,
+        probeOk ? 'Dependências ok' : 'Degradado',
+        `${data?.alerts.length ?? 0} alertas`,
+        countInfraIssues(metrics) > 0 ? `${countInfraIssues(metrics)} infra down` : null,
+        'Auto-refresh 60s',
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : 'Carregando métricas…'
+
+  if (loading && !data) {
+    return (
+      <div className="ch-layout" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Spin size="large" />
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {error && (
+        <Alert
+          type="error"
+          showIcon
+          message={error}
+          style={{ margin: 16 }}
+          closable
+          onClose={() => setError(null)}
+        />
+      )}
+      {!data ? null : (
         <OpsMetricsDashboard
           data={data}
           runtime={data.runtime}
+          deploymentTier={deploymentTier}
           onRefresh={refresh}
+          headerActions={headerActions}
+          footerStatus={footerStatus}
           stackSlot={
-            <OpsPanel title="Stack Aiyra" description="API :3010 e web :5173 — app monitorado.">
-              <StackControlCard onStackChange={refresh} />
+            <OpsPanel
+              title="Stack Aiyra"
+              description={
+                deploymentTier === 'preview'
+                  ? 'API :3020 e web :5174 — app monitorado (staging local).'
+                  : 'API :3010 e web :5173 — app monitorado (dev local).'
+              }
+            >
+              <StackControlCard deploymentTier={deploymentTier} onStackChange={refresh} />
             </OpsPanel>
           }
         />
       )}
-    </OpsShell>
+    </>
   )
+}
+
+export function App() {
+  if (isChLayoutMock()) {
+    return <ChLayoutMockPage />
+  }
+  return <AppConsole />
 }

@@ -5,6 +5,8 @@ import {
   sanitizeOpsToastText,
 } from '../src/domain/ops/ops-alert-toast.js'
 
+const DETECTED_AT = '2026-01-01T00:00:00.000Z'
+
 describe('ops-alert-toast', () => {
   it('sanitize removes problematic unicode punctuation', () => {
     expect(sanitizeOpsToastText('API — lenta • test')).toBe('API - lenta - test')
@@ -16,6 +18,7 @@ describe('ops-alert-toast', () => {
       severity: 'critical',
       category: 'sync',
       message: 'Sync travado (amil) há 45 min',
+      detectedAt: DETECTED_AT,
     }])
     expect(toast.title).toBe('[Ambiente] CRITICO')
     expect(toast.body).toContain('[!]')
@@ -31,6 +34,7 @@ describe('ops-alert-toast', () => {
       severity: 'warning',
       category: 'product',
       message: '12 bloqueios de franquia Ava (1h)',
+      detectedAt: DETECTED_AT,
     }])
     expect(toast.title).toBe('[Ambiente] AVISO')
     expect(resolveOpsToastIcon([{
@@ -38,6 +42,7 @@ describe('ops-alert-toast', () => {
       severity: 'warning',
       category: 'product',
       message: 'x',
+      detectedAt: DETECTED_AT,
     }])).toBe('info')
     expect(toast.icon).toBe('info')
   })
@@ -49,12 +54,14 @@ describe('ops-alert-toast', () => {
         severity: 'critical',
         category: 'infra',
         message: 'API health falhou',
+        detectedAt: DETECTED_AT,
       },
       {
         id: 'llm_cascade_fail',
         severity: 'critical',
         category: 'llm',
         message: 'Ava: 4 falhas em 5 min',
+        detectedAt: DETECTED_AT,
       },
     ])
     expect(toast.icon).toBe('error')

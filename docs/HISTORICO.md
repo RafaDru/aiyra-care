@@ -1,5 +1,113 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-09-24] - Nome oficial Command Hub (CH)
+
+### Decisão
+- Plataforma interna (console `:3013`, `/ops/*`, suporte, alertas, telemetria) passa a ser chamada **Command Hub**; acrônimo **CH** na conversa.
+- Paths legados (`docs/ops/`, `packages/ops-console`, `test:ops`) mantidos até pós-MVP.
+
+### Realizado
+- [`docs/ops/COMMAND_HUB.md`](ops/COMMAND_HUB.md); hub e escopo MVP atualizados; rule `.cursor/rules/aiyra-ops-session.mdc`.
+
+## [2026-09-23] - Preview pausado; Ops MVP em ambiente único
+
+### Decisão
+- **Congelar Ambiente 2 (Preview/staging)** na rotina diária até o MVP App + Web + Plataforma passar `promotion:gates` e lane `regression` em integração.
+- **Concentrar Ops** em uma pilha: API `:3010`, web `:5173`, console `:3013`, PG `aiyracare`, uma `OPS_METRICS_KEY`; sem dual-env ops nem `OPS_WORKER_MONITOR=1` sem worker.
+- **Ordem go-live:** integração verde → retomar staging → produção (CNPJ).
+
+### Realizado
+- [`docs/ops/OPS_MVP_SCOPE.md`](ops/OPS_MVP_SCOPE.md) — escopo ops ativo vs congelado.
+- Atualização: [`docs/ops/README.md`](ops/README.md), [`docs/infra/TWO_ENV_MODEL.md`](infra/TWO_ENV_MODEL.md), [`docs/infra/ENV_PREVIEW.md`](infra/ENV_PREVIEW.md), [`docs/infra/OPS_TWO_ENV_SETUP.md`](infra/OPS_TWO_ENV_SETUP.md).
+
+## [2026-09-20] - Família: exclusão de perfil só pelo titular (PR #8)
+
+### Realizado
+- **DELETE /patients/:id** — apenas `owner_account_id` (cuidador convidado recebia 204 e o CASCADE apagava o histórico).
+- **POST /patients** — grava `owner_account_id` (antes só `completeProfile` gravava; filhos criados no dashboard ficavam sem titular).
+- **Migration 070** — backfill de `owner_account_id` a partir de grants/memberships.
+- **Care circles** — `addMember` não rebaixa o titular (`ON CONFLICT` upsert de role).
+- **UI** — botão excluir só para o titular (`isOwner`).
+
+## [2026-09-18] - Docs Automations: criação manual na UI (sem import JSON)
+
+### Decisão
+- A UI **Cursor → Automations** não oferece import de workflow JSON (confirmado por Rafael). Runbooks passam a descrever **New automation** + colar prompt dos `*.yaml` / playbook; `*.workflow.json` ficam só como referência versionada.
+
+### Realizado
+- `.cursor/automations/README.md`, `docs/coordination/CURSOR_RETURN_PATH.md`, runbooks ops; `backend-task-cursor-handoff.yaml` de referência.
+
+## [2026-09-18] - Parceria Cursor × Claude Code (backend + fila + gatilhos)
+
+### Decisão
+- **Variante A:** Cursor = produto, interfaces, contrato BFF, QA; Claude Code = núcleo servidor com capabilities completas.
+- Fila `docs/coordination/BACKEND_TASK_QUEUE.md`; guard-rails de pacotes; `fs.watch` + notificação CLI Claude→Cursor.
+
+### Realizado
+- `docs/CLAUDE_CODE_PARTNERSHIP.md`, `docs/coordination/*` (reconciliar com cópia local Claude após merge).
+
+### Próximo
+- PR docs → `main`; piloto `TASK-*` na fila.
+
+## [2026-09-18] - Worker My Machines: detecção e autostart resilientes
+
+### Realizado
+- `cursor-worker-start.ps1` — corrige falso positivo com `0 workers`; remove `worker.lock` obsoleto; loop de reinício no modo `-Autostart` (tarefa `AiyraCare-CursorMyMachinesWorker`).
+
+## [2026-09-16] - MVP: épico family-day-to-day fechado; referral billing fora do MVP
+
+### Decisão
+- Épico `family-day-to-day` marcado **done** no `roadmap.json` (D1–D5 + suites QA). Atribuição referral no share (D4) permanece sem billing.
+- **Programa de indicação bilateral com descontos** permanece **fora do MVP** — debate em `docs/discovery/referral-growth-loop.md`; depende de parecer jurídico formal antes de qualquer cobrança/desconto.
+
+### Realizado
+- Suite QA `patient-wallet` (smoke Carteira) + correção `docs/testing/suites/index.json` (entradas integrations/hygiene/support/ava desaninhadas).
+- i18n Batch S3: `i18n:check` + strings Ava report/lite mode.
+
+### Próximo
+- Merge drafts #4, #13, #18 + Ava stabilize; Rafael valida Staging `:5174`.
+
+## [2026-09-16] - Cursor Projects + My Machines (execução local)
+
+### Decisão
+- Modo **Projects**: coordenador na nuvem; implementação no checkout local via **My Machines** (`NotebookRafael`), não VM cloud clone.
+- Autostart no logon Windows — tarefa `AiyraCare-CursorMyMachinesWorker` (+45s).
+
+### Realizado
+- CLI `agent` + fix Windows `better-sqlite3` (`scripts/cursor-worker-repair.ps1`).
+- Scripts `cursor-worker-start|install-autostart|uninstall-autostart.ps1`.
+- Runbook: `docs/CURSOR_WORKSPACE.md`, `docs/CURSOR_AGENT_OPS.md`.
+
+### Próximo
+- `.cursor/mcp.json` no repo para MCP stdio no worker; fallback WSL se bug Node voltar.
+
+## [2026-09-16] - Ops: investigationId + notificador PS 5.1
+
+### Decisão
+- Chave canônica de correlação entre console Suporte/Issues, toast, webhook Cursor e callback do agente: **`investigationId`** = `ops_analysis_queue.id` (UUID). `reportId` / `alertId` permanecem como origem do evento.
+
+### Realizado
+- Domínio `investigation-correlation.ts`; payload webhook com `investigationId` + `[inv:xxxxxxxx]` no `text`; callback aceita `investigationId` (legado `queueId`).
+- Console: coluna `investigationId` (Issues + Suporte), deep link `?tab=issues&investigationId=`, componente copiar ID.
+- Simulates incluem `analysisQueue` + `investigationId`; enqueue antes do toast no submit de suporte.
+- Fix `ops-notifier-attention.ps1` — compatível Windows PowerShell 5.1 (`??`, `$Label:`).
+- Docs: `docs/ops/INVESTIGATION_CORRELATION.md`, playbooks e `AUTOMATIONS_LANES.md`.
+
+### Próximo
+- Callback público em preview GCP; persistir `backgroundComposerId` (opcional); Tier 1 em produção com revisão humana.
+
+## [2026-09-15] - Ops Tier 1 + pilha Issues (commits anteriores)
+
+### Realizado
+- Migration 068 `ops_analysis_queue`; aba Issues; tray contadores; pré-análise `OPS_ANALYSIS_PRE_SCREEN`; Tier 1 opt-in `OPS_INVESTIGATOR_TIER1`.
+- Automations: **AiCare - Suporte ao Desenvolvimento** + **AiCare - Suporte SRE**.
+
+## [2026-09-15] - Push main: produto D4–D5 + G3 + RBAC (`aa43ba7`, `90f357b`)
+
+### Realizado
+- D4 referral/e-mail + D5 portal médico + dossiê jurídico PDF + suites QA.
+- Ava G3 + RBAC org (067) — ver entradas abaixo.
+
 ## [2026-09-15] - Ava G3 ações confirmadas + RBAC org audit
 
 ### Realizado

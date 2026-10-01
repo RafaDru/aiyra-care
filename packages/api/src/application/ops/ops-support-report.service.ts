@@ -6,8 +6,10 @@ import {
 } from '../support-report/support-report-dispatch.js'
 import { investigateSupportReportWithQueue } from './ops-analysis-investigation.helper.js'
 import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
+import type { IncidentDispatchService } from './incident-dispatch.service.js'
 import type {
   SupportReportAnalysisStatus,
+  SupportReportRecord,
   SupportReportStatus,
 } from '../../domain/support-report/support-report.types.js'
 import {
@@ -36,9 +38,18 @@ export interface SupportReportOpsRow {
   analysisRequestedAt: string | null
   analysisCompletedAt: string | null
   analysisLastError: string | null
+  investigationId: string | null
+  suggestedCategory: string | null
+  categoryReviewNote: string | null
+  taxonomyGapProposal: string | null
+  deploymentStatus: string
+  deploymentActions: Array<{ label: string; kind: string; url?: string; done?: boolean }>
 }
 
-function mapOpsRow(row: Awaited<ReturnType<SupportReportPgRepository['listForOps']>>[number]): SupportReportOpsRow {
+function mapOpsRow(
+  row: Awaited<ReturnType<SupportReportPgRepository['listForOps']>>[number],
+  investigationId?: string | null,
+): SupportReportOpsRow {
   return {
     id: row.id,
     accountId: row.accountId,
@@ -60,22 +71,42 @@ function mapOpsRow(row: Awaited<ReturnType<SupportReportPgRepository['listForOps
     analysisRequestedAt: row.analysisRequestedAt?.toISOString() ?? null,
     analysisCompletedAt: row.analysisCompletedAt?.toISOString() ?? null,
     analysisLastError: row.analysisLastError,
+    investigationId: investigationId ?? null,
+    suggestedCategory: row.suggestedCategory,
+    categoryReviewNote: row.categoryReviewNote,
+    taxonomyGapProposal: row.taxonomyGapProposal,
+    deploymentStatus: row.deploymentStatus,
+    deploymentActions: row.deploymentActions,
   }
 }
 
 export type RequestAnalysisResult =
-  | { ok: true; analysisStatus: SupportReportAnalysisStatus; message: string }
+  | { ok: true; analysisStatus: SupportReportAnalysisStatus; message: string; investigationId?: string }
   | { ok: false; error: 'not_found' | 'investigator_unavailable' | 'dispatch_failed'; message: string }
 
 export class OpsSupportReportService {
   constructor(
     private readonly repo: SupportReportPgRepository,
     private readonly queueService?: OpsAnalysisQueueService,
+    private readonly incidentDispatch?: IncidentDispatchService,
   ) {}
 
   async list(status: SupportReportStatus = 'open', limit = 50): Promise<SupportReportOpsRow[]> {
     const rows = await this.repo.listForOps(status, limit)
-    return rows.map(mapOpsRow)
+    if (!this.queueService || !rows.length) {
+      return rows.map((row) => mapOpsRow(row))
+    }
+    let invMap = new Map<string, string>()
+    try {
+      invMap = await this.queueService.findInvestigationIdsForSources(
+        'support_report',
+        rows.map((r) => r.id),
+      )
+    } catch (err) {
+      const code = typeof err === 'object' && err !== null ? (err as { code?: string }).code : undefined
+      if (code !== '42P01') throw err
+    }
+    return rows.map((row) => mapOpsRow(row, invMap.get(row.id)))
   }
 
   async updateStatus(id: string, status: 'triaged' | 'resolved' | 'closed'): Promise<boolean> {
@@ -94,15 +125,23 @@ export class OpsSupportReportService {
     }
 
     const fullRecord = { ...record, operatorNotes: notes }
-    const dispatch = this.queueService
-      ? (await investigateSupportReportWithQueue(this.queueService, fullRecord, {
-        operatorNotes: notes,
-        trigger: 'manual',
-      })).dispatch
-      : await dispatchSupportReportInvestigator(fullRecord, {
+    let investigationId: string | undefined
+    let dispatch: Awaited<ReturnType<typeof dispatchSupportReportInvestigator>>
+    if (this.queueService) {
+      const result = await investigateSupportReportWithQueue(
+        this.queueService,
+        fullRecord,
+        { operatorNotes: notes, trigger: 'manual' },
+        this.incidentDispatch,
+      )
+      investigationId = result.investigationId
+      dispatch = result.dispatch
+    } else {
+      dispatch = await dispatchSupportReportInvestigator(fullRecord, {
         operatorNotes: notes,
         trigger: 'manual',
       })
+    }
 
     const analysisStatus = analysisStatusFromInvestigatorResult(dispatch)
     const analysisError = analysisErrorFromInvestigatorResult(dispatch)
@@ -120,7 +159,10 @@ export class OpsSupportReportService {
       return {
         ok: true,
         analysisStatus: 'in_progress',
-        message: 'Investigador Cursor disparado — aguarde o rascunho em docs/ops/investigations/',
+        message: investigationId
+          ? `Investigador disparado — investigationId ${investigationId.slice(0, 8)}…`
+          : 'Investigador Cursor disparado — aguarde o rascunho em docs/ops/investigations/',
+        investigationId,
       }
     }
 
@@ -141,18 +183,32 @@ export class OpsSupportReportService {
 
   async completeAnalysis(
     id: string,
-    input: { analysisSummary?: string; analysisArtifactPath?: string },
+    input: {
+      analysisSummary?: string
+      analysisArtifactPath?: string
+      deploymentStatus?: string
+      deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+    },
   ): Promise<boolean> {
     const summary = sanitizeAnalysisSummary(input.analysisSummary)
     const artifact = input.analysisArtifactPath?.trim().slice(0, 512) ?? null
-    if (!summary && !artifact) return false
+    const hasDeployment = Boolean(input.deploymentStatus || input.deploymentActions?.length)
+    if (!summary && !artifact && !hasDeployment) return false
 
-    return this.repo.updateAnalysisStateForOps(id, {
+    const ok = await this.repo.applyAgentOpsPatch(id, {
       analysisStatus: 'completed',
       analysisSummary: summary,
       analysisArtifactPath: artifact,
       analysisCompletedAt: new Date(),
-      analysisLastError: null,
+      deploymentStatus: input.deploymentStatus as SupportReportRecord['deploymentStatus'] | undefined,
+      deploymentActions: input.deploymentActions,
     })
+    if (ok && this.queueService) {
+      const invId = await this.queueService.findInvestigationIdForSource('support_report', id)
+      if (invId) {
+        await this.queueService.markHumanCompleted(invId).catch(() => undefined)
+      }
+    }
+    return ok
   }
 }

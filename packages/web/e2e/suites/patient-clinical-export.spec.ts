@@ -1,8 +1,14 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { requireQaTestCredentials } from '../helpers/env'
 import { ensureQaE2eSession } from '../helpers/session'
 import { qaPatientName, uniqueQaCpf } from '../helpers/fixtures'
 import { createPatientFromDashboard, openPatientByName } from '../helpers/patient'
+
+/** API may return PUBLIC_WEB_URL (e.g. :5173); Playwright preview uses another origin. */
+function webShareUrl(page: Page, apiShareUrl: string): string {
+  const { pathname, search } = new URL(apiShareUrl)
+  return new URL(`${pathname}${search}`, page.url()).href
+}
 
 test.describe('patient-clinical-export', () => {
   test.beforeEach(() => {
@@ -32,7 +38,7 @@ test.describe('patient-clinical-export', () => {
     await expect(copyButton).toBeEnabled({ timeout: 20_000 })
     await copyButton.click()
 
-    await expect(page.getByText(/Link copiado/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.ant-message').getByText(/Link copiado/i)).toBeVisible({ timeout: 10_000 })
     await dialog.getByRole('button', { name: 'Fechar' }).click()
     await dialog.waitFor({ state: 'hidden' })
   })
@@ -97,9 +103,9 @@ test.describe('patient-clinical-export', () => {
     await expect.poll(() => shareUrl, { timeout: 20_000 }).not.toBeNull()
 
     const publicPage = await context.newPage()
-    await publicPage.goto(shareUrl!)
+    await publicPage.goto(webShareUrl(page, shareUrl!))
     await expect(publicPage.getByText('Portal do médico')).toBeVisible({ timeout: 20_000 })
-    await expect(publicPage.getByText(patientName)).toBeVisible()
+    await expect(publicPage.getByRole('heading', { name: patientName, level: 3 })).toBeVisible()
     await expect(publicPage.getByText(/Este resumo foi útil/i)).toBeVisible()
     await publicPage.close()
     await page.getByRole('dialog', { name: 'Levar na consulta' }).getByRole('button', { name: 'Fechar' }).click()

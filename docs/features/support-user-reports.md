@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `support-user-reports` |
 | **Épico** | `prod-run-intelligence` |
-| **Status** | `done` (MVP usuário + fila ops; backlog: screenshot UI, sparkline KPI) |
+| **Status** | `done` |
 | **Categoria** | técnico |
 | **Prioridade** | P1 |
 
@@ -32,7 +32,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 | Tipo | Referência |
 |------|------------|
 | Rotas web | Todas (botão em `AppLayout`) |
-| API | `POST /support/reports`, `GET /support/reports`, `GET /support/reports/:id` |
+| API | `POST /support/reports` (cria `support_reports` + incidente `ops_analysis_queue`, origem Usuário), `GET …` |
 | Tabelas PG | `support_reports` (migration **061**) |
 | UI | `packages/web/src/components/support/SupportReportModal.tsx` |
 | Telemetria | `support_report_submitted` em `product_events` |
@@ -56,8 +56,9 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 ## Fora de escopo (backlog pós-MVP)
 
 - Captura de screenshot na UI (API pronta)
-- Sparkline de volume no ops console (KPI numérico hoje)
 - Criptografia KMS do bundle (JSON já sanitizado)
+
+> Aba Suporte no ops console (`:3013`), fila Issues e agente investigador já entregues — ver [`docs/ops/SUPPORT_REPORTS.md`](../ops/SUPPORT_REPORTS.md).
 
 ## Dependências
 
@@ -75,6 +76,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 - Suite: [`support-user-report`](../testing/suites/support-user-report.md)
 - Comando: `npm run qa:run -- --suite support-user-report`
 - Automação: `packages/web/e2e/suites/support-user-report.spec.ts`
+- **Batch investigator (ops):** com `OPS_SUPPORT_INVESTIGATOR_MODE=batch`, `POST /support/reports` mantém toast e deixa `analysis_status=queued` até o job (`OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS`, padrão 6h no connect-worker). Botão **Analisar** no console continua imediato. Vitest: `support-report-batch.test.ts`, `support-report-dispatch.test.ts`.
 
 ## Ver também
 

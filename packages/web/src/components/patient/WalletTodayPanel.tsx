@@ -65,8 +65,9 @@ export function WalletTodayPanel({
 }: Props) {
   const { t } = useTranslation()
   const lensPatients = patients ?? []
-  const showPatientPicker = lensPatients.length > 0 && Boolean(onPatientChange)
+  const showPatientPicker = lensPatients.length > 1 && Boolean(onPatientChange)
   const activePatient = lensPatients.find((p) => p.id === patientId) ?? null
+  const followingName = activePatient?.name.trim().split(/\s+/)[0] ?? activePatient?.name
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<TodayItem[]>([])
   const [actingId, setActingId] = useState<string | null>(null)
@@ -166,6 +167,11 @@ export function WalletTodayPanel({
           <Text type="secondary" style={{ fontSize: 12 }}>
             {t('walletToday.subtitle', { date: dayjs().format('dddd, DD/MM') })}
           </Text>
+          {lensPatients.length === 1 && followingName && (
+            <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 2 }}>
+              {t('walletToday.followingLine', { name: followingName })}
+            </Text>
+          )}
         </div>
         <Space wrap size="small">
           <Button
@@ -189,7 +195,7 @@ export function WalletTodayPanel({
       {showPatientPicker && (
         <div style={{ marginBottom: 12 }}>
           <Text type="secondary" style={{ display: 'block', marginBottom: 6, fontSize: 12 }}>
-            {t('quickCapture.patientLabel')}
+            {t('walletToday.lensLabel')}
           </Text>
           <AvaPatientLensSelect
             patients={lensPatients}
@@ -197,11 +203,6 @@ export function WalletTodayPanel({
             onChange={onPatientChange!}
             routePatientId={routePatientId}
           />
-          {activePatient && (
-            <Text type="secondary" style={{ display: 'block', marginTop: 4, fontSize: 12 }}>
-              {activePatient.name}
-            </Text>
-          )}
         </div>
       )}
 

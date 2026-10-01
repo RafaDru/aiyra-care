@@ -1,13 +1,30 @@
 import { execSync } from 'child_process'
 import { resolve } from 'path'
 import type { Page } from '@playwright/test'
-import { loginViaPassword } from './auth'
+import { loginViaPassword, waitForSupabaseSession } from './auth'
 import { requireQaTestCredentials } from './env'
 import { completeOnboardingProfile, dismissCookieBanner } from './onboarding'
 import { uniqueQaCpf } from './fixtures'
-import { hideAvaDock, dismissHygienePrompt } from './ui'
+import { hideAvaDock, dismissHygienePrompt, dismissFirstVisitTour } from './ui'
+import { dashboardAddFamilyButton, waitForDashboardReady } from './dashboard'
 
 const repoRoot = resolve(process.cwd(), '..', '..')
+
+async function waitForPatientList(page: Page) {
+  await page
+    .waitForResponse(
+      (r) => {
+        try {
+          const path = new URL(r.url()).pathname
+          return path === '/patients' && r.request().method() === 'GET' && r.ok()
+        } catch {
+          return false
+        }
+      },
+      { timeout: 30_000 },
+    )
+    .catch(() => undefined)
+}
 
 export type EnsureSessionOptions = {
   keepHygienePrompt?: boolean
@@ -18,10 +35,11 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   execSync('npm run qa:seed-e2e-account', { cwd: repoRoot, stdio: 'ignore' })
   const { email, password } = requireQaTestCredentials()
   await loginViaPassword(page, email, password)
+  await waitForSupabaseSession(page)
   await dismissCookieBanner(page)
 
-  const novoPaciente = page.getByRole('button', { name: 'Novo Paciente' })
-  const onboardingHeading = page.getByRole('heading', { name: 'Complete seu cadastro' })
+  const novoPaciente = dashboardAddFamilyButton(page)
+  const onboardingHeading = page.getByRole('heading', { name: 'Bem-vindo ao AiyraCare' })
 
   await Promise.race([
     novoPaciente.waitFor({ state: 'visible', timeout: 30_000 }),
@@ -35,9 +53,12 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
       genderLabel: 'Masculino',
       cpf: uniqueQaCpf(Date.now()),
     })
+    await waitForPatientList(page)
   }
 
-  await novoPaciente.waitFor({ state: 'visible', timeout: 15_000 })
+  await dismissFirstVisitTour(page)
+  await waitForPatientList(page)
+  await waitForDashboardReady(page)
   if (!opts?.keepAvaDock) {
     await hideAvaDock(page)
   }

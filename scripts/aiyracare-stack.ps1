@@ -10,11 +10,23 @@ $root = Split-Path $PSScriptRoot -Parent
 $apiDir = Join-Path $root "packages\api"
 $webDir = Join-Path $root "packages\web"
 $apiPort = if ($env:PORT) { [int]$env:PORT } else { 3010 }
-$webPort = 5173
+$webPort = if ($env:AIYRA_STACK_WEB_PORT) { [int]$env:AIYRA_STACK_WEB_PORT } else { 5173 }
+$previewStack = $apiPort -eq 3020 -or $webPort -eq 5174
+$logSuffix = if ($previewStack) { '-preview' } else { '' }
 
 $envFile = Join-Path $root ".env"
 if (Test-Path $envFile) {
   Get-Content $envFile | ForEach-Object {
+    if ($_ -match '^([^#=]+)=(.*)$') {
+      $k = $matches[1].Trim()
+      $v = $matches[2].Trim()
+      if ($k -and $v) { Set-Item -Path "env:$k" -Value $v -ErrorAction SilentlyContinue }
+    }
+  }
+}
+$envPreviewFile = Join-Path $root ".env.preview"
+if ($previewStack -and (Test-Path $envPreviewFile)) {
+  Get-Content $envPreviewFile | ForEach-Object {
     if ($_ -match '^([^#=]+)=(.*)$') {
       $k = $matches[1].Trim()
       $v = $matches[2].Trim()
@@ -100,20 +112,26 @@ function Wait-ForStack {
 
 function Start-AiyraApi {
   Stop-ListenerOnPort $apiPort
-  $logApi = Join-Path $root "api.log"
+  $logApi = Join-Path $root "api$logSuffix.log"
   $env:PORT = "$apiPort"
   if (-not $Cloud) {
-    $env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare"
+    $dbName = if ($previewStack) { 'aiyracare_preview' } else { 'aiyracare' }
+    $env:DATABASE_URL = "postgresql://postgres:postgres123@127.0.0.1:5432/$dbName"
   }
+  $deploymentTier = if ($previewStack) { 'preview' } else { 'integration' }
   $llmQuotaUnlimited = $env:LLM_QUOTA_UNLIMITED
-  $cmdApi = "set PORT=$apiPort&&set DATABASE_URL=$env:DATABASE_URL&&set LLM_QUOTA_UNLIMITED=$llmQuotaUnlimited&&set OPENCODE_GO_API_KEY=$env:OPENCODE_GO_API_KEY&&set OPENCODE_ZEN_API_KEY=$env:OPENCODE_ZEN_API_KEY&&set GEMINI_API_KEY=$env:GEMINI_API_KEY&&set GROQ_API_KEY=$env:GROQ_API_KEY&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
+  $cmdApi = "set PORT=$apiPort&&set DEPLOYMENT_TIER=$deploymentTier&&set DATABASE_URL=$env:DATABASE_URL&&set LLM_QUOTA_UNLIMITED=$llmQuotaUnlimited&&set OPENCODE_GO_API_KEY=$env:OPENCODE_GO_API_KEY&&set OPENCODE_ZEN_API_KEY=$env:OPENCODE_ZEN_API_KEY&&set GEMINI_API_KEY=$env:GEMINI_API_KEY&&set GROQ_API_KEY=$env:GROQ_API_KEY&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
   cmd /c "start /B cmd /c `"$cmdApi`""
 }
 
 function Start-AiyraWeb {
   Stop-ListenerOnPort $webPort
-  $logWeb = Join-Path $root "web.log"
-  $cmdWeb = "cd /d $webDir&&npx vite --host 0.0.0.0 >`"$logWeb`" 2>&1"
+  $logWeb = Join-Path $root "web$logSuffix.log"
+  $viteApiUrl = "http://127.0.0.1:$apiPort"
+  $opsConsolePort = if ($previewStack) { 3023 } else { 3013 }
+  $viteOpsConsoleUrl = "http://127.0.0.1:$opsConsolePort"
+  $viteDeploymentTier = if ($previewStack) { 'preview' } else { 'integration' }
+  $cmdWeb = "set VITE_API_URL=$viteApiUrl&&set VITE_OPS_CONSOLE_URL=$viteOpsConsoleUrl&&set VITE_DEPLOYMENT_TIER=$viteDeploymentTier&&cd /d $webDir&&npx vite --host 0.0.0.0 --port $webPort >`"$logWeb`" 2>&1"
   cmd /c "start /B cmd /c `"$cmdWeb`""
 }
 

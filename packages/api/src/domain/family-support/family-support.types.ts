@@ -37,6 +37,8 @@ export interface FamilySupportInsight {
 export interface FamilySupportBundle {
   disclaimer: string
   insights: FamilySupportInsight[]
+  /** True when the patient has vitals, allergies, or medications on record. */
+  hasClinicalHistory: boolean
   generatedAt: string
   patientId: string
 }

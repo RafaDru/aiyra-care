@@ -14,12 +14,16 @@ export const createExamResultItemSchema = z.object({
 })
 
 export const createExamResultItemBatchSchema = z.object({
-  items: z.array(createExamResultItemSchema),
+  items: z.array(createExamResultItemSchema).min(1).max(200),
 })
 
 export const patientMarkersQuerySchema = z.object({
   patientId: z.string().uuid(),
   markerName: z.string().optional(),
+})
+
+export const patientMarkersParamsSchema = z.object({
+  patientId: z.string().uuid(),
 })
 
 export const examMarkersParamsSchema = z.object({

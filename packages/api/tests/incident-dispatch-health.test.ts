@@ -6,7 +6,6 @@ describe('resolveIncidentDispatchWebhookFlags', () => {
     const flags = resolveIncidentDispatchWebhookFlags({} as NodeJS.ProcessEnv)
     expect(flags.developmentSupport.ready).toBe(false)
     expect(flags.sreSupport.ready).toBe(false)
-    expect(flags.defectFix.ready).toBe(false)
   })
 
   it('reports ready when url and key present', () => {
@@ -18,13 +17,5 @@ describe('resolveIncidentDispatchWebhookFlags', () => {
     } as NodeJS.ProcessEnv)
     expect(flags.developmentSupport.ready).toBe(true)
     expect(flags.sreSupport.ready).toBe(true)
-  })
-
-  it('reports defect fix lane when env present', () => {
-    const flags = resolveIncidentDispatchWebhookFlags({
-      CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL: 'https://example.com/defect',
-      CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY: 'df-key',
-    } as NodeJS.ProcessEnv)
-    expect(flags.defectFix.ready).toBe(true)
   })
 })

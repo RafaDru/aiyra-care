@@ -33,6 +33,7 @@ Ver `.cursor/rules/qa-delivery.mdc` e `docs/testing/QA_PROCESS.md`.
 |-----|----------|
 | `AGENTS.md` | Stack, comandos, arquitetura, hooks |
 | `docs/CURSOR_AGENT_OPS.md` | Guard-rails, skills tier, hooks |
+| `docs/CURSOR_WORKSPACE.md` | Workspace canônico + Projects / My Machines local |
 | `docs/DELIVERY_PIPELINE.md` | Gates `promotion:gates`, preview |
 | `docs/testing/QA_PROCESS.md` | QA manual + paralelo + gate `main` |
 | `docs/FEATURE_REVIEW_FRAMEWORK.md` | Tier 0–3 antes de merge |
@@ -42,6 +43,7 @@ Ver `.cursor/rules/qa-delivery.mdc` e `docs/testing/QA_PROCESS.md`.
 - Roadmap UI: `GET /roadmap`
 - Contexto LLM: `GET /project/context` (inclui catálogo `features`)
 - Hub docs: `docs/README.md`
+- Parceria backend Claude Code + fila: `docs/CLAUDE_CODE_PARTNERSHIP.md` · `docs/coordination/BACKEND_TASK_QUEUE.md`
 
 ## Sessão «Aiyra: Ops» (observabilidade)
 
@@ -51,6 +53,8 @@ Ver `.cursor/rules/qa-delivery.mdc` e `docs/testing/QA_PROCESS.md`.
 | `docs/ops/CONSOLE.md` | Console `:3013` |
 | `docs/ops/TELEMETRY.md` | Queries / LGPD |
 | `docs/ops/SUPPORT_REPORTS.md` | Migration 061 |
+| `docs/ops/INVESTIGATION_CORRELATION.md` | Chave `investigationId` (console ↔ Automations) |
+| `docs/ops/AUTOMATIONS_LANES.md` | Lanes AiCare + pilha Issues |
 
 Regra: `.cursor/rules/aiyra-ops-session.mdc`
 

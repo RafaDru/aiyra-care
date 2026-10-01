@@ -23,7 +23,8 @@ function portalLabel(portalType: string): string {
   return brandForPortal(portalType)?.shortLabel ?? PORTAL_LABELS[portalType] ?? portalType
 }
 
-function isSyncStale(link: IntegrationLink): boolean {
+/** Dados do portal acima do intervalo de refresh silencioso (Carteira). */
+export function isWalletLinkDataStale(link: IntegrationLink): boolean {
   const when = link.effectiveLastSyncAt ?? link.lastSyncAt
   if (!when) return true
   return Date.now() - new Date(when).getTime() > SILENT_SYNC_STALE_MS
@@ -55,7 +56,7 @@ export function buildWalletSyncBanners(
       })
       continue
     }
-    if (isSyncStale(link) && !meta?.active) {
+    if (isWalletLinkDataStale(link) && !meta?.active) {
       items.push({
         kind: 'stale',
         portalType: link.portalType,
@@ -67,22 +68,41 @@ export function buildWalletSyncBanners(
   return items
 }
 
-export function walletSyncBannerMessage(items: WalletSyncBannerItem[]): string | null {
+type WalletBannerT = (key: string, opts?: { names?: string }) => string
+
+/** CTA para Integrações quando o usuário precisa agir (falha ou primeira sessão). */
+export function walletSyncBannerNeedsIntegrationsCta(items: WalletSyncBannerItem[]): boolean {
+  return items.some((i) => i.kind === 'failed' || i.kind === 'no_session')
+}
+
+/** Oculta aviso «stale» enquanto algum vínculo está sincronizando (silent ou manual). */
+export function filterWalletSyncBannersForActiveSync(
+  items: WalletSyncBannerItem[],
+  anyLinkSyncActive: boolean,
+): WalletSyncBannerItem[] {
+  if (!anyLinkSyncActive) return items
+  return items.filter((i) => i.kind !== 'stale')
+}
+
+export function walletSyncBannerMessage(
+  t: WalletBannerT,
+  items: WalletSyncBannerItem[],
+): string | null {
   if (!items.length) return null
   const failed = items.filter((i) => i.kind === 'failed')
   const stale = items.filter((i) => i.kind === 'stale')
   const noSession = items.filter((i) => i.kind === 'no_session')
   if (failed.length) {
     const names = failed.map((i) => i.portalLabel).join(', ')
-    return `A última sincronização falhou (${names}). Os dados da carteira podem estar desatualizados. Tente Sincronizar em Integrações.`
+    return t('walletSyncBanner.failed', { names })
   }
   if (stale.length) {
     const names = stale.map((i) => i.portalLabel).join(', ')
-    return `Dados de ${names} podem estar desatualizados. A atualização automática ocorre quando há sessão válida.`
+    return t('walletSyncBanner.stale', { names })
   }
   if (noSession.length) {
     const names = noSession.map((i) => i.portalLabel).join(', ')
-    return `Para atualizar ${names}, use Sincronizar em Integrações (primeiro login no portal).`
+    return t('walletSyncBanner.noSession', { names })
   }
   return null
 }

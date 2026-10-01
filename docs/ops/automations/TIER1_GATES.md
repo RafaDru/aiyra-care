@@ -32,7 +32,7 @@ Caso contrário permanece **Tier 0** (só markdown, sem PR).
 
 ```json
 {
-  "queueId": "<analysisQueue.id>",
+  "investigationId": "<investigationId>",
   "remediationSummary": "Correção: …",
   "analysisArtifactPath": "docs/ops/investigations/….md",
   "prUrl": "https://github.com/RafaDru/aiyra-care/pull/NNN"

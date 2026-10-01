@@ -21,6 +21,8 @@ test.describe('family-access-matrix', () => {
     await ensureQaE2eSession(page)
     await gotoFamilySettings(page)
 
+    await expect(page.getByTestId('family-glossary-card')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText('Como funciona família e acesso')).toBeVisible()
     await expect(page.getByRole('heading', { name: /Famílias/ }).first()).toBeVisible({ timeout: 15_000 })
     await expect(page.getByRole('button', { name: 'Nova família' })).toBeVisible()
   })

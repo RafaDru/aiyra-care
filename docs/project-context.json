@@ -151,7 +151,7 @@
     { "id": "family-access-model-done", "date": "2026-09-04", "title": "Épico família MVP completo", "decision": "057–063, audit 062, e-mail Resend opcional, caso Mariana (profile share)", "status": "active" }
   ],
   "plannedWork": [
-    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "done", "priority": "P1", "note": "MVP completo — ver family-access-model.md" },
+    { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "done", "priority": "P1", "note": "MVP completo — exclusão só titular (070); ver family-access-model.md" },
     { "id": "qa-e2e-platform", "title": "QA integrado — suites + E2E CI", "status": "in_progress", "priority": "P1", "note": "docs/testing/ — manual operacional; automação Fase 1–2" },
     { "id": "documentation-knowledge-base", "title": "Base de conhecimento features + help", "status": "in_progress", "priority": "P2" },
     { "id": "platform-environments", "title": "Ambientes dev/staging/prod + massas + esteiras", "status": "done", "priority": "P2" },

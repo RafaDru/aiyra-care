@@ -89,17 +89,6 @@ export class PlatformDefectPgRepository {
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
-  async listLinkedIncidentIds(defectId: string): Promise<string[]> {
-    const res = await this.pool.query<{ incident_id: string }>(
-      `SELECT incident_id::text AS incident_id
-       FROM platform_defect_incidents
-       WHERE defect_id = $1::uuid
-       ORDER BY linked_at ASC`,
-      [defectId],
-    )
-    return res.rows.map((row) => row.incident_id)
-  }
-
   async linkIncident(
     defectId: string,
     incidentId: string,

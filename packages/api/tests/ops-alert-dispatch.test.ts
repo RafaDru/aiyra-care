@@ -19,7 +19,7 @@ describe('ops alert dispatch payload', () => {
   it('redirects legacy dashboard URL to ops-console', () => {
     process.env.OPS_ALERT_DASHBOARD_URL = 'http://localhost:5173/ops'
     const payload = buildOpsAlertDispatchPayload(
-      [{ id: 'a1', severity: 'critical', category: 'sync', message: 'fail' }],
+      [{ id: 'a1', severity: 'critical', category: 'sync', message: 'fail', detectedAt: '2026-01-01T00:00:00.000Z' }],
       '2026-01-01T00:00:00.000Z',
     )
     expect(payload.dashboardUrl).toBe('http://127.0.0.1:3013')
@@ -63,6 +63,7 @@ describe('OpsAlertDispatchService', () => {
           severity: 'critical',
           category: 'llm',
           message: 'cascade',
+          detectedAt: '2026-01-01T00:00:00.000Z',
         }],
       }),
     }
@@ -87,6 +88,7 @@ describe('OpsAlertDispatchService', () => {
             severity: 'warning',
             category: 'product',
             message: 'quota',
+            detectedAt: '2026-01-01T00:00:00.000Z',
           },
         ],
       }),

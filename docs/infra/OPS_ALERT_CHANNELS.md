@@ -67,6 +67,8 @@ npm run test:ops:notifier                  # valida triagem sem POST
 
 `OPS_LOCAL_NOTIFIER_OPEN=0` no processo do notificador evita abrir o browser em cada toast (só balloon).
 
+**Aba duplicada (Windows):** antes de abrir o console ops, o tray (`Start-OpsTrayUrl` / `scripts/ops-notifier-browser.ps1`) verifica se já existe janela/aba do browser com `:3013`/`:3023` ou título `Observabilidade`; se sim, não dispara novo `start`. Debounce de 8s por porta evita rajadas de alertas. Menu manual «Observabilidade» segue a mesma regra (foco em não empilhar abas).
+
 Toasts usam UTF-8 via arquivo temporário; ícone/cor: **Error** (crítico), **Warning** (sync/infra aviso), **Info** (produto/Neo4j). Payload inclui `toast: { title, body, icon }`.
 
 

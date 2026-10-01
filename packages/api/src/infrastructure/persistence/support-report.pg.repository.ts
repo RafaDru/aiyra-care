@@ -1,6 +1,8 @@
 import type { Pool } from 'pg'
 import type { SupportReportRepository, SupportReportInsertRow } from '../../domain/support-report/support-report.repository.js'
 import type {
+  SupportDeploymentAction,
+  SupportDeploymentStatus,
   SupportReportAnalysisStatus,
   SupportReportRecord,
 } from '../../domain/support-report/support-report.types.js'
@@ -38,9 +40,45 @@ function mapRow(row: Record<string, unknown>): SupportReportRecord {
       ? new Date(row.analysis_completed_at as string)
       : null,
     analysisLastError: row.analysis_last_error as string | null,
+    suggestedCategory: (row.suggested_category as string | null) ?? null,
+    categoryReviewNote: (row.category_review_note as string | null) ?? null,
+    taxonomyGapProposal: (row.taxonomy_gap_proposal as string | null) ?? null,
+    deploymentStatus: (row.deployment_status as SupportDeploymentStatus) ?? 'none',
+    deploymentActions: Array.isArray(row.deployment_actions)
+      ? (row.deployment_actions as SupportDeploymentAction[])
+      : [],
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
   }
+}
+
+/** Migration 061 — lista ops funciona mesmo sem 064/069 aplicadas. */
+const SUPPORT_REPORT_SELECT_BASE = `
+  id, account_id, status, category, description, route, session_id, patient_id,
+  consent_technical, consent_screenshot, consent_profile_access,
+  profile_access_until, diagnostic_context,
+  (screenshot_data IS NOT NULL) AS screenshot_data,
+  app_version, user_agent, expires_at, resolved_at,
+  created_at, updated_at
+`
+
+const SUPPORT_REPORT_SELECT = `
+  ${SUPPORT_REPORT_SELECT_BASE.trim()},
+  analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
+  analysis_requested_at, analysis_completed_at, analysis_last_error,
+  suggested_category, category_review_note, taxonomy_gap_proposal,
+  deployment_status, deployment_actions
+`
+
+function isPgUndefinedColumnError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === '42703'
+}
+
+function mapSupportReportRows(rows: Record<string, unknown>[]): SupportReportRecord[] {
+  return rows.map((row) => mapRow({
+    ...row,
+    screenshot_data: row.screenshot_data ? '1' : null,
+  }))
 }
 
 export class SupportReportPgRepository implements SupportReportRepository {
@@ -83,36 +121,19 @@ export class SupportReportPgRepository implements SupportReportRepository {
 
   async listByAccount(accountId: string, limit: number): Promise<SupportReportRecord[]> {
     const { rows } = await this.pool.query(
-      `SELECT id, account_id, status, category, description, route, session_id, patient_id,
-              consent_technical, consent_screenshot, consent_profile_access,
-              profile_access_until, diagnostic_context,
-              (screenshot_data IS NOT NULL) AS screenshot_data,
-              app_version, user_agent, expires_at, resolved_at,
-              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
-              analysis_requested_at, analysis_completed_at, analysis_last_error,
-              created_at, updated_at
+      `SELECT ${SUPPORT_REPORT_SELECT}
        FROM support_reports
        WHERE account_id = $1
        ORDER BY created_at DESC
        LIMIT $2`,
       [accountId, limit],
     )
-    return rows.map((row) => mapRow({
-      ...row,
-      screenshot_data: row.screenshot_data ? '1' : null,
-    }))
+    return mapSupportReportRows(rows)
   }
 
   async findByIdForAccount(id: string, accountId: string): Promise<SupportReportRecord | null> {
     const { rows } = await this.pool.query(
-      `SELECT id, account_id, status, category, description, route, session_id, patient_id,
-              consent_technical, consent_screenshot, consent_profile_access,
-              profile_access_until, diagnostic_context,
-              (screenshot_data IS NOT NULL) AS screenshot_data,
-              app_version, user_agent, expires_at, resolved_at,
-              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
-              analysis_requested_at, analysis_completed_at, analysis_last_error,
-              created_at, updated_at
+      `SELECT ${SUPPORT_REPORT_SELECT}
        FROM support_reports
        WHERE id = $1 AND account_id = $2`,
       [id, accountId],
@@ -195,25 +216,20 @@ export class SupportReportPgRepository implements SupportReportRepository {
     status: SupportReportRecord['status'],
     limit: number,
   ): Promise<SupportReportRecord[]> {
-    const { rows } = await this.pool.query(
-      `SELECT id, account_id, status, category, description, route, session_id, patient_id,
-              consent_technical, consent_screenshot, consent_profile_access,
-              profile_access_until, diagnostic_context,
-              (screenshot_data IS NOT NULL) AS screenshot_data,
-              app_version, user_agent, expires_at, resolved_at,
-              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
-              analysis_requested_at, analysis_completed_at, analysis_last_error,
-              created_at, updated_at
+    const sql = (select: string) =>
+      `SELECT ${select}
        FROM support_reports
        WHERE status = $1
        ORDER BY created_at DESC
-       LIMIT $2`,
-      [status, limit],
-    )
-    return rows.map((row) => mapRow({
-      ...row,
-      screenshot_data: row.screenshot_data ? '1' : null,
-    }))
+       LIMIT $2`
+    try {
+      const { rows } = await this.pool.query(sql(SUPPORT_REPORT_SELECT), [status, limit])
+      return mapSupportReportRows(rows)
+    } catch (err) {
+      if (!isPgUndefinedColumnError(err)) throw err
+      const { rows } = await this.pool.query(sql(SUPPORT_REPORT_SELECT_BASE), [status, limit])
+      return mapSupportReportRows(rows)
+    }
   }
 
   async updateStatusForOps(
@@ -236,14 +252,7 @@ export class SupportReportPgRepository implements SupportReportRepository {
 
   async findByIdForOps(id: string): Promise<SupportReportRecord | null> {
     const { rows } = await this.pool.query(
-      `SELECT id, account_id, status, category, description, route, session_id, patient_id,
-              consent_technical, consent_screenshot, consent_profile_access,
-              profile_access_until, diagnostic_context,
-              (screenshot_data IS NOT NULL) AS screenshot_data,
-              app_version, user_agent, expires_at, resolved_at,
-              analysis_status, operator_notes, analysis_summary, analysis_artifact_path,
-              analysis_requested_at, analysis_completed_at, analysis_last_error,
-              created_at, updated_at
+      `SELECT ${SUPPORT_REPORT_SELECT}
        FROM support_reports
        WHERE id = $1::uuid`,
       [id],
@@ -298,6 +307,72 @@ export class SupportReportPgRepository implements SupportReportRepository {
         patch.analysisSummary ?? null,
         patch.analysisArtifactPath ?? null,
         patch.operatorNotes ?? null,
+      ],
+    )
+    return (rowCount ?? 0) > 0
+  }
+
+  async listQueuedForBatch(deploymentTier: string, limit = 200): Promise<SupportReportRecord[]> {
+    const { rows } = await this.pool.query(
+      `SELECT ${SUPPORT_REPORT_SELECT}
+       FROM support_reports sr
+       WHERE sr.status IN ('open', 'triaged')
+         AND sr.analysis_status IN ('queued', 'pending')
+         AND NOT EXISTS (
+           SELECT 1 FROM ops_analysis_queue q
+           WHERE q.source_type = 'support_report'
+             AND q.source_id = sr.id::text
+             AND q.deployment_tier = $2
+             AND q.status = 'investigating'
+         )
+       ORDER BY sr.category, sr.created_at ASC
+       LIMIT $1`,
+      [limit, deploymentTier],
+    )
+    return rows.map((row) => mapRow({
+      ...row,
+      screenshot_data: row.screenshot_data ? '1' : null,
+    }))
+  }
+
+  async applyAgentOpsPatch(
+    id: string,
+    patch: {
+      suggestedCategory?: string | null
+      categoryReviewNote?: string | null
+      taxonomyGapProposal?: string | null
+      deploymentStatus?: SupportDeploymentStatus
+      deploymentActions?: SupportDeploymentAction[]
+      analysisStatus?: SupportReportAnalysisStatus
+      analysisSummary?: string | null
+      analysisArtifactPath?: string | null
+      analysisCompletedAt?: Date | null
+    },
+  ): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `UPDATE support_reports SET
+         suggested_category = COALESCE($2, suggested_category),
+         category_review_note = COALESCE($3, category_review_note),
+         taxonomy_gap_proposal = COALESCE($4, taxonomy_gap_proposal),
+         deployment_status = COALESCE($5::varchar, deployment_status),
+         deployment_actions = COALESCE($6::jsonb, deployment_actions),
+         analysis_status = COALESCE($7::varchar, analysis_status),
+         analysis_summary = COALESCE($8, analysis_summary),
+         analysis_artifact_path = COALESCE($9, analysis_artifact_path),
+         analysis_completed_at = COALESCE($10, analysis_completed_at),
+         updated_at = NOW()
+       WHERE id = $1::uuid`,
+      [
+        id,
+        patch.suggestedCategory ?? null,
+        patch.categoryReviewNote?.slice(0, 4000) ?? null,
+        patch.taxonomyGapProposal?.slice(0, 2000) ?? null,
+        patch.deploymentStatus ?? null,
+        patch.deploymentActions ? JSON.stringify(patch.deploymentActions) : null,
+        patch.analysisStatus ?? null,
+        patch.analysisSummary ?? null,
+        patch.analysisArtifactPath?.slice(0, 512) ?? null,
+        patch.analysisCompletedAt ?? null,
       ],
     )
     return (rowCount ?? 0) > 0

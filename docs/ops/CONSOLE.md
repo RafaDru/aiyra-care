@@ -1,7 +1,52 @@
-# Console ops — guia por aba
+# Command Hub — console (guia por tela)
 
-> Console independente: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
+> UI: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
 > Lê **Postgres direto** + sonda API monitorada — não passa pelo JWT do app.
+
+## Layout — Command Hub Care (shell v2)
+
+Spec: Project store `docs/ch-header-spec-2026-09-24.md` · `layoutVersion: ch-shell-v2` em `GET /health`.
+
+### Header fixo (sticky)
+
+| Bloco | Conteúdo |
+|-------|----------|
+| **Marca** | **Command Hub Care** + ícone gradiente Aiyra (`ChHubCareLogo`) |
+| **Ambiente** | Chip: **Desenvolvimento** \| **Preview** \| **Produção** (`DEPLOYMENT_TIER` + porta `:3013` / `:3023`) |
+| **Status geral** | Pills **Web** e **Backend** — `UP` / `Degraded` / `Down` (`GET /api/services/status`, refresh ~60s) |
+| **Ações** | **Atualizar** · **Verificar e acionar** |
+| **Central de comando** | Faixa abaixo: **Operação** · **Produto** · **Negócio** · **AI** (horizontal) |
+
+### Corpo
+
+| Zona | Função |
+|------|--------|
+| **Sidebar** | Itens da central ativa (vertical); badges de atenção |
+| **Conteúdo** | Context bar + painel |
+| **Rodapé** | Snapshot, probe, alertas, auto-refresh 60s, link docs CH |
+
+**URLs:** `?group=operacao&tab=overview` (legado `group=plataforma` → `ai`).
+
+| Central (`group`) | Telas (`tab`) |
+|-------------------|----------------|
+| Operação | `overview`, `issues`, `sync`, `infra` |
+| Produto | `produto` (Ciclo de vida), `product`, `support` |
+| Negócio | `business`, `strategy` |
+| **AI** | `ava`, `cost` |
+
+**Validação (NotebookRafael):**
+
+```powershell
+git fetch origin
+git checkout cursor/ch-layout-shell-193e
+npm run ops:console
+curl -s http://127.0.0.1:3013/health   # layoutVersion: ch-shell-v2
+```
+
+- Console: http://127.0.0.1:3013/
+- Mock: http://127.0.0.1:3013/mock/ch-layout
+
+Mapa: `packages/ops-console/src/client/ch-navigation.ts` · `ChHeader.tsx`.
 
 ## Subir
 
@@ -18,15 +63,14 @@ npm run ops:console
 
 Abrir: `http://127.0.0.1:3013` ou `http://127.0.0.1:3023`
 
-## Cabeçalho
+## Cabeçalho — ações
 
 | Controle | Ação |
 |----------|------|
 | **Atualizar** | `GET /api/metrics` + health |
 | **Verificar e acionar** | `POST /api/alerts/check` — triagem + webhook |
-| **Faixa de ambiente** | `integration` / `preview` / `production` (via `DEPLOYMENT_TIER` + porta) |
 
-Auto-refresh: 60s (aba visível).
+Auto-refresh métricas: 60s (aba visível). Status Web/Backend: `GET /api/services/status` (~60s).
 
 ---
 
@@ -58,6 +102,32 @@ Auto-refresh: 60s (aba visível).
 **Queries manuais:** ver [`TELEMETRY.md`](./TELEMETRY.md#client_errors).
 
 **Relacionado:** botão «Reportar problema» alimenta `support_reports` — ver [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md).
+
+---
+
+## Aba: Issues
+
+**Objetivo:** pilha unificada de investigação (Suporte Dev + SRE).
+
+| Bloco | Fonte |
+|-------|--------|
+| Fila `queued` → `fix_proposed` | `ops_analysis_queue` (migration 068) |
+| Coluna **investigationId** | UUID canônico — correlaciona toast, webhook e Automations |
+| Deep link | `?tab=incidentes&investigationId=<uuid>` (alias legado `tab=issues`) |
+
+Ver [`INVESTIGATION_CORRELATION.md`](./INVESTIGATION_CORRELATION.md).
+
+---
+
+## Aba: Suporte
+
+**Objetivo:** chamados «Reportar problema» (fila humana + análise legada).
+
+| Bloco | Fonte |
+|-------|--------|
+| Fila open / triaged / resolved | `support_reports` |
+| **investigationId** (quando enfileirado) | join com `ops_analysis_queue` |
+| Analisar / Concluir | dispara lane AiCare Dev |
 
 ---
 

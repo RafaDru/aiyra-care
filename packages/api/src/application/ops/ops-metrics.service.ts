@@ -39,6 +39,7 @@ export class OpsMetricsService {
       avaEventsHourly24h,
       clientErrorsHourly24h,
       avaTokensHourly24h,
+      supportReportsSubmittedHourly24h,
       workerLastTickAt,
       stripeWebhookRejected1h,
       supportOpenCount,
@@ -61,6 +62,7 @@ export class OpsMetricsService {
       this.repo.avaEventsHourly24h(),
       this.repo.clientErrorsHourly24h(),
       this.repo.avaTokensHourly24h(),
+      this.repo.supportReportsSubmittedHourly24h(),
       this.repo.opsWorkerLastTickAt(),
       this.repo.stripeWebhookRejectedCount1h(),
       this.repo.supportReportsOpenCount(),
@@ -123,6 +125,7 @@ export class OpsMetricsService {
         avaEventsHourly24h,
         clientErrorsHourly24h,
         avaTokensHourly24h,
+        supportReportsSubmittedHourly24h,
       ),
       probe: readOpsProbeArtifact() ?? undefined,
       ops: {

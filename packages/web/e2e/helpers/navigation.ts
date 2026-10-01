@@ -40,6 +40,6 @@ export async function gotoPatientTab(page: Page, patientId: string, tab: Patient
 }
 
 export async function gotoFamilySettings(page: Page) {
-  await page.goto('/settings/family')
-  await page.waitForURL(/\/settings\/family/, { timeout: 15_000 })
+  await page.goto('/family')
+  await page.waitForURL(/\/family/, { timeout: 15_000 })
 }

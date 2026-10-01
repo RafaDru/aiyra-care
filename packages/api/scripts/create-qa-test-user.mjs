@@ -27,7 +27,7 @@ if (!url || !serviceRole) {
 /** CI: senha fixa no workflow evita corrida entre jobs paralelos no mesmo usuário Supabase. */
 const password =
   process.env.QA_TEST_PASSWORD?.trim() ||
-  (process.env.CI === 'true' ? 'ci-e2e-qa-test-v1' : randomBytes(18).toString('base64url'))
+  (process.env.CI ? 'ci-e2e-qa-test-v1' : randomBytes(18).toString('base64url'))
 const admin = createClient(url, serviceRole, {
   auth: { autoRefreshToken: false, persistSession: false },
 })

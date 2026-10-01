@@ -7,7 +7,7 @@
 | **Lane** | `regression`, `business-full` |
 | **Fixture** | [`qa-onboarding`](../fixtures/qa-onboarding.json) |
 
-Fluxo completo de **primeiro acesso**: compliance (quando pendente) → formulário de onboarding → dashboard com perfil titular (`self`).
+Fluxo completo de **primeiro acesso**: compliance (quando pendente) → wizard de onboarding (perfil titular + dependentes opcionais) → dashboard «Sua família» com perfil titular (`self`).
 
 ## Pré-requisitos
 
@@ -28,7 +28,8 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 2 | Login e-mail/senha | Redireciona para `/compliance/accept` ou `/onboarding` | |
 | 3 | Aceitar termos (se gate) | Avança para `/onboarding` | |
 | 4 | Preencher nome, nascimento ≥18, sexo, CPF | Validação OK | |
-| 5 | **Concluir cadastro** | Dashboard `/` com card do titular | |
+| 5 | **Continuar** → passo dependentes | «Quem você acompanha?» | |
+| 6 | **Pular por agora** (ou adicionar dependente) | Dashboard `/` com heading «Sua família» | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)
 
@@ -41,6 +42,19 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 3 | Onboarding (mesmos campos) | Dashboard com paciente titular | |
 
 > Signup via UI fora do gate E2E automático no dev (rate limit Supabase). Use conta dedicada + reset (cenário A) na CI.
+
+### D — Guia «Primeiros passos» (primeira visita)
+
+Conta recém-onboarded; `localStorage` sem `aiyracare.first_visit_tour_completed`.
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Concluir cenário A (dashboard `/`) | Drawer «Primeiros passos» abre em ~1s | |
+| 2 | Percorrer 4 etapas (família → pessoa → registro → Ava) | Textos i18n; etapa Ava desabilitada se zero pacientes | |
+| 3 | **Concluir** ou **Fechar guia** | Drawer fecha; flag localStorage; evento `first_visit_tour_completed` | |
+| 4 | Recarregar dashboard | Drawer não reaparece | |
+
+**Automação:** `packages/web/e2e/onboarding.spec.ts` (assert `data-testid="first-visit-tour-drawer"`)
 
 ### C — Bloqueio menor de 18 (manual rápido)
 

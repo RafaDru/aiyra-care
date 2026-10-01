@@ -2,6 +2,7 @@ import type { AuthProviderPort, AuthUser } from '../../domain/auth/auth-provider
 import type { AppAccountRepository, PatientMembershipRepository } from '../../domain/auth/app-account.repository.js'
 import { AppAccount } from '../../domain/auth/app-account.entity.js'
 import type { PatientService } from '../patient/patient.service.js'
+import type { MeasurementService } from '../measurement/measurement.service.js'
 import type { CompleteProfileInput } from '../../infrastructure/http/auth/auth.schema.js'
 import { ConflictError } from '../../domain/errors.js'
 import type { Patient } from '../../domain/patient/patient.entity.js'
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly accounts: AppAccountRepository,
     private readonly memberships: PatientMembershipRepository,
     private readonly patients: PatientService,
+    private readonly measurements?: MeasurementService,
     private readonly providerName = 'supabase',
   ) {}
 
@@ -88,6 +90,13 @@ export class AuthService {
     })
     await this.patients.setOwnerAccountId(patient.id, accountId)
     await this.memberships.ensureMembership(accountId, patient.id, 'self')
+
+    if (this.measurements && (data.weightKg != null || data.heightCm != null)) {
+      await this.measurements.seedInitialAnthropometry(patient.id, {
+        weightKg: data.weightKg,
+        heightCm: data.heightCm,
+      })
+    }
 
     return { patient, needsProfile: false }
   }

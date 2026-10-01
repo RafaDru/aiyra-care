@@ -10,6 +10,7 @@ import { config } from 'dotenv'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { readFileSync } from 'fs'
+import { randomUUID } from 'crypto'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 config({ path: resolve(root, '.env') })
@@ -29,24 +30,37 @@ function resolveEnvironment() {
   return { deploymentTier: resolveDeploymentTier(), apiPublicUrl }
 }
 
+const investigationId = randomUUID()
+const reportId = 'sim-' + Date.now().toString(36)
+const consolePort = process.env.OPS_CONSOLE_PORT?.trim() || '3013'
+const consoleBase = `http://127.0.0.1:${consolePort}`
+const callbackUrl = `${consoleBase}/api/analysis-queue/callback`
+const dashboardUrl = `${consoleBase}?tab=issues&investigationId=${investigationId}&reportId=${reportId}`
+
 const sample = {
   type: 'support_report',
-  reportId: 'sim-' + Date.now().toString(36),
+  investigationId,
+  reportId,
   category: 'technical_bug',
   route: '/patients/demo',
   consentTechnical: true,
   consentProfileAccess: false,
   topFingerprint: 'sim_fingerprint_sync_timeout',
-  dashboardUrl: 'http://127.0.0.1:3013?tab=support',
+  dashboardUrl,
   environment: resolveEnvironment(),
   submittedAt: new Date().toISOString(),
-  text: 'Novo chamado: Bug técnico — /patients/demo',
+  text: `Novo chamado: Bug técnico — /patients/demo [inv:${investigationId.slice(0, 8)}]`,
   toast: {
     title: 'AiyraCare | Novo chamado',
-    body: 'Bug técnico\n/patients/demo\nErro: sim_fingerprint_sync_timeout',
+    body: `Bug técnico\n/patients/demo\nErro: sim_fingerprint_sync_timeout\nInvestigation: ${investigationId}`,
     icon: 'info',
   },
-  investigation: { tier: 0, playbook: 'support-report-tier0' },
+  investigation: { tier: 0, playbook: 'support-report-tier0', trigger: 'manual' },
+  analysisQueue: {
+    id: investigationId,
+    callbackUrl,
+    lane: 'development_support',
+  },
 }
 
 async function post(label, url, body, bearerKey) {
@@ -89,7 +103,8 @@ const investigatorKey = process.env.CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOO
   || process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY?.trim()
 
 console.log('support-investigator-simulate')
-console.log('  reportId:', sample.reportId)
+console.log('  investigationId:', investigationId)
+console.log('  reportId:', reportId)
 console.log('')
 
 const notifierOk = await post('Notificador local', notifierUrl, sample)

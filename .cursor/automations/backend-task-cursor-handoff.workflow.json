@@ -1,0 +1,24 @@
+{
+  "name": "AiCare - Backend handoff (Claude→Cursor)",
+  "description": "Webhook backend_task_handoff — PR task/* ou fila review; revisão CI, merge tier-0, fila done.",
+  "workflow": {
+    "triggers": [
+      {
+        "webhook": {}
+      }
+    ],
+    "gitConfig": {
+      "repo": "RafaDru/aiyra-care",
+      "branch": "main"
+    },
+    "prompts": [
+      "Handoff backend_task_handoff — integração Claude Code → Cursor.\n\n1. Parse JSON (taskId, prUrl, prNumber, branch, queueStatus, trigger).\n2. Playbook: docs/ops/automations/backend-task-cursor-handoff.prompt.md\n3. Parceria: docs/CLAUDE_CODE_PARTNERSHIP.md\n4. Fila: docs/coordination/BACKEND_TASK_QUEUE.md\n5. Smoke/tier-0: merge PR se CI ok. Contrato/web: não mergear — sinalizar na fila.\n6. Rafael não opera a app — não pedir ação manual salvo blocked legal/segurança."
+    ],
+    "model": "composer-2.5",
+    "agentOptions": {
+      "skipInstall": false
+    },
+    "memoryEnabled": true,
+    "actions": []
+  }
+}

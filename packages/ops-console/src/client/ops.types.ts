@@ -1,11 +1,37 @@
 export type OpsAlertSeverity = 'warning' | 'critical'
 
+export type IncidentDispatchSnapshot = {
+  status: string | null
+  attemptCount: number
+  lastError: string | null
+  forwardedAt: string | null
+  updatedAt: string | null
+}
+
+export type IncidentDispatchHealth = {
+  deadCount: number
+  staleOpenWithoutOutboxCount: number
+  webhooks: {
+    developmentSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+    sreSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+  }
+  anyWebhookMissing: boolean
+}
+
 export interface OpsAnalysisQueueItem {
   id: string
   sourceType: 'support_report' | 'ops_alert'
   sourceId: string
   lane: 'development_support' | 'sre_support'
   status: 'queued' | 'investigating' | 'fix_proposed' | 'completed' | 'dismissed' | 'failed'
+  incidentPipelineStatus?:
+    | 'open'
+    | 'forwarded'
+    | 'queued_worker'
+    | 'in_triage'
+    | 'triaged'
+    | 'dismissed'
+    | 'dispatch_failed'
   priority: 'low' | 'normal' | 'high' | 'critical'
   deploymentTier: string
   title: string
@@ -22,6 +48,40 @@ export interface OpsAnalysisQueueItem {
   completedAt: string | null
   createdAt: string
   updatedAt: string
+  dispatch?: IncidentDispatchSnapshot | null
+}
+
+export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
+
+export interface DefectPrBatchItem {
+  id: string
+  status: 'open' | 'merged' | 'failed'
+  scheduledWindowStart: string
+  mergedPrUrl: string | null
+  defectCount: number
+  createdAt: string
+}
+
+export interface PlatformDefectItem {
+  id: string
+  title: string
+  status: PlatformDefectStatus
+  fingerprint: string | null
+  impact: number | null
+  applications: string[]
+  ownerSubject: string | null
+  triageSummary: string | null
+  triageArtifactPath: string | null
+  branchName: string | null
+  prUrl: string | null
+  prBatchId: string | null
+  firstSeenAt: string
+  fixStartedAt: string | null
+  readyForPrAt: string | null
+  fixedAt: string | null
+  createdAt: string
+  updatedAt: string
+  incidentCount?: number
 }
 
 export interface OpsAnalysisAttentionCounts {
@@ -51,6 +111,8 @@ export interface OpsAlert {
   severity: OpsAlertSeverity
   category: 'sync' | 'llm' | 'product' | 'infra'
   message: string
+  /** When the condition was detected (ISO). */
+  detectedAt: string
   details?: Record<string, unknown>
 }
 
@@ -141,6 +203,7 @@ export interface OpsTimeSeries24h {
   avaEvents: OpsHourlyAvaEventBucket[]
   clientErrors: OpsHourlyCountBucket[]
   avaTokens: OpsHourlyAvaTokensBucket[]
+  supportReportsSubmitted: OpsHourlyCountBucket[]
 }
 
 export interface ErrorFingerprintRow {
@@ -395,13 +458,19 @@ export interface SupportReportOpsRow {
   createdAt: string
   expiresAt: string
   diagnosticContext: Record<string, unknown>
-  analysisStatus: 'none' | 'pending' | 'in_progress' | 'completed' | 'failed'
+  analysisStatus: 'none' | 'queued' | 'pending' | 'in_progress' | 'completed' | 'failed'
   operatorNotes: string | null
   analysisSummary: string | null
   analysisArtifactPath: string | null
   analysisRequestedAt: string | null
   analysisCompletedAt: string | null
   analysisLastError: string | null
+  investigationId: string | null
+  suggestedCategory: string | null
+  categoryReviewNote: string | null
+  taxonomyGapProposal: string | null
+  deploymentStatus: string
+  deploymentActions: Array<{ label: string; kind: string; url?: string; done?: boolean }>
 }
 
 export interface RuntimeDegradedView {
@@ -428,6 +497,33 @@ export interface OpsMetricsResponse {
   runtime?: RuntimeDegradedView
   triage?: OpsAlertTriageRow[]
   alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
+}
+
+export interface ProductLifecycleSnapshot {
+  loadedAt: string
+  roadmapUpdatedAt?: string
+  featuresUpdatedAt?: string
+  epicsInProgress: Array<{
+    id: string
+    title: string
+    priority: string
+    category: string
+    status: string
+    statusLabel?: string
+    summary?: string
+    inProgressItems: number
+  }>
+  features: Array<{
+    id: string
+    epicId?: string
+    title: string
+    status: string
+    priority: string
+    category: string
+    doc: string
+    suiteId?: string
+    suiteDoc?: string
+  }>
 }
 
 export interface OpsAlertsDispatchResult {
@@ -464,4 +560,30 @@ export interface StackActionResult {
   status: StackStatusSnapshot
   platform?: string
   error?: string
+}
+
+export type StrategySectionId = 'mkt' | 'finance' | 'cx'
+
+export type StrategyManifestResponse = {
+  updatedAt: string
+  source?: string
+  sections: Record<
+    StrategySectionId,
+    {
+      title: string
+      primaryFile: string
+      secondaryFile?: string
+      advisorSkill: string
+    }
+  >
+}
+
+export type StrategyContentPayload = {
+  section: StrategySectionId
+  title: string
+  updatedAt: string
+  advisorSkill: string
+  primaryMarkdown: string
+  secondaryMarkdown?: string
+  secondaryTitle?: string
 }

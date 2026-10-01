@@ -20,40 +20,42 @@ import {
   dispatchSupportReportInvestigator,
   type SupportInvestigatorDispatchResult,
 } from '../support-report/support-report-dispatch.js'
+import type { IncidentDispatchService } from './incident-dispatch.service.js'
 
 export async function investigateSupportReportWithQueue(
   queueService: OpsAnalysisQueueService,
   record: SupportReportRecord,
   options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
-): Promise<{ queueId: string; dispatch: SupportInvestigatorDispatchResult }> {
+  incidentDispatch?: IncidentDispatchService,
+): Promise<{ investigationId: string; queueId: string; dispatch: SupportInvestigatorDispatchResult }> {
   const item = await queueService.enqueueSupportReport(record, options)
 
   if (isPreScreenEnabled()) {
     const pre = preScreenSupportReport(record, options.trigger)
     if (pre.outcome === 'dismiss') {
       await queueService.markDismissed(item.id, `pre_screen: ${pre.reason}`)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
     if (pre.outcome === 'defer') {
       await queueService.markDeferred(item.id, pre.reason)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
   }
 
-  const callbackUrl = resolveInvestigatorCallbackUrl()
-  const investigationTier = resolveSupportInvestigationTier(record, options.trigger)
-  const dispatch = await dispatchSupportReportInvestigator(record, {
-    operatorNotes: options.operatorNotes,
-    trigger: options.trigger,
-    analysisQueue: { id: item.id, callbackUrl },
-    investigationTier,
-  })
+  const dispatch = incidentDispatch
+    ? await incidentDispatch.dispatchSupportTriage(record, item.id, options)
+    : await dispatchSupportReportInvestigator(record, {
+        operatorNotes: options.operatorNotes,
+        trigger: options.trigger,
+        analysisQueue: { id: item.id, callbackUrl: resolveInvestigatorCallbackUrl() },
+        investigationTier: resolveSupportInvestigationTier(record, options.trigger),
+      })
   if (dispatch.outcome === 'sent') {
     await queueService.markInvestigating(item.id)
   } else if (dispatch.outcome === 'failed') {
     await queueService.markFailed(item.id, dispatch.error)
   }
-  return { queueId: item.id, dispatch }
+  return { investigationId: item.id, queueId: item.id, dispatch }
 }
 
 export async function investigateOpsAlertWithQueue(
@@ -65,7 +67,8 @@ export async function investigateOpsAlertWithQueue(
     operatorNotes?: string | null
     trigger: 'auto' | 'manual'
   },
-): Promise<{ queueId: string; dispatch: OpsAlertInvestigatorDispatchResult }> {
+  incidentDispatch?: IncidentDispatchService,
+): Promise<{ investigationId: string; queueId: string; dispatch: OpsAlertInvestigatorDispatchResult }> {
   const item = await queueService.enqueueOpsAlert(alert, {
     operatorNotes: options.operatorNotes,
     trigger: options.trigger,
@@ -75,25 +78,25 @@ export async function investigateOpsAlertWithQueue(
     const pre = preScreenOpsAlert(alert, options.trigger)
     if (pre.outcome === 'dismiss') {
       await queueService.markDismissed(item.id, `pre_screen: ${pre.reason}`)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
     if (pre.outcome === 'defer') {
       await queueService.markDeferred(item.id, pre.reason)
-      return { queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
+      return { investigationId: item.id, queueId: item.id, dispatch: { outcome: 'skipped', reason: 'pre_screen' } }
     }
   }
 
-  const callbackUrl = resolveInvestigatorCallbackUrl()
-  const investigationTier = resolveOpsAlertInvestigationTier(alert, options.trigger)
-  const dispatch = await dispatchOpsAlertInvestigator(alert, {
-    ...options,
-    analysisQueue: { id: item.id, callbackUrl },
-    investigationTier,
-  })
+  const dispatch = incidentDispatch
+    ? await incidentDispatch.dispatchOpsAlertTriage(alert, item.id, options)
+    : await dispatchOpsAlertInvestigator(alert, {
+        ...options,
+        analysisQueue: { id: item.id, callbackUrl: resolveInvestigatorCallbackUrl() },
+        investigationTier: resolveOpsAlertInvestigationTier(alert, options.trigger),
+      })
   if (dispatch.outcome === 'sent') {
     await queueService.markInvestigating(item.id)
   } else if (dispatch.outcome === 'failed') {
     await queueService.markFailed(item.id, dispatch.error)
   }
-  return { queueId: item.id, dispatch }
+  return { investigationId: item.id, queueId: item.id, dispatch }
 }

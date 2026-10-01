@@ -7,6 +7,7 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import type { StackActionResult } from './ops.types.js'
 import { opsApi } from './api.js'
+import type { OpsDeploymentTier } from './theme/ops-environment.js'
 
 const { Text, Paragraph } = Typography
 
@@ -19,8 +20,10 @@ function serviceTag(label: string, up: boolean, port: number) {
 }
 
 export function StackControlCard({
+  deploymentTier = 'integration',
   onStackChange,
 }: {
+  deploymentTier?: OpsDeploymentTier
   onStackChange?: () => void
 }) {
   const [status, setStatus] = useState<StackActionResult | null>(null)
@@ -64,6 +67,10 @@ export function StackControlCard({
 
   const snap = status?.status
   const disabled = Boolean(status?.error) && status?.platform !== 'win32'
+  const defaultApiPort = deploymentTier === 'preview' ? 3020 : 3010
+  const defaultWebPort = deploymentTier === 'preview' ? 5174 : 5173
+  const apiPortLabel = snap?.apiPort ?? defaultApiPort
+  const webPortLabel = snap?.webPort ?? defaultWebPort
 
   return (
     <Card
@@ -102,7 +109,7 @@ export function StackControlCard({
           Start
         </Button>
         <Popconfirm
-          title="Encerrar API (:3010) e Web (:5173)?"
+          title={`Encerrar API (:${apiPortLabel}) e Web (:${webPortLabel})?`}
           description="O console ops e o notificador continuam rodando."
           onConfirm={() => run('stop')}
           okText="Encerrar"
@@ -136,7 +143,12 @@ export function StackControlCard({
       </Space>
 
       <Paragraph type="secondary" style={{ marginTop: 12, marginBottom: 0, fontSize: 12 }}>
-        Logs: <Text code>api.log</Text> · <Text code>web.log</Text> na raiz do monorepo.
+        Logs:{' '}
+        <Text code>{deploymentTier === 'preview' ? 'api-preview.log' : 'api.log'}</Text>
+        {' · '}
+        <Text code>{deploymentTier === 'preview' ? 'web-preview.log' : 'web.log'}</Text>
+        {' '}
+        na raiz do monorepo.
       </Paragraph>
     </Card>
   )

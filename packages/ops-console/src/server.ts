@@ -25,19 +25,22 @@ import { OpsAlertAnalysisService } from '../../api/src/application/ops/ops-alert
 import { OpsAlertIncidentPgRepository } from '../../api/src/infrastructure/persistence/ops-alert-incident.pg.repository.js'
 import { OpsAnalysisQueuePgRepository } from '../../api/src/infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import { OpsAnalysisQueueService } from '../../api/src/application/ops/ops-analysis-queue.service.js'
-import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
 import {
   PlatformDefectService,
   PlatformDefectTransitionError,
 } from '../../api/src/application/ops/platform-defect.service.js'
 import { PlatformDefectPgRepository } from '../../api/src/infrastructure/persistence/platform-defect.pg.repository.js'
+import { DefectPrBatchPgRepository } from '../../api/src/infrastructure/persistence/defect-pr-batch.pg.repository.js'
+import { createIncidentDispatchService } from '../../api/src/application/ops/incident-dispatch.service.js'
+import { getIncidentDispatchHealth } from '../../api/src/application/ops/incident-dispatch-health.js'
+import { DefectPrBatchService } from '../../api/src/application/ops/defect-pr-batch.service.js'
+import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
+import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
 import {
   dispatchErrorMessage,
   startPlatformDefectFixWithDispatch,
 } from '../../api/src/application/ops/platform-defect-fix-dispatch.js'
-import { getIncidentDispatchHealth } from '../../api/src/application/ops/incident-dispatch-health.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
-import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { runOpsProbe } from '../../api/src/application/ops/ops-probe.service.js'
 import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe-artifact.js'
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
@@ -46,6 +49,13 @@ import {
   runStackAction,
   isStackControlEnabled,
 } from './stack-control.js'
+import { loadProductLifecycle } from './product-lifecycle.js'
+import {
+  loadStrategyContent,
+  loadStrategyManifest,
+  type StrategySectionId,
+} from './strategy-content.js'
+import { fetchServicesStatus } from './services-status.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -59,10 +69,10 @@ const isDev = process.env.NODE_ENV !== 'production'
 const probeIntervalMs = Number(process.env.OPS_PROBE_INTERVAL_MS ?? '60000')
 
 function resolveDeploymentTier(): 'integration' | 'preview' | 'production' {
-  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
-  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   if (port === 3023) return 'preview'
   if (port === 3013) return 'integration'
+  const tier = process.env.DEPLOYMENT_TIER?.trim().toLowerCase()
+  if (tier === 'preview' || tier === 'production' || tier === 'integration') return tier
   return 'integration'
 }
 
@@ -83,16 +93,28 @@ const metricsService = new OpsMetricsService(
 const runtimeService = new RuntimeDegradedService(new RuntimeDegradedPgRepository(pool))
 const alertIncidentRepo = new OpsAlertIncidentPgRepository(pool)
 const supportRepo = new SupportReportPgRepository(pool)
+const platformDefectRepo = new PlatformDefectPgRepository(pool)
+const defectPrBatchRepo = new DefectPrBatchPgRepository(pool)
+const platformDefectService = new PlatformDefectService(platformDefectRepo)
+const incidentDispatchService = createIncidentDispatchService(pool)
+const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
   new OpsAnalysisQueuePgRepository(pool),
   supportRepo,
   alertIncidentRepo,
+  platformDefectService,
 )
-const alertAnalysisService = new OpsAlertAnalysisService(alertIncidentRepo, analysisQueueService)
+const alertAnalysisService = new OpsAlertAnalysisService(
+  alertIncidentRepo,
+  analysisQueueService,
+  incidentDispatchService,
+)
 const dispatchService = new OpsAlertDispatchService(metricsService, alertAnalysisService)
-const supportReportService = new OpsSupportReportService(supportRepo, analysisQueueService)
-const platformDefectRepo = new PlatformDefectPgRepository(pool)
-const platformDefectService = new PlatformDefectService(platformDefectRepo)
+const supportReportService = new OpsSupportReportService(
+  supportRepo,
+  analysisQueueService,
+  incidentDispatchService,
+)
 
 async function runProbeCycle(): Promise<void> {
   try {
@@ -147,19 +169,54 @@ async function registerClientRoutes(fastify: FastifyInstance, vite?: ViteDevServ
 async function main() {
   const fastify = Fastify({ logger: false })
 
+  fastify.get('/mock/ch-layout', async (_req, reply) => {
+    return reply.redirect('/?mock=ch-layout')
+  })
+
   fastify.get('/health', async () => ({
     service: 'aiyracare-ops-console',
     status: 'ok',
     port,
     deploymentTier,
+    layoutVersion: 'ch-shell-v2',
+    commandHub: true,
   }))
+
+  fastify.get('/api/services/status', async () => fetchServicesStatus(port))
+
+  let productLifecycleCache: ReturnType<typeof loadProductLifecycle> | undefined
+
+  fastify.get('/api/product-lifecycle', async () => {
+    productLifecycleCache = loadProductLifecycle(monorepoRoot)
+    return productLifecycleCache
+  })
+
+  fastify.get('/api/strategy/manifest', async () => loadStrategyManifest())
+
+  fastify.get<{ Params: { section: string } }>('/api/strategy/content/:section', async (req, reply) => {
+    const section = req.params.section?.trim() as StrategySectionId
+    if (section !== 'mkt' && section !== 'finance' && section !== 'cx') {
+      return reply.status(400).send({ error: 'invalid_strategy_section' })
+    }
+    try {
+      return loadStrategyContent(section)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'strategy_load_failed'
+      return reply.status(500).send({ error: message })
+    }
+  })
 
   fastify.get('/api/metrics', async () => {
     const payload = await metricsService.getMetrics()
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
     const alertAnalysis = await alertAnalysisService.getAll()
-    return { ...payload, runtime, triage, alertAnalysis }
+    return {
+      ...payload,
+      runtime,
+      triage,
+      alertAnalysis,
+    }
   })
 
   fastify.post('/api/alerts/check', async () => {
@@ -236,10 +293,27 @@ async function main() {
     platform: process.platform,
   }))
 
-  fastify.get<{ Querystring: { status?: string } }>('/api/support-reports', async (req) => {
+  fastify.get<{ Querystring: { status?: string } }>('/api/support-reports', async (req, reply) => {
     const status = (req.query.status ?? 'open') as 'open' | 'triaged' | 'resolved' | 'closed'
-    const rows = await supportReportService.list(status, 50)
-    return { reports: rows }
+    try {
+      const rows = await supportReportService.list(status, 50)
+      return { reports: rows }
+    } catch (err) {
+      const code = typeof err === 'object' && err !== null ? (err as { code?: string }).code : undefined
+      const message = err instanceof Error ? err.message : 'support_reports_query_failed'
+      if (code === '42P01') {
+        return reply.status(503).send({
+          error: 'schema_outdated',
+          message:
+            'Tabela support_reports ou ops_analysis_queue ausente — aplique migrations 061–069 no Postgres de integração.',
+        })
+      }
+      if (code === 'ECONNREFUSED' || code === 'ENOTFOUND') {
+        return reply.status(503).send({ error: 'postgres_unavailable', message })
+      }
+      console.error('[ops-console] support-reports list failed:', message)
+      return reply.status(500).send({ error: 'support_reports_query_failed', message })
+    }
   })
 
   fastify.patch<{ Params: { id: string }; Body: { status?: string } }>(
@@ -272,22 +346,37 @@ async function main() {
 
   fastify.post<{
     Params: { id: string }
-    Body: { analysisSummary?: string; analysisArtifactPath?: string }
+    Body: {
+      analysisSummary?: string
+      analysisArtifactPath?: string
+      deploymentStatus?: string
+      deploymentActions?: Array<{ label: string; kind: string; url?: string; done?: boolean }>
+    }
   }>(
     '/api/support-reports/:id/complete-analysis',
     async (req, reply) => {
       const ok = await supportReportService.completeAnalysis(req.params.id, {
         analysisSummary: req.body?.analysisSummary,
         analysisArtifactPath: req.body?.analysisArtifactPath,
+        deploymentStatus: req.body?.deploymentStatus,
+        deploymentActions: req.body?.deploymentActions,
       })
       if (!ok) return reply.status(400).send({ error: 'invalid_payload' })
       return { ok: true }
     },
   )
 
-  fastify.get('/api/analysis-queue', async () => ({
-    items: await analysisQueueService.listOpen(100),
-  }))
+  fastify.get('/api/analysis-queue', async () => {
+    const records = await analysisQueueService.listOpen(100)
+    const dispatchMap = await incidentDispatchService.dispatchSnapshotsForIncidentIds(
+      records.map((r) => r.id),
+    )
+    const items = records.map((record) => ({
+      ...record,
+      dispatch: dispatchMap.get(record.id) ?? null,
+    }))
+    return { items }
+  })
 
   fastify.get('/api/incident-dispatch/health', async () => getIncidentDispatchHealth(pool))
 
@@ -304,25 +393,7 @@ async function main() {
       })) {
         return reply.status(401).send({ error: 'unauthorized' })
       }
-      const body = req.body ?? {}
-      if (body.defectId && body.defectStatus) {
-        const summary = body.remediationSummary?.trim()
-        if (!summary) return reply.status(400).send({ error: 'invalid_payload' })
-        try {
-          const item = await platformDefectService.transition(body.defectId, body.defectStatus, {
-            branchName: body.branchName ?? null,
-            prUrl: body.prUrl ?? null,
-          })
-          return { ok: true, defect: item }
-        } catch (err) {
-          if (err instanceof PlatformDefectTransitionError) {
-            if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
-            return reply.status(409).send({ error: err.code })
-          }
-          throw err
-        }
-      }
-      const record = await analysisQueueService.completeFromAgent(body)
+      const record = await analysisQueueService.completeFromAgent(req.body ?? {})
       if (!record) return reply.status(400).send({ error: 'invalid_payload' })
       return { ok: true, item: record }
     },
@@ -337,15 +408,28 @@ async function main() {
     },
   )
 
+  fastify.post<{ Params: { id: string }; Body?: { runTick?: boolean } }>(
+    '/api/analysis-queue/:id/retry-dispatch',
+    async (req, reply) => {
+      const result = await incidentDispatchService.retryDispatchForIncident(req.params.id, {
+        runTick: req.body?.runTick === true,
+      })
+      if (!result.ok) {
+        if (result.error === 'not_found') return reply.status(404).send({ error: result.error })
+        return reply.status(409).send({ error: result.error })
+      }
+      return { ok: true }
+    },
+  )
+
   fastify.get<{ Querystring: { status?: string; includeFixed?: string } }>(
     '/api/platform-defects',
-    async (req) => {
-      const items = await platformDefectService.listForOps({
+    async (req) => ({
+      items: await platformDefectService.listForOps({
         statusFilter: req.query.status,
         includeFixed: req.query.includeFixed === '1' || req.query.includeFixed === 'true',
-      })
-      return { items }
-    },
+      }),
+    }),
   )
 
   fastify.get<{ Params: { id: string } }>('/api/platform-defects/:id', async (req, reply) => {
@@ -356,14 +440,15 @@ async function main() {
 
   fastify.patch<{
     Params: { id: string }
-    Body: { status?: PlatformDefectStatus; branchName?: string; prUrl?: string }
+    Body: { status?: PlatformDefectStatus; branchName?: string; prUrl?: string; skipBatch?: boolean }
   }>('/api/platform-defects/:id/status', async (req, reply) => {
     const status = req.body?.status
     if (!status) return reply.status(400).send({ error: 'invalid_payload' })
     try {
       const item = await platformDefectService.transition(req.params.id, status, {
-        branchName: req.body.branchName ?? null,
-        prUrl: req.body.prUrl ?? null,
+        branchName: req.body.branchName,
+        prUrl: req.body.prUrl,
+        skipBatch: req.body.skipBatch,
       })
       return { ok: true, item }
     } catch (err) {
@@ -407,6 +492,17 @@ async function main() {
     },
   )
 
+  fastify.get('/api/defect-pr-batches/config', async () => {
+    const { intervalMs, nextWindowAt } = defectPrBatchService.config()
+    const readyCount = await defectPrBatchService.countReady()
+    return { intervalMs, readyCount, nextWindowAt }
+  })
+
+  fastify.post('/api/defect-pr-batches/run', async () => {
+    const result = await defectPrBatchService.runReadyForPrBatch()
+    return { ok: true, ...result }
+  })
+
   fastify.post<{ Params: { id: string }; Body: { incidentId?: string; linkedBy?: string } }>(
     '/api/platform-defects/:id/link-incident',
     async (req, reply) => {
@@ -439,12 +535,14 @@ async function main() {
   await registerClientRoutes(fastify, vite)
 
   let probeTimer: ReturnType<typeof setInterval> | undefined
+  let dispatchTimer: ReturnType<typeof setInterval> | undefined
   let shuttingDown = false
 
   const shutdown = async () => {
     if (shuttingDown) return
     shuttingDown = true
     if (probeTimer) clearInterval(probeTimer)
+    if (dispatchTimer) clearInterval(dispatchTimer)
     try {
       if (vite) await vite.close()
       await fastify.close()
@@ -468,11 +566,28 @@ async function main() {
     throw err
   }
 
-  console.log(`[ops-console] http://${host}:${port} (independent observability console)`)
+  productLifecycleCache = loadProductLifecycle(monorepoRoot)
+  console.log(`[ops-console] http://${host}:${port} (command hub · ${deploymentTier})`)
 
   await runProbeCycle()
   probeTimer = setInterval(() => runProbeCycle(), probeIntervalMs)
   probeTimer.unref()
+
+  if (process.env.CH_INCIDENT_DISPATCH_WORKER !== '0') {
+    const dispatchIntervalMs = Number(process.env.CH_INCIDENT_DISPATCH_INTERVAL_MS ?? '30000')
+    const runDispatch = () => {
+      incidentDispatchService.runWorkerTick(20, 50).catch((err) => {
+        console.error(
+          '[ops-console] incident dispatch worker',
+          err instanceof Error ? err.message : err,
+        )
+      })
+    }
+    runDispatch()
+    dispatchTimer = setInterval(runDispatch, dispatchIntervalMs)
+    dispatchTimer.unref()
+    console.log(`[ops-console] incident dispatch worker every ${dispatchIntervalMs}ms`)
+  }
 }
 
 main().catch(async (err) => {
