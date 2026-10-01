@@ -15,20 +15,25 @@ function isAvaChatPostUrl(method: string, url: string) {
   }
 }
 
-function avaChatShell(page: Page) {
-  return page.locator('.ava-chat-shell')
+/** Painel Ava global — único dock na app (drawer pode estar fechado no DOM). */
+function avaDockRoot(page: Page) {
+  return page.locator('.ava-global-dock')
+}
+
+function avaComposerRoot(page: Page) {
+  return avaDockRoot(page).locator('.ava-chat-panel__composer')
 }
 
 function avaAssistantBubbleBodies(page: Page) {
-  return avaChatShell(page).locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
+  return avaDockRoot(page).locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
 }
 
 function avaComposerInput(page: Page) {
-  return avaChatShell(page).getByPlaceholder(AVA_COMPOSER_PLACEHOLDER)
+  return avaComposerRoot(page).getByPlaceholder(AVA_COMPOSER_PLACEHOLDER)
 }
 
 function avaSendButton(page: Page) {
-  return avaChatShell(page).getByRole('button', { name: AVA_SEND_LABEL })
+  return avaComposerRoot(page).getByRole('button', { name: AVA_SEND_LABEL })
 }
 
 async function waitForAvaChatPostComplete(page: Page, timeout = 90_000) {
@@ -63,7 +68,7 @@ async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
 
 async function waitForAvaFab(page: Page, timeout = 45_000) {
   // ensureQaE2eSession já hidratou pacientes — só aguardar o FAB (evita stall de 60s no CI).
-  await page.getByRole('button', { name: AVA_FAB_LABEL }).waitFor({
+  await avaDockRoot(page).getByRole('button', { name: AVA_FAB_LABEL }).waitFor({
     state: 'visible',
     timeout,
   })
@@ -79,12 +84,8 @@ export async function openAvaDock(page: Page) {
     const convoList = page
       .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 25_000 })
       .catch(() => null)
-    await page.getByRole('button', { name: AVA_FAB_LABEL }).click({ force: true })
-    await page.locator('.ava-chat-drawer .ant-drawer-content').waitFor({
-      state: 'visible',
-      timeout: 25_000,
-    })
-    await avaComposerInput(page).waitFor({ state: 'visible', timeout: 25_000 })
+    await avaDockRoot(page).locator('.ava-dock-trigger').click({ force: true })
+    await page.getByPlaceholder(AVA_COMPOSER_PLACEHOLDER).waitFor({ state: 'visible', timeout: 25_000 })
     await convoList
   }).toPass({ timeout: 60_000 })
 
@@ -94,10 +95,10 @@ export async function openAvaDock(page: Page) {
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
 export async function startFreshAvaConversation(page: Page) {
   await expect(async () => {
-    const avaRows = avaChatShell(page).locator('.ava-chat-bubble-row--ava')
+    const avaRows = avaDockRoot(page).locator('.ava-chat-bubble-row--ava')
     const count = await avaRows.count()
     if (count > 0) {
-      const btn = avaChatShell(page).getByRole('button', { name: AVA_NEW_CONVERSATION })
+      const btn = avaDockRoot(page).getByRole('button', { name: AVA_NEW_CONVERSATION })
       if (await btn.isVisible().catch(() => false)) {
         await btn.click()
       }
@@ -163,7 +164,7 @@ export async function sendAvaMessage(page: Page, text: string) {
 }
 
 export async function waitForAvaAssistantBubble(page: Page, timeout = 45_000) {
-  const bubble = avaChatShell(page).locator('.ava-chat-bubble-row--ava').last()
+  const bubble = avaDockRoot(page).locator('.ava-chat-bubble-row--ava').last()
   await bubble.waitFor({ state: 'visible', timeout })
   return bubble
 }
