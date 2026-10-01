@@ -101,6 +101,10 @@ Cada desvio fora do happy path (`open` → outbox → webhook 2xx → `in_triage
 
 `open → in_fix → ready_for_pr → fixed`
 
+**Em correção:** só após `start-fix` com `dispatch.outcome === sent` (`last_fix_dispatch_sent_at`). Reconciliação e operador: [`DEFEITO_EM_CORRECAO.md`](./DEFEITO_EM_CORRECAO.md).
+
+**Refs humanas (077):** `INC-*` / `DEF-*` nas listas CH — UUID inalterado.
+
 **Dedup:** índice parcial único em `fingerprint` onde `status IN ('open','in_fix','ready_for_pr')`.
 
 ### 2.3 Lote PR (CH)
@@ -121,6 +125,7 @@ Cada desvio fora do happy path (`open` → outbox → webhook 2xx → `in_triage
 | **074** | `incident_dispatch_outbox` |
 | **075** | `ops_analysis_queue.incident_pipeline_status` |
 | **076** | `dispatch_failed` no CHECK de `incident_pipeline_status` |
+| **077** | `reference_code` INC/DEF + `last_fix_dispatch_sent_at` |
 
 Aplicar (com `DATABASE_URL` no `.env`):
 

@@ -23,6 +23,7 @@ import {
   formatBatchWindowHours,
 } from './ch-defect-display.js'
 import { OpsPanel } from './components/OpsPanel.js'
+import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
 import { opsApi } from './api.js'
 import type { PlatformDefectItem, PlatformDefectStatus } from './ops.types.js'
 
@@ -120,8 +121,27 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
     }
   }
 
-  const startFix = (id: string) =>
-    runAction(id, () => opsApi.startPlatformDefectFix(id), 'Correção iniciada')
+  const startFix = async (id: string, retry = false) => {
+    setUpdatingId(id)
+    try {
+      const res = await opsApi.startPlatformDefectFix(id)
+      if (res.ok) {
+        message.success(retry ? 'Correção reenfileirada' : 'Correção iniciada')
+      } else {
+        const detail =
+          res.dispatch?.outcome === 'skipped'
+            ? 'Dispatch ignorado — verifique webhook Correção Dev no .env'
+            : res.dispatch?.error ?? 'Dispatch não aceito'
+        message.warning(detail)
+      }
+      await load()
+      await onRefresh?.()
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Falha na ação')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   const markReadyForPr = (id: string) => {
     const branchName = branchDraft[id]?.trim()
@@ -211,6 +231,13 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
           }}
           columns={[
             {
+              title: 'Ref',
+              dataIndex: 'referenceCode',
+              width: 108,
+              align: 'center',
+              render: (code: string | null) => <OpsReferenceCodeTag code={code} compact />,
+            },
+            {
               title: 'Título',
               dataIndex: 'title',
               ellipsis: true,
@@ -263,15 +290,25 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
                     </Button>
                   )}
                   {row.status === 'in_fix' && (
-                    <Button
-                      type="link"
-                      size="small"
-                      icon={<PullRequestOutlined />}
-                      loading={updatingId === row.id}
-                      onClick={() => void markReadyForPr(row.id)}
-                    >
-                      Marcar pronto p/ PR
-                    </Button>
+                    <>
+                      <Button
+                        type="link"
+                        size="small"
+                        loading={updatingId === row.id}
+                        onClick={() => void startFix(row.id, true)}
+                      >
+                        Reenfileirar correção
+                      </Button>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<PullRequestOutlined />}
+                        loading={updatingId === row.id}
+                        onClick={() => void markReadyForPr(row.id)}
+                      >
+                        Marcar pronto p/ PR
+                      </Button>
+                    </>
                   )}
                   {row.status === 'ready_for_pr' && (
                     <Button
@@ -331,6 +368,9 @@ function DefeitoDetail({
 
   return (
     <div style={{ maxWidth: 720 }}>
+      <Paragraph>
+        <Text strong>Referência:</Text> <OpsReferenceCodeTag code={row.referenceCode} />
+      </Paragraph>
       {row.triageSummary && (
         <Paragraph>
           <Text strong>Triagem:</Text> {row.triageSummary}

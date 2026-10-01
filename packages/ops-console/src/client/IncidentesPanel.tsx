@@ -24,6 +24,7 @@ import {
   incidentPipelineTagColor,
 } from './ch-incident-display.js'
 import { InvestigationIdTag } from './components/InvestigationIdTag.js'
+import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { opsApi } from './api.js'
 import type { IncidentDispatchHealth, OpsAnalysisQueueItem } from './ops.types.js'
@@ -253,6 +254,10 @@ export function IncidentesPanel({
                   )}
                 </Paragraph>
                 <Paragraph>
+                  <Text strong>Referência:</Text>{' '}
+                  <OpsReferenceCodeTag code={row.referenceCode} />
+                </Paragraph>
+                <Paragraph>
                   <Text strong>investigationId:</Text>{' '}
                   <InvestigationIdTag investigationId={row.id} showFull />
                 </Paragraph>
@@ -263,6 +268,13 @@ export function IncidentesPanel({
             ),
           }}
           columns={[
+            {
+              title: 'Ref',
+              dataIndex: 'referenceCode',
+              width: 108,
+              align: 'center',
+              render: (code: string | null) => <OpsReferenceCodeTag code={code} compact />,
+            },
             {
               title: 'Timestamp',
               dataIndex: 'queuedAt',

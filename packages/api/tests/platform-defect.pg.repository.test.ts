@@ -9,22 +9,27 @@ describe('PlatformDefectPgRepository', () => {
 
     const pool = {
       query: vi.fn(async (sql: string, params?: unknown[]) => {
+        if (sql.includes('ops_reference_sequences')) {
+          return { rows: [{ next_val: '7' }] }
+        }
         if (sql.includes('INSERT INTO platform_defects')) {
           idSeq += 1
           const id = `d${idSeq}`
           const row = {
             id,
-            title: params![0],
+            reference_code: params![0],
+            title: params![1],
             status: 'open',
-            fingerprint: params![1],
-            impact: params![2],
-            applications: JSON.parse(params![3] as string),
-            owner_subject: params![4],
-            triage_summary: params![5],
-            triage_artifact_path: params![6],
+            fingerprint: params![2],
+            impact: params![3],
+            applications: JSON.parse(params![4] as string),
+            owner_subject: params![5],
+            triage_summary: params![6],
+            triage_artifact_path: params![7],
             pr_batch_id: null,
             first_seen_at: new Date().toISOString(),
             fix_started_at: null,
+            last_fix_dispatch_sent_at: null,
             ready_for_pr_at: null,
             fixed_at: null,
             created_at: new Date().toISOString(),
@@ -51,6 +56,7 @@ describe('PlatformDefectPgRepository', () => {
       fingerprint: 'wallet-sync-500',
     })
     expect(created.title).toBe('Erro carteira')
+    expect(created.referenceCode).toBe('DEF-000007')
 
     const found = await repo.findOpenByFingerprint('wallet-sync-500')
     expect(found?.id).toBe(created.id)

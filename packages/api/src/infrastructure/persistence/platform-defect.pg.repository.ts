@@ -5,11 +5,13 @@ import type {
   PlatformDefectRecord,
   PlatformDefectStatus,
 } from '../../domain/ops/platform-defect.types.js'
+import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
 
 function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
   const apps = row.applications
   return {
     id: String(row.id),
+    referenceCode: row.reference_code != null ? String(row.reference_code) : null,
     title: String(row.title),
     status: row.status as PlatformDefectStatus,
     fingerprint: row.fingerprint != null ? String(row.fingerprint) : null,
@@ -23,6 +25,9 @@ function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
     prBatchId: row.pr_batch_id != null ? String(row.pr_batch_id) : null,
     firstSeenAt: new Date(String(row.first_seen_at)).toISOString(),
     fixStartedAt: row.fix_started_at ? new Date(String(row.fix_started_at)).toISOString() : null,
+    lastFixDispatchSentAt: row.last_fix_dispatch_sent_at
+      ? new Date(String(row.last_fix_dispatch_sent_at)).toISOString()
+      : null,
     readyForPrAt: row.ready_for_pr_at ? new Date(String(row.ready_for_pr_at)).toISOString() : null,
     fixedAt: row.fixed_at ? new Date(String(row.fixed_at)).toISOString() : null,
     createdAt: new Date(String(row.created_at)).toISOString(),
@@ -35,13 +40,15 @@ export class PlatformDefectPgRepository {
   constructor(private readonly pool: Pool) {}
 
   async insert(input: CreatePlatformDefectInput): Promise<PlatformDefectRecord> {
+    const referenceCode = await allocateOpsReferenceCode(this.pool, 'defect')
     const res = await this.pool.query(
       `INSERT INTO platform_defects (
-        title, fingerprint, impact, applications, owner_subject,
+        reference_code, title, fingerprint, impact, applications, owner_subject,
         triage_summary, triage_artifact_path
-      ) VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7)
+      ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)
       RETURNING *`,
       [
+        referenceCode,
         input.title.slice(0, 2000),
         input.fingerprint?.slice(0, 128) ?? null,
         input.impact ?? null,
@@ -51,6 +58,19 @@ export class PlatformDefectPgRepository {
         input.triageArtifactPath?.slice(0, 512) ?? null,
       ],
     )
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async markFixDispatchSent(id: string): Promise<PlatformDefectRecord | null> {
+    const res = await this.pool.query(
+      `UPDATE platform_defects SET
+        last_fix_dispatch_sent_at = NOW(),
+        updated_at = NOW()
+      WHERE id = $1::uuid
+      RETURNING *`,
+      [id],
+    )
+    if (!res.rows[0]) return null
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
@@ -140,9 +160,21 @@ export class PlatformDefectPgRepository {
   async updateStatus(
     id: string,
     status: PlatformDefectStatus,
-    meta?: { branchName?: string | null; prUrl?: string | null; prBatchId?: string | null },
+    meta?: {
+      branchName?: string | null
+      prUrl?: string | null
+      prBatchId?: string | null
+      markFixDispatchSent?: boolean
+      clearFixProgress?: boolean
+    },
   ): Promise<PlatformDefectRecord | null> {
     const fixStarted = status === 'in_fix' ? 'fix_started_at = COALESCE(fix_started_at, NOW()),' : ''
+    const markDispatch = meta?.markFixDispatchSent
+      ? 'last_fix_dispatch_sent_at = NOW(),'
+      : ''
+    const clearFix = meta?.clearFixProgress
+      ? 'fix_started_at = NULL, last_fix_dispatch_sent_at = NULL,'
+      : ''
     const readyForPr =
       status === 'ready_for_pr' ? 'ready_for_pr_at = COALESCE(ready_for_pr_at, NOW()),' : ''
     const fixed = status === 'fixed' ? 'fixed_at = COALESCE(fixed_at, NOW()),' : ''
@@ -151,6 +183,8 @@ export class PlatformDefectPgRepository {
       `UPDATE platform_defects SET
         status = $2,
         ${fixStarted}
+        ${markDispatch}
+        ${clearFix}
         ${readyForPr}
         ${fixed}
         branch_name = COALESCE($3, branch_name),

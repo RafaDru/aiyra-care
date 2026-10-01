@@ -25,7 +25,7 @@ export class PlatformDefectTransitionError extends Error {
 export class PlatformDefectService {
   constructor(private readonly repo: PlatformDefectPgRepository) {}
 
-  listForOps(options: {
+  async listForOps(options: {
     statusFilter?: string
     includeFixed?: boolean
     limit?: number
@@ -34,14 +34,18 @@ export class PlatformDefectService {
       ?.split(',')
       .map((s) => s.trim())
       .filter(Boolean) as PlatformDefectStatus[] | undefined
-    return this.repo.listForOps({
+    const items = await this.repo.listForOps({
       statuses: statuses?.length ? statuses : undefined,
       includeFixed: options.includeFixed,
       limit: options.limit,
     })
+    const { reconcileUntruthfulDefectsInList } = await import('./platform-defect-in-fix-reconcile.js')
+    return reconcileUntruthfulDefectsInList(this, items)
   }
 
   async getDetail(id: string) {
+    const { reconcileDefectByIdIfNeeded } = await import('./platform-defect-in-fix-reconcile.js')
+    await reconcileDefectByIdIfNeeded(this, this.repo, id)
     return this.repo.findByIdWithIncidents(id)
   }
 
@@ -72,8 +76,25 @@ export class PlatformDefectService {
     await this.repo.linkIncident(defectId, incidentId, linkedBy)
   }
 
+  /** Somente após `dispatch.outcome === sent` (via start-fix). */
   async startFix(id: string): Promise<PlatformDefectRecord> {
-    return this.transition(id, 'in_fix')
+    const current = await this.repo.findById(id)
+    if (!current) throw new PlatformDefectTransitionError('not_found')
+    if (current.status !== 'open') {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+    const updated = await this.repo.updateStatus(id, 'in_fix', { markFixDispatchSent: true })
+    if (!updated) throw new PlatformDefectTransitionError('not_found')
+    return updated
+  }
+
+  async revertStaleInFix(id: string): Promise<PlatformDefectRecord> {
+    const current = await this.repo.findById(id)
+    if (!current) throw new PlatformDefectTransitionError('not_found')
+    if (current.status !== 'in_fix') return current
+    const updated = await this.repo.updateStatus(id, 'open', { clearFixProgress: true })
+    if (!updated) throw new PlatformDefectTransitionError('not_found')
+    return updated
   }
 
   async transition(
@@ -84,6 +105,10 @@ export class PlatformDefectService {
     const current = await this.repo.findById(id)
     if (!current) throw new PlatformDefectTransitionError('not_found')
 
+    if (nextStatus === 'in_fix') {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+
     const allowed = ALLOWED[current.status]
     if (!allowed.includes(nextStatus)) {
       throw new PlatformDefectTransitionError('invalid_transition')
@@ -93,6 +118,7 @@ export class PlatformDefectService {
     const updated = await this.repo.updateStatus(id, nextStatus, {
       branchName: meta?.branchName,
       prUrl: meta?.prUrl,
+      clearFixProgress: current.status === 'in_fix' && nextStatus === 'open',
     })
     if (!updated) throw new PlatformDefectTransitionError('not_found')
     return updated

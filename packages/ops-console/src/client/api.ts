@@ -167,10 +167,15 @@ export const opsApi = {
       },
     ),
   startPlatformDefectFix: (id: string) =>
-    request<{ ok: boolean; item: import('./ops.types.js').PlatformDefectItem }>(
-      `/api/platform-defects/${encodeURIComponent(id)}/start-fix`,
-      { method: 'POST' },
-    ),
+    request<{
+      ok: boolean
+      item: import('./ops.types.js').PlatformDefectItem
+      dispatch?: {
+        outcome: 'sent' | 'skipped' | 'failed'
+        reason?: string
+        error?: string
+      }
+    }>(`/api/platform-defects/${encodeURIComponent(id)}/start-fix`, { method: 'POST' }),
   defectPrBatchConfig: () =>
     request<{
       intervalMs: number
