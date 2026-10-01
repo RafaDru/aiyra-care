@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Alert } from 'antd'
 import { opsApi } from './api.js'
 import type { OpsMetricsResponse, RuntimeDegradedView } from './ops.types.js'
 import {
@@ -76,6 +77,7 @@ export function OpsMetricsDashboard({
   const [activeTab, setActiveTab] = useState<ChTabKey>(initialNav.tab)
   const [webStatus, setWebStatus] = useState<ChServiceState>('unknown')
   const [backendStatus, setBackendStatus] = useState<ChServiceState>('unknown')
+  const [partialLoadWarning, setPartialLoadWarning] = useState<string | null>(null)
 
   useEffect(() => {
     const loadServices = () => {
@@ -96,13 +98,25 @@ export function OpsMetricsDashboard({
   }, [data, metrics.probe])
 
   useEffect(() => {
-    void opsApi.analysisAttentionCounts().then((c) => {
-      setIssueAttention(c.totalAttention)
-    }).catch(() => undefined)
+    setPartialLoadWarning(null)
+    const recordWarning = (msg: string) => {
+      setPartialLoadWarning((prev) => (prev ? `${prev} · ${msg}` : msg))
+    }
+    void opsApi.analysisAttentionCounts()
+      .then((c) => setIssueAttention(c.totalAttention))
+      .catch((err) => {
+        recordWarning(
+          err instanceof Error ? err.message : 'Não foi possível carregar contagem de incidentes',
+        )
+      })
     void opsApi
       .platformDefects({ status: 'open,in_fix,ready_for_pr' })
       .then((r) => setDefectOpenCount(r.items.length))
-      .catch(() => undefined)
+      .catch((err) => {
+        recordWarning(
+          err instanceof Error ? err.message : 'Não foi possível carregar contagem de defeitos',
+        )
+      })
   }, [data])
 
   useEffect(() => {
@@ -250,7 +264,12 @@ export function OpsMetricsDashboard({
         onSelectGroup={onSelectGroup}
         onSelectTab={onSelectTab}
       >
-        <div className="ops-tab-panel" style={{ padding: 0, gap: 16 }}>{panel}</div>
+        <div className="ops-tab-panel" style={{ padding: 0, gap: 16 }}>
+          {partialLoadWarning ? (
+            <Alert type="warning" showIcon message={partialLoadWarning} style={{ marginBottom: 8 }} />
+          ) : null}
+          {panel}
+        </div>
       </ChLayout>
     </OpsDrillDownProvider>
   )

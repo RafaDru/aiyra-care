@@ -56,6 +56,10 @@ import {
   type StrategySectionId,
 } from './strategy-content.js'
 import { fetchServicesStatus } from './services-status.js'
+import {
+  CH_SCHEMA_MIGRATION_HINT,
+  isPgSchemaOutdatedError,
+} from '../../api/src/infrastructure/persistence/pg-error.helper.js'
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -168,6 +172,25 @@ async function registerClientRoutes(fastify: FastifyInstance, vite?: ViteDevServ
 
 async function main() {
   const fastify = Fastify({ logger: false })
+
+  fastify.setErrorHandler((err, _req, reply) => {
+    if (isPgSchemaOutdatedError(err)) {
+      const detail = err instanceof Error ? err.message : String(err)
+      return reply.status(503).send({
+        error: 'database_schema_outdated',
+        message: CH_SCHEMA_MIGRATION_HINT,
+        detail,
+      })
+    }
+    const statusCode =
+      err !== null && typeof err === 'object' && 'statusCode' in err
+        ? Number((err as { statusCode?: number }).statusCode) || 500
+        : 500
+    return reply.status(statusCode).send({
+      error: 'internal_error',
+      message: err instanceof Error ? err.message : 'internal_error',
+    })
+  })
 
   fastify.get('/mock/ch-layout', async (_req, reply) => {
     return reply.redirect('/?mock=ch-layout')
