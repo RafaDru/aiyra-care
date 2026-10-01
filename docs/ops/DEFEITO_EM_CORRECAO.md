@@ -9,6 +9,7 @@
 | `open` | Padrão após triagem; também após reconciliação se `in_fix` sem dispatch |
 | `in_fix` | **Somente** após `POST /api/platform-defects/:id/start-fix` com `dispatch.outcome === sent` |
 | `ready_for_pr` / `fixed` | Callback agente ou ação manual no CH |
+| `ready_for_pr` + `prUrl` | Callback ou PATCH exige URL GitHub PR (`https://github.com/.../pull/N`); senão **400** `pr_url_required` |
 
 `PATCH /api/platform-defects/:id/status` **não** aceita `in_fix` (409 `invalid_transition`). Use sempre **Iniciar correção** / **Reenfileirar correção**.
 

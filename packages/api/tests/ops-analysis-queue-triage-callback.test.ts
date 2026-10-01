@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { OpsAnalysisQueueService } from '../src/application/ops/ops-analysis-queue.service.js'
+import { PlatformDefectTransitionError } from '../src/application/ops/platform-defect.service.js'
 import type { OpsAnalysisQueueRecord } from '../src/domain/ops/ops-analysis-queue.types.js'
 
 function queueRecord(overrides: Partial<OpsAnalysisQueueRecord> = {}): OpsAnalysisQueueRecord {
@@ -75,5 +76,27 @@ describe('OpsAnalysisQueueService triage callback', () => {
       triageDecision: 'dismiss',
     })
     expect(repo.markDismissed).toHaveBeenCalled()
+  })
+
+  it('rejects ready_for_pr defect callback without prUrl', async () => {
+    const repo = {
+      applyAgentCallback: vi.fn(async () => queueRecord()),
+      findById: vi.fn(async () => queueRecord()),
+    }
+    const defects = {
+      transition: vi.fn(),
+    }
+    const svc = new OpsAnalysisQueueService(repo as never, undefined, undefined, defects as never)
+
+    await expect(
+      svc.completeFromAgent({
+        defectId: 'def-1',
+        defectStatus: 'ready_for_pr',
+        remediationSummary: '[defect:abc] done',
+      }),
+    ).rejects.toBeInstanceOf(PlatformDefectTransitionError)
+
+    expect(repo.applyAgentCallback).not.toHaveBeenCalled()
+    expect(defects.transition).not.toHaveBeenCalled()
   })
 })

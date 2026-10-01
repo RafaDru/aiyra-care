@@ -16,7 +16,10 @@ import {
 import type { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import type { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
 import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
-import type { PlatformDefectService } from './platform-defect.service.js'
+import {
+  assertGithubPrUrlForReadyForPr,
+  type PlatformDefectService,
+} from './platform-defect.service.js'
 import { sanitizeAnalysisSummary } from '../../domain/support-report/support-report.types.js'
 import { sanitizeOpsAlertAnalysisSummary } from '../../domain/ops/ops-alert-analysis.types.js'
 
@@ -150,6 +153,10 @@ export class OpsAnalysisQueueService {
       ?? sanitizeOpsAlertAnalysisSummary(input.remediationSummary)
     if (!summary) return null
 
+    if (input.defectId && input.defectStatus === 'ready_for_pr') {
+      assertGithubPrUrlForReadyForPr(input.prUrl)
+    }
+
     let record: OpsAnalysisQueueRecord | null = null
     const investigationId = resolveInvestigationIdFromCallback(input)
     if (investigationId) {
@@ -190,12 +197,10 @@ export class OpsAnalysisQueueService {
     const decision = input.triageDecision
 
     if (input.defectId && input.defectStatus && this.platformDefects) {
-      await this.platformDefects
-        .transition(input.defectId, input.defectStatus, {
-          branchName: input.branchName ?? null,
-          prUrl: input.prUrl ?? null,
-        })
-        .catch(() => undefined)
+      await this.platformDefects.transition(input.defectId, input.defectStatus, {
+        branchName: input.branchName ?? null,
+        prUrl: input.prUrl ?? null,
+      })
     }
 
     if (!decision) return

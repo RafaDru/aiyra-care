@@ -416,9 +416,20 @@ async function main() {
       })) {
         return reply.status(401).send({ error: 'unauthorized' })
       }
-      const record = await analysisQueueService.completeFromAgent(req.body ?? {})
-      if (!record) return reply.status(400).send({ error: 'invalid_payload' })
-      return { ok: true, item: record }
+      try {
+        const record = await analysisQueueService.completeFromAgent(req.body ?? {})
+        if (!record) return reply.status(400).send({ error: 'invalid_payload' })
+        return { ok: true, item: record }
+      } catch (err) {
+        if (err instanceof PlatformDefectTransitionError) {
+          if (err.code === 'pr_url_required') {
+            return reply.status(400).send({ error: 'pr_url_required' })
+          }
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          return reply.status(409).send({ error: err.code })
+        }
+        throw err
+      }
     },
   )
 
@@ -477,6 +488,9 @@ async function main() {
     } catch (err) {
       if (err instanceof PlatformDefectTransitionError) {
         if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+        if (err.code === 'pr_url_required') {
+          return reply.status(400).send({ error: 'pr_url_required' })
+        }
         return reply.status(409).send({ error: err.code })
       }
       throw err

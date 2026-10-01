@@ -4,6 +4,7 @@ import type {
   PlatformDefectRecord,
   PlatformDefectStatus,
 } from '../../domain/ops/platform-defect.types.js'
+import { isGithubPullRequestUrl } from '../../domain/ops/platform-defect-pr-url.js'
 import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
 
 const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
@@ -14,11 +15,17 @@ const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
 }
 
 export class PlatformDefectTransitionError extends Error {
-  readonly code: 'invalid_transition' | 'not_found'
+  readonly code: 'invalid_transition' | 'not_found' | 'pr_url_required'
 
-  constructor(code: 'invalid_transition' | 'not_found') {
+  constructor(code: 'invalid_transition' | 'not_found' | 'pr_url_required') {
     super(code)
     this.code = code
+  }
+}
+
+export function assertGithubPrUrlForReadyForPr(prUrl: string | null | undefined): void {
+  if (!isGithubPullRequestUrl(prUrl)) {
+    throw new PlatformDefectTransitionError('pr_url_required')
   }
 }
 
@@ -114,6 +121,11 @@ export class PlatformDefectService {
       throw new PlatformDefectTransitionError('invalid_transition')
     }
     void meta?.skipBatch
+
+    if (nextStatus === 'ready_for_pr') {
+      const effectivePrUrl = meta?.prUrl !== undefined ? meta.prUrl : current.prUrl
+      assertGithubPrUrlForReadyForPr(effectivePrUrl)
+    }
 
     const updated = await this.repo.updateStatus(id, nextStatus, {
       branchName: meta?.branchName,

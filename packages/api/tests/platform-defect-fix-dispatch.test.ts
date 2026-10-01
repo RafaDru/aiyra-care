@@ -38,6 +38,7 @@ describe('platform-defect-fix-dispatch', () => {
     delete process.env.OPS_INVESTIGATOR_CALLBACK_KEY
     delete process.env.OPS_METRICS_KEY
     delete process.env.OPS_INVESTIGATOR_TIER1
+    delete process.env.OPS_DEFECT_FIX_TIER1
     vi.unstubAllGlobals()
   })
 
@@ -68,6 +69,16 @@ describe('platform-defect-fix-dispatch', () => {
     expect('error' in built).toBe(false)
     if ('error' in built) return
     expect(built.playbook).toBe('defect-fix-tier1')
+    expect(built.investigation.tier).toBe(1)
+  })
+
+  it('uses OPS_DEFECT_FIX_TIER1 over OPS_INVESTIGATOR_TIER1', () => {
+    process.env.OPS_INVESTIGATOR_TIER1 = '0'
+    process.env.OPS_DEFECT_FIX_TIER1 = '1'
+    process.env.OPS_METRICS_KEY = 'ops-key'
+    const built = buildPlatformDefectFixDispatchPayload(sampleDefect, [])
+    expect('error' in built).toBe(false)
+    if ('error' in built) return
     expect(built.investigation.tier).toBe(1)
   })
 
