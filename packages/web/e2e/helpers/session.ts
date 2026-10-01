@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import type { Page } from '@playwright/test'
 import { loginViaPassword, waitForSupabaseSession } from './auth'
 import { requireQaTestCredentials } from './env'
-import { completeOnboardingProfile, dismissCookieBanner } from './onboarding'
+import { completeOnboardingProfile, dismissCookieBanner, primeE2eClientStorage } from './onboarding'
 import { uniqueQaCpf } from './fixtures'
 import { hideAvaDock, dismissHygienePrompt, dismissFirstVisitTour } from './ui'
 import { dashboardAddFamilyButton, waitForDashboardReady } from './dashboard'
@@ -33,6 +33,7 @@ export type EnsureSessionOptions = {
 
 export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions) {
   execSync('npm run qa:seed-e2e-account', { cwd: repoRoot, stdio: 'ignore' })
+  await primeE2eClientStorage(page)
   const { email, password } = requireQaTestCredentials()
   await loginViaPassword(page, email, password)
   await waitForSupabaseSession(page)

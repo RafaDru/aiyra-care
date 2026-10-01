@@ -8,7 +8,10 @@ export async function selectAntOption(
   scope?: Locator,
 ) {
   const root = scope ?? page
-  const field = root.getByLabel(fieldLabel, { exact: true })
+  const field =
+    fieldLabel instanceof RegExp
+      ? root.getByLabel(fieldLabel, { exact: false })
+      : root.getByLabel(fieldLabel, { exact: true })
   await field.scrollIntoViewIfNeeded()
   await field.click()
   const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()

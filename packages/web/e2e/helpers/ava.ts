@@ -163,7 +163,10 @@ export async function submitAvaMessage(page: Page, text: string) {
 
 export async function sendAvaMessage(page: Page, text: string) {
   await submitAvaMessage(page, text)
-  await waitForAvaAssistantReply(page, /.{8,}/, 90_000)
+  const replyPattern = process.env.CI
+    ? /Resposta de teste Ava|companheira de cuidado|saúde na família|exames|vacina|não há/i
+    : /.{8,}/
+  await waitForAvaAssistantReply(page, replyPattern, 90_000)
   await waitAvaComposerReady(page)
 }
 
