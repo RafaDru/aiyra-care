@@ -270,7 +270,7 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
                       loading={updatingId === row.id}
                       onClick={() => void markReadyForPr(row.id)}
                     >
-                      Pronto PR
+                      Marcar pronto p/ PR
                     </Button>
                   )}
                   {row.status === 'ready_for_pr' && (
