@@ -105,7 +105,28 @@ Tier 0: `prUrl` pode ser omitido/null.
 
 ---
 
-## 6. Estado final no CH
+## 6. Pós-`ready_for_pr` — PR, CI, review (G3), merge, `fixed`
+
+Runbook operador solo: [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) §6. Spec fatias R2–R4: [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md).
+
+| # | Passo | OK |
+|---|--------|-----|
+| 6.1 | CH: defeito `ready_for_pr`; conferir `branchName` / `prUrl` (Tier 1) | ☐ |
+| 6.2 | Abrir ou localizar PR no GitHub (criar manualmente se Tier 0 sem `prUrl`) | ☐ |
+| 6.3 | CI Actions verde (api, migrations, web, agents conforme diff) | ☐ |
+| 6.4 | *(Opcional R3)* **Solicitar revisão agêntica** no CH — só após CI OK ou com ressalva documentada | ☐ |
+| 6.5 | Rafael **aprova merge** no GitHub (G3); agente de review **não** mergeia | ☐ |
+| 6.6 | CH → marcar **Corrigido** (`fixed`, G4); incidentes ligados permanecem `triaged` | ☐ |
+
+**Se CI falhar:** corrigir na branch ou voltar a **Iniciar / Reenfileirar correção** (G2) com link da run e jobs falhos no próximo dispatch — ver [`DEFEITO_EM_CORRECAO.md`](./DEFEITO_EM_CORRECAO.md). Automação R2 registrará `pipeline_status` no defeito.
+
+**Se review pedir mudanças (R3):** mesmo retorno à correção; anexar feedback no corpo do próximo `start-fix` / instruções do agente.
+
+**PASS pós-correção (manual R0):** `ready_for_pr` → PR aberto → CI verde → merge aprovado → `fixed` no CH.
+
+---
+
+## 7. Estado final no CH
 
 ```bash
 curl -sS "$BASE/api/platform-defects/$DEFECT" | python3 -c "
@@ -127,7 +148,7 @@ Incidente ligado permanece **`triaged`** (não reabre).
 
 ---
 
-## 7. Falhas comuns
+## 8. Falhas comuns
 
 | Sintoma | Causa provável |
 |---------|----------------|
@@ -143,7 +164,7 @@ Incidente ligado permanece **`triaged`** (não reabre).
 
 ---
 
-## 8. Fora deste checklist
+## 9. Fora deste checklist
 
 - **Lote PR** (`defect_pr_batches`) — fatia posterior do #74.
 - Re-triagem dos incidentes legados `in_triage` — mesmo padrão triador + `callbackAuth`.

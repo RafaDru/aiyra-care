@@ -17,6 +17,7 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 | 1a | [`COMMAND_HUB.md`](./COMMAND_HUB.md) | Nome, acrônimo, mapa pacotes |
 | 1b | [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md) | **Escopo MVP** — o que operar agora vs congelado |
 | 1c | [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) | **Pipeline CH** incidentes → defeitos → lote PR (spec + fatias A–E) |
+| 1d | [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) | **Operador solo** — gates G0–G4, falhas, pós-`ready_for_pr` (fatia R0) |
 | 2 | [`CONSOLE.md`](./CONSOLE.md) | Abas do console `:3013`, o que cada uma mede |
 | 3 | [`TELEMETRY.md`](./TELEMETRY.md) | Tabelas PG, LGPD, queries úteis |
 | 4 | [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) | Chamados «Reportar problema» (migration 061) |
