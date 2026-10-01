@@ -1,4 +1,10 @@
-export type QuickCaptureKind = 'note' | 'measurement' | 'medication' | 'agenda' | 'document'
+export type QuickCaptureKind =
+  | 'note'
+  | 'symptom'
+  | 'measurement'
+  | 'medication'
+  | 'agenda'
+  | 'document'
 
 export interface QuickCaptureOpenRequest {
   patientId?: string

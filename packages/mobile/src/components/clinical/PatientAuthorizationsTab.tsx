@@ -115,6 +115,7 @@ export function PatientAuthorizationsTab({ patientId }: Props) {
                   <AvaAcceleratorButton
                     patientId={patientId}
                     initialMessage={t('ava.acceleratorAuthorization', { title })}
+                    entityPin={{ entityType: 'authorization', entityId: row.id }}
                     compact
                   />
                 </View>

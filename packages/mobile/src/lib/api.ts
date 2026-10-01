@@ -289,6 +289,16 @@ export const api = {
       ),
   },
   measurements: {
+    createBatch: (data: {
+      patientId: string
+      observedAt: string
+      healthThreadId?: string
+      items: Array<{ typeCode: string; valueNumeric?: number }>
+    }) =>
+      request<unknown[]>('/measurements/batch', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
     chartSeries: (params: {
       patientId: string
       healthThreadId?: string

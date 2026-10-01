@@ -4,7 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAvaPatientLens } from '@/hooks/useAvaPatientLens'
-import { DUAL_ENTRY_FAB_BOTTOM_OFFSET } from '@/lib/dual-entry-layout'
+import {
+  DUAL_ENTRY_EDGE_INSET,
+  DUAL_ENTRY_FAB_BOTTOM_OFFSET,
+  DUAL_ENTRY_FAB_RADIUS,
+  DUAL_ENTRY_FAB_SHADOW,
+} from '@/lib/dual-entry-layout'
 import {
   subscribeQuickCaptureOpen,
   type QuickCaptureKind,
@@ -45,11 +50,13 @@ export function QuickCaptureGlobal() {
         }}
         style={[
           styles.fab,
+          DUAL_ENTRY_FAB_SHADOW,
           {
             bottom,
-            left: 16,
+            left: DUAL_ENTRY_EDGE_INSET,
             borderColor: tokens.colorPrimary,
             backgroundColor: tokens.colorBgContainer,
+            borderRadius: DUAL_ENTRY_FAB_RADIUS,
           },
         ]}
       >
@@ -73,7 +80,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 48,
     height: 48,
-    borderRadius: 24,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',

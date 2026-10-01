@@ -3,6 +3,8 @@ import { AvaEntityContextService } from '../src/application/llm/ava-entity-conte
 import { Exam } from '../src/domain/exam/exam.entity.js'
 import { ExamOrder } from '../src/domain/exam-order/exam-order.entity.js'
 import { ExamResultItem } from '../src/domain/exam-result-item/exam-result-item.entity.js'
+import { Authorization } from '../src/domain/authorization/authorization.entity.js'
+import { MedicalRecord } from '../src/domain/medical-record/medical-record.entity.js'
 import { NotFoundError } from '../src/domain/errors.js'
 
 describe('AvaEntityContextService', () => {
@@ -118,5 +120,65 @@ describe('AvaEntityContextService', () => {
     expect(block).toContain('série')
     expect(block).toContain('11.0 g/dL')
     expect(block).toContain('Histórico recente')
+  })
+
+  it('builds authorization pin block', async () => {
+    const auth = Authorization.create(
+      {
+        patientId,
+        classification: 'Ressonância joelho',
+        status: 'authorized',
+        authorizationDate: new Date('2024-03-01'),
+        guideNumber: 'G-99',
+      },
+      'ffffffff-ffff-4fff-8fff-ffffffffffff',
+    )
+
+    const service = new AvaEntityContextService(
+      { findById: vi.fn() },
+      { findById: vi.fn() },
+      { findById: vi.fn(), findAll: vi.fn() },
+      { findById: vi.fn().mockResolvedValue(auth), findAll: vi.fn() },
+      { findById: vi.fn(), findAll: vi.fn() },
+    )
+
+    const block = await service.buildPinBlock(patientId, {
+      entityType: 'authorization',
+      entityId: auth.id,
+    })
+
+    expect(block).toContain('autorização')
+    expect(block).toContain('Ressonância joelho')
+    expect(block).toContain('G-99')
+  })
+
+  it('builds medical record pin block', async () => {
+    const record = MedicalRecord.create(
+      {
+        patientId,
+        recordDate: new Date('2024-02-10'),
+        recordType: 'consulta',
+        description: 'Retorno pediatria',
+        doctorName: 'Dr. Silva',
+      },
+      '10101010-1010-4101-8101-010101010101',
+    )
+
+    const service = new AvaEntityContextService(
+      { findById: vi.fn() },
+      { findById: vi.fn() },
+      { findById: vi.fn(), findAll: vi.fn() },
+      { findById: vi.fn(), findAll: vi.fn() },
+      { findById: vi.fn().mockResolvedValue(record), findAll: vi.fn() },
+    )
+
+    const block = await service.buildPinBlock(patientId, {
+      entityType: 'medical_record',
+      entityId: record.id,
+    })
+
+    expect(block).toContain('atendimento')
+    expect(block).toContain('consulta')
+    expect(block).toContain('Retorno pediatria')
   })
 })

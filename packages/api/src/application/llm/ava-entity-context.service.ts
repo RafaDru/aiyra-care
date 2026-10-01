@@ -1,6 +1,8 @@
+import type { AuthorizationRepository } from '../../domain/authorization/authorization.repository.js'
 import type { ExamRepository } from '../../domain/exam/exam.repository.js'
 import type { ExamOrderRepository } from '../../domain/exam-order/exam-order.repository.js'
 import type { ExamResultItemRepository } from '../../domain/exam-result-item/exam-result-item.repository.js'
+import type { MedicalRecordRepository } from '../../domain/medical-record/medical-record.repository.js'
 import { NotFoundError } from '../../domain/errors.js'
 
 export type AvaEntityPin =
@@ -8,6 +10,8 @@ export type AvaEntityPin =
   | { entityType: 'exam_order'; entityId: string }
   | { entityType: 'exam_result_item'; entityId: string }
   | { entityType: 'exam_marker'; markerName: string }
+  | { entityType: 'authorization'; entityId: string }
+  | { entityType: 'medical_record'; entityId: string }
 
 function formatDate(d: Date | string | null | undefined): string {
   if (!d) return '—'
@@ -20,6 +24,8 @@ export class AvaEntityContextService {
     private readonly exams: ExamRepository,
     private readonly examOrders: ExamOrderRepository,
     private readonly examResultItems: ExamResultItemRepository,
+    private readonly authorizations?: AuthorizationRepository,
+    private readonly medicalRecords?: MedicalRecordRepository,
   ) {}
 
   async buildPinBlock(patientId: string, pin: AvaEntityPin): Promise<string> {
@@ -32,6 +38,10 @@ export class AvaEntityContextService {
         return this.formatResultItemPin(patientId, pin.entityId)
       case 'exam_marker':
         return this.formatMarkerPin(patientId, pin.markerName)
+      case 'authorization':
+        return this.formatAuthorizationPin(patientId, pin.entityId)
+      case 'medical_record':
+        return this.formatMedicalRecordPin(patientId, pin.entityId)
       default:
         return ''
     }
@@ -87,6 +97,55 @@ export class AvaEntityContextService {
       item.sourceDocumentId ? `Documento origem: ${item.sourceDocumentId}` : '',
       `Exame vinculado: ${item.examId}`,
     ].filter(Boolean).join('\n')
+  }
+
+  private async formatAuthorizationPin(patientId: string, authId: string): Promise<string> {
+    if (!this.authorizations) return ''
+    const auth = await this.authorizations.findById(authId)
+    if (!auth || auth.patientId !== patientId) {
+      throw new NotFoundError('Autorização', authId)
+    }
+    const title =
+      auth.classification?.trim() ||
+      auth.procedureDescription?.trim() ||
+      auth.solicitationNumber?.trim() ||
+      auth.guideNumber?.trim() ||
+      '—'
+    return [
+      'Tipo: autorização de convênio',
+      `ID: ${auth.id}`,
+      `Título/resumo: ${title}`,
+      auth.status ? `Status: ${auth.status}` : '',
+      `Data autorização: ${formatDate(auth.authorizationDate)}`,
+      auth.validityDate ? `Validade: ${formatDate(auth.validityDate)}` : '',
+      auth.doctorName ? `Profissional: ${auth.doctorName}` : '',
+      auth.specialty ? `Especialidade: ${auth.specialty}` : '',
+      auth.guideNumber ? `Guia: ${auth.guideNumber}` : '',
+      auth.source ? `Fonte: ${auth.source}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n')
+  }
+
+  private async formatMedicalRecordPin(patientId: string, recordId: string): Promise<string> {
+    if (!this.medicalRecords) return ''
+    const record = await this.medicalRecords.findById(recordId)
+    if (!record || record.patientId !== patientId) {
+      throw new NotFoundError('Atendimento', recordId)
+    }
+    return [
+      'Tipo: atendimento / prontuário',
+      `ID: ${record.id}`,
+      `Tipo registro: ${record.recordType}`,
+      `Data: ${formatDate(record.recordDate)}`,
+      record.description?.trim() ? `Descrição: ${record.description.trim().slice(0, 400)}` : '',
+      record.doctorName ? `Profissional: ${record.doctorName}` : '',
+      record.specialty ? `Especialidade: ${record.specialty}` : '',
+      record.clinicName ? `Local: ${record.clinicName}` : '',
+      record.source ? `Fonte: ${record.source}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n')
   }
 
   private async formatMarkerPin(patientId: string, markerName: string): Promise<string> {

@@ -13,11 +13,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AvaPatientLensPicker } from '@/components/ava/AvaPatientLensPicker'
 import { useToast } from '@/contexts/ToastContext'
 import { api } from '@/lib/api'
+import { DUAL_ENTRY_FAB_RADIUS } from '@/lib/dual-entry-layout'
 import type { QuickCaptureKind } from '@/lib/quick-capture-bus'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 import type { Patient } from '@/lib/api.types'
 
-const KINDS: QuickCaptureKind[] = ['note', 'measurement', 'medication', 'agenda', 'document']
+const KINDS: QuickCaptureKind[] = ['note', 'symptom', 'measurement', 'medication', 'agenda', 'document']
+const THREAD_ENTRY_KINDS: QuickCaptureKind[] = ['note', 'symptom']
 
 type Props = {
   visible: boolean
@@ -29,7 +31,14 @@ type Props = {
   initialKind?: QuickCaptureKind
 }
 
-/** Sheet de registro rápido — MVP: nota em health thread; demais kinds em fase seguinte. */
+function parseOptionalNumber(raw: string): number | undefined {
+  const trimmed = raw.trim().replace(',', '.')
+  if (!trimmed) return undefined
+  const n = Number(trimmed)
+  return Number.isFinite(n) ? n : undefined
+}
+
+/** Sheet de registro rápido — nota/sintoma (health thread) + medição (batch); demais kinds em rollout. */
 export function QuickCaptureSheet({
   visible,
   onClose,
@@ -45,12 +54,18 @@ export function QuickCaptureSheet({
   const insets = useSafeAreaInsets()
   const [kind, setKind] = useState<QuickCaptureKind>(initialKind ?? 'note')
   const [noteBody, setNoteBody] = useState('')
+  const [temperature, setTemperature] = useState('')
+  const [heartRate, setHeartRate] = useState('')
+  const [spo2, setSpo2] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!visible) return
     setKind(initialKind ?? 'note')
     setNoteBody('')
+    setTemperature('')
+    setHeartRate('')
+    setSpo2('')
   }, [visible, initialKind])
 
   const resolveThreadId = useCallback(async (): Promise<string> => {
@@ -68,10 +83,10 @@ export function QuickCaptureSheet({
     throw new Error('thread_required')
   }, [patientId, t])
 
-  const saveNote = async () => {
+  const saveThreadEntry = async () => {
     const body = noteBody.trim()
     if (!body) {
-      toast.info(t('quickCapture.noteRequired'))
+      toast.info(t(kind === 'symptom' ? 'quickCapture.symptomRequired' : 'quickCapture.noteRequired'))
       return
     }
     setSaving(true)
@@ -91,17 +106,51 @@ export function QuickCaptureSheet({
     }
   }
 
+  const saveMeasurement = async () => {
+    if (!patientId) return
+    const items = [
+      { typeCode: 'temperature', valueNumeric: parseOptionalNumber(temperature) },
+      { typeCode: 'heart_rate', valueNumeric: parseOptionalNumber(heartRate) },
+      { typeCode: 'spo2', valueNumeric: parseOptionalNumber(spo2) },
+    ].filter((i) => i.valueNumeric != null)
+    if (!items.length) {
+      toast.info(t('quickCapture.measurementRequired'))
+      return
+    }
+    setSaving(true)
+    try {
+      await api.measurements.createBatch({
+        patientId,
+        observedAt: new Date().toISOString(),
+        items,
+      })
+      toast.success(t('quickCapture.saved'))
+      onClose()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('quickCapture.error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleSave = () => {
     if (!patientId) {
       toast.info(t('quickCapture.pickPatient'))
       return
     }
-    if (kind === 'note') {
-      void saveNote()
+    if (THREAD_ENTRY_KINDS.includes(kind)) {
+      void saveThreadEntry()
+      return
+    }
+    if (kind === 'measurement') {
+      void saveMeasurement()
       return
     }
     toast.info(t('quickCapture.comingSoon'))
   }
+
+  const showThreadForm = THREAD_ENTRY_KINDS.includes(kind)
+  const showMeasurementForm = kind === 'measurement'
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -144,7 +193,8 @@ export function QuickCaptureSheet({
                     styles.kindChip,
                     {
                       borderColor: active ? tokens.colorPrimary : tokens.colorBorder,
-                      backgroundColor: active ? tokens.colorBgLayout : tokens.colorBgContainer,
+                      backgroundColor: active ? tokens.colorBgContainer : tokens.colorBgLayout,
+                      borderRadius: DUAL_ENTRY_FAB_RADIUS,
                     },
                   ]}
                 >
@@ -156,13 +206,17 @@ export function QuickCaptureSheet({
             })}
           </View>
 
-          {kind === 'note' ? (
+          {showThreadForm ? (
             <View style={{ marginTop: 12, gap: 6 }}>
-              <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('quickCapture.noteLabel')}</Text>
+              <Text style={[styles.label, { color: tokens.colorTextBase }]}>
+                {t(kind === 'symptom' ? 'quickCapture.symptomLabel' : 'quickCapture.noteLabel')}
+              </Text>
               <TextInput
                 value={noteBody}
                 onChangeText={setNoteBody}
-                placeholder={t('quickCapture.notePlaceholder')}
+                placeholder={t(
+                  kind === 'symptom' ? 'quickCapture.symptomPlaceholder' : 'quickCapture.notePlaceholder',
+                )}
                 placeholderTextColor={tokens.colorTextSecondary}
                 multiline
                 style={[
@@ -171,18 +225,99 @@ export function QuickCaptureSheet({
                     borderColor: tokens.colorBorder,
                     backgroundColor: tokens.colorBgContainer,
                     color: tokens.colorTextBase,
+                    borderRadius: DUAL_ENTRY_FAB_RADIUS,
                   },
                 ]}
               />
             </View>
-          ) : (
+          ) : null}
+
+          {showMeasurementForm ? (
+            <View style={{ marginTop: 12, gap: 12 }}>
+              <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>
+                {t('quickCapture.measurementWhenHint')}
+              </Text>
+              <View style={styles.measureRow}>
+                <Text style={[styles.measureLabel, { color: tokens.colorTextBase }]}>
+                  {t('measurement.type.temperature')}
+                </Text>
+                <TextInput
+                  value={temperature}
+                  onChangeText={setTemperature}
+                  keyboardType="decimal-pad"
+                  placeholder="°C"
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={[
+                    styles.measureInput,
+                    {
+                      borderColor: tokens.colorBorder,
+                      backgroundColor: tokens.colorBgContainer,
+                      color: tokens.colorTextBase,
+                      borderRadius: DUAL_ENTRY_FAB_RADIUS,
+                    },
+                  ]}
+                />
+              </View>
+              <View style={styles.measureRow}>
+                <Text style={[styles.measureLabel, { color: tokens.colorTextBase }]}>
+                  {t('measurement.type.heart_rate')}
+                </Text>
+                <TextInput
+                  value={heartRate}
+                  onChangeText={setHeartRate}
+                  keyboardType="number-pad"
+                  placeholder="bpm"
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={[
+                    styles.measureInput,
+                    {
+                      borderColor: tokens.colorBorder,
+                      backgroundColor: tokens.colorBgContainer,
+                      color: tokens.colorTextBase,
+                      borderRadius: DUAL_ENTRY_FAB_RADIUS,
+                    },
+                  ]}
+                />
+              </View>
+              <View style={styles.measureRow}>
+                <Text style={[styles.measureLabel, { color: tokens.colorTextBase }]}>
+                  {t('measurement.type.spo2')}
+                </Text>
+                <TextInput
+                  value={spo2}
+                  onChangeText={setSpo2}
+                  keyboardType="number-pad"
+                  placeholder="%"
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={[
+                    styles.measureInput,
+                    {
+                      borderColor: tokens.colorBorder,
+                      backgroundColor: tokens.colorBgContainer,
+                      color: tokens.colorTextBase,
+                      borderRadius: DUAL_ENTRY_FAB_RADIUS,
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+          ) : null}
+
+          {!showThreadForm && !showMeasurementForm ? (
             <Text style={{ color: tokens.colorTextSecondary, marginTop: 12 }}>{t('quickCapture.comingSoon')}</Text>
-          )}
+          ) : null}
 
           <Pressable
             onPress={handleSave}
             disabled={saving}
-            style={[styles.saveBtn, { backgroundColor: tokens.colorPrimary, opacity: saving ? 0.6 : 1 }]}
+            style={[
+              styles.saveBtn,
+              {
+                backgroundColor: tokens.colorPrimary,
+                opacity: saving ? 0.6 : 1,
+                borderRadius: DUAL_ENTRY_FAB_RADIUS,
+              },
+            ]}
           >
             <Text style={styles.saveLabel}>{t('quickCapture.save')}</Text>
           </Pressable>
@@ -199,8 +334,11 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24, gap: 8 },
   label: { fontSize: 14, fontWeight: '600' },
   kindRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  kindChip: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8 },
-  input: { borderWidth: 1, borderRadius: 12, padding: 12, minHeight: 100, textAlignVertical: 'top' },
-  saveBtn: { marginTop: 20, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+  kindChip: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8 },
+  input: { borderWidth: 1, padding: 12, minHeight: 100, textAlignVertical: 'top' },
+  measureRow: { gap: 6 },
+  measureLabel: { fontSize: 14, fontWeight: '600' },
+  measureInput: { borderWidth: 1, padding: 12, fontSize: 16 },
+  saveBtn: { marginTop: 20, paddingVertical: 14, alignItems: 'center' },
   saveLabel: { color: '#fff', fontWeight: '700', fontSize: 16 },
 })

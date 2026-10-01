@@ -265,6 +265,7 @@ export function PatientMedicalRecordsTab({ patientId }: Props) {
                       initialMessage={t('ava.acceleratorRecord', {
                         title: formatRecordType(row.recordType),
                       })}
+                      entityPin={{ entityType: 'medical_record', entityId: row.id }}
                       compact
                     />
                   </Pressable>

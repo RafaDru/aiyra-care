@@ -8,7 +8,12 @@ import { AvaPatientLensPicker } from './AvaPatientLensPicker'
 import type { AvaOpenRequest } from '@/lib/ava-entity-pin'
 import { subscribeAvaOpen } from '@/lib/ava-dock-bus'
 import { useAvaPatientLens } from '@/hooks/useAvaPatientLens'
-import { DUAL_ENTRY_FAB_BOTTOM_OFFSET } from '@/lib/dual-entry-layout'
+import {
+  DUAL_ENTRY_EDGE_INSET,
+  DUAL_ENTRY_FAB_BOTTOM_OFFSET,
+  DUAL_ENTRY_FAB_RADIUS,
+  DUAL_ENTRY_FAB_SHADOW,
+} from '@/lib/dual-entry-layout'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 /** Presença global da Ava: FAB + modal de chat com lente de paciente (paridade G1/G4 web). */
@@ -76,11 +81,12 @@ export function AvaGlobalDock() {
         onPress={() => setOpen(true)}
         style={[
           styles.fab,
+          DUAL_ENTRY_FAB_SHADOW,
           {
             backgroundColor: tokens.colorPrimary,
             bottom: Math.max(insets.bottom, 16) + DUAL_ENTRY_FAB_BOTTOM_OFFSET,
-            right: 16,
-            shadowColor: '#000',
+            right: DUAL_ENTRY_EDGE_INSET,
+            borderRadius: DUAL_ENTRY_FAB_RADIUS,
           },
         ]}
       >
@@ -140,13 +146,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 56,
     height: 56,
-    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     zIndex: 100,
   },
   fabLabel: { color: '#fff', fontWeight: '700', fontSize: 14 },
