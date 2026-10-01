@@ -4,6 +4,7 @@ import type {
   AnalysisQueuePriority,
   AnalysisQueueSourceType,
   AnalysisQueueStatus,
+  IncidentPipelineStatus,
   OpsAnalysisAttentionCounts,
   OpsAnalysisQueueRecord,
 } from '../../domain/ops/ops-analysis-queue.types.js'
@@ -15,6 +16,7 @@ function mapRow(row: Record<string, unknown>): OpsAnalysisQueueRecord {
     sourceId: String(row.source_id),
     lane: row.lane as AnalysisQueueLane,
     status: row.status as AnalysisQueueStatus,
+    incidentPipelineStatus: (row.incident_pipeline_status as IncidentPipelineStatus) ?? 'open',
     priority: row.priority as AnalysisQueuePriority,
     deploymentTier: String(row.deployment_tier),
     title: String(row.title),
@@ -90,10 +92,21 @@ export class OpsAnalysisQueuePgRepository {
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
+  async setIncidentPipelineStatus(id: string, status: IncidentPipelineStatus): Promise<void> {
+    await this.pool.query(
+      `UPDATE ops_analysis_queue SET
+        incident_pipeline_status = $2,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, status],
+    )
+  }
+
   async markInvestigating(id: string): Promise<void> {
     await this.pool.query(
       `UPDATE ops_analysis_queue SET
         status = 'investigating',
+        incident_pipeline_status = 'in_triage',
         investigation_requested_at = COALESCE(investigation_requested_at, NOW()),
         analysis_last_error = NULL,
         updated_at = NOW()
@@ -106,6 +119,7 @@ export class OpsAnalysisQueuePgRepository {
     await this.pool.query(
       `UPDATE ops_analysis_queue SET
         status = 'dismissed',
+        incident_pipeline_status = 'dismissed',
         remediation_summary = $2,
         analysis_last_error = NULL,
         updated_at = NOW()
@@ -218,6 +232,7 @@ export class OpsAnalysisQueuePgRepository {
     const res = await this.pool.query(
       `SELECT * FROM ops_analysis_queue
        WHERE status NOT IN ('completed', 'dismissed')
+         AND incident_pipeline_status NOT IN ('triaged', 'dismissed')
        ORDER BY
          CASE priority
            WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3
@@ -227,6 +242,50 @@ export class OpsAnalysisQueuePgRepository {
       [limit],
     )
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
+  /** Incidentes `open` sem outbox ativo (pending/forwarded/claimed). */
+  async listOpenNeedingDispatchOutbox(
+    limit: number,
+    options?: { staleMs?: number },
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const staleMs = options?.staleMs
+    const params: unknown[] = [limit]
+    let staleSql = ''
+    if (staleMs != null && staleMs > 0) {
+      params.push(staleMs)
+      staleSql = `AND q.created_at < NOW() - ($2::bigint * interval '1 millisecond')`
+    }
+    const res = await this.pool.query(
+      `SELECT q.* FROM ops_analysis_queue q
+       WHERE q.incident_pipeline_status = 'open'
+         AND q.status NOT IN ('completed', 'dismissed')
+         ${staleSql}
+         AND NOT EXISTS (
+           SELECT 1 FROM incident_dispatch_outbox o
+           WHERE o.incident_id = q.id
+             AND o.status IN ('pending', 'forwarded', 'claimed')
+         )
+       ORDER BY q.created_at ASC
+       LIMIT $1`,
+      params,
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
+  /** Incidentes `open` há mais de `staleMs` sem qualquer linha outbox (D5). */
+  async countStaleOpenWithoutOutbox(staleMs: number): Promise<number> {
+    const res = await this.pool.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM ops_analysis_queue q
+       WHERE q.incident_pipeline_status = 'open'
+         AND q.status NOT IN ('completed', 'dismissed')
+         AND q.created_at < NOW() - ($1::bigint * interval '1 millisecond')
+         AND NOT EXISTS (
+           SELECT 1 FROM incident_dispatch_outbox o WHERE o.incident_id = q.id
+         )`,
+      [staleMs],
+    )
+    return Number(res.rows[0]?.count ?? 0)
   }
 
   async attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {

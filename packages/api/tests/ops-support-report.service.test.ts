@@ -64,6 +64,42 @@ describe('OpsSupportReportService', () => {
   })
 })
 
+describe('SupportReportPgRepository.listForOps', () => {
+  it('falls back to migration-061 columns when analysis columns are missing', async () => {
+    const baseRow = {
+      id: '11111111-1111-1111-1111-111111111111',
+      account_id: '22222222-2222-2222-2222-222222222222',
+      status: 'open',
+      category: 'technical_bug',
+      description: 'x',
+      route: '/',
+      session_id: null,
+      patient_id: null,
+      consent_technical: true,
+      consent_screenshot: false,
+      consent_profile_access: false,
+      profile_access_until: null,
+      diagnostic_context: {},
+      screenshot_data: false,
+      app_version: null,
+      user_agent: null,
+      expires_at: new Date().toISOString(),
+      resolved_at: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    const query = vi
+      .fn()
+      .mockRejectedValueOnce(Object.assign(new Error('column "analysis_status" does not exist'), { code: '42703' }))
+      .mockResolvedValueOnce({ rows: [baseRow] })
+    const repo = new SupportReportPgRepository({ query } as never)
+    const rows = await repo.listForOps('open', 10)
+    expect(query).toHaveBeenCalledTimes(2)
+    expect(rows[0]?.analysisStatus).toBe('none')
+    expect(rows[0]?.deploymentStatus).toBe('none')
+  })
+})
+
 describe('SupportReportPgRepository.updateStatusForOps', () => {
   it('casts status param to varchar for Postgres CASE', async () => {
     const query = vi.fn(async () => ({ rowCount: 1 }))

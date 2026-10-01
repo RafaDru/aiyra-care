@@ -1,25 +1,12 @@
 # Playbook — Suporte SRE (Tier 0)
 
-Você é o agente **Suporte SRE** do AiyraCare. Um webhook `ops_alert` disparou esta execução (alerta de métricas / probes).
+**Instructions para colar no Cursor Automations:** use o arquivo canônico na raiz de `docs/`:
 
-## Entrada (JSON do webhook — sem PHI)
+→ **[automations-aiyra-triador-sre-instructions.md](../../automations-aiyra-triador-sre-instructions.md)**
 
-| Campo | Uso |
-|-------|-----|
-| `type` | Deve ser `ops_alert` |
-| `alertId` | ID estável do alerta (`infra_api_down`, `sync_stuck_*`, …) |
-| `severity` | `warning` \| `critical` |
-| `category` | `infra` \| `sync` \| `llm` \| `product` |
-| `message` | Texto humano do alerta |
-| `details` | JSON opcional (latências, portal, contagens) |
-| `triage` | Linha de triagem (`humanRequired`, `tier`, `reason`) |
-| `dashboardUrl` | Console ops |
-| `environment.deploymentTier` | `integration` \| `preview` \| `production` — **sempre** use este campo (não infira ambiente pela porta) |
-| `environment.apiPublicUrl` | Base URL da API que disparou o webhook |
-| `operatorNotes` | Contexto **ops** passado manualmente — priorize na hipótese |
-| `investigation.trigger` | `auto` (Verificar e acionar) ou `manual` (botão Analisar) |
-| `analysisQueue.id` | ID na pilha — cite no callback |
-| `analysisQueue.callbackUrl` | POST ao finalizar (ver «Callback» abaixo) |
+(Caminho no repo: `docs/automations-aiyra-triador-sre-instructions.md` — bloco entre `=== INÍCIO ===` e `=== FIM ===`.)
+
+Este `.prompt.md` permanece como referência para workflows em `.cursor/automations/`.
 
 **Proibido:** credenciais, `DATABASE_URL`, dados de paciente, conteúdo de logs com PHI.
 

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { opsApi } from './api.js'
-import { Tabs } from 'antd'
 import type { OpsMetricsResponse, RuntimeDegradedView } from './ops.types.js'
 import {
   AvaPanel,
@@ -14,7 +13,8 @@ import {
 } from './ops-panels.js'
 import { SupportPanel } from './SupportPanel.js'
 import { BusinessPanel } from './BusinessPanel.js'
-import { IssuesPanel } from './IssuesPanel.js'
+import { IncidentesPanel } from './IncidentesPanel.js'
+import { DefeitosPanel } from './DefeitosPanel.js'
 import { ProdutoLifecyclePanel } from './ProdutoLifecyclePanel.js'
 import {
   readStoredStrategySection,
@@ -23,43 +23,24 @@ import {
 } from './StrategyPanel.js'
 import { OpsDrillDownProvider } from './ops-drill-down.js'
 import type { StrategySectionId } from './ops.types.js'
-
-const TAB_STORAGE_KEY = 'ops-console-active-tab'
-
-type TabKey =
-  | 'overview'
-  | 'business'
-  | 'strategy'
-  | 'issues'
-  | 'produto'
-  | 'product'
-  | 'support'
-  | 'sync'
-  | 'ava'
-  | 'infra'
-  | 'cost'
-
-const TAB_KEYS: TabKey[] = [
-  'overview', 'business', 'strategy', 'issues', 'produto', 'product', 'support', 'sync', 'ava', 'infra', 'cost',
-]
-
-function isTabKey(value: string | null): value is TabKey {
-  return value != null && TAB_KEYS.includes(value as TabKey)
-}
+import {
+  CH_NAV_GROUPS,
+  getGroup,
+  getNavItem,
+  lastTabForGroup,
+  persistNav,
+  readNavFromUrl,
+  tabToGroup,
+  writeNavToUrl,
+  type ChGroupId,
+  type ChTabKey,
+} from './ch-navigation.js'
+import { ChLayout } from './components/ChLayout.js'
+import type { OpsDeploymentTier } from './theme/ops-environment.js'
+import { mergeServicesStatus, type ChServiceState } from './ch-service-status.js'
 
 function resolveInitialStrategySection(): StrategySectionId {
   return readStrategySectionFromUrl() ?? readStoredStrategySection() ?? 'mkt'
-}
-
-function TabLabel({ text, count, alert }: { text: string; count?: number; alert?: boolean }) {
-  return (
-    <span className="ops-tab-label">
-      {text}
-      {count != null && count > 0 && (
-        <span className={`ops-tab-count${alert ? ' ops-tab-count--alert' : ''}`}>{count}</span>
-      )}
-    </span>
-  )
 }
 
 export function OpsMetricsDashboard({
@@ -67,14 +48,22 @@ export function OpsMetricsDashboard({
   runtime,
   stackSlot,
   onRefresh,
+  deploymentTier,
+  headerActions,
+  footerStatus,
 }: {
   data: OpsMetricsResponse
   runtime?: RuntimeDegradedView
   stackSlot?: ReactNode
   onRefresh?: () => void
+  deploymentTier: OpsDeploymentTier
+  headerActions?: ReactNode
+  footerStatus?: ReactNode
 }) {
   const metrics = data.metrics
   const [issueAttention, setIssueAttention] = useState(0)
+  const [defectOpenCount, setDefectOpenCount] = useState(0)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const highlightInvestigationId = useMemo(
     () => new URLSearchParams(window.location.search).get('investigationId'),
     [],
@@ -82,183 +71,187 @@ export function OpsMetricsDashboard({
 
   const [strategySection, setStrategySection] = useState<StrategySectionId>(resolveInitialStrategySection)
 
-  const [activeTab, setActiveTab] = useState<TabKey>(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get('tab')
-    if (isTabKey(fromUrl)) return fromUrl
-    const saved = localStorage.getItem(TAB_STORAGE_KEY)
-    if (isTabKey(saved)) return saved
-    return 'overview'
-  })
+  const initialNav = useMemo(() => readNavFromUrl(), [])
+  const [groupId, setGroupId] = useState<ChGroupId>(initialNav.group)
+  const [activeTab, setActiveTab] = useState<ChTabKey>(initialNav.tab)
+  const [webStatus, setWebStatus] = useState<ChServiceState>('unknown')
+  const [backendStatus, setBackendStatus] = useState<ChServiceState>('unknown')
+
+  useEffect(() => {
+    const loadServices = () => {
+      void opsApi.servicesStatus()
+        .then((s) => {
+          setWebStatus(s.web)
+          setBackendStatus(s.backend)
+        })
+        .catch(() => {
+          const merged = mergeServicesStatus(metrics.probe, null)
+          setBackendStatus(merged.backend)
+          setWebStatus(merged.web)
+        })
+    }
+    loadServices()
+    const id = window.setInterval(loadServices, 60_000)
+    return () => window.clearInterval(id)
+  }, [data, metrics.probe])
 
   useEffect(() => {
     void opsApi.analysisAttentionCounts().then((c) => {
       setIssueAttention(c.totalAttention)
     }).catch(() => undefined)
+    void opsApi
+      .platformDefects({ status: 'open,in_fix,ready_for_pr' })
+      .then((r) => setDefectOpenCount(r.items.length))
+      .catch(() => undefined)
   }, [data])
 
   useEffect(() => {
     if (highlightInvestigationId) {
-      setActiveTab('issues')
+      setGroupId('operacao')
+      setActiveTab('incidentes')
+      persistNav('operacao', 'incidentes')
+      writeNavToUrl('operacao', 'incidentes')
     }
   }, [highlightInvestigationId])
 
-  const badges = useMemo(() => ({
+  const tabCounts = useMemo((): Partial<Record<ChTabKey, number>> => ({
     overview: data.alerts.filter((a) => a.severity === 'critical').length,
+    incidentes: issueAttention,
+    defeitos: defectOpenCount,
     product: countHotFeatures(metrics),
     support: metrics.supportReports?.openCount ?? 0,
     sync: metrics.sync.stuckJobs.length,
     ava: metrics.productEvents.last5m.avaChatFailed,
     infra: countInfraIssues(metrics),
     cost: metrics.internalLlm?.exhausted ? 1 : metrics.internalLlm?.budgetExhausted ?? 0,
-  }), [data.alerts, metrics])
+  }), [data.alerts, metrics, issueAttention])
 
-  const syncUrl = (tab: TabKey, strategy?: StrategySectionId) => {
-    const params = new URLSearchParams(window.location.search)
-    params.set('tab', tab)
-    if (tab === 'strategy') {
-      params.set('strategy', strategy ?? strategySection)
-    } else {
-      params.delete('strategy')
+  const tabAlert = useMemo((): Partial<Record<ChTabKey, boolean>> => ({
+    overview: (tabCounts.overview ?? 0) > 0,
+    incidentes: (tabCounts.incidentes ?? 0) > 0,
+    defeitos: (tabCounts.defeitos ?? 0) > 0,
+    product: (tabCounts.product ?? 0) > 0,
+    support: (tabCounts.support ?? 0) > 0,
+    sync: (tabCounts.sync ?? 0) > 0,
+    ava: (tabCounts.ava ?? 0) > 0,
+    infra: (tabCounts.infra ?? 0) > 0,
+    cost: (tabCounts.cost ?? 0) > 0,
+  }), [tabCounts])
+
+  const groupAlertCounts = useMemo(() => {
+    const out: Partial<Record<ChGroupId, number>> = {}
+    for (const g of CH_NAV_GROUPS) {
+      let n = 0
+      for (const item of g.items) {
+        if ((tabCounts[item.tab] ?? 0) > 0 && tabAlert[item.tab]) n += 1
+      }
+      if (n > 0) out[g.id] = n
     }
-    const qs = params.toString()
-    const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
-    window.history.replaceState(null, '', next)
+    return out
+  }, [tabCounts, tabAlert])
+
+  const onSelectGroup = (id: ChGroupId) => {
+    const nextTab = lastTabForGroup(id)
+    setGroupId(id)
+    setActiveTab(nextTab)
+    persistNav(id, nextTab)
+    writeNavToUrl(id, nextTab, nextTab === 'strategy' ? { strategy: strategySection } : undefined)
   }
 
-  const onTabChange = (key: string) => {
-    const tab = key as TabKey
+  const onSelectTab = (tab: ChTabKey) => {
+    const g = tabToGroup(tab)
+    setGroupId(g)
     setActiveTab(tab)
-    localStorage.setItem(TAB_STORAGE_KEY, tab)
-    syncUrl(tab)
+    persistNav(g, tab)
+    writeNavToUrl(g, tab, tab === 'strategy' ? { strategy: strategySection } : undefined)
   }
 
   const onStrategySectionChange = (section: StrategySectionId) => {
     setStrategySection(section)
-    syncUrl('strategy', section)
+    writeNavToUrl(groupId, 'strategy', { strategy: section })
   }
 
-  const items = [
-    {
-      key: 'overview',
-      label: <TabLabel text="Visão geral" count={badges.overview} alert />,
-      children: (
-        <div className="ops-tab-panel">
-          <OverviewPanel data={data} onRefresh={onRefresh} />
-        </div>
-      ),
-    },
-    {
-      key: 'business',
-      label: <TabLabel text="Negócio" />,
-      children: (
-        <div className="ops-tab-panel">
-          <BusinessPanel data={data} />
-        </div>
-      ),
-    },
-    {
-      key: 'strategy',
-      label: <TabLabel text="Estratégia" />,
-      children: (
-        <div className="ops-tab-panel">
-          <StrategyPanel section={strategySection} onSectionChange={onStrategySectionChange} />
-        </div>
-      ),
-    },
-    {
-      key: 'issues',
-      label: <TabLabel text="Issues" count={issueAttention} alert={issueAttention > 0} />,
-      children: (
-        <div className="ops-tab-panel">
-          <IssuesPanel
+  const group = getGroup(groupId)
+  const navItem = getNavItem(activeTab) ?? group.items[0]
+
+  const panel = (() => {
+    switch (activeTab) {
+      case 'overview':
+        return <OverviewPanel data={data} onRefresh={onRefresh} />
+      case 'business':
+        return <BusinessPanel data={data} />
+      case 'strategy':
+        return <StrategyPanel section={strategySection} onSectionChange={onStrategySectionChange} />
+      case 'incidentes':
+        return (
+          <IncidentesPanel
             onRefresh={onRefresh}
             highlightInvestigationId={highlightInvestigationId}
           />
-        </div>
-      ),
-    },
-    {
-      key: 'produto',
-      label: <TabLabel text="Produto" />,
-      children: (
-        <div className="ops-tab-panel">
-          <ProdutoLifecyclePanel />
-        </div>
-      ),
-    },
-    {
-      key: 'product',
-      label: <TabLabel text="Produto & UX" count={badges.product} alert={badges.product > 0} />,
-      children: (
-        <div className="ops-tab-panel">
-          <ProductPanel data={data} />
-        </div>
-      ),
-    },
-    {
-      key: 'support',
-      label: <TabLabel text="Suporte" count={badges.support} alert={badges.support > 0} />,
-      children: (
-        <div className="ops-tab-panel">
+        )
+      case 'defeitos':
+        return <DefeitosPanel onRefresh={onRefresh} />
+      case 'produto':
+        return <ProdutoLifecyclePanel />
+      case 'product':
+        return <ProductPanel data={data} />
+      case 'support':
+        return (
           <SupportPanel
             openCount={metrics.supportReports?.openCount ?? 0}
             submitted24h={metrics.supportReports?.submitted24h ?? 0}
-            submittedSparkline={metrics.timeSeries24h.supportReportsSubmitted?.map((r) => r.count)}
+            submittedSparkline={metrics.timeSeries24h?.supportReportsSubmitted?.map((r) => r.count)}
             onQueueChange={onRefresh}
           />
-        </div>
-      ),
-    },
-    {
-      key: 'sync',
-      label: <TabLabel text="Sync" count={badges.sync} alert={badges.sync > 0} />,
-      children: (
-        <div className="ops-tab-panel">
-          <SyncPanel data={data} />
-        </div>
-      ),
-    },
-    {
-      key: 'ava',
-      label: <TabLabel text="Ava & LLM" count={badges.ava} alert={badges.ava > 0} />,
-      children: (
-        <div className="ops-tab-panel">
-          <AvaPanel data={data} />
-        </div>
-      ),
-    },
-    {
-      key: 'infra',
-      label: <TabLabel text="Infra" count={badges.infra} alert={badges.infra > 0} />,
-      children: (
-        <div className="ops-tab-panel">
+        )
+      case 'sync':
+        return <SyncPanel data={data} />
+      case 'ava':
+        return <AvaPanel data={data} />
+      case 'infra':
+        return (
           <InfraPanel data={data} runtime={runtime} stackSlot={stackSlot} onRefresh={onRefresh} />
-        </div>
-      ),
-    },
-    {
-      key: 'cost',
-      label: <TabLabel text="Custo interno" count={badges.cost} alert={badges.cost > 0} />,
-      children: (
-        <div className="ops-tab-panel">
-          <CostPanel data={data} />
-        </div>
-      ),
-    },
-  ]
+        )
+      case 'cost':
+        return <CostPanel data={data} />
+      default:
+        return null
+    }
+  })()
 
   return (
     <OpsDrillDownProvider data={data}>
-      <div className="ops-tabs-card">
-        <Tabs
-          activeKey={activeTab}
-          onChange={onTabChange}
-          items={items}
-          destroyOnHidden={false}
-          tabBarGutter={0}
-          size="middle"
-        />
-      </div>
+      <ChLayout
+        group={group}
+        item={navItem}
+        activeTab={activeTab}
+        deploymentTier={deploymentTier}
+        webStatus={webStatus}
+        backendStatus={backendStatus}
+        headerActions={headerActions}
+        footer={
+          <>
+            <span>{footerStatus}</span>
+            <a
+              href="https://github.com/RafaDru/aiyra-care/blob/main/docs/ops/README.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Documentação CH
+            </a>
+          </>
+        }
+        tabCounts={tabCounts}
+        tabAlert={tabAlert}
+        groupAlertCounts={groupAlertCounts}
+        mobileNavOpen={mobileNavOpen}
+        onOpenMobileNav={() => setMobileNavOpen(true)}
+        onCloseMobileNav={() => setMobileNavOpen(false)}
+        onSelectGroup={onSelectGroup}
+        onSelectTab={onSelectTab}
+      >
+        <div className="ops-tab-panel" style={{ padding: 0, gap: 16 }}>{panel}</div>
+      </ChLayout>
     </OpsDrillDownProvider>
   )
 }

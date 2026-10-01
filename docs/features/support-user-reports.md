@@ -32,7 +32,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 | Tipo | Referência |
 |------|------------|
 | Rotas web | Todas (botão em `AppLayout`) |
-| API | `POST /support/reports`, `GET /support/reports`, `GET /support/reports/:id` |
+| API | `POST /support/reports` (cria `support_reports` + incidente `ops_analysis_queue`, origem Usuário), `GET …` |
 | Tabelas PG | `support_reports` (migration **061**) |
 | UI | `packages/web/src/components/support/SupportReportModal.tsx` |
 | Telemetria | `support_report_submitted` em `product_events` |

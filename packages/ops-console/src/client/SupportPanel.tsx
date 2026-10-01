@@ -221,13 +221,14 @@ export function SupportPanel({
       <Alert
         type="info"
         showIcon
-        message="Ciclo de suporte"
+        message="Inbox do usuário (LGPD)"
         description={(
           <>
-            <strong>Triar/Resolver</strong> atualiza a fila humana.{' '}
-            <strong>Analisar</strong> dispara AiCare Suporte ao Desenvolvimento — use notas para contexto
-            extra. Chamados sem webhook configurado ficam «Sem análise» até você analisar manualmente
-            ou concluir com resumo.
+            Esta aba é o <strong>chamado voluntário</strong> e o status percebido pelo usuário — não
+            substitui a fila técnica. Cada novo reporte cria um <strong>incidente</strong> em Operação ›
+            Incidentes (origem Usuário) com investigador automático quando configurado. Use{' '}
+            <strong>Triar/Resolver</strong> para SLA humano; <strong>Analisar</strong> só para reenviar o
+            agente ou notas extras.
           </>
         )}
         style={{ marginBottom: 8 }}
@@ -242,8 +243,8 @@ export function SupportPanel({
       />
 
       <OpsPanel
-        title="Fila de suporte"
-        description="Chamados «Reportar problema» — migration 061 + ciclo de análise 064."
+        title="Chamados ao usuário"
+        description="Consentimento, TTL e resposta — técnica em Operação › Incidentes."
         extra={(
           <Space size={8}>
             <Segmented

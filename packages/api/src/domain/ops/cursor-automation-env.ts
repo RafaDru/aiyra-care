@@ -68,3 +68,16 @@ export function resolveSreSupportAutomationWebhookKey(
   if (hasDedicatedSreUrl) return undefined
   return resolveDevelopmentSupportAutomationWebhookKey(env)
 }
+
+/** Lane Correção Dev — defeito de plataforma (`defect_fix_v1`). */
+export function resolveDefectFixAutomationWebhookUrl(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  return readEnv(env, 'CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL')
+}
+
+export function resolveDefectFixAutomationWebhookKey(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  return cleanCursorAutomationKey(readEnv(env, 'CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY'))
+}

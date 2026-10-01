@@ -19,6 +19,19 @@ export function resolveInvestigatorCallbackUrl(): string {
   return `${resolveOpsConsoleBaseUrl()}/api/analysis-queue/callback`
 }
 
+/** Header + valor para a Automation POSTar no callback (sem expor segredo em logs). */
+export function resolveInvestigatorCallbackAuth(): { header: string; value: string } | null {
+  const investigatorKey = process.env.OPS_INVESTIGATOR_CALLBACK_KEY?.trim()
+  if (investigatorKey) {
+    return { header: 'x-investigator-callback-key', value: investigatorKey }
+  }
+  const opsKey = process.env.OPS_METRICS_KEY?.trim()
+  if (opsKey) {
+    return { header: 'x-internal-ops-key', value: opsKey }
+  }
+  return null
+}
+
 export function isInvestigatorCallbackAuthorized(headers: Record<string, string | undefined>): boolean {
   const callbackKey = process.env.OPS_INVESTIGATOR_CALLBACK_KEY?.trim()
   const opsKey = process.env.OPS_METRICS_KEY?.trim()
