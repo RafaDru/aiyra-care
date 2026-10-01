@@ -97,14 +97,11 @@ export async function openAvaDock(page: Page) {
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
 export async function startFreshAvaConversation(page: Page) {
   await expect(async () => {
-    const avaRows = page.locator('.ava-chat-bubble-row--ava')
-    const count = await avaRows.count()
-    if (count > 0) {
-      const btn = page.getByRole('button', { name: AVA_NEW_CONVERSATION })
-      if (await btn.isVisible().catch(() => false)) {
-        await btn.click()
-      }
+    const btn = page.getByRole('button', { name: AVA_NEW_CONVERSATION })
+    if (await btn.isVisible().catch(() => false)) {
+      await btn.click()
     }
+    const avaRows = page.locator('.ava-chat-bubble-row--ava')
     expect(await avaRows.count()).toBe(0)
   }).toPass({ timeout: 30_000 })
   await waitAvaComposerReady(page)

@@ -114,6 +114,8 @@ export function AvaChatPanel({
   const resumeAttemptedRef = useRef(false)
   /** Evita que listConversations em voo reative conversa após «Nova conversa». */
   const userClearedConversationRef = useRef(false)
+  /** GET /messages em voo não pode sobrescrever bolhas do turno local (corrida no CI). */
+  const suppressMessageHydrationRef = useRef(false)
   const conversationIdRef = useRef<string | null>(conversationId ?? null)
   conversationIdRef.current = conversationId ?? null
 
@@ -146,10 +148,11 @@ export function AvaChatPanel({
       .catch(() => setConversationOptions([]))
   }, [patientId])
 
-  const loadConversationMessages = useCallback((id: string) => {
+  const loadConversationMessages = useCallback((id: string, opts?: { force?: boolean }) => {
     api.ava.getMessages(id)
       .then((r) => {
         if (conversationIdRef.current !== id) return
+        if (!opts?.force && suppressMessageHydrationRef.current) return
         if (r.messages.length === 0) return
         setMessages(r.messages.map((m) => ({
           role: m.role,
@@ -230,6 +233,7 @@ export function AvaChatPanel({
     const pin = pinForTurn ?? entityPin
     const attachmentForTurn = attachment
 
+    suppressMessageHydrationRef.current = true
     if (!overrideText) setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
     setMessages((prev) => [...prev, { role: 'assistant', text: '', streaming: true }])
@@ -319,6 +323,7 @@ export function AvaChatPanel({
         message.error(errMsg)
       }
     } finally {
+      suppressMessageHydrationRef.current = false
       setLoading(false)
     }
   }
@@ -361,6 +366,7 @@ export function AvaChatPanel({
 
   const startNewConversation = () => {
     userClearedConversationRef.current = true
+    suppressMessageHydrationRef.current = false
     onConversationIdChange?.(null)
     setMessages([])
     setAttachment(null)
@@ -400,8 +406,9 @@ export function AvaChatPanel({
   }
 
   const handleConversationSelect = (id: string) => {
+    suppressMessageHydrationRef.current = false
     onConversationIdChange?.(id)
-    loadConversationMessages(id)
+    loadConversationMessages(id, { force: true })
   }
 
   useEffect(() => {
