@@ -5,6 +5,7 @@ import type { LegalComplianceService } from '../../../application/legal-complian
 import type { DataGenerationService } from '../../../application/data-generation/data-generation.service.js'
 import type { PatientMembershipRepository } from '../../../domain/auth/app-account.repository.js'
 import { isMinorBirthDate } from '../../../domain/patient/patient-age.js'
+import { writeSseResponseHead } from '../sse-response.helper.js'
 
 function enrichPatientJson(
   patient: { toJSON: () => object },
@@ -173,12 +174,7 @@ export class PatientController {
 
     const patientId = parsed.data.id
     const res = reply.raw
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-      'X-Accel-Buffering': 'no',
-    })
+    writeSseResponseHead(req.raw, res)
     res.write('\n')
 
     const writeEvent = (event: string, payload: unknown) => {

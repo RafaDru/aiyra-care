@@ -617,6 +617,7 @@ export function AvaChatPanel({
             {messages.map((item, idx) => (
               <div
                 key={idx}
+                data-testid={item.role === 'assistant' ? 'ava-assistant-bubble' : 'ava-user-bubble'}
                 className={[
                   'ava-chat-bubble-row',
                   item.role === 'user' ? 'ava-chat-bubble-row--user' : 'ava-chat-bubble-row--ava',

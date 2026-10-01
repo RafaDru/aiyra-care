@@ -25,7 +25,7 @@ function avaComposerRoot(page: Page) {
 }
 
 function avaAssistantBubbleBodies(page: Page) {
-  return page.locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
+  return page.getByTestId('ava-assistant-bubble').locator('.ava-chat-bubble__body')
 }
 
 function avaComposerInput(page: Page) {
@@ -101,7 +101,7 @@ export async function startFreshAvaConversation(page: Page) {
     if (await btn.isVisible().catch(() => false)) {
       await btn.click()
     }
-    const avaRows = page.locator('.ava-chat-bubble-row--ava')
+    const avaRows = page.getByTestId('ava-assistant-bubble')
     expect(await avaRows.count()).toBe(0)
   }).toPass({ timeout: 30_000 })
   await waitAvaComposerReady(page)
@@ -152,11 +152,16 @@ export async function submitAvaMessage(page: Page, text: string) {
     (r) => isAvaChatPostUrl(r.method(), r.url()),
     { timeout: 45_000 },
   )
+  const chatFinished = page.waitForResponse(
+    (r) => isAvaChatPostUrl(r.request().method(), r.url()) && r.ok(),
+    { timeout: 90_000 },
+  )
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
 
   await chatStarted
+  await chatFinished
   await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout: 90_000 })
   await waitAvaComposerReady(page)
 }
@@ -171,7 +176,7 @@ export async function sendAvaMessage(page: Page, text: string) {
 }
 
 export async function waitForAvaAssistantBubble(page: Page, timeout = 45_000) {
-  const bubble = page.locator('.ava-chat-bubble-row--ava').last()
+  const bubble = page.getByTestId('ava-assistant-bubble').last()
   await bubble.waitFor({ state: 'visible', timeout })
   return bubble
 }

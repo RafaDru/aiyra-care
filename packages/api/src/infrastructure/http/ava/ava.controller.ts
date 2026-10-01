@@ -6,6 +6,7 @@ import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess } from '../auth/patient-access.guard.js'
 import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
 import { chunkReplyForSse } from '../../../domain/llm/ava-reply-stream.js'
+import { writeSseResponseHead } from '../sse-response.helper.js'
 import { avaChatBodySchema, avaChatParamsSchema } from './ava.schema.js'
 
 function writeSse(res: import('node:http').ServerResponse, event: string, data: unknown) {
@@ -43,12 +44,7 @@ export class AvaController {
 
     if (body.data.streamActivity) {
       const res = reply.raw
-      res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache, no-transform',
-        Connection: 'keep-alive',
-        'X-Accel-Buffering': 'no',
-      })
+      writeSseResponseHead(req.raw, res)
       res.write('\n')
 
       try {
