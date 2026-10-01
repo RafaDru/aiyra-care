@@ -209,9 +209,6 @@ export function AppLayout() {
     </Layout>
   )
 
-  if (configured && user) {
-    return <ActiveCareCircleProvider>{layout}</ActiveCareCircleProvider>
-  }
-
-  return layout
+  // Dashboard e /family usam useActiveCareCircle; o provider tolera !user (legacy / bootstrap).
+  return <ActiveCareCircleProvider>{layout}</ActiveCareCircleProvider>
 }
