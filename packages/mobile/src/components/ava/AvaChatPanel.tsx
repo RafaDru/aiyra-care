@@ -248,7 +248,10 @@ export function AvaChatPanel({
 
   const quotaLabel =
     quota && !quota.quotaBypassed
-      ? `${Math.round(quota.usagePercent)}% · ${quota.totalTokensRemaining} tokens`
+      ? t('ava.quotaUsage', {
+          percent: Math.round(quota.usagePercent),
+          tokens: quota.totalTokensRemaining,
+        })
       : null
 
   return (

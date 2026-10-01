@@ -234,7 +234,9 @@
     "deleteConversationBody": "Esta ação não pode ser desfeita.",
     "entityPinActive": "Contexto de entidade anexado a esta conversa.",
     "imageAttachFailed": "Não foi possível anexar a imagem.",
-    "imagePermissionDenied": "Permita acesso à galeria para anexar imagens."
+    "imagePermissionDenied": "Permita acesso à galeria para anexar imagens.",
+    "lensNoPatient": "Nenhum paciente na lente",
+    "quotaUsage": "{{percent}}% do período · {{tokens}} tokens restantes"
   },
   "toast": {
     "success": "Sucesso",

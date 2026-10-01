@@ -234,7 +234,9 @@
     "deleteConversationBody": "This cannot be undone.",
     "entityPinActive": "Entity context attached to this chat.",
     "imageAttachFailed": "Could not attach the image.",
-    "imagePermissionDenied": "Allow photo library access to attach images."
+    "imagePermissionDenied": "Allow photo library access to attach images.",
+    "lensNoPatient": "No patient in lens",
+    "quotaUsage": "{{percent}}% of period · {{tokens}} tokens left"
   },
   "toast": {
     "success": "Success",

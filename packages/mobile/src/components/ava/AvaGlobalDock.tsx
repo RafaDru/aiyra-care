@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AvaChatPanel } from './AvaChatPanel'
 import { AvaConversationToolbar } from './AvaConversationToolbar'
@@ -11,6 +12,7 @@ import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 /** Presença global da Ava: FAB + modal de chat com lente de paciente (paridade G1/G4 web). */
 export function AvaGlobalDock() {
+  const { t } = useTranslation()
   const { tokens } = useAiyraTheme()
   const insets = useSafeAreaInsets()
   const {
@@ -69,7 +71,7 @@ export function AvaGlobalDock() {
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Abrir chat da Ava"
+        accessibilityLabel={t('ava.openChat')}
         onPress={() => setOpen(true)}
         style={[
           styles.fab,
@@ -81,20 +83,22 @@ export function AvaGlobalDock() {
           },
         ]}
       >
-        <Text style={styles.fabLabel}>Ava</Text>
+        <Text style={styles.fabLabel}>{t('ava.title')}</Text>
       </Pressable>
 
       <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
         <View style={[styles.sheet, { backgroundColor: tokens.colorBgLayout, paddingTop: insets.top + 8 }]}>
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.title, { color: tokens.colorTextBase }]}>Ava</Text>
+              <Text style={[styles.title, { color: tokens.colorTextBase }]}>{t('ava.title')}</Text>
               <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>
-                {activePatient?.name ?? 'Companion'}
+                {activePatient?.name ?? t('ava.lensNoPatient')}
               </Text>
             </View>
-            <Pressable onPress={handleClose} hitSlop={12}>
-              <Text style={{ color: tokens.colorPrimary, fontSize: 16, fontWeight: '600' }}>Fechar</Text>
+            <Pressable onPress={handleClose} hitSlop={12} accessibilityRole="button">
+              <Text style={{ color: tokens.colorPrimary, fontSize: 16, fontWeight: '600' }}>
+                {t('common.close')}
+              </Text>
             </Pressable>
           </View>
 
