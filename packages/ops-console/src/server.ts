@@ -389,7 +389,7 @@ async function main() {
           console.warn('[ops-console] platform-defect start-fix dispatch:', dispatchError)
         }
         return {
-          ok: true,
+          ok: dispatch.outcome === 'sent',
           item,
           dispatch: {
             outcome: dispatch.outcome,

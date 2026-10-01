@@ -14,7 +14,10 @@ import {
   resolveInvestigatorCallbackAuth,
   resolveInvestigatorCallbackUrl,
 } from './ops-analysis-callback-url.js'
-import { PlatformDefectService } from './platform-defect.service.js'
+import {
+  PlatformDefectService,
+  PlatformDefectTransitionError,
+} from './platform-defect.service.js'
 
 export type PlatformDefectFixDispatchResult =
   | { outcome: 'sent' }
@@ -102,7 +105,9 @@ export async function postPlatformDefectFixWebhook(
     body: JSON.stringify(payload),
   })
   if (!res.ok) {
-    throw new Error(`defect_fix webhook failed (${url}): HTTP ${res.status}`)
+    const bodySnippet = (await res.text()).replace(/\s+/g, ' ').slice(0, 400)
+    const detail = bodySnippet ? ` — ${bodySnippet}` : ''
+    throw new Error(`defect_fix webhook failed (${url}): HTTP ${res.status}${detail}`)
   }
 }
 
@@ -132,15 +137,31 @@ export async function dispatchPlatformDefectFix(
   }
 }
 
+/** Webhook aceito (`sent`) antes de `open` → `in_fix`. Em `in_fix`, só re-dispatch (retry). */
 export async function startPlatformDefectFixWithDispatch(
   service: PlatformDefectService,
   repo: PlatformDefectPgRepository,
   defectId: string,
 ): Promise<{ item: PlatformDefectRecord; dispatch: PlatformDefectFixDispatchResult }> {
-  const item = await service.startFix(defectId)
+  const defect = await repo.findById(defectId)
+  if (!defect) throw new PlatformDefectTransitionError('not_found')
+
   const linkedIncidentIds = await repo.listLinkedIncidentIds(defectId)
-  const dispatch = await dispatchPlatformDefectFix(item, linkedIncidentIds)
-  return { item, dispatch }
+  const dispatch = await dispatchPlatformDefectFix(defect, linkedIncidentIds)
+
+  if (defect.status === 'open') {
+    if (dispatch.outcome !== 'sent') {
+      return { item: defect, dispatch }
+    }
+    const item = await service.startFix(defectId)
+    return { item, dispatch }
+  }
+
+  if (defect.status === 'in_fix') {
+    return { item: defect, dispatch }
+  }
+
+  throw new PlatformDefectTransitionError('invalid_transition')
 }
 
 export function dispatchErrorMessage(result: PlatformDefectFixDispatchResult): string | null {

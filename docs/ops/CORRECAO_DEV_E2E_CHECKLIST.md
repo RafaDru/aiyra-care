@@ -35,7 +35,7 @@ Triador (já usado na triagem): `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_*
 | # | Ação | OK |
 |---|------|-----|
 | 2.1 | Automation **Aiyra - Correção Dev** criada (webhook dedicado) | ☐ |
-| 2.2 | Instructions coladas de `docs/automations-aiyra-correcao-dev-instructions.md` | ☐ |
+| 2.2 | Instructions: bloco texto plano (`=== INÍCIO ===` … `=== FIM ===`) de `docs/automations-aiyra-correcao-dev-instructions.md` — sem tabelas/markdown na UI | ☐ |
 | 2.3 | URL + auth header copiados para `CURSOR_DEFECT_FIX_*` no `.env` | ☐ |
 
 ---
@@ -69,7 +69,7 @@ curl -sS "$BASE/api/platform-defects/$DEFECT" | python3 -m json.tool
 | 4.1 | Abrir CH → aba **Defeitos** | ☐ |
 | 4.2 | Abrir defeito em `open` | ☐ |
 | 4.3 | Clicar **Iniciar correção** (ou equivalente `start-fix`) | ☐ |
-| 4.4 | Resposta API: `ok: true`, `item.status: in_fix`, `dispatch.outcome: sent` | ☐ |
+| 4.4 | Resposta API: `ok: true`, `dispatch.outcome: sent`, **então** `item.status: in_fix` | ☐ |
 
 **Se `dispatch.outcome: skipped`:** conferir `.env` + reinício `:3013`.  
 **Se `failed`:** log do ops-console; webhook URL/key ou rede.
@@ -134,10 +134,12 @@ Incidente ligado permanece **`triaged`** (não reabre).
 | `defectFix.ready: false` | `CURSOR_DEFECT_FIX_*` ausente ou processo antigo |
 | `dispatch: skipped` + `webhook_not_configured` | URL vazia |
 | `callback_auth_missing` | Sem `OPS_INVESTIGATOR_CALLBACK_KEY` / `OPS_METRICS_KEY` |
+| Webhook **HTTP 400** | Automação **desabilitada** na UI Cursor (`Automation … is disabled`), URL do Triador, ou key inválida — ver corpo em `dispatch.error` |
 | Automation não roda | Webhook errado (colou URL do Triador) |
 | Callback 401 | Header/key não bate com ops-console |
 | Callback 409 | Transição inválida (ex. `open` sem start-fix) |
-| Defeito `in_fix` sem run | Webhook falhou — **não reverte** `in_fix`; corrigir env e re-disparar manualmente se necessário |
+| `ok: false` e status ainda `open` | Webhook falhou/skipped — **não** entra em `in_fix` (comportamento atual) |
+| Defeito preso em `in_fix` (piloto antigo) | PATCH status → `open` no CH ou re-disparar `start-fix` (só reenvia webhook) |
 
 ---
 

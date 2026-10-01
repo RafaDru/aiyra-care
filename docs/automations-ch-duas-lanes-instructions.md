@@ -8,11 +8,13 @@ Três webhooks Cursor no ops-console / API:
 | Triagem SRE | Aiyra - Triador SRE | `CURSOR_SRE_SUPPORT_*` | Alertas `ops_alert` |
 | **Correção Dev** | **Aiyra - Correção Dev** | **`CURSOR_DEFECT_FIX_*`** | **`POST /api/platform-defects/:id/start-fix`** |
 
-## Instructions completas
+## Instructions completas (colar na UI)
 
-- Triagem Suporte: `docs/ops/automations/support-report-investigator.prompt.md`
-- Triagem SRE: `docs/ops/automations/ops-alert-investigator.prompt.md`
-- **Correção Dev:** [`automations-aiyra-correcao-dev-instructions.md`](./automations-aiyra-correcao-dev-instructions.md)
+Cursor Automations **não preserva markdown** — use só o bloco entre `=== INÍCIO ===` e `=== FIM ===` em cada arquivo:
+
+- Triagem Suporte: [`automations-aiyra-triador-dev-instructions.md`](./automations-aiyra-triador-dev-instructions.md)
+- Triagem SRE: [`automations-aiyra-triador-sre-instructions.md`](./automations-aiyra-triador-sre-instructions.md)
+- Correção Dev: [`automations-aiyra-correcao-dev-instructions.md`](./automations-aiyra-correcao-dev-instructions.md)
 
 Gates Tier 1: `docs/ops/automations/TIER1_GATES.md`
 

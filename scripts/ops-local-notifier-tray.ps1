@@ -466,7 +466,7 @@ function Invoke-LayerControl {
 }
 
 function Open-ObservabilityIssues {
-  $url = "http://127.0.0.1:$opsConsolePort/?tab=issues"
+  $url = "http://127.0.0.1:$opsConsolePort/?group=operacao&tab=incidentes"
   Start-Process $url
 }
 

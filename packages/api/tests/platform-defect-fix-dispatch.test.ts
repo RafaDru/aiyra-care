@@ -3,7 +3,9 @@ import {
   buildPlatformDefectFixDispatchPayload,
   defectFixPlaybookId,
   dispatchPlatformDefectFix,
+  startPlatformDefectFixWithDispatch,
 } from '../src/application/ops/platform-defect-fix-dispatch.js'
+import { PlatformDefectService } from '../src/application/ops/platform-defect.service.js'
 import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.types.js'
 
 const sampleDefect: PlatformDefectRecord = {
@@ -90,5 +92,41 @@ describe('platform-defect-fix-dispatch', () => {
   it('skips when webhook missing', async () => {
     const result = await dispatchPlatformDefectFix(sampleDefect, [])
     expect(result).toEqual({ outcome: 'skipped', reason: 'webhook_not_configured' })
+  })
+
+  it('start-fix stays open when dispatch fails', async () => {
+    const openDefect = { ...sampleDefect, status: 'open' as const, fixStartedAt: null }
+    const startFix = vi.fn()
+    const repo = {
+      findById: vi.fn(async () => openDefect),
+      listLinkedIncidentIds: vi.fn(async () => []),
+    }
+    const service = { startFix } as unknown as PlatformDefectService
+
+    const result = await startPlatformDefectFixWithDispatch(service, repo as never, openDefect.id)
+    expect(result.dispatch.outcome).toBe('skipped')
+    expect(result.item.status).toBe('open')
+    expect(startFix).not.toHaveBeenCalled()
+  })
+
+  it('start-fix transitions to in_fix only after dispatch sent', async () => {
+    process.env.CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL = 'http://127.0.0.1:3099/defect-fix'
+    process.env.CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY = 'crsr_test'
+    process.env.OPS_METRICS_KEY = 'ops-key'
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200 })))
+
+    const openDefect = { ...sampleDefect, status: 'open' as const, fixStartedAt: null }
+    const inFix = { ...openDefect, status: 'in_fix' as const }
+    const startFix = vi.fn(async () => inFix)
+    const repo = {
+      findById: vi.fn(async () => openDefect),
+      listLinkedIncidentIds: vi.fn(async () => []),
+    }
+    const service = { startFix } as unknown as PlatformDefectService
+
+    const result = await startPlatformDefectFixWithDispatch(service, repo as never, openDefect.id)
+    expect(result.dispatch).toEqual({ outcome: 'sent' })
+    expect(startFix).toHaveBeenCalledOnce()
+    expect(result.item.status).toBe('in_fix')
   })
 })

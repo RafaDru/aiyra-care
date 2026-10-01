@@ -6,6 +6,9 @@ Duas automations, responsabilidades distintas, **mesmo par de webhooks** no `.en
 |------|------------------------------|----------------|-------------|---------------|
 | **Suporte ao Desenvolvimento** | `AiCare - Suporte ao Desenvolvimento` | `support_report` | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_*` | Reporte manual no app |
 | **Suporte SRE** | `AiCare - Suporte SRE` | `ops_alert` | `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_*` | Métricas / alertas ops |
+| **Correção Dev** | `Aiyra - Correção Dev` | `defect_fix_v1` | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_*` | `POST /api/platform-defects/:id/start-fix` (CH) |
+
+Índice e blocos **texto plano** para colar na UI (sem markdown): `docs/automations-ch-duas-lanes-instructions.md`.
 
 Ambiente (`integration` \| `preview` \| `production`) vai em `environment.deploymentTier` no JSON — não duplique Automations por ambiente.
 
@@ -14,14 +17,30 @@ Ambiente (`integration` \| `preview` \| `production`) vai em `environment.deploy
 - **Foco:** bug de produto, UX, dado incorreto (triagem código/sync).
 - **Auto:** todo `POST /support/reports`.
 - **Console:** aba Suporte → **Analisar** / **Concluir**.
-- **Playbook:** `docs/ops/automations/support-report-investigator.prompt.md`
+- **Playbook (colar na UI):** `docs/automations-aiyra-triador-dev-instructions.md`
 
 ## Suporte SRE
 
 - **Foco:** infra, sync, LLM, telemetria — runbooks ops.
 - **Auto:** só `infra` + `critical` + pager humano (`OPS_ALERT_INVESTIGATOR_AUTO`).
 - **Console:** alertas derivados → **Analisar** / **Concluir**.
-- **Playbook:** `docs/ops/automations/ops-alert-investigator.prompt.md`
+- **Playbook (colar na UI):** `docs/automations-aiyra-triador-sre-instructions.md`
+
+## Correção Dev
+
+- **Foco:** implementar correção após triagem → defeito `ready_for_pr`.
+- **Disparo:** Command Hub → defeito `open` → **Iniciar correção** (`start-fix`).
+- **Playbook (colar na UI):** `docs/automations-aiyra-correcao-dev-instructions.md` (bloco `=== INÍCIO ===` … `=== FIM ===`).
+- **Saúde:** `GET /api/incident-dispatch/health` → `webhooks.defectFix`.
+- **E2E:** `docs/ops/CORRECAO_DEV_E2E_CHECKLIST.md`.
+
+## Falhas comuns (webhook)
+
+| HTTP / sintoma | Causa provável |
+|----------------|----------------|
+| **400** + `Automation … is disabled` | Automação desabilitada na UI Cursor — reativar ou criar nova e atualizar `CURSOR_DEFECT_FIX_*` + restart `:3010`/`:3013`. |
+| **400** (outro corpo) | URL de outra lane (ex. Triador), key inválida, ou payload rejeitado — conferir `dispatch.error` no CH. |
+| **skipped** `webhook_not_configured` | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL` ausente ou processo antigo. |
 
 ## Renomear na conta Cursor
 

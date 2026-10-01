@@ -8,7 +8,7 @@ import type { PlatformDefectPgRepository } from '../../infrastructure/persistenc
 
 const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
   open: ['in_fix'],
-  in_fix: ['ready_for_pr'],
+  in_fix: ['ready_for_pr', 'open'],
   ready_for_pr: ['fixed'],
   fixed: [],
 }
