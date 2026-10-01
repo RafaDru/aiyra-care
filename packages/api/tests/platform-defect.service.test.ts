@@ -78,8 +78,23 @@ describe('PlatformDefectService', () => {
 
     const svc = new PlatformDefectService(repo)
     await svc.startFix('d1')
-    await svc.transition('d1', 'ready_for_pr', { branchName: 'cursor/fix' })
+    await svc.transition('d1', 'ready_for_pr', {
+      branchName: 'cursor/fix',
+      prUrl: 'https://github.com/RafaDru/aiyra-care/pull/99',
+    })
     expect(status).toBe('ready_for_pr')
+  })
+
+  it('rejects ready_for_pr without GitHub prUrl', async () => {
+    const repo = {
+      findById: vi.fn(async () => defect({ status: 'in_fix' })),
+      updateStatus: vi.fn(),
+    } as unknown as PlatformDefectPgRepository
+    const svc = new PlatformDefectService(repo)
+    await expect(
+      svc.transition('d1', 'ready_for_pr', { branchName: 'cursor/fix' }),
+    ).rejects.toMatchObject({ code: 'pr_url_required' })
+    expect(repo.updateStatus).not.toHaveBeenCalled()
   })
 
   it('dedups createFromTriage by fingerprint', async () => {

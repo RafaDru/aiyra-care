@@ -3,7 +3,7 @@ import {
   resolveDefectFixAutomationWebhookUrl,
 } from '../../domain/ops/cursor-automation-env.js'
 import {
-  isTier1Enabled,
+  isDefectFixTier1Enabled,
   type InvestigationTier,
 } from '../../domain/ops/investigator-tier.js'
 import type { InvestigatorEnvironmentContext } from '../../domain/ops/investigator-environment.js'
@@ -52,7 +52,7 @@ export function resolvePlatformDefectFixWebhookKey(): string | undefined {
 }
 
 export function resolvePlatformDefectFixTier(_defect: PlatformDefectRecord): InvestigationTier {
-  return isTier1Enabled() ? 1 : 0
+  return isDefectFixTier1Enabled() ? 1 : 0
 }
 
 export function defectFixPlaybookId(tier: InvestigationTier): string {

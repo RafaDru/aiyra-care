@@ -82,7 +82,7 @@ curl -sS "$BASE/api/platform-defects/$DEFECT" | python3 -m json.tool
 |---|-----------------|-----|
 | 5.1 | Nova execução **Aiyra - Correção Dev** no painel Cursor | ☐ |
 | 5.2 | Payload com `type: defect_fix_v1`, `defectId`, `callbackUrl`, `callbackAuth` | ☐ |
-| 5.3 | Agente faz `POST` callback com `defectStatus: ready_for_pr` + `remediationSummary` | ☐ |
+| 5.3 | Agente faz `POST` callback com `defectStatus: ready_for_pr` + `remediationSummary` + `prUrl` (GitHub PR) | ☐ |
 | 5.4 | HTTP **2xx** no callback | ☐ |
 
 ### Callback (referência)
@@ -101,7 +101,7 @@ x-investigator-callback-key: {valor do OPS_*}
 }
 ```
 
-Tier 0: `prUrl` pode ser omitido/null.
+`prUrl` é **obrigatório** (PR draft no GitHub). Sem URL válida → callback **400** `pr_url_required`.
 
 ---
 
@@ -121,7 +121,7 @@ print('pr', d.get('prUrl'));
 | `status` | `ready_for_pr` |
 | `fixStartedAt` | preenchido (após start-fix) |
 | `readyForPrAt` | preenchido (após callback) |
-| `branchName` / `prUrl` | conforme Tier 0/1 |
+| `branchName` / `prUrl` | ambos preenchidos; `prUrl` = link GitHub PR |
 
 Incidente ligado permanece **`triaged`** (não reabre).
 
@@ -138,6 +138,7 @@ Incidente ligado permanece **`triaged`** (não reabre).
 | Automation não roda | Webhook errado (colou URL do Triador) |
 | Callback 401 | Header/key não bate com ops-console |
 | Callback 409 | Transição inválida (ex. `open` sem start-fix) |
+| Callback 400 `pr_url_required` | `prUrl` ausente ou não é URL `github.com/.../pull/N` |
 | `ok: false` e status ainda `open` | Webhook falhou/skipped — **não** entra em `in_fix` (comportamento atual) |
 | Defeito preso em `in_fix` (piloto antigo) | PATCH status → `open` no CH ou re-disparar `start-fix` (só reenvia webhook) |
 

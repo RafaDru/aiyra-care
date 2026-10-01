@@ -41,22 +41,20 @@ Proibido: buscar descrições livres de usuário, patientId, dados clínicos, cr
 OBJETIVO
 Corrigir o defeito descrito na triagem e devolver o defeito como pronto para PR (ready_for_pr) via callback.
 
-PASSOS — TIER 0 (default)
+FLUXO OBRIGATÓRIO (operador solo — Tier 0 só-branch está deprecado)
 1. Ler defect.triageArtifactPath e docs/ops/ relacionados.
-2. Reproduzir mentalmente o fluxo no monorepo (packages/api, packages/web, packages/ops-console conforme defect.applications).
+2. Reproduzir o fluxo no monorepo (packages/api, packages/web, packages/ops-console conforme defect.applications).
 3. Implementar correção mínima alinhada ao padrão do repo.
 4. Rodar testes focados (cd packages/api && npx vitest run <arquivo> ou npm run test:critical se tocar ops).
 5. Atualizar ou criar nota em docs/ops/investigations/ se faltar rastreio.
-6. Não abrir PR nem merge em main no Tier 0 — deixar branch local e descrever no callback.
+6. Branch cursor/… (nunca main); push para origin.
+7. Abrir PR draft no GitHub (labels auto-investigator, needs-human-review; tier-1 se investigation.tier === 1).
+8. Callback com prUrl (URL https://github.com/.../pull/N) e branchName — sem prUrl o CH rejeita com 400 pr_url_required.
+Nunca merge em main.
 
 TIER 1 (investigation.tier === 1, playbook defect-fix-tier1)
-Somente se OPS_INVESTIGATOR_TIER1=1 no ambiente que disparou o webhook.
-1. Tudo do Tier 0.
-2. Correção dentro dos gates: docs/ops/automations/TIER1_GATES.md (allowlist, máx. 8 arquivos / 200 linhas).
-3. Branch cursor/… (nunca main).
-4. PR draft com labels auto-investigator, tier-1, needs-human-review.
-5. Callback com prUrl e branchName.
-Nunca merge em main.
+Quando OPS_DEFECT_FIX_TIER1=1 ou OPS_INVESTIGATOR_TIER1=1 no ambiente que disparou o webhook (OPS_DEFECT_FIX_TIER1 prevalece se setado).
+Correção dentro dos gates: docs/ops/automations/TIER1_GATES.md (allowlist, máx. 8 arquivos / 200 linhas).
 
 CALLBACK (obrigatório ao finalizar)
 POST em callbackUrl com header callbackAuth.header = callbackAuth.value.
@@ -72,8 +70,8 @@ Corpo JSON (substitua placeholders):
 
 - defectStatus: use ready_for_pr quando a correção estiver pronta para revisão humana / lote PR.
 - remediationSummary: obrigatório; comece com a mesma tag [defect:xxxxxxxx] do payload.
-- Tier 0: omita prUrl ou envie null; inclua branchName se criou branch local.
-- Tier 1: prUrl obrigatório (PR draft).
+- prUrl: obrigatório (PR draft GitHub). Callback sem prUrl válido → HTTP 400 { "error": "pr_url_required" }.
+- branchName: obrigatório quando houver branch remota.
 
 Isso atualiza o defeito no Command Hub (in_fix → ready_for_pr).
 
@@ -93,6 +91,7 @@ No `.env` do monorepo (mesmo bloco das lanes de triagem):
 - `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL` — URL do webhook desta Automation
 - `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY` — token crsr_…
 - `OPS_INVESTIGATOR_CALLBACK_KEY` ou `OPS_METRICS_KEY` — callbackAuth no payload
+- `OPS_DEFECT_FIX_TIER1` — força Tier 1 na lane correção (prevalece sobre `OPS_INVESTIGATOR_TIER1` quando setado); `0` desliga Tier 1 mesmo com investigator Tier 1
 
 Saúde das lanes: `GET /api/incident-dispatch/health` no ops-console (`webhooks.defectFix`).
 
