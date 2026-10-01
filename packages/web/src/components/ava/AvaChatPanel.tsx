@@ -157,8 +157,8 @@ export function AvaChatPanel({
         })))
       })
       .catch(() => {
+        // Falha transitória de sync não deve apagar bolhas já renderizadas (ex.: corrida pós-turno no CI).
         if (conversationIdRef.current !== id) return
-        setMessages([])
       })
   }, [])
 
