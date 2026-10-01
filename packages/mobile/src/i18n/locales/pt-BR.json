@@ -205,6 +205,31 @@
     "biometricUnlock": "Desbloqueio biométrico",
     "biometricUnlockHint": "Ao voltar ao app, pede Face ID ou digital."
   },
+  "quickCapture": {
+    "trigger": "Registro rápido",
+    "triggerA11y": "Abrir registro rápido",
+    "title": "Registro rápido",
+    "patientLabel": "Quem ver hoje",
+    "typeLabel": "Tipo",
+    "noPatients": "Nenhum perfil disponível",
+    "pickPatient": "Selecione quem ver hoje",
+    "saved": "Registro salvo",
+    "save": "Salvar",
+    "error": "Não foi possível salvar",
+    "comingSoon": "Este tipo de registro chega na próxima versão do app.",
+    "threadRequired": "Selecione um acompanhamento ou deixe apenas um ativo",
+    "defaultThreadTitle": "Registro do dia a dia",
+    "noteLabel": "Sintoma ou nota",
+    "noteRequired": "Descreva o que aconteceu",
+    "notePlaceholder": "Ex.: febre 38,5°C, vômito após almoço…",
+    "kind": {
+      "note": "Nota",
+      "measurement": "Sinais vitais",
+      "medication": "Medicação",
+      "agenda": "Agenda",
+      "document": "Documento"
+    }
+  },
   "common": {
     "cancel": "Cancelar",
     "delete": "Excluir",
@@ -216,6 +241,8 @@
     "accelerator": "Pergunte à Ava",
     "acceleratorExam": "O que significa este exame no contexto do histórico de saúde?",
     "acceleratorMarker": "O que significa este marcador e como interpretar a evolução?",
+    "acceleratorAuthorization": "O que preciso saber sobre esta autorização ({{title}}) e quais são os próximos passos?",
+    "acceleratorRecord": "Como este registro ({{title}}) se encaixa no histórico clínico e o que devo observar?",
     "openChat": "Abrir chat da Ava",
     "messagePlaceholder": "Mensagem para a Ava…",
     "send": "Enviar",

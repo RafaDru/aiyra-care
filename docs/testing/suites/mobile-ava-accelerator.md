@@ -15,7 +15,8 @@
 |---|------|----------|
 | 1 | Clínico → **Exames** → item → **Pergunte à Ava** | Dock abre; mensagem enviada com `entityPin` exam |
 | 2 | Exames → **Marcadores** → marcador ativo → acelerador | Pin `exam_marker`; resposta sem 5xx |
-| 3 | Após resposta, chips de **sessão** (pins) visíveis se API retornar contexto | Labels de pin |
+| 3 | Clínico → **Autorizações** ou **Prontuários** → acelerador | Dock abre; mensagem contextual (sem `entityPin` até API) |
+| 4 | Após resposta, chips de **sessão** (pins) visíveis se API retornar contexto | Labels de pin |
 
 ## Não avaliar
 

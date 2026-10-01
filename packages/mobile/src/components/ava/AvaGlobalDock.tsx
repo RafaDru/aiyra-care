@@ -8,6 +8,7 @@ import { AvaPatientLensPicker } from './AvaPatientLensPicker'
 import type { AvaOpenRequest } from '@/lib/ava-entity-pin'
 import { subscribeAvaOpen } from '@/lib/ava-dock-bus'
 import { useAvaPatientLens } from '@/hooks/useAvaPatientLens'
+import { DUAL_ENTRY_FAB_BOTTOM_OFFSET } from '@/lib/dual-entry-layout'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 /** Presença global da Ava: FAB + modal de chat com lente de paciente (paridade G1/G4 web). */
@@ -77,7 +78,7 @@ export function AvaGlobalDock() {
           styles.fab,
           {
             backgroundColor: tokens.colorPrimary,
-            bottom: Math.max(insets.bottom, 16) + 56,
+            bottom: Math.max(insets.bottom, 16) + DUAL_ENTRY_FAB_BOTTOM_OFFSET,
             right: 16,
             shadowColor: '#000',
           },

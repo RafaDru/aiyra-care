@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { AvaAcceleratorButton } from '@/components/ava/AvaAcceleratorButton'
 import { MaskedField } from '@/components/form/MaskedField'
 import { SectionCard } from '@/components/family/SectionCard'
 import { StatePanel } from '@/components/StatePanel'
@@ -259,6 +260,13 @@ export function PatientMedicalRecordsTab({ patientId }: Props) {
                       {amount ? <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>{amount}</Text> : null}
                     </View>
                     <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>{t('clinical.records.tapToEdit')}</Text>
+                    <AvaAcceleratorButton
+                      patientId={patientId}
+                      initialMessage={t('ava.acceleratorRecord', {
+                        title: formatRecordType(row.recordType),
+                      })}
+                      compact
+                    />
                   </Pressable>
                 )
               })}

@@ -505,6 +505,22 @@ export const api = {
     delete: (id: string) =>
       request<void>(`/scheduled-events/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   },
+  healthThreads: {
+    list: (patientId: string, activeOnly = true) =>
+      request<import('./api.types.js').HealthThread[]>(
+        `/health-threads?patientId=${encodeURIComponent(patientId)}${activeOnly ? '&activeOnly=true' : ''}`,
+      ),
+    create: (data: { patientId: string; kind: string; title: string }) =>
+      request<import('./api.types.js').HealthThread>('/health-threads', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    addEntry: (id: string, body: string) =>
+      request(`/health-threads/${encodeURIComponent(id)}/entries`, {
+        method: 'POST',
+        body: JSON.stringify({ body }),
+      }),
+  },
   ava: {
     listConversations: (patientId?: string) => {
       const qs = patientId ? `?patientId=${encodeURIComponent(patientId)}` : ''

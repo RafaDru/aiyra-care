@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { AvaAcceleratorButton } from '@/components/ava/AvaAcceleratorButton'
 import { SectionCard } from '@/components/family/SectionCard'
 import { StatePanel } from '@/components/StatePanel'
 import { api } from '@/lib/api'
@@ -111,6 +112,11 @@ export function PatientAuthorizationsTab({ patientId }: Props) {
                   <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>
                     {t('clinical.source', { source: formatRecordSource(row.source) })}
                   </Text>
+                  <AvaAcceleratorButton
+                    patientId={patientId}
+                    initialMessage={t('ava.acceleratorAuthorization', { title })}
+                    compact
+                  />
                 </View>
               )
             })}

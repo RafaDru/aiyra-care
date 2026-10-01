@@ -70,6 +70,13 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 ## Marco M5 (Ava companion)
 
 - FAB **`AvaGlobalDock`**, chat SSE, lente de paciente — ver `docs/AVA_OPERATIONAL.md`
+- Aceleradores G1 em exames, marcadores, autorizações e prontuários (mensagem contextual; `entityPin` quando BFF suportar tipos além de exame/marcador)
+
+## Dual entry (Ava + Registro rápido)
+
+- **Spec UX (Project store):** `docs/mobile-dual-entry-ux-spec.md` — padrão **dual FAB** (registro inferior esquerdo, Ava inferior direito), alinhado ao web (`QuickCaptureGlobal` no header + orb Ava).
+- **Fundação:** `QuickCaptureGlobal` + `QuickCaptureSheet` — MVP **nota** via `healthThreads`; demais kinds em rollout.
+- **Bus:** `packages/mobile/src/lib/quick-capture-bus.ts`
 
 ## Marco M6 (integrações / sync — sem Playwright)
 

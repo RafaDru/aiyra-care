@@ -1,6 +1,7 @@
 import { Redirect, Stack } from 'expo-router'
 import { ActivityIndicator, View } from 'react-native'
 import { AvaGlobalDock } from '@/components/ava/AvaGlobalDock'
+import { QuickCaptureGlobal } from '@/components/quick-capture/QuickCaptureGlobal'
 import { RequireComplianceGate } from '@/components/auth/RequireComplianceGate'
 import { useRequiresBiometricUnlock } from '@/contexts/AppLockContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -37,6 +38,7 @@ export default function AppShellLayout() {
           <Stack.Screen name="compliance/accept" options={{ title: 'Termos e privacidade', headerBackVisible: false }} />
           <Stack.Screen name="onboarding" options={{ title: 'Complete seu cadastro', headerBackVisible: false }} />
         </Stack>
+        <QuickCaptureGlobal />
         <AvaGlobalDock />
       </View>
     </RequireComplianceGate>

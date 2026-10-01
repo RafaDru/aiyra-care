@@ -122,6 +122,16 @@ export interface AvaProposedAction {
   payload: Record<string, unknown>
 }
 
+export interface HealthThread {
+  id: string
+  patientId: string
+  kind: string
+  title: string
+  status: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface AvaConversation {
   id: string
   accountId: string
