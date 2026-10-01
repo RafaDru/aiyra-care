@@ -158,6 +158,10 @@ export async function startPlatformDefectFixWithDispatch(
   }
 
   if (defect.status === 'in_fix') {
+    if (dispatch.outcome === 'sent') {
+      const refreshed = await repo.markFixDispatchSent(defectId)
+      return { item: refreshed ?? defect, dispatch }
+    }
     return { item: defect, dispatch }
   }
 

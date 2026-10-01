@@ -20,6 +20,7 @@ export type IncidentDispatchHealth = {
 
 export interface OpsAnalysisQueueItem {
   id: string
+  referenceCode: string | null
   sourceType: 'support_report' | 'ops_alert'
   sourceId: string
   lane: 'development_support' | 'sre_support'
@@ -64,6 +65,7 @@ export interface DefectPrBatchItem {
 
 export interface PlatformDefectItem {
   id: string
+  referenceCode: string | null
   title: string
   status: PlatformDefectStatus
   fingerprint: string | null
@@ -77,6 +79,7 @@ export interface PlatformDefectItem {
   prBatchId: string | null
   firstSeenAt: string
   fixStartedAt: string | null
+  lastFixDispatchSentAt: string | null
   readyForPrAt: string | null
   fixedAt: string | null
   createdAt: string

@@ -4,6 +4,7 @@ export type PlatformDefectIncidentLinkedBy = 'agent_triage' | 'ops_manual' | 'sy
 
 export interface PlatformDefectRecord {
   id: string
+  referenceCode: string | null
   title: string
   status: PlatformDefectStatus
   fingerprint: string | null
@@ -17,6 +18,7 @@ export interface PlatformDefectRecord {
   prBatchId: string | null
   firstSeenAt: string
   fixStartedAt: string | null
+  lastFixDispatchSentAt: string | null
   readyForPrAt: string | null
   fixedAt: string | null
   createdAt: string

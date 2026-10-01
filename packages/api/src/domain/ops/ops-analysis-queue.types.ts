@@ -20,6 +20,7 @@ export type IncidentPipelineStatus =
 
 export interface OpsAnalysisQueueRecord {
   id: string
+  referenceCode: string | null
   sourceType: AnalysisQueueSourceType
   sourceId: string
   lane: AnalysisQueueLane

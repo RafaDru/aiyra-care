@@ -10,6 +10,7 @@ import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.typ
 
 const sampleDefect: PlatformDefectRecord = {
   id: '0e672818-72ec-4ef7-918e-312db34bbeb5',
+  referenceCode: 'DEF-000001',
   title: 'Sync silent skip',
   status: 'in_fix',
   fingerprint: 'fp-abc',
@@ -23,6 +24,7 @@ const sampleDefect: PlatformDefectRecord = {
   prBatchId: null,
   firstSeenAt: '2026-09-28T12:00:00.000Z',
   fixStartedAt: '2026-09-28T13:00:00.000Z',
+  lastFixDispatchSentAt: '2026-09-28T13:00:00.000Z',
   readyForPrAt: null,
   fixedAt: null,
   createdAt: '2026-09-28T11:00:00.000Z',
@@ -128,5 +130,29 @@ describe('platform-defect-fix-dispatch', () => {
     expect(result.dispatch).toEqual({ outcome: 'sent' })
     expect(startFix).toHaveBeenCalledOnce()
     expect(result.item.status).toBe('in_fix')
+  })
+
+  it('in_fix retries dispatch and refreshes last_fix_dispatch_sent_at', async () => {
+    process.env.CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL = 'http://127.0.0.1:3099/defect-fix'
+    process.env.CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY = 'crsr_test'
+    process.env.OPS_METRICS_KEY = 'ops-key'
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200 })))
+
+    const refreshed = {
+      ...sampleDefect,
+      lastFixDispatchSentAt: '2026-09-28T14:00:00.000Z',
+    }
+    const repo = {
+      findById: vi.fn(async () => sampleDefect),
+      listLinkedIncidentIds: vi.fn(async () => []),
+      markFixDispatchSent: vi.fn(async () => refreshed),
+    }
+    const service = { startFix: vi.fn() } as unknown as PlatformDefectService
+
+    const result = await startPlatformDefectFixWithDispatch(service, repo as never, sampleDefect.id)
+    expect(result.dispatch).toEqual({ outcome: 'sent' })
+    expect(repo.markFixDispatchSent).toHaveBeenCalledOnce()
+    expect(service.startFix).not.toHaveBeenCalled()
+    expect(result.item.lastFixDispatchSentAt).toBe(refreshed.lastFixDispatchSentAt)
   })
 })

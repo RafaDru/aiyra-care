@@ -8,10 +8,12 @@ import type {
   OpsAnalysisAttentionCounts,
   OpsAnalysisQueueRecord,
 } from '../../domain/ops/ops-analysis-queue.types.js'
+import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
 
 function mapRow(row: Record<string, unknown>): OpsAnalysisQueueRecord {
   return {
     id: String(row.id),
+    referenceCode: row.reference_code != null ? String(row.reference_code) : null,
     sourceType: row.source_type as AnalysisQueueSourceType,
     sourceId: String(row.source_id),
     lane: row.lane as AnalysisQueueLane,
@@ -55,11 +57,12 @@ export class OpsAnalysisQueuePgRepository {
   constructor(private readonly pool: Pool) {}
 
   async upsertQueued(input: UpsertQueueInput): Promise<OpsAnalysisQueueRecord> {
+    const referenceCode = await allocateOpsReferenceCode(this.pool, 'incident')
     const res = await this.pool.query(
       `INSERT INTO ops_analysis_queue (
-        source_type, source_id, lane, deployment_tier, title, error_summary,
+        reference_code, source_type, source_id, lane, deployment_tier, title, error_summary,
         context_snapshot, operator_notes, investigation_trigger, priority, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, 'queued')
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, 'queued')
       ON CONFLICT (source_type, source_id, deployment_tier) DO UPDATE SET
         lane = EXCLUDED.lane,
         title = EXCLUDED.title,
@@ -77,6 +80,7 @@ export class OpsAnalysisQueuePgRepository {
         updated_at = NOW()
       RETURNING *`,
       [
+        referenceCode,
         input.sourceType,
         input.sourceId,
         input.lane,

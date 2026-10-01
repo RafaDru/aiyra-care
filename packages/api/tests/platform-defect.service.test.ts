@@ -9,6 +9,7 @@ import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.typ
 function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRecord {
   return {
     id: 'd1',
+    referenceCode: 'DEF-000099',
     title: 'Bug',
     status: 'open',
     fingerprint: null,
@@ -22,6 +23,7 @@ function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRe
     prBatchId: null,
     firstSeenAt: new Date().toISOString(),
     fixStartedAt: null,
+    lastFixDispatchSentAt: null,
     readyForPrAt: null,
     fixedAt: null,
     createdAt: new Date().toISOString(),
@@ -31,6 +33,17 @@ function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRe
 }
 
 describe('PlatformDefectService', () => {
+  it('rejects PATCH transition directly to in_fix', async () => {
+    const repo = {
+      findById: vi.fn(async () => defect({ status: 'open' })),
+      updateStatus: vi.fn(),
+    } as unknown as PlatformDefectPgRepository
+    const svc = new PlatformDefectService(repo)
+    await expect(svc.transition('d1', 'in_fix')).rejects.toMatchObject({
+      code: 'invalid_transition',
+    })
+  })
+
   it('rejects illegal status transition with 409 code', async () => {
     const repo = {
       findById: vi.fn(async () => defect({ status: 'open' })),
@@ -48,10 +61,19 @@ describe('PlatformDefectService', () => {
     let status: PlatformDefectRecord['status'] = 'open'
     const repo = {
       findById: vi.fn(async () => defect({ status })),
-      updateStatus: vi.fn(async (_id: string, next: PlatformDefectRecord['status']) => {
-        status = next
-        return defect({ status })
-      }),
+      updateStatus: vi.fn(
+        async (
+          _id: string,
+          next: PlatformDefectRecord['status'],
+          meta?: { markFixDispatchSent?: boolean },
+        ) => {
+          status = next
+          return defect({
+            status,
+            lastFixDispatchSentAt: meta?.markFixDispatchSent ? new Date().toISOString() : null,
+          })
+        },
+      ),
     } as unknown as PlatformDefectPgRepository
 
     const svc = new PlatformDefectService(repo)
