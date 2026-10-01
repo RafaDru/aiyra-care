@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-30",
+  "updatedAt": "2026-10-01",
   "title": "Roadmap AiyraCare",
   "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Fase atual (pré-CNPJ):** estruturar ambientes dev/staging/prod, massas e esteiras enquanto a regularização fiscal permite cobrança live; paralelo: discovery B2B (médicos, planos, labs, farmácias). **Go-live B2C:** código pronto no essencial; pendências com badge 🧑‍⚖️ dependem de revisão humana (advogado, contador, consultor, médico).",
   "reviewBadges": [
@@ -2313,6 +2313,47 @@
           "title": "Canal ops produção + worker heartbeat + Stripe alert",
           "status": "done",
           "detail": "setup:ops-prod; worker_stale + stripe_webhook_failures; test:ops + ops:smoke no CI; docs/ops/RUNBOOK_ALERTS.md."
+        }
+      ]
+    },
+    {
+      "id": "ch-solo-operator-journey",
+      "category": "tecnico",
+      "priority": "P1",
+      "title": "CH — Jornada operador solo (INC/DEF → merge)",
+      "summary": "Ponta a ponta da detecção ao Corrigido: gates G0–G4, falhas visíveis, review agêntico sob demanda (G3), merge só com aprovação humana. Spec: docs/ops/CH_SOLO_OPERATOR_JOURNEY_SPEC.md; runbook: docs/ops/SOLO_OPERATOR_RUNBOOK.md.",
+      "status": "in_progress",
+      "statusLabel": "R0 docs entregue — R1–R4 planejadas",
+      "items": [
+        {
+          "id": "ch-solo-operator-r0",
+          "title": "R0 — Runbook + checklist pós-ready_for_pr",
+          "status": "done",
+          "detail": "SOLO_OPERATOR_RUNBOOK.md; CH_SOLO_OPERATOR_JOURNEY_SPEC.md; CORRECAO_DEV_E2E_CHECKLIST §6; links em CH_INCIDENT_DEFECT_PIPELINE.md."
+        },
+        {
+          "id": "ch-solo-operator-r1",
+          "title": "R1 — Falha estruturada na correção",
+          "status": "planned",
+          "detail": "Callback correction_failed + failureDetails; CH expand; transição in_fix→open."
+        },
+        {
+          "id": "ch-solo-operator-r2",
+          "title": "R2 — PR + CI acoplados ao defeito",
+          "status": "planned",
+          "detail": "pipeline_status via GitHub; CI failed→in_fix com payload enriquecido; botão Criar PR Tier 0 opcional."
+        },
+        {
+          "id": "ch-solo-operator-r3",
+          "title": "R3 — Review agêntico sob demanda (G3)",
+          "status": "planned",
+          "detail": "CURSOR_DEFECT_REVIEW_*; POST request-review; callback reviewOutcome; override aprovar sem review."
+        },
+        {
+          "id": "ch-solo-operator-r4",
+          "title": "R4 — Esteira final (merge → fixed)",
+          "status": "planned",
+          "detail": "Webhook pull_request merged ou confirmação manual; métricas tempo por fase INC/DEF."
         }
       ]
     },

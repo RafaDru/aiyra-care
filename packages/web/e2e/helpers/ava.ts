@@ -25,7 +25,7 @@ function avaComposerRoot(page: Page) {
 }
 
 function avaAssistantBubbleBodies(page: Page) {
-  return page.locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
+  return page.getByTestId('ava-assistant-bubble').locator('.ava-chat-bubble__body')
 }
 
 function avaComposerInput(page: Page) {
@@ -97,14 +97,11 @@ export async function openAvaDock(page: Page) {
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
 export async function startFreshAvaConversation(page: Page) {
   await expect(async () => {
-    const avaRows = page.locator('.ava-chat-bubble-row--ava')
-    const count = await avaRows.count()
-    if (count > 0) {
-      const btn = page.getByRole('button', { name: AVA_NEW_CONVERSATION })
-      if (await btn.isVisible().catch(() => false)) {
-        await btn.click()
-      }
+    const btn = page.getByRole('button', { name: AVA_NEW_CONVERSATION })
+    if (await btn.isVisible().catch(() => false)) {
+      await btn.click()
     }
+    const avaRows = page.getByTestId('ava-assistant-bubble')
     expect(await avaRows.count()).toBe(0)
   }).toPass({ timeout: 30_000 })
   await waitAvaComposerReady(page)
@@ -155,23 +152,31 @@ export async function submitAvaMessage(page: Page, text: string) {
     (r) => isAvaChatPostUrl(r.method(), r.url()),
     { timeout: 45_000 },
   )
+  const chatFinished = page.waitForResponse(
+    (r) => isAvaChatPostUrl(r.request().method(), r.url()) && r.ok(),
+    { timeout: 90_000 },
+  )
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
 
   await chatStarted
+  await chatFinished
   await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout: 90_000 })
   await waitAvaComposerReady(page)
 }
 
 export async function sendAvaMessage(page: Page, text: string) {
   await submitAvaMessage(page, text)
-  await waitForAvaAssistantReply(page, /.{8,}/, 90_000)
+  const replyPattern = process.env.CI
+    ? /Resposta de teste Ava|companheira de cuidado|saúde na família|exames|vacina|não há/i
+    : /.{8,}/
+  await waitForAvaAssistantReply(page, replyPattern, 90_000)
   await waitAvaComposerReady(page)
 }
 
 export async function waitForAvaAssistantBubble(page: Page, timeout = 45_000) {
-  const bubble = page.locator('.ava-chat-bubble-row--ava').last()
+  const bubble = page.getByTestId('ava-assistant-bubble').last()
   await bubble.waitFor({ state: 'visible', timeout })
   return bubble
 }

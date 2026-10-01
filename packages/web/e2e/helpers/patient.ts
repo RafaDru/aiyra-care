@@ -14,8 +14,7 @@ export type CreatePatientInput = {
 
 async function fillMaskedDate(page: Page, label: string, value: string) {
   const input = page.getByLabel(label, { exact: false })
-  await input.click()
-  await input.fill(value)
+  await input.fill(value, { force: true })
   await input.press('Tab')
 }
 
@@ -24,6 +23,9 @@ const newPatientDialog = (page: Page) =>
 
 export async function openNewPatientModal(page: Page) {
   await dismissFirstVisitTour(page)
+  await hideAvaDock(page)
+  await page.keyboard.press('Escape')
+  await page.locator('.ant-drawer-mask').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => undefined)
   await dashboardAddFamilyButton(page).click({ force: true })
   await newPatientDialog(page).waitFor({ state: 'visible' })
 }
