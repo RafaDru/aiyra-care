@@ -3,7 +3,6 @@ import { dismissFirstVisitTour } from './ui'
 
 const AVA_FAB_LABEL = /Abrir conversa com Ava|Open chat with Ava/i
 const AVA_COMPOSER_PLACEHOLDER = /febre|fever|Ex\.:|E\.g\./i
-const AVA_SEND_LABEL = /Enviar|Send/
 const AVA_NEW_CONVERSATION = /^(Nova conversa|New conversation)$/
 
 function isAvaChatPostUrl(method: string, url: string) {
@@ -37,11 +36,13 @@ function avaSendButton(page: Page) {
   return avaComposerRoot(page).locator('.ava-chat-panel__composer-actions button.ant-btn-primary')
 }
 
-async function waitForAvaChatPostComplete(page: Page, timeout = 90_000) {
-  await page.waitForResponse(
-    (r) => isAvaChatPostUrl(r.request().method(), r.url()) && r.ok(),
-    { timeout },
-  )
+async function ensureAvaSharingOptIn(page: Page) {
+  const box = avaComposerRoot(page).getByRole('checkbox').first()
+  if (await box.isVisible().catch(() => false)) {
+    if (!(await box.isChecked().catch(() => false))) {
+      await box.check()
+    }
+  }
 }
 
 async function waitAvaComposerReady(page: Page, timeout = 90_000) {
@@ -146,15 +147,20 @@ export async function waitForAvaAssistantReply(
 
 export async function submitAvaMessage(page: Page, text: string) {
   await waitAvaComposerReady(page)
+  await ensureAvaSharingOptIn(page)
 
   const input = avaComposerInput(page)
   const send = avaSendButton(page)
-  const chatComplete = waitForAvaChatPostComplete(page)
+  const chatStarted = page.waitForRequest(
+    (r) => isAvaChatPostUrl(r.method(), r.url()),
+    { timeout: 45_000 },
+  )
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
 
-  await chatComplete
+  await chatStarted
+  await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout: 90_000 })
   await waitAvaComposerReady(page)
 }
 
