@@ -57,9 +57,20 @@ describe('platform-defect-fix-dispatch', () => {
       value: 'callback-secret',
     })
     expect(built.playbook).toBe(defectFixPlaybookId(0))
-    expect(built.text).toBe('[defect:0e672818] Correção: Sync silent skip')
+    expect(built.defect.referenceCode).toBe('DEF-000001')
+    expect(built.text).toBe('DEF-000001 · [defect:0e672818] Correção: Sync silent skip')
     expect(built.environment.deploymentTier).toBe('integration')
     expect(JSON.stringify(built)).not.toContain('patient')
+  })
+
+  it('omits referenceCode prefix in text when null', () => {
+    process.env.OPS_INVESTIGATOR_CALLBACK_KEY = 'callback-secret'
+    const noRef = { ...sampleDefect, referenceCode: null }
+    const built = buildPlatformDefectFixDispatchPayload(noRef, [])
+    expect('error' in built).toBe(false)
+    if ('error' in built) return
+    expect(built.defect.referenceCode).toBeNull()
+    expect(built.text).toBe('[defect:0e672818] Correção: Sync silent skip')
   })
 
   it('uses tier1 playbook when OPS_INVESTIGATOR_TIER1=1', () => {

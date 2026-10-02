@@ -30,3 +30,16 @@ export function formatBatchWindowHours(intervalMs: number): string {
   const hours = Math.max(1, Math.round(intervalMs / 3_600_000))
   return `${hours}h`
 }
+
+/** Tag curta alinhada ao payload defect_fix_v1 (`text` / PR). */
+export function defectShortTag(defectId: string): string {
+  return `[defect:${defectId.slice(0, 8)}]`
+}
+
+export function formatDefectRefLine(item: {
+  id: string
+  referenceCode: string | null
+}): string {
+  const tag = defectShortTag(item.id)
+  return item.referenceCode ? `${item.referenceCode} · ${tag}` : tag
+}
