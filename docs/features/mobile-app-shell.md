@@ -114,7 +114,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 - `POST /telemetry/client-errors` com JWT — `packages/mobile/src/lib/client-errors.ts` (API/network, `ui_boundary`, auth pós-login)
 - `AppErrorBoundary` + toast em falhas 5xx/rede (`service-failure-notify.ts`)
-- Command Hub → Produto → Mobile — feature `mobile_shell` / `settings`
+- Erros de auth pós-login visíveis em telemetria produto (`client_errors`) — painel CH quando catalogado
 
 ## Pendente
 
