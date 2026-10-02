@@ -56,6 +56,14 @@ export class PlatformDefectService {
     return this.repo.findByIdWithIncidents(id)
   }
 
+  findByReferenceCode(referenceCode: string): Promise<PlatformDefectRecord | null> {
+    return this.repo.findByReferenceCode(referenceCode)
+  }
+
+  searchForOps(query: string, limit = 50): Promise<PlatformDefectRecord[]> {
+    return this.repo.searchForOps(query, limit)
+  }
+
   async createFromTriage(
     input: CreatePlatformDefectInput,
     incidentId: string,

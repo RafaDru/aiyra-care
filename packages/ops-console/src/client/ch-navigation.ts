@@ -211,8 +211,12 @@ export function readNavFromUrl(): { group: ChGroupId; tab: ChTabKey } {
   const tabParam = params.get('tab')
   const groupParam = normalizeChGroupId(params.get('group'))
 
-  if (params.get('investigationId')) {
+  if (params.get('investigationId') || params.get('incidentRef')) {
     return { group: 'operacao', tab: 'incidentes' }
+  }
+
+  if (params.get('defectRef') || params.get('defectId')) {
+    return { group: 'operacao', tab: 'defeitos' }
   }
 
   const normalizedTab = normalizeChTabKey(tabParam)

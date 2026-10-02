@@ -65,9 +65,12 @@ export function OpsMetricsDashboard({
   const [issueAttention, setIssueAttention] = useState(0)
   const [defectOpenCount, setDefectOpenCount] = useState(0)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const highlightInvestigationId = useMemo(
-    () => new URLSearchParams(window.location.search).get('investigationId'),
-    [],
+  const urlSearch = useMemo(() => new URLSearchParams(window.location.search), [])
+  const [highlightInvestigationId, setHighlightInvestigationId] = useState<string | null>(
+    () => urlSearch.get('investigationId'),
+  )
+  const [highlightDefectId, setHighlightDefectId] = useState<string | null>(
+    () => urlSearch.get('defectId'),
   )
 
   const [strategySection, setStrategySection] = useState<StrategySectionId>(resolveInitialStrategySection)
@@ -120,13 +123,39 @@ export function OpsMetricsDashboard({
   }, [data])
 
   useEffect(() => {
-    if (highlightInvestigationId) {
+    const incidentRef = urlSearch.get('incidentRef')
+    if (incidentRef && !highlightInvestigationId) {
+      void opsApi
+        .analysisQueueByRef(incidentRef)
+        .then(({ item }) => setHighlightInvestigationId(item.id))
+        .catch(() => undefined)
+    }
+    const defectRef = urlSearch.get('defectRef')
+    if (defectRef && !highlightDefectId) {
+      void opsApi
+        .platformDefectByRef(defectRef)
+        .then(({ item }) => setHighlightDefectId(item.id))
+        .catch(() => undefined)
+    }
+  }, [urlSearch, highlightInvestigationId, highlightDefectId])
+
+  useEffect(() => {
+    if (highlightInvestigationId || urlSearch.get('incidentRef')) {
       setGroupId('operacao')
       setActiveTab('incidentes')
       persistNav('operacao', 'incidentes')
       writeNavToUrl('operacao', 'incidentes')
     }
-  }, [highlightInvestigationId])
+  }, [highlightInvestigationId, urlSearch])
+
+  useEffect(() => {
+    if (highlightDefectId || urlSearch.get('defectRef')) {
+      setGroupId('operacao')
+      setActiveTab('defeitos')
+      persistNav('operacao', 'defeitos')
+      writeNavToUrl('operacao', 'defeitos')
+    }
+  }, [highlightDefectId, urlSearch])
 
   const tabCounts = useMemo((): Partial<Record<ChTabKey, number>> => ({
     overview: data.alerts.filter((a) => a.severity === 'critical').length,
@@ -204,7 +233,9 @@ export function OpsMetricsDashboard({
           />
         )
       case 'defeitos':
-        return <DefeitosPanel onRefresh={onRefresh} />
+        return (
+          <DefeitosPanel onRefresh={onRefresh} highlightDefectId={highlightDefectId} />
+        )
       case 'produto':
         return <ProdutoLifecyclePanel />
       case 'product':

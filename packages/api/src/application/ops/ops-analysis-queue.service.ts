@@ -364,6 +364,28 @@ export class OpsAnalysisQueueService {
     return this.repo.listOpen(limit)
   }
 
+  async listForIncidentBoard(
+    filter: import('../../domain/ops/incident-list-filter.js').IncidentBoardFilter,
+    options?: { limit?: number; ensureId?: string },
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const limit = options?.limit ?? 100
+    const records = await this.repo.listForIncidentBoard(filter, limit)
+    const ensureId = options?.ensureId?.trim()
+    if (!ensureId) return records
+    if (records.some((r) => r.id === ensureId)) return records
+    const extra = await this.repo.findById(ensureId)
+    if (!extra) return records
+    return [extra, ...records].slice(0, limit)
+  }
+
+  findByReferenceCode(referenceCode: string): Promise<OpsAnalysisQueueRecord | null> {
+    return this.repo.findByReferenceCode(referenceCode)
+  }
+
+  searchForIncidentBoard(query: string, limit = 50): Promise<OpsAnalysisQueueRecord[]> {
+    return this.repo.searchForIncidentBoard(query, limit)
+  }
+
   attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
     return this.repo.attentionCounts(deploymentTier)
   }

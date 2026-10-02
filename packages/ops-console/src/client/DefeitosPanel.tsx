@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button,
   Card,
@@ -26,6 +26,7 @@ import {
 import { OpsPanel } from './components/OpsPanel.js'
 import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
 import { opsApi } from './api.js'
+import { matchesPlatformDefectItem, parseOpsSearchInput } from './ch-ops-search.js'
 import type { PlatformDefectItem, PlatformDefectStatus } from './ops.types.js'
 
 const { Text, Paragraph, Link } = Typography
@@ -46,11 +47,19 @@ function buildIncidentDeepLink(incidentId: string): string {
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`
 }
 
-export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
+export function DefeitosPanel({
+  onRefresh,
+  highlightDefectId,
+}: {
+  onRefresh?: () => void
+  highlightDefectId?: string | null
+}) {
   const [items, setItems] = useState<PlatformDefectItem[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<PlatformDefectStatus | 'all'>('all')
+  const [searchText, setSearchText] = useState('')
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
+  const highlightRef = useRef<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [batchConfig, setBatchConfig] = useState<{
     intervalMs: number
@@ -82,6 +91,70 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (!highlightDefectId) return
+    setExpandedRowKeys((prev) =>
+      prev.includes(highlightDefectId) ? prev : [...prev, highlightDefectId],
+    )
+    void opsApi
+      .platformDefectDetail(highlightDefectId)
+      .then((d) => {
+        setItems((prev) => {
+          if (prev.some((x) => x.id === d.defect.id)) return prev
+          return [d.defect, ...prev]
+        })
+      })
+      .catch(() => undefined)
+  }, [highlightDefectId])
+
+  useEffect(() => {
+    if (!highlightDefectId || loading) return
+    if (highlightRef.current === highlightDefectId) return
+    const row = document.querySelector(`[data-defect-row-id="${highlightDefectId}"]`)
+    if (row) {
+      highlightRef.current = highlightDefectId
+      row.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }
+  }, [highlightDefectId, loading, items])
+
+  const parsedSearch = useMemo(() => parseOpsSearchInput(searchText), [searchText])
+  const visibleItems = useMemo(() => {
+    if (!parsedSearch) return items
+    return items.filter((item) => matchesPlatformDefectItem(item, parsedSearch))
+  }, [items, parsedSearch])
+
+  const runSearch = async (raw: string) => {
+    const parsed = parseOpsSearchInput(raw)
+    if (!parsed) {
+      setSearchText('')
+      return
+    }
+    setSearchText(raw)
+    if (parsed.kind === 'defect_ref') {
+      try {
+        const { item } = await opsApi.platformDefectByRef(parsed.value)
+        setStatusFilter('all')
+        setItems([item])
+        setExpandedRowKeys([item.id])
+      } catch (err) {
+        message.warning(err instanceof Error ? err.message : 'Defeito não encontrado')
+      }
+      return
+    }
+    try {
+      const { items: found } = await opsApi.platformDefects({ q: parsed.value })
+      if (found.length === 0) {
+        message.info('Nenhum defeito encontrado')
+        return
+      }
+      setStatusFilter('all')
+      setItems(found)
+      if (found.length === 1) setExpandedRowKeys([found[0].id])
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Busca falhou')
+    }
+  }
 
   const readyCount = useMemo(() => defectReadyForPrCount(items), [items])
   const displayReady = batchConfig?.readyCount ?? readyCount
@@ -196,6 +269,15 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
         </Space>
       </Card>
 
+      <Input.Search
+        allowClear
+        placeholder="DEF-000001, título ou prefixo do UUID"
+        style={{ maxWidth: 420, marginBottom: 12 }}
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        onSearch={(v) => void runSearch(v)}
+      />
+
       <Space wrap style={{ marginBottom: 12 }}>
         {FILTER_STATUSES.map((s) => (
           <Button
@@ -209,7 +291,7 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
         ))}
       </Space>
 
-      {items.length === 0 && !loading ? (
+      {visibleItems.length === 0 && !loading ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum defeito neste filtro" />
       ) : (
         <Table<PlatformDefectItem>
@@ -217,7 +299,11 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
           rowKey="id"
           loading={loading}
           pagination={false}
-          dataSource={items}
+          dataSource={visibleItems}
+          onRow={(row) => ({ 'data-defect-row-id': row.id })}
+          rowClassName={(row) =>
+            highlightDefectId && row.id === highlightDefectId ? 'ops-row-highlight' : ''
+          }
           expandable={{
             expandedRowKeys,
             onExpandedRowsChange: (keys) => setExpandedRowKeys(keys.map(String)),

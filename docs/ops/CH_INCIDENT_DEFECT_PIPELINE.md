@@ -246,7 +246,7 @@ Ver também [`docs/CURSOR_WORKSPACE.md`](../CURSOR_WORKSPACE.md) § worktree CH.
 
 - `cd packages/api && npx vitest run platform-defect incident-dispatch-outbox incident-dispatch-reconcile incident-pipeline-status incident-dispatch-display incident-dispatch-health`
 - `npm run test:ops` (regressão)
-- Suite futura: `docs/testing/suites/ops-ch-defeitos.md`
+- Suite QA: [`docs/testing/suites/ops-ch-defeitos.md`](../testing/suites/ops-ch-defeitos.md) — `npm run qa:run -- --suite ops-ch-defeitos`
 
 ---
 

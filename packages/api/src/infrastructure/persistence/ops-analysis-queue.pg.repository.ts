@@ -8,6 +8,11 @@ import type {
   OpsAnalysisAttentionCounts,
   OpsAnalysisQueueRecord,
 } from '../../domain/ops/ops-analysis-queue.types.js'
+import {
+  incidentBoardWhereClause,
+  type IncidentBoardFilter,
+  normalizeIncidentReferenceCode,
+} from '../../domain/ops/incident-list-filter.js'
 import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
 
 function mapRow(row: Record<string, unknown>): OpsAnalysisQueueRecord {
@@ -242,10 +247,17 @@ export class OpsAnalysisQueuePgRepository {
   }
 
   async listOpen(limit = 100): Promise<OpsAnalysisQueueRecord[]> {
+    return this.listForIncidentBoard('needs_attention', limit)
+  }
+
+  async listForIncidentBoard(
+    filter: IncidentBoardFilter,
+    limit = 100,
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const where = incidentBoardWhereClause(filter)
     const res = await this.pool.query(
       `SELECT * FROM ops_analysis_queue
-       WHERE status NOT IN ('completed', 'dismissed')
-         AND incident_pipeline_status NOT IN ('triaged', 'dismissed')
+       WHERE ${where}
        ORDER BY
          CASE priority
            WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3
@@ -253,6 +265,48 @@ export class OpsAnalysisQueuePgRepository {
          updated_at DESC
        LIMIT $1`,
       [limit],
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
+  async findByReferenceCode(referenceCode: string): Promise<OpsAnalysisQueueRecord | null> {
+    const normalized = normalizeIncidentReferenceCode(referenceCode)
+    if (!normalized) return null
+    const res = await this.pool.query(
+      `SELECT * FROM ops_analysis_queue WHERE reference_code = $1 LIMIT 1`,
+      [normalized],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async searchForIncidentBoard(
+    query: string,
+    limit = 50,
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const trimmed = query.trim()
+    if (!trimmed) return []
+    const ref = normalizeIncidentReferenceCode(trimmed)
+    if (ref) {
+      const one = await this.findByReferenceCode(ref)
+      return one ? [one] : []
+    }
+    const params: unknown[] = []
+    let where = ''
+    if (/^[0-9a-f-]{8,36}$/i.test(trimmed)) {
+      params.push(`${trimmed.toLowerCase()}%`)
+      where = `id::text LIKE $1`
+    } else {
+      params.push(`%${trimmed.slice(0, 200)}%`)
+      where = `title ILIKE $1`
+    }
+    params.push(limit)
+    const res = await this.pool.query(
+      `SELECT * FROM ops_analysis_queue
+       WHERE ${where}
+       ORDER BY updated_at DESC
+       LIMIT $2`,
+      params,
     )
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
