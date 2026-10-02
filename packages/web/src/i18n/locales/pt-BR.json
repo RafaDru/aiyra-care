@@ -163,6 +163,7 @@
       "profile": "Seu perfil",
       "dependents": "Sua família"
     },
+    "stepsAria": "Etapas do cadastro inicial",
     "name": "Nome completo",
     "nameRequired": "Informe seu nome",
     "birthDate": "Data de nascimento",

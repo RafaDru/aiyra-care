@@ -163,6 +163,7 @@
       "profile": "Your profile",
       "dependents": "Your family"
     },
+    "stepsAria": "Onboarding wizard steps",
     "name": "Full name",
     "nameRequired": "Enter your name",
     "birthDate": "Date of birth",
