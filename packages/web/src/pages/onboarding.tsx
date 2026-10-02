@@ -48,6 +48,12 @@ export function OnboardingPage() {
     trackProductEvent('onboarding_step', { step: 'step_1_viewed' })
   }, [])
 
+  useEffect(() => {
+    if (!needsProfile && readOnboardingWizardStep() === 1 && currentStep === 0) {
+      setCurrentStep(1)
+    }
+  }, [needsProfile, currentStep])
+
   if (!configured) return <Navigate to="/" replace />
 
   if (loading) {
@@ -61,7 +67,11 @@ export function OnboardingPage() {
   }
 
   // Após completeProfile, needsProfile fica false mas o passo de dependentes ainda deve aparecer.
-  if (!needsProfile && currentStep === 0) return <Navigate to="/" replace />
+  // sessionStorage é gravado antes do refreshSync — evita corrida em que needsProfile atualiza antes do setState do passo 2.
+  const wizardOnDependentsStep = readOnboardingWizardStep() === 1
+  if (!needsProfile && currentStep === 0 && !wizardOnDependentsStep) {
+    return <Navigate to="/" replace />
+  }
 
   const goToDependentsStep = () => {
     sessionStorage.setItem(ONBOARDING_WIZARD_STEP_KEY, '1')
@@ -138,6 +148,8 @@ export function OnboardingPage() {
         current={currentStep}
         style={{ marginBottom: 24 }}
         responsive
+        aria-label={t('onboarding.stepsAria')}
+        data-testid="onboarding-wizard-steps"
         items={[
           { title: t('onboarding.steps.profile') },
           { title: t('onboarding.steps.dependents') },
@@ -204,7 +216,7 @@ export function OnboardingPage() {
             </Form>
           </>
         ) : (
-          <>
+          <div data-testid="onboarding-step-dependents">
             <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.dependentsTitle')}</Title>
             <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.dependentsSubtitle')}</Text>
 
@@ -262,7 +274,7 @@ export function OnboardingPage() {
                 {t('onboarding.skipDependents')}
               </Button>
             </Space>
-          </>
+          </div>
         )}
       </Card>
     </OnboardingLayout>

@@ -19,6 +19,8 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 3. **Onboarding passo 1:** perfil titular (CPF obrigatório; CNS opcional)
 4. **Onboarding passo 2:** adicionar dependentes via `POST /patients` ou pular
 
+**Nota (passo 2):** após `POST /auth/complete-profile`, o wizard permanece em `/onboarding` até «Pular» ou «Ir para o início». O passo ativo persiste em `sessionStorage` (`aiyracare.onboarding_wizard_step`) para não redirecionar ao dashboard antes do passo de família (corrida com `refreshSync` / `needsProfile`).
+
 ## Telemetria
 
 `onboarding_step` — `step_1_viewed`, `profile_complete`, `step_2_viewed`, `dependent_added`, `dependents_skipped`, `dependents_complete`

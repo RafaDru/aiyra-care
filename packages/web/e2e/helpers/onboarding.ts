@@ -59,15 +59,7 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
     throw new Error(`complete-profile HTTP ${saveResponse.status()}: ${body.slice(0, 240)}`)
   }
 
-  const leftOnboarding = await page
-    .waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 18_000 })
-    .then(() => true)
-    .catch(() => false)
-  if (!leftOnboarding) {
-    await page
-      .getByRole('heading', { name: /Quem você acompanha|Who do you care/i })
-      .waitFor({ timeout: 35_000 })
-    await page.getByRole('button', { name: /Pular por agora|Skip for now/i }).click()
-    await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 25_000 })
-  }
+  await page.getByTestId('onboarding-step-dependents').waitFor({ state: 'visible', timeout: 25_000 })
+  await page.getByRole('button', { name: /Pular por agora|Skip for now/i }).click()
+  await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 25_000 })
 }
