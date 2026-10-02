@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-16",
+  "updatedAt": "2026-10-02",
   "description": "Catálogo de suites QA — CRUD de negócio via UI. Ver docs/testing/BUSINESS_ACTION_MATRIX.md",
   "suites": [
     {
@@ -299,6 +299,18 @@
       "coverage": "partial",
       "automation": { "status": "partial", "spec": "packages/api/scripts/ops-smoke.ts" },
       "estimatedMinutes": 10
+    },
+    {
+      "id": "ops-ch-defeitos",
+      "domain": "ops",
+      "title": "CH — defeitos, incidentes, deep link e busca",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "ops-local",
+      "doc": "docs/testing/suites/ops-ch-defeitos.md",
+      "coverage": "partial",
+      "automation": { "status": "partial", "spec": "packages/api/tests/incident-list-filter.test.ts" },
+      "estimatedMinutes": 15
     }
   ],
   "lanes": {

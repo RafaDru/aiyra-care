@@ -5,6 +5,7 @@ import type {
   PlatformDefectRecord,
   PlatformDefectStatus,
 } from '../../domain/ops/platform-defect.types.js'
+import { normalizeDefectReferenceCode } from '../../domain/ops/incident-list-filter.js'
 import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
 
 function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
@@ -78,6 +79,47 @@ export class PlatformDefectPgRepository {
     const res = await this.pool.query(`SELECT * FROM platform_defects WHERE id = $1::uuid`, [id])
     if (!res.rows[0]) return null
     return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async findByReferenceCode(referenceCode: string): Promise<PlatformDefectRecord | null> {
+    const normalized = normalizeDefectReferenceCode(referenceCode)
+    if (!normalized) return null
+    const res = await this.pool.query(
+      `SELECT * FROM platform_defects WHERE reference_code = $1 LIMIT 1`,
+      [normalized],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async searchForOps(query: string, limit = 50): Promise<PlatformDefectRecord[]> {
+    const trimmed = query.trim()
+    if (!trimmed) return []
+    const ref = normalizeDefectReferenceCode(trimmed)
+    if (ref) {
+      const one = await this.findByReferenceCode(ref)
+      return one ? [one] : []
+    }
+    const params: unknown[] = []
+    let where = ''
+    if (/^[0-9a-f-]{8,36}$/i.test(trimmed)) {
+      params.push(`${trimmed.toLowerCase()}%`)
+      where = `d.id::text LIKE $1`
+    } else {
+      params.push(`%${trimmed.slice(0, 200)}%`)
+      where = `d.title ILIKE $1`
+    }
+    params.push(limit)
+    const res = await this.pool.query(
+      `SELECT d.*,
+        (SELECT COUNT(*)::int FROM platform_defect_incidents i WHERE i.defect_id = d.id) AS incident_count
+       FROM platform_defects d
+       WHERE ${where}
+       ORDER BY d.updated_at DESC
+       LIMIT $2`,
+      params,
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
   async findByIdWithIncidents(
