@@ -1,0 +1,11 @@
+---
+description: RTK — quando comprimir saída de shell e quando preservar integral
+alwaysApply: true
+---
+
+# RTK (token compression)
+
+- O hook `pre-tool-shell-rtk` reescreve comandos **Shell** para `rtk …` salvo bypass — ver `docs/CURSOR_RTK.md`.
+- **Nunca** interpretar falha de QA/E2E/build só com saída RTK: esses comandos já estão no bypass; se ainda comprimir, use `AIYRA_NO_RTK=1`.
+- Em debug de causa raiz (teste flake, CI, migração), preferir saída integral (`AIYRA_NO_RTK=1`) antes de concluir fix.
+- Cloud: se `rtk` ausente, hook é no-op — rodar `bash scripts/install-rtk.sh` quando quiser economia de tokens.

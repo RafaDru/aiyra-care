@@ -11,6 +11,7 @@
     "agent:pediatria": "cd packages/agents/pediatria && python -m uvicorn main:app --reload",
     "agent:integracao": "cd packages/agents/integracao && python -m uvicorn main:app --reload",
     "agent:farmaceutico": "cd packages/agents/farmaceutico && python -m uvicorn main:app --reload",
+    "rtk:install": "bash scripts/install-rtk.sh",
     "lint": "echo 'linting'",
     "test": "echo 'tests'",
     "connect-worker": "cd packages/connect-worker && npm run start",
