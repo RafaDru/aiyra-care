@@ -108,3 +108,22 @@ export function reportUiBoundaryError(componentName: string, errorName: string):
     properties: { component: componentName.slice(0, 64) },
   }).catch(() => undefined)
 }
+
+/** Account/settings flows — stable `account_settings` feature for CH bridge pilot. */
+export function reportAccountSettingsFailure(
+  apiPath: string,
+  statusOrCode: number | string,
+  options?: { route?: string },
+): void {
+  const errorCode =
+    typeof statusOrCode === 'number' && statusOrCode > 0
+      ? `HTTP_${statusOrCode}`
+      : sanitizeErrorCode(String(statusOrCode))
+  void reportClientError({
+    feature: 'account_settings',
+    errorKind: 'api',
+    errorCode,
+    apiPath,
+    route: options?.route,
+  }).catch(() => undefined)
+}

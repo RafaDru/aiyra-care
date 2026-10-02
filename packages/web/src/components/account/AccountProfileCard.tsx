@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import { api } from '../../lib/api.js'
+import { reportAccountSettingsFailure } from '../../lib/client-errors.js'
 import type { AccountProfileView, UpdateAccountProfileInput } from '../../lib/api.types.js'
 import { MaskedDatePicker } from '../ui/MaskedDatePicker.js'
 
@@ -125,7 +126,12 @@ export function AccountProfileCard() {
         setEmail(profile.email)
         form.setFieldsValue(viewToForm(profile))
       })
-      .catch(() => message.error(t('accountProfile.loadError')))
+      .catch(() => {
+        reportAccountSettingsFailure('/auth/profile', 'profile_load_failed', {
+          route: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        })
+        message.error(t('accountProfile.loadError'))
+      })
       .finally(() => setLoading(false))
   }, [form, message, t])
 
@@ -138,6 +144,9 @@ export function AccountProfileCard() {
       message.success(t('accountProfile.saveOk'))
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
+      reportAccountSettingsFailure('/auth/profile', 'profile_save_failed', {
+        route: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      })
       message.error(err instanceof Error ? err.message : t('accountProfile.saveError'))
     } finally {
       setSaving(false)

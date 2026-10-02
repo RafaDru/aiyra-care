@@ -88,5 +88,6 @@ Chamados alimentam incidentes `INC-*` no Command Hub. Ciclo completo até corre�
 - [`docs/ops/SUPPORT_REPORTS.md`](../ops/SUPPORT_REPORTS.md) — runbook ops (sessão **Aiyra: Ops**)
 - [`docs/ops/CH_INCIDENT_DEFECT_PIPELINE.md`](../ops/CH_INCIDENT_DEFECT_PIPELINE.md) — pipeline INC/DEF
 - [`docs/ops/TELEMETRY.md`](../ops/TELEMETRY.md)
+- [`docs/ops/CLIENT_ERROR_INCIDENT_BRIDGE.md`](../ops/CLIENT_ERROR_INCIDENT_BRIDGE.md) — auto-INC a partir de `client_errors` (piloto)
 - [`docs/OPERATION_MODEL.md`](../OPERATION_MODEL.md) Fase 3–5
 - `docs/roadmap.json` → `run-support-user-reports`, `ch-solo-operator-journey`

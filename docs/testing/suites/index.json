@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-16",
+  "updatedAt": "2026-10-02",
   "description": "Catálogo de suites QA — CRUD de negócio via UI. Ver docs/testing/BUSINESS_ACTION_MATRIX.md",
   "suites": [
     {
@@ -287,6 +287,21 @@
       "businessActions": ["health_thread.investigation_create"],
       "automation": { "status": "done", "spec": "packages/web/e2e/suites/patient-health-thread.spec.ts" },
       "estimatedMinutes": 5
+    },
+    {
+      "id": "client-error-ch-bridge",
+      "domain": "ops",
+      "title": "Client errors → CH incident bridge",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/client-error-ch-bridge.md",
+      "coverage": "done",
+      "automation": {
+        "status": "done",
+        "spec": "packages/api/tests/client-error-incident-bridge.service.test.ts"
+      },
+      "estimatedMinutes": 10
     },
     {
       "id": "ops-health",
