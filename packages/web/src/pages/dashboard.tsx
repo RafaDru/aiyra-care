@@ -15,6 +15,7 @@ import { DayToDayDiscoveryHub } from '../components/dashboard/DayToDayDiscoveryH
 import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
 import { useAuth } from '../contexts/AuthContext.js'
 import { useActiveCareCircle } from '../contexts/ActiveCareCircleContext.js'
+import { reportApiClientError } from '../lib/client-errors.js'
 
 const { Title, Text } = Typography
 
@@ -59,7 +60,9 @@ export function Dashboard() {
       .catch((err) => {
         setPatients([])
         setCircleGroups([])
-        setLoadError(err instanceof Error ? err.message : t('patient.loadListFailed'))
+        const message = err instanceof Error ? err.message : t('patient.loadListFailed')
+        reportApiClientError('/patients', 0, { route: '/', message })
+        setLoadError(message)
       })
   }
   useEffect(() => {
