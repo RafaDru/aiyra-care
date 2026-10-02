@@ -44,7 +44,15 @@ OpenCode MCP já aponta ao projeto: `~/.config/opencode/opencode.json` → `proj
    - Authorized redirect URI: `https://lyljosprzmtapkocmxxa.supabase.co/auth/v1/callback`
 3. **Supabase** → Authentication → URL Configuration
    - Site URL: `http://localhost:5173` (dev)
-   - Redirect URLs: `http://localhost:5173/**`, `http://127.0.0.1:5173/**`
+   - Redirect URLs (web): `http://localhost:5173/**`, `http://127.0.0.1:5173/**`
+   - Redirect URLs (**mobile / Expo Go** — obrigatório para Google OAuth no app):
+     - `exp://**` (LAN / tunnel do Metro)
+     - `aiyracare://**` e `aiyracare://auth/callback` (dev build / deep link)
+   - LAN dev: `http://<IP-LAN>:5173/**` e `http://<IP-LAN>:5173/mobile-oauth-return`
+   - Sem allow list **e** sem `redirectTo` LAN no app, o Supabase ignora o mobile e cai no **Site URL** (`localhost:5173` no celular).
+   - **Site URL** no projeto cloud deve ser **LAN** no teste físico (`http://<IP>:5173`), não `localhost` — senão o celular abre `localhost:5173` no fallback. Script: `node scripts/patch-supabase-auth-redirect-urls.mjs` (atualiza `site_url` + allow list).
+   - App Expo Go: padrão **bridge** `http://<LAN>:5173/mobile-oauth-return` (Custom Tabs). A página repassa hash/query para `exp://<LAN>:8081/--/auth/callback` (Expo Go). `exp://` direto com `EXPO_PUBLIC_OAUTH_USE_EXP_REDIRECT=1`. `VITE_MOBILE_LAN_IP` no `.env` raiz se o celular cair em `localhost:5173` na bridge.
+   - Script (com PAT): `SUPABASE_ACCESS_TOKEN=sbp_... node scripts/patch-supabase-auth-redirect-urls.mjs`
 
 ### Erro: `Unsupported provider: provider is not enabled`
 

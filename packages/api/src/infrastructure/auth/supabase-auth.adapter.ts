@@ -19,7 +19,7 @@ export class SupabaseAuthAdapter implements AuthProviderPort, AuthIdentityDeleti
     const displayName =
       (meta?.full_name as string | undefined)
       ?? (meta?.name as string | undefined)
-      ?? user.email
+      ?? null
     const avatarUrl = (meta?.avatar_url as string | undefined) ?? (meta?.picture as string | undefined)
     return {
       id: user.id,

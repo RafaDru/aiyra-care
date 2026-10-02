@@ -4,10 +4,70 @@ export interface Patient {
   birthDate: string
   gender: 'male' | 'female' | null
   bloodType: string | null
+  cpf?: string | null
+  cns?: string | null
+  weightKg?: number | null
+  heightCm?: number | null
   ageCategory: 'children' | 'adolescents' | 'adults'
   isSelf?: boolean
+  membershipRole?: 'self' | 'guardian' | string
   createdAt: string
   updatedAt: string
+}
+
+export type PatientDocumentType =
+  | 'prescription'
+  | 'exam'
+  | 'report'
+  | 'vaccine_card'
+  | 'other'
+  | 'certidao_nascimento'
+  | 'rg'
+  | 'cpf_card'
+  | 'cnh'
+
+export interface PatientDocument {
+  id: string
+  patientId: string
+  documentType: PatientDocumentType
+  originalFilename: string
+  fileSizeBytes: number | null
+  mimeType: string | null
+  createdAt: string
+}
+
+export interface PatientAccessGrant {
+  id: string
+  accountId: string
+  accessLevel: string
+  membershipRole: string
+  email?: string | null
+  displayName?: string | null
+}
+
+export interface InsurancePlan {
+  id: string
+  operator: string
+  operatorName: string | null
+  planName: string
+  productCode: string | null
+  networkName: string | null
+}
+
+export interface PlanMembership {
+  id: string
+  patientId: string
+  insurancePlanId: string
+  integrationLinkId: string | null
+  memberNumber: string | null
+  role: string
+  status: string
+  source: string
+  lastSyncedAt: string | null
+}
+
+export interface PlanMembershipWithPlan extends PlanMembership {
+  plan: InsurancePlan | null
 }
 
 export type LlmQuotaStatus = 'ok' | 'warn' | 'exhausted'
@@ -62,6 +122,16 @@ export interface AvaProposedAction {
   payload: Record<string, unknown>
 }
 
+export interface HealthThread {
+  id: string
+  patientId: string
+  kind: string
+  title: string
+  status: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface AvaConversation {
   id: string
   accountId: string
@@ -70,6 +140,29 @@ export interface AvaConversation {
   title: string | null
   status: 'active' | 'archived'
   lastActivityAt: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AvaMessage {
+  id: string
+  conversationId: string
+  role: 'user' | 'assistant'
+  content: string
+  documentId: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface AvaSessionPin {
+  id: string
+  conversationId: string
+  entityType: 'exam' | 'exam_order' | 'exam_result_item' | 'exam_marker'
+  entityId: string
+  patientId: string
+  label: string | null
+  source: 'user' | 'accelerator' | 'auto' | 'inferred'
+  active: boolean
   createdAt: string
   updatedAt: string
 }
@@ -108,6 +201,42 @@ export interface AuthSyncResponse {
   account: AppAccount
   isNew: boolean
   needsProfile: boolean
+}
+
+export interface CompleteProfileInput {
+  name: string
+  birthDate: string
+  gender: 'male' | 'female'
+  cpf: string
+  cns?: string
+  weightKg?: number
+  heightCm?: number
+}
+
+export type ScheduledEventKind = 'appointment' | 'reminder' | 'task'
+export type ScheduledEventStatus = 'planned' | 'done' | 'cancelled'
+
+export interface ScheduledEvent {
+  id: string
+  patientId: string
+  title: string
+  description: string | null
+  scheduledAt: string
+  endAt: string | null
+  kind: ScheduledEventKind
+  status: ScheduledEventStatus
+  source: string
+  sourceLabel: string | null
+}
+
+export interface CreatePatientInput {
+  name: string
+  birthDate: string
+  gender?: 'male' | 'female'
+  cpf?: string
+  cns?: string
+  weightKg?: number
+  heightCm?: number
 }
 
 export type LegalDocumentKind = 'terms_of_use' | 'privacy_policy' | 'cookie_policy' | 'minor_guardian_consent'
@@ -189,6 +318,183 @@ export interface CareCircleDetail extends CareCircleSummary {
 export interface OwnedPatient {
   id: string
   name: string
+}
+
+export interface MeasurementChartPoint {
+  id?: string
+  observedAt: string
+  value: number | null
+  valueSecondary: number | null
+  notes: string | null
+  healthThreadId: string | null
+  source?: string
+  sourceRef?: string | null
+}
+
+export interface MeasurementChartSeries {
+  typeCode: string
+  labelKey: string
+  category: string
+  unit: string | null
+  valueKind: string
+  chartConfig: {
+    enabled?: boolean
+    chartKind?: 'line' | 'area' | 'dual-line' | 'dual-axis'
+    color?: string
+    components?: { code: string; color?: string }[]
+  }
+  normalRange: { min?: number; max?: number; criticalLow?: number; criticalHigh?: number } | null
+  points: MeasurementChartPoint[]
+}
+
+export interface WhoGrowthPayload {
+  typeCode: 'weight' | 'height' | 'head_circumference'
+  unit: string
+  gender: 'male' | 'female'
+  percentilesAvailable: true
+  patientPoints: Array<{
+    ageMonths: number
+    value: number
+    observedAt: string
+    percentile: number | null
+    observationId?: string
+  }>
+  referenceCurve: Array<{ ageMonths: number; p3: number; p50: number; p97: number }>
+}
+
+export interface MarkerTrendPoint {
+  collectedAt: string
+  numericValue: number | null
+  displayValue: string
+  unit: string | null
+  status: string
+  examId: string
+}
+
+export interface MarkerTrendGroup {
+  markerName: string
+  technicalName?: string
+  unit?: string
+  referenceRange?: string
+  refLow?: number
+  refHigh?: number
+  latestValue: string
+  latestStatus: string
+  latestCollectedAt: string
+  points: MarkerTrendPoint[]
+}
+
+export interface Exam {
+  id: string
+  patientId: string
+  medicalRecordId: string | null
+  examOrderId: string | null
+  examType: string
+  examDate: string
+  resultSummary: string | null
+  resultFileUrl: string | null
+  laboratory: string | null
+  notes: string | null
+  source: string
+  createdAt: string
+}
+
+export interface Medication {
+  id: string
+  patientId: string
+  medicalRecordId: string | null
+  genericName: string
+  brandName: string | null
+  dosage: string | null
+  frequency: string | null
+  route: string | null
+  duration: string | null
+  startDate: string | null
+  startedAt: string | null
+  endDate: string | null
+  endDateIsProjected: boolean
+  prescribingDoctor: string | null
+  notes: string | null
+  isActive: boolean
+  createdAt: string
+}
+
+export interface Allergy {
+  id: string
+  patientId: string
+  allergen: string
+  reaction: string | null
+  severity: string | null
+  diagnosedDate: string | null
+  notes: string | null
+  createdAt: string
+}
+
+export interface Diagnosis {
+  id: string
+  patientId: string
+  medicalRecordId: string | null
+  diagnosisCode: string | null
+  diagnosisName: string
+  description: string | null
+  isChronic: boolean
+  diagnosedDate: string | null
+  status: string | null
+  createdAt: string
+}
+
+export interface Authorization {
+  id: string
+  patientId: string
+  procedureCode: string | null
+  procedureDescription: string | null
+  doctorName: string | null
+  clinicName: string | null
+  authorizationDate: string | null
+  validityDate: string | null
+  status: string
+  guideNumber: string | null
+  solicitationNumber: string | null
+  specialty: string | null
+  classification: string | null
+  source: string
+  notes: string | null
+}
+
+export interface MedicalRecord {
+  id: string
+  patientId: string
+  recordDate: string
+  recordType: string
+  description: string | null
+  doctorName: string | null
+  doctorCrm: string | null
+  specialty: string | null
+  clinicName: string | null
+  notes: string | null
+  source: string
+  invoiceNumber: string | null
+  chargedAmount: number | null
+  copartCompanyAmount: number | null
+  copartBaseAmount: number | null
+  providerExternalId: string | null
+  procedureExternalId: string | null
+  createdAt: string
+}
+
+export interface Vaccine {
+  id: string
+  patientId: string
+  vaccineName: string
+  doseNumber: number | null
+  batchNumber: string | null
+  applicationDate: string
+  nextDoseDate: string | null
+  appliedBy: string | null
+  clinic: string | null
+  notes: string | null
+  source: string
+  createdAt: string
 }
 
 export interface IntegrationLink {

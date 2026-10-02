@@ -2,12 +2,16 @@
   "name": "aiyra-care",
   "version": "0.1.0",
   "private": true,
-  "description": "AiyraCare - Gerenciamento centralizado de hist\u00F3rico m\u00E9dico infantil",
+  "description": "AiyraCare - Gerenciamento centralizado de histórico médico infantil",
   "scripts": {
     "api:dev": "cd packages/api && npm run dev",
     "web:dev": "cd packages/web && npm run dev",
     "mobile:start": "cd packages/mobile && npx expo start",
+    "mobile:lan": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mobile-street-up.ps1 -Mode lan",
+    "mobile:street": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mobile-street-up.ps1 -Mode street",
     "mobile:web": "cd packages/mobile && npm run web",
+    "mobile:check": "cd packages/mobile && npm run typecheck && npx expo export --platform web",
+    "qa:run:mobile": "npm run qa:run -- --suite mobile-shell-smoke",
     "agent:pediatria": "cd packages/agents/pediatria && python -m uvicorn main:app --reload",
     "agent:integracao": "cd packages/agents/integracao && python -m uvicorn main:app --reload",
     "agent:farmaceutico": "cd packages/agents/farmaceutico && python -m uvicorn main:app --reload",
@@ -85,6 +89,7 @@
     "caddy:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1",
     "caddy:local:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/caddy-local.ps1 -Stop",
     "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/env-status.ps1",
+    "preview:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-preview-local.ps1",
     "up:both": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/up-both.ps1",
     "startup:register": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Register",
     "startup:unregister": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Unregister",
@@ -99,5 +104,14 @@
   "workspaces": [
     "packages/*",
     "packages/agents/*"
-  ]
+  ],
+  "overrides": {
+    "expo": "57.0.24",
+    "expo-constants": "57.0.19",
+    "expo-linking": "57.0.10",
+    "expo-modules-core": "57.0.18"
+  },
+  "devDependencies": {
+    "localtunnel": "^2.0.2"
+  }
 }

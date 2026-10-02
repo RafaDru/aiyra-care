@@ -4,6 +4,8 @@ export type AvaEntityPin =
   | { entityType: 'exam_order'; entityId: string }
   | { entityType: 'exam_result_item'; entityId: string }
   | { entityType: 'exam_marker'; markerName: string }
+  | { entityType: 'authorization'; entityId: string }
+  | { entityType: 'medical_record'; entityId: string }
 
 export interface AvaOpenRequest {
   patientId: string

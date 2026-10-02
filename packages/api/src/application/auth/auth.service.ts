@@ -18,6 +18,26 @@ export type CompleteProfileResult = {
   needsProfile: false
 }
 
+function looksLikeEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+}
+
+/** Não deixa o fallback de e-mail do IdP sobrescrever nome definido no onboarding. */
+function mergeAccountDisplayName(
+  existing: string | null,
+  fromProvider: string | null | undefined,
+  email: string | null | undefined,
+): string | null {
+  const provider = fromProvider?.trim() || null
+  const kept = existing?.trim() || null
+  const emailNorm = email?.trim() || null
+  const providerUsable =
+    Boolean(provider) && provider !== emailNorm && !looksLikeEmail(provider ?? '')
+  if (providerUsable) return provider
+  if (kept && kept !== emailNorm && !looksLikeEmail(kept)) return kept
+  return kept ?? provider
+}
+
 export class AuthService {
   constructor(
     private readonly authProvider: AuthProviderPort,
@@ -45,7 +65,11 @@ export class AuthService {
       const updated = AppAccount.restore({
         ...existing.toJSON(),
         email: user.email ?? existing.email,
-        displayName: user.displayName ?? existing.displayName,
+        displayName: mergeAccountDisplayName(
+          existing.displayName,
+          user.displayName,
+          user.email ?? existing.email,
+        ),
         avatarUrl: user.avatarUrl ?? existing.avatarUrl,
         updatedAt: new Date(),
       })
@@ -90,6 +114,16 @@ export class AuthService {
     })
     await this.patients.setOwnerAccountId(patient.id, accountId)
     await this.memberships.ensureMembership(accountId, patient.id, 'self')
+
+    const account = await this.accounts.findById(accountId)
+    if (account) {
+      const withName = AppAccount.restore({
+        ...account.toJSON(),
+        displayName: data.name.trim(),
+        updatedAt: new Date(),
+      })
+      await this.accounts.update(withName)
+    }
 
     if (this.measurements && (data.weightKg != null || data.heightCm != null)) {
       await this.measurements.seedInitialAnthropometry(patient.id, {

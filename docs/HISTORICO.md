@@ -20,6 +20,37 @@
 - [`docs/ops/OPS_MVP_SCOPE.md`](ops/OPS_MVP_SCOPE.md) — escopo ops ativo vs congelado.
 - Atualização: [`docs/ops/README.md`](ops/README.md), [`docs/infra/TWO_ENV_MODEL.md`](infra/TWO_ENV_MODEL.md), [`docs/infra/ENV_PREVIEW.md`](infra/ENV_PREVIEW.md), [`docs/infra/OPS_TWO_ENV_SETUP.md`](infra/OPS_TWO_ENV_SETUP.md).
 
+## [2026-09-21] - Mobile: onboarding família + saudação por nome
+
+### Realizado
+- Onboarding mobile **passo 2** (dependentes), paridade com web; wizard persistido em AsyncStorage até concluir ou pular.
+- Máscaras CPF/data, tag «Você», refs `p_*` na navegação; API não sobrescreve `display_name` com e-mail do Supabase no sync.
+
+## [2026-09-21] - Mobile: correção cadastro + UX auth
+
+### Realizado
+- **Bug cadastro:** após `signUp` sem sessão JWT, o app chamava `api.compliance.accept()` e exibia «Sessão não disponível» — fluxo corrigido (mensagem de confirmação de e-mail).
+- Logo PNG no bundle, aparência (claro/escuro/sistema), teclado em telas auth, mostrar senha, confirmação de senha (web + mobile).
+
+## [2026-09-21] - Mobile: entrega dual 80/20 + paridade Convênios e welcome
+
+### Decisão
+- Capacidades de produto devem ser entregues **web + mobile** no mesmo ciclo, exceto exceções documentadas (sync browser, ops, OAuth Microsoft, etc.) — ver `docs/MOBILE_WEB_DUAL_DELIVERY.md`.
+
+### Realizado
+- Tela **`(auth)/welcome`** (apresentação, Entrar / Criar conta).
+- **`PatientCoverageTab`** — convênios read-only (espelho `CoverageTab` web).
+- Configurações: logo + atalho «Abrir versão web».
+- Feature card `mobile-app-shell`, roadmap `plat-mobile`, suite `mobile-shell-smoke` atualizados.
+
+## [2026-09-20] - Mobile: Carteira, Exames resumo, OAuth Google
+
+### Realizado
+- **Carteira read-only** no app Expo (`PatientWalletTab`) — cartões CNS/convênio via API.
+- **Exames resumo read-only** (`PatientExamsTab`) — lista `GET /exams?patientId=`, pull-to-refresh, link ao web.
+- **Login Google** no mobile (`expo-auth-session` + Supabase OAuth, scheme `aiyracare://auth/callback`).
+- Suite QA **`mobile-shell-smoke`** e scripts `npm run mobile:check` / `qa:run:mobile`.
+
 ## [2026-09-20] - Família: exclusão de perfil só pelo titular (PR #8)
 
 ### Realizado

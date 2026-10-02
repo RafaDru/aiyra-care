@@ -25,9 +25,11 @@ type AuthContextValue = {
   signInWithGoogle: (remember?: boolean) => Promise<void>
   signInWithMicrosoft: (remember?: boolean) => Promise<void>
   signInWithPassword: (email: string, password: string, remember?: boolean) => Promise<void>
-  signUpWithPassword: (email: string, password: string, remember?: boolean) => Promise<void>
+  signUpWithPassword: (email: string, password: string, remember?: boolean) => Promise<SignUpResult>
   signOut: () => Promise<void>
 }
+
+export type SignUpResult = { kind: 'session' } | { kind: 'email_confirmation' }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
@@ -184,8 +186,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!client) throw new Error('Supabase não configurado')
       applyRememberMe(remember)
       setRememberMeState(remember)
-      const { error } = await client.auth.signUp({ email, password })
+      const { data, error } = await client.auth.signUp({ email, password })
       if (error) throw error
+      if (data.session) {
+        setMemoryAccessToken(data.session.access_token)
+        setSession(data.session)
+        return { kind: 'session' }
+      }
+      return { kind: 'email_confirmation' }
     },
     signOut: async () => {
       const client = getSupabase()
