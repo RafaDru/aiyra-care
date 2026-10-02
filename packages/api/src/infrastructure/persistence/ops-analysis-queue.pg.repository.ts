@@ -110,9 +110,18 @@ export class OpsAnalysisQueuePgRepository {
     await this.pool.query(
       `UPDATE ops_analysis_queue SET
         status = 'investigating',
-        incident_pipeline_status = 'in_triage',
         investigation_requested_at = COALESCE(investigation_requested_at, NOW()),
         analysis_last_error = NULL,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id],
+    )
+  }
+
+  async markPipelineInTriage(id: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE ops_analysis_queue SET
+        incident_pipeline_status = 'in_triage',
         updated_at = NOW()
       WHERE id = $1::uuid`,
       [id],
