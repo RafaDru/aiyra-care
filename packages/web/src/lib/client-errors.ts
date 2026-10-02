@@ -12,6 +12,17 @@ const recentKeys = new Map<string, number>()
 const pendingIngest: Promise<void>[] = []
 /** Teto para não bloquear envio de suporte se ingest de telemetria travar (ex. E2E / rede lenta). */
 const AWAIT_PENDING_INGEST_MAX_MS = 2_000
+/** Aborta fetch pendente para liberar pool HTTP (evita fila infinita antes de POST /support/reports). */
+const INGEST_FETCH_TIMEOUT_MS = 4_000
+
+function withIngestTimeout(run: (signal?: AbortSignal) => Promise<unknown>): Promise<void> {
+  if (typeof AbortController === 'undefined') {
+    return Promise.resolve(run()).then(() => undefined, () => undefined)
+  }
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), INGEST_FETCH_TIMEOUT_MS)
+  return run(controller.signal).then(() => undefined, () => undefined).finally(() => clearTimeout(timer))
+}
 
 /** Aguarda telemetria fire-and-forget antes do bundle de suporte (evita race com `client_errors`). */
 export async function awaitPendingClientErrorReports(): Promise<void> {
@@ -73,23 +84,27 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
   if (shouldDedupe(fingerprint)) return
 
   const { api } = await import('./api.js')
-  const ingest = api.telemetry.reportClientErrors({
-    errors: [{
-      fingerprint,
-      feature,
-      errorKind: input.errorKind,
-      errorCode,
-      sessionId: getBrowserSessionId(),
-      route,
-      patientId: input.patientId,
-      properties: {
-        ...(input.apiPath ? { api_path: input.apiPath.split('?')[0].slice(0, 128) } : {}),
-        ...input.properties,
+  const ingest = withIngestTimeout((signal) =>
+    api.telemetry.reportClientErrors(
+      {
+        errors: [{
+          fingerprint,
+          feature,
+          errorKind: input.errorKind,
+          errorCode,
+          sessionId: getBrowserSessionId(),
+          route,
+          patientId: input.patientId,
+          properties: {
+            ...(input.apiPath ? { api_path: input.apiPath.split('?')[0].slice(0, 128) } : {}),
+            ...input.properties,
+          },
+        }],
       },
-    }],
-  }).then(() => undefined, () => undefined)
+      signal ? { signal } : undefined,
+    ),
+  )
   pendingIngest.push(ingest)
-  await ingest
 }
 
 export function reportApiClientError(

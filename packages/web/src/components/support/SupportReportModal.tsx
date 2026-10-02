@@ -3,6 +3,7 @@ import { Modal, Form, Select, Input, Checkbox, Alert, Typography, message } from
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { api } from '../../lib/api.js'
+import { awaitPendingClientErrorReports } from '../../lib/client-errors.js'
 import {
   buildSupportClientContext,
   getBrowserSessionId,
@@ -11,6 +12,13 @@ import {
 import type { SupportReportCategory } from '../../lib/api.types.js'
 
 const { Text, Link } = Typography
+
+type SupportReportFormValues = {
+  category: SupportReportCategory
+  description?: string
+  consentTechnical: boolean
+  consentProfileAccess: boolean
+}
 
 interface SupportReportModalProps {
   open: boolean
@@ -21,19 +29,12 @@ export function SupportReportModal({ open, onClose }: SupportReportModalProps) {
   const { t } = useTranslation()
   const location = useLocation()
   const [submitting, setSubmitting] = useState(false)
-  const [form] = Form.useForm<{
-    category: SupportReportCategory
-    description?: string
-    consentTechnical: boolean
-    consentProfileAccess: boolean
-  }>()
+  const [form] = Form.useForm<SupportReportFormValues>()
 
-  const handleSubmit = async () => {
+  const handleFinish = async (values: SupportReportFormValues) => {
+    setSubmitting(true)
     try {
-      const values = await form.validateFields()
-      setSubmitting(true)
       if (values.consentTechnical) {
-        const { awaitPendingClientErrorReports } = await import('../../lib/client-errors.js')
         await awaitPendingClientErrorReports()
       }
       const patientId = inferPatientIdFromRoute(location.pathname)
@@ -53,8 +54,7 @@ export function SupportReportModal({ open, onClose }: SupportReportModalProps) {
       message.success(t('support.reportSuccess', { id: result.id.slice(0, 8) }))
       form.resetFields()
       onClose()
-    } catch (err) {
-      if (err && typeof err === 'object' && 'errorFields' in err) throw err
+    } catch {
       message.error(t('support.reportError'))
     } finally {
       setSubmitting(false)
@@ -66,7 +66,7 @@ export function SupportReportModal({ open, onClose }: SupportReportModalProps) {
       title={t('support.reportTitle')}
       open={open}
       onCancel={onClose}
-      onOk={() => handleSubmit()}
+      onOk={() => form.submit()}
       okText={t('support.reportSubmit')}
       cancelText={t('common.cancel')}
       confirmLoading={submitting}
@@ -87,6 +87,7 @@ export function SupportReportModal({ open, onClose }: SupportReportModalProps) {
           consentTechnical: true,
           consentProfileAccess: false,
         }}
+        onFinish={(values) => void handleFinish(values)}
       >
         <Form.Item
           name="category"
