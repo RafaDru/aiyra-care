@@ -34,6 +34,11 @@ import { DefectPrBatchPgRepository } from '../../api/src/infrastructure/persiste
 import { createIncidentDispatchService } from '../../api/src/application/ops/incident-dispatch.service.js'
 import { getIncidentDispatchHealth } from '../../api/src/application/ops/incident-dispatch-health.js'
 import { DefectPrBatchService } from '../../api/src/application/ops/defect-pr-batch.service.js'
+import {
+  defectCorrectionBatchIntervalMs,
+  triageBatchIntervalMs,
+} from '../../api/src/application/ops/ch-batch-cadence.config.js'
+import { runDefectCorrectionBatch } from '../../api/src/application/ops/defect-correction-batch.service.js'
 import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
 import {
@@ -617,6 +622,15 @@ async function main() {
     return { ok: true, ...result }
   })
 
+  fastify.post('/api/defect-correction-batches/run', async () => {
+    const result = await runDefectCorrectionBatch(
+      defectPrBatchService,
+      platformDefectService,
+      platformDefectRepo,
+    )
+    return { ok: true, ...result }
+  })
+
   fastify.post<{ Params: { id: string }; Body: { incidentId?: string; linkedBy?: string } }>(
     '/api/platform-defects/:id/link-incident',
     async (req, reply) => {
@@ -650,6 +664,7 @@ async function main() {
 
   let probeTimer: ReturnType<typeof setInterval> | undefined
   let dispatchTimer: ReturnType<typeof setInterval> | undefined
+  let defectCorrectionBatchTimer: ReturnType<typeof setInterval> | undefined
   let shuttingDown = false
 
   const shutdown = async () => {
@@ -657,6 +672,7 @@ async function main() {
     shuttingDown = true
     if (probeTimer) clearInterval(probeTimer)
     if (dispatchTimer) clearInterval(dispatchTimer)
+    if (defectCorrectionBatchTimer) clearInterval(defectCorrectionBatchTimer)
     try {
       if (vite) await vite.close()
       await fastify.close()
@@ -700,7 +716,31 @@ async function main() {
     runDispatch()
     dispatchTimer = setInterval(runDispatch, dispatchIntervalMs)
     dispatchTimer.unref()
-    console.log(`[ops-console] incident dispatch worker every ${dispatchIntervalMs}ms`)
+    const triageBatchMs = triageBatchIntervalMs()
+    console.log(
+      `[ops-console] incident dispatch worker every ${dispatchIntervalMs}ms` +
+        (triageBatchMs > 0 ? ` (triage batch collect every ${triageBatchMs}ms)` : ''),
+    )
+  }
+
+  const defectBatchMs = defectCorrectionBatchIntervalMs()
+  if (defectBatchMs > 0) {
+    const runDefectBatch = () => {
+      runDefectCorrectionBatch(defectPrBatchService, platformDefectService, platformDefectRepo)
+        .then((result) => {
+          console.log('[ops-console] defect correction batch', JSON.stringify(result))
+        })
+        .catch((err) => {
+          console.error(
+            '[ops-console] defect correction batch',
+            err instanceof Error ? err.message : err,
+          )
+        })
+    }
+    runDefectBatch()
+    defectCorrectionBatchTimer = setInterval(runDefectBatch, defectBatchMs)
+    defectCorrectionBatchTimer.unref()
+    console.log(`[ops-console] defect correction batch every ${defectBatchMs}ms`)
   }
 }
 

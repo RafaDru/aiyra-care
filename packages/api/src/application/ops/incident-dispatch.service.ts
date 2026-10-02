@@ -33,11 +33,19 @@ import {
   opsAlertFromQueueRecord,
   supportDispatchOptionsFromQueue,
 } from './incident-dispatch-payload.helper.js'
+import { triageBatchIntervalMs } from './ch-batch-cadence.config.js'
 
 const DISPATCH_KIND = 'triage_v1'
 const MAX_OUTBOX_ATTEMPTS = 8
 
 let lastReconcileAtMs = 0
+let lastTriageBatchAtMs = 0
+
+/** Test hook — reset batch/reconcile timers between vitest cases. */
+export function resetIncidentDispatchWorkerClocks(): void {
+  lastReconcileAtMs = 0
+  lastTriageBatchAtMs = 0
+}
 
 export function reconcileIntervalMs(): number {
   const raw = process.env.CH_INCIDENT_RECONCILE_INTERVAL_MS?.trim()
@@ -378,17 +386,26 @@ export class IncidentDispatchService {
     batchLimit = 20,
     reconcileLimit = 50,
   ): Promise<{
+    triageBatch?: boolean
     reconcile?: ReconcileOpenIncidentsResult
     batch: { processed: number; sent: number; failed: number; dead: number; skipped: number }
   }> {
     const now = Date.now()
     let reconcile: ReconcileOpenIncidentsResult | undefined
-    if (now - lastReconcileAtMs >= reconcileIntervalMs()) {
+    let triageBatch = false
+    const triageInterval = triageBatchIntervalMs()
+    if (triageInterval > 0) {
+      if (lastTriageBatchAtMs === 0 || now - lastTriageBatchAtMs >= triageInterval) {
+        reconcile = await this.backfillOpenIncidents(reconcileLimit)
+        lastTriageBatchAtMs = now
+        triageBatch = true
+      }
+    } else if (now - lastReconcileAtMs >= reconcileIntervalMs()) {
       reconcile = await this.reconcileOpenIncidents(reconcileLimit, { staleOnly: true })
       lastReconcileAtMs = now
     }
     const batch = await this.processOutboxBatch(batchLimit)
-    return { reconcile, batch }
+    return { triageBatch, reconcile, batch }
   }
 
   async processOutboxBatch(
