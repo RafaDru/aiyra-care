@@ -293,13 +293,15 @@ export class OpsAnalysisQueuePgRepository {
   }
 
   async attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
+    const openIncidentFilter = `status NOT IN ('completed', 'dismissed')
+           AND incident_pipeline_status NOT IN ('triaged', 'dismissed')`
     const res = await this.pool.query<{ status: string; count: string }>(
       deploymentTier
         ? `SELECT status, COUNT(*)::text AS count FROM ops_analysis_queue
-           WHERE deployment_tier = $1 AND status NOT IN ('completed', 'dismissed')
+           WHERE deployment_tier = $1 AND ${openIncidentFilter}
            GROUP BY status`
         : `SELECT status, COUNT(*)::text AS count FROM ops_analysis_queue
-           WHERE status NOT IN ('completed', 'dismissed')
+           WHERE ${openIncidentFilter}
            GROUP BY status`,
       deploymentTier ? [deploymentTier] : [],
     )

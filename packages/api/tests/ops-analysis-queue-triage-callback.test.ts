@@ -36,6 +36,7 @@ describe('OpsAnalysisQueueService triage callback', () => {
     const repo = {
       applyAgentCallback: vi.fn(async () => queueRecord()),
       setIncidentPipelineStatus: vi.fn(async () => undefined),
+      markCompleted: vi.fn(async () => true),
       findById: vi.fn(async () => queueRecord({ incidentPipelineStatus: 'triaged' })),
     }
     const supportRepo = {
@@ -61,6 +62,7 @@ describe('OpsAnalysisQueueService triage callback', () => {
 
     expect(defects.createFromTriage).toHaveBeenCalled()
     expect(repo.setIncidentPipelineStatus).toHaveBeenCalledWith('q-1', 'triaged')
+    expect(repo.markCompleted).toHaveBeenCalledWith('q-1')
   })
 
   it('dismisses incident on triageDecision dismiss', async () => {
