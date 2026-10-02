@@ -32,6 +32,10 @@ export function SupportReportModal({ open, onClose }: SupportReportModalProps) {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
+      if (values.consentTechnical) {
+        const { awaitPendingClientErrorReports } = await import('../../lib/client-errors.js')
+        await awaitPendingClientErrorReports()
+      }
       const patientId = inferPatientIdFromRoute(location.pathname)
       const result = await api.support.createReport({
         category: values.category,

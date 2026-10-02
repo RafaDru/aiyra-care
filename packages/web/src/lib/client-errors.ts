@@ -9,6 +9,14 @@ import {
 const SESSION_KEY = 'aiyracare.browser_session'
 const DEDUPE_MS = 15_000
 const recentKeys = new Map<string, number>()
+const pendingIngest: Promise<void>[] = []
+
+/** Aguarda telemetria fire-and-forget antes do bundle de suporte (evita race com `client_errors`). */
+export async function awaitPendingClientErrorReports(): Promise<void> {
+  const batch = pendingIngest.splice(0)
+  if (!batch.length) return
+  await Promise.allSettled(batch)
+}
 
 function getBrowserSessionId(): string {
   try {
@@ -58,7 +66,7 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
   if (shouldDedupe(fingerprint)) return
 
   const { api } = await import('./api.js')
-  await api.telemetry.reportClientErrors({
+  const ingest = api.telemetry.reportClientErrors({
     errors: [{
       fingerprint,
       feature,
@@ -72,7 +80,9 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
         ...input.properties,
       },
     }],
-  })
+  }).then(() => undefined, () => undefined)
+  pendingIngest.push(ingest)
+  await ingest
 }
 
 export function reportApiClientError(
