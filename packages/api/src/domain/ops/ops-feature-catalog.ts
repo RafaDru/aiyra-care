@@ -74,6 +74,14 @@ const ROUTE_FEATURES: OpsFeatureCatalogEntry[] = [
     routeExample: '/compliance/accept',
   },
   {
+    key: 'account_settings',
+    label: 'Conta — perfil e exclusão',
+    area: 'Conta',
+    section: 'product',
+    routeExample: '/settings/account',
+    description: 'GET/PATCH /auth/profile, DELETE /auth/account (LGPD)',
+  },
+  {
     key: 'settings',
     label: 'Configurações',
     area: 'Conta',
@@ -199,6 +207,7 @@ export function deriveFeatureKeyFromRoute(route: string): string {
   if (path.startsWith('/integrations')) return 'integrations'
   if (path.startsWith('/settings/family')) return 'settings_family'
   if (path.startsWith('/settings/plan')) return 'billing'
+  if (path.startsWith('/settings/account')) return 'account_settings'
   if (path.startsWith('/settings')) return 'settings'
   if (path.startsWith('/invite/accept')) return 'family_invite'
   if (path.startsWith('/compliance')) return 'compliance'
