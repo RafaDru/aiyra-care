@@ -18,6 +18,7 @@ import {
 } from '@ant-design/icons'
 import {
   defectReadyForPrCount,
+  defectShortTag,
   defectStatusColor,
   defectStatusLabel,
   formatBatchWindowHours,
@@ -232,10 +233,19 @@ export function DefeitosPanel({ onRefresh }: { onRefresh?: () => void }) {
           columns={[
             {
               title: 'Ref',
-              dataIndex: 'referenceCode',
-              width: 108,
+              key: 'ref',
+              width: 200,
               align: 'center',
-              render: (code: string | null) => <OpsReferenceCodeTag code={code} compact />,
+              render: (_: unknown, row) => (
+                <Space size={4} wrap style={{ justifyContent: 'center' }}>
+                  <OpsReferenceCodeTag code={row.referenceCode} compact />
+                  <Tooltip title={row.id}>
+                    <Text code style={{ fontSize: 11, whiteSpace: 'nowrap' }}>
+                      {defectShortTag(row.id)}
+                    </Text>
+                  </Tooltip>
+                </Space>
+              ),
             },
             {
               title: 'Título',
@@ -369,7 +379,9 @@ function DefeitoDetail({
   return (
     <div style={{ maxWidth: 720 }}>
       <Paragraph>
-        <Text strong>Referência:</Text> <OpsReferenceCodeTag code={row.referenceCode} />
+        <Text strong>Referência:</Text>{' '}
+        <OpsReferenceCodeTag code={row.referenceCode} />{' '}
+        <Text code>{defectShortTag(row.id)}</Text>
       </Paragraph>
       {row.triageSummary && (
         <Paragraph>

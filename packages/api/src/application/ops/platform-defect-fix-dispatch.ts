@@ -28,6 +28,7 @@ export interface PlatformDefectFixDispatchPayload {
   type: 'defect_fix_v1'
   defectId: string
   defect: {
+    referenceCode: string | null
     title: string
     fingerprint: string | null
     triageSummary: string | null
@@ -70,10 +71,15 @@ export function buildPlatformDefectFixDispatchPayload(
   const tier = resolvePlatformDefectFixTier(defect)
   const playbook = defectFixPlaybookId(tier)
   const shortId = defect.id.slice(0, 8)
+  const defectTag = `[defect:${shortId}]`
+  const text = defect.referenceCode
+    ? `${defect.referenceCode} · ${defectTag} Correção: ${defect.title}`
+    : `${defectTag} Correção: ${defect.title}`
   return {
     type: 'defect_fix_v1',
     defectId: defect.id,
     defect: {
+      referenceCode: defect.referenceCode,
       title: defect.title,
       fingerprint: defect.fingerprint,
       triageSummary: defect.triageSummary,
@@ -86,7 +92,7 @@ export function buildPlatformDefectFixDispatchPayload(
     callbackAuth,
     playbook,
     investigation: { tier, playbook, trigger: 'manual' },
-    text: `[defect:${shortId}] Correção: ${defect.title}`,
+    text,
   }
 }
 
