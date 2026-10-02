@@ -34,8 +34,20 @@ const PIPELINE_TAG_COLOR: Record<IncidentPipelineUiBucket, string> = {
   falha: 'error',
 }
 
-export function incidentPipelineUiBucket(row: OpsAnalysisQueueItem): IncidentPipelineUiBucket {
+function resolvePipelineStatus(row: OpsAnalysisQueueItem) {
   const pipeline = row.incidentPipelineStatus
+  if (
+    pipeline === 'in_triage' &&
+    row.dispatch?.status === 'forwarded' &&
+    !row.analysisArtifactPath
+  ) {
+    return 'forwarded' as const
+  }
+  return pipeline
+}
+
+export function incidentPipelineUiBucket(row: OpsAnalysisQueueItem): IncidentPipelineUiBucket {
+  const pipeline = resolvePipelineStatus(row)
   if (pipeline === 'forwarded') return 'encaminhado'
   if (pipeline === 'queued_worker') return 'em_fila'
   if (pipeline === 'in_triage') return 'em_triagem'

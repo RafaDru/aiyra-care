@@ -3,7 +3,30 @@ import {
   buildIncidentDispatchIdempotencyKey,
   incidentPipelineUiBucket,
   incidentPipelineUiLabel,
+  resolveIncidentPipelineStatusForDisplay,
 } from '../src/domain/ops/incident-pipeline-status.js'
+
+describe('resolveIncidentPipelineStatusForDisplay', () => {
+  it('maps stale in_triage + forwarded outbox to forwarded', () => {
+    expect(
+      resolveIncidentPipelineStatusForDisplay({
+        incidentPipelineStatus: 'in_triage',
+        dispatchStatus: 'forwarded',
+        analysisArtifactPath: null,
+      }),
+    ).toBe('forwarded')
+  })
+
+  it('keeps in_triage when triage artifact exists', () => {
+    expect(
+      resolveIncidentPipelineStatusForDisplay({
+        incidentPipelineStatus: 'in_triage',
+        dispatchStatus: 'forwarded',
+        analysisArtifactPath: 'docs/ops/foo.md',
+      }),
+    ).toBe('in_triage')
+  })
+})
 
 describe('incidentPipelineUiBucket', () => {
   it('maps pipeline status to CH buckets', () => {

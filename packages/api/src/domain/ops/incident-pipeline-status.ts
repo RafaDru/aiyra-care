@@ -22,6 +22,23 @@ export function incidentPipelineUiLabel(bucket: IncidentPipelineUiBucket): strin
   return UI_LABEL[bucket]
 }
 
+/** Prefer canonical PG column; heal stale rows stuck in `in_triage` while outbox is only `forwarded`. */
+export function resolveIncidentPipelineStatusForDisplay(input: {
+  incidentPipelineStatus?: IncidentPipelineStatus | null
+  analysisArtifactPath?: string | null
+  dispatchStatus?: string | null
+}): IncidentPipelineStatus | null | undefined {
+  const pipeline = input.incidentPipelineStatus
+  if (
+    pipeline === 'in_triage' &&
+    input.dispatchStatus === 'forwarded' &&
+    !input.analysisArtifactPath
+  ) {
+    return 'forwarded'
+  }
+  return pipeline
+}
+
 export function incidentPipelineUiBucket(
   pipelineStatus: IncidentPipelineStatus | null | undefined,
   legacyStatus?: AnalysisQueueStatus,
