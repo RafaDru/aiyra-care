@@ -10,12 +10,19 @@ const SESSION_KEY = 'aiyracare.browser_session'
 const DEDUPE_MS = 15_000
 const recentKeys = new Map<string, number>()
 const pendingIngest: Promise<void>[] = []
+/** Teto para não bloquear envio de suporte se ingest de telemetria travar (ex. E2E / rede lenta). */
+const AWAIT_PENDING_INGEST_MAX_MS = 2_000
 
 /** Aguarda telemetria fire-and-forget antes do bundle de suporte (evita race com `client_errors`). */
 export async function awaitPendingClientErrorReports(): Promise<void> {
   const batch = pendingIngest.splice(0)
   if (!batch.length) return
-  await Promise.allSettled(batch)
+  await Promise.race([
+    Promise.allSettled(batch),
+    new Promise<void>((resolve) => {
+      setTimeout(resolve, AWAIT_PENDING_INGEST_MAX_MS)
+    }),
+  ])
 }
 
 function getBrowserSessionId(): string {

@@ -53,7 +53,8 @@ export function SupportReportModal({ open, onClose }: SupportReportModalProps) {
       message.success(t('support.reportSuccess', { id: result.id.slice(0, 8) }))
       form.resetFields()
       onClose()
-    } catch {
+    } catch (err) {
+      if (err && typeof err === 'object' && 'errorFields' in err) throw err
       message.error(t('support.reportError'))
     } finally {
       setSubmitting(false)
@@ -65,7 +66,7 @@ export function SupportReportModal({ open, onClose }: SupportReportModalProps) {
       title={t('support.reportTitle')}
       open={open}
       onCancel={onClose}
-      onOk={() => void handleSubmit()}
+      onOk={() => handleSubmit()}
       okText={t('support.reportSubmit')}
       cancelText={t('common.cancel')}
       confirmLoading={submitting}
