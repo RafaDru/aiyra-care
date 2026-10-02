@@ -205,11 +205,15 @@ Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /ap
 
 | Variável | Default | Uso |
 |----------|---------|-----|
-| `OPS_DEFECT_PR_BATCH_INTERVAL_MS` | 21600000 | Janela lote CH |
-| `CH_INCIDENT_DISPATCH_INTERVAL_MS` | 30000 | Worker poll |
+| `OPS_DEFECT_PR_BATCH_INTERVAL_MS` | 21600000 | Janela lote PR (`ready_for_pr`) |
+| `CH_INCIDENT_DISPATCH_INTERVAL_MS` | 30000 | Worker poll (flush outbox) |
+| `CH_INCIDENT_TRIAGE_BATCH_INTERVAL_MS` | 0 (off) | **Dispatch batch:** a cada N ms, `backfillOpenIncidents` (todos `open` sem outbox ativo). Piloto: `900000` (15 min). Não substitui o poll — só a **coleta** periódica; envio Triador segue no outbox a cada poll. |
+| `CH_DEFECT_CORRECTION_BATCH_INTERVAL_MS` | 0 (off) | Loop ops-console: lote PR + opcional `start-fix` em massa. Piloto: `900000`. |
+| `CH_DEFECT_CORRECTION_BATCH_AUTO_START_FIX` | 0 | `1` = no batch, dispara Correção Dev para defeitos `open` (até `CH_DEFECT_CORRECTION_BATCH_START_FIX_LIMIT`, default 5). **Risco:** custo/automação paralela — ver spec CH 15 min. |
+| `CH_DEFECT_CORRECTION_BATCH_START_FIX_LIMIT` | 5 | Teto por tick do auto `start-fix`. |
 | `CH_INCIDENT_DISPATCH_WORKER` | 1 | 0 = só API síncrona |
-| `CH_INCIDENT_RECONCILE_INTERVAL_MS` | 60000 | Mínimo entre varreduras reconciliador no worker |
-| `CH_INCIDENT_OPEN_STALE_MS` | 300000 | Idade mínima do incidente `open` para reconciliar (evita corrida com enqueue síncrono) |
+| `CH_INCIDENT_RECONCILE_INTERVAL_MS` | 60000 | Reconciliador stale-only quando `CH_INCIDENT_TRIAGE_BATCH_INTERVAL_MS` **não** está definido |
+| `CH_INCIDENT_OPEN_STALE_MS` | 300000 | Idade mínima do incidente `open` para reconciliar stale-only (evita corrida com enqueue síncrono) |
 | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL` | — | Agente 2 (correção) |
 
 ### 6.2 Dispatch triagem — Cursor Automations + ops
