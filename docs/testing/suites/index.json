@@ -304,6 +304,21 @@
       "estimatedMinutes": 5
     },
     {
+      "id": "client-error-ch-bridge",
+      "domain": "ops",
+      "title": "Client errors → CH incident bridge",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/client-error-ch-bridge.md",
+      "coverage": "done",
+      "automation": {
+        "status": "done",
+        "spec": "packages/api/tests/client-error-incident-bridge.service.test.ts"
+      },
+      "estimatedMinutes": 10
+    },
+    {
       "id": "ops-health",
       "domain": "ops",
       "title": "Ops — health e métricas",

@@ -191,6 +191,16 @@ async function registerRoutes() {
   await app.register(patientAccessRoutes)
   const { careCircleRoutes } = await import('./infrastructure/http/care-circle/care-circle.routes.js')
   await app.register(careCircleRoutes)
+
+  const { createClientErrorIngestStack } = await import(
+    './infrastructure/http/telemetry/create-client-error-stack.js'
+  )
+  const { pgPool } = await import('./db/postgres.js')
+  const { bridge } = createClientErrorIngestStack(pgPool)
+  const { registerClientErrorIncidentErrorHandler } = await import(
+    './infrastructure/http/client-error-incident-bridge.plugin.js'
+  )
+  registerClientErrorIncidentErrorHandler(app, bridge)
 }
 
 const start = async () => {

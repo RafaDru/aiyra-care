@@ -7,6 +7,8 @@ import {
   type ClientErrorInput,
 } from '../../domain/telemetry/client-error.js'
 import type { ClientErrorPgRepository } from '../../infrastructure/persistence/client-error.pg.repository.js'
+import type { ClientErrorIncidentBridgeService } from '../ops/client-error-incident-bridge.service.js'
+import { resolveDeploymentTier } from '../../domain/ops/investigator-environment.js'
 
 export interface ClientErrorIngestResult {
   accepted: number
@@ -14,7 +16,10 @@ export interface ClientErrorIngestResult {
 }
 
 export class ClientErrorService {
-  constructor(private readonly repo: ClientErrorPgRepository) {}
+  constructor(
+    private readonly repo: ClientErrorPgRepository,
+    private readonly incidentBridge?: ClientErrorIncidentBridgeService,
+  ) {}
 
   async ingest(
     accountId: string | null,
@@ -45,6 +50,12 @@ export class ClientErrorService {
 
     if (accepted.length) {
       await this.repo.insertMany(accountId, accepted)
+      if (this.incidentBridge?.isEnabled()) {
+        void this.incidentBridge.onIngestedErrors(accepted, {
+          accountId,
+          deploymentTier: resolveDeploymentTier(),
+        }).catch(() => undefined)
+      }
     }
 
     return { accepted: accepted.length, rejected }
