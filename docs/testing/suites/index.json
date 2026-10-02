@@ -48,6 +48,21 @@
       "estimatedMinutes": 10
     },
     {
+      "id": "settings-account",
+      "domain": "conta",
+      "title": "Configurações — perfil e exclusão de conta",
+      "lane": "business",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "requiredForMain": false,
+      "order": 4,
+      "doc": "docs/testing/suites/settings-account.md",
+      "coverage": "partial",
+      "businessActions": ["account.profile.read", "account.profile.update", "account.delete"],
+      "automation": { "status": "planned", "spec": "packages/web/e2e/suites/settings-account.spec.ts" },
+      "estimatedMinutes": 10
+    },
+    {
       "id": "core-patient-crud",
       "domain": "conta",
       "title": "Paciente — CRUD completo (criar, editar, excluir)",

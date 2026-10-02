@@ -10,6 +10,7 @@ export function deriveFeatureFromRoute(route: string): string {
   if (path.startsWith('/family')) return 'family_hub'
   if (path.startsWith('/settings/family')) return 'family_hub'
   if (path.startsWith('/settings/plan')) return 'billing'
+  if (path.startsWith('/settings/account')) return 'account_settings'
   if (path.startsWith('/settings')) return 'settings'
   if (path.startsWith('/invite/accept')) return 'family_invite'
   if (path.startsWith('/compliance')) return 'compliance'

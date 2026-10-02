@@ -3,6 +3,7 @@ import { Alert, Button, Card, Input, Modal, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { api } from '../../lib/api.js'
+import { httpStatusFromError, reportAccountSettingsFailure } from '../../lib/account-settings-errors.js'
 
 const { Text, Paragraph } = Typography
 
@@ -28,6 +29,11 @@ export function DeleteAccountCard() {
       setOpen(false)
       await signOut()
     } catch (e) {
+      reportAccountSettingsFailure('account_delete', {
+        apiPath: '/auth/account',
+        status: httpStatusFromError(e),
+        message: e instanceof Error ? e.message : undefined,
+      })
       setError(e instanceof Error ? e.message : t('accountPlan.deleteError'))
     } finally {
       setSubmitting(false)

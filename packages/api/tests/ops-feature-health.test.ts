@@ -11,6 +11,7 @@ describe('ops-feature-catalog', () => {
     expect(deriveFeatureKeyFromRoute('/')).toBe('dashboard')
     expect(deriveFeatureKeyFromRoute('/patients/abc')).toBe('patient_detail')
     expect(deriveFeatureKeyFromRoute('/settings/plan')).toBe('billing')
+    expect(deriveFeatureKeyFromRoute('/settings/account')).toBe('account_settings')
     expect(deriveFeatureKeyFromRoute('/settings/family')).toBe('settings_family')
     expect(deriveFeatureKeyFromRoute('/invite/accept')).toBe('family_invite')
   })

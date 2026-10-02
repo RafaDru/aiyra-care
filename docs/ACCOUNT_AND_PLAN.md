@@ -37,6 +37,12 @@ Constantes: `packages/web/src/lib/settings-paths.ts`.
 |------|------------|
 | NFS-e / Contabilizei | `legal-fiscal-nfse` |
 
+## QA
+
+- Suite manual: [`docs/testing/suites/settings-account.md`](./testing/suites/settings-account.md)
+- Comando: `npm run qa:run -- --suite settings-account`
+- Telemetria: falhas em `/settings/account` catalogam `client_errors` com feature `account_settings` (não abrem incidente CH automaticamente — ver suite).
+
 ## Relacionado
 
 - [`BILLING.md`](./BILLING.md) — variáveis Stripe
