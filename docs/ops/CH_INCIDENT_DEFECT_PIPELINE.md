@@ -38,8 +38,10 @@ Pipeline ops de ponta a ponta:
 | **Em fila** | `queued_worker` | Worker local claim do outbox |
 | **Em triagem** | `in_triage` | Agente 1 iniciou (`investigating`) |
 | **Falha** | `dispatch_failed` | Outbox `dead` (max tentativas) ou falha do worker com pipeline em dispatch |
-| *(interno)* Triado | `triaged` | Callback triagem + defeito criado/vinculado |
+| *(interno)* Triado | `triaged` | Callback triagem + defeito criado/vinculado (permanece após DEF `fixed`) |
 | *(interno)* Descartado | `dismissed` | Triagem descarta |
+
+**Reincidência (084):** nova ocorrência após INC `triaged` (mesma fonte/fingerprint ou triagem com `parentDefectId`) → **novo** INC com `recurrence_of_incident_id` + `recurrence_kind = reincidencia` — **não** reabre o INC anterior e **não** usa status `resolved`.
 
 **Canônico «Falha»:** valor PG `dispatch_failed` (migration **076**). Não derivar só do outbox `dead` na UI — o worker / `markDead` grava `dispatch_failed` no incidente para não ficar preso em «Em fila» (`queued_worker`) nem voltar silenciosamente a «Aberto».
 
@@ -130,6 +132,8 @@ Cada desvio fora do happy path (`open` → outbox → webhook 2xx → `in_triage
 | **075** | `ops_analysis_queue.incident_pipeline_status` |
 | **076** | `dispatch_failed` no CHECK de `incident_pipeline_status` |
 | **077** | `reference_code` INC/DEF + `last_fix_dispatch_sent_at` |
+| **083** | `platform_defects.parent_defect_id` (reincidência DEF) |
+| **084** | `recurrence_of_incident_id`, `recurrence_kind` + índice fonte ativa |
 
 Aplicar (com `DATABASE_URL` no `.env`):
 

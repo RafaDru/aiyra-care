@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-04] - CH: reincidência de incidente (`recurrence_of_incident_id`)
+
+### Decisão
+- **Não** introduzir status de pipeline `resolved` / bucket UI «Resolvido» — INC anterior segue **`triaged`** quando o DEF vai a `fixed` (correção à proposta inicial do coordinator).
+- Nova ocorrência similar → **novo** `ops_analysis_queue` (novo `INC-*`) com `recurrence_kind = reincidencia` e FK `recurrence_of_incident_id`; alinhado a `parent_defect_id` (083) com foco UX no vínculo INC.
+
+### Realizado
+- Migration **084** (colunas de reincidência + índice parcial de fonte ativa); enqueue/triagem não reabre INC triado; CH Incidentes mostra link «Reincidência de INC-xxxxx».
+
 ## [2026-10-04] - CH: reincidência de defeito (`parent_defect_id`)
 
 ### Decisão

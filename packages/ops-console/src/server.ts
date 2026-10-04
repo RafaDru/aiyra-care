@@ -112,12 +112,13 @@ const alertIncidentRepo = new OpsAlertIncidentPgRepository(pool)
 const supportRepo = new SupportReportPgRepository(pool)
 const platformDefectRepo = new PlatformDefectPgRepository(pool)
 const defectPrBatchRepo = new DefectPrBatchPgRepository(pool)
+const analysisQueueRepo = new OpsAnalysisQueuePgRepository(pool)
 const platformDefectService = new PlatformDefectService(platformDefectRepo)
 const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(platformDefectRepo)
 const incidentDispatchService = createIncidentDispatchService(pool)
 const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
-  new OpsAnalysisQueuePgRepository(pool),
+  analysisQueueRepo,
   supportRepo,
   alertIncidentRepo,
   platformDefectService,

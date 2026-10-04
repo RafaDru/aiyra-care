@@ -36,17 +36,25 @@ Vários incidentes podem apontar para um único defeito aberto.
 
 ---
 
-## 3. Reincidência — novo INC após `fixed_at`
+## 3. Reincidência — novo INC / novo DEF após correção
 
-**Implementado (migration 083, fatia `ch-defect-recurrence`):** triagem `createFromTriage` + `parent_defect_id` + badge CH.
+**Correção Rafael (2026-10-04):** o pipeline de incidente **não** ganha status terminal «Resolvido» (`resolved`). INC anterior permanece **`triaged`** quando o DEF vai a `fixed`; UX de fechamento é no defeito, não reabrindo o INC.
 
-**Regra acordada (implementação pós-R4 ou fatia dedicada):**
+**Defeito (migration 083):** `createFromTriage` + `parent_defect_id` + badge CH no DEF.
+
+**Incidente (migration 084):** nova ocorrência similar → **nova linha** `ops_analysis_queue` (novo `INC-*`), sem reabrir o INC triado:
+
+| Campo | Uso |
+|-------|-----|
+| `recurrence_of_incident_id` | FK ao INC anterior (tipicamente `triaged`) |
+| `recurrence_kind` | `reincidencia` quando o vínculo é explícito |
 
 | Condição | Ação |
 |----------|------|
-| Mesma `fingerprint` (ou correlação explícita do triador) **e** `incident.created_at` (ou `first_seen_at` do INC) **>** `defect.fixed_at` do DEF anterior | Criar **novo** DEF com `parent_defect_id` (ou tabela `platform_defect_relations` com tipo `recurrence`) |
-| UI CH | Badge **Reincidência** + link ao DEF pai; métrica de eficácia da correção |
-| Triador | Pode sinalizar `recurrenceLikely` no callback quando não houver fingerprint estável |
+| Mesma fonte/fingerprint após INC anterior `triaged` (e opcionalmente DEF `fixed`) | **Insert** novo INC + `recurrence_kind=reincidencia` |
+| Índice parcial | Um INC «ativo» por `(source_type, source_id, deployment_tier)` — terminais `triaged` / `dismissed` liberam novo insert |
+| Triagem `new_defect` + `parentDefectId` | Liga `recurrence_of_incident_id` ao INC do DEF pai quando aplicável |
+| UI CH | Detalhe do INC: **Reincidência de INC-xxxxx** (deep link); DEF mantém badge §083 |
 
 Não confundir com §2: dedup só aplica a defeitos **ainda abertos** na esteira.
 

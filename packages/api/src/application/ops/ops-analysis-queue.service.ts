@@ -253,6 +253,10 @@ export class OpsAnalysisQueueService {
     }
 
     if (this.platformDefects) {
+      if (decision === 'new_defect' && input.parentDefectId?.trim()) {
+        await this.repo.linkRecurrenceFromPriorDefect(record.id, input.parentDefectId.trim())
+      }
+
       if (decision === 'new_defect' && input.defect?.title) {
         await this.platformDefects.createFromTriage(
           {

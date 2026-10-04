@@ -6,6 +6,10 @@ import type { OpsAnalysisQueueRecord } from '../src/domain/ops/ops-analysis-queu
 function queueRecord(overrides: Partial<OpsAnalysisQueueRecord> = {}): OpsAnalysisQueueRecord {
   return {
     id: 'q-1',
+    referenceCode: 'INC-000001',
+    recurrenceOfIncidentId: null,
+    recurrenceOfReferenceCode: null,
+    recurrenceKind: null,
     sourceType: 'support_report',
     sourceId: 'rep-1',
     lane: 'development_support',

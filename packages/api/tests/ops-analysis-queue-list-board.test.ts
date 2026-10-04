@@ -3,6 +3,9 @@ import { OpsAnalysisQueueService } from '../src/application/ops/ops-analysis-que
 
 const baseRecord = {
   id: '11111111-1111-4111-8111-111111111111',
+  recurrenceOfIncidentId: null,
+  recurrenceOfReferenceCode: null,
+  recurrenceKind: null,
   sourceType: 'support_report' as const,
   sourceId: 'rep-1',
   lane: 'development_support' as const,

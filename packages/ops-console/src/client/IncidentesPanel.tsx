@@ -77,6 +77,14 @@ const BOARD_FILTERS: IncidentBoardFilter[] = [
   'completed',
 ]
 
+function buildIncidentRefDeepLink(referenceCode: string): string {
+  const params = new URLSearchParams()
+  params.set('group', 'operacao')
+  params.set('tab', 'incidentes')
+  params.set('incidentRef', referenceCode)
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
+}
+
 function buildInvestigationDeepLink(investigationId: string): string {
   const params = new URLSearchParams()
   params.set('group', 'operacao')
@@ -436,6 +444,14 @@ export function IncidentesPanel({
                   <Text strong>Referência:</Text>{' '}
                   <OpsReferenceCodeTag code={row.referenceCode} />
                 </Paragraph>
+                {row.recurrenceOfReferenceCode && (
+                  <Paragraph>
+                    <Text strong>Reincidência de</Text>{' '}
+                    <a href={buildIncidentRefDeepLink(row.recurrenceOfReferenceCode)}>
+                      {row.recurrenceOfReferenceCode}
+                    </a>
+                  </Paragraph>
+                )}
                 <Paragraph>
                   <Text strong>investigationId:</Text>{' '}
                   <InvestigationIdTag investigationId={row.id} showFull />

@@ -5,7 +5,7 @@
 
 ## Pré-requisitos
 
-- Migration **077** aplicada; **082** para metadados `correction_failed`; **083** para `parent_defect_id` (reincidência)
+- Migration **077** aplicada; **082** para metadados `correction_failed`; **083** para `parent_defect_id`; **084** para reincidência INC (`recurrence_of_incident_id`)
 - ops-console `:3013` com `CURSOR_DEFECT_FIX_*` (opcional para dispatch real)
 
 ## Passos
@@ -24,8 +24,9 @@
 12. Chip **Triados** — coluna Status mostra tag **Triado** (não «Aberto» / «Em aberto»)
 13. **R4 (opcional com secret):** com `GITHUB_DEFECT_MERGE_WEBHOOK_SECRET` e defeito `ready_for_pr` + `prUrl`, simular payload GitHub `pull_request` merged → status `fixed`, `fixedVia=github_webhook`, hint no expand do CH
 14. **R1:** simular callback `correction_failed` (ou API vitest) — defeito `open`, expand com banner de falha, tag **Falha correção**; **Iniciar correção** após falha limpa metadados ao entrar em `in_fix`
-15. **Reincidência:** após DEF `fixed`, triagem de INC com mesma fingerprint (ou callback `parentDefectId` + `recurrenceLikely`) — novo DEF com tag **Reincidência** e link «Abrir DEF pai» no expand
+15. **Reincidência DEF:** após DEF `fixed`, triagem de INC com mesma fingerprint (ou callback `parentDefectId` + `recurrenceLikely`) — novo DEF com tag **Reincidência** e link «Abrir DEF pai» no expand
+16. **Reincidência INC:** após INC anterior `triaged` + DEF `fixed`, novo sinal (ex. client-error bridge) — novo `INC-*` com detalhe **Reincidência de INC-xxxxx** (INC anterior permanece triado)
 
 ## Critério
 
-- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados exibem label **Triado**, R1 exibe falha estruturada sem reset silencioso (passo 13 quando webhook configurado), e reincidência liga ao DEF pai (passo 15)
+- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados exibem label **Triado**, R1 exibe falha estruturada sem reset silencioso (passo 13 quando webhook configurado), reincidência DEF liga ao DEF pai (passo 15) e reincidência INC liga ao INC anterior sem bucket «Resolvido» (passo 16)
