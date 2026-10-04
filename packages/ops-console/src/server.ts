@@ -173,12 +173,15 @@ function parseIncidentBoardFilter(raw: string | undefined): IncidentBoardFilter 
 async function analysisQueueItemsWithDispatch(
   records: Awaited<ReturnType<OpsAnalysisQueueService['listForIncidentBoard']>>,
 ) {
-  const dispatchMap = await incidentDispatchService.dispatchSnapshotsForIncidentIds(
-    records.map((r) => r.id),
-  )
+  const ids = records.map((r) => r.id)
+  const [dispatchMap, defectLinks] = await Promise.all([
+    incidentDispatchService.dispatchSnapshotsForIncidentIds(ids),
+    platformDefectRepo.listDefectLinksByIncidentIds(ids),
+  ])
   return records.map((record) => ({
     ...record,
     dispatch: dispatchMap.get(record.id) ?? null,
+    linkedDefects: defectLinks.get(record.id) ?? [],
   }))
 }
 

@@ -217,6 +217,46 @@ export class PlatformDefectPgRepository {
     return res.rows.map((row) => row.id)
   }
 
+  /** N:1 links for CH incident list (defect ref + status per incident). */
+  async listDefectLinksByIncidentIds(
+    incidentIds: string[],
+  ): Promise<Map<string, Array<{ id: string; referenceCode: string | null; status: PlatformDefectStatus }>>> {
+    const map = new Map<
+      string,
+      Array<{ id: string; referenceCode: string | null; status: PlatformDefectStatus }>
+    >()
+    if (!incidentIds.length) return map
+
+    const res = await this.pool.query<{
+      incident_id: string
+      defect_id: string
+      reference_code: string | null
+      status: PlatformDefectStatus
+    }>(
+      `SELECT
+         pdi.incident_id::text AS incident_id,
+         d.id::text AS defect_id,
+         d.reference_code,
+         d.status
+       FROM platform_defect_incidents pdi
+       JOIN platform_defects d ON d.id = pdi.defect_id
+       WHERE pdi.incident_id = ANY($1::uuid[])
+       ORDER BY pdi.linked_at DESC`,
+      [incidentIds],
+    )
+
+    for (const row of res.rows) {
+      const list = map.get(row.incident_id) ?? []
+      list.push({
+        id: row.defect_id,
+        referenceCode: row.reference_code,
+        status: row.status,
+      })
+      map.set(row.incident_id, list)
+    }
+    return map
+  }
+
   async linkIncident(
     defectId: string,
     incidentId: string,

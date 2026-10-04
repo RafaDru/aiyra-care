@@ -28,6 +28,7 @@
 16. **Reincidência INC:** após INC `resolved` (DEF `fixed`), novo sinal — novo `INC-*` com **Reincidência de INC-xxxxx**
 17. **Resolvido:** DEF `fixed` → INC vinculado tag **Resolvido** no chip **Resolvidos** (backfill mig 084 cobre piloto INC-000001)
 18. **Em triagem (hook):** com INC `forwarded`, simular `POST /api/analysis-queue/:id/triage-started` (auth callback) → pipeline `in_triage` + status `investigating`; idempotente se já `in_triage`
+19. **Incidentes ao vivo:** lista recarrega a cada ~15s (sem F5); coluna **Defeito** + expand mostram `DEF-*` vinculado via `platform_defect_incidents`
 
 ## Critério
 

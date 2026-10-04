@@ -8,6 +8,14 @@ export type IncidentDispatchSnapshot = {
   updatedAt: string | null
 }
 
+export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
+
+export type IncidentLinkedDefectSummary = {
+  id: string
+  referenceCode: string | null
+  status: PlatformDefectStatus
+}
+
 export type IncidentDispatchHealth = {
   deadCount: number
   staleOpenWithoutOutboxCount: number
@@ -54,9 +62,8 @@ export interface OpsAnalysisQueueItem {
   createdAt: string
   updatedAt: string
   dispatch?: IncidentDispatchSnapshot | null
+  linkedDefects?: IncidentLinkedDefectSummary[]
 }
-
-export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
 
 export interface DefectPrBatchItem {
   id: string

@@ -77,6 +77,9 @@ const BOARD_FILTERS: IncidentBoardFilter[] = [
   'all_open',
 ]
 
+/** Atualização automática da lista (PG ao vivo; sem SSE). */
+const INCIDENT_LIST_POLL_MS = 15_000
+
 function buildIncidentRefDeepLink(referenceCode: string): string {
   const params = new URLSearchParams()
   params.set('group', 'operacao')
@@ -90,6 +93,14 @@ function buildInvestigationDeepLink(investigationId: string): string {
   params.set('group', 'operacao')
   params.set('tab', 'incidentes')
   params.set('investigationId', investigationId)
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
+}
+
+function buildDefectDeepLink(defectId: string): string {
+  const params = new URLSearchParams()
+  params.set('group', 'operacao')
+  params.set('tab', 'defeitos')
+  params.set('defectId', defectId)
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`
 }
 
@@ -116,8 +127,8 @@ export function IncidentesPanel({
   const [tableSort, setTableSort] = useState<IncidentTableSortState>(() => loadIncidentTableSort())
   const highlightRef = useRef<string | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const load = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true)
     try {
       const [data, health] = await Promise.all([
         opsApi.analysisQueue({
@@ -129,14 +140,32 @@ export function IncidentesPanel({
       setItems(data.items)
       setDispatchHealth(health)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Falha ao carregar incidentes')
+      if (!options?.silent) {
+        message.error(err instanceof Error ? err.message : 'Falha ao carregar incidentes')
+      }
     } finally {
-      setLoading(false)
+      if (!options?.silent) setLoading(false)
     }
   }, [boardFilter, highlightInvestigationId])
 
   useEffect(() => {
     void load()
+  }, [load])
+
+  useEffect(() => {
+    const tick = () => {
+      if (document.visibilityState !== 'visible') return
+      void load({ silent: true })
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void load({ silent: true })
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    const id = window.setInterval(tick, INCIDENT_LIST_POLL_MS)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.clearInterval(id)
+    }
   }, [load])
 
   useEffect(() => {
@@ -330,7 +359,7 @@ export function IncidentesPanel({
   return (
     <OpsPanel
       title="Incidentes"
-      description="Sinais cru até triagem — dados ao vivo via GET /api/analysis-queue (Postgres ops_analysis_queue)."
+      description="Sinais cru até triagem — GET /api/analysis-queue (Postgres); lista atualiza a cada 15s e ao voltar à aba."
     >
       {dispatchHealthBanner}
       <Space wrap style={{ marginBottom: 12 }} align="center">
@@ -452,6 +481,19 @@ export function IncidentesPanel({
                     </a>
                   </Paragraph>
                 )}
+                {row.linkedDefects && row.linkedDefects.length > 0 && (
+                  <Paragraph>
+                    <Text strong>Defeito(s):</Text>{' '}
+                    {row.linkedDefects.map((def) => (
+                      <span key={def.id} style={{ marginRight: 8 }}>
+                        <a href={buildDefectDeepLink(def.id)}>
+                          <OpsReferenceCodeTag code={def.referenceCode} compact />
+                        </a>
+                        <Text type="secondary"> ({def.status})</Text>
+                      </span>
+                    ))}
+                  </Paragraph>
+                )}
                 <Paragraph>
                   <Text strong>investigationId:</Text>{' '}
                   <InvestigationIdTag investigationId={row.id} showFull />
@@ -530,6 +572,21 @@ export function IncidentesPanel({
               render: (_: unknown, row) => (
                 <Tag color={incidentPipelineTagColor(row)}>{incidentPipelineLabel(row)}</Tag>
               ),
+            },
+            {
+              title: 'Defeito',
+              key: 'linkedDefects',
+              width: 108,
+              align: 'center',
+              render: (_: unknown, row) => {
+                const first = row.linkedDefects?.[0]
+                if (!first) return <Text type="secondary">—</Text>
+                return (
+                  <a href={buildDefectDeepLink(first.id)} onClick={(e) => e.stopPropagation()}>
+                    <OpsReferenceCodeTag code={first.referenceCode} compact />
+                  </a>
+                )
+              },
             },
             {
               title: 'ID',
