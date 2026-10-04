@@ -1,6 +1,0 @@
-{"ts":"2026-10-04T20:51:34.268Z","event":"bypass","command":"cd /workspace && npm run test:critical 2>&1"}
-{"ts":"2026-10-04T20:51:34.268Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run incident-recurrence.test.ts ops-analysis-queue-triage-callback.test.ts ops-analysis-queue-list-board.test.ts platform-defect-recurrence.test.ts platform-defect.service.test.ts platform-defect-mer"}
-{"ts":"2026-10-04T20:51:44.327Z","event":"bypass","command":"cd /workspace && npm install 2>&1 | tail -5 && cd packages/api && npm run test -- --run incident-recurrence.test.ts ops-analysis-queue-triage-callback.test.ts platform-defect-recurrence.test.ts 2>&1 | tail -30"}
-{"ts":"2026-10-04T20:52:14.052Z","event":"bypass","command":"cd /workspace && npm run test:critical 2>&1 | tail -25"}
-{"ts":"2026-10-04T20:52:20.826Z","event":"bypass","command":"cd /workspace/packages/api && npm run test:ops 2>&1 | tail -20"}
-{"ts":"2026-10-04T20:59:01.360Z","event":"bypass","command":"cd /workspace/packages/api && npm run test -- --run incident-pipeline-resolution.test.ts incident-recurrence.test.ts ops-analysis-queue-triage-callback.test.ts platform-defect-merge-webhook.service.test.ts 2>&1 | tail -15 && npm run test:op"}
