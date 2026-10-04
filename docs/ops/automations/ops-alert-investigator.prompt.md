@@ -63,6 +63,10 @@ Rascunho de investigação para triagem humana — **não** abrir PR nem alterar
 <dashboardUrl>
 ```
 
+## Início da triagem (Automation HTTP — não LLM)
+
+Antes do agente, a Automation deve executar **passo 0**: `POST` em `analysisQueue.triageStartedUrl` com o mesmo header de auth do callback. Isso marca o incidente **Em triagem** no CH sem consumir tokens do modelo.
+
 ## Callback (obrigatório ao finalizar)
 
 `POST` em `analysisQueue.callbackUrl` com header `x-investigator-callback-key` ou `x-internal-ops-key`.

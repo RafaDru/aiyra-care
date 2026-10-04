@@ -10,7 +10,7 @@ import {
   resolveOpsAlertInvestigationTier,
   resolveSupportInvestigationTier,
 } from '../../domain/ops/investigator-tier.js'
-import { resolveInvestigatorCallbackUrl } from './ops-analysis-callback-url.js'
+import { resolveInvestigatorAnalysisQueueUrls } from './ops-analysis-callback-url.js'
 import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
 import {
   dispatchOpsAlertInvestigator,
@@ -47,7 +47,7 @@ export async function investigateSupportReportWithQueue(
     : await dispatchSupportReportInvestigator(record, {
         operatorNotes: options.operatorNotes,
         trigger: options.trigger,
-        analysisQueue: { id: item.id, callbackUrl: resolveInvestigatorCallbackUrl() },
+        analysisQueue: resolveInvestigatorAnalysisQueueUrls(item.id),
         investigationTier: resolveSupportInvestigationTier(record, options.trigger),
       })
   if (dispatch.outcome === 'sent') {
@@ -90,7 +90,7 @@ export async function investigateOpsAlertWithQueue(
     ? await incidentDispatch.dispatchOpsAlertTriage(alert, item.id, options)
     : await dispatchOpsAlertInvestigator(alert, {
         ...options,
-        analysisQueue: { id: item.id, callbackUrl: resolveInvestigatorCallbackUrl() },
+        analysisQueue: resolveInvestigatorAnalysisQueueUrls(item.id),
         investigationTier: resolveOpsAlertInvestigationTier(alert, options.trigger),
       })
   if (dispatch.outcome === 'sent') {

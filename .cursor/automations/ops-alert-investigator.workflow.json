@@ -12,7 +12,7 @@
       "branch": "main"
     },
     "prompts": [
-      "Alerta ops_alert — lane AiCare Suporte SRE.\n\n1. Leia JSON (investigationId, alertId, environment, analysisQueue, investigation, triage, dashboardUrl).\n2. Playbook: docs/ops/automations/ops-alert-investigator.prompt.md.\n3. Rascunho em docs/ops/investigations/.\n4. investigation.tier 0 → só markdown. Tier 1 → PR draft nos gates (TIER1_GATES.md).\n5. POST callback com investigationId + remediationSummary + analysisArtifactPath (+ prUrl se Tier 1)."
+      "Alerta ops_alert — lane AiCare Suporte SRE.\n\n0. (Manual na UI) Antes do agente: ação HTTP POST em analysisQueue.triageStartedUrl com header x-investigator-callback-key (mesmo segredo do callback). Não use o LLM para este passo.\n1. Leia JSON (investigationId, alertId, environment, analysisQueue, investigation, triage, dashboardUrl).\n2. Playbook: docs/ops/automations/ops-alert-investigator.prompt.md.\n3. Rascunho em docs/ops/investigations/.\n4. investigation.tier 0 → só markdown. Tier 1 → PR draft nos gates (TIER1_GATES.md).\n5. POST callback com investigationId + remediationSummary + analysisArtifactPath (+ prUrl se Tier 1)."
     ],
     "model": "composer-2.5",
     "agentOptions": {

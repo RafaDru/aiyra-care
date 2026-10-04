@@ -36,7 +36,12 @@ export interface OpsAlertInvestigatorPayload {
   text: string
   operatorNotes?: string | null
   investigation?: { tier: 0 | 1; playbook: string; trigger: 'auto' | 'manual' }
-  analysisQueue?: { id: string; callbackUrl: string; lane: 'development_support' | 'sre_support' }
+  analysisQueue?: {
+    id: string
+    callbackUrl: string
+    triageStartedUrl: string
+    lane: 'development_support' | 'sre_support'
+  }
 }
 
 export function resolveOpsAlertInvestigatorWebhookUrl(): string | undefined {
@@ -140,7 +145,7 @@ export async function dispatchOpsAlertInvestigator(
     triage?: OpsAlertTriageRow
     operatorNotes?: string | null
     trigger: 'auto' | 'manual'
-    analysisQueue?: { id: string; callbackUrl: string }
+    analysisQueue?: { id: string; callbackUrl: string; triageStartedUrl: string }
     investigationTier?: InvestigationTier
   },
 ): Promise<OpsAlertInvestigatorDispatchResult> {
@@ -168,6 +173,7 @@ export async function dispatchOpsAlertInvestigator(
           analysisQueue: {
             id: options.analysisQueue.id,
             callbackUrl: options.analysisQueue.callbackUrl,
+            triageStartedUrl: options.analysisQueue.triageStartedUrl,
             lane: 'sre_support' as const,
           },
         }

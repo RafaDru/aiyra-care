@@ -6,7 +6,7 @@ import {
 } from '../../domain/ops/investigator-tier.js'
 import type { OpsAnalysisQueueService } from '../ops/ops-analysis-queue.service.js'
 import type { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
-import { resolveInvestigatorCallbackUrl } from '../ops/ops-analysis-callback-url.js'
+import { resolveInvestigatorAnalysisQueueUrls } from '../ops/ops-analysis-callback-url.js'
 import {
   dispatchSupportReportBatchInvestigator,
   type SupportReportBatchDispatchResult,
@@ -66,7 +66,7 @@ export async function runSupportReportBatchDispatch(options: {
   }
 
   const groups = groupSupportReportsForBatch(queued, deploymentTier)
-  const callbackUrl = resolveInvestigatorCallbackUrl()
+  const analysisQueue = resolveInvestigatorAnalysisQueueUrls(queueItem.id)
   let groupsDispatched = 0
   let reportsDispatched = 0
   const errors: string[] = []
@@ -94,7 +94,7 @@ export async function runSupportReportBatchDispatch(options: {
         diagnosticSummary: diagnosticExcerpt(r),
       })),
       investigationTier: tier,
-      analysisQueue: { id: queueItem.id, callbackUrl },
+      analysisQueue,
     })
 
     if (dispatch.outcome === 'sent') {
