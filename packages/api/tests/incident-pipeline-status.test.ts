@@ -7,14 +7,26 @@ import {
 } from '../src/domain/ops/incident-pipeline-status.js'
 
 describe('resolveIncidentPipelineStatusForDisplay', () => {
-  it('maps stale in_triage + forwarded outbox to forwarded', () => {
+  it('maps stale in_triage + forwarded outbox to forwarded when not investigating', () => {
     expect(
       resolveIncidentPipelineStatusForDisplay({
         incidentPipelineStatus: 'in_triage',
         dispatchStatus: 'forwarded',
         analysisArtifactPath: null,
+        legacyStatus: 'queued',
       }),
     ).toBe('forwarded')
+  })
+
+  it('keeps in_triage after triage-started (investigating + forwarded outbox)', () => {
+    expect(
+      resolveIncidentPipelineStatusForDisplay({
+        incidentPipelineStatus: 'in_triage',
+        dispatchStatus: 'forwarded',
+        analysisArtifactPath: null,
+        legacyStatus: 'investigating',
+      }),
+    ).toBe('in_triage')
   })
 
   it('keeps in_triage when triage artifact exists', () => {

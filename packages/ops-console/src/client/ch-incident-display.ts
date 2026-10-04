@@ -42,10 +42,12 @@ const PIPELINE_TAG_COLOR: Record<IncidentPipelineUiBucket, string> = {
 
 function resolvePipelineStatus(row: OpsAnalysisQueueItem) {
   const pipeline = row.incidentPipelineStatus
+  const activelyTriaging = row.status === 'investigating' || row.status === 'fix_proposed'
   if (
     pipeline === 'in_triage' &&
     row.dispatch?.status === 'forwarded' &&
-    !row.analysisArtifactPath
+    !row.analysisArtifactPath &&
+    !activelyTriaging
   ) {
     return 'forwarded' as const
   }

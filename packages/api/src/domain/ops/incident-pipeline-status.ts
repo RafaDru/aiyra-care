@@ -22,17 +22,21 @@ export function incidentPipelineUiLabel(bucket: IncidentPipelineUiBucket): strin
   return UI_LABEL[bucket]
 }
 
-/** Prefer canonical PG column; heal stale rows stuck in `in_triage` while outbox is only `forwarded`. */
+/** Heal stale `in_triage` when dispatch never progressed; keep real triage after `triage-started`. */
 export function resolveIncidentPipelineStatusForDisplay(input: {
   incidentPipelineStatus?: IncidentPipelineStatus | null
   analysisArtifactPath?: string | null
   dispatchStatus?: string | null
+  legacyStatus?: AnalysisQueueStatus | null
 }): IncidentPipelineStatus | null | undefined {
   const pipeline = input.incidentPipelineStatus
+  const activelyTriaging =
+    input.legacyStatus === 'investigating' || input.legacyStatus === 'fix_proposed'
   if (
     pipeline === 'in_triage' &&
     input.dispatchStatus === 'forwarded' &&
-    !input.analysisArtifactPath
+    !input.analysisArtifactPath &&
+    !activelyTriaging
   ) {
     return 'forwarded'
   }
