@@ -21,10 +21,21 @@ import {
 } from '@ant-design/icons'
 import {
   incidentApplicationLabel,
+  incidentDispatchStatusLabel,
   incidentOriginLabel,
   incidentPipelineLabel,
   incidentPipelineTagColor,
+  incidentSourceFootnote,
+  INCIDENT_LANE_LABEL,
+  INCIDENT_PRIORITY_LABEL,
+  INCIDENT_QUEUE_STATUS_LABEL,
 } from './ch-incident-display.js'
+import { defectStatusLabel } from './ch-defect-display.js'
+import {
+  buildDefectDeepLink,
+  buildIncidentRefDeepLink,
+  buildInvestigationDeepLink,
+} from './ch-ops-deep-link.js'
 import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
 import { OpsPanel } from './components/OpsPanel.js'
@@ -34,7 +45,7 @@ import {
   suggestIncidentBoardFilter,
   type IncidentBoardFilter,
 } from './ch-incident-board-filter.js'
-import { incidentMatchesBoardFilter } from '../../api/src/domain/ops/incident-list-filter.js'
+import { incidentMatchesBoardFilter } from '../../../api/src/domain/ops/incident-list-filter.js'
 import {
   matchesOpsAnalysisQueueItem,
   parseOpsSearchInput,
@@ -48,28 +59,10 @@ import {
 } from './ch-incident-table-sort.js'
 import type { IncidentDispatchHealth, OpsAnalysisQueueItem } from './ops.types.js'
 
-const { Text, Paragraph } = Typography
+const { Text, Paragraph, Link } = Typography
 
-const LANE_LABEL: Record<OpsAnalysisQueueItem['lane'], string> = {
-  development_support: 'Dev',
-  sre_support: 'SRE',
-}
-
-const PIPELINE_STATUS_LABEL: Record<OpsAnalysisQueueItem['status'], string> = {
-  queued: 'Na fila',
-  investigating: 'Investigando',
-  fix_proposed: 'Solução proposta',
-  completed: 'Concluída',
-  dismissed: 'Descartada',
-  failed: 'Falhou',
-}
-
-const PRIORITY_LABEL: Record<OpsAnalysisQueueItem['priority'], string> = {
-  low: 'Baixa',
-  normal: 'Normal',
-  high: 'Alta',
-  critical: 'Crítica',
-}
+/** Atualização automática da lista (PG ao vivo; sem SSE). */
+const INCIDENT_LIST_POLL_MS = 15_000
 
 const BOARD_FILTERS: IncidentBoardFilter[] = [
   'all_open',
@@ -78,31 +71,130 @@ const BOARD_FILTERS: IncidentBoardFilter[] = [
   'resolved',
 ]
 
-/** Atualização automática da lista (PG ao vivo; sem SSE). */
-const INCIDENT_LIST_POLL_MS = 15_000
+function IncidentExpandedDetail({ row }: { row: OpsAnalysisQueueItem }) {
+  const sourceNote = incidentSourceFootnote(row)
+  const tierLabel =
+    row.deploymentTier === 'production'
+      ? 'Produção'
+      : row.deploymentTier === 'preview'
+        ? 'Preview'
+        : row.deploymentTier
 
-function buildIncidentRefDeepLink(referenceCode: string): string {
-  const params = new URLSearchParams()
-  params.set('group', 'operacao')
-  params.set('tab', 'incidentes')
-  params.set('incidentRef', referenceCode)
-  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
-}
+  return (
+    <div style={{ maxWidth: 720 }}>
+      <Space size={[4, 4]} wrap style={{ marginBottom: 12 }}>
+        <Tag color={incidentPipelineTagColor(row)}>{incidentPipelineLabel(row)}</Tag>
+        <Tag>{INCIDENT_QUEUE_STATUS_LABEL[row.status]}</Tag>
+        <Tag>{INCIDENT_PRIORITY_LABEL[row.priority]}</Tag>
+        <Tag>{incidentOriginLabel(row)}</Tag>
+        <Text type="secondary">
+          {incidentApplicationLabel(row)} · {INCIDENT_LANE_LABEL[row.lane]} · {tierLabel}
+        </Text>
+      </Space>
 
-function buildInvestigationDeepLink(investigationId: string): string {
-  const params = new URLSearchParams()
-  params.set('group', 'operacao')
-  params.set('tab', 'incidentes')
-  params.set('investigationId', investigationId)
-  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
-}
+      <Paragraph>
+        <Text strong>Referência:</Text>{' '}
+        <OpsReferenceCodeTag code={row.referenceCode} showCopy />{' '}
+        <InvestigationIdTag investigationId={row.id} compact />
+      </Paragraph>
 
-function buildDefectDeepLink(defectId: string): string {
-  const params = new URLSearchParams()
-  params.set('group', 'operacao')
-  params.set('tab', 'defeitos')
-  params.set('defectId', defectId)
-  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
+      {row.errorSummary && (
+        <Paragraph>
+          <Text strong>Resumo:</Text> {row.errorSummary}
+        </Paragraph>
+      )}
+      {row.remediationSummary && (
+        <Paragraph>
+          <Text strong>Próximo passo sugerido:</Text> {row.remediationSummary}
+        </Paragraph>
+      )}
+      {row.analysisLastError && (
+        <Paragraph type="danger">
+          <Text strong>Erro na triagem:</Text> {row.analysisLastError}
+        </Paragraph>
+      )}
+      {row.analysisArtifactPath && (
+        <Paragraph>
+          <Text strong>Artefato da análise:</Text> <Text code>{row.analysisArtifactPath}</Text>
+        </Paragraph>
+      )}
+      {row.prUrl && (
+        <Paragraph>
+          <Text strong>Pull request:</Text>{' '}
+          <Link href={row.prUrl} target="_blank" rel="noreferrer">
+            {row.prUrl}
+          </Link>
+        </Paragraph>
+      )}
+
+      <Paragraph>
+        <Text strong>Encaminhamento ao Cursor</Text>
+        <br />
+        {row.dispatch ? (
+          <>
+            <Text>{incidentDispatchStatusLabel(row.dispatch.status)}</Text>
+            {row.dispatch.attemptCount > 0 && (
+              <Text type="secondary"> · {row.dispatch.attemptCount} tentativa(s)</Text>
+            )}
+            {row.dispatch.forwardedAt && (
+              <>
+                <br />
+                <Text type="secondary">
+                  Enviado em {new Date(row.dispatch.forwardedAt).toLocaleString('pt-BR')}
+                </Text>
+              </>
+            )}
+            {row.dispatch.lastError && (
+              <div style={{ marginTop: 4 }}>
+                <Text type="danger">{row.dispatch.lastError}</Text>
+              </div>
+            )}
+          </>
+        ) : (
+          <Text type="secondary"> Ainda não há registro de envio para triagem.</Text>
+        )}
+      </Paragraph>
+
+      {row.recurrenceOfReferenceCode && (
+        <Paragraph>
+          <Text strong>Reincidência de</Text>{' '}
+          <Link href={buildIncidentRefDeepLink(row.recurrenceOfReferenceCode)}>
+            <OpsReferenceCodeTag code={row.recurrenceOfReferenceCode} compact navigateOnClick={false} />
+          </Link>
+        </Paragraph>
+      )}
+
+      {row.linkedDefects && row.linkedDefects.length > 0 && (
+        <>
+          <Paragraph style={{ marginBottom: 4 }}>
+            <Text strong>Defeitos vinculados</Text>
+          </Paragraph>
+          <ul style={{ margin: '0 0 8px', paddingLeft: 18, listStyle: 'none' }}>
+            {row.linkedDefects.map((def) => (
+              <li key={def.id} style={{ marginBottom: 4 }}>
+                <Space size={6} wrap>
+                  <Link href={buildDefectDeepLink(def.id)}>
+                    <OpsReferenceCodeTag code={def.referenceCode} compact navigateOnClick={false} />
+                  </Link>
+                  <Tag>{defectStatusLabel(def.status)}</Tag>
+                </Space>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <Paragraph style={{ marginBottom: 0 }}>
+        <Text type="secondary">Identificador interno: </Text>
+        <InvestigationIdTag investigationId={row.id} showFull showCopy />
+      </Paragraph>
+      {sourceNote && (
+        <Text type="secondary" style={{ display: 'block', marginTop: 6 }}>
+          {sourceNote}
+        </Text>
+      )}
+    </div>
+  )
 }
 
 export function IncidentesPanel({
@@ -429,114 +521,24 @@ export function IncidentesPanel({
           expandable={{
             expandedRowKeys,
             onExpandedRowsChange: (keys) => setExpandedRowKeys(keys.map(String)),
-            expandedRowRender: (row) => (
-              <div style={{ maxWidth: 720 }}>
-                <Paragraph type="secondary">
-                  Pipeline CH: {incidentPipelineLabel(row)} · Fila: {PIPELINE_STATUS_LABEL[row.status]} ·
-                  Lane {LANE_LABEL[row.lane]} · {row.deploymentTier}
-                  {row.incidentPipelineStatus && (
-                    <>
-                      {' '}
-                      · <Text code>{row.incidentPipelineStatus}</Text>
-                    </>
-                  )}
-                </Paragraph>
-                {row.remediationSummary && (
-                  <Paragraph>
-                    <Text strong>Remediação:</Text> {row.remediationSummary}
-                  </Paragraph>
-                )}
-                {row.analysisArtifactPath && (
-                  <Paragraph>
-                    <Text strong>Artefato:</Text> <Text code>{row.analysisArtifactPath}</Text>
-                  </Paragraph>
-                )}
-                {row.prUrl && (
-                  <Paragraph>
-                    <Text strong>PR:</Text>{' '}
-                    <a href={row.prUrl} target="_blank" rel="noreferrer">{row.prUrl}</a>
-                  </Paragraph>
-                )}
-                {row.errorSummary && (
-                  <Paragraph>
-                    <Text strong>Contexto:</Text> {row.errorSummary}
-                  </Paragraph>
-                )}
-                {row.analysisLastError && (
-                  <Paragraph type="danger">{row.analysisLastError}</Paragraph>
-                )}
-                <Paragraph>
-                  <Text strong>Dispatch</Text>
-                  {row.dispatch ? (
-                    <>
-                      {' '}
-                      — outbox <Text code>{row.dispatch.status ?? '—'}</Text>
-                      {row.dispatch.attemptCount > 0 && (
-                        <> · tentativas {row.dispatch.attemptCount}</>
-                      )}
-                      {row.dispatch.forwardedAt && (
-                        <>
-                          {' '}
-                          · encaminhado{' '}
-                          {new Date(row.dispatch.forwardedAt).toLocaleString('pt-BR')}
-                        </>
-                      )}
-                      {row.dispatch.lastError && (
-                        <div>
-                          <Text type="danger">{row.dispatch.lastError}</Text>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <Text type="secondary"> — sem linha outbox</Text>
-                  )}
-                </Paragraph>
-                <Paragraph>
-                  <Text strong>Referência:</Text>{' '}
-                  <OpsReferenceCodeTag code={row.referenceCode} />
-                </Paragraph>
-                {row.recurrenceOfReferenceCode && (
-                  <Paragraph>
-                    <Text strong>Reincidência de</Text>{' '}
-                    <a href={buildIncidentRefDeepLink(row.recurrenceOfReferenceCode)}>
-                      {row.recurrenceOfReferenceCode}
-                    </a>
-                  </Paragraph>
-                )}
-                {row.linkedDefects && row.linkedDefects.length > 0 && (
-                  <Paragraph>
-                    <Text strong>Defeito(s):</Text>{' '}
-                    {row.linkedDefects.map((def) => (
-                      <span key={def.id} style={{ marginRight: 8 }}>
-                        <a href={buildDefectDeepLink(def.id)}>
-                          <OpsReferenceCodeTag code={def.referenceCode} compact />
-                        </a>
-                        <Text type="secondary"> ({def.status})</Text>
-                      </span>
-                    ))}
-                  </Paragraph>
-                )}
-                <Paragraph>
-                  <Text strong>investigationId:</Text>{' '}
-                  <InvestigationIdTag investigationId={row.id} showFull />
-                </Paragraph>
-                <Text type="secondary">
-                  {row.sourceType} · {row.sourceId}
-                </Text>
-              </div>
-            ),
+            expandedRowRender: (row) => <IncidentExpandedDetail row={row} />,
           }}
           columns={[
             {
               title: 'Ref',
               key: 'referenceCode',
               dataIndex: 'referenceCode',
-              width: 108,
+              width: 200,
               align: 'center',
               sorter: true,
               sortOrder:
                 tableSort.columnKey === 'referenceCode' ? tableSort.order : null,
-              render: (code: string | null) => <OpsReferenceCodeTag code={code} compact />,
+              render: (_: unknown, row) => (
+                <Space size={4} wrap style={{ justifyContent: 'center' }}>
+                  <OpsReferenceCodeTag code={row.referenceCode} compact />
+                  <InvestigationIdTag investigationId={row.id} compact />
+                </Space>
+              ),
             },
             {
               title: 'Atualizado',
@@ -581,7 +583,7 @@ export function IncidentesPanel({
               align: 'center',
               sorter: true,
               sortOrder: tableSort.columnKey === 'priority' ? tableSort.order : null,
-              render: (p: OpsAnalysisQueueItem['priority']) => PRIORITY_LABEL[p],
+              render: (p: OpsAnalysisQueueItem['priority']) => INCIDENT_PRIORITY_LABEL[p],
             },
             {
               title: 'Status',
@@ -605,17 +607,10 @@ export function IncidentesPanel({
                 if (!first) return <Text type="secondary">—</Text>
                 return (
                   <a href={buildDefectDeepLink(first.id)} onClick={(e) => e.stopPropagation()}>
-                    <OpsReferenceCodeTag code={first.referenceCode} compact />
+                    <OpsReferenceCodeTag code={first.referenceCode} compact navigateOnClick={false} />
                   </a>
                 )
               },
-            },
-            {
-              title: 'ID',
-              dataIndex: 'id',
-              width: 72,
-              align: 'center',
-              render: (id: string) => <InvestigationIdTag investigationId={id} compact />,
             },
             {
               title: 'Ações',
@@ -656,7 +651,7 @@ export function IncidentesPanel({
                       }}
                     />
                   </Tooltip>
-                  <Tooltip title="Copiar link com investigationId">
+                  <Tooltip title="Copiar link do incidente">
                     <Button
                       type="text"
                       size="small"

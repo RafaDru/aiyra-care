@@ -1,5 +1,57 @@
 import type { OpsAnalysisQueueItem } from './ops.types.js'
 
+export const INCIDENT_QUEUE_STATUS_LABEL: Record<OpsAnalysisQueueItem['status'], string> = {
+  queued: 'Na fila',
+  investigating: 'Investigando',
+  fix_proposed: 'Solução proposta',
+  completed: 'Concluída',
+  dismissed: 'Descartada',
+  failed: 'Falhou',
+}
+
+export const INCIDENT_LANE_LABEL: Record<OpsAnalysisQueueItem['lane'], string> = {
+  development_support: 'Correção (Dev)',
+  sre_support: 'Infra (SRE)',
+}
+
+export const INCIDENT_PRIORITY_LABEL: Record<OpsAnalysisQueueItem['priority'], string> = {
+  low: 'Baixa',
+  normal: 'Normal',
+  high: 'Alta',
+  critical: 'Crítica',
+}
+
+/** Tag curta alinhada a deep links / busca por prefixo UUID. */
+export function incidentShortTag(investigationId: string): string {
+  return `[inc:${investigationId.slice(0, 8)}]`
+}
+
+export function formatIncidentRefLine(item: {
+  id: string
+  referenceCode: string | null
+}): string {
+  const tag = incidentShortTag(item.id)
+  return item.referenceCode ? `${item.referenceCode} · ${tag}` : tag
+}
+
+export function incidentDispatchStatusLabel(status: string | null | undefined): string {
+  if (!status) return 'Sem registro de envio'
+  const map: Record<string, string> = {
+    pending: 'Aguardando envio',
+    forwarded: 'Enviado ao Cursor',
+    dead: 'Falhou após tentativas',
+    skipped: 'Envio ignorado',
+  }
+  return map[status] ?? status
+}
+
+export function incidentSourceFootnote(row: OpsAnalysisQueueItem): string | null {
+  if (row.sourceType === 'support_report') return 'Origem: relato de suporte'
+  if (row.sourceType === 'ops_alert') return 'Origem: alerta de operação'
+  if (row.sourceType) return `Origem: ${row.sourceType.replace(/_/g, ' ')}`
+  return null
+}
+
 export type IncidentPipelineUiBucket =
   | 'aberto'
   | 'encaminhado'

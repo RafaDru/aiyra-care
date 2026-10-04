@@ -175,7 +175,7 @@ export const opsApi = {
   platformDefectDetail: (id: string) =>
     request<{
       defect: import('./ops.types.js').PlatformDefectItem
-      incidents: Array<{ id: string; title: string }>
+      incidents: Array<{ id: string; title: string; referenceCode: string | null }>
     }>(`/api/platform-defects/${encodeURIComponent(id)}`),
   patchPlatformDefectStatus: (
     id: string,

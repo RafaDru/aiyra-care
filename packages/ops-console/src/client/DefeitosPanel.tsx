@@ -27,8 +27,14 @@ import {
   defectStatusLabel,
   formatBatchWindowHours,
 } from './ch-defect-display.js'
+
+import {
+  buildDefectDeepLink,
+  buildInvestigationDeepLink,
+} from './ch-ops-deep-link.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
+import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { opsApi } from './api.js'
 import { matchesPlatformDefectItem, parseOpsSearchInput } from './ch-ops-search.js'
 import type { PlatformDefectItem, PlatformDefectStatus } from './ops.types.js'
@@ -42,22 +48,6 @@ const FILTER_STATUSES: Array<PlatformDefectStatus | 'all'> = [
   'ready_for_pr',
   'fixed',
 ]
-
-function buildDefectDeepLink(defectId: string): string {
-  const params = new URLSearchParams()
-  params.set('group', 'operacao')
-  params.set('tab', 'defeitos')
-  params.set('defectId', defectId)
-  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
-}
-
-function buildIncidentDeepLink(incidentId: string): string {
-  const params = new URLSearchParams()
-  params.set('group', 'operacao')
-  params.set('tab', 'incidentes')
-  params.set('investigationId', incidentId)
-  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
-}
 
 export function DefeitosPanel({
   onRefresh,
@@ -337,10 +327,14 @@ export function DefeitosPanel({
               render: (_: unknown, row) => (
                 <Space size={4} wrap style={{ justifyContent: 'center' }}>
                   <OpsReferenceCodeTag code={row.referenceCode} compact />
-                  <Tooltip title={row.id}>
-                    <Text code style={{ fontSize: 11, whiteSpace: 'nowrap' }}>
+                  <Tooltip title={`${row.id} — clique para abrir`}>
+                    <a
+                      href={buildDefectDeepLink(row.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ fontFamily: 'monospace', fontSize: 11, color: 'inherit' }}
+                    >
                       {defectShortTag(row.id)}
-                    </Text>
+                    </a>
                   </Tooltip>
                 </Space>
               ),
@@ -471,7 +465,9 @@ function DefeitoDetail({
   branchValue: string
   onBranchChange: (value: string) => void
 }) {
-  const [incidents, setIncidents] = useState<Array<{ id: string; title: string }>>([])
+  const [incidents, setIncidents] = useState<
+    Array<{ id: string; title: string; referenceCode: string | null }>
+  >([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -531,16 +527,27 @@ function DefeitoDetail({
       )}
       <Paragraph>
         <Text strong>Referência:</Text>{' '}
-        <OpsReferenceCodeTag code={row.referenceCode} />{' '}
-        <Text code>{defectShortTag(row.id)}</Text>
+        <OpsReferenceCodeTag code={row.referenceCode} showCopy />{' '}
+        <Tooltip title="Abrir por UUID">
+          <a
+            href={buildDefectDeepLink(row.id)}
+            style={{ fontFamily: 'monospace', fontSize: 11, color: 'inherit' }}
+          >
+            {defectShortTag(row.id)}
+          </a>
+        </Tooltip>
       </Paragraph>
       {defectIsRecurrence(row) && (
         <Paragraph>
           <Text strong>Reincidência de:</Text>{' '}
           {row.parentReferenceCode ? (
-            <OpsReferenceCodeTag code={row.parentReferenceCode} />
+            <OpsReferenceCodeTag code={row.parentReferenceCode} showCopy />
           ) : (
-            <Text code>{defectShortTag(row.parentDefectId!)}</Text>
+            <OpsReferenceCodeTag
+              code={defectShortTag(row.parentDefectId!)}
+              href={buildDefectDeepLink(row.parentDefectId!)}
+              showCopy
+            />
           )}{' '}
           <Link href={buildDefectDeepLink(row.parentDefectId!)}>Abrir DEF pai</Link>
         </Paragraph>
@@ -576,17 +583,27 @@ function DefeitoDetail({
         <Paragraph type="secondary">{defectFixedViaHint(row.fixedVia)}</Paragraph>
       )}
       <Paragraph>
-        <Text strong>Incidentes vinculados:</Text>{' '}
-        {loading ? '…' : incidents.length === 0 ? '—' : null}
+        <Text strong>Incidentes vinculados</Text>
       </Paragraph>
-      <ul style={{ margin: 0, paddingLeft: 18 }}>
-        {incidents.map((inc) => (
-          <li key={inc.id}>
-            <a href={buildIncidentDeepLink(inc.id)}>{inc.title}</a>
-            <Text type="secondary"> · {inc.id.slice(0, 8)}</Text>
-          </li>
-        ))}
-      </ul>
+      {loading ? (
+        <Text type="secondary">Carregando…</Text>
+      ) : incidents.length === 0 ? (
+        <Text type="secondary">Nenhum incidente vinculado ainda.</Text>
+      ) : (
+        <ul style={{ margin: '0 0 8px', paddingLeft: 18, listStyle: 'none' }}>
+          {incidents.map((inc) => (
+            <li key={inc.id} style={{ marginBottom: 6 }}>
+              <Space size={6} wrap align="start">
+                {inc.referenceCode ? (
+                  <OpsReferenceCodeTag code={inc.referenceCode} compact />
+                ) : null}
+                <Link href={buildInvestigationDeepLink(inc.id)}>{inc.title}</Link>
+                <InvestigationIdTag investigationId={inc.id} compact />
+              </Space>
+            </li>
+          ))}
+        </ul>
+      )}
       {row.status === 'in_fix' && (
         <Paragraph style={{ marginTop: 8 }}>
           <Text type="secondary">Branch para PR:</Text>
