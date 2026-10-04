@@ -37,6 +37,24 @@ Legenda cobertura: ✅ suite existe · 🟡 parcial · ⬜ planejada · 🚫 for
 | Ação UI | CRUD | Suite | Cobertura |
 |---------|------|-------|-----------|
 | Login / logout | — | `regression-smoke` | ✅ |
+| **Mobile shell** — login, Carteira/Exames read-only | R | `mobile-shell-smoke` | 🟡 |
+| **Mobile** — alergias CRUD | CRUD | `mobile-allergies-crud` | 🟡 |
+| **Mobile** — atendimentos CRUD | CRUD | `mobile-medical-records-crud` | 🟡 |
+| **Mobile** — medicamentos CRUD | CRUD | `mobile-medications-crud` | 🟡 |
+| **Mobile** — vacinas CRUD | CRUD | `mobile-vaccines-crud` | 🟡 |
+| **Mobile** — exames CRUD (manual) | CRUD | `mobile-exams-crud` | 🟡 |
+| **Mobile** — marcadores de exame (gráfico) | Leitura | `mobile-exam-markers-chart` | 🟡 |
+| **Mobile** — curvas WHO | Leitura | `mobile-who-growth-chart` | 🟡 |
+| **Mobile** — gráficos de medidas | Leitura | `mobile-measurements-chart` | 🟡 |
+| **Mobile** — Ava companion smoke | Chat | `mobile-ava-companion-smoke` | 🟡 |
+| **Mobile** — Ava conversas | CRUD | `mobile-ava-conversation-crud` | 🟡 |
+| **Mobile** — Ava acelerador G1 | Chat | `mobile-ava-accelerator` | 🟡 |
+| **Mobile** — Ava anexo imagem | Chat | `mobile-ava-attachment-smoke` | 🟡 |
+| **Mobile** — agenda (eventos) | CRUD | `mobile-agenda-crud` | 🟡 |
+| **Mobile** — diagnósticos CRUD | CRUD | `mobile-diagnoses-crud` | 🟡 |
+| **Mobile** — paciente / onboarding TX | CRUD | `mobile-patient-tx` | 🟡 |
+| **Mobile** — documentos upload | CU | `mobile-documents-tx` | 🟡 |
+| **Mobile** — família (hub TX) | CRUD | `mobile-family-tx` | 🟡 |
 | Onboarding + perfil titular (`self`) | C | `onboarding-flow` | 🟡 |
 | Compliance gate (aceite termos) | C | `onboarding-flow` | 🟡 |
 | Dashboard listar pacientes | R | `core-patient-crud` | 🟡 |

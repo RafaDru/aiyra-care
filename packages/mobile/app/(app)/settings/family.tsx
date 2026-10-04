@@ -1,5 +1,6 @@
 import { RefreshControl, ScrollView, StyleSheet, Text } from 'react-native'
 import { useCallback, useState } from 'react'
+import { PatientAccessGrantsSection } from '@/components/family/PatientAccessGrantsSection'
 import { CareCirclesSection } from '@/components/family/CareCirclesSection'
 import { FamilyInvitesSection } from '@/components/family/FamilyInvitesSection'
 import { ProfileSharesSection } from '@/components/family/ProfileSharesSection'
@@ -29,6 +30,7 @@ export default function SettingsFamilyScreen() {
       <CareCirclesSection key={`circles-${refreshKey}`} />
       <ProfileSharesSection key={`shares-${refreshKey}`} />
       <FamilyInvitesSection key={`invites-${refreshKey}`} />
+      <PatientAccessGrantsSection key={`grants-${refreshKey}`} />
     </ScrollView>
   )
 }

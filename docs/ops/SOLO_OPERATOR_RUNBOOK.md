@@ -1,11 +1,11 @@
 # Runbook — operador solo (Command Hub)
 
 > **Fatia:** R0 · **Spec:** [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md)  
-> **Última atualização:** 2026-10-02
+> **Última atualização:** 2026-10-04
 
 Playbook único para Rafael operar **INC-*** → **DEF-*** até **Corrigido**, com gates humanos e recuperação de falhas sem SQL manual.
 
-**Pipeline técnico:** [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · **Correção E2E:** [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) · **Em correção:** [`DEFEITO_EM_CORRECAO.md`](./DEFEITO_EM_CORRECAO.md)
+**Pipeline técnico:** [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · **Decisões 2026-10-04:** [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) (merge → `fixed`, ops agêntico — Rafael só estratégico/G3) · **Correção E2E:** [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) · **Em correção:** [`DEFEITO_EM_CORRECAO.md`](./DEFEITO_EM_CORRECAO.md)
 
 ---
 
@@ -43,7 +43,7 @@ Detecção → INC (Aberto → … → Triado|Descartado)
 | **G1** | Triagem ambígua | Completar/descartar análise manual (suporte legado) |
 | **G2** | Antes de gastar correção | **Iniciar correção** / **Reenfileirar** após falha de dispatch ou retorno da esteira |
 | **G3** | `ready_for_pr` | (Futuro R3) **Solicitar revisão agêntica** sob demanda + **aprovar merge** no GitHub |
-| **G4** | Pós-merge | Marcar **Corrigido** no CH; validar deploy se aplicável |
+| **G4** | Pós-merge | **R4:** webhook merge → `fixed` automático; até lá, marcar **Corrigido** no CH; validar deploy se aplicável. INC ligado permanece `triaged`. |
 
 Tier 0 (piloto): `prUrl` pode faltar no callback; Tier 1 com `OPS_INVESTIGATOR_TIER1=1` — PR draft + allowlist.
 

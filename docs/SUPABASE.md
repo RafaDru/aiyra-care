@@ -44,7 +44,15 @@ OpenCode MCP já aponta ao projeto: `~/.config/opencode/opencode.json` → `proj
    - Authorized redirect URI: `https://lyljosprzmtapkocmxxa.supabase.co/auth/v1/callback`
 3. **Supabase** → Authentication → URL Configuration
    - Site URL: `http://localhost:5173` (dev)
-   - Redirect URLs: `http://localhost:5173/**`, `http://127.0.0.1:5173/**`
+   - Redirect URLs (web): `http://localhost:5173/**`, `http://127.0.0.1:5173/**`
+   - Redirect URLs (**mobile / Expo Go** — obrigatório para Google OAuth no app):
+     - `exp://**` (LAN / tunnel do Metro)
+     - `aiyracare://**` e `aiyracare://auth/callback` (dev build / deep link)
+   - LAN dev: `http://<IP-LAN>:5173/**` e `http://<IP-LAN>:5173/mobile-oauth-return`
+   - Sem allow list **e** sem `redirectTo` LAN no app, o Supabase ignora o mobile e cai no **Site URL** (`localhost:5173` no celular).
+   - **Site URL** no projeto cloud deve ser **LAN** no teste físico (`http://<IP>:5173`), não `localhost` — senão o celular abre `localhost:5173` no fallback. Script: `node scripts/patch-supabase-auth-redirect-urls.mjs` (atualiza `site_url` + allow list).
+   - App Expo Go: padrão **bridge** `http://<LAN>:5173/mobile-oauth-return` (Custom Tabs). A página repassa hash/query para `exp://<LAN>:8081/--/auth/callback` (Expo Go). `exp://` direto com `EXPO_PUBLIC_OAUTH_USE_EXP_REDIRECT=1`. `VITE_MOBILE_LAN_IP` no `.env` raiz se o celular cair em `localhost:5173` na bridge.
+   - Script (com PAT): `SUPABASE_ACCESS_TOKEN=sbp_... node scripts/patch-supabase-auth-redirect-urls.mjs`
 
 ### Erro: `Unsupported provider: provider is not enabled`
 
@@ -98,7 +106,7 @@ Sem as variáveis Supabase na API, o enforcement fica desligado (dev local abert
 
 O Postgres do projeto Supabase (`lyljosprzmtapkocmxxa`) expõe o schema `public` via **PostgREST** (roles `anon` e `authenticated`). Dados clínicos e vínculos de conta **não** devem ser lidos pelo cliente Supabase JS: web e mobile usam a **API** (`Authorization: Bearer` + rotas Fastify); a API conecta com `DATABASE_URL` (role `postgres` / pool direto) e valida escopo com `patient_memberships`, `owner_account_id` e guards na aplicação.
 
-**Migration `079_clinical_tables_rls.sql`** (aplicar no cloud pelo Rafael):
+**Migration `080_clinical_tables_rls.sql`** (aplicar no cloud pelo Rafael):
 
 - `ENABLE ROW LEVEL SECURITY` em: `patients`, `medical_records`, `diagnoses`, `medications`, `vaccines`, `allergies`, `exams`, `growth_records`, `documents`, e em `app_accounts` / `patient_memberships` **quando existirem** (`to_regclass` — cloud parcial sem 018 não falha).
 - **Sem policies** para `anon` / `authenticated` → negação por padrão no PostgREST.
@@ -108,13 +116,13 @@ O Postgres do projeto Supabase (`lyljosprzmtapkocmxxa`) expõe o schema `public`
 Aplicar local:
 
 ```powershell
-node packages/api/scripts/apply-migration-079.mjs
+node packages/api/scripts/apply-migration-080.mjs
 ```
 
 Cloud (mesmo padrão das outras migrations):
 
 ```powershell
-node scripts/apply-sql.mjs database/relational/079_clinical_tables_rls.sql --cloud
+node scripts/apply-sql.mjs database/relational/080_clinical_tables_rls.sql --cloud
 ```
 
 Se no futuro algum fluxo precisar de `supabase.from()` em tabela clínica, criar policy explícita (ex.: `patient_id` ∈ membership do `auth.uid()`) — hoje não há esse uso no monorepo.

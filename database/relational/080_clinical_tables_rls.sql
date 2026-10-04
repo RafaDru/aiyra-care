@@ -1,4 +1,4 @@
--- 079: RLS deny-by-default on clinical and account-linkage tables in public (PostgREST).
+-- 080: RLS deny-by-default on clinical and account-linkage tables in public (PostgREST).
 -- AiyraCare uses Fastify API + direct Postgres (DATABASE_URL), not supabase.from() on these tables.
 -- RLS on with no policies for anon/authenticated => PostgREST cannot read or write rows.
 -- Supabase service_role JWT and the postgres DB role bypass RLS (API unchanged).
@@ -42,7 +42,7 @@ BEGIN
   LOOP
     regclass_oid := to_regclass('public.' || t);
     IF regclass_oid IS NULL THEN
-      RAISE NOTICE '079: skipping % (table not present)', t;
+      RAISE NOTICE '080: skipping % (table not present)', t;
       CONTINUE;
     END IF;
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);

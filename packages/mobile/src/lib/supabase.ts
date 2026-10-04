@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import Constants from 'expo-constants'
+import { hybridAuthStorage } from '@/lib/remember-me'
 
 const extra = Constants.expoConfig?.extra as Record<string, string | undefined> | undefined
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? extra?.supabaseUrl
@@ -14,7 +14,7 @@ function buildClient(): SupabaseClient | null {
   if (!url || !anonKey) return null
   const client = createClient(url, anonKey, {
     auth: {
-      storage: AsyncStorage,
+      storage: hybridAuthStorage,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: typeof window !== 'undefined',
@@ -39,6 +39,10 @@ export async function getAccessToken(): Promise<string | null> {
   const token = data.session?.access_token ?? null
   if (token) memoryAccessToken = token
   return token
+}
+
+export function setMemoryAccessToken(token: string | null): void {
+  memoryAccessToken = token
 }
 
 export async function ensureAccessToken(): Promise<string | null> {

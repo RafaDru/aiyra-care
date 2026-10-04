@@ -5,16 +5,10 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "aiyracare",
-    "linking": {
-      "prefixes": ["aiyracare://", "https://app.aiyracare.com.br"],
-      "config": {
-        "screens": {
-          "invite/accept": "invite/accept"
-        }
-      }
+    "userInterfaceStyle": "light",
+    "android": {
+      "softwareKeyboardLayoutMode": "resize"
     },
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "web": {
       "bundler": "metro",
       "output": "single"
@@ -22,6 +16,19 @@
     "experiments": {
       "tsconfigPaths": true
     },
-    "plugins": ["expo-router"]
+    "ios": {
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "O AiyraCare usa Face ID para desbloquear o app com segurança."
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permitir que o AiyraCare use Face ID para desbloquear o app."
+        }
+      ]
+    ]
   }
 }

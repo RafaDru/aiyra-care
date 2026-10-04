@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-04] - CH: pipeline DEF na esteira GitHub, reincidência e ops agêntico
+
+### Decisão
+- **R4:** merge em `main` (webhook `pull_request` merged) fecha o defeito (`platform_defects.status = fixed`, `merged_at`, `merged_pr_url`); **G3** mantém aprovação humana de Rafael quando exigida; **G4** deixa de depender só de clique **Corrigido**.
+- **Incidente:** estado terminal permanece **`triaged`** — correção do DEF não reabre fila INC (métrica futura opcional, sem reabrir pipeline).
+- **Dedup:** N incidentes → 1 DEF aberto por `fingerprint` (já em triagem); reincidência após `fixed_at` exige **novo** DEF com `parent_defect_id` (fatia `ch-defect-recurrence`).
+- **Arquitetura CH:** bounded context Ops em `packages/api` (hexagonal, PG 071+); `ops-console` só UI; Neo4j **não** para INC/DEF.
+- **Operação:** Rafael só estratégico + merge (G3); triagem/correção/fechamento rotineiro via agentes e automações (batch 15 min, callbacks).
+
+### Realizado
+- [`docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md`](ops/CH_DEFECT_PIPELINE_DECISIONS.md); cross-links em pipeline, runbook e jornada solo; item `ch-defect-recurrence` no épico `ch-solo-operator-journey`.
+
 ## [2026-09-24] - Nome oficial Command Hub (CH)
 
 ### Decisão
@@ -19,6 +31,37 @@
 ### Realizado
 - [`docs/ops/OPS_MVP_SCOPE.md`](ops/OPS_MVP_SCOPE.md) — escopo ops ativo vs congelado.
 - Atualização: [`docs/ops/README.md`](ops/README.md), [`docs/infra/TWO_ENV_MODEL.md`](infra/TWO_ENV_MODEL.md), [`docs/infra/ENV_PREVIEW.md`](infra/ENV_PREVIEW.md), [`docs/infra/OPS_TWO_ENV_SETUP.md`](infra/OPS_TWO_ENV_SETUP.md).
+
+## [2026-09-21] - Mobile: onboarding família + saudação por nome
+
+### Realizado
+- Onboarding mobile **passo 2** (dependentes), paridade com web; wizard persistido em AsyncStorage até concluir ou pular.
+- Máscaras CPF/data, tag «Você», refs `p_*` na navegação; API não sobrescreve `display_name` com e-mail do Supabase no sync.
+
+## [2026-09-21] - Mobile: correção cadastro + UX auth
+
+### Realizado
+- **Bug cadastro:** após `signUp` sem sessão JWT, o app chamava `api.compliance.accept()` e exibia «Sessão não disponível» — fluxo corrigido (mensagem de confirmação de e-mail).
+- Logo PNG no bundle, aparência (claro/escuro/sistema), teclado em telas auth, mostrar senha, confirmação de senha (web + mobile).
+
+## [2026-09-21] - Mobile: entrega dual 80/20 + paridade Convênios e welcome
+
+### Decisão
+- Capacidades de produto devem ser entregues **web + mobile** no mesmo ciclo, exceto exceções documentadas (sync browser, ops, OAuth Microsoft, etc.) — ver `docs/MOBILE_WEB_DUAL_DELIVERY.md`.
+
+### Realizado
+- Tela **`(auth)/welcome`** (apresentação, Entrar / Criar conta).
+- **`PatientCoverageTab`** — convênios read-only (espelho `CoverageTab` web).
+- Configurações: logo + atalho «Abrir versão web».
+- Feature card `mobile-app-shell`, roadmap `plat-mobile`, suite `mobile-shell-smoke` atualizados.
+
+## [2026-09-20] - Mobile: Carteira, Exames resumo, OAuth Google
+
+### Realizado
+- **Carteira read-only** no app Expo (`PatientWalletTab`) — cartões CNS/convênio via API.
+- **Exames resumo read-only** (`PatientExamsTab`) — lista `GET /exams?patientId=`, pull-to-refresh, link ao web.
+- **Login Google** no mobile (`expo-auth-session` + Supabase OAuth, scheme `aiyracare://auth/callback`).
+- Suite QA **`mobile-shell-smoke`** e scripts `npm run mobile:check` / `qa:run:mobile`.
 
 ## [2026-09-20] - Família: exclusão de perfil só pelo titular (PR #8)
 

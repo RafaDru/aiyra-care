@@ -8,10 +8,10 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 config({ path: resolve(root, '.env') })
 
 const sql = readFileSync(
-  resolve(root, 'database/relational/079_clinical_tables_rls.sql'),
+  resolve(root, 'database/relational/079_ava_session_context_auth_record_pins.sql'),
   'utf8',
 )
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
 await pool.query(sql)
-console.log('079_clinical_tables_rls applied')
+console.log('079_ava_session_context_auth_record_pins applied')
 await pool.end()

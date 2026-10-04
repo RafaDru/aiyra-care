@@ -990,7 +990,7 @@
           "id": "plat-mobile",
           "title": "App mobile (React Native + Expo)",
           "status": "in_progress",
-          "detail": "M5: Ava FAB + chat SSE + lente paciente. M4 done. Plano: Project store docs/mobile-parity-plan.md."
+          "detail": "Entrega dual 80/20. Shell leitura (M2–M6) em curso. Sequência: docs/MOBILE_EVOLUTION_BLOCKS.md — Bloco 1 transacional → gráficos → Ava → UX."
         },
         {
           "id": "plat-microservices",
@@ -2359,7 +2359,13 @@
           "id": "ch-solo-operator-r4",
           "title": "R4 — Esteira final (merge → fixed)",
           "status": "planned",
-          "detail": "Webhook pull_request merged ou confirmação manual; métricas tempo por fase INC/DEF."
+          "detail": "Webhook pull_request merged ou confirmação manual; métricas tempo por fase INC/DEF. Decisões: docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md (INC permanece triaged)."
+        },
+        {
+          "id": "ch-defect-recurrence",
+          "title": "Pós-R4 — Reincidência de defeito (parent_defect_id)",
+          "status": "planned",
+          "detail": "INC após fixed_at + mesma fingerprint → novo DEF com parent_defect_id; badge CH; spec CH_DEFECT_PIPELINE_DECISIONS.md §3."
         }
       ]
     },
