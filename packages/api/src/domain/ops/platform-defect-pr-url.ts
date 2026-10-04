@@ -8,3 +8,11 @@ export function isGithubPullRequestUrl(value: string | null | undefined): boolea
   if (!trimmed) return false
   return GITHUB_PR_URL.test(trimmed)
 }
+
+/** Case-insensitive match for webhook ↔ stored `pr_url`. */
+export function normalizeGithubPrUrlForMatch(value: string | null | undefined): string | null {
+  if (value == null) return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  return trimmed.replace(/\/+$/, '').toLowerCase()
+}

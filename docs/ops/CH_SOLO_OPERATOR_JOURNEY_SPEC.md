@@ -240,7 +240,7 @@ Ordem sugerida para não quebrar o piloto:
 
 ### Fatia R4 — Esteira final operador (2–3 dias)
 
-- [ ] Registrar merge (`mergedPrUrl`, `fixed`) via webhook `pull_request` closed merged **ou** confirmação manual
+- [x] Registrar merge (`mergedPrUrl`, `fixed`) via webhook `pull_request` closed merged **ou** confirmação manual (`POST :3013/api/webhooks/github/defect-merge`)
 - [ ] Métricas: tempo por fase INC/DEF no ops metrics
 
 Decisões formalizadas (2026-10-04): [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) — merge fecha DEF; INC permanece `triaged`.

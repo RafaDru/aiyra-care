@@ -43,3 +43,9 @@ export function formatDefectRefLine(item: {
   const tag = defectShortTag(item.id)
   return item.referenceCode ? `${item.referenceCode} · ${tag}` : tag
 }
+
+export function defectFixedViaHint(fixedVia: PlatformDefectItem['fixedVia']): string | null {
+  if (fixedVia === 'github_webhook') return 'Fechado via merge GitHub (webhook)'
+  if (fixedVia === 'manual') return 'Marcado manualmente no CH'
+  return null
+}

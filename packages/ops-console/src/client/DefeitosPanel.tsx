@@ -17,6 +17,7 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons'
 import {
+  defectFixedViaHint,
   defectReadyForPrCount,
   defectShortTag,
   defectStatusColor,
@@ -489,6 +490,15 @@ function DefeitoDetail({
           <Text strong>PR:</Text>{' '}
           <Link href={row.prUrl} target="_blank" rel="noreferrer">{row.prUrl}</Link>
         </Paragraph>
+      )}
+      {row.mergedPrUrl && row.mergedPrUrl !== row.prUrl && (
+        <Paragraph>
+          <Text strong>PR mergeado:</Text>{' '}
+          <Link href={row.mergedPrUrl} target="_blank" rel="noreferrer">{row.mergedPrUrl}</Link>
+        </Paragraph>
+      )}
+      {row.status === 'fixed' && defectFixedViaHint(row.fixedVia) && (
+        <Paragraph type="secondary">{defectFixedViaHint(row.fixedVia)}</Paragraph>
       )}
       <Paragraph>
         <Text strong>Incidentes vinculados:</Text>{' '}

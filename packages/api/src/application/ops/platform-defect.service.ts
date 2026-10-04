@@ -139,6 +139,7 @@ export class PlatformDefectService {
       branchName: meta?.branchName,
       prUrl: meta?.prUrl,
       clearFixProgress: current.status === 'in_fix' && nextStatus === 'open',
+      fixedVia: nextStatus === 'fixed' ? 'manual' : undefined,
     })
     if (!updated) throw new PlatformDefectTransitionError('not_found')
     return updated

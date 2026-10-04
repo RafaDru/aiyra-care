@@ -43,7 +43,7 @@ Detecção → INC (Aberto → … → Triado|Descartado)
 | **G1** | Triagem ambígua | Completar/descartar análise manual (suporte legado) |
 | **G2** | Antes de gastar correção | **Iniciar correção** / **Reenfileirar** após falha de dispatch ou retorno da esteira |
 | **G3** | `ready_for_pr` | (Futuro R3) **Solicitar revisão agêntica** sob demanda + **aprovar merge** no GitHub |
-| **G4** | Pós-merge | **R4:** webhook merge → `fixed` automático; até lá, marcar **Corrigido** no CH; validar deploy se aplicável. INC ligado permanece `triaged`. |
+| **G4** | Pós-merge | Webhook GitHub (`GITHUB_DEFECT_MERGE_WEBHOOK_SECRET` → `POST :3013/api/webhooks/github/defect-merge`) fecha o DEF em `fixed` com `mergedPrUrl`; fallback manual **Corrigido** no CH (`fixed_via=manual`). INC ligado permanece `triaged`. |
 
 Tier 0 (piloto): `prUrl` pode faltar no callback; Tier 1 com `OPS_INVESTIGATOR_TIER1=1` — PR draft + allowlist.
 
@@ -97,7 +97,7 @@ Passo a passo E2E: [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIS
 
 **Hoje (R0):** manual — abrir/acompanhar PR no GitHub, CI no Actions, merge só após Rafael aprovar; CH **Corrigido** após merge confirmado.
 
-**Planejado (R2–R4):** `pipeline_status` no defeito, CI failed → `in_fix` com link da run; review agêntico sob demanda (G3); webhook merge → `fixed`.
+**Planejado (R2–R3):** `pipeline_status` no defeito, CI failed → `in_fix` com link da run; review agêntico sob demanda (G3). **R4 entregue:** webhook merge → `fixed` (ver G4).
 
 Checklist operacional pós-callback: [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) §6.
 
