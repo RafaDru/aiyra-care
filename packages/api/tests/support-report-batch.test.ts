@@ -83,7 +83,11 @@ describe('support-report-batch', () => {
         },
       ],
       investigationTier: 0,
-      analysisQueue: { id: 'queue-uuid', callbackUrl: 'http://127.0.0.1:3013/api/analysis-queue/callback' },
+      analysisQueue: {
+        id: 'queue-uuid',
+        callbackUrl: 'http://127.0.0.1:3013/api/analysis-queue/callback',
+        triageStartedUrl: 'http://127.0.0.1:3013/api/analysis-queue/queue-uuid/triage-started',
+      },
     })
     expect(result).toEqual({ outcome: 'sent' })
     const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))
@@ -96,6 +100,7 @@ describe('support-report-batch', () => {
     })
     expect(body.reports).toHaveLength(1)
     expect(body.analysisQueue.id).toBe('queue-uuid')
+    expect(body.analysisQueue.triageStartedUrl).toContain('/triage-started')
   })
 
   it('resolveSupportInvestigatorMode defaults to immediate', async () => {

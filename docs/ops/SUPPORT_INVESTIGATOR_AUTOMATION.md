@@ -16,6 +16,8 @@ POST /support/reports
 
 Canais **independentes**: o notificador local e a Automation recebem o mesmo payload (investigator inclui `investigation: { tier: 0 }`).
 
+**Passo 0 (Automation HTTP, zero LLM):** antes do agente, configure uma ação HTTP `POST` em `analysisQueue.triageStartedUrl` do payload (ou `http://127.0.0.1:3013/api/analysis-queue/<investigationId>/triage-started`) com o mesmo header de auth do callback (`x-investigator-callback-key` / `x-internal-ops-key`). Isso move o incidente **Encaminhado → Em triagem** no CH. **Não** peça ao LLM para chamar essa URL — só a ação HTTP da Automation.
+
 **Ambiente:** `environment.deploymentTier` (`integration` \| `preview` \| `production`) vem de `DEPLOYMENT_TIER` na API que disparou — não infira pela porta. As vars `CURSOR_*_WEBHOOK_*` podem ficar **só no `.env`** (mesma Automation para dev e preview).
 
 ---
@@ -74,7 +76,7 @@ Implementação: `packages/api/src/application/support-report/support-report-dis
 |-------|------|
 | 1 | Cursor → **Automations** → `AiCare - Suporte ao Desenvolvimento` → copiar **Webhook URL** → `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL` |
 | 2 | Mesma tela → **Generate / Copy auth header** → só o token `crsr_…` → `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY` |
-| 3 | Opcional callback agente: `OPS_INVESTIGATOR_CALLBACK_KEY` (ou fallback `OPS_METRICS_KEY`) — header `x-investigator-callback-key` em `POST :3013/api/analysis-queue/callback` |
+| 3 | Opcional callback agente: `OPS_INVESTIGATOR_CALLBACK_KEY` (ou fallback `OPS_METRICS_KEY`) — header `x-investigator-callback-key` em `POST :3013/api/analysis-queue/callback` **e** no passo 0 `POST :3013/api/analysis-queue/:id/triage-started` |
 | 4 | Link no payload: `OPS_ALERT_DASHBOARD_URL` — se usar `http://127.0.0.1:5173/ops`, a API **reescreve** para ops-console `http://127.0.0.1:3013` no `callbackUrl` / `dashboardUrl` |
 | 5 | **Reiniciar** processos que leem `.env`: API `:3010` e ops-console `:3013` (worker de outbox embutido) |
 | 6 | Validar: `curl -s http://127.0.0.1:3013/api/incident-dispatch/health` — lanes `developmentSupport` / `sreSupport` com `ready: true` quando URL+key corretas |

@@ -8,7 +8,7 @@ import {
   resolveOpsAlertInvestigationTier,
   resolveSupportInvestigationTier,
 } from '../../domain/ops/investigator-tier.js'
-import { resolveInvestigatorCallbackUrl } from './ops-analysis-callback-url.js'
+import { resolveInvestigatorCallbackUrl, resolveInvestigatorAnalysisQueueUrls } from './ops-analysis-callback-url.js'
 import {
   dispatchOpsAlertInvestigator,
   type OpsAlertInvestigatorDispatchResult,
@@ -89,6 +89,7 @@ export class IncidentDispatchService {
     options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
   ): Promise<SupportInvestigatorDispatchResult> {
     const callbackUrl = resolveInvestigatorCallbackUrl()
+    const analysisQueue = resolveInvestigatorAnalysisQueueUrls(incidentId)
     const investigationTier = resolveSupportInvestigationTier(record, options.trigger)
     const idempotencyKey = buildIncidentDispatchIdempotencyKey(incidentId, DISPATCH_KIND)
 
@@ -102,6 +103,7 @@ export class IncidentDispatchService {
           trigger: options.trigger,
           operatorNotes: options.operatorNotes ?? null,
           callbackUrl,
+          triageStartedUrl: analysisQueue.triageStartedUrl,
           investigationTier,
         },
       })) ?? (await this.outbox.findByIdempotencyKey(idempotencyKey))
@@ -109,7 +111,7 @@ export class IncidentDispatchService {
     const dispatch = await dispatchSupportReportInvestigator(record, {
       operatorNotes: options.operatorNotes,
       trigger: options.trigger,
-      analysisQueue: { id: incidentId, callbackUrl },
+      analysisQueue,
       investigationTier,
     })
 
@@ -130,6 +132,7 @@ export class IncidentDispatchService {
     },
   ): Promise<OpsAlertInvestigatorDispatchResult> {
     const callbackUrl = resolveInvestigatorCallbackUrl()
+    const analysisQueue = resolveInvestigatorAnalysisQueueUrls(incidentId)
     const investigationTier = resolveOpsAlertInvestigationTier(alert, options.trigger)
     const idempotencyKey = buildIncidentDispatchIdempotencyKey(incidentId, DISPATCH_KIND)
 
@@ -145,13 +148,14 @@ export class IncidentDispatchService {
           trigger: options.trigger,
           operatorNotes: options.operatorNotes ?? null,
           callbackUrl,
+          triageStartedUrl: analysisQueue.triageStartedUrl,
           investigationTier,
         },
       })) ?? (await this.outbox.findByIdempotencyKey(idempotencyKey))
 
     const dispatch = await dispatchOpsAlertInvestigator(alert, {
       ...options,
-      analysisQueue: { id: incidentId, callbackUrl },
+      analysisQueue,
       investigationTier,
     })
 
@@ -457,6 +461,9 @@ export class IncidentDispatchService {
             analysisQueue: {
               id: row.incidentId,
               callbackUrl: String(payload.callbackUrl ?? resolveInvestigatorCallbackUrl()),
+              triageStartedUrl: String(
+                payload.triageStartedUrl ?? resolveInvestigatorAnalysisQueueUrls(row.incidentId).triageStartedUrl,
+              ),
             },
             investigationTier: (payload.investigationTier as 0 | 1) ?? 0,
           })
@@ -470,6 +477,9 @@ export class IncidentDispatchService {
             analysisQueue: {
               id: row.incidentId,
               callbackUrl: String(payload.callbackUrl ?? resolveInvestigatorCallbackUrl()),
+              triageStartedUrl: String(
+                payload.triageStartedUrl ?? resolveInvestigatorAnalysisQueueUrls(row.incidentId).triageStartedUrl,
+              ),
             },
             investigationTier: (payload.investigationTier as 0 | 1) ?? 0,
           })
