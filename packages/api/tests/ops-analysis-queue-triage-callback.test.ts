@@ -60,7 +60,12 @@ describe('OpsAnalysisQueueService triage callback', () => {
       defect: { title: 'Wallet sync 500', fingerprint: 'wallet-500' },
     })
 
-    expect(defects.createFromTriage).toHaveBeenCalled()
+    expect(defects.createFromTriage).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Wallet sync 500', fingerprint: 'wallet-500' }),
+      'q-1',
+      'agent_triage',
+      expect.objectContaining({ incidentSeenAt: expect.any(String) }),
+    )
     expect(repo.setIncidentPipelineStatus).toHaveBeenCalledWith('q-1', 'triaged')
     expect(repo.markCompleted).toHaveBeenCalledWith('q-1')
   })

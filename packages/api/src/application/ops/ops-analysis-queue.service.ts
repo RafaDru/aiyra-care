@@ -265,6 +265,11 @@ export class OpsAnalysisQueueService {
           },
           record.id,
           'agent_triage',
+          {
+            incidentSeenAt: record.createdAt,
+            parentDefectId: input.parentDefectId ?? null,
+            recurrenceLikely: input.recurrenceLikely,
+          },
         )
       } else if (decision === 'link_defect' && input.linkDefectId) {
         await this.platformDefects.linkIncident(input.linkDefectId, record.id, 'agent_triage')

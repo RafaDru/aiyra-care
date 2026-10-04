@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-04] - CH: reincidência de defeito (`parent_defect_id`)
+
+### Decisão
+- Novo INC após `fixed_at` com mesma fingerprint (ou `parentDefectId` explícito do Triador) cria **novo** DEF com `parent_defect_id` — dedup §2 continua só para DEF abertos.
+
+### Realizado
+- Migration **083** (`parent_defect_id` FK); `resolveRecurrenceParentId` + `createFromTriage` com contexto de incidente; callback `recurrenceLikely` / `parentDefectId`.
+- CH Defeitos: tag **Reincidência** + deep link ao DEF pai; vitest `platform-defect-recurrence` + service triagem.
+
 ## [2026-10-04] - CH R1: `correction_failed` na Correção Dev
 
 ### Decisão

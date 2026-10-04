@@ -92,6 +92,9 @@ export interface AgentAnalysisCallbackInput {
     applications?: string[]
   }
   linkDefectId?: string
+  /** DEF `fixed` anterior — reincidência sem fingerprint estável (CH §3). */
+  parentDefectId?: string
+  recurrenceLikely?: boolean
   /** Atualização agente 2 no mesmo endpoint */
   defectId?: string
   defectStatus?: PlatformDefectAgentCallbackStatus

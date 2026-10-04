@@ -41,6 +41,8 @@ export interface PlatformDefectRecord {
   createdAt: string
   updatedAt: string
   incidentCount?: number
+  parentDefectId?: string | null
+  parentReferenceCode?: string | null
 }
 
 export interface CreatePlatformDefectInput {
@@ -51,6 +53,14 @@ export interface CreatePlatformDefectInput {
   ownerSubject?: string | null
   triageSummary?: string | null
   triageArtifactPath?: string | null
+  parentDefectId?: string | null
+}
+
+export interface CreatePlatformDefectFromTriageContext {
+  incidentSeenAt: string
+  parentDefectId?: string | null
+  /** Hint do Triador quando fingerprint instável — exige `parentDefectId` explícito. */
+  recurrenceLikely?: boolean
 }
 
 export type DefectPrBatchStatus = 'open' | 'merged' | 'failed'

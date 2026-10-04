@@ -99,6 +99,8 @@ export interface PlatformDefectItem {
   createdAt: string
   updatedAt: string
   incidentCount?: number
+  parentDefectId?: string | null
+  parentReferenceCode?: string | null
 }
 
 export interface OpsAnalysisAttentionCounts {

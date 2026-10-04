@@ -2364,7 +2364,7 @@
         {
           "id": "ch-defect-recurrence",
           "title": "Pós-R4 — Reincidência de defeito (parent_defect_id)",
-          "status": "planned",
+          "status": "done",
           "detail": "INC após fixed_at + mesma fingerprint → novo DEF com parent_defect_id; badge CH; spec CH_DEFECT_PIPELINE_DECISIONS.md §3."
         }
       ]
