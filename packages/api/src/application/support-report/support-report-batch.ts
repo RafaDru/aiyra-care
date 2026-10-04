@@ -66,7 +66,6 @@ export async function runSupportReportBatchDispatch(options: {
   }
 
   const groups = groupSupportReportsForBatch(queued, deploymentTier)
-  const analysisQueue = resolveInvestigatorAnalysisQueueUrls(queueItem.id)
   let groupsDispatched = 0
   let reportsDispatched = 0
   const errors: string[] = []
@@ -82,6 +81,7 @@ export async function runSupportReportBatchDispatch(options: {
       reportIds: records.map((r) => r.id),
       records,
     })
+    const analysisQueue = resolveInvestigatorAnalysisQueueUrls(queueItem.id)
 
     const tier = resolveSupportInvestigationTier(records[0], 'auto')
     const dispatch: SupportReportBatchDispatchResult = await dispatchSupportReportBatchInvestigator({
