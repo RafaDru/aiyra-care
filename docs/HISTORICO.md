@@ -11,6 +11,7 @@
 
 ### Realizado
 - [`docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md`](ops/CH_DEFECT_PIPELINE_DECISIONS.md); cross-links em pipeline, runbook e jornada solo; item `ch-defect-recurrence` no épico `ch-solo-operator-journey`.
+- **R4 implementado:** migration **081** (`merged_pr_url`, `merged_at`, `fixed_via`); webhook `POST /api/webhooks/github/defect-merge` no ops-console; transição idempotente `ready_for_pr`/`in_fix` → `fixed` por `prUrl` ou `DEF-*`/UUID no PR.
 
 ## [2026-09-24] - Nome oficial Command Hub (CH)
 

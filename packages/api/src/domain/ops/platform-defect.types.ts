@@ -1,5 +1,7 @@
 export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
 
+export type PlatformDefectFixedVia = 'github_webhook' | 'manual'
+
 export type PlatformDefectIncidentLinkedBy = 'agent_triage' | 'ops_manual' | 'system_dedup' | string
 
 export interface PlatformDefectRecord {
@@ -15,6 +17,9 @@ export interface PlatformDefectRecord {
   triageArtifactPath: string | null
   branchName: string | null
   prUrl: string | null
+  mergedPrUrl: string | null
+  mergedAt: string | null
+  fixedVia: PlatformDefectFixedVia | null
   prBatchId: string | null
   firstSeenAt: string
   fixStartedAt: string | null

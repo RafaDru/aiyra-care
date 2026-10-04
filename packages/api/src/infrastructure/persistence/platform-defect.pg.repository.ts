@@ -6,6 +6,8 @@ import type {
   PlatformDefectStatus,
 } from '../../domain/ops/platform-defect.types.js'
 import { normalizeDefectReferenceCode } from '../../domain/ops/incident-list-filter.js'
+import { normalizeGithubPrUrlForMatch } from '../../domain/ops/platform-defect-pr-url.js'
+import type { PlatformDefectFixedVia } from '../../domain/ops/platform-defect.types.js'
 import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
 
 function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
@@ -23,6 +25,9 @@ function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
     triageArtifactPath: row.triage_artifact_path != null ? String(row.triage_artifact_path) : null,
     branchName: row.branch_name != null ? String(row.branch_name) : null,
     prUrl: row.pr_url != null ? String(row.pr_url) : null,
+    mergedPrUrl: row.merged_pr_url != null ? String(row.merged_pr_url) : null,
+    mergedAt: row.merged_at ? new Date(String(row.merged_at)).toISOString() : null,
+    fixedVia: row.fixed_via != null ? (row.fixed_via as PlatformDefectFixedVia) : null,
     prBatchId: row.pr_batch_id != null ? String(row.pr_batch_id) : null,
     firstSeenAt: new Date(String(row.first_seen_at)).toISOString(),
     fixStartedAt: row.fix_started_at ? new Date(String(row.fix_started_at)).toISOString() : null,
@@ -199,6 +204,82 @@ export class PlatformDefectPgRepository {
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
+  async findMergeCandidates(input: {
+    mergedPrUrl: string
+    referenceCodes: string[]
+    defectIds: string[]
+  }): Promise<PlatformDefectRecord[]> {
+    const normalizedPr = normalizeGithubPrUrlForMatch(input.mergedPrUrl)
+    if (!normalizedPr) return []
+
+    const byId = new Map<string, PlatformDefectRecord>()
+
+    const prRes = await this.pool.query(
+      `SELECT * FROM platform_defects
+       WHERE pr_url IS NOT NULL
+         AND lower(regexp_replace(trim(pr_url), '/+$', '')) = $1`,
+      [normalizedPr],
+    )
+    for (const row of prRes.rows) {
+      const mapped = mapRow(row as Record<string, unknown>)
+      byId.set(mapped.id, mapped)
+    }
+
+    for (const ref of input.referenceCodes) {
+      const one = await this.findByReferenceCode(ref)
+      if (one) byId.set(one.id, one)
+    }
+
+    for (const defectId of input.defectIds) {
+      const one = await this.findById(defectId)
+      if (one) byId.set(one.id, one)
+    }
+
+    return [...byId.values()].filter((d) =>
+      d.status === 'ready_for_pr' || d.status === 'in_fix' || d.status === 'fixed',
+    )
+  }
+
+  async applyGithubMergeFixed(
+    id: string,
+    mergedPrUrl: string,
+  ): Promise<{ record: PlatformDefectRecord; wasAlreadyFixed: boolean } | null> {
+    const existing = await this.findById(id)
+    if (!existing) return null
+
+    const normalized = normalizeGithubPrUrlForMatch(mergedPrUrl)
+    if (!normalized) return null
+
+    if (existing.status === 'fixed') {
+      const sameMerge =
+        normalizeGithubPrUrlForMatch(existing.mergedPrUrl) === normalized ||
+        normalizeGithubPrUrlForMatch(existing.prUrl) === normalized
+      if (sameMerge) return { record: existing, wasAlreadyFixed: true }
+      return null
+    }
+
+    if (existing.status !== 'ready_for_pr' && existing.status !== 'in_fix') {
+      return null
+    }
+
+    const res = await this.pool.query(
+      `UPDATE platform_defects SET
+        status = 'fixed',
+        fixed_at = COALESCE(fixed_at, NOW()),
+        merged_at = COALESCE(merged_at, NOW()),
+        merged_pr_url = COALESCE(merged_pr_url, $2),
+        pr_url = COALESCE(pr_url, $2),
+        fixed_via = COALESCE(fixed_via, 'github_webhook'),
+        updated_at = NOW()
+      WHERE id = $1::uuid
+        AND status IN ('ready_for_pr', 'in_fix')
+      RETURNING *`,
+      [id, mergedPrUrl.slice(0, 512)],
+    )
+    if (!res.rows[0]) return null
+    return { record: mapRow(res.rows[0] as Record<string, unknown>), wasAlreadyFixed: false }
+  }
+
   async updateStatus(
     id: string,
     status: PlatformDefectStatus,
@@ -208,6 +289,8 @@ export class PlatformDefectPgRepository {
       prBatchId?: string | null
       markFixDispatchSent?: boolean
       clearFixProgress?: boolean
+      fixedVia?: PlatformDefectFixedVia | null
+      mergedPrUrl?: string | null
     },
   ): Promise<PlatformDefectRecord | null> {
     const fixStarted = status === 'in_fix' ? 'fix_started_at = COALESCE(fix_started_at, NOW()),' : ''
@@ -220,6 +303,12 @@ export class PlatformDefectPgRepository {
     const readyForPr =
       status === 'ready_for_pr' ? 'ready_for_pr_at = COALESCE(ready_for_pr_at, NOW()),' : ''
     const fixed = status === 'fixed' ? 'fixed_at = COALESCE(fixed_at, NOW()),' : ''
+    const manualFixed =
+      status === 'fixed' && meta?.fixedVia === 'manual'
+        ? `fixed_via = COALESCE(fixed_via, 'manual'),
+           merged_at = COALESCE(merged_at, NOW()),
+           merged_pr_url = COALESCE(merged_pr_url, pr_url, $4),`
+        : ''
 
     const res = await this.pool.query(
       `UPDATE platform_defects SET
@@ -229,6 +318,7 @@ export class PlatformDefectPgRepository {
         ${clearFix}
         ${readyForPr}
         ${fixed}
+        ${manualFixed}
         branch_name = COALESCE($3, branch_name),
         pr_url = COALESCE($4, pr_url),
         pr_batch_id = COALESCE($5::uuid, pr_batch_id),

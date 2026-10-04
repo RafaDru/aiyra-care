@@ -76,6 +76,9 @@ export interface PlatformDefectItem {
   triageArtifactPath: string | null
   branchName: string | null
   prUrl: string | null
+  mergedPrUrl: string | null
+  mergedAt: string | null
+  fixedVia: 'github_webhook' | 'manual' | null
   prBatchId: string | null
   firstSeenAt: string
   fixStartedAt: string | null

@@ -217,6 +217,8 @@ Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /ap
 | `CH_INCIDENT_RECONCILE_INTERVAL_MS` | 60000 | Reconciliador stale-only quando `CH_INCIDENT_TRIAGE_BATCH_INTERVAL_MS` **não** está definido |
 | `CH_INCIDENT_OPEN_STALE_MS` | 300000 | Idade mínima do incidente `open` para reconciliar stale-only (evita corrida com enqueue síncrono) |
 | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL` | — | Agente 2 (correção) |
+| `GITHUB_DEFECT_MERGE_WEBHOOK_SECRET` | — | HMAC `x-hub-signature-256` em `POST :3013/api/webhooks/github/defect-merge` (evento `pull_request` merged → `fixed`) |
+| `GITHUB_DEFECT_MERGE_BASE_REF` | `main` | Branch base do merge aceito pelo webhook |
 
 ### 6.2 Dispatch triagem — Cursor Automations + ops
 

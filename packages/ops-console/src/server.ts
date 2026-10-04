@@ -45,6 +45,9 @@ import {
   dispatchErrorMessage,
   startPlatformDefectFixWithDispatch,
 } from '../../api/src/application/ops/platform-defect-fix-dispatch.js'
+import { PlatformDefectMergeWebhookService } from '../../api/src/application/ops/platform-defect-merge-webhook.service.js'
+import { verifyGithubWebhookSignature } from '../../api/src/domain/ops/github-webhook-signature.js'
+import { resolveGithubDefectMergeWebhookSecret } from '../../api/src/application/ops/platform-defect-merge-webhook.config.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
 import type { IncidentBoardFilter } from '../../api/src/domain/ops/incident-list-filter.js'
 import {
@@ -110,6 +113,7 @@ const supportRepo = new SupportReportPgRepository(pool)
 const platformDefectRepo = new PlatformDefectPgRepository(pool)
 const defectPrBatchRepo = new DefectPrBatchPgRepository(pool)
 const platformDefectService = new PlatformDefectService(platformDefectRepo)
+const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(platformDefectRepo)
 const incidentDispatchService = createIncidentDispatchService(pool)
 const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
@@ -206,8 +210,29 @@ async function registerClientRoutes(fastify: FastifyInstance, vite?: ViteDevServ
   }
 }
 
+const GITHUB_DEFECT_MERGE_WEBHOOK_PATH = '/api/webhooks/github/defect-merge'
+
 async function main() {
   const fastify = Fastify({ logger: false })
+
+  fastify.addContentTypeParser(
+    'application/json',
+    { parseAs: 'buffer' },
+    (req, body, done) => {
+      const path = req.url?.split('?')[0] ?? ''
+      if (path === GITHUB_DEFECT_MERGE_WEBHOOK_PATH) {
+        (req as { rawBody?: Buffer }).rawBody = body as Buffer
+        done(null, body)
+        return
+      }
+      try {
+        const text = (body as Buffer).toString('utf8')
+        done(null, text ? JSON.parse(text) : {})
+      } catch (err) {
+        done(err as Error, undefined)
+      }
+    },
+  )
 
   fastify.setErrorHandler((err, _req, reply) => {
     if (isPgSchemaOutdatedError(err)) {
@@ -521,6 +546,45 @@ async function main() {
       return { ok: true }
     },
   )
+
+  fastify.post(GITHUB_DEFECT_MERGE_WEBHOOK_PATH, async (req, reply) => {
+    const secret = resolveGithubDefectMergeWebhookSecret()
+    if (!secret) {
+      return reply.status(503).send({ error: 'webhook_disabled' })
+    }
+    const signature = req.headers['x-hub-signature-256'] as string | undefined
+    const rawBody =
+      (req as { rawBody?: Buffer }).rawBody ??
+      (Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body ?? {})))
+    if (!verifyGithubWebhookSignature(rawBody, signature, secret)) {
+      return reply.status(401).send({ error: 'invalid_signature' })
+    }
+    let payload: unknown
+    try {
+      payload = JSON.parse(rawBody.toString('utf8'))
+    } catch {
+      return reply.status(400).send({ error: 'invalid_json' })
+    }
+    const result = await platformDefectMergeWebhook.handlePullRequestClosed(payload)
+    if (result.outcome === 'disabled') {
+      return reply.status(503).send({ error: result.reason })
+    }
+    if (result.outcome === 'ignored') {
+      return { ok: true, ignored: true, reason: result.reason }
+    }
+    return {
+      ok: true,
+      outcome: result.outcome,
+      idempotent: result.idempotent,
+      defects: result.defects.map((d) => ({
+        id: d.id,
+        referenceCode: d.referenceCode,
+        status: d.status,
+        mergedPrUrl: d.mergedPrUrl,
+        fixedVia: d.fixedVia,
+      })),
+    }
+  })
 
   fastify.get<{ Querystring: { status?: string; includeFixed?: string; q?: string } }>(
     '/api/platform-defects',
