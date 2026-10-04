@@ -2359,7 +2359,13 @@
           "id": "ch-solo-operator-r4",
           "title": "R4 — Esteira final (merge → fixed)",
           "status": "planned",
-          "detail": "Webhook pull_request merged ou confirmação manual; métricas tempo por fase INC/DEF."
+          "detail": "Webhook pull_request merged ou confirmação manual; métricas tempo por fase INC/DEF. Decisões: docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md (INC permanece triaged)."
+        },
+        {
+          "id": "ch-defect-recurrence",
+          "title": "Pós-R4 — Reincidência de defeito (parent_defect_id)",
+          "status": "planned",
+          "detail": "INC após fixed_at + mesma fingerprint → novo DEF com parent_defect_id; badge CH; spec CH_DEFECT_PIPELINE_DECISIONS.md §3."
         }
       ]
     },

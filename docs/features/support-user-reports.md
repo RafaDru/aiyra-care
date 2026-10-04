@@ -80,7 +80,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 
 ## Ops — jornada após o chamado
 
-Chamados alimentam incidentes `INC-*` no Command Hub. Ciclo completo até correção mergeada: [`docs/ops/SOLO_OPERATOR_RUNBOOK.md`](../ops/SOLO_OPERATOR_RUNBOOK.md) (épico `ch-solo-operator-journey`).
+Chamados alimentam incidentes `INC-*` no Command Hub. Ciclo completo até correção mergeada: [`docs/ops/SOLO_OPERATOR_RUNBOOK.md`](../ops/SOLO_OPERATOR_RUNBOOK.md) (épico `ch-solo-operator-journey`). Decisões de pipeline (dedup, merge → `fixed`, reincidência, ops agêntico): [`docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md`](../ops/CH_DEFECT_PIPELINE_DECISIONS.md). Domínio INC/DEF em PG (`packages/api` ops); suite QA do fluxo CH: [`ops-ch-defeitos`](../testing/suites/ops-ch-defeitos.md).
 
 ## Ver também
 
