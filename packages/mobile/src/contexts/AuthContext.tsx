@@ -1,8 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Linking } from 'react-native'
 import type { Session, User } from '@supabase/supabase-js'
 import type { AppAccount } from '@/lib/api.types'
 import { api } from '@/lib/api'
-import { getSupabase, supabaseConfigured } from '@/lib/supabase'
+import { createSessionFromOAuthUrl, signInWithOAuthProvider } from '@/lib/supabase-oauth'
+import { setBiometricUnlockEnabled } from '@/lib/biometric-unlock'
+import {
+  isRememberMeEnabled,
+  setRememberMePreference,
+} from '@/lib/remember-me'
+import { getAccessToken, getSupabase, setMemoryAccessToken, supabaseConfigured } from '@/lib/supabase'
+import { withTimeout } from '@/lib/with-timeout'
+
+export type SignUpResult = { kind: 'session' } | { kind: 'email_confirmation' }
 
 type AuthContextValue = {
   configured: boolean
@@ -14,7 +24,11 @@ type AuthContextValue = {
   user: User | null
   account: AppAccount | null
   needsProfile: boolean
+  rememberMe: boolean
+  setRememberMe: (remember: boolean) => Promise<void>
   signInWithPassword: (email: string, password: string) => Promise<void>
+  signUpWithPassword: (email: string, password: string) => Promise<SignUpResult>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   refreshSync: () => Promise<void>
 }
@@ -27,8 +41,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [account, setAccount] = useState<AppAccount | null>(null)
   const [needsProfile, setNeedsProfile] = useState(false)
+  const [rememberMe, setRememberMeState] = useState(true)
 
   const authUserId = session?.user?.id ?? null
+
+  useEffect(() => {
+    void isRememberMeEnabled().then(setRememberMeState)
+  }, [])
+
+  const setRememberMe = useCallback(async (remember: boolean) => {
+    await setRememberMePreference(remember)
+    setRememberMeState(remember)
+  }, [])
 
   const syncAccount = useCallback(async (accessToken: string | undefined) => {
     if (!accessToken || !supabaseConfigured) {
@@ -36,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setNeedsProfile(false)
       return
     }
-    const result = await api.auth.sync()
+    const result = await withTimeout(api.auth.sync(), 15_000, 'api.auth.sync')
     setAccount(result.account)
     setNeedsProfile(result.needsProfile)
   }, [])
@@ -58,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const refreshSync = useCallback(async () => {
-    await runSync(session?.access_token)
+    const token = (await getAccessToken()) ?? session?.access_token
+    await runSync(token)
   }, [session?.access_token, runSync])
 
   useEffect(() => {
@@ -67,13 +92,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
       return
     }
-    client.auth
-      .getSession()
+    void withTimeout(client.auth.getSession(), 12_000, 'auth.getSession')
       .then(({ data }) => {
         setSession(data.session)
-        return runSync(data.session?.access_token)
+        setLoading(false)
+        void runSync(data.session?.access_token)
       })
-      .finally(() => setLoading(false))
+      .catch(() => {
+        setSession(null)
+        setLoading(false)
+      })
 
     const { data: sub } = client.auth.onAuthStateChange((_event, next) => {
       setSession(next)
@@ -82,6 +110,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe()
   }, [runSync])
 
+  useEffect(() => {
+    const handleUrl = (url: string | null) => {
+      if (!url) return
+      if (!url.includes('access_token') && !url.includes('code=') && !url.includes('error=')) return
+      void createSessionFromOAuthUrl(url).catch(() => undefined)
+    }
+    const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url))
+    void Linking.getInitialURL().then(handleUrl)
+    return () => sub.remove()
+  }, [])
+
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = getSupabase()
     if (!client) throw new Error('Auth não configurado')
@@ -89,10 +128,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }, [])
 
+  const signUpWithPassword = useCallback(async (email: string, password: string): Promise<SignUpResult> => {
+    const client = getSupabase()
+    if (!client) throw new Error('Auth não configurado')
+    const { data, error } = await client.auth.signUp({ email, password })
+    if (error) throw error
+    if (data.session) {
+      setMemoryAccessToken(data.session.access_token)
+      setSession(data.session)
+      return { kind: 'session' }
+    }
+    return { kind: 'email_confirmation' }
+  }, [])
+
+  const signInWithGoogle = useCallback(async () => {
+    await signInWithOAuthProvider('google')
+  }, [])
+
   const signOut = useCallback(async () => {
     const client = getSupabase()
     if (!client) return
     await client.auth.signOut()
+    await setBiometricUnlockEnabled(false)
     setAccount(null)
     setNeedsProfile(false)
   }, [])
@@ -107,11 +164,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       account,
       needsProfile,
+      rememberMe,
+      setRememberMe,
       signInWithPassword,
+      signUpWithPassword,
+      signInWithGoogle,
       signOut,
       refreshSync,
     }),
-    [loading, syncing, session, authUserId, account, needsProfile, signInWithPassword, signOut, refreshSync],
+    [
+      loading,
+      syncing,
+      session,
+      authUserId,
+      account,
+      needsProfile,
+      rememberMe,
+      setRememberMe,
+      signInWithPassword,
+      signUpWithPassword,
+      signInWithGoogle,
+      signOut,
+      refreshSync,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

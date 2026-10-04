@@ -19,6 +19,8 @@ export const avaChatBodySchema = z.object({
     z.object({ entityType: z.literal('exam_order'), entityId: z.string().uuid() }),
     z.object({ entityType: z.literal('exam_result_item'), entityId: z.string().uuid() }),
     z.object({ entityType: z.literal('exam_marker'), markerName: z.string().min(1).max(255) }),
+    z.object({ entityType: z.literal('authorization'), entityId: z.string().uuid() }),
+    z.object({ entityType: z.literal('medical_record'), entityId: z.string().uuid() }),
   ]).optional(),
   /** Emite eventos SSE de atividade (ferramentas + reflexão) durante o turno. */
   streamActivity: z.boolean().optional(),

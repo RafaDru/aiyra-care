@@ -10,75 +10,117 @@
 
 ## Resumo
 
-Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Supabase, lista de pacientes, perfil com macro-seções (overview / clinical / plan / files) e tabs **Carteira**, **Convênios**, **Integrações**, **Exames** com placeholders até port UI.
+Estrutura **React Native + Expo** espelhando jornadas principais do web: auth Supabase (e-mail/senha + Google OAuth), lista de pacientes, perfil com macro-seções e tabs com conteúdo **read-only** onde o web ainda concentra CRUD/sync.
 
 ## Objetivo
 
 Permitir evolução mobile **Cursor-only** sem duplicar lógica de backend; mesmo BFF FastAPI em `:3010`.
+
+**Plano em quatro blocos (sequência fixa):** transacional → gráficos → Ava → estética — ver [`MOBILE_EVOLUTION_BLOCKS.md`](../MOBILE_EVOLUTION_BLOCKS.md). **Bloco 3 Ava** em curso (`cursor/mobile-bloco3-ava-a5c1`): conversas, pins, aceleradores, anexo.
+
+## Entrega dual (80/20)
+
+Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma entrega, salvo exceções documentadas — ver [`MOBILE_WEB_DUAL_DELIVERY.md`](../MOBILE_WEB_DUAL_DELIVERY.md).
 
 ## Superfície técnica
 
 | Camada | Referência |
 |--------|------------|
 | Package | `packages/mobile` (Expo Router) |
-| Tokens | `packages/design-tokens` (`@aiyra-care/design-tokens`) |
+| Tokens | `packages/design-tokens` |
 | Navegação paciente | Espelho de `packages/web/src/lib/patient-navigation.ts` |
-| API / env | `packages/mobile/src/lib/api.ts`; `EXPO_PUBLIC_API_URL` (default `:3010`) — ver `.env.example` |
-| Auth | `EXPO_PUBLIC_SUPABASE_*` + AsyncStorage — ver `packages/mobile/.env.example` |
+| API / env | `packages/mobile/src/lib/api.ts`; `EXPO_PUBLIC_*` — ver `packages/mobile/README.md` |
+| Auth | Supabase + AsyncStorage; OAuth Google → `src/lib/supabase-oauth.ts` |
+| Ops | Command Hub → contexto **Produto** → aba **Mobile** (`docs/ops/CONSOLE.md`) |
 | Plano | Project store `docs/mobile-parity-plan.md` |
 
-## QA (M1–M3)
+## Conteúdo (paridade fila 2026-09)
 
-Estrutural — smoke manual: login → lista → abrir paciente → tab Carteira. Suite automatizada: **pendente** (`mobile-shell-smoke`).
-
-**Env local:** copiar `packages/mobile/.env.example` → `.env` (não commitar).
+| Tab | Mobile | Web-only |
+|-----|--------|----------|
+| **Carteira** | `PatientWalletTab` — CNS, convênios, link web | QR token, sync modal, copay detalhada |
+| **Convênios** | `PatientCoverageTab` — planos/carteirinha read-only + link web | Vincular plano, cartão virtual |
+| **Exames** | `PatientExamsTab` — **CRUD manual** + sub-aba **Marcadores** (`PatientExamMarkersPanel`, SVG) | Laudos PDF/OCR |
+| **Crescimento** | `PatientGrowthTab` — curvas **WHO** + gráficos `chart-series` (vitals + antropometria), read-only | Lançar medidas / monitoramento TX |
+| **Medicamentos** | `PatientMedicationsTab` — **CRUD** + em uso/encerrado | Administração, lembretes |
+| **Vacinas** | `PatientVaccinesTab` — **CRUD** + pull-to-refresh, link web | Calendário PNI, ConecteSUS, OCR carteira |
+| **Alergias** | `PatientAllergiesTab` — **CRUD** + pull-to-refresh | — |
+| **Atendimentos** | `PatientMedicalRecordsTab` — **CRUD** + link web (sequência) | Encadeamento Neo4j / vínculos avançados |
+| **Autorizações** | `PatientAuthorizationsTab` — lista read-only | PDF, sequência |
+| **Diagnósticos** | `PatientDiagnosesTab` — **CRUD** + pull-to-refresh | Busca CID avançada (web) |
+| **Integrações** | Status + link web | Login portal, `POST …/sync` |
 
 ## Marco M2 (login + início)
 
-- `.env.example` com `EXPO_PUBLIC_SUPABASE_*` e `EXPO_PUBLIC_API_URL`
-- Lista de pacientes via `GET /patients`, agrupada por faixa etária (espelho dashboard web)
+- Tela **`(auth)/welcome`** — apresentação + Entrar / Criar conta
+- Login **Entrar / Criar conta** (e-mail/senha + aceite legal no cadastro), logo `AppLogo` (variante **square**, paridade `AuthPageLayout` web), Google OAuth
+- **i18n** — `packages/mobile/src/i18n` (`pt-BR` / `en`, chave `aiyra-care-lang` igual ao web); idioma em Configurações
+- **Toast** — `ToastProvider` + `useToast()` para feedback padronizado (auth e fluxos futuros)
+- **Manter conectado** — mesma chave `aiyra-care-remember-me` do web; sessão Supabase em memória se desligado (perde ao fechar o app)
+- **Biometria** — `expo-local-authentication`; tela `/(auth)/unlock`; re-lock ao ir para background; toggle no login e em Configurações
+- **Logo PNG** — `npm run brand:sync-png` (mobile) rasteriza SVG do web com **Inter 600** (`@expo-google-fonts/inter`); rodar após mudar `packages/web/public/brand/*.svg`
+- **Rotas de paciente** — URL usa ref opaca `p_*` (mapa em memória no app); API continua com UUID. **Roadmap:** refs de sessão no BFF (estilo «handle» por login) para não expor IDs em tráfego de cliente — padrão comum em fintech; não substitui autorização no servidor.
+- Lista de pacientes via `GET /patients`, agrupada por faixa etária
 - Loading, erro com retry e pull-to-refresh na aba Início
-
-## Marco M3 (tokens compartilhados)
-
-- Web importa `@aiyra-care/design-tokens` via `packages/web/src/theme/aiyracare-tokens.ts` (re-export + `SIDEBAR_SURFACE` / `AI_INSIGHT_STYLE` web-only)
-- Ant Design `ThemeProvider` inalterado na forma — mapeamento continua em `ThemeProvider.tsx`
 
 ## Marco M4 (família + compliance)
 
-- Hub **Família e cuidadores** (`/(app)/settings/family`) — círculos, convites e profile-shares via mesmas rotas do web (`/family-access/*`, `/care-circles`).
-- Deep link **`invite/accept`** (`aiyracare://invite/accept?token=…`) com login prévio.
-- Gate **`RequireComplianceGate`** + tela `/(app)/compliance/accept` (`GET/POST /compliance/*`).
+- Hub **Família** (`/(app)/settings/family`), deep link `invite/accept`, gate compliance
 
 ## Marco M5 (Ava companion)
 
-- FAB global **`AvaGlobalDock`** no shell autenticado (paridade `AvaGlobalDock` web).
-- Chat com **SSE de atividade** (`POST /patients/:id/ava/chat`, `streamActivity: true`) via `ava-chat-stream.ts`.
-- **Lente de paciente**: rota do perfil → último usado (AsyncStorage) → self → primeiro (`useAvaPatientLens`).
-- API client: `api.ava.*`, `api.llm.quota`; bus interno `requestAvaOpen` para aceleradores futuros.
-- Referência operacional: `docs/AVA_OPERATIONAL.md` (G1 lente + G4 activity trace).
+- FAB **`AvaGlobalDock`**, chat SSE, lente de paciente — ver `docs/AVA_OPERATIONAL.md`
+- Aceleradores G1 em exames, marcadores, autorizações e prontuários (`entityPin` inclui `authorization` e `medical_record` no BFF)
+
+## Dual entry (Ava + Registro rápido)
+
+- **Spec UX (Project store):** `docs/mobile-dual-entry-ux-spec.md` — padrão **dual FAB** (registro inferior esquerdo, Ava inferior direito), alinhado ao web (`QuickCaptureGlobal` no header + orb Ava).
+- **Fundação:** `QuickCaptureGlobal` + `QuickCaptureSheet` — **nota**, **sintoma** e **medição** (vitals batch); medicação/agenda/documento em rollout.
+- **Bus:** `packages/mobile/src/lib/quick-capture-bus.ts`
 
 ## Marco M6 (integrações / sync — sem Playwright)
 
-- Aba **Integrações** do paciente: lista `GET /integration-links`, status via polling `GET /integration-links/:id/sync-status` (`useIntegrationLinkSyncStatus`).
-- **Sem** `POST /integration-links/:id/sync` no mobile — login browser e scrapers só no web.
-- CTAs **Abrir integrações / Carteira no navegador** (`EXPO_PUBLIC_WEB_APP_URL`, deep link `?section=plan&tab=integrations|wallet`).
-- Banner resumido na aba **Carteira** (`PatientWalletSyncBanner`).
+- **`PatientIntegrationsPanel`** — sem `POST …/sync` no mobile
 
 ## QA
 
 | Escopo | Comando |
 |--------|---------|
-| Tipo mobile | `cd packages/mobile && npm run typecheck` |
-| Export web smoke | `cd packages/mobile && npx expo export --platform web` |
-| M5 Ava | Smoke manual: login → FAB Ava → trocar lente → enviar pergunta (API local) |
-| M6 Integrações | Smoke manual: paciente → Plano → Integrações → ver status → link web |
-| API inalterada | Sem suite web nova — smoke estrutural mobile |
+| **Smoke mobile (manual + estrutural)** | [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile` |
+| **Bloco 1 — alergias CRUD** | [`mobile-allergies-crud`](../../docs/testing/suites/mobile-allergies-crud.md) · `npm run qa:run -- --suite mobile-allergies-crud` |
+| **Bloco 1 — atendimentos CRUD** | [`mobile-medical-records-crud`](../../docs/testing/suites/mobile-medical-records-crud.md) · `npm run qa:run -- --suite mobile-medical-records-crud` |
+| **Bloco 1 — medicamentos CRUD** | [`mobile-medications-crud`](../../docs/testing/suites/mobile-medications-crud.md) · `npm run qa:run -- --suite mobile-medications-crud` |
+| **Bloco 1 — vacinas CRUD** | [`mobile-vaccines-crud`](../../docs/testing/suites/mobile-vaccines-crud.md) · `npm run qa:run -- --suite mobile-vaccines-crud` |
+| **Bloco 1 — exames CRUD** | [`mobile-exams-crud`](../../docs/testing/suites/mobile-exams-crud.md) · `npm run qa:run -- --suite mobile-exams-crud` |
+| **Bloco 1 — agenda transacional** | [`mobile-agenda-crud`](../../docs/testing/suites/mobile-agenda-crud.md) · `npm run qa:run -- --suite mobile-agenda-crud` |
+| **Bloco 1 — diagnósticos CRUD** | [`mobile-diagnoses-crud`](../../docs/testing/suites/mobile-diagnoses-crud.md) · `npm run qa:run -- --suite mobile-diagnoses-crud` |
+| **Bloco 1 — paciente / onboarding TX** | [`mobile-patient-tx`](../../docs/testing/suites/mobile-patient-tx.md) · `npm run qa:run -- --suite mobile-patient-tx` |
+| **Bloco 1 — documentos** | [`mobile-documents-tx`](../../docs/testing/suites/mobile-documents-tx.md) · `npm run qa:run -- --suite mobile-documents-tx` |
+| **Bloco 1 — família TX** | [`mobile-family-tx`](../../docs/testing/suites/mobile-family-tx.md) · `npm run qa:run -- --suite mobile-family-tx` |
+| **Bloco 2 — marcadores (gráfico)** | [`mobile-exam-markers-chart`](../../docs/testing/suites/mobile-exam-markers-chart.md) · `npm run qa:run -- --suite mobile-exam-markers-chart` |
+| **Bloco 2 — WHO** | [`mobile-who-growth-chart`](../../docs/testing/suites/mobile-who-growth-chart.md) · `npm run qa:run -- --suite mobile-who-growth-chart` |
+| **Bloco 2 — medidas** | [`mobile-measurements-chart`](../../docs/testing/suites/mobile-measurements-chart.md) · `npm run qa:run -- --suite mobile-measurements-chart` |
+| **Bloco 3 — Ava smoke** | [`mobile-ava-companion-smoke`](../../docs/testing/suites/mobile-ava-companion-smoke.md) |
+| **Bloco 3 — conversas** | [`mobile-ava-conversation-crud`](../../docs/testing/suites/mobile-ava-conversation-crud.md) |
+| **Bloco 3 — acelerador G1** | [`mobile-ava-accelerator`](../../docs/testing/suites/mobile-ava-accelerator.md) |
+| **Bloco 3 — anexo** | [`mobile-ava-attachment-smoke`](../../docs/testing/suites/mobile-ava-attachment-smoke.md) |
+| Tipo + export web | `npm run mobile:check` |
+| Tipo isolado | `cd packages/mobile && npm run typecheck` |
+| API inalterada | Sem alteração de contrato nesta entrega |
+
+**Passos resumidos:** login → lista → paciente → Plano/Carteira + Clínico/Exames/Medicamentos/Vacinas → (opcional) Google OAuth.
+
+## Telemetria (paridade web)
+
+- `POST /telemetry/client-errors` com JWT — `packages/mobile/src/lib/client-errors.ts` (API/network, `ui_boundary`, auth pós-login)
+- `AppErrorBoundary` + toast em falhas 5xx/rede (`service-failure-notify.ts`)
+- Erros de auth pós-login visíveis em telemetria produto (`client_errors`) — painel CH quando catalogado
 
 ## Pendente
 
-- Onboarding mobile
-- Aceleradores «Pergunte à Ava» em entidades (pins G1)
-- Ações G3 com confirmação no mobile
-- Port de tabs clínicas (ExamsTab, WalletCardsTab UI completa)
-- OAuth Google deep links
+- Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail)
+- Onboarding mobile — titular + dependentes; **CRUD perfil** em Dados básicos + Início (Adicionar perfil)
+- **Agenda** — CRUD eventos (consulta/lembrete/tarefa) em `PatientAgendaTab`; calendário/ICS/sync no web
+- Demais tabs clínicas (autorizações, diagnósticos, crescimento, …) e Convênios UI completa
+- Microsoft OAuth no mobile
+- Suite Playwright mobile (CI)

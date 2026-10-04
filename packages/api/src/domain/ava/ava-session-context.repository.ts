@@ -1,4 +1,10 @@
-export type AvaSessionPinEntityType = 'exam' | 'exam_order' | 'exam_result_item' | 'exam_marker'
+export type AvaSessionPinEntityType =
+  | 'exam'
+  | 'exam_order'
+  | 'exam_result_item'
+  | 'exam_marker'
+  | 'authorization'
+  | 'medical_record'
 export type AvaSessionPinSource = 'user' | 'accelerator' | 'auto' | 'inferred'
 
 export interface AvaSessionPinRow {

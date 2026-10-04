@@ -81,6 +81,8 @@ export async function avaRoutes(app: FastifyInstance) {
     new ExamPgRepository(pgPool),
     new ExamOrderPgRepository(pgPool),
     new ExamResultItemPgRepository(pgPool),
+    new AuthorizationPgRepository(pgPool),
+    new MedicalRecordPgRepository(pgPool),
   )
   const operationalContext = new AvaOperationalContextService(
     new IntegrationLinkPgRepository(pgPool),

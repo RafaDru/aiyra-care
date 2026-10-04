@@ -17,7 +17,7 @@ npm workspaces (`packages/*`, `packages/agents/*`):
 | `packages/connect` | TypeScript + Zod | Canonical connector contract |
 | `packages/connect-worker` | TypeScript | Standalone scheduled sync runner |
 | `packages/neo4j-lineage-worker` | TypeScript | Neo4j lineage backfill |
-| `packages/mobile` | React Native + Expo | Skeleton |
+| `packages/mobile` | React Native + Expo | Shell Expo — paridade 80/20 com web (`docs/MOBILE_WEB_DUAL_DELIVERY.md`) |
 | `packages/agents/*` | Python FastAPI | Agent services (pediatria, integracao, farmaceutico) |
 
 ## Starting services
