@@ -2340,8 +2340,8 @@
         {
           "id": "ch-solo-operator-r1",
           "title": "R1 — Falha estruturada na correção",
-          "status": "planned",
-          "detail": "Callback correction_failed + failureDetails; CH expand; transição in_fix→open."
+          "status": "done",
+          "detail": "Callback correction_failed + failureDetails; CH expand; transição in_fix→open (migration 082)."
         },
         {
           "id": "ch-solo-operator-r2",

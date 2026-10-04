@@ -18,6 +18,13 @@ export function defectStatusLabel(status: PlatformDefectStatus): string {
   return DEFECT_STATUS_LABEL[status]
 }
 
+export function defectHasCorrectionFailure(item: {
+  correctionFailedAt?: string | null
+  lastCorrectionFailureDetails?: { message: string } | null
+}): boolean {
+  return Boolean(item.correctionFailedAt && item.lastCorrectionFailureDetails?.message)
+}
+
 export function defectStatusColor(status: PlatformDefectStatus): string {
   return DEFECT_STATUS_COLOR[status]
 }

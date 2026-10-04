@@ -1,3 +1,9 @@
+import type {
+  PlatformDefectAgentCallbackStatus,
+  PlatformDefectRecord,
+} from './platform-defect.types.js'
+import type { CorrectionFailureDetails } from './platform-defect-correction-failure.js'
+
 export type AnalysisQueueSourceType = 'support_report' | 'ops_alert'
 export type AnalysisQueueLane = 'development_support' | 'sre_support'
 export type AnalysisQueueStatus =
@@ -88,6 +94,13 @@ export interface AgentAnalysisCallbackInput {
   linkDefectId?: string
   /** Atualização agente 2 no mesmo endpoint */
   defectId?: string
-  defectStatus?: 'ready_for_pr' | 'fixed'
+  defectStatus?: PlatformDefectAgentCallbackStatus
+  /** Obrigatório quando `defectStatus` é `correction_failed`. */
+  failureDetails?: CorrectionFailureDetails
   branchName?: string
+}
+
+export interface AgentCallbackProcessResult {
+  queue: OpsAnalysisQueueRecord | null
+  defect: PlatformDefectRecord | null
 }

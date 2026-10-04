@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  Alert,
   Button,
   Card,
   Empty,
@@ -20,6 +21,7 @@ import {
   defectFixedViaHint,
   defectReadyForPrCount,
   defectShortTag,
+  defectHasCorrectionFailure,
   defectStatusColor,
   defectStatusLabel,
   formatBatchWindowHours,
@@ -357,8 +359,13 @@ export function DefeitosPanel({
               dataIndex: 'status',
               width: 130,
               align: 'center',
-              render: (s: PlatformDefectStatus) => (
-                <Tag color={defectStatusColor(s)}>{defectStatusLabel(s)}</Tag>
+              render: (s: PlatformDefectStatus, row) => (
+                <Space size={4} wrap style={{ justifyContent: 'center' }}>
+                  <Tag color={defectStatusColor(s)}>{defectStatusLabel(s)}</Tag>
+                  {defectHasCorrectionFailure(row) && (
+                    <Tag color="error">Falha correção</Tag>
+                  )}
+                </Space>
               ),
             },
             {
@@ -463,8 +470,45 @@ function DefeitoDetail({
     }
   }, [defectId])
 
+  const failure = row.lastCorrectionFailureDetails
+  const showFailureBanner = defectHasCorrectionFailure(row)
+
   return (
     <div style={{ maxWidth: 720 }}>
+      {showFailureBanner && (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 12 }}
+          message="Correção Dev falhou — defeito reaberto"
+          description={
+            <div>
+              {row.lastFailureSummary && <div>{row.lastFailureSummary}</div>}
+              {failure?.blockedReason && (
+                <div style={{ marginTop: 4 }}>
+                  <Text type="secondary">Bloqueio:</Text> {failure.blockedReason}
+                </div>
+              )}
+              <Space size={8} wrap style={{ marginTop: 8 }}>
+                {failure?.runUrl && (
+                  <Link href={failure.runUrl} target="_blank" rel="noreferrer">Run / logs</Link>
+                )}
+                {failure?.logUrl && (
+                  <Link href={failure.logUrl} target="_blank" rel="noreferrer">Log</Link>
+                )}
+                {failure?.artifactPath && <Text code>{failure.artifactPath}</Text>}
+              </Space>
+              {row.correctionFailedAt && (
+                <div style={{ marginTop: 6 }}>
+                  <Text type="secondary">
+                    Registrado em {new Date(row.correctionFailedAt).toLocaleString('pt-BR')}
+                  </Text>
+                </div>
+              )}
+            </div>
+          }
+        />
+      )}
       <Paragraph>
         <Text strong>Referência:</Text>{' '}
         <OpsReferenceCodeTag code={row.referenceCode} />{' '}

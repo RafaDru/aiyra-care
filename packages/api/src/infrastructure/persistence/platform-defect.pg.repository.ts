@@ -8,7 +8,23 @@ import type {
 import { normalizeDefectReferenceCode } from '../../domain/ops/incident-list-filter.js'
 import { normalizeGithubPrUrlForMatch } from '../../domain/ops/platform-defect-pr-url.js'
 import type { PlatformDefectFixedVia } from '../../domain/ops/platform-defect.types.js'
+import type { CorrectionFailureDetails } from '../../domain/ops/platform-defect-correction-failure.js'
+import type { PlatformDefectFailureKind } from '../../domain/ops/platform-defect-correction-failure.js'
 import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
+
+function mapCorrectionFailureDetails(value: unknown): CorrectionFailureDetails | null {
+  if (!value || typeof value !== 'object') return null
+  const raw = value as Record<string, unknown>
+  if (typeof raw.message !== 'string') return null
+  return {
+    message: String(raw.message),
+    ...(typeof raw.code === 'string' ? { code: raw.code } : {}),
+    ...(typeof raw.logUrl === 'string' ? { logUrl: raw.logUrl } : {}),
+    ...(typeof raw.runUrl === 'string' ? { runUrl: raw.runUrl } : {}),
+    ...(typeof raw.artifactPath === 'string' ? { artifactPath: raw.artifactPath } : {}),
+    ...(typeof raw.blockedReason === 'string' ? { blockedReason: raw.blockedReason } : {}),
+  }
+}
 
 function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
   const apps = row.applications
@@ -36,6 +52,13 @@ function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
       : null,
     readyForPrAt: row.ready_for_pr_at ? new Date(String(row.ready_for_pr_at)).toISOString() : null,
     fixedAt: row.fixed_at ? new Date(String(row.fixed_at)).toISOString() : null,
+    lastFailureKind:
+      row.last_failure_kind != null ? (String(row.last_failure_kind) as PlatformDefectFailureKind) : null,
+    lastFailureSummary: row.last_failure_summary != null ? String(row.last_failure_summary) : null,
+    lastCorrectionFailureDetails: mapCorrectionFailureDetails(row.last_correction_failure_details),
+    correctionFailedAt: row.correction_failed_at
+      ? new Date(String(row.correction_failed_at)).toISOString()
+      : null,
     createdAt: new Date(String(row.created_at)).toISOString(),
     updatedAt: new Date(String(row.updated_at)).toISOString(),
     incidentCount: row.incident_count != null ? Number(row.incident_count) : undefined,
@@ -71,6 +94,10 @@ export class PlatformDefectPgRepository {
     const res = await this.pool.query(
       `UPDATE platform_defects SET
         last_fix_dispatch_sent_at = NOW(),
+        last_failure_kind = NULL,
+        last_failure_summary = NULL,
+        last_correction_failure_details = NULL,
+        correction_failed_at = NULL,
         updated_at = NOW()
       WHERE id = $1::uuid
       RETURNING *`,
@@ -293,7 +320,14 @@ export class PlatformDefectPgRepository {
       mergedPrUrl?: string | null
     },
   ): Promise<PlatformDefectRecord | null> {
-    const fixStarted = status === 'in_fix' ? 'fix_started_at = COALESCE(fix_started_at, NOW()),' : ''
+    const fixStarted =
+      status === 'in_fix'
+        ? `fix_started_at = COALESCE(fix_started_at, NOW()),
+        last_failure_kind = NULL,
+        last_failure_summary = NULL,
+        last_correction_failure_details = NULL,
+        correction_failed_at = NULL,`
+        : ''
     const markDispatch = meta?.markFixDispatchSent
       ? 'last_fix_dispatch_sent_at = NOW(),'
       : ''
@@ -331,6 +365,38 @@ export class PlatformDefectPgRepository {
         meta?.branchName?.slice(0, 256) ?? null,
         meta?.prUrl?.slice(0, 512) ?? null,
         meta?.prBatchId ?? null,
+      ],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async recordCorrectionFailure(
+    id: string,
+    input: {
+      failureKind: PlatformDefectFailureKind
+      failureSummary: string
+      failureDetails: CorrectionFailureDetails
+    },
+  ): Promise<PlatformDefectRecord | null> {
+    const res = await this.pool.query(
+      `UPDATE platform_defects SET
+        status = 'open',
+        fix_started_at = NULL,
+        last_fix_dispatch_sent_at = NULL,
+        last_failure_kind = $2,
+        last_failure_summary = $3,
+        last_correction_failure_details = $4::jsonb,
+        correction_failed_at = NOW(),
+        updated_at = NOW()
+      WHERE id = $1::uuid
+        AND status = 'in_fix'
+      RETURNING *`,
+      [
+        id,
+        input.failureKind,
+        input.failureSummary.slice(0, 2000),
+        JSON.stringify(input.failureDetails),
       ],
     )
     if (!res.rows[0]) return null

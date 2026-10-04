@@ -103,6 +103,33 @@ x-investigator-callback-key: {valor do OPS_*}
 
 `prUrl` é **obrigatório** (PR draft no GitHub). Sem URL válida → callback **400** `pr_url_required`.
 
+### Callback — correção falhou (`correction_failed`, R1)
+
+Quando o agente não conclui a correção (bloqueio, escopo ambíguo, erro de execução):
+
+```http
+POST {callbackUrl}
+Content-Type: application/json
+x-investigator-callback-key: {valor do OPS_*}
+
+{
+  "defectId": "<uuid>",
+  "defectStatus": "correction_failed",
+  "remediationSummary": "DEF-000001 · [defect:xxxxxxxx] Correção bloqueada: …",
+  "failureDetails": {
+    "message": "Resumo curto da falha",
+    "code": "blocked",
+    "blockedReason": "Título do defeito não bate com artefato de triagem",
+    "logUrl": "https://…",
+    "artifactPath": "docs/ops/investigations/…"
+  }
+}
+```
+
+- `failureDetails.message` é **obrigatório**; sem payload válido → **400** `failure_details_required`.
+- PG: `in_fix` → `open`, colunas `last_failure_*` + `correction_failed_at` (migration **082**).
+- CH: banner no expand + tag **Falha correção**; **Iniciar correção** / re-dispatch envia `priorCorrectionFailure` no webhook `defect_fix_v1`.
+
 ---
 
 ## 6. Pós-`ready_for_pr` — PR, CI, review (G3), merge, `fixed`

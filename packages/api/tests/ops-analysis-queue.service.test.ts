@@ -3,8 +3,7 @@ import { OpsAnalysisQueueService } from '../src/application/ops/ops-analysis-que
 
 describe('OpsAnalysisQueueService', () => {
   it('completeFromAgent applies fix_proposed via repository', async () => {
-    const repo = {
-      applyAgentCallback: vi.fn(async () => ({
+    const record = {
         id: 'q-1',
         sourceType: 'support_report',
         sourceId: 'rep-1',
@@ -27,10 +26,14 @@ describe('OpsAnalysisQueueService', () => {
         completedAt: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      })),
+      }
+    const repo = {
+      applyAgentCallback: vi.fn(async () => record),
+      findById: vi.fn(async () => record),
     }
     const supportRepo = {
       updateAnalysisStateForOps: vi.fn(async () => true),
+      applyAgentOpsPatch: vi.fn(async () => true),
     }
     const svc = new OpsAnalysisQueueService(repo as never, supportRepo as never)
     const result = await svc.completeFromAgent({

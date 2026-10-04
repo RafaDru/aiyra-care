@@ -1,4 +1,12 @@
+import type {
+  CorrectionFailureDetails,
+  PlatformDefectFailureKind,
+} from './platform-defect-correction-failure.js'
+
 export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
+
+/** Callback semantic — not a PG `status` value. */
+export type PlatformDefectAgentCallbackStatus = PlatformDefectStatus | 'correction_failed'
 
 export type PlatformDefectFixedVia = 'github_webhook' | 'manual'
 
@@ -26,6 +34,10 @@ export interface PlatformDefectRecord {
   lastFixDispatchSentAt: string | null
   readyForPrAt: string | null
   fixedAt: string | null
+  lastFailureKind: PlatformDefectFailureKind | null
+  lastFailureSummary: string | null
+  lastCorrectionFailureDetails: CorrectionFailureDetails | null
+  correctionFailedAt: string | null
   createdAt: string
   updatedAt: string
   incidentCount?: number

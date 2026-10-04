@@ -4,6 +4,11 @@ import type {
   PlatformDefectRecord,
   PlatformDefectStatus,
 } from '../../domain/ops/platform-defect.types.js'
+import {
+  parseCorrectionFailureDetails,
+  summarizeCorrectionFailure,
+} from '../../domain/ops/platform-defect-correction-failure.js'
+import type { AgentAnalysisCallbackInput } from '../../domain/ops/ops-analysis-queue.types.js'
 import { isGithubPullRequestUrl } from '../../domain/ops/platform-defect-pr-url.js'
 import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
 
@@ -15,9 +20,15 @@ const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
 }
 
 export class PlatformDefectTransitionError extends Error {
-  readonly code: 'invalid_transition' | 'not_found' | 'pr_url_required'
+  readonly code:
+    | 'invalid_transition'
+    | 'not_found'
+    | 'pr_url_required'
+    | 'failure_details_required'
 
-  constructor(code: 'invalid_transition' | 'not_found' | 'pr_url_required') {
+  constructor(
+    code: 'invalid_transition' | 'not_found' | 'pr_url_required' | 'failure_details_required',
+  ) {
     super(code)
     this.code = code
   }
@@ -143,5 +154,45 @@ export class PlatformDefectService {
     })
     if (!updated) throw new PlatformDefectTransitionError('not_found')
     return updated
+  }
+
+  async applyAgentStatusCallback(input: AgentAnalysisCallbackInput): Promise<PlatformDefectRecord> {
+    const defectId = input.defectId?.trim()
+    const defectStatus = input.defectStatus
+    if (!defectId || !defectStatus) {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+
+    if (defectStatus === 'correction_failed') {
+      const failureDetails = parseCorrectionFailureDetails(input.failureDetails)
+      if (!failureDetails) {
+        throw new PlatformDefectTransitionError('failure_details_required')
+      }
+      const summary =
+        summarizeCorrectionFailure(failureDetails) ||
+        input.remediationSummary?.slice(0, 2000) ||
+        failureDetails.message
+      const updated = await this.repo.recordCorrectionFailure(defectId, {
+        failureKind: 'callback',
+        failureSummary: summary,
+        failureDetails,
+      })
+      if (!updated) {
+        const exists = await this.repo.findById(defectId)
+        if (!exists) throw new PlatformDefectTransitionError('not_found')
+        throw new PlatformDefectTransitionError('invalid_transition')
+      }
+      return updated
+    }
+
+    if (defectStatus === 'ready_for_pr') {
+      assertGithubPrUrlForReadyForPr(input.prUrl)
+    }
+
+    const nextStatus = defectStatus as PlatformDefectStatus
+    return this.transition(defectId, nextStatus, {
+      branchName: input.branchName ?? null,
+      prUrl: input.prUrl ?? null,
+    })
   }
 }

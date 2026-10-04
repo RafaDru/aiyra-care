@@ -29,6 +29,10 @@ function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRe
     lastFixDispatchSentAt: null,
     readyForPrAt: null,
     fixedAt: null,
+    lastFailureKind: null,
+    lastFailureSummary: null,
+    lastCorrectionFailureDetails: null,
+    correctionFailedAt: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,
@@ -117,6 +121,41 @@ describe('PlatformDefectService', () => {
     expect(result.id).toBe('existing')
     expect(repo.insert).not.toHaveBeenCalled()
     expect(repo.linkIncident).toHaveBeenCalledWith('existing', 'inc-1', 'agent_triage')
+  })
+
+  it('records correction_failed as open with failure metadata', async () => {
+    const openAfter = defect({
+      status: 'open',
+      lastFailureKind: 'callback',
+      lastFailureSummary: '[blocked] Could not fix',
+      lastCorrectionFailureDetails: { message: 'Could not fix', code: 'blocked' },
+      correctionFailedAt: new Date().toISOString(),
+    })
+    const repo = {
+      recordCorrectionFailure: vi.fn(async () => openAfter),
+      findById: vi.fn(),
+    } as unknown as PlatformDefectPgRepository
+    const svc = new PlatformDefectService(repo)
+    const result = await svc.applyAgentStatusCallback({
+      defectId: 'd1',
+      defectStatus: 'correction_failed',
+      remediationSummary: '[defect:d1] blocked',
+      failureDetails: { message: 'Could not fix', code: 'blocked' },
+    })
+    expect(result.status).toBe('open')
+    expect(repo.recordCorrectionFailure).toHaveBeenCalled()
+  })
+
+  it('requires failureDetails for correction_failed', async () => {
+    const repo = {} as unknown as PlatformDefectPgRepository
+    const svc = new PlatformDefectService(repo)
+    await expect(
+      svc.applyAgentStatusCallback({
+        defectId: 'd1',
+        defectStatus: 'correction_failed',
+        remediationSummary: 'fail',
+      }),
+    ).rejects.toMatchObject({ code: 'failure_details_required' })
   })
 
   it('throws not_found when defect missing', async () => {

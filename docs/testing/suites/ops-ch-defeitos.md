@@ -5,7 +5,7 @@
 
 ## Pré-requisitos
 
-- Migration **077** aplicada
+- Migration **077** aplicada; **082** para metadados `correction_failed`
 - ops-console `:3013` com `CURSOR_DEFECT_FIX_*` (opcional para dispatch real)
 
 ## Passos
@@ -23,7 +23,8 @@
 11. **Incidentes** — ordenação por coluna (Ref, Atualizado, Título, Prioridade, Status); padrão **Atualizado** mais recente primeiro; ordem persiste na sessão do browser ao trocar de aba CH e voltar
 12. Chip **Triados** — coluna Status mostra tag **Triado** (não «Aberto» / «Em aberto»)
 13. **R4 (opcional com secret):** com `GITHUB_DEFECT_MERGE_WEBHOOK_SECRET` e defeito `ready_for_pr` + `prUrl`, simular payload GitHub `pull_request` merged → status `fixed`, `fixedVia=github_webhook`, hint no expand do CH
+14. **R1:** simular callback `correction_failed` (ou API vitest) — defeito `open`, expand com banner de falha, tag **Falha correção**; **Iniciar correção** após falha limpa metadados ao entrar em `in_fix`
 
 ## Critério
 
-- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam e triados exibem label **Triado** (passo 13 quando webhook configurado)
+- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados exibem label **Triado**, e R1 exibe falha estruturada sem reset silencioso (passo 13 quando webhook configurado)

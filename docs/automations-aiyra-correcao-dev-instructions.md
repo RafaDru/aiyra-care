@@ -82,7 +82,8 @@ Corpo JSON (substitua placeholders):
   "remediationSummary": "DEF-000001 · [defect:xxxxxxxx] Correção: resumo em até 5 linhas — hipótese, mudança, testes rodados"
 }
 
-- defectStatus: ready_for_pr quando a correção estiver pronta para revisão humana / lote PR; use in_fix + remediationSummary se bloqueado (ex.: mismatch título/artefato).
+- defectStatus: ready_for_pr quando a correção estiver pronta para revisão humana / lote PR.
+- defectStatus: correction_failed + failureDetails (message obrigatório) quando bloqueado ou falha explícita — reabre o defeito no CH (não deixar in_fix “mentiroso”).
 - remediationSummary: obrigatório; repita referenceCode · tag quando houver referenceCode.
 - prUrl: obrigatório para ready_for_pr (PR draft GitHub). Callback sem prUrl válido → HTTP 400 { "error": "pr_url_required" } (#85).
 - branchName: obrigatório quando houver branch remota.

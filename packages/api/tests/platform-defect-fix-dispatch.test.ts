@@ -30,6 +30,10 @@ const sampleDefect: PlatformDefectRecord = {
   lastFixDispatchSentAt: '2026-09-28T13:00:00.000Z',
   readyForPrAt: null,
   fixedAt: null,
+  lastFailureKind: null,
+  lastFailureSummary: null,
+  lastCorrectionFailureDetails: null,
+  correctionFailedAt: null,
   createdAt: '2026-09-28T11:00:00.000Z',
   updatedAt: '2026-09-28T13:00:00.000Z',
 }
@@ -64,6 +68,22 @@ describe('platform-defect-fix-dispatch', () => {
     expect(built.text).toBe('DEF-000001 · [defect:0e672818] Correção: Sync silent skip')
     expect(built.environment.deploymentTier).toBe('integration')
     expect(JSON.stringify(built)).not.toContain('patient')
+  })
+
+  it('includes priorCorrectionFailure when defect returned from correction_failed', () => {
+    process.env.OPS_INVESTIGATOR_CALLBACK_KEY = 'callback-secret'
+    const withFailure = {
+      ...sampleDefect,
+      status: 'open' as const,
+      lastFailureSummary: '[blocked] Scope ambiguous',
+      lastCorrectionFailureDetails: { message: 'Scope ambiguous', code: 'blocked' },
+      correctionFailedAt: '2026-10-04T12:00:00.000Z',
+    }
+    const built = buildPlatformDefectFixDispatchPayload(withFailure, [])
+    expect('error' in built).toBe(false)
+    if ('error' in built) return
+    expect(built.priorCorrectionFailure?.summary).toBe('[blocked] Scope ambiguous')
+    expect(built.priorCorrectionFailure?.details).toMatchObject({ code: 'blocked' })
   })
 
   it('omits referenceCode prefix in text when null', () => {

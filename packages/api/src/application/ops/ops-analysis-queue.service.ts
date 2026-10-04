@@ -1,11 +1,13 @@
 import type { OpsAlert } from '../../domain/ops/ops-metrics.types.js'
 import type {
   AgentAnalysisCallbackInput,
+  AgentCallbackProcessResult,
   AnalysisQueueLane,
   AnalysisQueueSourceType,
   OpsAnalysisAttentionCounts,
   OpsAnalysisQueueRecord,
 } from '../../domain/ops/ops-analysis-queue.types.js'
+import type { PlatformDefectRecord } from '../../domain/ops/platform-defect.types.js'
 import { resolveDeploymentTier } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigationIdFromCallback } from '../../domain/ops/investigation-correlation.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
@@ -182,12 +184,18 @@ export class OpsAnalysisQueueService {
     await this.repo.markDeferred(queueId, reason)
   }
 
-  async completeFromAgent(input: AgentAnalysisCallbackInput): Promise<OpsAnalysisQueueRecord | null> {
+  async processAgentCallback(input: AgentAnalysisCallbackInput): Promise<AgentCallbackProcessResult> {
     const summary = sanitizeAnalysisSummary(input.remediationSummary)
       ?? sanitizeOpsAlertAnalysisSummary(input.remediationSummary)
-    if (!summary) return null
+    if (!summary) return { queue: null, defect: null }
 
-    if (input.defectId && input.defectStatus === 'ready_for_pr') {
+    let defectRecord: PlatformDefectRecord | null = null
+    if (input.defectId && input.defectStatus && this.platformDefects) {
+      defectRecord = await this.platformDefects.applyAgentStatusCallback({
+        ...input,
+        remediationSummary: summary,
+      })
+    } else if (input.defectId && input.defectStatus === 'ready_for_pr') {
       assertGithubPrUrlForReadyForPr(input.prUrl)
     }
 
@@ -206,7 +214,7 @@ export class OpsAnalysisQueueService {
         input.sourceId,
         resolveDeploymentTier(),
       )
-      if (!existing) return null
+      if (!existing) return { queue: null, defect: defectRecord }
       record = await this.repo.applyAgentCallback(existing.id, {
         remediationSummary: summary,
         analysisArtifactPath: input.analysisArtifactPath,
@@ -214,13 +222,20 @@ export class OpsAnalysisQueueService {
         errorSummary: input.errorSummary,
       })
     }
-    if (!record) return null
+    if (!record) {
+      return { queue: null, defect: defectRecord }
+    }
 
     await this.syncLegacyAnalysis(record, summary, input)
     await this.applySupportReportPatches(record, input)
     await this.applyTriagePipelineOutcome(record, summary, input)
     const refreshed = await this.repo.findById(record.id)
-    return refreshed ?? record
+    return { queue: refreshed ?? record, defect: defectRecord }
+  }
+
+  async completeFromAgent(input: AgentAnalysisCallbackInput): Promise<OpsAnalysisQueueRecord | null> {
+    const result = await this.processAgentCallback(input)
+    return result.queue
   }
 
   private async applyTriagePipelineOutcome(
@@ -229,13 +244,6 @@ export class OpsAnalysisQueueService {
     input: AgentAnalysisCallbackInput,
   ): Promise<void> {
     const decision = input.triageDecision
-
-    if (input.defectId && input.defectStatus && this.platformDefects) {
-      await this.platformDefects.transition(input.defectId, input.defectStatus, {
-        branchName: input.branchName ?? null,
-        prUrl: input.prUrl ?? null,
-      })
-    }
 
     if (!decision) return
 

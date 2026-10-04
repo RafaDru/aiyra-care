@@ -129,7 +129,7 @@ flowchart LR
 | Callback 401/409 | Auth / transição | Ajustar `OPS_INVESTIGATOR_CALLBACK_KEY` | Agente reexecuta ou manual `Marcar pronto p/ PR` (escape hatch) |
 | Agente bloqueado | Escopo ambíguo | `remediationSummary` com bloqueio; operador decide | PATCH `open` + novo ciclo G2 |
 
-**Estado hoje:** E2E piloto PASS. **Gap:** não há estado **`correction_failed`** nem reabertura automática quando callback declara falha explícita (R1).
+**Estado hoje:** E2E piloto PASS. **R1:** callback `defectStatus: correction_failed` + `failureDetails` reabre o defeito (`in_fix` → `open`) com metadados no CH.
 
 ---
 
@@ -221,9 +221,9 @@ Ordem sugerida para não quebrar o piloto:
 
 ### Fatia R1 — Falha estruturada na correção (3–5 dias)
 
-- [ ] Callback aceitar `defectStatus: correction_failed` + `failureDetails`
-- [ ] Transição `in_fix` → `open` automática ou operador 1-clique
-- [ ] CH: exibir `failureDetails` no painel expand
+- [x] Callback aceitar `defectStatus: correction_failed` + `failureDetails`
+- [x] Transição `in_fix` → `open` automática (reenfileirar via G2 / `start-fix`)
+- [x] CH: exibir `failureDetails` no painel expand
 
 ### Fatia R2 — PR + CI acoplados ao defeito (5–8 dias)
 
