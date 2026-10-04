@@ -21,6 +21,18 @@ export function isTier1Enabled(): boolean {
   return raw === '1' || raw === 'true' || raw === 'on'
 }
 
+/**
+ * Tier da lane Correção Dev (`defect_fix_v1`).
+ * `OPS_DEFECT_FIX_TIER1` explícito (`0`/`false`/`off`) desliga Tier 1 mesmo com `OPS_INVESTIGATOR_TIER1=1`.
+ * Se `OPS_DEFECT_FIX_TIER1` não estiver setado, herda `OPS_INVESTIGATOR_TIER1`.
+ */
+export function isDefectFixTier1Enabled(): boolean {
+  const raw = process.env.OPS_DEFECT_FIX_TIER1?.trim().toLowerCase()
+  if (raw === '1' || raw === 'true' || raw === 'on') return true
+  if (raw === '0' || raw === 'false' || raw === 'off') return false
+  return isTier1Enabled()
+}
+
 export function resolveSupportInvestigationTier(
   record: SupportReportRecord,
   trigger: 'auto' | 'manual',

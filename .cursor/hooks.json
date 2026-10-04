@@ -37,6 +37,11 @@
         "command": "node .cursor/hooks/pre-tool-guard.mjs",
         "matcher": "Write|StrReplace|Delete",
         "failClosed": false
+      },
+      {
+        "command": "node .cursor/hooks/pre-tool-shell-rtk.mjs",
+        "matcher": "Shell",
+        "failClosed": false
       }
     ],
     "stop": [

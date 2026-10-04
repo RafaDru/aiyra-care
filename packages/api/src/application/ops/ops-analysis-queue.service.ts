@@ -9,9 +9,17 @@ import type {
 import { resolveDeploymentTier } from '../../domain/ops/investigator-environment.js'
 import { resolveInvestigationIdFromCallback } from '../../domain/ops/investigation-correlation.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
+import {
+  inferSupportReportApplication,
+  SUPPORT_INCIDENT_ORIGIN_USUARIO,
+} from '../../domain/support-report/support-report-incident.js'
 import type { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import type { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
 import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
+import {
+  assertGithubPrUrlForReadyForPr,
+  type PlatformDefectService,
+} from './platform-defect.service.js'
 import { sanitizeAnalysisSummary } from '../../domain/support-report/support-report.types.js'
 import { sanitizeOpsAlertAnalysisSummary } from '../../domain/ops/ops-alert-analysis.types.js'
 
@@ -37,6 +45,8 @@ function supportContext(record: SupportReportRecord): Record<string, unknown> {
     route: record.route,
     consentTechnical: record.consentTechnical,
     appVersion: record.appVersion,
+    incidentOrigin: SUPPORT_INCIDENT_ORIGIN_USUARIO,
+    application: inferSupportReportApplication(record),
   }
 }
 
@@ -51,6 +61,7 @@ export class OpsAnalysisQueueService {
     private readonly repo: OpsAnalysisQueuePgRepository,
     private readonly supportRepo?: SupportReportPgRepository,
     private readonly alertStore?: OpsAlertAnalysisStore,
+    private readonly platformDefects?: PlatformDefectService,
   ) {}
 
   async enqueueSupportReportBatch(input: {
@@ -97,6 +108,40 @@ export class OpsAnalysisQueueService {
     })
   }
 
+  async enqueueClientErrorSignal(input: {
+    fingerprint: string
+    feature: string
+    errorCode: string
+    errorKind: string
+    route?: string | null
+    apiPath?: string | null
+    deploymentTier: string
+    lane: AnalysisQueueLane
+  }): Promise<OpsAnalysisQueueRecord> {
+    const title = `Client error · ${input.feature} · ${input.errorCode}`
+    return this.repo.upsertQueued({
+      sourceType: 'ops_alert',
+      sourceId: `client_error:${input.fingerprint}`,
+      lane: input.lane,
+      deploymentTier: input.deploymentTier,
+      title,
+      errorSummary: input.errorCode.slice(0, 4000),
+      contextSnapshot: {
+        severity: 'warning',
+        category: 'product',
+        incidentOrigin: 'client_error_bridge',
+        application: 'Web',
+        fingerprint: input.fingerprint,
+        feature: input.feature,
+        errorKind: input.errorKind,
+        ...(input.route ? { route: input.route.slice(0, 128) } : {}),
+        ...(input.apiPath ? { api_path: input.apiPath.slice(0, 128) } : {}),
+      },
+      investigationTrigger: 'auto',
+      priority: 'normal',
+    })
+  }
+
   async enqueueOpsAlert(
     alert: OpsAlert,
     options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
@@ -111,6 +156,8 @@ export class OpsAnalysisQueueService {
       contextSnapshot: {
         severity: alert.severity,
         category: alert.category,
+        incidentOrigin: 'alerta_ops',
+        application: 'Ops',
         ...(alert.details ?? {}),
       },
       operatorNotes: options.operatorNotes,
@@ -140,6 +187,10 @@ export class OpsAnalysisQueueService {
       ?? sanitizeOpsAlertAnalysisSummary(input.remediationSummary)
     if (!summary) return null
 
+    if (input.defectId && input.defectStatus === 'ready_for_pr') {
+      assertGithubPrUrlForReadyForPr(input.prUrl)
+    }
+
     let record: OpsAnalysisQueueRecord | null = null
     const investigationId = resolveInvestigationIdFromCallback(input)
     if (investigationId) {
@@ -167,7 +218,60 @@ export class OpsAnalysisQueueService {
 
     await this.syncLegacyAnalysis(record, summary, input)
     await this.applySupportReportPatches(record, input)
-    return record
+    await this.applyTriagePipelineOutcome(record, summary, input)
+    const refreshed = await this.repo.findById(record.id)
+    return refreshed ?? record
+  }
+
+  private async applyTriagePipelineOutcome(
+    record: OpsAnalysisQueueRecord,
+    summary: string,
+    input: AgentAnalysisCallbackInput,
+  ): Promise<void> {
+    const decision = input.triageDecision
+
+    if (input.defectId && input.defectStatus && this.platformDefects) {
+      await this.platformDefects.transition(input.defectId, input.defectStatus, {
+        branchName: input.branchName ?? null,
+        prUrl: input.prUrl ?? null,
+      })
+    }
+
+    if (!decision) return
+
+    if (decision === 'dismiss') {
+      await this.repo.markDismissed(record.id, summary)
+      return
+    }
+
+    if (this.platformDefects) {
+      if (decision === 'new_defect' && input.defect?.title) {
+        await this.platformDefects.createFromTriage(
+          {
+            title: input.defect.title,
+            fingerprint: input.defect.fingerprint ?? null,
+            impact: input.defect.impact ?? null,
+            applications: input.defect.applications ?? [],
+            triageSummary: summary,
+            triageArtifactPath: input.analysisArtifactPath ?? null,
+          },
+          record.id,
+          'agent_triage',
+        )
+      } else if (decision === 'link_defect' && input.linkDefectId) {
+        await this.platformDefects.linkIncident(input.linkDefectId, record.id, 'agent_triage')
+      }
+    }
+
+    if (
+      decision === 'new_defect' ||
+      decision === 'link_defect' ||
+      decision === 'resolve_incident_only' ||
+      decision === 'infra_failure'
+    ) {
+      await this.repo.setIncidentPipelineStatus(record.id, 'triaged')
+      await this.repo.markCompleted(record.id)
+    }
   }
 
   private isBatchSupportRecord(record: OpsAnalysisQueueRecord): boolean {
@@ -292,6 +396,28 @@ export class OpsAnalysisQueueService {
 
   listOpen(limit = 100): Promise<OpsAnalysisQueueRecord[]> {
     return this.repo.listOpen(limit)
+  }
+
+  async listForIncidentBoard(
+    filter: import('../../domain/ops/incident-list-filter.js').IncidentBoardFilter,
+    options?: { limit?: number; ensureId?: string },
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const limit = options?.limit ?? 100
+    const records = await this.repo.listForIncidentBoard(filter, limit)
+    const ensureId = options?.ensureId?.trim()
+    if (!ensureId) return records
+    if (records.some((r) => r.id === ensureId)) return records
+    const extra = await this.repo.findById(ensureId)
+    if (!extra) return records
+    return [extra, ...records].slice(0, limit)
+  }
+
+  findByReferenceCode(referenceCode: string): Promise<OpsAnalysisQueueRecord | null> {
+    return this.repo.findByReferenceCode(referenceCode)
+  }
+
+  searchForIncidentBoard(query: string, limit = 50): Promise<OpsAnalysisQueueRecord[]> {
+    return this.repo.searchForIncidentBoard(query, limit)
   }
 
   attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {

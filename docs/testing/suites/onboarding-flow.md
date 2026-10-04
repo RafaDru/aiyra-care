@@ -28,7 +28,7 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 2 | Login e-mail/senha | Redireciona para `/compliance/accept` ou `/onboarding` | |
 | 3 | Aceitar termos (se gate) | Avança para `/onboarding` | |
 | 4 | Preencher nome, nascimento ≥18, sexo, CPF | Validação OK | |
-| 5 | **Continuar** → passo dependentes | «Quem você acompanha?» | |
+| 5 | **Continuar** → passo dependentes | Permanece em `/onboarding`; `data-testid="onboarding-step-dependents"`; título «Quem você acompanha?» | |
 | 6 | **Pular por agora** (ou adicionar dependente) | Dashboard `/` com heading «Sua família» | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)

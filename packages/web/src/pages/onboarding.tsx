@@ -48,6 +48,12 @@ export function OnboardingPage() {
     trackProductEvent('onboarding_step', { step: 'step_1_viewed' })
   }, [])
 
+  useEffect(() => {
+    if (!needsProfile && readOnboardingWizardStep() === 1 && currentStep === 0) {
+      setCurrentStep(1)
+    }
+  }, [needsProfile, currentStep])
+
   if (!configured) return <Navigate to="/" replace />
 
   if (loading) {
@@ -61,7 +67,11 @@ export function OnboardingPage() {
   }
 
   // Após completeProfile, needsProfile fica false mas o passo de dependentes ainda deve aparecer.
-  if (!needsProfile && currentStep === 0) return <Navigate to="/" replace />
+  // sessionStorage é gravado antes do refreshSync — evita corrida em que needsProfile atualiza antes do setState do passo 2.
+  const wizardOnDependentsStep = readOnboardingWizardStep() === 1
+  if (!needsProfile && currentStep === 0 && !wizardOnDependentsStep) {
+    return <Navigate to="/" replace />
+  }
 
   const goToDependentsStep = () => {
     sessionStorage.setItem(ONBOARDING_WIZARD_STEP_KEY, '1')
@@ -81,8 +91,6 @@ export function OnboardingPage() {
     gender: 'male' | 'female'
     cpf: string
     cns?: string
-    weightKg?: string
-    heightCm?: string
   }) => {
     setSubmitting(true)
     setError(null)
@@ -93,8 +101,6 @@ export function OnboardingPage() {
         gender: values.gender,
         cpf: values.cpf.replace(/\D/g, ''),
         cns: values.cns?.replace(/\D/g, '') || undefined,
-        weightKg: values.weightKg ? Number(values.weightKg) : undefined,
-        heightCm: values.heightCm ? Number(values.heightCm) : undefined,
       })
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
       goToDependentsStep()
@@ -111,8 +117,6 @@ export function OnboardingPage() {
     birthDate: { toDate: () => Date }
     gender?: 'male' | 'female'
     cpf?: string
-    weightKg?: string
-    heightCm?: string
     minorGuardianConsent?: boolean
   }) => {
     setSubmitting(true)
@@ -126,8 +130,6 @@ export function OnboardingPage() {
         name: values.name,
         birthDate: birthDate.toISOString(),
         gender: values.gender || undefined,
-        weightKg: values.weightKg ? Number(values.weightKg) : undefined,
-        heightCm: values.heightCm ? Number(values.heightCm) : undefined,
         cpf: values.cpf?.replace(/\D/g, '') || undefined,
       })
       setDependents((prev) => [...prev, { id: created.id, name: created.name }])
@@ -146,6 +148,8 @@ export function OnboardingPage() {
         current={currentStep}
         style={{ marginBottom: 24 }}
         responsive
+        aria-label={t('onboarding.stepsAria')}
+        data-testid="onboarding-wizard-steps"
         items={[
           { title: t('onboarding.steps.profile') },
           { title: t('onboarding.steps.dependents') },
@@ -206,19 +210,13 @@ export function OnboardingPage() {
               >
                 <Input placeholder={t('onboarding.cnsPlaceholder')} maxLength={15} />
               </Form.Item>
-              <Form.Item name="weightKg" label={t('onboarding.weightOptional')}>
-                <Input type="number" step="0.1" addonAfter={t('patient.weight')} />
-              </Form.Item>
-              <Form.Item name="heightCm" label={t('onboarding.heightOptional')}>
-                <Input type="number" step="0.1" addonAfter={t('patient.height')} />
-              </Form.Item>
               <Button type="primary" htmlType="submit" block size="large" loading={submitting}>
                 {t('onboarding.continue')}
               </Button>
             </Form>
           </>
         ) : (
-          <>
+          <div data-testid="onboarding-step-dependents">
             <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.dependentsTitle')}</Title>
             <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.dependentsSubtitle')}</Text>
 
@@ -249,12 +247,6 @@ export function OnboardingPage() {
                   ]}
                 />
               </Form.Item>
-              <Form.Item name="weightKg" label={t('onboarding.weightOptional')}>
-                <Input type="number" step="0.1" addonAfter={t('patient.weight')} />
-              </Form.Item>
-              <Form.Item name="heightCm" label={t('onboarding.heightOptional')}>
-                <Input type="number" step="0.1" addonAfter={t('patient.height')} />
-              </Form.Item>
               <Form.Item
                 name="cpf"
                 label="CPF"
@@ -282,7 +274,7 @@ export function OnboardingPage() {
                 {t('onboarding.skipDependents')}
               </Button>
             </Space>
-          </>
+          </div>
         )}
       </Card>
     </OnboardingLayout>

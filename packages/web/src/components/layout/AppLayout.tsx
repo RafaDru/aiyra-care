@@ -209,9 +209,7 @@ export function AppLayout() {
     </Layout>
   )
 
-  if (configured && user) {
-    return <ActiveCareCircleProvider>{layout}</ActiveCareCircleProvider>
-  }
-
-  return layout
+  // Provider sempre montado: Dashboard e rotas autenticadas usam useActiveCareCircle mesmo
+  // quando o seletor global só aparece com sessão (configured && user).
+  return <ActiveCareCircleProvider>{layout}</ActiveCareCircleProvider>
 }

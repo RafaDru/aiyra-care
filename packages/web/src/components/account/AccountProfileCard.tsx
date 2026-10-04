@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import { api } from '../../lib/api.js'
+import { httpStatusFromError, reportAccountSettingsFailure } from '../../lib/account-settings-errors.js'
 import type { AccountProfileView, UpdateAccountProfileInput } from '../../lib/api.types.js'
 import { MaskedDatePicker } from '../ui/MaskedDatePicker.js'
 
@@ -125,7 +126,14 @@ export function AccountProfileCard() {
         setEmail(profile.email)
         form.setFieldsValue(viewToForm(profile))
       })
-      .catch(() => message.error(t('accountProfile.loadError')))
+      .catch((err) => {
+        reportAccountSettingsFailure('profile_load', {
+          apiPath: '/auth/profile',
+          status: httpStatusFromError(err),
+          message: err instanceof Error ? err.message : undefined,
+        })
+        message.error(t('accountProfile.loadError'))
+      })
       .finally(() => setLoading(false))
   }, [form, message, t])
 
@@ -138,6 +146,11 @@ export function AccountProfileCard() {
       message.success(t('accountProfile.saveOk'))
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
+      reportAccountSettingsFailure('profile_save', {
+        apiPath: '/auth/profile',
+        status: httpStatusFromError(err),
+        message: err instanceof Error ? err.message : undefined,
+      })
       message.error(err instanceof Error ? err.message : t('accountProfile.saveError'))
     } finally {
       setSaving(false)

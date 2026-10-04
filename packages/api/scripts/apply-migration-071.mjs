@@ -1,23 +1,14 @@
-import pg from 'pg'
-import { config } from 'dotenv'
-import { readFileSync, readdirSync } from 'fs'
+import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import pg from 'pg'
+import { config } from 'dotenv'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 config({ path: resolve(root, '.env') })
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
-})
-
-const dir = resolve(root, 'database/relational')
-const file = readdirSync(dir).find((f) => f.startsWith('071_'))
-if (!file) {
-  console.error('Migration 071 não encontrada')
-  process.exit(1)
-}
-
-await pool.query(readFileSync(resolve(dir, file), 'utf8'))
-console.log(`✅ ${file}`)
+const sql = readFileSync(resolve(root, 'database/relational/071_platform_defects.sql'), 'utf8')
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+await pool.query(sql)
+console.log('071_platform_defects applied')
 await pool.end()

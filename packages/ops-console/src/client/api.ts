@@ -14,6 +14,15 @@ export type OpsConsoleHealth = {
   status: string
   port: number
   deploymentTier: OpsDeploymentTier
+  layoutVersion?: string
+}
+
+export type ChServicesStatusResponse = {
+  checkedAt: string
+  backend: 'up' | 'degraded' | 'down'
+  web: 'up' | 'degraded' | 'down'
+  apiPort: number
+  webPort: number
 }
 
 function stackHeaders(): Record<string, string> {
@@ -33,8 +42,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const text = await res.text().catch(() => '')
     let message = `HTTP ${res.status}`
     try {
-      const body = JSON.parse(text) as { error?: string }
-      if (body.error) message = body.error
+      const body = JSON.parse(text) as { error?: string; message?: string }
+      if (body.message) message = body.message
+      else if (body.error) message = body.error
     } catch {
       if (text) message = `${message}: ${text}`
     }
@@ -45,6 +55,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
+  servicesStatus: () => request<ChServicesStatusResponse>('/api/services/status'),
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
   strategyManifest: () => request<StrategyManifestResponse>('/api/strategy/manifest'),
@@ -106,8 +117,33 @@ export const opsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }),
-  analysisQueue: () =>
-    request<{ items: import('./ops.types.js').OpsAnalysisQueueItem[] }>('/api/analysis-queue'),
+  analysisQueue: (params?: {
+    filter?: import('./ch-incident-board-filter.js').IncidentBoardFilter
+    ensureId?: string
+  }) => {
+    const q = new URLSearchParams()
+    if (params?.filter) q.set('filter', params.filter)
+    if (params?.ensureId) q.set('ensureId', params.ensureId)
+    const suffix = q.toString() ? `?${q.toString()}` : ''
+    return request<{
+      items: import('./ops.types.js').OpsAnalysisQueueItem[]
+      filter: import('./ch-incident-board-filter.js').IncidentBoardFilter
+    }>(`/api/analysis-queue${suffix}`)
+  },
+  analysisQueueItem: (id: string) =>
+    request<{ item: import('./ops.types.js').OpsAnalysisQueueItem }>(
+      `/api/analysis-queue/${encodeURIComponent(id)}`,
+    ),
+  analysisQueueByRef: (ref: string) =>
+    request<{ item: import('./ops.types.js').OpsAnalysisQueueItem }>(
+      `/api/analysis-queue/by-ref/${encodeURIComponent(ref)}`,
+    ),
+  searchAnalysisQueue: (query: string) =>
+    request<{ items: import('./ops.types.js').OpsAnalysisQueueItem[] }>(
+      `/api/analysis-queue/search?q=${encodeURIComponent(query)}`,
+    ),
+  incidentDispatchHealth: () =>
+    request<import('./ops.types.js').IncidentDispatchHealth>('/api/incident-dispatch/health'),
   analysisAttentionCounts: () =>
     request<import('./ops.types.js').OpsAnalysisAttentionCounts>(
       '/api/analysis-queue/attention-counts',
@@ -116,4 +152,69 @@ export const opsApi = {
     request<{ ok: boolean }>(`/api/analysis-queue/${encodeURIComponent(id)}/complete`, {
       method: 'POST',
     }),
+  retryAnalysisQueueDispatch: (id: string, options?: { runTick?: boolean }) =>
+    request<{ ok: boolean }>(`/api/analysis-queue/${encodeURIComponent(id)}/retry-dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ runTick: options?.runTick === true }),
+    }),
+  platformDefects: (params?: { status?: string; includeFixed?: boolean; q?: string }) => {
+    const q = new URLSearchParams()
+    if (params?.q) q.set('q', params.q)
+    if (params?.status) q.set('status', params.status)
+    if (params?.includeFixed) q.set('includeFixed', '1')
+    const suffix = q.toString() ? `?${q.toString()}` : ''
+    return request<{ items: import('./ops.types.js').PlatformDefectItem[] }>(
+      `/api/platform-defects${suffix}`,
+    )
+  },
+  platformDefectByRef: (ref: string) =>
+    request<{ item: import('./ops.types.js').PlatformDefectItem }>(
+      `/api/platform-defects/by-ref/${encodeURIComponent(ref)}`,
+    ),
+  platformDefectDetail: (id: string) =>
+    request<{
+      defect: import('./ops.types.js').PlatformDefectItem
+      incidents: Array<{ id: string; title: string }>
+    }>(`/api/platform-defects/${encodeURIComponent(id)}`),
+  patchPlatformDefectStatus: (
+    id: string,
+    body: {
+      status: import('./ops.types.js').PlatformDefectStatus
+      branchName?: string
+      prUrl?: string
+      skipBatch?: boolean
+    },
+  ) =>
+    request<{ ok: boolean; item: import('./ops.types.js').PlatformDefectItem }>(
+      `/api/platform-defects/${encodeURIComponent(id)}/status`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      },
+    ),
+  startPlatformDefectFix: (id: string) =>
+    request<{
+      ok: boolean
+      item: import('./ops.types.js').PlatformDefectItem
+      dispatch?: {
+        outcome: 'sent' | 'skipped' | 'failed'
+        reason?: string
+        error?: string
+      }
+    }>(`/api/platform-defects/${encodeURIComponent(id)}/start-fix`, { method: 'POST' }),
+  defectPrBatchConfig: () =>
+    request<{
+      intervalMs: number
+      readyCount: number
+      nextWindowAt: string
+    }>('/api/defect-pr-batches/config'),
+  runDefectPrBatch: () =>
+    request<{
+      ok: boolean
+      batch: import('./ops.types.js').DefectPrBatchItem | null
+      defectIds: string[]
+      count: number
+    }>('/api/defect-pr-batches/run', { method: 'POST' }),
 }

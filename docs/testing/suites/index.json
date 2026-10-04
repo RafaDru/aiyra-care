@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-16",
+  "updatedAt": "2026-10-02",
   "description": "Catálogo de suites QA — CRUD de negócio via UI. Ver docs/testing/BUSINESS_ACTION_MATRIX.md",
   "suites": [
     {
@@ -45,6 +45,21 @@
       "coverage": "partial",
       "businessActions": ["auth.login", "auth.signup_mode", "onboarding.complete"],
       "automation": { "status": "partial", "spec": "packages/web/e2e/suites/auth-entry-flow.spec.ts" },
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "settings-account",
+      "domain": "conta",
+      "title": "Configurações — perfil e exclusão de conta",
+      "lane": "business",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "requiredForMain": false,
+      "order": 4,
+      "doc": "docs/testing/suites/settings-account.md",
+      "coverage": "partial",
+      "businessActions": ["account.profile.read", "account.profile.update", "account.delete"],
+      "automation": { "status": "planned", "spec": "packages/web/e2e/suites/settings-account.spec.ts" },
       "estimatedMinutes": 10
     },
     {
@@ -289,6 +304,21 @@
       "estimatedMinutes": 5
     },
     {
+      "id": "client-error-ch-bridge",
+      "domain": "ops",
+      "title": "Client errors → CH incident bridge",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/client-error-ch-bridge.md",
+      "coverage": "done",
+      "automation": {
+        "status": "done",
+        "spec": "packages/api/tests/client-error-incident-bridge.service.test.ts"
+      },
+      "estimatedMinutes": 10
+    },
+    {
       "id": "ops-health",
       "domain": "ops",
       "title": "Ops — health e métricas",
@@ -299,6 +329,18 @@
       "coverage": "partial",
       "automation": { "status": "partial", "spec": "packages/api/scripts/ops-smoke.ts" },
       "estimatedMinutes": 10
+    },
+    {
+      "id": "ops-ch-defeitos",
+      "domain": "ops",
+      "title": "CH — defeitos, incidentes, deep link e busca",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "ops-local",
+      "doc": "docs/testing/suites/ops-ch-defeitos.md",
+      "coverage": "partial",
+      "automation": { "status": "partial", "spec": "packages/api/tests/incident-list-filter.test.ts" },
+      "estimatedMinutes": 15
     }
   ],
   "lanes": {

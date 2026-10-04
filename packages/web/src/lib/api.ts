@@ -363,22 +363,26 @@ export const api = {
         body: JSON.stringify(body),
         skipErrorReport: true,
       }),
-    reportClientErrors: (body: {
-      errors: Array<{
-        fingerprint: string
-        feature: string
-        errorKind: 'ui_boundary' | 'api' | 'network'
-        errorCode: string
-        sessionId?: string
-        route?: string
-        patientId?: string
-        properties?: Record<string, unknown>
-      }>
-    }) =>
+    reportClientErrors: (
+      body: {
+        errors: Array<{
+          fingerprint: string
+          feature: string
+          errorKind: 'ui_boundary' | 'api' | 'network'
+          errorCode: string
+          sessionId?: string
+          route?: string
+          patientId?: string
+          properties?: Record<string, unknown>
+        }>
+      },
+      init?: Pick<RequestInit, 'signal'>,
+    ) =>
       request<{ accepted: number; rejected: number }>('/telemetry/client-errors', {
         method: 'POST',
         body: JSON.stringify(body),
         skipErrorReport: true,
+        signal: init?.signal,
       }),
   },
   support: {

@@ -55,8 +55,15 @@ Stop-OpsConsoleProcesses -Port $opsConsolePort
 Stop-ListenerOnPort $opsConsolePort
 Start-Sleep -Milliseconds 800
 
+# API resolves OPS_ALERT_DASHBOARD_URL before OPS_CONSOLE_PUBLIC_URL; inheriting
+# localhost here breaks Triador/Correção callbacks when a tunnel URL is in .env.
 if (-not $env:OPS_ALERT_DASHBOARD_URL) {
-  $env:OPS_ALERT_DASHBOARD_URL = "http://127.0.0.1:$opsConsolePort"
+  $publicUrl = if ($env:OPS_CONSOLE_PUBLIC_URL) { $env:OPS_CONSOLE_PUBLIC_URL.Trim() } else { '' }
+  if ($publicUrl) {
+    $env:OPS_ALERT_DASHBOARD_URL = $publicUrl
+  } else {
+    $env:OPS_ALERT_DASHBOARD_URL = "http://127.0.0.1:$opsConsolePort"
+  }
 }
 
 $tsxCmd = if ($Watch) { 'npx tsx watch src/server.ts' } else { 'npx tsx src/server.ts' }

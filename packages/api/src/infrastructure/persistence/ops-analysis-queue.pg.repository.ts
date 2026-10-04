@@ -4,17 +4,26 @@ import type {
   AnalysisQueuePriority,
   AnalysisQueueSourceType,
   AnalysisQueueStatus,
+  IncidentPipelineStatus,
   OpsAnalysisAttentionCounts,
   OpsAnalysisQueueRecord,
 } from '../../domain/ops/ops-analysis-queue.types.js'
+import {
+  incidentBoardWhereClause,
+  type IncidentBoardFilter,
+  normalizeIncidentReferenceCode,
+} from '../../domain/ops/incident-list-filter.js'
+import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
 
 function mapRow(row: Record<string, unknown>): OpsAnalysisQueueRecord {
   return {
     id: String(row.id),
+    referenceCode: row.reference_code != null ? String(row.reference_code) : null,
     sourceType: row.source_type as AnalysisQueueSourceType,
     sourceId: String(row.source_id),
     lane: row.lane as AnalysisQueueLane,
     status: row.status as AnalysisQueueStatus,
+    incidentPipelineStatus: (row.incident_pipeline_status as IncidentPipelineStatus) ?? 'open',
     priority: row.priority as AnalysisQueuePriority,
     deploymentTier: String(row.deployment_tier),
     title: String(row.title),
@@ -53,11 +62,12 @@ export class OpsAnalysisQueuePgRepository {
   constructor(private readonly pool: Pool) {}
 
   async upsertQueued(input: UpsertQueueInput): Promise<OpsAnalysisQueueRecord> {
+    const referenceCode = await allocateOpsReferenceCode(this.pool, 'incident')
     const res = await this.pool.query(
       `INSERT INTO ops_analysis_queue (
-        source_type, source_id, lane, deployment_tier, title, error_summary,
+        reference_code, source_type, source_id, lane, deployment_tier, title, error_summary,
         context_snapshot, operator_notes, investigation_trigger, priority, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, 'queued')
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, 'queued')
       ON CONFLICT (source_type, source_id, deployment_tier) DO UPDATE SET
         lane = EXCLUDED.lane,
         title = EXCLUDED.title,
@@ -75,6 +85,7 @@ export class OpsAnalysisQueuePgRepository {
         updated_at = NOW()
       RETURNING *`,
       [
+        referenceCode,
         input.sourceType,
         input.sourceId,
         input.lane,
@@ -90,6 +101,16 @@ export class OpsAnalysisQueuePgRepository {
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
+  async setIncidentPipelineStatus(id: string, status: IncidentPipelineStatus): Promise<void> {
+    await this.pool.query(
+      `UPDATE ops_analysis_queue SET
+        incident_pipeline_status = $2,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, status],
+    )
+  }
+
   async markInvestigating(id: string): Promise<void> {
     await this.pool.query(
       `UPDATE ops_analysis_queue SET
@@ -102,10 +123,21 @@ export class OpsAnalysisQueuePgRepository {
     )
   }
 
+  async markPipelineInTriage(id: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE ops_analysis_queue SET
+        incident_pipeline_status = 'in_triage',
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id],
+    )
+  }
+
   async markDismissed(id: string, reason: string): Promise<void> {
     await this.pool.query(
       `UPDATE ops_analysis_queue SET
         status = 'dismissed',
+        incident_pipeline_status = 'dismissed',
         remediation_summary = $2,
         analysis_last_error = NULL,
         updated_at = NOW()
@@ -215,9 +247,17 @@ export class OpsAnalysisQueuePgRepository {
   }
 
   async listOpen(limit = 100): Promise<OpsAnalysisQueueRecord[]> {
+    return this.listForIncidentBoard('needs_attention', limit)
+  }
+
+  async listForIncidentBoard(
+    filter: IncidentBoardFilter,
+    limit = 100,
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const where = incidentBoardWhereClause(filter)
     const res = await this.pool.query(
       `SELECT * FROM ops_analysis_queue
-       WHERE status NOT IN ('completed', 'dismissed')
+       WHERE ${where}
        ORDER BY
          CASE priority
            WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3
@@ -229,14 +269,102 @@ export class OpsAnalysisQueuePgRepository {
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
+  async findByReferenceCode(referenceCode: string): Promise<OpsAnalysisQueueRecord | null> {
+    const normalized = normalizeIncidentReferenceCode(referenceCode)
+    if (!normalized) return null
+    const res = await this.pool.query(
+      `SELECT * FROM ops_analysis_queue WHERE reference_code = $1 LIMIT 1`,
+      [normalized],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async searchForIncidentBoard(
+    query: string,
+    limit = 50,
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const trimmed = query.trim()
+    if (!trimmed) return []
+    const ref = normalizeIncidentReferenceCode(trimmed)
+    if (ref) {
+      const one = await this.findByReferenceCode(ref)
+      return one ? [one] : []
+    }
+    const params: unknown[] = []
+    let where = ''
+    if (/^[0-9a-f-]{8,36}$/i.test(trimmed)) {
+      params.push(`${trimmed.toLowerCase()}%`)
+      where = `id::text LIKE $1`
+    } else {
+      params.push(`%${trimmed.slice(0, 200)}%`)
+      where = `title ILIKE $1`
+    }
+    params.push(limit)
+    const res = await this.pool.query(
+      `SELECT * FROM ops_analysis_queue
+       WHERE ${where}
+       ORDER BY updated_at DESC
+       LIMIT $2`,
+      params,
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
+  /** Incidentes `open` sem outbox ativo (pending/forwarded/claimed). */
+  async listOpenNeedingDispatchOutbox(
+    limit: number,
+    options?: { staleMs?: number },
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const staleMs = options?.staleMs
+    const params: unknown[] = [limit]
+    let staleSql = ''
+    if (staleMs != null && staleMs > 0) {
+      params.push(staleMs)
+      staleSql = `AND q.created_at < NOW() - ($2::bigint * interval '1 millisecond')`
+    }
+    const res = await this.pool.query(
+      `SELECT q.* FROM ops_analysis_queue q
+       WHERE q.incident_pipeline_status = 'open'
+         AND q.status NOT IN ('completed', 'dismissed')
+         ${staleSql}
+         AND NOT EXISTS (
+           SELECT 1 FROM incident_dispatch_outbox o
+           WHERE o.incident_id = q.id
+             AND o.status IN ('pending', 'forwarded', 'claimed')
+         )
+       ORDER BY q.created_at ASC
+       LIMIT $1`,
+      params,
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
+  /** Incidentes `open` há mais de `staleMs` sem qualquer linha outbox (D5). */
+  async countStaleOpenWithoutOutbox(staleMs: number): Promise<number> {
+    const res = await this.pool.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM ops_analysis_queue q
+       WHERE q.incident_pipeline_status = 'open'
+         AND q.status NOT IN ('completed', 'dismissed')
+         AND q.created_at < NOW() - ($1::bigint * interval '1 millisecond')
+         AND NOT EXISTS (
+           SELECT 1 FROM incident_dispatch_outbox o WHERE o.incident_id = q.id
+         )`,
+      [staleMs],
+    )
+    return Number(res.rows[0]?.count ?? 0)
+  }
+
   async attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
+    const openIncidentFilter = `status NOT IN ('completed', 'dismissed')
+           AND incident_pipeline_status NOT IN ('triaged', 'dismissed')`
     const res = await this.pool.query<{ status: string; count: string }>(
       deploymentTier
         ? `SELECT status, COUNT(*)::text AS count FROM ops_analysis_queue
-           WHERE deployment_tier = $1 AND status NOT IN ('completed', 'dismissed')
+           WHERE deployment_tier = $1 AND ${openIncidentFilter}
            GROUP BY status`
         : `SELECT status, COUNT(*)::text AS count FROM ops_analysis_queue
-           WHERE status NOT IN ('completed', 'dismissed')
+           WHERE ${openIncidentFilter}
            GROUP BY status`,
       deploymentTier ? [deploymentTier] : [],
     )

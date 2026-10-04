@@ -1,6 +1,10 @@
 import { expect, type Page } from '@playwright/test'
 import { dismissFirstVisitTour } from './ui'
 
+const AVA_FAB_LABEL = /Abrir conversa com Ava|Open chat with Ava/i
+const AVA_COMPOSER_PLACEHOLDER = /febre|fever|Ex\.:|E\.g\./i
+const AVA_NEW_CONVERSATION = /^(Nova conversa|New conversation)$/
+
 function isAvaChatPostUrl(method: string, url: string) {
   if (method !== 'POST') return false
   try {
@@ -10,13 +14,40 @@ function isAvaChatPostUrl(method: string, url: string) {
   }
 }
 
+/** FAB no layout; chat no Drawer (portal — fora de .ava-global-dock). */
+function avaDockTrigger(page: Page) {
+  return page.locator('.ava-global-dock .ava-dock-trigger')
+}
+
+/** Único AvaChatPanel na app (drawer em portal). */
+function avaComposerRoot(page: Page) {
+  return page.locator('.ava-chat-panel__composer')
+}
+
 function avaAssistantBubbleBodies(page: Page) {
-  return page.locator('.ava-chat-bubble-row--ava .ava-chat-bubble__body')
+  return page.getByTestId('ava-assistant-bubble').locator('.ava-chat-bubble__body')
+}
+
+function avaComposerInput(page: Page) {
+  return avaComposerRoot(page).getByPlaceholder(AVA_COMPOSER_PLACEHOLDER)
+}
+
+function avaSendButton(page: Page) {
+  return avaComposerRoot(page).locator('.ava-chat-panel__composer-actions button.ant-btn-primary')
+}
+
+async function ensureAvaSharingOptIn(page: Page) {
+  const box = avaComposerRoot(page).getByRole('checkbox').first()
+  if (await box.isVisible().catch(() => false)) {
+    if (!(await box.isChecked().catch(() => false))) {
+      await box.check()
+    }
+  }
 }
 
 async function waitAvaComposerReady(page: Page, timeout = 90_000) {
-  const input = page.getByPlaceholder(/febre|Ex\.:/i)
-  const send = page.getByRole('button', { name: 'Enviar' })
+  const input = avaComposerInput(page)
+  const send = avaSendButton(page)
   await input.waitFor({ state: 'visible', timeout })
   await send.waitFor({ state: 'visible', timeout })
   await expect(input).toBeEnabled({ timeout })
@@ -39,7 +70,7 @@ async function waitForAvaDockSettled(page: Page, timeout = 30_000) {
 
 async function waitForAvaFab(page: Page, timeout = 45_000) {
   // ensureQaE2eSession já hidratou pacientes — só aguardar o FAB (evita stall de 60s no CI).
-  await page.getByRole('button', { name: 'Abrir conversa com Ava' }).waitFor({
+  await page.getByRole('button', { name: AVA_FAB_LABEL }).waitFor({
     state: 'visible',
     timeout,
   })
@@ -47,18 +78,16 @@ async function waitForAvaFab(page: Page, timeout = 45_000) {
 
 export async function openAvaDock(page: Page) {
   await dismissFirstVisitTour(page)
+  // useAvaDockIntro pula animação (~6.4s) — estabiliza abertura do drawer no CI.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await waitForAvaFab(page)
-  if (process.env.CI) {
-    // useAvaDockIntro: greeting + settling (~6.4s) antes do dock ficar estável no CI.
-    await page.waitForTimeout(7_000)
-  }
 
   await expect(async () => {
     const convoList = page
       .waitForResponse((r) => /\/ava\/conversations/.test(r.url()) && r.ok(), { timeout: 25_000 })
       .catch(() => null)
-    await page.getByRole('button', { name: 'Abrir conversa com Ava' }).click({ force: true })
-    await page.getByPlaceholder(/febre|Ex\.:/i).waitFor({ state: 'visible', timeout: 25_000 })
+    await avaDockTrigger(page).click({ force: true })
+    await page.getByPlaceholder(AVA_COMPOSER_PLACEHOLDER).waitFor({ state: 'visible', timeout: 25_000 })
     await convoList
   }).toPass({ timeout: 60_000 })
 
@@ -68,14 +97,11 @@ export async function openAvaDock(page: Page) {
 /** Nova conversa — evita bolha stale de specs anteriores no mesmo usuário QA. */
 export async function startFreshAvaConversation(page: Page) {
   await expect(async () => {
-    const avaRows = page.locator('.ava-chat-bubble-row--ava')
-    const count = await avaRows.count()
-    if (count > 0) {
-      const btn = page.getByRole('button', { name: 'Nova conversa' })
-      if (await btn.isVisible().catch(() => false)) {
-        await btn.click()
-      }
+    const btn = page.getByRole('button', { name: AVA_NEW_CONVERSATION })
+    if (await btn.isVisible().catch(() => false)) {
+      await btn.click()
     }
+    const avaRows = page.getByTestId('ava-assistant-bubble')
     expect(await avaRows.count()).toBe(0)
   }).toPass({ timeout: 30_000 })
   await waitAvaComposerReady(page)
@@ -87,7 +113,7 @@ export async function waitForAvaAssistantReply(
   pattern: RegExp,
   timeout = 90_000,
 ) {
-  const send = page.getByRole('button', { name: 'Enviar' })
+  const send = avaSendButton(page)
   await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout })
 
   await expect(async () => {
@@ -118,33 +144,39 @@ export async function waitForAvaAssistantReply(
 
 export async function submitAvaMessage(page: Page, text: string) {
   await waitAvaComposerReady(page)
-  const avaBubblesBefore = await page.locator('.ava-chat-bubble-row--ava').count()
+  await ensureAvaSharingOptIn(page)
 
-  const input = page.getByPlaceholder(/febre|Ex\.:/i)
-  const send = page.getByRole('button', { name: 'Enviar' })
+  const input = avaComposerInput(page)
+  const send = avaSendButton(page)
   const chatStarted = page.waitForRequest(
     (r) => isAvaChatPostUrl(r.method(), r.url()),
     { timeout: 45_000 },
+  )
+  const chatFinished = page.waitForResponse(
+    (r) => isAvaChatPostUrl(r.request().method(), r.url()) && r.ok(),
+    { timeout: 90_000 },
   )
   await input.fill(text)
   await expect(send).toBeEnabled({ timeout: 30_000 })
   await send.click({ force: true })
 
   await chatStarted
-  await expect(page.locator('.ava-chat-bubble-row--ava')).toHaveCount(avaBubblesBefore + 1, {
-    timeout: 90_000,
-  })
+  await chatFinished
+  await expect(send).not.toHaveClass(/ant-btn-loading/, { timeout: 90_000 })
   await waitAvaComposerReady(page)
 }
 
 export async function sendAvaMessage(page: Page, text: string) {
   await submitAvaMessage(page, text)
-  await waitForAvaAssistantReply(page, /.{8,}/, 90_000)
+  const replyPattern = process.env.CI
+    ? /Resposta de teste Ava|companheira de cuidado|saúde na família|exames|vacina|não há/i
+    : /.{8,}/
+  await waitForAvaAssistantReply(page, replyPattern, 90_000)
   await waitAvaComposerReady(page)
 }
 
 export async function waitForAvaAssistantBubble(page: Page, timeout = 45_000) {
-  const bubble = page.locator('.ava-chat-bubble-row--ava').last()
+  const bubble = page.getByTestId('ava-assistant-bubble').last()
   await bubble.waitFor({ state: 'visible', timeout })
   return bubble
 }

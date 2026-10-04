@@ -1,0 +1,146 @@
+import type {
+  CreatePlatformDefectInput,
+  PlatformDefectIncidentLinkedBy,
+  PlatformDefectRecord,
+  PlatformDefectStatus,
+} from '../../domain/ops/platform-defect.types.js'
+import { isGithubPullRequestUrl } from '../../domain/ops/platform-defect-pr-url.js'
+import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
+
+const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
+  open: ['in_fix'],
+  in_fix: ['ready_for_pr', 'open'],
+  ready_for_pr: ['fixed'],
+  fixed: [],
+}
+
+export class PlatformDefectTransitionError extends Error {
+  readonly code: 'invalid_transition' | 'not_found' | 'pr_url_required'
+
+  constructor(code: 'invalid_transition' | 'not_found' | 'pr_url_required') {
+    super(code)
+    this.code = code
+  }
+}
+
+export function assertGithubPrUrlForReadyForPr(prUrl: string | null | undefined): void {
+  if (!isGithubPullRequestUrl(prUrl)) {
+    throw new PlatformDefectTransitionError('pr_url_required')
+  }
+}
+
+export class PlatformDefectService {
+  constructor(private readonly repo: PlatformDefectPgRepository) {}
+
+  async listForOps(options: {
+    statusFilter?: string
+    includeFixed?: boolean
+    limit?: number
+  } = {}): Promise<PlatformDefectRecord[]> {
+    const statuses = options.statusFilter
+      ?.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean) as PlatformDefectStatus[] | undefined
+    const items = await this.repo.listForOps({
+      statuses: statuses?.length ? statuses : undefined,
+      includeFixed: options.includeFixed,
+      limit: options.limit,
+    })
+    const { reconcileUntruthfulDefectsInList } = await import('./platform-defect-in-fix-reconcile.js')
+    return reconcileUntruthfulDefectsInList(this, items)
+  }
+
+  async getDetail(id: string) {
+    const { reconcileDefectByIdIfNeeded } = await import('./platform-defect-in-fix-reconcile.js')
+    await reconcileDefectByIdIfNeeded(this, this.repo, id)
+    return this.repo.findByIdWithIncidents(id)
+  }
+
+  findByReferenceCode(referenceCode: string): Promise<PlatformDefectRecord | null> {
+    return this.repo.findByReferenceCode(referenceCode)
+  }
+
+  searchForOps(query: string, limit = 50): Promise<PlatformDefectRecord[]> {
+    return this.repo.searchForOps(query, limit)
+  }
+
+  async createFromTriage(
+    input: CreatePlatformDefectInput,
+    incidentId: string,
+    linkedBy: PlatformDefectIncidentLinkedBy = 'agent_triage',
+  ): Promise<PlatformDefectRecord> {
+    if (input.fingerprint) {
+      const existing = await this.repo.findOpenByFingerprint(input.fingerprint)
+      if (existing) {
+        await this.repo.linkIncident(existing.id, incidentId, linkedBy)
+        return existing
+      }
+    }
+    const defect = await this.repo.insert(input)
+    await this.repo.linkIncident(defect.id, incidentId, linkedBy)
+    return defect
+  }
+
+  async linkIncident(
+    defectId: string,
+    incidentId: string,
+    linkedBy: PlatformDefectIncidentLinkedBy,
+  ): Promise<void> {
+    const defect = await this.repo.findById(defectId)
+    if (!defect) throw new PlatformDefectTransitionError('not_found')
+    await this.repo.linkIncident(defectId, incidentId, linkedBy)
+  }
+
+  /** Somente após `dispatch.outcome === sent` (via start-fix). */
+  async startFix(id: string): Promise<PlatformDefectRecord> {
+    const current = await this.repo.findById(id)
+    if (!current) throw new PlatformDefectTransitionError('not_found')
+    if (current.status !== 'open') {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+    const updated = await this.repo.updateStatus(id, 'in_fix', { markFixDispatchSent: true })
+    if (!updated) throw new PlatformDefectTransitionError('not_found')
+    return updated
+  }
+
+  async revertStaleInFix(id: string): Promise<PlatformDefectRecord> {
+    const current = await this.repo.findById(id)
+    if (!current) throw new PlatformDefectTransitionError('not_found')
+    if (current.status !== 'in_fix') return current
+    const updated = await this.repo.updateStatus(id, 'open', { clearFixProgress: true })
+    if (!updated) throw new PlatformDefectTransitionError('not_found')
+    return updated
+  }
+
+  async transition(
+    id: string,
+    nextStatus: PlatformDefectStatus,
+    meta?: { branchName?: string | null; prUrl?: string | null; skipBatch?: boolean },
+  ): Promise<PlatformDefectRecord> {
+    const current = await this.repo.findById(id)
+    if (!current) throw new PlatformDefectTransitionError('not_found')
+
+    if (nextStatus === 'in_fix') {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+
+    const allowed = ALLOWED[current.status]
+    if (!allowed.includes(nextStatus)) {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+    void meta?.skipBatch
+
+    if (nextStatus === 'ready_for_pr') {
+      const effectivePrUrl = meta?.prUrl !== undefined ? meta.prUrl : current.prUrl
+      assertGithubPrUrlForReadyForPr(effectivePrUrl)
+    }
+
+    const updated = await this.repo.updateStatus(id, nextStatus, {
+      branchName: meta?.branchName,
+      prUrl: meta?.prUrl,
+      clearFixProgress: current.status === 'in_fix' && nextStatus === 'open',
+    })
+    if (!updated) throw new PlatformDefectTransitionError('not_found')
+    return updated
+  }
+}

@@ -78,7 +78,7 @@ export function buildOpsAlertInvestigatorPayload(
   const consoleBase = resolveOpsAlertDashboardUrl()?.replace(/\?.*$/, '')
     ?? `http://127.0.0.1:${process.env.OPS_CONSOLE_PORT ?? '3013'}`
   const dashboardUrl = buildOpsConsoleUrl(consoleBase, {
-    tab: 'issues',
+    tab: 'incidentes',
     investigationId: options.investigationId,
     alertId: alert.id,
   })

@@ -32,7 +32,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 | Tipo | Referência |
 |------|------------|
 | Rotas web | Todas (botão em `AppLayout`) |
-| API | `POST /support/reports`, `GET /support/reports`, `GET /support/reports/:id` |
+| API | `POST /support/reports` (cria `support_reports` + incidente `ops_analysis_queue`, origem Usuário), `GET …` |
 | Tabelas PG | `support_reports` (migration **061**) |
 | UI | `packages/web/src/components/support/SupportReportModal.tsx` |
 | Telemetria | `support_report_submitted` em `product_events` |
@@ -78,10 +78,16 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 - Automação: `packages/web/e2e/suites/support-user-report.spec.ts`
 - **Batch investigator (ops):** com `OPS_SUPPORT_INVESTIGATOR_MODE=batch`, `POST /support/reports` mantém toast e deixa `analysis_status=queued` até o job (`OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS`, padrão 6h no connect-worker). Botão **Analisar** no console continua imediato. Vitest: `support-report-batch.test.ts`, `support-report-dispatch.test.ts`.
 
+## Ops — jornada após o chamado
+
+Chamados alimentam incidentes `INC-*` no Command Hub. Ciclo completo até correção mergeada: [`docs/ops/SOLO_OPERATOR_RUNBOOK.md`](../ops/SOLO_OPERATOR_RUNBOOK.md) (épico `ch-solo-operator-journey`).
+
 ## Ver também
 
 - [`docs/OBSERVABILITY.md`](../OBSERVABILITY.md)
 - [`docs/ops/SUPPORT_REPORTS.md`](../ops/SUPPORT_REPORTS.md) — runbook ops (sessão **Aiyra: Ops**)
+- [`docs/ops/CH_INCIDENT_DEFECT_PIPELINE.md`](../ops/CH_INCIDENT_DEFECT_PIPELINE.md) — pipeline INC/DEF
 - [`docs/ops/TELEMETRY.md`](../ops/TELEMETRY.md)
+- [`docs/ops/CLIENT_ERROR_INCIDENT_BRIDGE.md`](../ops/CLIENT_ERROR_INCIDENT_BRIDGE.md) — auto-INC a partir de `client_errors` (piloto)
 - [`docs/OPERATION_MODEL.md`](../OPERATION_MODEL.md) Fase 3–5
-- `docs/roadmap.json` → `run-support-user-reports`
+- `docs/roadmap.json` → `run-support-user-reports`, `ch-solo-operator-journey`

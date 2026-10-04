@@ -9,6 +9,32 @@ import {
 const SESSION_KEY = 'aiyracare.browser_session'
 const DEDUPE_MS = 15_000
 const recentKeys = new Map<string, number>()
+const pendingIngest: Promise<void>[] = []
+/** Teto para não bloquear envio de suporte se ingest de telemetria travar (ex. E2E / rede lenta). */
+const AWAIT_PENDING_INGEST_MAX_MS = 2_000
+/** Aborta fetch pendente para liberar pool HTTP (evita fila infinita antes de POST /support/reports). */
+const INGEST_FETCH_TIMEOUT_MS = 4_000
+
+function withIngestTimeout(run: (signal?: AbortSignal) => Promise<unknown>): Promise<void> {
+  if (typeof AbortController === 'undefined') {
+    return Promise.resolve(run()).then(() => undefined, () => undefined)
+  }
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), INGEST_FETCH_TIMEOUT_MS)
+  return run(controller.signal).then(() => undefined, () => undefined).finally(() => clearTimeout(timer))
+}
+
+/** Aguarda telemetria fire-and-forget antes do bundle de suporte (evita race com `client_errors`). */
+export async function awaitPendingClientErrorReports(): Promise<void> {
+  const batch = pendingIngest.splice(0)
+  if (!batch.length) return
+  await Promise.race([
+    Promise.allSettled(batch),
+    new Promise<void>((resolve) => {
+      setTimeout(resolve, AWAIT_PENDING_INGEST_MAX_MS)
+    }),
+  ])
+}
 
 function getBrowserSessionId(): string {
   try {
@@ -58,21 +84,27 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
   if (shouldDedupe(fingerprint)) return
 
   const { api } = await import('./api.js')
-  await api.telemetry.reportClientErrors({
-    errors: [{
-      fingerprint,
-      feature,
-      errorKind: input.errorKind,
-      errorCode,
-      sessionId: getBrowserSessionId(),
-      route,
-      patientId: input.patientId,
-      properties: {
-        ...(input.apiPath ? { api_path: input.apiPath.split('?')[0].slice(0, 128) } : {}),
-        ...input.properties,
+  const ingest = withIngestTimeout((signal) =>
+    api.telemetry.reportClientErrors(
+      {
+        errors: [{
+          fingerprint,
+          feature,
+          errorKind: input.errorKind,
+          errorCode,
+          sessionId: getBrowserSessionId(),
+          route,
+          patientId: input.patientId,
+          properties: {
+            ...(input.apiPath ? { api_path: input.apiPath.split('?')[0].slice(0, 128) } : {}),
+            ...input.properties,
+          },
+        }],
       },
-    }],
-  })
+      signal ? { signal } : undefined,
+    ),
+  )
+  pendingIngest.push(ingest)
 }
 
 export function reportApiClientError(
@@ -106,5 +138,24 @@ export function reportUiBoundaryError(componentName: string, errorName: string):
     errorKind: 'ui_boundary',
     errorCode: sanitizeErrorCode(errorName || 'ReactError'),
     properties: { component: componentName.slice(0, 64) },
+  }).catch(() => undefined)
+}
+
+/** Account/settings flows — stable `account_settings` feature for CH bridge pilot. */
+export function reportAccountSettingsFailure(
+  apiPath: string,
+  statusOrCode: number | string,
+  options?: { route?: string },
+): void {
+  const errorCode =
+    typeof statusOrCode === 'number' && statusOrCode > 0
+      ? `HTTP_${statusOrCode}`
+      : sanitizeErrorCode(String(statusOrCode))
+  void reportClientError({
+    feature: 'account_settings',
+    errorKind: 'api',
+    errorCode,
+    apiPath,
+    route: options?.route,
   }).catch(() => undefined)
 }

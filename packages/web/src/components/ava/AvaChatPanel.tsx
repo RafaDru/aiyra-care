@@ -114,6 +114,8 @@ export function AvaChatPanel({
   const resumeAttemptedRef = useRef(false)
   /** Evita que listConversations em voo reative conversa após «Nova conversa». */
   const userClearedConversationRef = useRef(false)
+  /** GET /messages em voo não pode sobrescrever bolhas do turno local (corrida no CI). */
+  const suppressMessageHydrationRef = useRef(false)
   const conversationIdRef = useRef<string | null>(conversationId ?? null)
   conversationIdRef.current = conversationId ?? null
 
@@ -146,10 +148,12 @@ export function AvaChatPanel({
       .catch(() => setConversationOptions([]))
   }, [patientId])
 
-  const loadConversationMessages = useCallback((id: string) => {
+  const loadConversationMessages = useCallback((id: string, opts?: { force?: boolean }) => {
     api.ava.getMessages(id)
       .then((r) => {
         if (conversationIdRef.current !== id) return
+        if (!opts?.force && suppressMessageHydrationRef.current) return
+        if (r.messages.length === 0) return
         setMessages(r.messages.map((m) => ({
           role: m.role,
           text: m.content,
@@ -157,8 +161,8 @@ export function AvaChatPanel({
         })))
       })
       .catch(() => {
+        // Falha transitória de sync não deve apagar bolhas já renderizadas (ex.: corrida pós-turno no CI).
         if (conversationIdRef.current !== id) return
-        setMessages([])
       })
   }, [])
 
@@ -200,7 +204,7 @@ export function AvaChatPanel({
 
   useEffect(() => {
     if (conversationId) {
-      if (!loading) loadConversationMessages(conversationId)
+      if (!loading && messages.length === 0) loadConversationMessages(conversationId)
       return
     }
     if (resumeAttemptedRef.current || initialMessage?.trim() || autoSend || loading) return
@@ -212,7 +216,7 @@ export function AvaChatPanel({
         if (latest) onConversationIdChange?.(latest.id)
       })
       .catch(() => {})
-  }, [conversationId, patientId, initialMessage, autoSend, loading, loadConversationMessages, onConversationIdChange])
+  }, [conversationId, patientId, initialMessage, autoSend, loading, messages.length, loadConversationMessages, onConversationIdChange])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -229,6 +233,7 @@ export function AvaChatPanel({
     const pin = pinForTurn ?? entityPin
     const attachmentForTurn = attachment
 
+    suppressMessageHydrationRef.current = true
     if (!overrideText) setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
     setMessages((prev) => [...prev, { role: 'assistant', text: '', streaming: true }])
@@ -318,6 +323,7 @@ export function AvaChatPanel({
         message.error(errMsg)
       }
     } finally {
+      suppressMessageHydrationRef.current = false
       setLoading(false)
     }
   }
@@ -360,6 +366,7 @@ export function AvaChatPanel({
 
   const startNewConversation = () => {
     userClearedConversationRef.current = true
+    suppressMessageHydrationRef.current = false
     onConversationIdChange?.(null)
     setMessages([])
     setAttachment(null)
@@ -399,8 +406,9 @@ export function AvaChatPanel({
   }
 
   const handleConversationSelect = (id: string) => {
+    suppressMessageHydrationRef.current = false
     onConversationIdChange?.(id)
-    loadConversationMessages(id)
+    loadConversationMessages(id, { force: true })
   }
 
   useEffect(() => {
@@ -609,6 +617,7 @@ export function AvaChatPanel({
             {messages.map((item, idx) => (
               <div
                 key={idx}
+                data-testid={item.role === 'assistant' ? 'ava-assistant-bubble' : 'ava-user-bubble'}
                 className={[
                   'ava-chat-bubble-row',
                   item.role === 'user' ? 'ava-chat-bubble-row--user' : 'ava-chat-bubble-row--ava',

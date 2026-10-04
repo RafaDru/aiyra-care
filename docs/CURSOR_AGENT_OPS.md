@@ -29,6 +29,7 @@ O modelo **interpreta** skills; hooks e CI **executam** independentemente do mod
 | `afterFileEdit` | `after-file-edit-doc-ritual.mjs` | Marca ritual docs se produto sem `docs/features` |
 | `afterFileEdit` | `after-file-edit-qa-ritual.mjs` | Marca ritual QA se produto sem `qa:run` |
 | `preToolUse` | `pre-tool-guard.mjs` | Bloqueia Write/Delete em `.env` e credenciais |
+| `preToolUse` | `pre-tool-shell-rtk.mjs` (matcher `Shell`) | RTK com bypass QA/E2E/testes — ver `docs/CURSOR_RTK.md` |
 | `stop` | `stop-doc-ritual.mjs` | `followup_message` se ritual docs **ou QA** pendente (`loop_limit: 3`) |
 
 Regras always-on: `.cursor/rules/agent-bootstrap.mdc`, **`.cursor/rules/qa-delivery.mdc`**.

@@ -79,7 +79,18 @@ for ($i = 0; $i -lt 12; $i++) {
 Write-Host "Starting Ops console..." -NoNewline
 if ($Preview -and -not $env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT = $defaultOpsConsole }
 $opsConsolePort = if ($env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT } else { $defaultOpsConsole }
-& (Join-Path $PSScriptRoot "ops-console-up.ps1") | Out-Null
+$chShellRoot = if ($env:AIYRA_CH_SHELL_ROOT) {
+  $env:AIYRA_CH_SHELL_ROOT.Trim()
+} else {
+  Join-Path (Split-Path $root -Parent) "aiyra-care-ch-shell"
+}
+$chShellOpsUp = Join-Path $chShellRoot "scripts\ops-console-up.ps1"
+if ((Test-Path $chShellOpsUp) -and -not $Preview) {
+  Write-Host " (CH v2 via ch-shell)" -ForegroundColor DarkCyan
+  & $chShellOpsUp | Out-Null
+} else {
+  & (Join-Path $PSScriptRoot "ops-console-up.ps1") | Out-Null
+}
 try {
   $h = Invoke-RestMethod -Uri "http://127.0.0.1:$opsConsolePort/health" -ErrorAction Stop
   if ($h.service -eq 'aiyracare-ops-console') { Write-Host " OK" -ForegroundColor Green }
@@ -121,7 +132,7 @@ Write-Host @"
 `nAiyraCare $envLabel running :
   Web  $webOpenUrl
   API  $apiDisplayUrl/health
-  Ops  $opsDisplayUrl
+  Ops  $opsDisplayUrl/?group=operacao&tab=defeitos
   Notifier http://127.0.0.1:$notifierPort/ops-alert
   PG   $env:DATABASE_URL
   Logs api$logSuffix.log / web$logSuffix.log / ops-console.log / ops-notifier.log

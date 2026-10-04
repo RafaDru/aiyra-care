@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => {
       ? { 'import.meta.env.VITE_OPS_CONSOLE_STACK_KEY': JSON.stringify(stackKey) }
       : {},
     plugins: [react()],
+    resolve: {
+      alias: {
+        '@aiyra-care/design-tokens': resolve(monorepoRoot, 'packages/design-tokens/src/index.ts'),
+      },
+    },
     root: resolve(__dirname, 'src/client'),
     build: {
       outDir: resolve(__dirname, 'dist/client'),

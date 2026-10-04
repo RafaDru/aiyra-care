@@ -22,6 +22,7 @@ import {
   isAwaitingHermesPardiniOtp,
   submitHermesPardiniOtpCode,
 } from '../../scraper/hermes-pardini-otp-session.js'
+import { writeSseResponseHead } from '../sse-response.helper.js'
 
 const syncLocks = new Set<string>()
 
@@ -322,12 +323,7 @@ export class IntegrationLinkController {
     if (!guarded) return
 
     const res = reply.raw
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-      'X-Accel-Buffering': 'no',
-    })
+    writeSseResponseHead(req.raw, res)
     res.write('\n')
 
     const writeEvent = (event: string, payload: SyncProgressPayload) => {
