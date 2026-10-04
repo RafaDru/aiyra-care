@@ -34,6 +34,7 @@ import {
   suggestIncidentBoardFilter,
   type IncidentBoardFilter,
 } from './ch-incident-board-filter.js'
+import { incidentMatchesBoardFilter } from '../../api/src/domain/ops/incident-list-filter.js'
 import {
   matchesOpsAnalysisQueueItem,
   parseOpsSearchInput,
@@ -71,10 +72,10 @@ const PRIORITY_LABEL: Record<OpsAnalysisQueueItem['priority'], string> = {
 }
 
 const BOARD_FILTERS: IncidentBoardFilter[] = [
+  'all_open',
   'needs_attention',
   'triaged',
   'resolved',
-  'all_open',
 ]
 
 /** Atualização automática da lista (PG ao vivo; sem SSE). */
@@ -118,7 +119,7 @@ export function IncidentesPanel({
   const [items, setItems] = useState<OpsAnalysisQueueItem[]>([])
   const [loading, setLoading] = useState(true)
   const [boardFilter, setBoardFilter] = useState<IncidentBoardFilter>(
-    initialBoardFilter ?? 'needs_attention',
+    initialBoardFilter ?? 'all_open',
   )
   const [searchText, setSearchText] = useState(initialSearch ?? '')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -213,9 +214,30 @@ export function IncidentesPanel({
 
   const parsedSearch = useMemo(() => parseOpsSearchInput(searchText), [searchText])
   const visibleItems = useMemo(() => {
-    if (!parsedSearch) return items
-    return items.filter((item) => matchesOpsAnalysisQueueItem(item, parsedSearch))
-  }, [items, parsedSearch])
+    const highlightId = highlightInvestigationId?.trim() || null
+    const inFilter = items.filter((item) =>
+      incidentMatchesBoardFilter(
+        {
+          status: item.status,
+          incidentPipelineStatus: item.incidentPipelineStatus ?? 'open',
+        },
+        boardFilter,
+      ),
+    )
+    let result = inFilter
+    if (highlightId) {
+      const ensured = items.find((item) => item.id === highlightId)
+      if (ensured && !result.some((item) => item.id === highlightId)) {
+        result = [...result, ensured]
+      }
+    }
+    if (!parsedSearch) return result
+    return result.filter(
+      (item) =>
+        (highlightId !== null && item.id === highlightId) ||
+        matchesOpsAnalysisQueueItem(item, parsedSearch),
+    )
+  }, [items, parsedSearch, boardFilter, highlightInvestigationId])
 
   const sortedItems = useMemo(
     () => sortIncidentTableItems(visibleItems, tableSort),

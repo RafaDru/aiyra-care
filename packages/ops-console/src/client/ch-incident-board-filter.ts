@@ -7,15 +7,26 @@ export type IncidentBoardFilter =
   | 'all_open'
 
 export const INCIDENT_BOARD_FILTER_LABELS: Record<IncidentBoardFilter, string> = {
+  all_open: 'Em aberto',
   needs_attention: 'Precisam atenção',
   triaged: 'Triados',
   resolved: 'Resolvidos',
-  all_open: 'Todos abertos',
 }
 
 export function suggestIncidentBoardFilter(item: OpsAnalysisQueueItem): IncidentBoardFilter {
-  if (item.incidentPipelineStatus === 'resolved') return 'resolved'
-  if (item.incidentPipelineStatus === 'dismissed') return 'all_open'
-  if (item.incidentPipelineStatus === 'triaged') return 'triaged'
-  return 'needs_attention'
+  const pipeline = item.incidentPipelineStatus ?? 'open'
+  if (pipeline === 'resolved') return 'resolved'
+  if (pipeline === 'triaged') return 'triaged'
+  /** Sem chip «Descartados»; linha permanece visível com deep link (`ensureId`). */
+  if (pipeline === 'dismissed') return 'all_open'
+  if (
+    pipeline === 'dispatch_failed' ||
+    pipeline === 'open' ||
+    pipeline === 'forwarded' ||
+    pipeline === 'queued_worker' ||
+    pipeline === 'in_triage'
+  ) {
+    return 'needs_attention'
+  }
+  return 'all_open'
 }

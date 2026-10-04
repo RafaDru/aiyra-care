@@ -167,7 +167,7 @@ function parseIncidentBoardFilter(raw: string | undefined): IncidentBoardFilter 
   if (raw && INCIDENT_BOARD_FILTERS.has(raw as IncidentBoardFilter)) {
     return raw as IncidentBoardFilter
   }
-  return 'needs_attention'
+  return 'all_open'
 }
 
 async function analysisQueueItemsWithDispatch(

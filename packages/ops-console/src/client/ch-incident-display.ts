@@ -7,6 +7,7 @@ export type IncidentPipelineUiBucket =
   | 'em_triagem'
   | 'triado'
   | 'resolvido'
+  | 'descartado'
   | 'falha'
 
 export const INCIDENT_ORIGIN_LABEL: Record<string, string> = {
@@ -27,6 +28,7 @@ const PIPELINE_UI_LABEL: Record<IncidentPipelineUiBucket, string> = {
   em_triagem: 'Em triagem',
   triado: 'Triado',
   resolvido: 'Resolvido',
+  descartado: 'Descartado',
   falha: 'Falha',
 }
 
@@ -37,6 +39,7 @@ const PIPELINE_TAG_COLOR: Record<IncidentPipelineUiBucket, string> = {
   em_triagem: 'processing',
   triado: 'success',
   resolvido: 'default',
+  descartado: 'default',
   falha: 'error',
 }
 
@@ -63,7 +66,7 @@ export function incidentPipelineUiBucket(row: OpsAnalysisQueueItem): IncidentPip
   if (pipeline === 'dispatch_failed') return 'falha'
   if (pipeline === 'triaged') return 'triado'
   if (pipeline === 'resolved') return 'resolvido'
-  if (pipeline === 'dismissed') return 'aberto'
+  if (pipeline === 'dismissed') return 'descartado'
 
   if (row.status === 'investigating' || row.status === 'fix_proposed') return 'em_triagem'
   return 'aberto'

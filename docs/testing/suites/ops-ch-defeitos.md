@@ -15,7 +15,7 @@
 3. Com webhook mock/ready: `ok: true`, status `in_fix`
 4. **Em correção** → **Reenfileirar correção** — `POST start-fix` sem mudar status indevidamente
 5. **Incidentes** — coluna **Ref** `INC-*`
-6. **Incidentes** — filtro padrão **Precisam atenção**; chips **Triados** / **Resolvidos** (`triaged` / `resolved`); sem chip «Concluídos»
+6. **Incidentes** — filtro padrão **Em aberto** (`all_open`); chips **Precisam atenção**, **Triados** / **Resolvidos**; sem chip «Descartados» (deep link `investigationId` ainda exibe linha descartada)
 7. Deep link `?group=operacao&tab=incidentes&investigationId=<uuid>` (ou `incidentRef=INC-00000N`) — linha visível, expandida e destacada (mesmo se triado)
 8. Busca **Incidentes**: `INC-*` / prefixo UUID / substring do título encontra linha
 9. Busca **Defeitos**: `DEF-*` / prefixo UUID / substring do título encontra linha
