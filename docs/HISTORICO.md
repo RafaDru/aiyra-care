@@ -1,5 +1,15 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-04] - CH R1: `correction_failed` na Correção Dev
+
+### Decisão
+- Callback `defectStatus: correction_failed` é semântica de agente (não status PG); transição automática **`in_fix` → `open`** com `failureDetails` persistidos — sem reset silencioso.
+- Próximo `defect_fix_v1` recebe `priorCorrectionFailure` para contexto do re-dispatch.
+
+### Realizado
+- Migration **082** (`last_failure_*`, `last_correction_failure_details`, `correction_failed_at`); `PlatformDefectService.applyAgentStatusCallback`; `processAgentCallback` no ops (defeito-only retorna `{ defect }`).
+- CH Defeitos: banner no expand + tag **Falha correção**; docs/QA suite `ops-ch-defeitos` passo R1.
+
 ## [2026-10-04] - CH: pipeline DEF na esteira GitHub, reincidência e ops agêntico
 
 ### Decisão

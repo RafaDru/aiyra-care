@@ -85,6 +85,17 @@ export interface PlatformDefectItem {
   lastFixDispatchSentAt: string | null
   readyForPrAt: string | null
   fixedAt: string | null
+  lastFailureKind: 'dispatch' | 'callback' | 'ci' | 'review' | 'human_reject' | null
+  lastFailureSummary: string | null
+  lastCorrectionFailureDetails: {
+    message: string
+    code?: string
+    logUrl?: string
+    runUrl?: string
+    artifactPath?: string
+    blockedReason?: string
+  } | null
+  correctionFailedAt: string | null
   createdAt: string
   updatedAt: string
   incidentCount?: number

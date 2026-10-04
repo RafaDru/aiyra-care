@@ -86,12 +86,14 @@ describe('OpsAnalysisQueueService triage callback', () => {
       findById: vi.fn(async () => queueRecord()),
     }
     const defects = {
-      transition: vi.fn(),
+      applyAgentStatusCallback: vi.fn(async () => {
+        throw new PlatformDefectTransitionError('pr_url_required')
+      }),
     }
     const svc = new OpsAnalysisQueueService(repo as never, undefined, undefined, defects as never)
 
     await expect(
-      svc.completeFromAgent({
+      svc.processAgentCallback({
         defectId: 'def-1',
         defectStatus: 'ready_for_pr',
         remediationSummary: '[defect:abc] done',
@@ -99,6 +101,22 @@ describe('OpsAnalysisQueueService triage callback', () => {
     ).rejects.toBeInstanceOf(PlatformDefectTransitionError)
 
     expect(repo.applyAgentCallback).not.toHaveBeenCalled()
-    expect(defects.transition).not.toHaveBeenCalled()
+    expect(defects.applyAgentStatusCallback).toHaveBeenCalled()
+  })
+
+  it('applies correction_failed defect-only callback without queue record', async () => {
+    const openDefect = { id: 'def-1', status: 'open' as const }
+    const defects = {
+      applyAgentStatusCallback: vi.fn(async () => openDefect),
+    }
+    const svc = new OpsAnalysisQueueService({} as never, undefined, undefined, defects as never)
+    const result = await svc.processAgentCallback({
+      defectId: 'def-1',
+      defectStatus: 'correction_failed',
+      remediationSummary: '[defect:def-1] blocked',
+      failureDetails: { message: 'Scope ambiguous', code: 'blocked' },
+    })
+    expect(result.queue).toBeNull()
+    expect(result.defect).toEqual(openDefect)
   })
 })

@@ -36,6 +36,10 @@ export interface PlatformDefectFixDispatchPayload {
     applications: string[]
   }
   linkedIncidentIds: string[]
+  priorCorrectionFailure?: {
+    summary: string | null
+    details: Record<string, unknown>
+  }
   environment: InvestigatorEnvironmentContext
   callbackUrl: string
   callbackAuth: { header: string; value: string }
@@ -87,6 +91,14 @@ export function buildPlatformDefectFixDispatchPayload(
       applications: defect.applications,
     },
     linkedIncidentIds,
+    ...(defect.lastCorrectionFailureDetails
+      ? {
+          priorCorrectionFailure: {
+            summary: defect.lastFailureSummary,
+            details: { ...defect.lastCorrectionFailureDetails },
+          },
+        }
+      : {}),
     environment: resolveInvestigatorEnvironmentContext(),
     callbackUrl: resolveInvestigatorCallbackUrl(),
     callbackAuth,

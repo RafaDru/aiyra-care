@@ -508,13 +508,22 @@ async function main() {
         return reply.status(401).send({ error: 'unauthorized' })
       }
       try {
-        const record = await analysisQueueService.completeFromAgent(req.body ?? {})
-        if (!record) return reply.status(400).send({ error: 'invalid_payload' })
-        return { ok: true, item: record }
+        const result = await analysisQueueService.processAgentCallback(req.body ?? {})
+        if (!result.queue && !result.defect) {
+          return reply.status(400).send({ error: 'invalid_payload' })
+        }
+        return {
+          ok: true,
+          ...(result.queue ? { item: result.queue } : {}),
+          ...(result.defect ? { defect: result.defect } : {}),
+        }
       } catch (err) {
         if (err instanceof PlatformDefectTransitionError) {
           if (err.code === 'pr_url_required') {
             return reply.status(400).send({ error: 'pr_url_required' })
+          }
+          if (err.code === 'failure_details_required') {
+            return reply.status(400).send({ error: 'failure_details_required' })
           }
           if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
           return reply.status(409).send({ error: err.code })
