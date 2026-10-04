@@ -26,6 +26,7 @@ describe('PlatformDefectPgRepository', () => {
             owner_subject: params![5],
             triage_summary: params![6],
             triage_artifact_path: params![7],
+            parent_defect_id: params![8] ?? null,
             pr_batch_id: null,
             first_seen_at: new Date().toISOString(),
             fix_started_at: null,

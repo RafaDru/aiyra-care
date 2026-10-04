@@ -56,3 +56,7 @@ export function defectFixedViaHint(fixedVia: PlatformDefectItem['fixedVia']): st
   if (fixedVia === 'manual') return 'Marcado manualmente no CH'
   return null
 }
+
+export function defectIsRecurrence(item: { parentDefectId?: string | null }): boolean {
+  return Boolean(item.parentDefectId)
+}

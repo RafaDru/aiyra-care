@@ -38,7 +38,7 @@ Vários incidentes podem apontar para um único defeito aberto.
 
 ## 3. Reincidência — novo INC após `fixed_at`
 
-**Gap atual:** fingerprint com DEF já `fixed` abre **novo** DEF sem vínculo explícito com o anterior.
+**Implementado (migration 083, fatia `ch-defect-recurrence`):** triagem `createFromTriage` + `parent_defect_id` + badge CH.
 
 **Regra acordada (implementação pós-R4 ou fatia dedicada):**
 

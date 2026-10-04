@@ -1,4 +1,5 @@
 import type {
+  CreatePlatformDefectFromTriageContext,
   CreatePlatformDefectInput,
   PlatformDefectIncidentLinkedBy,
   PlatformDefectRecord,
@@ -10,6 +11,7 @@ import {
 } from '../../domain/ops/platform-defect-correction-failure.js'
 import type { AgentAnalysisCallbackInput } from '../../domain/ops/ops-analysis-queue.types.js'
 import { isGithubPullRequestUrl } from '../../domain/ops/platform-defect-pr-url.js'
+import { resolveRecurrenceParentId } from '../../domain/ops/platform-defect-recurrence.js'
 import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
 
 const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
@@ -79,6 +81,7 @@ export class PlatformDefectService {
     input: CreatePlatformDefectInput,
     incidentId: string,
     linkedBy: PlatformDefectIncidentLinkedBy = 'agent_triage',
+    context?: CreatePlatformDefectFromTriageContext,
   ): Promise<PlatformDefectRecord> {
     if (input.fingerprint) {
       const existing = await this.repo.findOpenByFingerprint(input.fingerprint)
@@ -87,7 +90,29 @@ export class PlatformDefectService {
         return existing
       }
     }
-    const defect = await this.repo.insert(input)
+
+    const incidentSeenAt = context?.incidentSeenAt ?? new Date().toISOString()
+    const explicitParentId = context?.parentDefectId?.trim() || null
+    if (context?.recurrenceLikely && !input.fingerprint && !explicitParentId) {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+
+    const fixedByFingerprint = input.fingerprint
+      ? await this.repo.findLatestFixedByFingerprint(input.fingerprint)
+      : null
+    const explicitParent = explicitParentId ? await this.repo.findById(explicitParentId) : null
+
+    const parentDefectId = resolveRecurrenceParentId({
+      incidentSeenAt,
+      fixedByFingerprint,
+      explicitParentId,
+      explicitParent,
+    })
+
+    const defect = await this.repo.insert({
+      ...input,
+      parentDefectId,
+    })
     await this.repo.linkIncident(defect.id, incidentId, linkedBy)
     return defect
   }

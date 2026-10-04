@@ -158,6 +158,81 @@ describe('PlatformDefectService', () => {
     ).rejects.toMatchObject({ code: 'failure_details_required' })
   })
 
+  it('creates recurrence child when fingerprint matches fixed defect after fixed_at', async () => {
+    const fixedParent = defect({
+      id: 'parent',
+      status: 'fixed',
+      fingerprint: 'fp-recur',
+      fixedAt: '2026-10-01T12:00:00.000Z',
+    })
+    const child = defect({ id: 'child', fingerprint: 'fp-recur', parentDefectId: 'parent' })
+    const repo = {
+      findOpenByFingerprint: vi.fn(async () => null),
+      findLatestFixedByFingerprint: vi.fn(async () => fixedParent),
+      findById: vi.fn(),
+      insert: vi.fn(async (input: { parentDefectId?: string | null }) => child),
+      linkIncident: vi.fn(),
+    } as unknown as PlatformDefectPgRepository
+
+    const svc = new PlatformDefectService(repo)
+    const result = await svc.createFromTriage(
+      { title: 'Reopened', fingerprint: 'fp-recur' },
+      'inc-new',
+      'agent_triage',
+      { incidentSeenAt: '2026-10-05T00:00:00.000Z' },
+    )
+    expect(result.id).toBe('child')
+    expect(repo.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ parentDefectId: 'parent' }),
+    )
+  })
+
+  it('does not set parent when incident is older than fixed_at', async () => {
+    const fixedParent = defect({
+      id: 'parent',
+      status: 'fixed',
+      fingerprint: 'fp-old',
+      fixedAt: '2026-10-04T12:00:00.000Z',
+    })
+    const repo = {
+      findOpenByFingerprint: vi.fn(async () => null),
+      findLatestFixedByFingerprint: vi.fn(async () => fixedParent),
+      findById: vi.fn(),
+      insert: vi.fn(async () => defect({ id: 'new' })),
+      linkIncident: vi.fn(),
+    } as unknown as PlatformDefectPgRepository
+
+    const svc = new PlatformDefectService(repo)
+    await svc.createFromTriage(
+      { title: 'Same bug', fingerprint: 'fp-old' },
+      'inc-old',
+      'agent_triage',
+      { incidentSeenAt: '2026-10-04T00:00:00.000Z' },
+    )
+    expect(repo.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ parentDefectId: null }),
+    )
+  })
+
+  it('throws when recurrenceLikely without fingerprint or parentDefectId', async () => {
+    const repo = {
+      findOpenByFingerprint: vi.fn(),
+      findLatestFixedByFingerprint: vi.fn(),
+      findById: vi.fn(),
+      insert: vi.fn(),
+      linkIncident: vi.fn(),
+    } as unknown as PlatformDefectPgRepository
+    const svc = new PlatformDefectService(repo)
+    await expect(
+      svc.createFromTriage(
+        { title: 'Unstable' },
+        'inc-1',
+        'agent_triage',
+        { incidentSeenAt: new Date().toISOString(), recurrenceLikely: true },
+      ),
+    ).rejects.toMatchObject({ code: 'invalid_transition' })
+  })
+
   it('throws not_found when defect missing', async () => {
     const repo = {
       findById: vi.fn(async () => null),

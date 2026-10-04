@@ -22,6 +22,7 @@ import {
   defectReadyForPrCount,
   defectShortTag,
   defectHasCorrectionFailure,
+  defectIsRecurrence,
   defectStatusColor,
   defectStatusLabel,
   formatBatchWindowHours,
@@ -41,6 +42,14 @@ const FILTER_STATUSES: Array<PlatformDefectStatus | 'all'> = [
   'ready_for_pr',
   'fixed',
 ]
+
+function buildDefectDeepLink(defectId: string): string {
+  const params = new URLSearchParams()
+  params.set('group', 'operacao')
+  params.set('tab', 'defeitos')
+  params.set('defectId', defectId)
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
+}
 
 function buildIncidentDeepLink(incidentId: string): string {
   const params = new URLSearchParams()
@@ -362,6 +371,17 @@ export function DefeitosPanel({
               render: (s: PlatformDefectStatus, row) => (
                 <Space size={4} wrap style={{ justifyContent: 'center' }}>
                   <Tag color={defectStatusColor(s)}>{defectStatusLabel(s)}</Tag>
+                  {defectIsRecurrence(row) && (
+                    <Tooltip
+                      title={
+                        row.parentReferenceCode
+                          ? `Reincidência de ${row.parentReferenceCode}`
+                          : 'Reincidência de defeito corrigido'
+                      }
+                    >
+                      <Tag color="magenta">Reincidência</Tag>
+                    </Tooltip>
+                  )}
                   {defectHasCorrectionFailure(row) && (
                     <Tag color="error">Falha correção</Tag>
                   )}
@@ -514,6 +534,17 @@ function DefeitoDetail({
         <OpsReferenceCodeTag code={row.referenceCode} />{' '}
         <Text code>{defectShortTag(row.id)}</Text>
       </Paragraph>
+      {defectIsRecurrence(row) && (
+        <Paragraph>
+          <Text strong>Reincidência de:</Text>{' '}
+          {row.parentReferenceCode ? (
+            <OpsReferenceCodeTag code={row.parentReferenceCode} />
+          ) : (
+            <Text code>{defectShortTag(row.parentDefectId!)}</Text>
+          )}{' '}
+          <Link href={buildDefectDeepLink(row.parentDefectId!)}>Abrir DEF pai</Link>
+        </Paragraph>
+      )}
       {row.triageSummary && (
         <Paragraph>
           <Text strong>Triagem:</Text> {row.triageSummary}

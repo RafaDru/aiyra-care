@@ -247,8 +247,8 @@ Decisões formalizadas (2026-10-04): [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DE
 
 ### Fatia pós-R4 — Reincidência de defeito (`ch-defect-recurrence`)
 
-- [ ] Novo INC com mesma fingerprint após `fixed_at` → DEF com `parent_defect_id` (ou `platform_defect_relations.recurrence`)
-- [ ] CH: badge **Reincidência** + link ao DEF pai; callback opcional `recurrenceLikely`
+- [x] Novo INC com mesma fingerprint após `fixed_at` → DEF com `parent_defect_id` (ou `platform_defect_relations.recurrence`)
+- [x] CH: badge **Reincidência** + link ao DEF pai; callback opcional `recurrenceLikely`
 - [ ] Métrica de eficácia da correção (não confundir com dedup N:1 em DEF aberto — já entregue)
 
 ---

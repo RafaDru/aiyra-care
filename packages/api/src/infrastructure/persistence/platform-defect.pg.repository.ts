@@ -62,8 +62,16 @@ function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
     createdAt: new Date(String(row.created_at)).toISOString(),
     updatedAt: new Date(String(row.updated_at)).toISOString(),
     incidentCount: row.incident_count != null ? Number(row.incident_count) : undefined,
+    parentDefectId: row.parent_defect_id != null ? String(row.parent_defect_id) : null,
+    parentReferenceCode:
+      row.parent_reference_code != null ? String(row.parent_reference_code) : null,
   }
 }
+
+const DEFECT_SELECT_WITH_PARENT = `d.*,
+  parent.reference_code AS parent_reference_code`
+const DEFECT_FROM_WITH_PARENT = `FROM platform_defects d
+  LEFT JOIN platform_defects parent ON parent.id = d.parent_defect_id`
 
 export class PlatformDefectPgRepository {
   constructor(private readonly pool: Pool) {}
@@ -73,8 +81,8 @@ export class PlatformDefectPgRepository {
     const res = await this.pool.query(
       `INSERT INTO platform_defects (
         reference_code, title, fingerprint, impact, applications, owner_subject,
-        triage_summary, triage_artifact_path
-      ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)
+        triage_summary, triage_artifact_path, parent_defect_id
+      ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, $9::uuid)
       RETURNING *`,
       [
         referenceCode,
@@ -85,6 +93,7 @@ export class PlatformDefectPgRepository {
         input.ownerSubject?.slice(0, 128) ?? null,
         input.triageSummary?.slice(0, 8000) ?? null,
         input.triageArtifactPath?.slice(0, 512) ?? null,
+        input.parentDefectId ?? null,
       ],
     )
     return mapRow(res.rows[0] as Record<string, unknown>)
@@ -143,9 +152,9 @@ export class PlatformDefectPgRepository {
     }
     params.push(limit)
     const res = await this.pool.query(
-      `SELECT d.*,
+      `SELECT ${DEFECT_SELECT_WITH_PARENT},
         (SELECT COUNT(*)::int FROM platform_defect_incidents i WHERE i.defect_id = d.id) AS incident_count
-       FROM platform_defects d
+       ${DEFECT_FROM_WITH_PARENT}
        WHERE ${where}
        ORDER BY d.updated_at DESC
        LIMIT $2`,
@@ -168,6 +177,20 @@ export class PlatformDefectPgRepository {
       [id],
     )
     return { defect, incidents: res.rows }
+  }
+
+  async findLatestFixedByFingerprint(fingerprint: string): Promise<PlatformDefectRecord | null> {
+    const res = await this.pool.query(
+      `SELECT * FROM platform_defects
+       WHERE fingerprint = $1
+         AND status = 'fixed'
+         AND fixed_at IS NOT NULL
+       ORDER BY fixed_at DESC
+       LIMIT 1`,
+      [fingerprint.slice(0, 128)],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
   async findOpenByFingerprint(fingerprint: string): Promise<PlatformDefectRecord | null> {
@@ -220,9 +243,9 @@ export class PlatformDefectPgRepository {
         : ['open', 'in_fix', 'ready_for_pr']
 
     const res = await this.pool.query(
-      `SELECT d.*,
+      `SELECT ${DEFECT_SELECT_WITH_PARENT},
         (SELECT COUNT(*)::int FROM platform_defect_incidents i WHERE i.defect_id = d.id) AS incident_count
-       FROM platform_defects d
+       ${DEFECT_FROM_WITH_PARENT}
        WHERE d.status = ANY($1::text[])
        ORDER BY d.updated_at DESC
        LIMIT $2`,
