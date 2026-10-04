@@ -165,18 +165,32 @@ export class PlatformDefectPgRepository {
 
   async findByIdWithIncidents(
     id: string,
-  ): Promise<{ defect: PlatformDefectRecord; incidents: Array<{ id: string; title: string }> } | null> {
+  ): Promise<{
+    defect: PlatformDefectRecord
+    incidents: Array<{ id: string; title: string; referenceCode: string | null }>
+  } | null> {
     const defect = await this.findById(id)
     if (!defect) return null
-    const res = await this.pool.query<{ id: string; title: string }>(
-      `SELECT q.id::text AS id, q.title
+    const res = await this.pool.query<{
+      id: string
+      title: string
+      reference_code: string | null
+    }>(
+      `SELECT q.id::text AS id, q.title, q.reference_code
        FROM platform_defect_incidents pdi
        JOIN ops_analysis_queue q ON q.id = pdi.incident_id
        WHERE pdi.defect_id = $1::uuid
        ORDER BY pdi.linked_at DESC`,
       [id],
     )
-    return { defect, incidents: res.rows }
+    return {
+      defect,
+      incidents: res.rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        referenceCode: row.reference_code != null ? String(row.reference_code) : null,
+      })),
+    }
   }
 
   async findLatestFixedByFingerprint(fingerprint: string): Promise<PlatformDefectRecord | null> {
