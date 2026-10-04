@@ -4,7 +4,7 @@
 > **Data:** 2026-10-01  
 > **Contexto:** Rafael opera solo; **aprovação humana** é a esteira final após tudo que for plausível automatizar. Revisão de PR **agêntica sob demanda**, sempre com **aprovação explícita** antes de merge.
 
-**Relacionado:** [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) · [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) · [`DEFEITO_EM_CORRECAO.md`](./DEFEITO_EM_CORRECAO.md) · piloto **DEF-000001** (E2E Correção PASS 2026-10-01)
+**Relacionado:** [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) · [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) · [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) · [`DEFEITO_EM_CORRECAO.md`](./DEFEITO_EM_CORRECAO.md) · piloto **DEF-000001** (E2E Correção PASS 2026-10-01)
 
 ---
 
@@ -242,6 +242,14 @@ Ordem sugerida para não quebrar o piloto:
 
 - [ ] Registrar merge (`mergedPrUrl`, `fixed`) via webhook `pull_request` closed merged **ou** confirmação manual
 - [ ] Métricas: tempo por fase INC/DEF no ops metrics
+
+Decisões formalizadas (2026-10-04): [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) — merge fecha DEF; INC permanece `triaged`.
+
+### Fatia pós-R4 — Reincidência de defeito (`ch-defect-recurrence`)
+
+- [ ] Novo INC com mesma fingerprint após `fixed_at` → DEF com `parent_defect_id` (ou `platform_defect_relations.recurrence`)
+- [ ] CH: badge **Reincidência** + link ao DEF pai; callback opcional `recurrenceLikely`
+- [ ] Métrica de eficácia da correção (não confundir com dedup N:1 em DEF aberto — já entregue)
 
 ---
 

@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-04] - CH: pipeline DEF na esteira GitHub, reincidência e ops agêntico
+
+### Decisão
+- **R4:** merge em `main` (webhook `pull_request` merged) fecha o defeito (`platform_defects.status = fixed`, `merged_at`, `merged_pr_url`); **G3** mantém aprovação humana de Rafael quando exigida; **G4** deixa de depender só de clique **Corrigido**.
+- **Incidente:** estado terminal permanece **`triaged`** — correção do DEF não reabre fila INC (métrica futura opcional, sem reabrir pipeline).
+- **Dedup:** N incidentes → 1 DEF aberto por `fingerprint` (já em triagem); reincidência após `fixed_at` exige **novo** DEF com `parent_defect_id` (fatia `ch-defect-recurrence`).
+- **Arquitetura CH:** bounded context Ops em `packages/api` (hexagonal, PG 071+); `ops-console` só UI; Neo4j **não** para INC/DEF.
+- **Operação:** Rafael só estratégico + merge (G3); triagem/correção/fechamento rotineiro via agentes e automações (batch 15 min, callbacks).
+
+### Realizado
+- [`docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md`](ops/CH_DEFECT_PIPELINE_DECISIONS.md); cross-links em pipeline, runbook e jornada solo; item `ch-defect-recurrence` no épico `ch-solo-operator-journey`.
+
 ## [2026-09-24] - Nome oficial Command Hub (CH)
 
 ### Decisão

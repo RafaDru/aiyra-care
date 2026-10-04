@@ -9,6 +9,8 @@ Cópia legível no monorepo da spec técnica (agent store: `docs/ch-incident-def
 
 **Jornada operador solo (gates G0–G4, falhas pós-`ready_for_pr`):** [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) · spec e fatias R1–R4 em [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md) (épico `ch-solo-operator-journey` no roadmap). R0 = docs; R1–R4 = produto (callback `correction_failed`, CI no defeito, review agêntico, merge registrado) — sem código nesta fatia.
 
+**Decisões Rafael (2026-10-04):** merge → `fixed`, dedup/reincidência, CH hexagonal, ops agêntico — [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md).
+
 ---
 
 ## 1. Objetivo
