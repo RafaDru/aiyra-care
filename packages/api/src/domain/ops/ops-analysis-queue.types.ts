@@ -21,6 +21,7 @@ export type IncidentPipelineStatus =
   | 'queued_worker'
   | 'in_triage'
   | 'triaged'
+  | 'resolved'
   | 'dismissed'
   | 'dispatch_failed'
 
@@ -32,6 +33,9 @@ export interface OpsAnalysisQueueRecord {
   lane: AnalysisQueueLane
   status: AnalysisQueueStatus
   incidentPipelineStatus: IncidentPipelineStatus
+  recurrenceOfIncidentId: string | null
+  recurrenceOfReferenceCode: string | null
+  recurrenceKind: 'reincidencia' | null
   priority: AnalysisQueuePriority
   deploymentTier: string
   title: string

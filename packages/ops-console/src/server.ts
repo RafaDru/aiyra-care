@@ -112,12 +112,25 @@ const alertIncidentRepo = new OpsAlertIncidentPgRepository(pool)
 const supportRepo = new SupportReportPgRepository(pool)
 const platformDefectRepo = new PlatformDefectPgRepository(pool)
 const defectPrBatchRepo = new DefectPrBatchPgRepository(pool)
-const platformDefectService = new PlatformDefectService(platformDefectRepo)
-const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(platformDefectRepo)
+const analysisQueueRepo = new OpsAnalysisQueuePgRepository(pool)
+const resolveIncidentsWhenDefectFixed = async (defectId: string) => {
+  const { resolveIncidentsLinkedToDefect } = await import(
+    '../../api/src/application/ops/incident-pipeline-resolution.js'
+  )
+  await resolveIncidentsLinkedToDefect(analysisQueueRepo, defectId)
+}
+const platformDefectService = new PlatformDefectService(
+  platformDefectRepo,
+  resolveIncidentsWhenDefectFixed,
+)
+const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(
+  platformDefectRepo,
+  resolveIncidentsWhenDefectFixed,
+)
 const incidentDispatchService = createIncidentDispatchService(pool)
 const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
-  new OpsAnalysisQueuePgRepository(pool),
+  analysisQueueRepo,
   supportRepo,
   alertIncidentRepo,
   platformDefectService,
@@ -145,8 +158,8 @@ async function runProbeCycle(): Promise<void> {
 const INCIDENT_BOARD_FILTERS = new Set<IncidentBoardFilter>([
   'needs_attention',
   'triaged',
+  'resolved',
   'all_open',
-  'completed',
 ])
 
 function parseIncidentBoardFilter(raw: string | undefined): IncidentBoardFilter {

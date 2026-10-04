@@ -1,5 +1,15 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-04] - CH: incidente `resolved` + reincidência INC→INC (084)
+
+### Decisão
+- Status terminal de pipeline **`resolved`** (UI **Resolvido**); filtro CH **Concluídos** substituído por **Resolvidos** (sem bucket legado `completed` na tab Incidentes).
+- DEF → `fixed` (manual ou webhook R4) → incidentes vinculados em `incident_pipeline_status = resolved` (idempotente); triagem deixa de marcar `status=completed` até o fechamento pelo DEF.
+- Nova ocorrência → novo INC com `recurrence_of_incident_id` + `recurrence_kind = reincidencia` (complementa `parent_defect_id` 083).
+
+### Realizado
+- Migration **084** (CHECK `resolved`, reincidência, backfill INC triado + DEF `fixed` — piloto INC-000001 / DEF-000002); CH link «Reincidência de INC-xxxxx».
+
 ## [2026-10-04] - CH: reincidência de defeito (`parent_defect_id`)
 
 ### Decisão

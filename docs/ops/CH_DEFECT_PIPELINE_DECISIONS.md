@@ -19,7 +19,7 @@ O defeito CH é **first-class** na esteira GitHub (fatia **R4**).
 | **G3** | Merge continua exigindo **aprovação humana** de Rafael quando a política exigir |
 | **G4** | Deixa de depender de clique manual **Corrigido** no CH quando o webhook confirmar merge |
 
-**Incidente:** o estado terminal do INC permanece **`triaged`** (spec atual). O defeito pode ir a `fixed` sem reabrir a fila de incidentes. Opcional futuro (somente métricas): coluna ou flag `incident_resolution = linked_defect_fixed` — **não** reabre fila nem altera `incident_pipeline_status`.
+**Incidente:** ao confirmar correção (`platform_defects.status = fixed`, manual ou webhook R4), incidentes vinculados em `platform_defect_incidents` passam a **`incident_pipeline_status = resolved`** (UI **Resolvido**, idempotente). O defeito não reabre o INC anterior; nova ocorrência é **novo** INC (084).
 
 ---
 
@@ -36,17 +36,23 @@ Vários incidentes podem apontar para um único defeito aberto.
 
 ---
 
-## 3. Reincidência — novo INC após `fixed_at`
+## 3. Reincidência — novo INC / novo DEF após correção
 
-**Implementado (migration 083, fatia `ch-defect-recurrence`):** triagem `createFromTriage` + `parent_defect_id` + badge CH.
+**Defeito (migration 083):** `createFromTriage` + `parent_defect_id` + badge CH no DEF.
 
-**Regra acordada (implementação pós-R4 ou fatia dedicada):**
+**Incidente (migration 084):** após INC **`resolved`**, nova ocorrência similar → **nova linha** `ops_analysis_queue` (novo `INC-*`):
+
+| Campo | Uso |
+|-------|-----|
+| `recurrence_of_incident_id` | FK ao INC anterior **resolvido** |
+| `recurrence_kind` | `reincidencia` |
 
 | Condição | Ação |
 |----------|------|
-| Mesma `fingerprint` (ou correlação explícita do triador) **e** `incident.created_at` (ou `first_seen_at` do INC) **>** `defect.fixed_at` do DEF anterior | Criar **novo** DEF com `parent_defect_id` (ou tabela `platform_defect_relations` com tipo `recurrence`) |
-| UI CH | Badge **Reincidência** + link ao DEF pai; métrica de eficácia da correção |
-| Triador | Pode sinalizar `recurrenceLikely` no callback quando não houver fingerprint estável |
+| Mesma fonte/fingerprint após INC `resolved` | **Insert** novo INC + `recurrence_kind=reincidencia` |
+| Índice parcial | Um INC ativo por fonte — terminais `resolved` / `dismissed` liberam novo insert |
+| Triagem `new_defect` + `parentDefectId` | Liga reincidência ao INC do DEF pai quando aplicável |
+| UI CH | **Reincidência de INC-xxxxx**; filtro **Resolvidos** (sem bucket `completed`) |
 
 Não confundir com §2: dedup só aplica a defeitos **ainda abertos** na esteira.
 

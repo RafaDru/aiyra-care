@@ -5,7 +5,7 @@
 
 ## Pré-requisitos
 
-- Migration **077** aplicada; **082** para metadados `correction_failed`; **083** para `parent_defect_id` (reincidência)
+- Migration **077** aplicada; **082** para metadados `correction_failed`; **083** para `parent_defect_id`; **084** para reincidência INC (`recurrence_of_incident_id`)
 - ops-console `:3013` com `CURSOR_DEFECT_FIX_*` (opcional para dispatch real)
 
 ## Passos
@@ -15,7 +15,7 @@
 3. Com webhook mock/ready: `ok: true`, status `in_fix`
 4. **Em correção** → **Reenfileirar correção** — `POST start-fix` sem mudar status indevidamente
 5. **Incidentes** — coluna **Ref** `INC-*`
-6. **Incidentes** — filtro padrão **Precisam atenção**; chip **Triados** lista incidentes com `incident_pipeline_status=triaged`
+6. **Incidentes** — filtro padrão **Precisam atenção**; chips **Triados** / **Resolvidos** (`triaged` / `resolved`); sem chip «Concluídos»
 7. Deep link `?group=operacao&tab=incidentes&investigationId=<uuid>` (ou `incidentRef=INC-00000N`) — linha visível, expandida e destacada (mesmo se triado)
 8. Busca **Incidentes**: `INC-*` / prefixo UUID / substring do título encontra linha
 9. Busca **Defeitos**: `DEF-*` / prefixo UUID / substring do título encontra linha
@@ -24,8 +24,10 @@
 12. Chip **Triados** — coluna Status mostra tag **Triado** (não «Aberto» / «Em aberto»)
 13. **R4 (opcional com secret):** com `GITHUB_DEFECT_MERGE_WEBHOOK_SECRET` e defeito `ready_for_pr` + `prUrl`, simular payload GitHub `pull_request` merged → status `fixed`, `fixedVia=github_webhook`, hint no expand do CH
 14. **R1:** simular callback `correction_failed` (ou API vitest) — defeito `open`, expand com banner de falha, tag **Falha correção**; **Iniciar correção** após falha limpa metadados ao entrar em `in_fix`
-15. **Reincidência:** após DEF `fixed`, triagem de INC com mesma fingerprint (ou callback `parentDefectId` + `recurrenceLikely`) — novo DEF com tag **Reincidência** e link «Abrir DEF pai» no expand
+15. **Reincidência DEF:** após DEF `fixed`, triagem de INC com mesma fingerprint (ou callback `parentDefectId` + `recurrenceLikely`) — novo DEF com tag **Reincidência** e link «Abrir DEF pai» no expand
+16. **Reincidência INC:** após INC `resolved` (DEF `fixed`), novo sinal — novo `INC-*` com **Reincidência de INC-xxxxx**
+17. **Resolvido:** DEF `fixed` → INC vinculado tag **Resolvido** no chip **Resolvidos** (backfill mig 084 cobre piloto INC-000001)
 
 ## Critério
 
-- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados exibem label **Triado**, R1 exibe falha estruturada sem reset silencioso (passo 13 quando webhook configurado), e reincidência liga ao DEF pai (passo 15)
+- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados/resolvidos exibem labels corretas, R1 exibe falha estruturada (passo 13 quando webhook configurado), reincidência DEF/INC (15–16) e fechamento INC em `resolved` (17)

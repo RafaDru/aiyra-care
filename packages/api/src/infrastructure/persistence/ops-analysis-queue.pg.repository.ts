@@ -13,6 +13,10 @@ import {
   type IncidentBoardFilter,
   normalizeIncidentReferenceCode,
 } from '../../domain/ops/incident-list-filter.js'
+import {
+  extractIncidentFingerprint,
+  INCIDENT_RECURRENCE_KIND_REINCIDENCIA,
+} from '../../domain/ops/incident-recurrence.js'
 import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
 
 function mapRow(row: Record<string, unknown>): OpsAnalysisQueueRecord {
@@ -24,6 +28,16 @@ function mapRow(row: Record<string, unknown>): OpsAnalysisQueueRecord {
     lane: row.lane as AnalysisQueueLane,
     status: row.status as AnalysisQueueStatus,
     incidentPipelineStatus: (row.incident_pipeline_status as IncidentPipelineStatus) ?? 'open',
+    recurrenceOfIncidentId:
+      row.recurrence_of_incident_id != null ? String(row.recurrence_of_incident_id) : null,
+    recurrenceOfReferenceCode:
+      row.recurrence_of_reference_code != null
+        ? String(row.recurrence_of_reference_code)
+        : null,
+    recurrenceKind:
+      row.recurrence_kind === INCIDENT_RECURRENCE_KIND_REINCIDENCIA
+        ? INCIDENT_RECURRENCE_KIND_REINCIDENCIA
+        : null,
     priority: row.priority as AnalysisQueuePriority,
     deploymentTier: String(row.deployment_tier),
     title: String(row.title),
@@ -62,27 +76,61 @@ export class OpsAnalysisQueuePgRepository {
   constructor(private readonly pool: Pool) {}
 
   async upsertQueued(input: UpsertQueueInput): Promise<OpsAnalysisQueueRecord> {
+    const active = await this.pool.query(
+      `SELECT * FROM ops_analysis_queue
+       WHERE source_type = $1 AND source_id = $2 AND deployment_tier = $3
+         AND incident_pipeline_status NOT IN ('resolved', 'dismissed')
+       ORDER BY updated_at DESC
+       LIMIT 1`,
+      [input.sourceType, input.sourceId, input.deploymentTier],
+    )
+    if (active.rows[0]) {
+      const res = await this.pool.query(
+        `UPDATE ops_analysis_queue SET
+          lane = $2,
+          title = $3,
+          error_summary = $4,
+          context_snapshot = $5::jsonb,
+          operator_notes = COALESCE($6, operator_notes),
+          investigation_trigger = $7,
+          priority = $8,
+          status = 'queued',
+          remediation_summary = NULL,
+          analysis_artifact_path = NULL,
+          pr_url = NULL,
+          analysis_last_error = NULL,
+          completed_at = NULL,
+          updated_at = NOW()
+        WHERE id = $1::uuid
+        RETURNING *`,
+        [
+          active.rows[0].id,
+          input.lane,
+          input.title.slice(0, 512),
+          input.errorSummary?.slice(0, 4000) ?? null,
+          JSON.stringify(input.contextSnapshot ?? {}),
+          input.operatorNotes?.slice(0, 2000) ?? null,
+          input.investigationTrigger ?? null,
+          input.priority ?? 'normal',
+        ],
+      )
+      return mapRow(res.rows[0] as Record<string, unknown>)
+    }
+
+    const recurrenceOfIncidentId = await this.findRecurrencePriorIncidentId({
+      sourceType: input.sourceType,
+      sourceId: input.sourceId,
+      deploymentTier: input.deploymentTier,
+      contextSnapshot: input.contextSnapshot,
+    })
+
     const referenceCode = await allocateOpsReferenceCode(this.pool, 'incident')
     const res = await this.pool.query(
       `INSERT INTO ops_analysis_queue (
         reference_code, source_type, source_id, lane, deployment_tier, title, error_summary,
-        context_snapshot, operator_notes, investigation_trigger, priority, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, 'queued')
-      ON CONFLICT (source_type, source_id, deployment_tier) DO UPDATE SET
-        lane = EXCLUDED.lane,
-        title = EXCLUDED.title,
-        error_summary = EXCLUDED.error_summary,
-        context_snapshot = EXCLUDED.context_snapshot,
-        operator_notes = COALESCE(EXCLUDED.operator_notes, ops_analysis_queue.operator_notes),
-        investigation_trigger = EXCLUDED.investigation_trigger,
-        priority = EXCLUDED.priority,
-        status = 'queued',
-        remediation_summary = NULL,
-        analysis_artifact_path = NULL,
-        pr_url = NULL,
-        analysis_last_error = NULL,
-        completed_at = NULL,
-        updated_at = NOW()
+        context_snapshot, operator_notes, investigation_trigger, priority, status,
+        recurrence_of_incident_id, recurrence_kind
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, 'queued', $12, $13)
       RETURNING *`,
       [
         referenceCode,
@@ -96,9 +144,98 @@ export class OpsAnalysisQueuePgRepository {
         input.operatorNotes?.slice(0, 2000) ?? null,
         input.investigationTrigger ?? null,
         input.priority ?? 'normal',
+        recurrenceOfIncidentId,
+        recurrenceOfIncidentId ? INCIDENT_RECURRENCE_KIND_REINCIDENCIA : null,
       ],
     )
     return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async findRecurrencePriorIncidentId(input: {
+    sourceType: AnalysisQueueSourceType
+    sourceId: string
+    deploymentTier: string
+    contextSnapshot?: Record<string, unknown>
+  }): Promise<string | null> {
+    const bySource = await this.pool.query<{ id: string }>(
+      `SELECT id::text AS id FROM ops_analysis_queue
+       WHERE source_type = $1 AND source_id = $2 AND deployment_tier = $3
+         AND incident_pipeline_status = 'resolved'
+       ORDER BY updated_at DESC
+       LIMIT 1`,
+      [input.sourceType, input.sourceId, input.deploymentTier],
+    )
+    if (bySource.rows[0]?.id) return bySource.rows[0].id
+
+    const fingerprint = extractIncidentFingerprint(input.contextSnapshot)
+    if (!fingerprint) return null
+
+    const byFingerprint = await this.pool.query<{ id: string }>(
+      `SELECT q.id::text AS id
+       FROM ops_analysis_queue q
+       WHERE q.deployment_tier = $2
+         AND q.incident_pipeline_status = 'resolved'
+         AND q.context_snapshot->>'fingerprint' = $1
+       ORDER BY q.updated_at DESC
+       LIMIT 1`,
+      [fingerprint, input.deploymentTier],
+    )
+    if (byFingerprint.rows[0]?.id) return byFingerprint.rows[0].id
+
+    const viaFixedDefect = await this.pool.query<{ id: string }>(
+      `SELECT q.id::text AS id
+       FROM platform_defects d
+       JOIN platform_defect_incidents pdi ON pdi.defect_id = d.id
+       JOIN ops_analysis_queue q ON q.id = pdi.incident_id
+       WHERE d.fingerprint = $1
+         AND d.status = 'fixed'
+         AND q.deployment_tier = $2
+         AND q.incident_pipeline_status IN ('resolved', 'triaged')
+       ORDER BY COALESCE(d.fixed_at, q.updated_at) DESC
+       LIMIT 1`,
+      [fingerprint, input.deploymentTier],
+    )
+    return viaFixedDefect.rows[0]?.id ?? null
+  }
+
+  async linkRecurrenceFromPriorDefect(incidentId: string, parentDefectId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE ops_analysis_queue SET
+        recurrence_of_incident_id = sub.prior_id,
+        recurrence_kind = $3,
+        updated_at = NOW()
+      FROM (
+        SELECT q.id AS prior_id
+        FROM platform_defect_incidents pdi
+        JOIN ops_analysis_queue q ON q.id = pdi.incident_id
+        WHERE pdi.defect_id = $2::uuid
+          AND q.incident_pipeline_status IN ('resolved', 'triaged')
+        ORDER BY q.updated_at DESC
+        LIMIT 1
+      ) sub
+      WHERE ops_analysis_queue.id = $1::uuid
+        AND ops_analysis_queue.recurrence_of_incident_id IS NULL
+        AND sub.prior_id IS NOT NULL
+        AND sub.prior_id <> ops_analysis_queue.id`,
+      [incidentId, parentDefectId, INCIDENT_RECURRENCE_KIND_REINCIDENCIA],
+    )
+  }
+
+  async resolveIncidentsLinkedToDefect(defectId: string): Promise<number> {
+    const res = await this.pool.query(
+      `UPDATE ops_analysis_queue q SET
+        incident_pipeline_status = 'resolved',
+        status = 'completed',
+        completed_at = COALESCE(q.completed_at, NOW()),
+        updated_at = NOW()
+      FROM platform_defect_incidents pdi
+      WHERE pdi.defect_id = $1::uuid
+        AND pdi.incident_id = q.id
+        AND q.incident_pipeline_status NOT IN ('resolved', 'dismissed')
+      RETURNING q.id`,
+      [defectId],
+    )
+    return res.rowCount ?? 0
   }
 
   async setIncidentPipelineStatus(id: string, status: IncidentPipelineStatus): Promise<void> {
@@ -213,7 +350,13 @@ export class OpsAnalysisQueuePgRepository {
   }
 
   async findById(id: string): Promise<OpsAnalysisQueueRecord | null> {
-    const res = await this.pool.query(`SELECT * FROM ops_analysis_queue WHERE id = $1::uuid`, [id])
+    const res = await this.pool.query(
+      `SELECT q.*, prior.reference_code AS recurrence_of_reference_code
+       FROM ops_analysis_queue q
+       LEFT JOIN ops_analysis_queue prior ON prior.id = q.recurrence_of_incident_id
+       WHERE q.id = $1::uuid`,
+      [id],
+    )
     if (!res.rows[0]) return null
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
@@ -238,8 +381,10 @@ export class OpsAnalysisQueuePgRepository {
     deploymentTier: string,
   ): Promise<OpsAnalysisQueueRecord | null> {
     const res = await this.pool.query(
-      `SELECT * FROM ops_analysis_queue
-       WHERE source_type = $1 AND source_id = $2 AND deployment_tier = $3`,
+      `SELECT q.*, prior.reference_code AS recurrence_of_reference_code
+       FROM ops_analysis_queue q
+       LEFT JOIN ops_analysis_queue prior ON prior.id = q.recurrence_of_incident_id
+       WHERE q.source_type = $1 AND q.source_id = $2 AND q.deployment_tier = $3`,
       [sourceType, sourceId, deploymentTier],
     )
     if (!res.rows[0]) return null
@@ -254,15 +399,17 @@ export class OpsAnalysisQueuePgRepository {
     filter: IncidentBoardFilter,
     limit = 100,
   ): Promise<OpsAnalysisQueueRecord[]> {
-    const where = incidentBoardWhereClause(filter)
+    const where = incidentBoardWhereClause(filter, 'q')
     const res = await this.pool.query(
-      `SELECT * FROM ops_analysis_queue
+      `SELECT q.*, prior.reference_code AS recurrence_of_reference_code
+       FROM ops_analysis_queue q
+       LEFT JOIN ops_analysis_queue prior ON prior.id = q.recurrence_of_incident_id
        WHERE ${where}
        ORDER BY
-         CASE priority
+         CASE q.priority
            WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3
          END,
-         updated_at DESC
+         q.updated_at DESC
        LIMIT $1`,
       [limit],
     )
@@ -273,7 +420,10 @@ export class OpsAnalysisQueuePgRepository {
     const normalized = normalizeIncidentReferenceCode(referenceCode)
     if (!normalized) return null
     const res = await this.pool.query(
-      `SELECT * FROM ops_analysis_queue WHERE reference_code = $1 LIMIT 1`,
+      `SELECT q.*, prior.reference_code AS recurrence_of_reference_code
+       FROM ops_analysis_queue q
+       LEFT JOIN ops_analysis_queue prior ON prior.id = q.recurrence_of_incident_id
+       WHERE q.reference_code = $1 LIMIT 1`,
       [normalized],
     )
     if (!res.rows[0]) return null
@@ -302,9 +452,11 @@ export class OpsAnalysisQueuePgRepository {
     }
     params.push(limit)
     const res = await this.pool.query(
-      `SELECT * FROM ops_analysis_queue
-       WHERE ${where}
-       ORDER BY updated_at DESC
+      `SELECT q.*, prior.reference_code AS recurrence_of_reference_code
+       FROM ops_analysis_queue q
+       LEFT JOIN ops_analysis_queue prior ON prior.id = q.recurrence_of_incident_id
+       WHERE ${where.replace(/\bid\b/g, 'q.id').replace(/\btitle\b/g, 'q.title')}
+       ORDER BY q.updated_at DESC
        LIMIT $2`,
       params,
     )
@@ -356,8 +508,8 @@ export class OpsAnalysisQueuePgRepository {
   }
 
   async attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
-    const openIncidentFilter = `status NOT IN ('completed', 'dismissed')
-           AND incident_pipeline_status NOT IN ('triaged', 'dismissed')`
+    const openIncidentFilter = `status NOT IN ('dismissed')
+           AND incident_pipeline_status NOT IN ('triaged', 'resolved', 'dismissed')`
     const res = await this.pool.query<{ status: string; count: string }>(
       deploymentTier
         ? `SELECT status, COUNT(*)::text AS count FROM ops_analysis_queue

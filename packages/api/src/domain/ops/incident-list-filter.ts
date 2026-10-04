@@ -2,8 +2,8 @@
 export type IncidentBoardFilter =
   | 'needs_attention'
   | 'triaged'
+  | 'resolved'
   | 'all_open'
-  | 'completed'
 
 const REF_INCIDENT = /^INC-\d{6}$/i
 const REF_DEFECT = /^DEF-\d{6}$/i
@@ -34,19 +34,18 @@ export function parseOpsReferenceOrUuidQuery(raw: string): {
   return { kind: 'title', value: trimmed }
 }
 
-export function incidentBoardWhereClause(filter: IncidentBoardFilter): string {
+export function incidentBoardWhereClause(filter: IncidentBoardFilter, alias = ''): string {
+  const p = alias ? `${alias}.` : ''
   switch (filter) {
     case 'needs_attention':
-      return `status NOT IN ('completed', 'dismissed')
-         AND incident_pipeline_status NOT IN ('triaged', 'dismissed')`
+      return `${p}status NOT IN ('dismissed')
+         AND ${p}incident_pipeline_status NOT IN ('triaged', 'resolved', 'dismissed')`
     case 'triaged':
-      return `status NOT IN ('completed', 'dismissed')
-         AND incident_pipeline_status = 'triaged'`
+      return `${p}incident_pipeline_status = 'triaged'`
+    case 'resolved':
+      return `${p}incident_pipeline_status = 'resolved'`
     case 'all_open':
-      return `status NOT IN ('completed', 'dismissed')`
-    case 'completed':
-      return `status IN ('completed', 'dismissed')
-         OR incident_pipeline_status IN ('dismissed')`
+      return `${p}incident_pipeline_status NOT IN ('resolved', 'dismissed')`
     default:
       return incidentBoardWhereClause('needs_attention')
   }

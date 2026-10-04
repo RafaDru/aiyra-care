@@ -12,7 +12,10 @@ export type DefectMergeWebhookOutcome =
   | { outcome: 'disabled'; reason: 'secret_not_configured' }
 
 export class PlatformDefectMergeWebhookService {
-  constructor(private readonly repo: PlatformDefectPgRepository) {}
+  constructor(
+    private readonly repo: PlatformDefectPgRepository,
+    private readonly onDefectFixed?: (defectId: string) => Promise<void>,
+  ) {}
 
   isEnabled(): boolean {
     return Boolean(resolveGithubDefectMergeWebhookSecret())
@@ -55,6 +58,9 @@ export class PlatformDefectMergeWebhookService {
       if (!result) continue
       updated.push(result.record)
       if (!result.wasAlreadyFixed) idempotent = false
+      if (result.record.status === 'fixed') {
+        await this.onDefectFixed?.(defect.id)
+      }
     }
 
     if (!updated.length) {

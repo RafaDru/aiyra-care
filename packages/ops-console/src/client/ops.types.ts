@@ -31,8 +31,12 @@ export interface OpsAnalysisQueueItem {
     | 'queued_worker'
     | 'in_triage'
     | 'triaged'
+    | 'resolved'
     | 'dismissed'
     | 'dispatch_failed'
+  recurrenceOfIncidentId?: string | null
+  recurrenceOfReferenceCode?: string | null
+  recurrenceKind?: 'reincidencia' | null
   priority: 'low' | 'normal' | 'high' | 'critical'
   deploymentTier: string
   title: string

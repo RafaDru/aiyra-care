@@ -2366,6 +2366,12 @@
           "title": "Pós-R4 — Reincidência de defeito (parent_defect_id)",
           "status": "done",
           "detail": "INC após fixed_at + mesma fingerprint → novo DEF com parent_defect_id; badge CH; spec CH_DEFECT_PIPELINE_DECISIONS.md §3."
+        },
+        {
+          "id": "ch-incident-recurrence",
+          "title": "Reincidência de incidente (INC→INC)",
+          "status": "done",
+          "detail": "Migration 084: resolved terminal + reincidencia INC→INC; filtro Resolvidos; DEF fixed → INC resolved; backfill piloto INC-000001."
         }
       ]
     },
