@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
   message,
+  type TableProps,
 } from 'antd'
 import {
   CheckOutlined,
@@ -37,6 +38,13 @@ import {
   matchesOpsAnalysisQueueItem,
   parseOpsSearchInput,
 } from './ch-ops-search.js'
+import {
+  DEFAULT_INCIDENT_TABLE_SORT,
+  loadIncidentTableSort,
+  persistIncidentTableSort,
+  sortIncidentTableItems,
+  type IncidentTableSortState,
+} from './ch-incident-table-sort.js'
 import type { IncidentDispatchHealth, OpsAnalysisQueueItem } from './ops.types.js'
 
 const { Text, Paragraph } = Typography
@@ -53,6 +61,13 @@ const PIPELINE_STATUS_LABEL: Record<OpsAnalysisQueueItem['status'], string> = {
   completed: 'Concluída',
   dismissed: 'Descartada',
   failed: 'Falhou',
+}
+
+const PRIORITY_LABEL: Record<OpsAnalysisQueueItem['priority'], string> = {
+  low: 'Baixa',
+  normal: 'Normal',
+  high: 'Alta',
+  critical: 'Crítica',
 }
 
 const BOARD_FILTERS: IncidentBoardFilter[] = [
@@ -90,6 +105,7 @@ export function IncidentesPanel({
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
   const [dispatchHealth, setDispatchHealth] = useState<IncidentDispatchHealth | null>(null)
+  const [tableSort, setTableSort] = useState<IncidentTableSortState>(() => loadIncidentTableSort())
   const highlightRef = useRef<string | null>(null)
 
   const load = useCallback(async () => {
@@ -163,6 +179,29 @@ export function IncidentesPanel({
     if (!parsedSearch) return items
     return items.filter((item) => matchesOpsAnalysisQueueItem(item, parsedSearch))
   }, [items, parsedSearch])
+
+  const sortedItems = useMemo(
+    () => sortIncidentTableItems(visibleItems, tableSort),
+    [visibleItems, tableSort],
+  )
+
+  const handleTableChange: TableProps<OpsAnalysisQueueItem>['onChange'] = (
+    _pagination,
+    _filters,
+    sorter,
+  ) => {
+    const single = Array.isArray(sorter) ? sorter[0] : sorter
+    if (!single || !single.columnKey) return
+    const next: IncidentTableSortState =
+      single.order === null || single.order === undefined
+        ? DEFAULT_INCIDENT_TABLE_SORT
+        : {
+            columnKey: String(single.columnKey),
+            order: single.order,
+          }
+    setTableSort(next)
+    persistIncidentTableSort(next)
+  }
 
   const runSearch = async (raw: string) => {
     const parsed = parseOpsSearchInput(raw)
@@ -318,7 +357,8 @@ export function IncidentesPanel({
           rowKey="id"
           loading={loading}
           pagination={false}
-          dataSource={visibleItems}
+          dataSource={sortedItems}
+          onChange={handleTableChange}
           onRow={(row) => ({
             'data-incident-row-id': row.id,
           })}
@@ -409,21 +449,35 @@ export function IncidentesPanel({
           columns={[
             {
               title: 'Ref',
+              key: 'referenceCode',
               dataIndex: 'referenceCode',
               width: 108,
               align: 'center',
+              sorter: true,
+              sortOrder:
+                tableSort.columnKey === 'referenceCode' ? tableSort.order : null,
               render: (code: string | null) => <OpsReferenceCodeTag code={code} compact />,
             },
             {
-              title: 'Timestamp',
-              dataIndex: 'queuedAt',
+              title: 'Atualizado',
+              key: 'updatedAt',
+              dataIndex: 'updatedAt',
               width: 148,
-              render: (v: string) => new Date(v).toLocaleString('pt-BR'),
+              sorter: true,
+              sortOrder: tableSort.columnKey === 'updatedAt' ? tableSort.order : null,
+              render: (v: string, row) => (
+                <Tooltip title={`Enfileirado: ${new Date(row.queuedAt).toLocaleString('pt-BR')}`}>
+                  <span>{new Date(v).toLocaleString('pt-BR')}</span>
+                </Tooltip>
+              ),
             },
             {
               title: 'Título',
+              key: 'title',
               dataIndex: 'title',
               ellipsis: { showTitle: true },
+              sorter: true,
+              sortOrder: tableSort.columnKey === 'title' ? tableSort.order : null,
             },
             {
               title: 'Aplicação',
@@ -440,10 +494,23 @@ export function IncidentesPanel({
               render: (_: unknown, row) => <Tag>{incidentOriginLabel(row)}</Tag>,
             },
             {
+              title: 'Prioridade',
+              key: 'priority',
+              dataIndex: 'priority',
+              width: 92,
+              align: 'center',
+              sorter: true,
+              sortOrder: tableSort.columnKey === 'priority' ? tableSort.order : null,
+              render: (p: OpsAnalysisQueueItem['priority']) => PRIORITY_LABEL[p],
+            },
+            {
               title: 'Status',
               key: 'pipelineStatus',
               width: 120,
               align: 'center',
+              sorter: true,
+              sortOrder:
+                tableSort.columnKey === 'pipelineStatus' ? tableSort.order : null,
               render: (_: unknown, row) => (
                 <Tag color={incidentPipelineTagColor(row)}>{incidentPipelineLabel(row)}</Tag>
               ),

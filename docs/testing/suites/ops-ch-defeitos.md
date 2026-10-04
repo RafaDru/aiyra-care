@@ -20,7 +20,9 @@
 8. Busca **Incidentes**: `INC-*` / prefixo UUID / substring do título encontra linha
 9. Busca **Defeitos**: `DEF-*` / prefixo UUID / substring do título encontra linha
 10. Link de incidente vinculado em detalhe de defeito abre **Incidentes** com highlight
+11. **Incidentes** — ordenação por coluna (Ref, Atualizado, Título, Prioridade, Status); padrão **Atualizado** mais recente primeiro; ordem persiste na sessão do browser ao trocar de aba CH e voltar
+12. Chip **Triados** — coluna Status mostra tag **Triado** (não «Aberto» / «Em aberto»)
 
 ## Critério
 
-- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona e busca INC/DEF/UUID localiza registro
+- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam e triados exibem label **Triado**
