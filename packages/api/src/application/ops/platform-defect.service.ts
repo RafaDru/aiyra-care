@@ -43,7 +43,10 @@ export function assertGithubPrUrlForReadyForPr(prUrl: string | null | undefined)
 }
 
 export class PlatformDefectService {
-  constructor(private readonly repo: PlatformDefectPgRepository) {}
+  constructor(
+    private readonly repo: PlatformDefectPgRepository,
+    private readonly onDefectFixed?: (defectId: string) => Promise<void>,
+  ) {}
 
   async listForOps(options: {
     statusFilter?: string
@@ -178,6 +181,9 @@ export class PlatformDefectService {
       fixedVia: nextStatus === 'fixed' ? 'manual' : undefined,
     })
     if (!updated) throw new PlatformDefectTransitionError('not_found')
+    if (nextStatus === 'fixed') {
+      await this.onDefectFixed?.(id)
+    }
     return updated
   }
 

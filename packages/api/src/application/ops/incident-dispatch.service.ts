@@ -225,7 +225,11 @@ export class IncidentDispatchService {
   ): Promise<{ ok: true } | { ok: false; error: string }> {
     const record = await this.queueRepo.findById(incidentId)
     if (!record) return { ok: false, error: 'not_found' }
-    if (record.status === 'completed' || record.status === 'dismissed') {
+    if (
+      record.incidentPipelineStatus === 'resolved' ||
+      record.incidentPipelineStatus === 'dismissed' ||
+      record.status === 'dismissed'
+    ) {
       return { ok: false, error: 'not_eligible' }
     }
     if (

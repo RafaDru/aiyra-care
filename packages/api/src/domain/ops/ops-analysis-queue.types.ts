@@ -21,6 +21,7 @@ export type IncidentPipelineStatus =
   | 'queued_worker'
   | 'in_triage'
   | 'triaged'
+  | 'resolved'
   | 'dismissed'
   | 'dispatch_failed'
 

@@ -21,7 +21,13 @@ export function isQueueRecordEligibleForDispatchReconcile(
   record: OpsAnalysisQueueRecord,
   options?: { recoverStuckDispatch?: boolean },
 ): boolean {
-  if (record.status === 'completed' || record.status === 'dismissed') return false
+  if (
+    record.incidentPipelineStatus === 'resolved' ||
+    record.incidentPipelineStatus === 'dismissed' ||
+    record.status === 'dismissed'
+  ) {
+    return false
+  }
   const pipeline = record.incidentPipelineStatus
   if (options?.recoverStuckDispatch) {
     return (INCIDENT_PIPELINE_RECOVERABLE_STATUSES as readonly string[]).includes(pipeline)

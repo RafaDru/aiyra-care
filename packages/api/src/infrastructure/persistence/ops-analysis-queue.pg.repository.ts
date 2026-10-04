@@ -79,7 +79,7 @@ export class OpsAnalysisQueuePgRepository {
     const active = await this.pool.query(
       `SELECT * FROM ops_analysis_queue
        WHERE source_type = $1 AND source_id = $2 AND deployment_tier = $3
-         AND incident_pipeline_status NOT IN ('triaged', 'dismissed')
+         AND incident_pipeline_status NOT IN ('resolved', 'dismissed')
        ORDER BY updated_at DESC
        LIMIT 1`,
       [input.sourceType, input.sourceId, input.deploymentTier],
@@ -160,7 +160,7 @@ export class OpsAnalysisQueuePgRepository {
     const bySource = await this.pool.query<{ id: string }>(
       `SELECT id::text AS id FROM ops_analysis_queue
        WHERE source_type = $1 AND source_id = $2 AND deployment_tier = $3
-         AND incident_pipeline_status = 'triaged'
+         AND incident_pipeline_status = 'resolved'
        ORDER BY updated_at DESC
        LIMIT 1`,
       [input.sourceType, input.sourceId, input.deploymentTier],
@@ -174,7 +174,7 @@ export class OpsAnalysisQueuePgRepository {
       `SELECT q.id::text AS id
        FROM ops_analysis_queue q
        WHERE q.deployment_tier = $2
-         AND q.incident_pipeline_status = 'triaged'
+         AND q.incident_pipeline_status = 'resolved'
          AND q.context_snapshot->>'fingerprint' = $1
        ORDER BY q.updated_at DESC
        LIMIT 1`,
@@ -190,7 +190,7 @@ export class OpsAnalysisQueuePgRepository {
        WHERE d.fingerprint = $1
          AND d.status = 'fixed'
          AND q.deployment_tier = $2
-         AND q.incident_pipeline_status = 'triaged'
+         AND q.incident_pipeline_status IN ('resolved', 'triaged')
        ORDER BY COALESCE(d.fixed_at, q.updated_at) DESC
        LIMIT 1`,
       [fingerprint, input.deploymentTier],
@@ -209,7 +209,7 @@ export class OpsAnalysisQueuePgRepository {
         FROM platform_defect_incidents pdi
         JOIN ops_analysis_queue q ON q.id = pdi.incident_id
         WHERE pdi.defect_id = $2::uuid
-          AND q.incident_pipeline_status = 'triaged'
+          AND q.incident_pipeline_status IN ('resolved', 'triaged')
         ORDER BY q.updated_at DESC
         LIMIT 1
       ) sub
@@ -219,6 +219,23 @@ export class OpsAnalysisQueuePgRepository {
         AND sub.prior_id <> ops_analysis_queue.id`,
       [incidentId, parentDefectId, INCIDENT_RECURRENCE_KIND_REINCIDENCIA],
     )
+  }
+
+  async resolveIncidentsLinkedToDefect(defectId: string): Promise<number> {
+    const res = await this.pool.query(
+      `UPDATE ops_analysis_queue q SET
+        incident_pipeline_status = 'resolved',
+        status = 'completed',
+        completed_at = COALESCE(q.completed_at, NOW()),
+        updated_at = NOW()
+      FROM platform_defect_incidents pdi
+      WHERE pdi.defect_id = $1::uuid
+        AND pdi.incident_id = q.id
+        AND q.incident_pipeline_status NOT IN ('resolved', 'dismissed')
+      RETURNING q.id`,
+      [defectId],
+    )
+    return res.rowCount ?? 0
   }
 
   async setIncidentPipelineStatus(id: string, status: IncidentPipelineStatus): Promise<void> {
@@ -491,8 +508,8 @@ export class OpsAnalysisQueuePgRepository {
   }
 
   async attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {
-    const openIncidentFilter = `status NOT IN ('completed', 'dismissed')
-           AND incident_pipeline_status NOT IN ('triaged', 'dismissed')`
+    const openIncidentFilter = `status NOT IN ('dismissed')
+           AND incident_pipeline_status NOT IN ('triaged', 'resolved', 'dismissed')`
     const res = await this.pool.query<{ status: string; count: string }>(
       deploymentTier
         ? `SELECT status, COUNT(*)::text AS count FROM ops_analysis_queue

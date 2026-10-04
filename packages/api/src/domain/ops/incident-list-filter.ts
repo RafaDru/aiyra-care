@@ -2,8 +2,8 @@
 export type IncidentBoardFilter =
   | 'needs_attention'
   | 'triaged'
+  | 'resolved'
   | 'all_open'
-  | 'completed'
 
 const REF_INCIDENT = /^INC-\d{6}$/i
 const REF_DEFECT = /^DEF-\d{6}$/i
@@ -38,16 +38,14 @@ export function incidentBoardWhereClause(filter: IncidentBoardFilter, alias = ''
   const p = alias ? `${alias}.` : ''
   switch (filter) {
     case 'needs_attention':
-      return `${p}status NOT IN ('completed', 'dismissed')
-         AND ${p}incident_pipeline_status NOT IN ('triaged', 'dismissed')`
+      return `${p}status NOT IN ('dismissed')
+         AND ${p}incident_pipeline_status NOT IN ('triaged', 'resolved', 'dismissed')`
     case 'triaged':
-      return `${p}status NOT IN ('completed', 'dismissed')
-         AND ${p}incident_pipeline_status = 'triaged'`
+      return `${p}incident_pipeline_status = 'triaged'`
+    case 'resolved':
+      return `${p}incident_pipeline_status = 'resolved'`
     case 'all_open':
-      return `${p}status NOT IN ('completed', 'dismissed')`
-    case 'completed':
-      return `${p}status IN ('completed', 'dismissed')
-         OR ${p}incident_pipeline_status IN ('dismissed')`
+      return `${p}incident_pipeline_status NOT IN ('resolved', 'dismissed')`
     default:
       return incidentBoardWhereClause('needs_attention')
   }

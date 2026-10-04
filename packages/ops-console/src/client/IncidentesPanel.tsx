@@ -73,8 +73,8 @@ const PRIORITY_LABEL: Record<OpsAnalysisQueueItem['priority'], string> = {
 const BOARD_FILTERS: IncidentBoardFilter[] = [
   'needs_attention',
   'triaged',
+  'resolved',
   'all_open',
-  'completed',
 ]
 
 function buildIncidentRefDeepLink(referenceCode: string): string {

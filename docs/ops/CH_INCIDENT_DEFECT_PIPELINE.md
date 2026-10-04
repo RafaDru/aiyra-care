@@ -38,10 +38,11 @@ Pipeline ops de ponta a ponta:
 | **Em fila** | `queued_worker` | Worker local claim do outbox |
 | **Em triagem** | `in_triage` | Agente 1 iniciou (`investigating`) |
 | **Falha** | `dispatch_failed` | Outbox `dead` (max tentativas) ou falha do worker com pipeline em dispatch |
-| *(interno)* Triado | `triaged` | Callback triagem + defeito criado/vinculado (permanece após DEF `fixed`) |
+| *(interno)* Triado | `triaged` | Callback triagem + defeito criado/vinculado |
+| **Resolvido** | `resolved` | DEF vinculado em `fixed` (manual ou webhook R4) |
 | *(interno)* Descartado | `dismissed` | Triagem descarta |
 
-**Reincidência (084):** nova ocorrência após INC `triaged` (mesma fonte/fingerprint ou triagem com `parentDefectId`) → **novo** INC com `recurrence_of_incident_id` + `recurrence_kind = reincidencia` — **não** reabre o INC anterior e **não** usa status `resolved`.
+**Reincidência (084):** após INC `resolved`, nova ocorrência → **novo** INC com `recurrence_of_incident_id` + `recurrence_kind = reincidencia`. Tab Incidentes: filtro **Resolvidos** (substitui legado «Concluídos»).
 
 **Canônico «Falha»:** valor PG `dispatch_failed` (migration **076**). Não derivar só do outbox `dead` na UI — o worker / `markDead` grava `dispatch_failed` no incidente para não ficar preso em «Em fila» (`queued_worker`) nem voltar silenciosamente a «Aberto».
 

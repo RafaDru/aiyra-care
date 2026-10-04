@@ -287,7 +287,6 @@ export class OpsAnalysisQueueService {
       decision === 'infra_failure'
     ) {
       await this.repo.setIncidentPipelineStatus(record.id, 'triaged')
-      await this.repo.markCompleted(record.id)
     }
   }
 

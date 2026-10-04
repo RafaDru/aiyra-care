@@ -135,7 +135,7 @@ export class IncidentDispatchOutboxPgRepository {
       `SELECT o.* FROM incident_dispatch_outbox o
        INNER JOIN ops_analysis_queue q ON q.id = o.incident_id
        WHERE o.status = 'dead'
-         AND q.incident_pipeline_status NOT IN ('triaged', 'dismissed')
+         AND q.incident_pipeline_status NOT IN ('triaged', 'resolved', 'dismissed')
          AND q.status NOT IN ('completed', 'dismissed')
        ORDER BY o.updated_at ASC
        LIMIT $1`,

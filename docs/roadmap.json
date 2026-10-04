@@ -2371,7 +2371,7 @@
           "id": "ch-incident-recurrence",
           "title": "Reincidência de incidente (INC→INC)",
           "status": "done",
-          "detail": "Migration 084: novo INC com recurrence_of_incident_id + kind reincidencia; INC anterior triado (sem status resolved); CH link Reincidência de INC-xxxxx."
+          "detail": "Migration 084: resolved terminal + reincidencia INC→INC; filtro Resolvidos; DEF fixed → INC resolved; backfill piloto INC-000001."
         }
       ]
     },
