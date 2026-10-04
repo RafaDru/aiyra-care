@@ -38,7 +38,12 @@ export interface SupportReportBatchDispatchPayload {
   toast: { title: string; body: string; icon: 'info' | 'warning' }
   dashboardUrl: string
   investigation: { tier: 0 | 1; playbook: string; trigger: 'scheduled' }
-  analysisQueue: { id: string; callbackUrl: string; lane: 'development_support' | 'sre_support' }
+  analysisQueue: {
+    id: string
+    callbackUrl: string
+    triageStartedUrl: string
+    lane: 'development_support' | 'sre_support'
+  }
 }
 
 export type SupportReportBatchDispatchResult =
@@ -62,7 +67,12 @@ export interface SupportReportDispatchPayload {
   text: string
   toast: { title: string; body: string; icon: 'info' | 'warning' }
   investigation?: { tier: 0 | 1; playbook: string; trigger: 'auto' | 'manual' }
-  analysisQueue?: { id: string; callbackUrl: string; lane: 'development_support' | 'sre_support' }
+  analysisQueue?: {
+    id: string
+    callbackUrl: string
+    triageStartedUrl: string
+    lane: 'development_support' | 'sre_support'
+  }
   operatorNotes?: string | null
 }
 
@@ -220,7 +230,7 @@ export async function dispatchSupportReportInvestigator(
   options?: {
     operatorNotes?: string | null
     trigger?: 'auto' | 'manual'
-    analysisQueue?: { id: string; callbackUrl: string }
+    analysisQueue?: { id: string; callbackUrl: string; triageStartedUrl: string }
     investigationTier?: InvestigationTier
   },
 ): Promise<SupportInvestigatorDispatchResult> {
@@ -252,6 +262,7 @@ export async function dispatchSupportReportInvestigator(
           analysisQueue: {
             id: options.analysisQueue.id,
             callbackUrl: options.analysisQueue.callbackUrl,
+            triageStartedUrl: options.analysisQueue.triageStartedUrl,
             lane: 'development_support',
           },
         }
@@ -291,7 +302,7 @@ export async function dispatchSupportReportBatchInvestigator(input: {
   deploymentTier: string
   records: SupportReportBatchReportEntry[]
   investigationTier: InvestigationTier
-  analysisQueue: { id: string; callbackUrl: string }
+  analysisQueue: { id: string; callbackUrl: string; triageStartedUrl: string }
 }): Promise<SupportReportBatchDispatchResult> {
   const webhook = resolveSupportInvestigatorWebhookUrl()
   if (!webhook) {
@@ -324,6 +335,7 @@ export async function dispatchSupportReportBatchInvestigator(input: {
     analysisQueue: {
       id: input.analysisQueue.id,
       callbackUrl: input.analysisQueue.callbackUrl,
+      triageStartedUrl: input.analysisQueue.triageStartedUrl,
       lane: 'development_support',
     },
   }

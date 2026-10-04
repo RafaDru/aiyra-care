@@ -22,6 +22,7 @@ Este `.prompt.md` permanece como referência para workflows em `.cursor/automati
 | `investigation.trigger` | `auto` (submit) ou `manual` (botão Analisar) |
 | `analysisQueue.id` | ID na pilha — cite no callback |
 | `analysisQueue.callbackUrl` | POST ao finalizar (ver «Callback» abaixo) |
+| `analysisQueue.triageStartedUrl` | **Não chame via LLM** — passo 0 da Automation (HTTP POST) marca **Em triagem** antes do agente |
 | `type: support_report_batch` | Vários `reports[]` no mesmo grupo (categoria + tier) — investigar em lote |
 | `reports[].reportId` / `route` / `descriptionExcerpt` / `diagnosticSummary` | Entrada batch (sem PHI) |
 

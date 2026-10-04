@@ -27,7 +27,8 @@
 15. **Reincidência DEF:** após DEF `fixed`, triagem de INC com mesma fingerprint (ou callback `parentDefectId` + `recurrenceLikely`) — novo DEF com tag **Reincidência** e link «Abrir DEF pai» no expand
 16. **Reincidência INC:** após INC `resolved` (DEF `fixed`), novo sinal — novo `INC-*` com **Reincidência de INC-xxxxx**
 17. **Resolvido:** DEF `fixed` → INC vinculado tag **Resolvido** no chip **Resolvidos** (backfill mig 084 cobre piloto INC-000001)
+18. **Em triagem (hook):** com INC `forwarded`, simular `POST /api/analysis-queue/:id/triage-started` (auth callback) → pipeline `in_triage` + status `investigating`; idempotente se já `in_triage`
 
 ## Critério
 
-- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados/resolvidos exibem labels corretas, R1 exibe falha estruturada (passo 13 quando webhook configurado), reincidência DEF/INC (15–16) e fechamento INC em `resolved` (17)
+- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados/resolvidos exibem labels corretas, R1 exibe falha estruturada (passo 13 quando webhook configurado), reincidência DEF/INC (15–16), fechamento INC em `resolved` (17), hook triage-started (18)

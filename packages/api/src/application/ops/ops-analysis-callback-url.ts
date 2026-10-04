@@ -19,6 +19,25 @@ export function resolveInvestigatorCallbackUrl(): string {
   return `${resolveOpsConsoleBaseUrl()}/api/analysis-queue/callback`
 }
 
+export function resolveInvestigatorTriageStartedUrl(queueId: string): string {
+  const id = queueId.trim()
+  return `${resolveOpsConsoleBaseUrl()}/api/analysis-queue/${encodeURIComponent(id)}/triage-started`
+}
+
+export interface InvestigatorAnalysisQueueUrls {
+  id: string
+  callbackUrl: string
+  triageStartedUrl: string
+}
+
+export function resolveInvestigatorAnalysisQueueUrls(queueId: string): InvestigatorAnalysisQueueUrls {
+  return {
+    id: queueId,
+    callbackUrl: resolveInvestigatorCallbackUrl(),
+    triageStartedUrl: resolveInvestigatorTriageStartedUrl(queueId),
+  }
+}
+
 /** Header + valor para a Automation POSTar no callback (sem expor segredo em logs). */
 export function resolveInvestigatorCallbackAuth(): { header: string; value: string } | null {
   const investigatorKey = process.env.OPS_INVESTIGATOR_CALLBACK_KEY?.trim()

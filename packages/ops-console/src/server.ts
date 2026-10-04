@@ -41,6 +41,7 @@ import {
 import { runDefectCorrectionBatch } from '../../api/src/application/ops/defect-correction-batch.service.js'
 import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
+import { postAnalysisQueueTriageStarted } from '../../api/src/application/ops/ops-analysis-triage-started.http.js'
 import {
   dispatchErrorMessage,
   startPlatformDefectFixWithDispatch,
@@ -543,6 +544,21 @@ async function main() {
         }
         throw err
       }
+    },
+  )
+
+  fastify.post<{ Params: { id: string } }>(
+    '/api/analysis-queue/:id/triage-started',
+    async (req, reply) => {
+      const { statusCode, body } = await postAnalysisQueueTriageStarted(
+        analysisQueueService,
+        req.params.id,
+        {
+          'x-investigator-callback-key': req.headers['x-investigator-callback-key'] as string,
+          'x-internal-ops-key': req.headers['x-internal-ops-key'] as string,
+        },
+      )
+      return reply.status(statusCode).send(body)
     },
   )
 
