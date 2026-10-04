@@ -108,6 +108,40 @@ export class OpsAnalysisQueueService {
     })
   }
 
+  async enqueueClientErrorSignal(input: {
+    fingerprint: string
+    feature: string
+    errorCode: string
+    errorKind: string
+    route?: string | null
+    apiPath?: string | null
+    deploymentTier: string
+    lane: AnalysisQueueLane
+  }): Promise<OpsAnalysisQueueRecord> {
+    const title = `Client error · ${input.feature} · ${input.errorCode}`
+    return this.repo.upsertQueued({
+      sourceType: 'ops_alert',
+      sourceId: `client_error:${input.fingerprint}`,
+      lane: input.lane,
+      deploymentTier: input.deploymentTier,
+      title,
+      errorSummary: input.errorCode.slice(0, 4000),
+      contextSnapshot: {
+        severity: 'warning',
+        category: 'product',
+        incidentOrigin: 'client_error_bridge',
+        application: 'Web',
+        fingerprint: input.fingerprint,
+        feature: input.feature,
+        errorKind: input.errorKind,
+        ...(input.route ? { route: input.route.slice(0, 128) } : {}),
+        ...(input.apiPath ? { api_path: input.apiPath.slice(0, 128) } : {}),
+      },
+      investigationTrigger: 'auto',
+      priority: 'normal',
+    })
+  }
+
   async enqueueOpsAlert(
     alert: OpsAlert,
     options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
@@ -362,6 +396,28 @@ export class OpsAnalysisQueueService {
 
   listOpen(limit = 100): Promise<OpsAnalysisQueueRecord[]> {
     return this.repo.listOpen(limit)
+  }
+
+  async listForIncidentBoard(
+    filter: import('../../domain/ops/incident-list-filter.js').IncidentBoardFilter,
+    options?: { limit?: number; ensureId?: string },
+  ): Promise<OpsAnalysisQueueRecord[]> {
+    const limit = options?.limit ?? 100
+    const records = await this.repo.listForIncidentBoard(filter, limit)
+    const ensureId = options?.ensureId?.trim()
+    if (!ensureId) return records
+    if (records.some((r) => r.id === ensureId)) return records
+    const extra = await this.repo.findById(ensureId)
+    if (!extra) return records
+    return [extra, ...records].slice(0, limit)
+  }
+
+  findByReferenceCode(referenceCode: string): Promise<OpsAnalysisQueueRecord | null> {
+    return this.repo.findByReferenceCode(referenceCode)
+  }
+
+  searchForIncidentBoard(query: string, limit = 50): Promise<OpsAnalysisQueueRecord[]> {
+    return this.repo.searchForIncidentBoard(query, limit)
   }
 
   attentionCounts(deploymentTier?: string): Promise<OpsAnalysisAttentionCounts> {

@@ -1,7 +1,7 @@
 # Runbook — operador solo (Command Hub)
 
 > **Fatia:** R0 · **Spec:** [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md)  
-> **Última atualização:** 2026-10-01
+> **Última atualização:** 2026-10-02
 
 Playbook único para Rafael operar **INC-*** → **DEF-*** até **Corrigido**, com gates humanos e recuperação de falhas sem SQL manual.
 
@@ -136,3 +136,19 @@ Ver [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md) §9
 - Merge automático em `main` sem G3.
 - Review agêntico em todo PR do monorepo (somente defeitos CH).
 - SLA paging externo — usar banner CH.
+
+---
+
+## 10. Túnel HTTPS (notebook)
+
+Automações **Triador** e **Correção** (Cursor na nuvem) precisam alcançar o callback do ops-console (`/api/analysis-queue/callback`). `127.0.0.1` no notebook **não** funciona para o agente remoto.
+
+| Passo | Ação |
+|-------|------|
+| 1 | Subir túnel (ex. Cloudflare) apontando para `http://127.0.0.1:3013` (ou `:3023` em preview) |
+| 2 | No `.env` (ou `.env.preview`), definir `OPS_CONSOLE_PUBLIC_URL=https://….trycloudflare.com` (sem barra final) |
+| 3 | Reiniciar **API** e ops-console após mudar env (`up.ps1` ou camada backend + observability no farol) |
+
+**Por quê:** a API monta `callbackUrl` com `OPS_ALERT_DASHBOARD_URL` **antes** de `OPS_CONSOLE_PUBLIC_URL` (`resolveOpsConsoleBaseUrl`). O script `scripts/ops-console-up.ps1` só preenche `OPS_ALERT_DASHBOARD_URL` quando vazio — se houver túnel, copia `OPS_CONSOLE_PUBLIC_URL` em vez de forçar localhost, para processos filhos (API reiniciada pelo farol) não herdarem base errada.
+
+Checklist E2E: [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) §1.4.

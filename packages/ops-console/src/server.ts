@@ -34,6 +34,11 @@ import { DefectPrBatchPgRepository } from '../../api/src/infrastructure/persiste
 import { createIncidentDispatchService } from '../../api/src/application/ops/incident-dispatch.service.js'
 import { getIncidentDispatchHealth } from '../../api/src/application/ops/incident-dispatch-health.js'
 import { DefectPrBatchService } from '../../api/src/application/ops/defect-pr-batch.service.js'
+import {
+  defectCorrectionBatchIntervalMs,
+  triageBatchIntervalMs,
+} from '../../api/src/application/ops/ch-batch-cadence.config.js'
+import { runDefectCorrectionBatch } from '../../api/src/application/ops/defect-correction-batch.service.js'
 import type { PlatformDefectStatus } from '../../api/src/domain/ops/platform-defect.types.js'
 import { isInvestigatorCallbackAuthorized } from '../../api/src/application/ops/ops-analysis-callback-url.js'
 import {
@@ -41,6 +46,11 @@ import {
   startPlatformDefectFixWithDispatch,
 } from '../../api/src/application/ops/platform-defect-fix-dispatch.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
+import type { IncidentBoardFilter } from '../../api/src/domain/ops/incident-list-filter.js'
+import {
+  normalizeDefectReferenceCode,
+  normalizeIncidentReferenceCode,
+} from '../../api/src/domain/ops/incident-list-filter.js'
 import { runOpsProbe } from '../../api/src/application/ops/ops-probe.service.js'
 import { writeOpsMetricsArtifact } from '../../api/src/application/ops/ops-probe-artifact.js'
 import { triageOpsAlerts } from '../../api/src/domain/ops/ops-alert-triage.js'
@@ -126,6 +136,32 @@ async function runProbeCycle(): Promise<void> {
   } catch (err) {
     console.error('[ops-console] probe failed:', err instanceof Error ? err.message : err)
   }
+}
+
+const INCIDENT_BOARD_FILTERS = new Set<IncidentBoardFilter>([
+  'needs_attention',
+  'triaged',
+  'all_open',
+  'completed',
+])
+
+function parseIncidentBoardFilter(raw: string | undefined): IncidentBoardFilter {
+  if (raw && INCIDENT_BOARD_FILTERS.has(raw as IncidentBoardFilter)) {
+    return raw as IncidentBoardFilter
+  }
+  return 'needs_attention'
+}
+
+async function analysisQueueItemsWithDispatch(
+  records: Awaited<ReturnType<OpsAnalysisQueueService['listForIncidentBoard']>>,
+) {
+  const dispatchMap = await incidentDispatchService.dispatchSnapshotsForIncidentIds(
+    records.map((r) => r.id),
+  )
+  return records.map((record) => ({
+    ...record,
+    dispatch: dispatchMap.get(record.id) ?? null,
+  }))
 }
 
 function isViteAssetPath(path: string): boolean {
@@ -389,16 +425,38 @@ async function main() {
     },
   )
 
-  fastify.get('/api/analysis-queue', async () => {
-    const records = await analysisQueueService.listOpen(100)
-    const dispatchMap = await incidentDispatchService.dispatchSnapshotsForIncidentIds(
-      records.map((r) => r.id),
-    )
-    const items = records.map((record) => ({
-      ...record,
-      dispatch: dispatchMap.get(record.id) ?? null,
-    }))
-    return { items }
+  fastify.get<{
+    Querystring: { filter?: string; ensureId?: string; limit?: string }
+  }>('/api/analysis-queue', async (req) => {
+    const filter = parseIncidentBoardFilter(req.query.filter)
+    const limit = Math.min(Number(req.query.limit) || 100, 200)
+    const records = await analysisQueueService.listForIncidentBoard(filter, {
+      limit,
+      ensureId: req.query.ensureId,
+    })
+    const items = await analysisQueueItemsWithDispatch(records)
+    return { items, filter }
+  })
+
+  fastify.get<{ Querystring: { q?: string; limit?: string } }>(
+    '/api/analysis-queue/search',
+    async (req) => {
+      const q = req.query.q?.trim() ?? ''
+      if (!q) return { items: [] as const }
+      const limit = Math.min(Number(req.query.limit) || 50, 100)
+      const records = await analysisQueueService.searchForIncidentBoard(q, limit)
+      const items = await analysisQueueItemsWithDispatch(records)
+      return { items }
+    },
+  )
+
+  fastify.get<{ Params: { ref: string } }>('/api/analysis-queue/by-ref/:ref', async (req, reply) => {
+    const normalized = normalizeIncidentReferenceCode(req.params.ref)
+    if (!normalized) return reply.status(400).send({ error: 'invalid_ref' })
+    const record = await analysisQueueService.findByReferenceCode(normalized)
+    if (!record) return reply.status(404).send({ error: 'not_found' })
+    const items = await analysisQueueItemsWithDispatch([record])
+    return { item: items[0] }
   })
 
   fastify.get('/api/incident-dispatch/health', async () => getIncidentDispatchHealth(pool))
@@ -406,6 +464,14 @@ async function main() {
   fastify.get('/api/analysis-queue/attention-counts', async () =>
     analysisQueueService.attentionCounts(deploymentTier),
   )
+
+  fastify.get<{ Params: { id: string } }>('/api/analysis-queue/:id', async (req, reply) => {
+    if (req.params.id === 'callback') return reply.callNotFound()
+    const record = await analysisQueueService.findById(req.params.id)
+    if (!record) return reply.status(404).send({ error: 'not_found' })
+    const items = await analysisQueueItemsWithDispatch([record])
+    return { item: items[0] }
+  })
 
   fastify.post<{ Body: AgentAnalysisCallbackInput }>(
     '/api/analysis-queue/callback',
@@ -456,17 +522,33 @@ async function main() {
     },
   )
 
-  fastify.get<{ Querystring: { status?: string; includeFixed?: string } }>(
+  fastify.get<{ Querystring: { status?: string; includeFixed?: string; q?: string } }>(
     '/api/platform-defects',
-    async (req) => ({
-      items: await platformDefectService.listForOps({
-        statusFilter: req.query.status,
-        includeFixed: req.query.includeFixed === '1' || req.query.includeFixed === 'true',
-      }),
-    }),
+    async (req) => {
+      const q = req.query.q?.trim()
+      if (q) {
+        const items = await platformDefectService.searchForOps(q)
+        return { items }
+      }
+      return {
+        items: await platformDefectService.listForOps({
+          statusFilter: req.query.status,
+          includeFixed: req.query.includeFixed === '1' || req.query.includeFixed === 'true',
+        }),
+      }
+    },
   )
 
+  fastify.get<{ Params: { ref: string } }>('/api/platform-defects/by-ref/:ref', async (req, reply) => {
+    const normalized = normalizeDefectReferenceCode(req.params.ref)
+    if (!normalized) return reply.status(400).send({ error: 'invalid_ref' })
+    const item = await platformDefectService.findByReferenceCode(normalized)
+    if (!item) return reply.status(404).send({ error: 'not_found' })
+    return { item }
+  })
+
   fastify.get<{ Params: { id: string } }>('/api/platform-defects/:id', async (req, reply) => {
+    if (req.params.id === 'by-ref') return reply.callNotFound()
     const detail = await platformDefectService.getDetail(req.params.id)
     if (!detail) return reply.status(404).send({ error: 'not_found' })
     return detail
@@ -540,6 +622,15 @@ async function main() {
     return { ok: true, ...result }
   })
 
+  fastify.post('/api/defect-correction-batches/run', async () => {
+    const result = await runDefectCorrectionBatch(
+      defectPrBatchService,
+      platformDefectService,
+      platformDefectRepo,
+    )
+    return { ok: true, ...result }
+  })
+
   fastify.post<{ Params: { id: string }; Body: { incidentId?: string; linkedBy?: string } }>(
     '/api/platform-defects/:id/link-incident',
     async (req, reply) => {
@@ -573,6 +664,7 @@ async function main() {
 
   let probeTimer: ReturnType<typeof setInterval> | undefined
   let dispatchTimer: ReturnType<typeof setInterval> | undefined
+  let defectCorrectionBatchTimer: ReturnType<typeof setInterval> | undefined
   let shuttingDown = false
 
   const shutdown = async () => {
@@ -580,6 +672,7 @@ async function main() {
     shuttingDown = true
     if (probeTimer) clearInterval(probeTimer)
     if (dispatchTimer) clearInterval(dispatchTimer)
+    if (defectCorrectionBatchTimer) clearInterval(defectCorrectionBatchTimer)
     try {
       if (vite) await vite.close()
       await fastify.close()
@@ -623,7 +716,31 @@ async function main() {
     runDispatch()
     dispatchTimer = setInterval(runDispatch, dispatchIntervalMs)
     dispatchTimer.unref()
-    console.log(`[ops-console] incident dispatch worker every ${dispatchIntervalMs}ms`)
+    const triageBatchMs = triageBatchIntervalMs()
+    console.log(
+      `[ops-console] incident dispatch worker every ${dispatchIntervalMs}ms` +
+        (triageBatchMs > 0 ? ` (triage batch collect every ${triageBatchMs}ms)` : ''),
+    )
+  }
+
+  const defectBatchMs = defectCorrectionBatchIntervalMs()
+  if (defectBatchMs > 0) {
+    const runDefectBatch = () => {
+      runDefectCorrectionBatch(defectPrBatchService, platformDefectService, platformDefectRepo)
+        .then((result) => {
+          console.log('[ops-console] defect correction batch', JSON.stringify(result))
+        })
+        .catch((err) => {
+          console.error(
+            '[ops-console] defect correction batch',
+            err instanceof Error ? err.message : err,
+          )
+        })
+    }
+    runDefectBatch()
+    defectCorrectionBatchTimer = setInterval(runDefectBatch, defectBatchMs)
+    defectCorrectionBatchTimer.unref()
+    console.log(`[ops-console] defect correction batch every ${defectBatchMs}ms`)
   }
 }
 

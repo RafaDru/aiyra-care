@@ -2332,6 +2332,12 @@
           "detail": "SOLO_OPERATOR_RUNBOOK.md; CH_SOLO_OPERATOR_JOURNEY_SPEC.md; CORRECAO_DEV_E2E_CHECKLIST §6; links em CH_INCIDENT_DEFECT_PIPELINE.md."
         },
         {
+          "id": "ch-15min-batch-cadence",
+          "title": "Cadência 15 min — coleta triagem + lote correção (tier-0 env)",
+          "status": "done",
+          "detail": "CH_INCIDENT_TRIAGE_BATCH_INTERVAL_MS + CH_DEFECT_CORRECTION_BATCH_INTERVAL_MS no ops-console; spec Context ch-15min-batch-cadence-spec.md; alinhar dedupe CLIENT_ERROR (coleta) vs dispatch outbox."
+        },
+        {
           "id": "ch-solo-operator-r1",
           "title": "R1 — Falha estruturada na correção",
           "status": "planned",

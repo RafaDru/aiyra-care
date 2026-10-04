@@ -117,8 +117,31 @@ export const opsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }),
-  analysisQueue: () =>
-    request<{ items: import('./ops.types.js').OpsAnalysisQueueItem[] }>('/api/analysis-queue'),
+  analysisQueue: (params?: {
+    filter?: import('./ch-incident-board-filter.js').IncidentBoardFilter
+    ensureId?: string
+  }) => {
+    const q = new URLSearchParams()
+    if (params?.filter) q.set('filter', params.filter)
+    if (params?.ensureId) q.set('ensureId', params.ensureId)
+    const suffix = q.toString() ? `?${q.toString()}` : ''
+    return request<{
+      items: import('./ops.types.js').OpsAnalysisQueueItem[]
+      filter: import('./ch-incident-board-filter.js').IncidentBoardFilter
+    }>(`/api/analysis-queue${suffix}`)
+  },
+  analysisQueueItem: (id: string) =>
+    request<{ item: import('./ops.types.js').OpsAnalysisQueueItem }>(
+      `/api/analysis-queue/${encodeURIComponent(id)}`,
+    ),
+  analysisQueueByRef: (ref: string) =>
+    request<{ item: import('./ops.types.js').OpsAnalysisQueueItem }>(
+      `/api/analysis-queue/by-ref/${encodeURIComponent(ref)}`,
+    ),
+  searchAnalysisQueue: (query: string) =>
+    request<{ items: import('./ops.types.js').OpsAnalysisQueueItem[] }>(
+      `/api/analysis-queue/search?q=${encodeURIComponent(query)}`,
+    ),
   incidentDispatchHealth: () =>
     request<import('./ops.types.js').IncidentDispatchHealth>('/api/incident-dispatch/health'),
   analysisAttentionCounts: () =>
@@ -135,8 +158,9 @@ export const opsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ runTick: options?.runTick === true }),
     }),
-  platformDefects: (params?: { status?: string; includeFixed?: boolean }) => {
+  platformDefects: (params?: { status?: string; includeFixed?: boolean; q?: string }) => {
     const q = new URLSearchParams()
+    if (params?.q) q.set('q', params.q)
     if (params?.status) q.set('status', params.status)
     if (params?.includeFixed) q.set('includeFixed', '1')
     const suffix = q.toString() ? `?${q.toString()}` : ''
@@ -144,6 +168,10 @@ export const opsApi = {
       `/api/platform-defects${suffix}`,
     )
   },
+  platformDefectByRef: (ref: string) =>
+    request<{ item: import('./ops.types.js').PlatformDefectItem }>(
+      `/api/platform-defects/by-ref/${encodeURIComponent(ref)}`,
+    ),
   platformDefectDetail: (id: string) =>
     request<{
       defect: import('./ops.types.js').PlatformDefectItem

@@ -383,7 +383,7 @@ Fase 6  Maturidade          [backlog]
 |---------|--------|
 | Alertas degradação p95 vs baseline 7d | sondas degradação |
 | `human_required` em todos alertas ops | pirâmide completa |
-| `incident_id` correlacionando ops + cliente + modo degradado | correlação |
+| `incident_id` correlacionando ops + cliente + modo degradado | correlação — **parcial:** bridge `client_error:{fingerprint}` → `INC-*` ([`CLIENT_ERROR_INCIDENT_BRIDGE.md`](ops/CLIENT_ERROR_INCIDENT_BRIDGE.md)) |
 | Grafana / Better Stack | dashboard |
 | `run-dev-audit-bridge` | staging |
 | Anomaly detection | fora de escopo |

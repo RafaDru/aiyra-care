@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Button,
   Empty,
+  Input,
   Popconfirm,
   Space,
   Table,
@@ -10,6 +11,7 @@ import {
   Tooltip,
   Typography,
   message,
+  type TableProps,
 } from 'antd'
 import {
   CheckOutlined,
@@ -27,6 +29,22 @@ import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
 import { OpsPanel } from './components/OpsPanel.js'
 import { opsApi } from './api.js'
+import {
+  INCIDENT_BOARD_FILTER_LABELS,
+  suggestIncidentBoardFilter,
+  type IncidentBoardFilter,
+} from './ch-incident-board-filter.js'
+import {
+  matchesOpsAnalysisQueueItem,
+  parseOpsSearchInput,
+} from './ch-ops-search.js'
+import {
+  DEFAULT_INCIDENT_TABLE_SORT,
+  loadIncidentTableSort,
+  persistIncidentTableSort,
+  sortIncidentTableItems,
+  type IncidentTableSortState,
+} from './ch-incident-table-sort.js'
 import type { IncidentDispatchHealth, OpsAnalysisQueueItem } from './ops.types.js'
 
 const { Text, Paragraph } = Typography
@@ -45,6 +63,20 @@ const PIPELINE_STATUS_LABEL: Record<OpsAnalysisQueueItem['status'], string> = {
   failed: 'Falhou',
 }
 
+const PRIORITY_LABEL: Record<OpsAnalysisQueueItem['priority'], string> = {
+  low: 'Baixa',
+  normal: 'Normal',
+  high: 'Alta',
+  critical: 'Crítica',
+}
+
+const BOARD_FILTERS: IncidentBoardFilter[] = [
+  'needs_attention',
+  'triaged',
+  'all_open',
+  'completed',
+]
+
 function buildInvestigationDeepLink(investigationId: string): string {
   const params = new URLSearchParams()
   params.set('group', 'operacao')
@@ -56,21 +88,34 @@ function buildInvestigationDeepLink(investigationId: string): string {
 export function IncidentesPanel({
   onRefresh,
   highlightInvestigationId,
+  initialBoardFilter,
+  initialSearch,
 }: {
   onRefresh?: () => void
   highlightInvestigationId?: string | null
+  initialBoardFilter?: IncidentBoardFilter
+  initialSearch?: string
 }) {
   const [items, setItems] = useState<OpsAnalysisQueueItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [boardFilter, setBoardFilter] = useState<IncidentBoardFilter>(
+    initialBoardFilter ?? 'needs_attention',
+  )
+  const [searchText, setSearchText] = useState(initialSearch ?? '')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
   const [dispatchHealth, setDispatchHealth] = useState<IncidentDispatchHealth | null>(null)
+  const [tableSort, setTableSort] = useState<IncidentTableSortState>(() => loadIncidentTableSort())
+  const highlightRef = useRef<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
       const [data, health] = await Promise.all([
-        opsApi.analysisQueue(),
+        opsApi.analysisQueue({
+          filter: boardFilter,
+          ensureId: highlightInvestigationId ?? undefined,
+        }),
         opsApi.incidentDispatchHealth(),
       ])
       setItems(data.items)
@@ -80,11 +125,34 @@ export function IncidentesPanel({
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [boardFilter, highlightInvestigationId])
 
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (initialBoardFilter) setBoardFilter(initialBoardFilter)
+  }, [initialBoardFilter])
+
+  useEffect(() => {
+    if (initialSearch) setSearchText(initialSearch)
+  }, [initialSearch])
+
+  useEffect(() => {
+    if (!highlightInvestigationId) return
+    let cancelled = false
+    void opsApi
+      .analysisQueueItem(highlightInvestigationId)
+      .then(({ item }) => {
+        if (cancelled) return
+        setBoardFilter(suggestIncidentBoardFilter(item))
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [highlightInvestigationId])
 
   useEffect(() => {
     if (highlightInvestigationId) {
@@ -93,6 +161,90 @@ export function IncidentesPanel({
       )
     }
   }, [highlightInvestigationId])
+
+  useEffect(() => {
+    if (!highlightInvestigationId || loading) return
+    if (highlightRef.current === highlightInvestigationId) return
+    const row = document.querySelector(
+      `[data-incident-row-id="${highlightInvestigationId}"]`,
+    )
+    if (row) {
+      highlightRef.current = highlightInvestigationId
+      row.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }
+  }, [highlightInvestigationId, loading, items])
+
+  const parsedSearch = useMemo(() => parseOpsSearchInput(searchText), [searchText])
+  const visibleItems = useMemo(() => {
+    if (!parsedSearch) return items
+    return items.filter((item) => matchesOpsAnalysisQueueItem(item, parsedSearch))
+  }, [items, parsedSearch])
+
+  const sortedItems = useMemo(
+    () => sortIncidentTableItems(visibleItems, tableSort),
+    [visibleItems, tableSort],
+  )
+
+  const handleTableChange: TableProps<OpsAnalysisQueueItem>['onChange'] = (
+    _pagination,
+    _filters,
+    sorter,
+  ) => {
+    const single = Array.isArray(sorter) ? sorter[0] : sorter
+    if (!single || !single.columnKey) return
+    const next: IncidentTableSortState =
+      single.order === null || single.order === undefined
+        ? DEFAULT_INCIDENT_TABLE_SORT
+        : {
+            columnKey: String(single.columnKey),
+            order: single.order,
+          }
+    setTableSort(next)
+    persistIncidentTableSort(next)
+  }
+
+  const runSearch = async (raw: string) => {
+    const parsed = parseOpsSearchInput(raw)
+    if (!parsed) {
+      setSearchText('')
+      return
+    }
+    setSearchText(raw)
+    if (parsed.kind === 'incident_ref') {
+      try {
+        const { item } = await opsApi.analysisQueueByRef(parsed.value)
+        setBoardFilter(suggestIncidentBoardFilter(item))
+        setItems([item])
+        setExpandedRowKeys([item.id])
+      } catch (err) {
+        message.warning(err instanceof Error ? err.message : 'Incidente não encontrado')
+      }
+      return
+    }
+    if (parsed.kind === 'uuid_prefix') {
+      try {
+        const { items: found } = await opsApi.searchAnalysisQueue(parsed.value)
+        if (found.length === 0) {
+          message.info('Nenhum incidente para esse ID')
+          return
+        }
+        const first = found[0]
+        setBoardFilter(suggestIncidentBoardFilter(first))
+        setItems(found)
+        setExpandedRowKeys([first.id])
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : 'Busca falhou')
+      }
+      return
+    }
+    try {
+      const { items: found } = await opsApi.searchAnalysisQueue(parsed.value)
+      setItems(found)
+      if (found.length === 1) setExpandedRowKeys([found[0].id])
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Busca falhou')
+    }
+  }
 
   const markComplete = async (id: string) => {
     setUpdatingId(id)
@@ -173,8 +325,31 @@ export function IncidentesPanel({
       description="Sinais cru até triagem — dados ao vivo via GET /api/analysis-queue (Postgres ops_analysis_queue)."
     >
       {dispatchHealthBanner}
-      {items.length === 0 && !loading ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum incidente aberto" />
+      <Space wrap style={{ marginBottom: 12 }} align="center">
+        {BOARD_FILTERS.map((f) => (
+          <Button
+            key={f}
+            size="small"
+            type={boardFilter === f ? 'primary' : 'default'}
+            onClick={() => {
+              setSearchText('')
+              setBoardFilter(f)
+            }}
+          >
+            {INCIDENT_BOARD_FILTER_LABELS[f]}
+          </Button>
+        ))}
+      </Space>
+      <Input.Search
+        allowClear
+        placeholder="INC-000001, título ou prefixo do UUID"
+        style={{ maxWidth: 420, marginBottom: 12 }}
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        onSearch={(v) => void runSearch(v)}
+      />
+      {visibleItems.length === 0 && !loading ? (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum incidente neste filtro" />
       ) : (
         <Table<OpsAnalysisQueueItem>
           className="ops-incidentes-table"
@@ -182,7 +357,11 @@ export function IncidentesPanel({
           rowKey="id"
           loading={loading}
           pagination={false}
-          dataSource={items}
+          dataSource={sortedItems}
+          onChange={handleTableChange}
+          onRow={(row) => ({
+            'data-incident-row-id': row.id,
+          })}
           rowClassName={(row) =>
             highlightInvestigationId && row.id === highlightInvestigationId
               ? 'ops-row-highlight'
@@ -270,21 +449,35 @@ export function IncidentesPanel({
           columns={[
             {
               title: 'Ref',
+              key: 'referenceCode',
               dataIndex: 'referenceCode',
               width: 108,
               align: 'center',
+              sorter: true,
+              sortOrder:
+                tableSort.columnKey === 'referenceCode' ? tableSort.order : null,
               render: (code: string | null) => <OpsReferenceCodeTag code={code} compact />,
             },
             {
-              title: 'Timestamp',
-              dataIndex: 'queuedAt',
+              title: 'Atualizado',
+              key: 'updatedAt',
+              dataIndex: 'updatedAt',
               width: 148,
-              render: (v: string) => new Date(v).toLocaleString('pt-BR'),
+              sorter: true,
+              sortOrder: tableSort.columnKey === 'updatedAt' ? tableSort.order : null,
+              render: (v: string, row) => (
+                <Tooltip title={`Enfileirado: ${new Date(row.queuedAt).toLocaleString('pt-BR')}`}>
+                  <span>{new Date(v).toLocaleString('pt-BR')}</span>
+                </Tooltip>
+              ),
             },
             {
               title: 'Título',
+              key: 'title',
               dataIndex: 'title',
               ellipsis: { showTitle: true },
+              sorter: true,
+              sortOrder: tableSort.columnKey === 'title' ? tableSort.order : null,
             },
             {
               title: 'Aplicação',
@@ -301,10 +494,23 @@ export function IncidentesPanel({
               render: (_: unknown, row) => <Tag>{incidentOriginLabel(row)}</Tag>,
             },
             {
+              title: 'Prioridade',
+              key: 'priority',
+              dataIndex: 'priority',
+              width: 92,
+              align: 'center',
+              sorter: true,
+              sortOrder: tableSort.columnKey === 'priority' ? tableSort.order : null,
+              render: (p: OpsAnalysisQueueItem['priority']) => PRIORITY_LABEL[p],
+            },
+            {
               title: 'Status',
               key: 'pipelineStatus',
               width: 120,
               align: 'center',
+              sorter: true,
+              sortOrder:
+                tableSort.columnKey === 'pipelineStatus' ? tableSort.order : null,
               render: (_: unknown, row) => (
                 <Tag color={incidentPipelineTagColor(row)}>{incidentPipelineLabel(row)}</Tag>
               ),
