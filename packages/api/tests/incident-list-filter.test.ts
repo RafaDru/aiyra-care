@@ -27,8 +27,8 @@ describe('incident-list-filter', () => {
   it('builds distinct SQL filters', () => {
     expect(incidentBoardWhereClause('needs_attention')).toContain('triaged')
     expect(incidentBoardWhereClause('triaged')).toContain("= 'triaged'")
-    expect(incidentBoardWhereClause('all_open')).not.toContain('NOT IN (\'triaged\'')
-    expect(incidentBoardWhereClause('all_open')).toContain('resolved')
+    expect(incidentBoardWhereClause('all_open')).toContain('triaged')
+    expect(incidentBoardWhereClause('all_open')).toContain('completed')
     expect(incidentBoardWhereClause('resolved')).toContain("= 'resolved'")
   })
 
@@ -40,16 +40,17 @@ describe('incident-list-filter', () => {
   describe('incidentMatchesBoardFilter — all_open', () => {
     const filter: IncidentBoardFilter = 'all_open'
 
-    it('includes triaged and active pipelines', () => {
-      expect(incidentMatchesBoardFilter(row('triaged'), filter)).toBe(true)
+    it('includes active dispatch/triage pipelines only', () => {
       expect(incidentMatchesBoardFilter(row('open'), filter)).toBe(true)
       expect(incidentMatchesBoardFilter(row('in_triage', 'investigating'), filter)).toBe(true)
     })
 
-    it('excludes resolved and dismissed', () => {
+    it('excludes triaged, resolved, completed, dismissed', () => {
+      expect(incidentMatchesBoardFilter(row('triaged'), filter)).toBe(false)
       expect(incidentMatchesBoardFilter(row('resolved', 'completed'), filter)).toBe(false)
       expect(incidentMatchesBoardFilter(row('dismissed', 'dismissed'), filter)).toBe(false)
       expect(incidentMatchesBoardFilter(row('open', 'dismissed'), filter)).toBe(false)
+      expect(incidentMatchesBoardFilter(row('triaged', 'completed'), filter)).toBe(false)
     })
   })
 
