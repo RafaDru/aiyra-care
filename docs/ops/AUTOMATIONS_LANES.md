@@ -7,6 +7,7 @@ Duas automations, responsabilidades distintas, **dois pares** URL + key no `.env
 | **Suporte ao Desenvolvimento** | `AiCare - Suporte ao Desenvolvimento` | `support_report` | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Reporte manual no app |
 | **Suporte SRE** | `AiCare - Suporte SRE` | `ops_alert` | `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Métricas / alertas ops |
 | **Correção Dev** | `Aiyra - Correção Dev` | `defect_fix_v1` | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY` | `POST /api/platform-defects/:id/start-fix` (CH) |
+| **Revisão PR** | `Aiyra - Revisão PR` | `defect_pr_review_v1` | `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY` | `POST /api/platform-defects/:id/request-review` (CH) — spec: `docs/ops/CH_PR_REVIEW_AGENT.md` |
 
 Índice e blocos **texto plano** para colar na UI (sem markdown): `docs/automations-ch-duas-lanes-instructions.md`.
 

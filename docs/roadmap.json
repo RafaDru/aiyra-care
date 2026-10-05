@@ -2353,7 +2353,7 @@
           "id": "ch-solo-operator-r3",
           "title": "R3 — Review agêntico sob demanda (G3)",
           "status": "planned",
-          "detail": "CURSOR_DEFECT_REVIEW_*; POST request-review; callback reviewOutcome; override aprovar sem review."
+          "detail": "Spec autorizada 2026-10-05: docs/ops/CH_PR_REVIEW_AGENT.md (Agent3 PR review — 3 dimensões + recommendation). CURSOR_DEFECT_PR_REVIEW_*; POST request-review + review-callback; defect_pr_reviews; CH_AUTO_PR_REVIEW_ON_READY; override G3 sem review."
         },
         {
           "id": "ch-solo-operator-r4",
