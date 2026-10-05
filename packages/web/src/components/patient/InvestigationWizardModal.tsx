@@ -61,11 +61,13 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
         .map((s) => s.trim())
         .filter(Boolean) ?? []
 
+      const optText = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined)
+
       const thread = await api.healthThreads.wizardInvestigation({
         patientId,
-        title: values.title,
-        reason: values.reason,
-        workingHypothesis: values.workingHypothesis,
+        title: String(values.title).trim(),
+        reason: optText(values.reason),
+        workingHypothesis: optText(values.workingHypothesis),
         plannedSteps: planned,
         symptoms,
       })
