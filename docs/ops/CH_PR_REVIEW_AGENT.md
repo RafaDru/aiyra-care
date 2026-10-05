@@ -7,6 +7,20 @@
 
 **Relacionado:** [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md) §4.4 · [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md) · [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) §6 · playbook Correção: [`../automations-aiyra-correcao-dev-instructions.md`](../automations-aiyra-correcao-dev-instructions.md)
 
+### Status de implementação (R3)
+
+| Item | Estado |
+|------|--------|
+| Migration **085** `defect_pr_reviews` + espelho em `platform_defects` | Entregue |
+| `POST /api/platform-defects/:id/request-review` | Entregue (ops-console) |
+| `POST /api/platform-defects/review-callback` | Entregue |
+| `POST …/operator-approve-pr` / `operator-request-changes` | Entregue (gate G3, sem auto-merge) |
+| CH card **Revisão agêntica** + botões | Entregue |
+| `GET /api/incident-dispatch/health` → `webhooks.defectPrReview` | Entregue |
+| Prompt Automation | [`automations/defect-pr-review.prompt.md`](./automations/defect-pr-review.prompt.md) |
+| `CH_AUTO_PR_REVIEW_ON_READY` (default `0`) | Entregue |
+| Batch review / `reviewFeedback` no `defect_fix_v1` | R3b / futuro |
+
 ---
 
 ## 1. Objetivo

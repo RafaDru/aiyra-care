@@ -37,7 +37,11 @@ import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
 import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { opsApi } from './api.js'
 import { matchesPlatformDefectItem, parseOpsSearchInput } from './ch-ops-search.js'
-import type { PlatformDefectItem, PlatformDefectStatus } from './ops.types.js'
+import type {
+  DefectPrReviewSummary,
+  PlatformDefectItem,
+  PlatformDefectStatus,
+} from './ops.types.js'
 
 const { Text, Paragraph, Link } = Typography
 
@@ -93,6 +97,19 @@ export function DefeitosPanel({
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    const needsPoll = items.some(
+      (d) =>
+        d.status === 'ready_for_pr'
+        && (d.latestReview?.status === 'running' || d.latestReview?.status === 'pending'),
+    )
+    if (!needsPoll) return
+    const timer = window.setInterval(() => {
+      void load()
+    }, 15_000)
+    return () => window.clearInterval(timer)
+  }, [items, load])
 
   useEffect(() => {
     if (!highlightDefectId) return
@@ -315,6 +332,12 @@ export function DefeitosPanel({
                 row={row}
                 branchValue={branchDraft[row.id] ?? row.branchName ?? ''}
                 onBranchChange={(v) => setBranchDraft((prev) => ({ ...prev, [row.id]: v }))}
+                onDefectUpdated={(defect) => {
+                  setItems((prev) =>
+                    prev.map((x) => (x.id === defect.id ? { ...x, ...defect } : x)),
+                  )
+                }}
+                onReload={load}
               />
             ),
           }}
@@ -459,24 +482,32 @@ function DefeitoDetail({
   row,
   branchValue,
   onBranchChange,
+  onDefectUpdated,
+  onReload,
 }: {
   defectId: string
   row: PlatformDefectItem
   branchValue: string
   onBranchChange: (value: string) => void
+  onDefectUpdated: (defect: PlatformDefectItem) => void
+  onReload: () => Promise<void>
 }) {
   const [incidents, setIncidents] = useState<
     Array<{ id: string; title: string; referenceCode: string | null }>
   >([])
   const [loading, setLoading] = useState(true)
+  const [reviewBusy, setReviewBusy] = useState(false)
+
+  const refreshDetail = useCallback(async () => {
+    const d = await opsApi.platformDefectDetail(defectId)
+    setIncidents(d.incidents)
+    onDefectUpdated(d.defect)
+    return d.defect
+  }, [defectId, onDefectUpdated])
 
   useEffect(() => {
     let cancelled = false
-    void opsApi
-      .platformDefectDetail(defectId)
-      .then((d) => {
-        if (!cancelled) setIncidents(d.incidents)
-      })
+    void refreshDetail()
       .catch(() => undefined)
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -484,7 +515,17 @@ function DefeitoDetail({
     return () => {
       cancelled = true
     }
-  }, [defectId])
+  }, [refreshDetail])
+
+  useEffect(() => {
+    const review = row.latestReview
+    if (row.status !== 'ready_for_pr' || !review) return
+    if (review.status !== 'running' && review.status !== 'pending') return
+    const timer = window.setInterval(() => {
+      void refreshDetail().catch(() => undefined)
+    }, 15_000)
+    return () => window.clearInterval(timer)
+  }, [row.status, row.latestReview, refreshDetail])
 
   const failure = row.lastCorrectionFailureDetails
   const showFailureBanner = defectHasCorrectionFailure(row)
@@ -616,6 +657,170 @@ function DefeitoDetail({
           />
         </Paragraph>
       )}
+      <DefeitoAgenticReviewCard
+        row={row}
+        busy={reviewBusy}
+        onRequestReview={async () => {
+          setReviewBusy(true)
+          try {
+            const res = await opsApi.requestPlatformDefectPrReview(defectId)
+            if (res.outcome === 'sent') {
+              message.success('Revisão agêntica solicitada')
+            } else {
+              message.info(res.reason ?? 'Revisão não disparada')
+            }
+            await refreshDetail()
+            await onReload()
+          } catch (err) {
+            message.error(err instanceof Error ? err.message : 'Falha ao solicitar revisão')
+          } finally {
+            setReviewBusy(false)
+          }
+        }}
+        onApprove={async () => {
+          setReviewBusy(true)
+          try {
+            const res = await opsApi.operatorApprovePlatformDefectPr(defectId)
+            message.success(res.message)
+            if (res.prUrl) window.open(res.prUrl, '_blank', 'noopener,noreferrer')
+            await refreshDetail()
+            await onReload()
+          } catch (err) {
+            message.error(err instanceof Error ? err.message : 'Falha ao registrar aprovação')
+          } finally {
+            setReviewBusy(false)
+          }
+        }}
+        onRequestChanges={async () => {
+          setReviewBusy(true)
+          try {
+            await opsApi.operatorRequestChangesPlatformDefectPr(defectId)
+            message.success('Mudanças solicitadas — defeito reaberto para correção')
+            await refreshDetail()
+            await onReload()
+          } catch (err) {
+            message.error(err instanceof Error ? err.message : 'Falha ao pedir mudanças')
+          } finally {
+            setReviewBusy(false)
+          }
+        }}
+      />
     </div>
+  )
+}
+
+function reviewRecommendationColor(
+  rec: DefectPrReviewSummary['recommendation'],
+): string {
+  if (rec === 'approve') return 'success'
+  if (rec === 'request_changes') return 'warning'
+  if (rec === 'block') return 'error'
+  return 'default'
+}
+
+function riskLevelColor(level: DefectPrReviewSummary['riskLevel']): string {
+  if (!level || level === 'nulo') return 'default'
+  if (level === 'baixo') return 'green'
+  if (level === 'medio') return 'gold'
+  if (level === 'alto') return 'orange'
+  return 'red'
+}
+
+function DefeitoAgenticReviewCard({
+  row,
+  busy,
+  onRequestReview,
+  onApprove,
+  onRequestChanges,
+}: {
+  row: PlatformDefectItem
+  busy: boolean
+  onRequestReview: () => Promise<void>
+  onApprove: () => Promise<void>
+  onRequestChanges: () => Promise<void>
+}) {
+  const review = row.latestReview
+  const showActions = row.status === 'ready_for_pr' && Boolean(row.prUrl)
+
+  return (
+    <Card size="small" title="Revisão agêntica" style={{ marginTop: 16 }}>
+      {!review ? (
+        <Text type="secondary">Nenhuma revisão agêntica registrada.</Text>
+      ) : (
+        <Space direction="vertical" size={8} style={{ width: '100%' }}>
+          <Space wrap>
+            <Tag>{review.status}</Tag>
+            {review.recommendation && (
+              <Tag color={reviewRecommendationColor(review.recommendation)}>
+                {review.recommendation}
+              </Tag>
+            )}
+            {review.completedAt && (
+              <Text type="secondary">
+                {new Date(review.completedAt).toLocaleString('pt-BR')}
+              </Text>
+            )}
+          </Space>
+          {review.correctionEffectiveness && (
+            <div>
+              <Text strong>Eficácia:</Text>{' '}
+              <Tag>{review.correctionEffectiveness}</Tag>
+            </div>
+          )}
+          {review.riskLevel && (
+            <div>
+              <Text strong>Risco:</Text>{' '}
+              <Tag color={riskLevelColor(review.riskLevel)}>{review.riskLevel}</Tag>
+              {review.riskSummary && <Text> — {review.riskSummary}</Text>}
+            </div>
+          )}
+          {review.securityVerdict && (
+            <div>
+              <Text strong>Segurança:</Text> <Tag>{review.securityVerdict}</Tag>
+              {review.securitySummary && <Text> — {review.securitySummary}</Text>}
+            </div>
+          )}
+          {review.recommendationRationale && (
+            <Paragraph type="secondary" style={{ marginBottom: 0 }}>
+              {review.recommendationRationale}
+            </Paragraph>
+          )}
+          <Space wrap>
+            {review.prReviewCommentUrl && (
+              <Link href={review.prReviewCommentUrl} target="_blank" rel="noreferrer">
+                Comentário no PR
+              </Link>
+            )}
+            {review.agentRunUrl && (
+              <Link href={review.agentRunUrl} target="_blank" rel="noreferrer">
+                Run do agente
+              </Link>
+            )}
+          </Space>
+        </Space>
+      )}
+      {showActions && (
+        <Space wrap style={{ marginTop: 12 }}>
+          <Button type="primary" loading={busy} onClick={() => void onRequestReview()}>
+            Solicitar revisão
+          </Button>
+          <Button href={row.prUrl!} target="_blank" rel="noreferrer">
+            Abrir PR no GitHub
+          </Button>
+          <Button loading={busy} onClick={() => void onApprove()}>
+            Aprovar para merge
+          </Button>
+          <Button danger loading={busy} onClick={() => void onRequestChanges()}>
+            Pedir mudanças
+          </Button>
+        </Space>
+      )}
+      {row.operatorPrApprovedAt && (
+        <Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0 }}>
+          Aprovação operador em {new Date(row.operatorPrApprovedAt).toLocaleString('pt-BR')}
+          {row.operatorPrApprovedNote ? ` — ${row.operatorPrApprovedNote}` : ''}
+        </Paragraph>
+      )}
+    </Card>
   )
 }

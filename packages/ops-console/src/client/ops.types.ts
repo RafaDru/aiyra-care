@@ -16,12 +16,29 @@ export type IncidentLinkedDefectSummary = {
   status: PlatformDefectStatus
 }
 
+export type DefectPrReviewSummary = {
+  id: string
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  recommendation: 'approve' | 'request_changes' | 'block' | null
+  correctionEffectiveness: 'plausible' | 'uncertain' | 'unlikely' | null
+  riskLevel: 'nulo' | 'baixo' | 'medio' | 'alto' | 'grave' | null
+  riskSummary: string | null
+  securityVerdict: 'pass' | 'concerns' | 'block' | null
+  securitySummary: string | null
+  recommendationRationale: string | null
+  completedAt: string | null
+  prReviewCommentUrl: string | null
+  agentRunUrl: string | null
+}
+
 export type IncidentDispatchHealth = {
   deadCount: number
   staleOpenWithoutOutboxCount: number
   webhooks: {
     developmentSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
     sreSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+    defectFix?: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+    defectPrReview?: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
   }
   anyWebhookMissing: boolean
 }
@@ -112,6 +129,9 @@ export interface PlatformDefectItem {
   incidentCount?: number
   parentDefectId?: string | null
   parentReferenceCode?: string | null
+  latestReview?: DefectPrReviewSummary | null
+  operatorPrApprovedAt?: string | null
+  operatorPrApprovedNote?: string | null
 }
 
 export interface OpsAnalysisAttentionCounts {

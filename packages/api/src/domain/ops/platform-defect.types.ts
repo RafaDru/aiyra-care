@@ -43,6 +43,13 @@ export interface PlatformDefectRecord {
   incidentCount?: number
   parentDefectId?: string | null
   parentReferenceCode?: string | null
+  lastPrReviewId?: string | null
+  lastPrReviewRecommendation?: string | null
+  lastPrReviewAt?: string | null
+  operatorPrApprovedAt?: string | null
+  operatorPrApprovedNote?: string | null
+  operatorChangesRequestedAt?: string | null
+  operatorChangesRequestedNote?: string | null
 }
 
 export interface CreatePlatformDefectInput {

@@ -65,6 +65,26 @@ function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
     parentDefectId: row.parent_defect_id != null ? String(row.parent_defect_id) : null,
     parentReferenceCode:
       row.parent_reference_code != null ? String(row.parent_reference_code) : null,
+    lastPrReviewId: row.last_pr_review_id != null ? String(row.last_pr_review_id) : null,
+    lastPrReviewRecommendation:
+      row.last_pr_review_recommendation != null
+        ? String(row.last_pr_review_recommendation)
+        : null,
+    lastPrReviewAt: row.last_pr_review_at
+      ? new Date(String(row.last_pr_review_at)).toISOString()
+      : null,
+    operatorPrApprovedAt: row.operator_pr_approved_at
+      ? new Date(String(row.operator_pr_approved_at)).toISOString()
+      : null,
+    operatorPrApprovedNote:
+      row.operator_pr_approved_note != null ? String(row.operator_pr_approved_note) : null,
+    operatorChangesRequestedAt: row.operator_changes_requested_at
+      ? new Date(String(row.operator_changes_requested_at)).toISOString()
+      : null,
+    operatorChangesRequestedNote:
+      row.operator_changes_requested_note != null
+        ? String(row.operator_changes_requested_note)
+        : null,
   }
 }
 
@@ -75,6 +95,10 @@ const DEFECT_FROM_WITH_PARENT = `FROM platform_defects d
 
 export class PlatformDefectPgRepository {
   constructor(private readonly pool: Pool) {}
+
+  getDbPool(): Pool {
+    return this.pool
+  }
 
   async insert(input: CreatePlatformDefectInput): Promise<PlatformDefectRecord> {
     const referenceCode = await allocateOpsReferenceCode(this.pool, 'defect')
@@ -478,5 +502,49 @@ export class PlatformDefectPgRepository {
     )
     if (!res.rows[0]) return null
     return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async listLinkedIncidentsMeta(
+    incidentIds: string[],
+  ): Promise<Array<{ id: string; referenceCode: string | null; fingerprint: string | null }>> {
+    if (!incidentIds.length) return []
+    const res = await this.pool.query<{
+      id: string
+      reference_code: string | null
+      fingerprint: string | null
+    }>(
+      `SELECT q.id::text AS id, q.reference_code, q.context_snapshot->>'fingerprint' AS fingerprint
+       FROM ops_analysis_queue q
+       WHERE q.id = ANY($1::uuid[])
+       ORDER BY array_position($1::uuid[], q.id)`,
+      [incidentIds],
+    )
+    return res.rows.map((row) => ({
+      id: row.id,
+      referenceCode: row.reference_code != null ? String(row.reference_code) : null,
+      fingerprint: row.fingerprint != null ? String(row.fingerprint) : null,
+    }))
+  }
+
+  async recordOperatorPrApproval(id: string, note: string | null): Promise<void> {
+    await this.pool.query(
+      `UPDATE platform_defects SET
+        operator_pr_approved_at = NOW(),
+        operator_pr_approved_note = $2,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, note?.slice(0, 4000) ?? null],
+    )
+  }
+
+  async recordOperatorChangesRequested(id: string, note: string | null): Promise<void> {
+    await this.pool.query(
+      `UPDATE platform_defects SET
+        operator_changes_requested_at = NOW(),
+        operator_changes_requested_note = $2,
+        updated_at = NOW()
+      WHERE id = $1::uuid`,
+      [id, note?.slice(0, 4000) ?? null],
+    )
   }
 }

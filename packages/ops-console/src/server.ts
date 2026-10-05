@@ -46,6 +46,12 @@ import {
   dispatchErrorMessage,
   startPlatformDefectFixWithDispatch,
 } from '../../api/src/application/ops/platform-defect-fix-dispatch.js'
+import {
+  PlatformDefectPrReviewError,
+  PlatformDefectPrReviewService,
+} from '../../api/src/application/ops/platform-defect-pr-review.service.js'
+import { DefectPrReviewPgRepository } from '../../api/src/infrastructure/persistence/defect-pr-review.pg.repository.js'
+import { prReviewDispatchErrorMessage } from '../../api/src/application/ops/platform-defect-pr-review-dispatch.js'
 import { PlatformDefectMergeWebhookService } from '../../api/src/application/ops/platform-defect-merge-webhook.service.js'
 import { verifyGithubWebhookSignature } from '../../api/src/domain/ops/github-webhook-signature.js'
 import { resolveGithubDefectMergeWebhookSecret } from '../../api/src/application/ops/platform-defect-merge-webhook.config.js'
@@ -123,6 +129,11 @@ const resolveIncidentsWhenDefectFixed = async (defectId: string) => {
 const platformDefectService = new PlatformDefectService(
   platformDefectRepo,
   resolveIncidentsWhenDefectFixed,
+)
+const platformDefectPrReviewService = new PlatformDefectPrReviewService(
+  platformDefectRepo,
+  new DefectPrReviewPgRepository(pool),
+  platformDefectService,
 )
 const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(
   platformDefectRepo,
@@ -633,14 +644,18 @@ async function main() {
     async (req) => {
       const q = req.query.q?.trim()
       if (q) {
-        const items = await platformDefectService.searchForOps(q)
+        const items = await platformDefectPrReviewService.attachLatestReviews(
+          await platformDefectService.searchForOps(q),
+        )
         return { items }
       }
       return {
-        items: await platformDefectService.listForOps({
-          statusFilter: req.query.status,
-          includeFixed: req.query.includeFixed === '1' || req.query.includeFixed === 'true',
-        }),
+        items: await platformDefectPrReviewService.attachLatestReviews(
+          await platformDefectService.listForOps({
+            statusFilter: req.query.status,
+            includeFixed: req.query.includeFixed === '1' || req.query.includeFixed === 'true',
+          }),
+        ),
       }
     },
   )
@@ -653,11 +668,40 @@ async function main() {
     return { item }
   })
 
+  fastify.post<{ Body: Record<string, unknown> }>(
+    '/api/platform-defects/review-callback',
+    async (req, reply) => {
+      if (!isInvestigatorCallbackAuthorized({
+        'x-investigator-callback-key': req.headers['x-investigator-callback-key'] as string,
+        'x-internal-ops-key': req.headers['x-internal-ops-key'] as string,
+      })) {
+        return reply.status(401).send({ error: 'unauthorized' })
+      }
+      const body = req.body ?? {}
+      try {
+        const result = await platformDefectPrReviewService.processCallback(
+          body as unknown as import('../../api/src/domain/ops/defect-pr-review.types.js').DefectPrReviewCallbackInput,
+          body,
+        )
+        return { ok: true, reviewId: result.reviewId, defect: result.defect }
+      } catch (err) {
+        if (err instanceof PlatformDefectPrReviewError) {
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          return reply.status(400).send({ error: err.code })
+        }
+        throw err
+      }
+    },
+  )
+
   fastify.get<{ Params: { id: string } }>('/api/platform-defects/:id', async (req, reply) => {
-    if (req.params.id === 'by-ref') return reply.callNotFound()
+    if (req.params.id === 'by-ref' || req.params.id === 'review-callback') {
+      return reply.callNotFound()
+    }
     const detail = await platformDefectService.getDetail(req.params.id)
     if (!detail) return reply.status(404).send({ error: 'not_found' })
-    return detail
+    const defect = await platformDefectPrReviewService.attachLatestReview(detail.defect)
+    return { ...detail, defect }
   })
 
   fastify.patch<{
@@ -684,6 +728,84 @@ async function main() {
       throw err
     }
   })
+
+  fastify.post<{ Params: { id: string }; Body: { force?: boolean } }>(
+    '/api/platform-defects/:id/request-review',
+    async (req, reply) => {
+      try {
+        const result = await platformDefectPrReviewService.requestReview(req.params.id, {
+          force: req.body?.force === true,
+        })
+        const dispatchError = result.dispatch
+          ? prReviewDispatchErrorMessage(
+              result.dispatch as import('../../api/src/application/ops/platform-defect-pr-review-dispatch.js').PlatformDefectPrReviewDispatchResult,
+            )
+          : null
+        if (dispatchError) {
+          console.warn('[ops-console] platform-defect request-review dispatch:', dispatchError)
+        }
+        return {
+          ok: result.outcome === 'sent',
+          outcome: result.outcome,
+          ...(result.reason ? { reason: result.reason } : {}),
+          reviewId: result.reviewId,
+          item: result.defect,
+          dispatch: result.dispatch,
+        }
+      } catch (err) {
+        if (err instanceof PlatformDefectPrReviewError) {
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          if (err.code === 'invalid_state') return reply.status(409).send({ error: err.code })
+          if (err.code === 'ci_not_green') return reply.status(412).send({ error: err.code })
+          return reply.status(400).send({ error: err.code })
+        }
+        throw err
+      }
+    },
+  )
+
+  fastify.post<{ Params: { id: string }; Body: { note?: string } }>(
+    '/api/platform-defects/:id/operator-approve-pr',
+    async (req, reply) => {
+      try {
+        const result = await platformDefectPrReviewService.operatorApprovePr(
+          req.params.id,
+          req.body?.note,
+        )
+        return {
+          ok: true,
+          prUrl: result.prUrl,
+          item: result.defect,
+          message: 'Aprovação registrada — conclua o merge manualmente no GitHub.',
+        }
+      } catch (err) {
+        if (err instanceof PlatformDefectPrReviewError) {
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          return reply.status(409).send({ error: err.code })
+        }
+        throw err
+      }
+    },
+  )
+
+  fastify.post<{ Params: { id: string }; Body: { note?: string } }>(
+    '/api/platform-defects/:id/operator-request-changes',
+    async (req, reply) => {
+      try {
+        const result = await platformDefectPrReviewService.operatorRequestChanges(
+          req.params.id,
+          req.body?.note,
+        )
+        return { ok: true, item: result.defect }
+      } catch (err) {
+        if (err instanceof PlatformDefectPrReviewError) {
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          return reply.status(409).send({ error: err.code })
+        }
+        throw err
+      }
+    },
+  )
 
   fastify.post<{ Params: { id: string } }>(
     '/api/platform-defects/:id/start-fix',

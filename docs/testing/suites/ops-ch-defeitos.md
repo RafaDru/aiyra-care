@@ -5,7 +5,7 @@
 
 ## Pré-requisitos
 
-- Migration **077** aplicada; **082** para metadados `correction_failed`; **083** para `parent_defect_id`; **084** para reincidência INC (`recurrence_of_incident_id`)
+- Migration **077** aplicada; **082** para metadados `correction_failed`; **083** para `parent_defect_id`; **084** para reincidência INC (`recurrence_of_incident_id`); **085** para `defect_pr_reviews` (Agent 3)
 - ops-console `:3013` com `CURSOR_DEFECT_FIX_*` (opcional para dispatch real)
 
 ## Passos
@@ -32,7 +32,10 @@
 20. **Incidentes ao vivo:** lista recarrega a cada ~15s (sem F5); coluna **Defeito** + expand mostram `DEF-*` vinculado via `platform_defect_incidents`
 21. **Triagem → DEF fixed:** callback `link_defect` para defeito já `fixed` → INC **`resolved`** (vitest `ops-analysis-queue-triage-callback` / `triage-defect-pipeline-followup`)
 22. **Auto start-fix triagem:** com `CH_AUTO_START_FIX_ON_TRIAGE=1` + webhook Correção ready, após `new_defect` o DEF passa a `in_fix` quando dispatch `sent` (default env off)
+23. **R3 revisão agêntica:** defeito `ready_for_pr` + `prUrl` — expand **Revisão agêntica**; **Solicitar revisão** (`POST request-review`); mock `POST /api/platform-defects/review-callback` com `defect_pr_review_v1` → card mostra eficácia, risco, segurança, `recommendation`
+24. **R3 G3:** **Aprovar para merge** registra intent + abre GitHub; **Pedir mudanças** reabre defeito (`open`); merge continua manual no GitHub
+25. `GET /api/incident-dispatch/health` — `webhooks.defectPrReview.ready` quando `CURSOR_DEFECT_PR_REVIEW_*` configurados
 
 ## Critério
 
-- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados/resolvidos exibem labels corretas, R1 exibe falha estruturada (passo 14 quando webhook configurado), reincidência DEF/INC (16–17), fechamento INC em `resolved` (18), hook triage-started (19), resolve-on-link-fixed (21), auto start-fix gate (22 quando flag ligada)
+- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados/resolvidos exibem labels corretas, R1 exibe falha estruturada (passo 14 quando webhook configurado), reincidência DEF/INC (16–17), fechamento INC em `resolved` (18), hook triage-started (19), resolve-on-link-fixed (21), auto start-fix gate (22 quando flag ligada), R3 review callback + ações G3 (23–25 quando mig 085 aplicada)

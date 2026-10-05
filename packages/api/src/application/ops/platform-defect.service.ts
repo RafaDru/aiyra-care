@@ -17,7 +17,7 @@ import type { PlatformDefectPgRepository } from '../../infrastructure/persistenc
 const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
   open: ['in_fix'],
   in_fix: ['ready_for_pr', 'open'],
-  ready_for_pr: ['fixed'],
+  ready_for_pr: ['fixed', 'open'],
   fixed: [],
 }
 
@@ -159,7 +159,12 @@ export class PlatformDefectService {
   async transition(
     id: string,
     nextStatus: PlatformDefectStatus,
-    meta?: { branchName?: string | null; prUrl?: string | null; skipBatch?: boolean },
+    meta?: {
+      branchName?: string | null
+      prUrl?: string | null
+      skipBatch?: boolean
+      clearFixProgress?: boolean
+    },
   ): Promise<PlatformDefectRecord> {
     const current = await this.repo.findById(id)
     if (!current) throw new PlatformDefectTransitionError('not_found')
@@ -182,12 +187,29 @@ export class PlatformDefectService {
     const updated = await this.repo.updateStatus(id, nextStatus, {
       branchName: meta?.branchName,
       prUrl: meta?.prUrl,
-      clearFixProgress: current.status === 'in_fix' && nextStatus === 'open',
+      clearFixProgress:
+        meta?.clearFixProgress
+        ?? (current.status === 'in_fix' && nextStatus === 'open'),
       fixedVia: nextStatus === 'fixed' ? 'manual' : undefined,
     })
     if (!updated) throw new PlatformDefectTransitionError('not_found')
     if (nextStatus === 'fixed') {
       await this.onDefectFixed?.(id)
+    }
+    if (nextStatus === 'ready_for_pr') {
+      const { isChAutoPrReviewOnReadyEnabled } = await import('./platform-defect-pr-review.service.js')
+      if (isChAutoPrReviewOnReadyEnabled()) {
+        const { DefectPrReviewPgRepository } = await import(
+          '../../infrastructure/persistence/defect-pr-review.pg.repository.js'
+        )
+        const { PlatformDefectPrReviewService } = await import('./platform-defect-pr-review.service.js')
+        const reviewService = new PlatformDefectPrReviewService(
+          this.repo,
+          new DefectPrReviewPgRepository(this.repo.getDbPool()),
+          this,
+        )
+        void reviewService.maybeAutoReviewOnReady(id)
+      }
     }
     return updated
   }
