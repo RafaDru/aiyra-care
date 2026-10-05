@@ -13,6 +13,7 @@ import type { AgentAnalysisCallbackInput } from '../../domain/ops/ops-analysis-q
 import { isGithubPullRequestUrl } from '../../domain/ops/platform-defect-pr-url.js'
 import { resolveRecurrenceParentId } from '../../domain/ops/platform-defect-recurrence.js'
 import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
+import { notifyDefectBoardFromRecord } from './defect-board-notify.js'
 
 const ALLOWED: Record<PlatformDefectStatus, PlatformDefectStatus[]> = {
   open: ['in_fix'],
@@ -132,6 +133,7 @@ export class PlatformDefectService {
     const defect = await this.repo.findById(defectId)
     if (!defect) throw new PlatformDefectTransitionError('not_found')
     await this.repo.linkIncident(defectId, incidentId, linkedBy)
+    notifyDefectBoardFromRecord(defect)
     return defect
   }
 
@@ -144,6 +146,7 @@ export class PlatformDefectService {
     }
     const updated = await this.repo.updateStatus(id, 'in_fix', { markFixDispatchSent: true })
     if (!updated) throw new PlatformDefectTransitionError('not_found')
+    notifyDefectBoardFromRecord(updated)
     return updated
   }
 
@@ -211,6 +214,7 @@ export class PlatformDefectService {
         void reviewService.maybeAutoReviewOnReady(id)
       }
     }
+    notifyDefectBoardFromRecord(updated)
     return updated
   }
 
@@ -240,6 +244,7 @@ export class PlatformDefectService {
         if (!exists) throw new PlatformDefectTransitionError('not_found')
         throw new PlatformDefectTransitionError('invalid_transition')
       }
+      notifyDefectBoardFromRecord(updated)
       return updated
     }
 

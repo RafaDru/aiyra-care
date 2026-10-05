@@ -3,7 +3,7 @@ import { resolveIncidentsLinkedToDefect } from '../src/application/ops/incident-
 
 describe('resolveIncidentsLinkedToDefect', () => {
   it('delegates to queue repository', async () => {
-    const resolveIncidentsLinkedToDefectRepo = vi.fn(async () => 2)
+    const resolveIncidentsLinkedToDefectRepo = vi.fn(async () => ['inc-1', 'inc-2'])
     const count = await resolveIncidentsLinkedToDefect(
       { resolveIncidentsLinkedToDefect: resolveIncidentsLinkedToDefectRepo } as never,
       'defect-1',

@@ -80,6 +80,12 @@ import {
   CH_SCHEMA_MIGRATION_HINT,
   isPgSchemaOutdatedError,
 } from '../../api/src/infrastructure/persistence/pg-error.helper.js'
+import { writeSseResponseHead } from '../../api/src/infrastructure/http/sse-response.helper.js'
+import { subscribeIncidentBoard } from '../../api/src/infrastructure/ops/incident-board.bus.js'
+import { subscribeDefectBoard } from '../../api/src/infrastructure/ops/platform-defect-board.bus.js'
+import { notifyIncidentBoardById } from '../../api/src/application/ops/incident-board-notify.js'
+
+const CH_BOARD_SSE_HEARTBEAT_MS = 25_000
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const monorepoRoot = resolve(pkgRoot, '..', '..')
@@ -124,7 +130,9 @@ const resolveIncidentsWhenDefectFixed = async (defectId: string) => {
   const { resolveIncidentsLinkedToDefect } = await import(
     '../../api/src/application/ops/incident-pipeline-resolution.js'
   )
-  await resolveIncidentsLinkedToDefect(analysisQueueRepo, defectId)
+  await resolveIncidentsLinkedToDefect(analysisQueueRepo, defectId, {
+    defectRepo: platformDefectRepo,
+  })
 }
 const platformDefectService = new PlatformDefectService(
   platformDefectRepo,
@@ -519,6 +527,30 @@ async function main() {
     analysisQueueService.attentionCounts(deploymentTier),
   )
 
+  fastify.get<{ Querystring: { deploymentTier?: string } }>(
+    '/api/analysis-queue/stream',
+    async (req, reply) => {
+      const tier = req.query.deploymentTier?.trim() || deploymentTier
+      const res = reply.raw
+      writeSseResponseHead(req.raw, res)
+      res.write('\n')
+      const writeEvent = (event: string, data: unknown) => {
+        res.write(`event: ${event}\n`)
+        res.write(`data: ${JSON.stringify(data)}\n\n`)
+      }
+      const unsub = subscribeIncidentBoard(tier, (payload) => {
+        writeEvent('incident_updated', payload)
+      })
+      const heartbeat = setInterval(() => {
+        writeEvent('heartbeat', { ts: new Date().toISOString() })
+      }, CH_BOARD_SSE_HEARTBEAT_MS)
+      req.raw.on('close', () => {
+        clearInterval(heartbeat)
+        unsub()
+      })
+    },
+  )
+
   fastify.get<{ Params: { id: string } }>('/api/analysis-queue/:id', async (req, reply) => {
     if (req.params.id === 'callback') return reply.callNotFound()
     const record = await analysisQueueService.findById(req.params.id)
@@ -596,6 +628,9 @@ async function main() {
         if (result.error === 'not_found') return reply.status(404).send({ error: result.error })
         return reply.status(409).send({ error: result.error })
       }
+      await notifyIncidentBoardById(analysisQueueRepo, req.params.id, platformDefectRepo).catch(
+        () => undefined,
+      )
       return { ok: true }
     },
   )
@@ -638,6 +673,30 @@ async function main() {
       })),
     }
   })
+
+  fastify.get<{ Querystring: { deploymentTier?: string } }>(
+    '/api/platform-defects/stream',
+    async (req, reply) => {
+      const tier = req.query.deploymentTier?.trim() || deploymentTier
+      const res = reply.raw
+      writeSseResponseHead(req.raw, res)
+      res.write('\n')
+      const writeEvent = (event: string, data: unknown) => {
+        res.write(`event: ${event}\n`)
+        res.write(`data: ${JSON.stringify(data)}\n\n`)
+      }
+      const unsub = subscribeDefectBoard(tier, (payload) => {
+        writeEvent('defect_updated', payload)
+      })
+      const heartbeat = setInterval(() => {
+        writeEvent('heartbeat', { ts: new Date().toISOString() })
+      }, CH_BOARD_SSE_HEARTBEAT_MS)
+      req.raw.on('close', () => {
+        clearInterval(heartbeat)
+        unsub()
+      })
+    },
+  )
 
   fastify.get<{ Querystring: { status?: string; includeFixed?: string; q?: string } }>(
     '/api/platform-defects',

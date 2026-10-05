@@ -15,6 +15,7 @@ import {
   dispatchPlatformDefectPrReview,
 } from './platform-defect-pr-review-dispatch.js'
 import { PlatformDefectService, PlatformDefectTransitionError } from './platform-defect.service.js'
+import { notifyDefectBoardFromRecord } from './defect-board-notify.js'
 
 export class PlatformDefectPrReviewError extends Error {
   readonly code:
@@ -209,9 +210,11 @@ export class PlatformDefectPrReviewService {
     )
 
     const refreshed = await this.defectRepo.findById(defectId)
+    const withReview = await this.attachLatestReview(refreshed ?? defect)
+    notifyDefectBoardFromRecord(withReview, withReview.latestReview)
     return {
       reviewId: updated.id,
-      defect: await this.attachLatestReview(refreshed ?? defect),
+      defect: withReview,
     }
   }
 
@@ -226,9 +229,11 @@ export class PlatformDefectPrReviewService {
     }
     await this.defectRepo.recordOperatorPrApproval(defectId, note?.trim() || null)
     const refreshed = await this.defectRepo.findById(defectId)
+    const withReview = await this.attachLatestReview(refreshed ?? defect)
+    notifyDefectBoardFromRecord(withReview, withReview.latestReview)
     return {
       prUrl: refreshed?.prUrl ?? defect.prUrl,
-      defect: await this.attachLatestReview(refreshed ?? defect),
+      defect: withReview,
     }
   }
 

@@ -34,6 +34,7 @@ import {
   supportDispatchOptionsFromQueue,
 } from './incident-dispatch-payload.helper.js'
 import { triageBatchIntervalMs } from './ch-batch-cadence.config.js'
+import { notifyIncidentBoardById } from './incident-board-notify.js'
 
 const DISPATCH_KIND = 'triage_v1'
 const MAX_OUTBOX_ATTEMPTS = 8
@@ -172,7 +173,7 @@ export class IncidentDispatchService {
   ): Promise<void> {
     if (dispatch.outcome === 'sent') {
       await this.outbox.markForwarded(outboxId)
-      await this.queueRepo.setIncidentPipelineStatus(incidentId, 'forwarded')
+      await this.setPipelineAndNotify(incidentId, 'forwarded')
       return
     }
     if (dispatch.outcome === 'failed') {
@@ -190,6 +191,15 @@ export class IncidentDispatchService {
 
   private async markPipelineDispatchFailed(incidentId: string): Promise<void> {
     await this.queueRepo.setIncidentPipelineStatus(incidentId, 'dispatch_failed')
+    await notifyIncidentBoardById(this.queueRepo, incidentId).catch(() => undefined)
+  }
+
+  private async setPipelineAndNotify(
+    incidentId: string,
+    status: import('../../domain/ops/ops-analysis-queue.types.js').IncidentPipelineStatus,
+  ): Promise<void> {
+    await this.queueRepo.setIncidentPipelineStatus(incidentId, status)
+    await notifyIncidentBoardById(this.queueRepo, incidentId).catch(() => undefined)
   }
 
   private async recordWorkerDispatchFailure(
@@ -252,7 +262,7 @@ export class IncidentDispatchService {
 
     if (existing) {
       if (['pending', 'forwarded', 'claimed'].includes(existing.status)) {
-        await this.queueRepo.setIncidentPipelineStatus(incidentId, 'open')
+        await this.setPipelineAndNotify(incidentId, 'open')
         if (options?.runTick) await this.processOutboxBatch(1)
         return { ok: true }
       }
@@ -265,7 +275,7 @@ export class IncidentDispatchService {
       })
     }
 
-    await this.queueRepo.setIncidentPipelineStatus(incidentId, 'open')
+    await this.setPipelineAndNotify(incidentId, 'open')
     if (options?.runTick) await this.processOutboxBatch(1)
     return { ok: true }
   }
@@ -324,7 +334,7 @@ export class IncidentDispatchService {
 
     await this.outbox.resetToPending(existing.id, payload)
     if (recoverStuck && shouldNormalizePipelineAfterDeadOutboxReset(record.incidentPipelineStatus)) {
-      await this.queueRepo.setIncidentPipelineStatus(record.id, 'open')
+      await this.setPipelineAndNotify(record.id, 'open')
     }
     return 'reset'
   }
@@ -382,7 +392,7 @@ export class IncidentDispatchService {
       }
       await this.outbox.resetToPending(row.id, payload)
       if (shouldNormalizePipelineAfterDeadOutboxReset(record.incidentPipelineStatus)) {
-        await this.queueRepo.setIncidentPipelineStatus(record.id, 'open')
+        await this.setPipelineAndNotify(record.id, 'open')
       }
       reset += 1
     }
@@ -441,7 +451,7 @@ export class IncidentDispatchService {
       if (!claimed) continue
 
       processed += 1
-      await this.queueRepo.setIncidentPipelineStatus(row.incidentId, 'queued_worker')
+      await this.setPipelineAndNotify(row.incidentId, 'queued_worker')
 
       const payload = row.payload
       const kind = payload.kind
@@ -491,7 +501,7 @@ export class IncidentDispatchService {
 
         if (dispatch.outcome === 'sent') {
           await this.outbox.markForwarded(row.id)
-          await this.queueRepo.setIncidentPipelineStatus(row.incidentId, 'forwarded')
+          await this.setPipelineAndNotify(row.incidentId, 'forwarded')
           await this.queueRepo.markInvestigating(row.incidentId)
           sent += 1
         } else if (dispatch.outcome === 'failed') {

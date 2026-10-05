@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   Button,
   Empty,
   Input,
-  Popconfirm,
   Space,
   Table,
   Tag,
@@ -21,16 +20,11 @@ import {
 } from '@ant-design/icons'
 import {
   incidentApplicationLabel,
-  incidentDispatchStatusLabel,
   incidentOriginLabel,
   incidentPipelineLabel,
   incidentPipelineTagColor,
-  incidentSourceFootnote,
-  INCIDENT_LANE_LABEL,
   INCIDENT_PRIORITY_LABEL,
-  INCIDENT_QUEUE_STATUS_LABEL,
 } from './ch-incident-display.js'
-import { defectStatusLabel } from './ch-defect-display.js'
 import {
   buildDefectDeepLink,
   buildIncidentRefDeepLink,
@@ -38,14 +32,21 @@ import {
 } from './ch-ops-deep-link.js'
 import { InvestigationIdTag } from './components/InvestigationIdTag.js'
 import { OpsReferenceCodeTag } from './components/OpsReferenceCodeTag.js'
+import { ChCopyableRefTag } from './components/ChCopyableRefTag.js'
+import { ChLiveIndicator } from './components/ChLiveIndicator.js'
+import { ChIncidentDetailBody } from './components/ChIncidentDetailBody.js'
 import { OpsPanel } from './components/OpsPanel.js'
+import { confirmTransactionalAction } from './ch-transactional-confirm.js'
+import { useIncidentBoardStream } from './hooks/useIncidentBoardStream.js'
+import { inferOpsReferenceHref } from './ch-ops-deep-link.js'
+import type { OpsDeploymentTier } from './theme/ops-environment.js'
 import { opsApi } from './api.js'
 import {
   INCIDENT_BOARD_FILTER_LABELS,
   suggestIncidentBoardFilter,
   type IncidentBoardFilter,
 } from './ch-incident-board-filter.js'
-import { incidentMatchesBoardFilter } from '../../../api/src/domain/ops/incident-list-filter.js'
+import { incidentMatchesBoardFilter } from './ch-incident-board-filter.js'
 import {
   matchesOpsAnalysisQueueItem,
   parseOpsSearchInput,
@@ -59,10 +60,7 @@ import {
 } from './ch-incident-table-sort.js'
 import type { IncidentDispatchHealth, OpsAnalysisQueueItem } from './ops.types.js'
 
-const { Text, Paragraph, Link } = Typography
-
-/** Atualização automática da lista (PG ao vivo; sem SSE). */
-const INCIDENT_LIST_POLL_MS = 15_000
+const { Text } = Typography
 
 const BOARD_FILTERS: IncidentBoardFilter[] = [
   'all_open',
@@ -71,142 +69,18 @@ const BOARD_FILTERS: IncidentBoardFilter[] = [
   'resolved',
 ]
 
-function IncidentExpandedDetail({ row }: { row: OpsAnalysisQueueItem }) {
-  const sourceNote = incidentSourceFootnote(row)
-  const tierLabel =
-    row.deploymentTier === 'production'
-      ? 'Produção'
-      : row.deploymentTier === 'preview'
-        ? 'Preview'
-        : row.deploymentTier
-
-  return (
-    <div style={{ maxWidth: 720 }}>
-      <Space size={[4, 4]} wrap style={{ marginBottom: 12 }}>
-        <Tag color={incidentPipelineTagColor(row)}>{incidentPipelineLabel(row)}</Tag>
-        <Tag>{INCIDENT_QUEUE_STATUS_LABEL[row.status]}</Tag>
-        <Tag>{INCIDENT_PRIORITY_LABEL[row.priority]}</Tag>
-        <Tag>{incidentOriginLabel(row)}</Tag>
-        <Text type="secondary">
-          {incidentApplicationLabel(row)} · {INCIDENT_LANE_LABEL[row.lane]} · {tierLabel}
-        </Text>
-      </Space>
-
-      <Paragraph>
-        <Text strong>Referência:</Text>{' '}
-        <OpsReferenceCodeTag code={row.referenceCode} showCopy />{' '}
-        <InvestigationIdTag investigationId={row.id} compact />
-      </Paragraph>
-
-      {row.errorSummary && (
-        <Paragraph>
-          <Text strong>Resumo:</Text> {row.errorSummary}
-        </Paragraph>
-      )}
-      {row.remediationSummary && (
-        <Paragraph>
-          <Text strong>Próximo passo sugerido:</Text> {row.remediationSummary}
-        </Paragraph>
-      )}
-      {row.analysisLastError && (
-        <Paragraph type="danger">
-          <Text strong>Erro na triagem:</Text> {row.analysisLastError}
-        </Paragraph>
-      )}
-      {row.analysisArtifactPath && (
-        <Paragraph>
-          <Text strong>Artefato da análise:</Text> <Text code>{row.analysisArtifactPath}</Text>
-        </Paragraph>
-      )}
-      {row.prUrl && (
-        <Paragraph>
-          <Text strong>Pull request:</Text>{' '}
-          <Link href={row.prUrl} target="_blank" rel="noreferrer">
-            {row.prUrl}
-          </Link>
-        </Paragraph>
-      )}
-
-      <Paragraph>
-        <Text strong>Encaminhamento ao Cursor</Text>
-        <br />
-        {row.dispatch ? (
-          <>
-            <Text>{incidentDispatchStatusLabel(row.dispatch.status)}</Text>
-            {row.dispatch.attemptCount > 0 && (
-              <Text type="secondary"> · {row.dispatch.attemptCount} tentativa(s)</Text>
-            )}
-            {row.dispatch.forwardedAt && (
-              <>
-                <br />
-                <Text type="secondary">
-                  Enviado em {new Date(row.dispatch.forwardedAt).toLocaleString('pt-BR')}
-                </Text>
-              </>
-            )}
-            {row.dispatch.lastError && (
-              <div style={{ marginTop: 4 }}>
-                <Text type="danger">{row.dispatch.lastError}</Text>
-              </div>
-            )}
-          </>
-        ) : (
-          <Text type="secondary"> Ainda não há registro de envio para triagem.</Text>
-        )}
-      </Paragraph>
-
-      {row.recurrenceOfReferenceCode && (
-        <Paragraph>
-          <Text strong>Reincidência de</Text>{' '}
-          <Link href={buildIncidentRefDeepLink(row.recurrenceOfReferenceCode)}>
-            <OpsReferenceCodeTag code={row.recurrenceOfReferenceCode} compact navigateOnClick={false} />
-          </Link>
-        </Paragraph>
-      )}
-
-      {row.linkedDefects && row.linkedDefects.length > 0 && (
-        <>
-          <Paragraph style={{ marginBottom: 4 }}>
-            <Text strong>Defeitos vinculados</Text>
-          </Paragraph>
-          <ul style={{ margin: '0 0 8px', paddingLeft: 18, listStyle: 'none' }}>
-            {row.linkedDefects.map((def) => (
-              <li key={def.id} style={{ marginBottom: 4 }}>
-                <Space size={6} wrap>
-                  <Link href={buildDefectDeepLink(def.id)}>
-                    <OpsReferenceCodeTag code={def.referenceCode} compact navigateOnClick={false} />
-                  </Link>
-                  <Tag>{defectStatusLabel(def.status)}</Tag>
-                </Space>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      <Paragraph style={{ marginBottom: 0 }}>
-        <Text type="secondary">Identificador interno: </Text>
-        <InvestigationIdTag investigationId={row.id} showFull showCopy />
-      </Paragraph>
-      {sourceNote && (
-        <Text type="secondary" style={{ display: 'block', marginTop: 6 }}>
-          {sourceNote}
-        </Text>
-      )}
-    </div>
-  )
-}
-
 export function IncidentesPanel({
   onRefresh,
   highlightInvestigationId,
   initialBoardFilter,
   initialSearch,
+  deploymentTier = 'integration',
 }: {
   onRefresh?: () => void
   highlightInvestigationId?: string | null
   initialBoardFilter?: IncidentBoardFilter
   initialSearch?: string
+  deploymentTier?: OpsDeploymentTier
 }) {
   const [items, setItems] = useState<OpsAnalysisQueueItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -218,7 +92,10 @@ export function IncidentesPanel({
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
   const [dispatchHealth, setDispatchHealth] = useState<IncidentDispatchHealth | null>(null)
   const [tableSort, setTableSort] = useState<IncidentTableSortState>(() => loadIncidentTableSort())
-  const highlightRef = useRef<string | null>(null)
+  const highlightRow = useMemo(
+    () => new URLSearchParams(window.location.search).get('highlight') === '1',
+    [],
+  )
 
   const load = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true)
@@ -245,21 +122,12 @@ export function IncidentesPanel({
     void load()
   }, [load])
 
-  useEffect(() => {
-    const tick = () => {
-      if (document.visibilityState !== 'visible') return
-      void load({ silent: true })
-    }
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') void load({ silent: true })
-    }
-    document.addEventListener('visibilitychange', onVisible)
-    const id = window.setInterval(tick, INCIDENT_LIST_POLL_MS)
-    return () => {
-      document.removeEventListener('visibilitychange', onVisible)
-      window.clearInterval(id)
-    }
-  }, [load])
+  const { connection } = useIncidentBoardStream({
+    deploymentTier,
+    boardFilter,
+    onPatch: setItems,
+    onReload: () => load({ silent: true }),
+  })
 
   useEffect(() => {
     if (initialBoardFilter) setBoardFilter(initialBoardFilter)
@@ -291,18 +159,6 @@ export function IncidentesPanel({
       )
     }
   }, [highlightInvestigationId])
-
-  useEffect(() => {
-    if (!highlightInvestigationId || loading) return
-    if (highlightRef.current === highlightInvestigationId) return
-    const row = document.querySelector(
-      `[data-incident-row-id="${highlightInvestigationId}"]`,
-    )
-    if (row) {
-      highlightRef.current = highlightInvestigationId
-      row.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }
-  }, [highlightInvestigationId, loading, items])
 
   const parsedSearch = useMemo(() => parseOpsSearchInput(searchText), [searchText])
   const visibleItems = useMemo(() => {
@@ -386,36 +242,42 @@ export function IncidentesPanel({
     }
   }
 
-  const markComplete = async (id: string) => {
-    setUpdatingId(id)
-    try {
-      await opsApi.completeAnalysisQueueItem(id)
-      message.success('Incidente marcado como concluído')
-      await load()
-      await onRefresh?.()
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Falha ao concluir')
-    } finally {
-      setUpdatingId(null)
-    }
+  const markComplete = (id: string) => {
+    confirmTransactionalAction('incident.mark_complete', async () => {
+      setUpdatingId(id)
+      try {
+        await opsApi.completeAnalysisQueueItem(id)
+        message.success('Incidente marcado como concluído')
+        await load()
+        await onRefresh?.()
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : 'Falha ao concluir')
+      } finally {
+        setUpdatingId(null)
+      }
+    })
   }
 
-  const retryDispatch = async (id: string) => {
-    setUpdatingId(id)
-    try {
-      await opsApi.retryAnalysisQueueDispatch(id, { runTick: true })
-      message.success('Nova tentativa de dispatch enfileirada')
-      await load()
-      await onRefresh?.()
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Falha ao reenfileirar')
-    } finally {
-      setUpdatingId(null)
-    }
+  const retryDispatch = (id: string) => {
+    confirmTransactionalAction('incident.retry_dispatch', async () => {
+      setUpdatingId(id)
+      try {
+        await opsApi.retryAnalysisQueueDispatch(id, { runTick: true })
+        message.success('Nova tentativa de dispatch enfileirada')
+        await load()
+        await onRefresh?.()
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : 'Falha ao reenfileirar')
+      } finally {
+        setUpdatingId(null)
+      }
+    })
   }
 
-  const openDetail = (id: string) => {
-    setExpandedRowKeys((prev) => (prev.includes(id) ? prev : [...prev, id]))
+  const toggleExpanded = (id: string) => {
+    setExpandedRowKeys((prev) =>
+      prev.includes(id) ? prev.filter((k) => k !== id) : [...prev, id],
+    )
   }
 
   const copyInvestigationLink = async (id: string) => {
@@ -462,10 +324,11 @@ export function IncidentesPanel({
   return (
     <OpsPanel
       title="Incidentes"
-      description="Sinais cru até triagem — GET /api/analysis-queue (Postgres); lista atualiza a cada 15s e ao voltar à aba."
+      description="Sinais cru até triagem — atualização em tempo real (SSE)."
     >
       {dispatchHealthBanner}
       <Space wrap style={{ marginBottom: 12 }} align="center">
+        <ChLiveIndicator state={connection} />
         {BOARD_FILTERS.map((f) => (
           <Button
             key={f}
@@ -501,16 +364,23 @@ export function IncidentesPanel({
           onChange={handleTableChange}
           onRow={(row) => ({
             'data-incident-row-id': row.id,
+            onClick: (e) => {
+              if ((e.target as HTMLElement).closest('[data-ch-no-row-toggle]')) return
+              if ((e.target as HTMLElement).closest('button, a, .ant-btn')) return
+              toggleExpanded(row.id)
+            },
+            style: { cursor: 'pointer' },
           })}
           rowClassName={(row) =>
-            highlightInvestigationId && row.id === highlightInvestigationId
+            highlightRow && highlightInvestigationId && row.id === highlightInvestigationId
               ? 'ops-row-highlight'
               : ''
           }
           expandable={{
             expandedRowKeys,
             onExpandedRowsChange: (keys) => setExpandedRowKeys(keys.map(String)),
-            expandedRowRender: (row) => <IncidentExpandedDetail row={row} />,
+            expandedRowRender: (row) => <ChIncidentDetailBody row={row} />,
+            expandRowByClick: false,
           }}
           columns={[
             {
@@ -524,7 +394,15 @@ export function IncidentesPanel({
                 tableSort.columnKey === 'referenceCode' ? tableSort.order : null,
               render: (_: unknown, row) => (
                 <Space size={4} wrap style={{ justifyContent: 'center' }}>
-                  <OpsReferenceCodeTag code={row.referenceCode} compact />
+                  {row.referenceCode ? (
+                    <ChCopyableRefTag
+                      code={row.referenceCode}
+                      href={inferOpsReferenceHref(row.referenceCode)}
+                      compact
+                    />
+                  ) : (
+                    <Text type="secondary">—</Text>
+                  )}
                   <InvestigationIdTag investigationId={row.id} compact />
                 </Space>
               ),
@@ -609,24 +487,20 @@ export function IncidentesPanel({
               render: (_: unknown, row) => (
                 <Space size={0} wrap style={{ justifyContent: 'center' }}>
                   {row.incidentPipelineStatus === 'dispatch_failed' && (
-                    <Popconfirm
-                      title="Nova tentativa de dispatch?"
-                      description="Reenfileira o webhook de triagem."
-                      okText="Tentar de novo"
-                      cancelText="Cancelar"
-                      onConfirm={() => retryDispatch(row.id)}
-                    >
-                      <Tooltip title="Nova tentativa">
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<RedoOutlined />}
-                          aria-label="Nova tentativa"
-                          loading={updatingId === row.id}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </Tooltip>
-                    </Popconfirm>
+                    <Tooltip title="Nova tentativa">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<RedoOutlined />}
+                        aria-label="Nova tentativa"
+                        loading={updatingId === row.id}
+                        data-ch-no-row-toggle
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          retryDispatch(row.id)
+                        }}
+                      />
+                    </Tooltip>
                   )}
                   <Tooltip title="Abrir detalhe">
                     <Button
@@ -634,9 +508,10 @@ export function IncidentesPanel({
                       size="small"
                       icon={<UnorderedListOutlined />}
                       aria-label="Detalhe"
+                      data-ch-no-row-toggle
                       onClick={(e) => {
                         e.stopPropagation()
-                        openDetail(row.id)
+                        toggleExpanded(row.id)
                       }}
                     />
                   </Tooltip>

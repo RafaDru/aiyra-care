@@ -79,9 +79,11 @@ export function ChLayout({
             onCloseMobileNav?.()
           }}
         />
-        <div className="ch-main-column">
-          <ChContextBar group={group} item={item} onOpenMobileNav={onOpenMobileNav} />
-          <div className="ch-content-panel">{children}</div>
+        <div className="ch-main-scroll">
+          <div className="ch-main-column">
+            <ChContextBar group={group} item={item} onOpenMobileNav={onOpenMobileNav} />
+            <div className="ch-content-panel">{children}</div>
+          </div>
         </div>
       </div>
 

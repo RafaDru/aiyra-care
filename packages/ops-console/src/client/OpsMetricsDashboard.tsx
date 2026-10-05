@@ -230,11 +230,16 @@ export function OpsMetricsDashboard({
           <IncidentesPanel
             onRefresh={onRefresh}
             highlightInvestigationId={highlightInvestigationId}
+            deploymentTier={deploymentTier}
           />
         )
       case 'defeitos':
         return (
-          <DefeitosPanel onRefresh={onRefresh} highlightDefectId={highlightDefectId} />
+          <DefeitosPanel
+            onRefresh={onRefresh}
+            highlightDefectId={highlightDefectId}
+            deploymentTier={deploymentTier}
+          />
         )
       case 'produto':
         return <ProdutoLifecyclePanel />

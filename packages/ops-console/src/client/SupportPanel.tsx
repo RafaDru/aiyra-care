@@ -123,22 +123,30 @@ export function SupportPanel({
     void load(queueStatus)
   }, [load, queueStatus])
 
-  const setStatus = async (id: string, status: 'triaged' | 'resolved') => {
-    setUpdatingId(id)
-    try {
-      await opsApi.updateSupportReport(id, status)
-      const label = STATUS_LABEL[status] ?? status
-      message.success(`Chamado ${id.slice(0, 8)} marcado como ${label}`)
-      onQueueChange?.()
-      await load(queueStatus)
-      if (status === 'triaged' || status === 'resolved') {
-        setLocalOpenCount((n) => Math.max(0, n - 1))
-      }
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Não foi possível atualizar o chamado')
-    } finally {
-      setUpdatingId(null)
-    }
+  const setStatus = (id: string, status: 'triaged' | 'resolved') => {
+    const label = STATUS_LABEL[status] ?? status
+    Modal.confirm({
+      title: `Marcar como ${label}?`,
+      content: 'Atualiza o status do chamado de suporte no CH.',
+      okText: 'Confirmar',
+      cancelText: 'Cancelar',
+      onOk: async () => {
+        setUpdatingId(id)
+        try {
+          await opsApi.updateSupportReport(id, status)
+          message.success(`Chamado ${id.slice(0, 8)} marcado como ${label}`)
+          onQueueChange?.()
+          await load(queueStatus)
+          if (status === 'triaged' || status === 'resolved') {
+            setLocalOpenCount((n) => Math.max(0, n - 1))
+          }
+        } catch (err) {
+          message.error(err instanceof Error ? err.message : 'Não foi possível atualizar o chamado')
+        } finally {
+          setUpdatingId(null)
+        }
+      },
+    })
   }
 
   const openAnalyzeModal = (row: SupportReportOpsRow) => {

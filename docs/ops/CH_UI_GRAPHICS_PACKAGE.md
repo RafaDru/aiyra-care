@@ -1,6 +1,6 @@
 # CH — Pacote UX / gráfico (especificação autorizada)
 
-> **Status:** spec autorizada (Rafael, 2026-10-05) · **Implementação:** pendente  
+> **Status:** spec autorizada (Rafael, 2026-10-05) · **Implementação:** concluída (branch `cursor/ch-ui-graphics-package-c214`)  
 > **Épico roadmap:** `ch-ui-graphics-package`  
 > **Relacionado:** [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) §7 · [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md) §7 · [`CH_INCIDENT_BOARD_SSE.md`](./CH_INCIDENT_BOARD_SSE.md) · [`CH_INCIDENT_BOARD_FILTERS.md`](./CH_INCIDENT_BOARD_FILTERS.md)
 

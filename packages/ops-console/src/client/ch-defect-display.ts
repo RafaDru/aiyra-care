@@ -60,3 +60,43 @@ export function defectFixedViaHint(fixedVia: PlatformDefectItem['fixedVia']): st
 export function defectIsRecurrence(item: { parentDefectId?: string | null }): boolean {
   return Boolean(item.parentDefectId)
 }
+
+const REVIEW_FIELD_LABELS: Record<string, string> = {
+  plausible: 'Plausível',
+  uncertain: 'Incerto',
+  unlikely: 'Improvável',
+  approve: 'Aprovar merge',
+  request_changes: 'Pedir mudanças',
+  block: 'Bloquear (advisory)',
+  pass: 'Ok',
+  concerns: 'Ressalvas',
+  running: 'Revisando…',
+  pending: 'Na fila',
+  completed: 'Concluída',
+  failed: 'Falhou',
+}
+
+export function humanizeDefectReviewField(value: string | null | undefined): string {
+  if (!value) return '—'
+  return REVIEW_FIELD_LABELS[value] ?? value
+}
+
+export function defectReviewRowBadge(
+  item: PlatformDefectItem,
+): { label: string; color: string } | null {
+  if (item.status !== 'ready_for_pr') return null
+  const review = item.latestReview
+  if (!review) return { label: 'Review', color: 'default' }
+  if (review.recommendation) {
+    const color =
+      review.recommendation === 'approve'
+        ? 'success'
+        : review.recommendation === 'request_changes'
+          ? 'warning'
+          : review.recommendation === 'block'
+            ? 'error'
+            : 'default'
+    return { label: humanizeDefectReviewField(review.recommendation), color }
+  }
+  return { label: humanizeDefectReviewField(review.status), color: 'processing' }
+}
