@@ -2372,6 +2372,12 @@
           "title": "Reincidência de incidente (INC→INC)",
           "status": "done",
           "detail": "Migration 084: resolved terminal + reincidencia INC→INC; filtro Resolvidos; DEF fixed → INC resolved; backfill piloto INC-000001."
+        },
+        {
+          "id": "ch-ui-graphics-package",
+          "title": "Pacote UX CH (layout, SSE, confirmações)",
+          "status": "planned",
+          "detail": "Spec autorizada 2026-10-05: docs/ops/CH_UI_GRAPHICS_PACKAGE.md — sidenav fixa, tags copiáveis, detalhe em seções, Modal em mutações, SSE incidentes+defeitos (sem Atualizar), badges review; suite ops-ch-ui-graphics."
         }
       ]
     },

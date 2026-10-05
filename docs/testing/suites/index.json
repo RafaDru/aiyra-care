@@ -593,6 +593,18 @@
       "coverage": "partial",
       "automation": { "status": "partial", "spec": "packages/api/tests/incident-list-filter.test.ts" },
       "estimatedMinutes": 15
+    },
+    {
+      "id": "ops-ch-ui-graphics",
+      "domain": "ops",
+      "title": "CH — pacote UX (layout, SSE, confirmações)",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "ops-local",
+      "doc": "docs/testing/suites/ops-ch-ui-graphics.md",
+      "coverage": "planned",
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 20
     }
   ],
   "lanes": {
