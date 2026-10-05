@@ -43,20 +43,20 @@ export const closeHealthThreadSchema = z.object({
 
 export const investigationWizardSchema = z.object({
   patientId: z.string().uuid(),
-  title: z.string().min(1).max(500),
-  reason: z.string().max(2000).optional(),
-  workingHypothesis: z.string().max(500).optional(),
-  symptoms: z.array(z.string().max(200)).optional(),
-  plannedSteps: z.array(z.string().max(200)).optional(),
+  title: z.string().trim().min(1).max(500),
+  reason: z.string().max(2000).nullish().transform((v) => v ?? undefined),
+  workingHypothesis: z.string().max(500).nullish().transform((v) => v ?? undefined),
+  symptoms: z.array(z.string().max(200)).nullish().transform((v) => v ?? undefined),
+  plannedSteps: z.array(z.string().max(200)).nullish().transform((v) => v ?? undefined),
 })
 
 export const taskWizardSchema = z.object({
   patientId: z.string().uuid(),
-  title: z.string().min(1).max(500),
-  summary: z.string().max(2000).optional(),
-  assignee: z.string().max(255).optional(),
-  location: z.string().max(255).optional(),
-  dueDate: z.coerce.date().optional(),
+  title: z.string().trim().min(1).max(500),
+  summary: z.string().max(2000).nullish().transform((v) => v ?? undefined),
+  assignee: z.string().max(255).nullish().transform((v) => v ?? undefined),
+  location: z.string().max(255).nullish().transform((v) => v ?? undefined),
+  dueDate: z.coerce.date().nullish().transform((v) => v ?? undefined),
 })
 
 export const addThreadEntrySchema = z.object({
