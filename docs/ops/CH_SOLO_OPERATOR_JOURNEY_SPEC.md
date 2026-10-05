@@ -233,7 +233,8 @@ Ordem sugerida para não quebrar o piloto:
 
 ### Fatia R3 — Review agêntico sob demanda (5–8 dias)
 
-- [ ] Nova automation + env `CURSOR_DEFECT_REVIEW_*`
+- [x] Spec autorizada: [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) (2026-10-05)
+- [ ] Nova automation + env `CURSOR_DEFECT_PR_REVIEW_*`
 - [ ] `POST /api/platform-defects/:id/request-review` (só `ready_for_pr`, idempotente)
 - [ ] Callback review → estados + comentário GitHub
 - [ ] Gate G3: UI “Aprovar para merge” só habilita com `reviewOutcome: approve` **ou** override explícito Rafael (“aprovar sem review agêntico”)
