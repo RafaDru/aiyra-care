@@ -316,19 +316,8 @@ export function IncidentesPanel({
         boardFilter,
       ),
     )
-    let result = inFilter
-    if (highlightId) {
-      const ensured = items.find((item) => item.id === highlightId)
-      if (ensured && !result.some((item) => item.id === highlightId)) {
-        result = [...result, ensured]
-      }
-    }
-    if (!parsedSearch) return result
-    return result.filter(
-      (item) =>
-        (highlightId !== null && item.id === highlightId) ||
-        matchesOpsAnalysisQueueItem(item, parsedSearch),
-    )
+    if (!parsedSearch) return inFilter
+    return inFilter.filter((item) => matchesOpsAnalysisQueueItem(item, parsedSearch))
   }, [items, parsedSearch, boardFilter, highlightInvestigationId])
 
   const sortedItems = useMemo(

@@ -51,8 +51,8 @@ export function incidentBoardWhereClause(filter: IncidentBoardFilter, alias = ''
     case 'resolved':
       return `${p}incident_pipeline_status = 'resolved'`
     case 'all_open':
-      return `${p}status NOT IN ('dismissed')
-         AND ${p}incident_pipeline_status NOT IN ('resolved', 'dismissed')`
+      return `${p}status NOT IN ('completed', 'dismissed')
+         AND ${p}incident_pipeline_status NOT IN ('triaged', 'resolved', 'dismissed')`
     default:
       return incidentBoardWhereClause('all_open', alias)
   }
@@ -82,7 +82,9 @@ export function incidentMatchesBoardFilter(
       return pipeline === 'resolved'
     case 'all_open':
       return (
+        status !== 'completed' &&
         status !== 'dismissed' &&
+        pipeline !== 'triaged' &&
         pipeline !== 'resolved' &&
         pipeline !== 'dismissed'
       )

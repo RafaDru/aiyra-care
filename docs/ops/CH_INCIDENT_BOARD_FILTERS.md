@@ -10,7 +10,7 @@
 
 | Chip (UI) | `filter` PG/API | O que entra |
 |-----------|-----------------|-------------|
-| **Em aberto** | `all_open` | Pipeline **não** terminal: tudo exceto `resolved` e `dismissed`. Inclui `triaged` (correção em curso no DEF). |
+| **Em aberto** | `all_open` | Fila **ativa** (dispatch/triagem): mesmo recorte que **Precisam atenção** — **não** inclui `triaged` nem `resolved` (ver chips **Triados** / **Resolvidos**). |
 | **Precisam atenção** | `needs_attention` | Fila ativa de dispatch/triagem: **não** `triaged` / `resolved` / `dismissed`; legado **não** `completed` / `dismissed`. |
 | **Triados** | `triaged` | `incident_pipeline_status = 'triaged'` apenas. |
 | **Resolvidos** | `resolved` | `incident_pipeline_status = 'resolved'` apenas. |
@@ -28,7 +28,7 @@
 | `forwarded` | ✓ | ✓ | | |
 | `in_triage` | ✓ | ✓ | | |
 | `dispatch_failed` | ✓ | ✓ | | |
-| `triaged` | ✓ | | ✓ | |
+| `triaged` | | | ✓ | |
 | `resolved` | | | | ✓ |
 | `dismissed` | | | | |
 
