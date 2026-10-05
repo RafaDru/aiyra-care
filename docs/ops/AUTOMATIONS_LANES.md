@@ -7,7 +7,7 @@ Duas automations, responsabilidades distintas, **dois pares** URL + key no `.env
 | **Suporte ao Desenvolvimento** | `AiCare - Suporte ao Desenvolvimento` | `support_report` | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Reporte manual no app |
 | **Suporte SRE** | `AiCare - Suporte SRE` | `ops_alert` | `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Métricas / alertas ops |
 | **Correção Dev** | `Aiyra - Correção Dev` | `defect_fix_v1` | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY` | `POST /api/platform-defects/:id/start-fix` (CH) |
-| **Revisão PR** | `Aiyra - Revisão PR` | `defect_pr_review_v1` | `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY` | `POST /api/platform-defects/:id/request-review` (CH) — spec: `docs/ops/CH_PR_REVIEW_AGENT.md` |
+| **Revisão Dev** | `Aiyra - Revisão Dev` | `defect_pr_review_v1` | `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY` (alias legado: `CURSOR_REVISOR_AUTOMATION_WEBHOOK_*`) | Auto ao `ready_for_pr` + `POST /api/platform-defects/:id/request-review` — spec: `docs/ops/CH_PR_REVIEW_AGENT.md` |
 
 Índice e blocos **texto plano** para colar na UI (sem markdown): `docs/automations-ch-duas-lanes-instructions.md`.
 
@@ -20,7 +20,7 @@ Ambiente (`integration` \| `preview` \| `production`) vai em `environment.deploy
 | **Painel Cursor** | Webhook URL e auth header (`crsr_…`) exibidos na Automation **após salvar** são a referência — copie para o `.env` do checkout que dispara (API `:3010`). |
 | **URL** | `*_WEBHOOK_URL` no `.env` deve ser **idêntica** à URL do trigger Webhook na UI (sem truncar query string se o painel incluir). |
 | **KEY** | `*_WEBHOOK_KEY` = valor atual do **Generate / Copy auth header**. Se regenerar no Cursor, **atualizar o `.env`** imediatamente; key antiga → HTTP **400** ou **401** no `POST` e outbox em retry/`dead`. |
-| **Legado** | Fallback `CURSOR_SUPPORT_AUTOMATION_*` / `CURSOR_OPS_ALERT_AUTOMATION_*` — preferir nomes `CURSOR_DEVELOPMENT_SUPPORT_*` e `CURSOR_SRE_SUPPORT_*`. |
+| **Legado** | Fallback `CURSOR_SUPPORT_AUTOMATION_*` / `CURSOR_OPS_ALERT_AUTOMATION_*` — preferir `CURSOR_DEVELOPMENT_SUPPORT_*` e `CURSOR_SRE_SUPPORT_*`. Revisão Dev: `CURSOR_REVISOR_AUTOMATION_WEBHOOK_*` → canônico `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_*`. |
 | **Callback** | Payload inclui `analysisQueue.callbackUrl` → `POST /api/analysis-queue/callback` no ops-console (`:3013`). Auth: `x-investigator-callback-key` = `OPS_INVESTIGATOR_CALLBACK_KEY` ou, se vazio, `OPS_METRICS_KEY`. |
 | **Dashboard no payload** | `OPS_ALERT_DASHBOARD_URL` — ex. `http://127.0.0.1:5173/ops` é reescrito para `http://127.0.0.1:3013` ao montar links/callback (ver `resolveSupportReportOpsConsoleBaseUrl` na API). |
 | **Reinício** | Após qualquer mudança em `CURSOR_*` ou keys ops: reiniciar **API `:3010`** e **ops-console `:3013`**. |
@@ -48,6 +48,14 @@ Ambiente (`integration` \| `preview` \| `production`) vai em `environment.deploy
 - **Playbook (colar na UI):** `docs/automations-aiyra-correcao-dev-instructions.md` (bloco `=== INÍCIO ===` … `=== FIM ===`).
 - **Saúde:** `GET /api/incident-dispatch/health` → `webhooks.defectFix`.
 - **E2E:** `docs/ops/CORRECAO_DEV_E2E_CHECKLIST.md`.
+
+## Revisão Dev
+
+- **Foco:** revisão agêntica do PR (efetividade, risco, segurança) — operador aprova no CH/GitHub (G3).
+- **Disparo:** automático quando defeito fica `ready_for_pr` com `prUrl`; re-disparo `POST …/request-review` (`force` opcional).
+- **Playbook (colar na UI):** `docs/automations-aiyra-revisor-dev-instructions.md` (bloco `=== INÍCIO ===` … `=== FIM ===`).
+- **Saúde:** `GET /api/incident-dispatch/health` → `webhooks.defectPrReview`.
+- **Spec:** `docs/ops/CH_PR_REVIEW_AGENT.md`.
 
 ## Falhas comuns (webhook)
 

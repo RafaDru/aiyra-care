@@ -86,11 +86,21 @@ export function resolveDefectFixAutomationWebhookKey(
 export function resolveDefectPrReviewAutomationWebhookUrl(
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
-  return readEnv(env, 'CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL')
+  return readEnv(
+    env,
+    'CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL',
+    'CURSOR_REVISOR_AUTOMATION_WEBHOOK_URL',
+  )
 }
 
 export function resolveDefectPrReviewAutomationWebhookKey(
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
-  return cleanCursorAutomationKey(readEnv(env, 'CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY'))
+  return cleanCursorAutomationKey(
+    readEnv(
+      env,
+      'CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY',
+      'CURSOR_REVISOR_AUTOMATION_WEBHOOK_KEY',
+    ),
+  )
 }
