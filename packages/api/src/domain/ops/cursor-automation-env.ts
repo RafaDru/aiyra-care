@@ -81,3 +81,16 @@ export function resolveDefectFixAutomationWebhookKey(
 ): string | undefined {
   return cleanCursorAutomationKey(readEnv(env, 'CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY'))
 }
+
+/** Lane Revisão PR — defeito `ready_for_pr` (`defect_pr_review_v1`). */
+export function resolveDefectPrReviewAutomationWebhookUrl(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  return readEnv(env, 'CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL')
+}
+
+export function resolveDefectPrReviewAutomationWebhookKey(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  return cleanCursorAutomationKey(readEnv(env, 'CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY'))
+}

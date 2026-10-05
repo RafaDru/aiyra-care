@@ -19,6 +19,10 @@ export function resolveInvestigatorCallbackUrl(): string {
   return `${resolveOpsConsoleBaseUrl()}/api/analysis-queue/callback`
 }
 
+export function resolveDefectPrReviewCallbackUrl(): string {
+  return `${resolveOpsConsoleBaseUrl()}/api/platform-defects/review-callback`
+}
+
 export function resolveInvestigatorTriageStartedUrl(queueId: string): string {
   const id = queueId.trim()
   return `${resolveOpsConsoleBaseUrl()}/api/analysis-queue/${encodeURIComponent(id)}/triage-started`

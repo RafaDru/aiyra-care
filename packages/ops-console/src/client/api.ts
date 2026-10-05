@@ -204,6 +204,38 @@ export const opsApi = {
         error?: string
       }
     }>(`/api/platform-defects/${encodeURIComponent(id)}/start-fix`, { method: 'POST' }),
+  requestPlatformDefectPrReview: (id: string, body?: { force?: boolean }) =>
+    request<{
+      ok: boolean
+      outcome: 'sent' | 'skipped'
+      reason?: string
+      reviewId?: string
+      item: import('./ops.types.js').PlatformDefectItem
+    }>(`/api/platform-defects/${encodeURIComponent(id)}/request-review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    }),
+  operatorApprovePlatformDefectPr: (id: string, body?: { note?: string }) =>
+    request<{
+      ok: boolean
+      prUrl: string | null
+      message: string
+      item: import('./ops.types.js').PlatformDefectItem
+    }>(`/api/platform-defects/${encodeURIComponent(id)}/operator-approve-pr`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    }),
+  operatorRequestChangesPlatformDefectPr: (id: string, body?: { note?: string }) =>
+    request<{
+      ok: boolean
+      item: import('./ops.types.js').PlatformDefectItem
+    }>(`/api/platform-defects/${encodeURIComponent(id)}/operator-request-changes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    }),
   defectPrBatchConfig: () =>
     request<{
       intervalMs: number

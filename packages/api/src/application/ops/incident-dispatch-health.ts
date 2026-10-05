@@ -2,6 +2,8 @@ import type { Pool } from 'pg'
 import {
   resolveDefectFixAutomationWebhookKey,
   resolveDefectFixAutomationWebhookUrl,
+  resolveDefectPrReviewAutomationWebhookKey,
+  resolveDefectPrReviewAutomationWebhookUrl,
   resolveDevelopmentSupportAutomationWebhookKey,
   resolveDevelopmentSupportAutomationWebhookUrl,
   resolveSreSupportAutomationWebhookKey,
@@ -20,6 +22,7 @@ export type IncidentDispatchHealth = {
     developmentSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
     sreSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
     defectFix: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+    defectPrReview: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
   }
   /** true se alguma lane de triagem/correção não tem URL+key no processo atual */
   anyWebhookMissing: boolean
@@ -34,6 +37,8 @@ export function resolveIncidentDispatchWebhookFlags(
   const sreKey = resolveSreSupportAutomationWebhookKey(env)
   const defectUrl = resolveDefectFixAutomationWebhookUrl(env)
   const defectKey = resolveDefectFixAutomationWebhookKey(env)
+  const defectReviewUrl = resolveDefectPrReviewAutomationWebhookUrl(env)
+  const defectReviewKey = resolveDefectPrReviewAutomationWebhookKey(env)
   return {
     developmentSupport: {
       urlConfigured: Boolean(devUrl),
@@ -49,6 +54,11 @@ export function resolveIncidentDispatchWebhookFlags(
       urlConfigured: Boolean(defectUrl),
       keyConfigured: Boolean(defectKey),
       ready: Boolean(defectUrl && defectKey),
+    },
+    defectPrReview: {
+      urlConfigured: Boolean(defectReviewUrl),
+      keyConfigured: Boolean(defectReviewKey),
+      ready: Boolean(defectReviewUrl && defectReviewKey),
     },
   }
 }

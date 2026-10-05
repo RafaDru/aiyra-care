@@ -7,6 +7,20 @@
 
 **Relacionado:** [`CH_SOLO_OPERATOR_JOURNEY_SPEC.md`](./CH_SOLO_OPERATOR_JOURNEY_SPEC.md) §4.4 · [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md) · [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) §6 · playbook Correção: [`../automations-aiyra-correcao-dev-instructions.md`](../automations-aiyra-correcao-dev-instructions.md)
 
+### Status de implementação (R3)
+
+| Item | Estado |
+|------|--------|
+| Migration **085** `defect_pr_reviews` + espelho em `platform_defects` | Entregue |
+| `POST /api/platform-defects/:id/request-review` | Entregue (ops-console) |
+| `POST /api/platform-defects/review-callback` | Entregue |
+| `POST …/operator-approve-pr` / `operator-request-changes` | Entregue (gate G3, sem auto-merge) |
+| CH card **Revisão agêntica** + gates G3 (sem botão manual) | Entregue |
+| `GET /api/incident-dispatch/health` → `webhooks.defectPrReview` | Entregue |
+| Prompt Automation | [`automations/defect-pr-review.prompt.md`](./automations/defect-pr-review.prompt.md) |
+| `CH_AUTO_PR_REVIEW_ON_READY` (default **on**; `0` desliga) | Entregue |
+| Batch review / `reviewFeedback` no `defect_fix_v1` | R3b / futuro |
+
 ---
 
 ## 1. Objetivo
@@ -59,10 +73,10 @@ Transição inválida (ex. `open`, `in_fix` sem PR) → HTTP **409** no `request
 
 | Modo | Quem dispara | Env / UI |
 |------|--------------|----------|
-| **Manual (MVP default)** | Rafael no CH | Botão **Solicitar revisão agêntica** no detalhe do defeito |
-| **Auto pós-ready** | ops-console após callback `ready_for_pr` ou job batch | `CH_AUTO_PR_REVIEW_ON_READY=1` (default **0**) |
+| **Auto pós-ready (default)** | API/ops-console ao transicionar para `ready_for_pr` (callback Correção Dev ou PATCH status) | `CH_AUTO_PR_REVIEW_ON_READY` omitido ou `1` (default **on**); `0` desliga |
+| **HTTP interno** | `POST …/request-review` (ops, testes, batch futuro) | Mesmo dispatch que o auto; body `{ "force": true }` ignora idempotência |
 
-**Idempotência:** segundo `request-review` com review **em andamento** (`review_status = running`) → `skipped: review_in_progress`. Com review **terminal** recente (`completed_at` &lt; `CH_PR_REVIEW_COOLDOWN_MS`, default 30 min) → `skipped: cooldown` salvo `force=1` no body.
+**Idempotência:** não reenvia webhook para o mesmo `(defect_id, pr_url)` enquanto houver review **em andamento** (`skipped: review_in_progress`) ou **concluída** para esse PR (`skipped: already_reviewed`). Com `headSha` no body, só pula se a última review `completed` tiver o mesmo `head_sha`; SHA novo no PR permite novo disparo. `force=1` no body ignora reviews concluídas (não ignora `running`).
 
 ### 3.3 Gate CI opcional
 
@@ -76,7 +90,7 @@ Transição inválida (ex. `open`, `in_fix` sem PR) → HTTP **409** no `request
 | Estratégia | Uso |
 |------------|-----|
 | **Per-PR (default)** | Um webhook por defeito / PR — alinhado a operador solo e G3. |
-| **Batch (opcional, fase 2)** | Job `runDefectPrReviewBatch()` no tick de `CH_DEFECT_PR_REVIEW_BATCH_INTERVAL_MS` (espelha cadência `defect_pr_batches`); processa até `CH_DEFECT_PR_REVIEW_BATCH_LIMIT` defeitos `ready_for_pr` sem `last_pr_review_at` ou com CI verde. **Não** substitui review manual; só auto quando `CH_AUTO_PR_REVIEW_ON_READY=1`. |
+| **Batch (opcional, fase 2)** | Job `runDefectPrReviewBatch()` no tick de `CH_DEFECT_PR_REVIEW_BATCH_INTERVAL_MS` (espelha cadência `defect_pr_batches`); processa até `CH_DEFECT_PR_REVIEW_BATCH_LIMIT` defeitos `ready_for_pr` sem review válida para o escopo `(pr_url, head_sha)`. Respeita a mesma idempotência que o auto. |
 
 ---
 
@@ -291,7 +305,7 @@ Dispatch: reutilizar padrão `startPlatformDefectFixWithDispatch` → `platform-
 | Dimensão 2 | Badge risco (`nulo`…`grave`) + texto |
 | Dimensão 3 | Veredito segurança + lista curta de findings |
 | Recomendação | Chip `approve` \| `request_changes` \| `block` + rationale |
-| Ações | **Solicitar revisão** (primary); link **Comentário no PR**; **Abrir PR** |
+| Ações | **Abrir PR**, **Aprovar para merge**, **Pedir mudanças**; links **Comentário no PR** / **Run do agente** quando existirem |
 | Override G3 | Checkbox explícito «Aprovar merge sem review agêntico» (já previsto na jornada R3) — fora do agente |
 
 Timeline do detalhe: inserir nó `review_requested` → `review_completed` entre `ready_for_pr` e merge.
@@ -304,9 +318,9 @@ Timeline do detalhe: inserir nó `review_requested` → `review_completed` entre
 |----------|---------|--------|
 | `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL` | — | URL webhook Automation |
 | `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY` | — | Bearer `crsr_…` |
-| `CH_AUTO_PR_REVIEW_ON_READY` | `0` | `1` = auto `request-review` ao aceitar callback `ready_for_pr` |
+| `CH_AUTO_PR_REVIEW_ON_READY` | **on** (`1` ou omitido) | `0` = não dispara auto ao `ready_for_pr` |
 | `CH_PR_REVIEW_REQUIRE_CI_GREEN` | `0` | `1` = gate CI antes do dispatch |
-| `CH_PR_REVIEW_COOLDOWN_MS` | `1800000` | Idempotência entre reviews |
+| `CH_PR_REVIEW_COOLDOWN_MS` | — | **Obsoleto** — idempotência por `(defect_id, pr_url, head_sha)` |
 | `CH_DEFECT_PR_REVIEW_BATCH_INTERVAL_MS` | `0` | Batch desligado |
 | `CH_DEFECT_PR_REVIEW_BATCH_LIMIT` | `5` | Máx. por tick batch |
 | `GITHUB_OPS_TOKEN` | — | Leitura checks/diff no dispatch (se já usado em R2) |
@@ -320,10 +334,10 @@ Reiniciar API `:3010` e ops-console `:3013` após alterar `CURSOR_*`.
 
 1. **Docs + Automation vazia** na conta Cursor (webhook URL/key no `.env`).
 2. Migration `defect_pr_reviews` + rotas callback/request-review.
-3. CH: card + botão **Solicitar revisão** apenas (`CH_AUTO_PR_REVIEW_ON_READY=0`).
-4. Piloto: um DEF `ready_for_pr` com PR draft (Tier 1) → review manual → validar callback + card.
-5. Habilitar `CH_AUTO_PR_REVIEW_ON_READY=1` no notebook solo após 3 reviews bons.
-6. Suite QA: estender `docs/testing/suites/ops-ch-defeitos.md` com passos review (mock callback).
+3. CH: card **Revisão agêntica** + gates G3; dispatch **automático** ao `ready_for_pr` (default).
+4. Piloto: um DEF `ready_for_pr` com PR draft (Tier 1) → validar webhook + callback + card.
+5. `CH_AUTO_PR_REVIEW_ON_READY=0` só para debug local sem Automation.
+6. Suite QA: `docs/testing/suites/ops-ch-defeitos.md` passos R3 (mock callback).
 
 ---
 
