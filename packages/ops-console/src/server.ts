@@ -135,6 +135,7 @@ const analysisQueueService = new OpsAnalysisQueueService(
   supportRepo,
   alertIncidentRepo,
   platformDefectService,
+  platformDefectRepo,
 )
 const alertAnalysisService = new OpsAlertAnalysisService(
   alertIncidentRepo,

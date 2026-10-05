@@ -219,6 +219,7 @@ Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /ap
 | `CH_INCIDENT_TRIAGE_BATCH_INTERVAL_MS` | 0 (off) | **Dispatch batch:** a cada N ms, `backfillOpenIncidents` (todos `open` sem outbox ativo). Piloto: `900000` (15 min). Não substitui o poll — só a **coleta** periódica; envio Triador segue no outbox a cada poll. |
 | `CH_DEFECT_CORRECTION_BATCH_INTERVAL_MS` | 0 (off) | Loop ops-console: lote PR + opcional `start-fix` em massa. Piloto: `900000`. |
 | `CH_DEFECT_CORRECTION_BATCH_AUTO_START_FIX` | 0 | `1` = no batch, dispara Correção Dev para defeitos `open` (até `CH_DEFECT_CORRECTION_BATCH_START_FIX_LIMIT`, default 5). **Risco:** custo/automação paralela — ver spec CH 15 min. |
+| `CH_AUTO_START_FIX_ON_TRIAGE` | 0 | `1` = após callback triagem (`new_defect` ou `link_defect` em DEF `open`/`in_fix`), dispara `start-fix` imediato (mesmo gate dispatch que botão CH). `link_defect` em DEF **`fixed`** → INC **`resolved`** (sem start-fix). |
 | `CH_DEFECT_CORRECTION_BATCH_START_FIX_LIMIT` | 5 | Teto por tick do auto `start-fix`. |
 | `CH_INCIDENT_DISPATCH_WORKER` | 1 | 0 = só API síncrona |
 | `CH_INCIDENT_RECONCILE_INTERVAL_MS` | 60000 | Reconciliador stale-only quando `CH_INCIDENT_TRIAGE_BATCH_INTERVAL_MS` **não** está definido |

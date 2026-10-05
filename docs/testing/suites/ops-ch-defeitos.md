@@ -30,7 +30,9 @@
 18. **Resolvido:** DEF `fixed` → INC vinculado tag **Resolvido** no chip **Resolvidos** (backfill mig 084 cobre piloto INC-000001)
 19. **Em triagem (hook):** com INC `forwarded`, simular `POST /api/analysis-queue/:id/triage-started` (auth callback) → pipeline `in_triage` + status `investigating`; idempotente se já `in_triage`
 20. **Incidentes ao vivo:** lista recarrega a cada ~15s (sem F5); coluna **Defeito** + expand mostram `DEF-*` vinculado via `platform_defect_incidents`
+21. **Triagem → DEF fixed:** callback `link_defect` para defeito já `fixed` → INC **`resolved`** (vitest `ops-analysis-queue-triage-callback` / `triage-defect-pipeline-followup`)
+22. **Auto start-fix triagem:** com `CH_AUTO_START_FIX_ON_TRIAGE=1` + webhook Correção ready, após `new_defect` o DEF passa a `in_fix` quando dispatch `sent` (default env off)
 
 ## Critério
 
-- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados/resolvidos exibem labels corretas, R1 exibe falha estruturada (passo 14 quando webhook configurado), reincidência DEF/INC (16–17), fechamento INC em `resolved` (18), hook triage-started (19)
+- PASS se refs aparecem, gate `in_fix` respeita dispatch (ou reconcilia para `open`), deep link triado funciona, busca INC/DEF/UUID localiza registro, ordenação padrão e persistência de sessão funcionam, triados/resolvidos exibem labels corretas, R1 exibe falha estruturada (passo 14 quando webhook configurado), reincidência DEF/INC (16–17), fechamento INC em `resolved` (18), hook triage-started (19), resolve-on-link-fixed (21), auto start-fix gate (22 quando flag ligada)

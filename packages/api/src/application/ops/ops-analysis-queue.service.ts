@@ -23,6 +23,8 @@ import {
   assertGithubPrUrlForReadyForPr,
   type PlatformDefectService,
 } from './platform-defect.service.js'
+import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
+import { finalizeTriageDefectPipeline } from './triage-defect-pipeline-followup.js'
 import { sanitizeAnalysisSummary } from '../../domain/support-report/support-report.types.js'
 import { sanitizeOpsAlertAnalysisSummary } from '../../domain/ops/ops-alert-analysis.types.js'
 
@@ -77,6 +79,8 @@ export class OpsAnalysisQueueService {
     private readonly supportRepo?: SupportReportPgRepository,
     private readonly alertStore?: OpsAlertAnalysisStore,
     private readonly platformDefects?: PlatformDefectService,
+    /** ops-console: resolve-on-link-fixed + auto start-fix após triagem */
+    private readonly platformDefectRepo?: PlatformDefectPgRepository,
   ) {}
 
   async enqueueSupportReportBatch(input: {
@@ -308,13 +312,15 @@ export class OpsAnalysisQueueService {
       return
     }
 
+    let triageLinkedDefect: PlatformDefectRecord | null = null
+
     if (this.platformDefects) {
       if (decision === 'new_defect' && input.parentDefectId?.trim()) {
         await this.repo.linkRecurrenceFromPriorDefect(record.id, input.parentDefectId.trim())
       }
 
       if (decision === 'new_defect' && input.defect?.title) {
-        await this.platformDefects.createFromTriage(
+        triageLinkedDefect = await this.platformDefects.createFromTriage(
           {
             title: input.defect.title,
             fingerprint: input.defect.fingerprint ?? null,
@@ -332,8 +338,28 @@ export class OpsAnalysisQueueService {
           },
         )
       } else if (decision === 'link_defect' && input.linkDefectId) {
-        await this.platformDefects.linkIncident(input.linkDefectId, record.id, 'agent_triage')
+        triageLinkedDefect = await this.platformDefects.linkIncident(
+          input.linkDefectId,
+          record.id,
+          'agent_triage',
+        )
       }
+    }
+
+    if (
+      triageLinkedDefect &&
+      this.platformDefects &&
+      this.platformDefectRepo &&
+      (decision === 'new_defect' || decision === 'link_defect')
+    ) {
+      await finalizeTriageDefectPipeline({
+        defect: triageLinkedDefect,
+        incidentId: record.id,
+        queueRepo: this.repo,
+        defectService: this.platformDefects,
+        defectRepo: this.platformDefectRepo,
+      })
+      return
     }
 
     if (

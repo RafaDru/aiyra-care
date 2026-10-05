@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { OpsAnalysisQueueService } from '../src/application/ops/ops-analysis-queue.service.js'
 import { PlatformDefectTransitionError } from '../src/application/ops/platform-defect.service.js'
 import type { OpsAnalysisQueueRecord } from '../src/domain/ops/ops-analysis-queue.types.js'
@@ -36,6 +36,10 @@ function queueRecord(overrides: Partial<OpsAnalysisQueueRecord> = {}): OpsAnalys
 }
 
 describe('OpsAnalysisQueueService triage callback', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('creates defect and marks incident triaged on new_defect', async () => {
     const repo = {
       applyAgentCallback: vi.fn(async () => queueRecord()),
@@ -48,13 +52,15 @@ describe('OpsAnalysisQueueService triage callback', () => {
       applyAgentOpsPatch: vi.fn(async () => true),
     }
     const defects = {
-      createFromTriage: vi.fn(async () => ({ id: 'def-1' })),
+      createFromTriage: vi.fn(async () => ({ id: 'def-1', status: 'open' })),
     }
+    const defectRepo = {}
     const svc = new OpsAnalysisQueueService(
       repo as never,
       supportRepo as never,
       undefined,
       defects as never,
+      defectRepo as never,
     )
 
     await svc.completeFromAgent({
@@ -72,6 +78,40 @@ describe('OpsAnalysisQueueService triage callback', () => {
     )
     expect(repo.setIncidentPipelineStatus).toHaveBeenCalledWith('q-1', 'triaged')
     expect(repo.markCompleted).not.toHaveBeenCalled()
+  })
+
+  it('link_defect to fixed defect resolves incident instead of triaged', async () => {
+    vi.stubEnv('CH_AUTO_START_FIX_ON_TRIAGE', '0')
+    const resolveIncidentsLinkedToDefect = vi.fn(async () => 1)
+    const setIncidentPipelineStatus = vi.fn(async () => undefined)
+    const repo = {
+      applyAgentCallback: vi.fn(async () => queueRecord()),
+      setIncidentPipelineStatus,
+      resolveIncidentsLinkedToDefect,
+      markCompleted: vi.fn(async () => true),
+      findById: vi.fn(async () => queueRecord({ incidentPipelineStatus: 'resolved' })),
+    }
+    const defects = {
+      linkIncident: vi.fn(async () => ({ id: 'def-fixed', status: 'fixed' })),
+    }
+    const svc = new OpsAnalysisQueueService(
+      repo as never,
+      undefined,
+      undefined,
+      defects as never,
+      {} as never,
+    )
+
+    await svc.completeFromAgent({
+      investigationId: 'q-1',
+      remediationSummary: 'Duplicate of fixed defect.',
+      triageDecision: 'link_defect',
+      linkDefectId: 'def-fixed',
+    })
+
+    expect(defects.linkIncident).toHaveBeenCalledWith('def-fixed', 'q-1', 'agent_triage')
+    expect(resolveIncidentsLinkedToDefect).toHaveBeenCalledWith('def-fixed')
+    expect(setIncidentPipelineStatus).not.toHaveBeenCalledWith('q-1', 'triaged')
   })
 
   it('dismisses incident on triageDecision dismiss', async () => {
