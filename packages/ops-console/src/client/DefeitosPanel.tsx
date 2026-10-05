@@ -660,23 +660,6 @@ function DefeitoDetail({
       <DefeitoAgenticReviewCard
         row={row}
         busy={reviewBusy}
-        onRequestReview={async () => {
-          setReviewBusy(true)
-          try {
-            const res = await opsApi.requestPlatformDefectPrReview(defectId)
-            if (res.outcome === 'sent') {
-              message.success('Revisão agêntica solicitada')
-            } else {
-              message.info(res.reason ?? 'Revisão não disparada')
-            }
-            await refreshDetail()
-            await onReload()
-          } catch (err) {
-            message.error(err instanceof Error ? err.message : 'Falha ao solicitar revisão')
-          } finally {
-            setReviewBusy(false)
-          }
-        }}
         onApprove={async () => {
           setReviewBusy(true)
           try {
@@ -729,13 +712,11 @@ function riskLevelColor(level: DefectPrReviewSummary['riskLevel']): string {
 function DefeitoAgenticReviewCard({
   row,
   busy,
-  onRequestReview,
   onApprove,
   onRequestChanges,
 }: {
   row: PlatformDefectItem
   busy: boolean
-  onRequestReview: () => Promise<void>
   onApprove: () => Promise<void>
   onRequestChanges: () => Promise<void>
 }) {
@@ -745,7 +726,11 @@ function DefeitoAgenticReviewCard({
   return (
     <Card size="small" title="Revisão agêntica" style={{ marginTop: 16 }}>
       {!review ? (
-        <Text type="secondary">Nenhuma revisão agêntica registrada.</Text>
+        <Text type="secondary">
+          {showActions
+            ? 'Revisão agêntica dispara automaticamente ao ficar pronto para PR.'
+            : 'Nenhuma revisão agêntica registrada.'}
+        </Text>
       ) : (
         <Space direction="vertical" size={8} style={{ width: '100%' }}>
           <Space wrap>
@@ -801,11 +786,8 @@ function DefeitoAgenticReviewCard({
       )}
       {showActions && (
         <Space wrap style={{ marginTop: 12 }}>
-          <Button type="primary" loading={busy} onClick={() => void onRequestReview()}>
-            Solicitar revisão
-          </Button>
           <Button href={row.prUrl!} target="_blank" rel="noreferrer">
-            Abrir PR no GitHub
+            Abrir PR
           </Button>
           <Button loading={busy} onClick={() => void onApprove()}>
             Aprovar para merge

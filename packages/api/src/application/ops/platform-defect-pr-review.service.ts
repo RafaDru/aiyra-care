@@ -43,14 +43,10 @@ export type PlatformDefectWithLatestReview = PlatformDefectRecord & {
   latestReview: DefectPrReviewSummary | null
 }
 
-function parseCooldownMs(): number {
-  const raw = process.env.CH_PR_REVIEW_COOLDOWN_MS?.trim()
-  const n = raw ? Number(raw) : 1_800_000
-  return Number.isFinite(n) && n >= 0 ? n : 1_800_000
-}
-
 export function isChAutoPrReviewOnReadyEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.CH_AUTO_PR_REVIEW_ON_READY === '1'
+  const raw = env.CH_AUTO_PR_REVIEW_ON_READY?.trim()
+  if (!raw || raw === '1') return true
+  return raw !== '0'
 }
 
 export class PlatformDefectPrReviewService {
@@ -82,7 +78,7 @@ export class PlatformDefectPrReviewService {
 
   async requestReview(
     defectId: string,
-    options?: { force?: boolean; trigger?: DefectPrReviewTrigger },
+    options?: { force?: boolean; trigger?: DefectPrReviewTrigger; headSha?: string | null },
   ): Promise<{
     outcome: 'sent' | 'skipped'
     reason?: string
@@ -96,20 +92,20 @@ export class PlatformDefectPrReviewService {
       throw new PlatformDefectPrReviewError('invalid_state')
     }
 
-    const running = await this.reviewRepo.findRunningByDefectId(defectId)
+    const prUrl = defect.prUrl!
+    const headSha = options?.headSha?.trim() || null
+
+    const running = await this.reviewRepo.findRunningByDefectIdAndPrUrl(defectId, prUrl)
     if (running) {
       const withReview = await this.attachLatestReview(defect)
       return { outcome: 'skipped', reason: 'review_in_progress', defect: withReview }
     }
 
     if (!options?.force) {
-      const lastCompleted = await this.reviewRepo.findLatestTerminalCompletedAt(defectId)
-      if (lastCompleted) {
-        const elapsed = Date.now() - new Date(lastCompleted).getTime()
-        if (elapsed < parseCooldownMs()) {
-          const withReview = await this.attachLatestReview(defect)
-          return { outcome: 'skipped', reason: 'cooldown', defect: withReview }
-        }
+      const skip = await this.shouldSkipForReviewScope(defectId, prUrl, headSha)
+      if (skip) {
+        const withReview = await this.attachLatestReview(defect)
+        return { outcome: 'skipped', reason: 'already_reviewed', defect: withReview }
       }
     }
 
@@ -266,5 +262,18 @@ export class PlatformDefectPrReviewService {
   ): Promise<Array<{ id: string; referenceCode: string | null; fingerprint: string | null }>> {
     if (!incidentIds.length) return []
     return this.defectRepo.listLinkedIncidentsMeta(incidentIds)
+  }
+
+  /** Idempotência: uma revisão por (defect_id, pr_url, head_sha); novo SHA no PR permite re-disparo. */
+  private async shouldSkipForReviewScope(
+    defectId: string,
+    prUrl: string,
+    headSha: string | null,
+  ): Promise<boolean> {
+    const completed = await this.reviewRepo.findLatestCompletedForPrUrl(defectId, prUrl)
+    if (!completed) return false
+    if (!headSha) return true
+    if (!completed.headSha) return true
+    return completed.headSha === headSha
   }
 }

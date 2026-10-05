@@ -5,6 +5,7 @@ import {
   dispatchPlatformDefectPrReview,
 } from '../src/application/ops/platform-defect-pr-review-dispatch.js'
 import {
+  isChAutoPrReviewOnReadyEnabled,
   PlatformDefectPrReviewError,
   PlatformDefectPrReviewService,
 } from '../src/application/ops/platform-defect-pr-review.service.js'
@@ -99,7 +100,59 @@ describe('platform-defect-pr-review callback auth', () => {
   })
 })
 
+describe('isChAutoPrReviewOnReadyEnabled', () => {
+  it('defaults to on unless CH_AUTO_PR_REVIEW_ON_READY=0', () => {
+    expect(isChAutoPrReviewOnReadyEnabled({})).toBe(true)
+    expect(isChAutoPrReviewOnReadyEnabled({ CH_AUTO_PR_REVIEW_ON_READY: '1' })).toBe(true)
+    expect(isChAutoPrReviewOnReadyEnabled({ CH_AUTO_PR_REVIEW_ON_READY: '0' })).toBe(false)
+  })
+})
+
 describe('PlatformDefectPrReviewService', () => {
+  it('skips duplicate request-review for same defect and pr_url', async () => {
+    const defectRepo = {
+      findById: vi.fn(async () => readyDefect),
+      listLinkedIncidentIds: vi.fn(async () => []),
+      listLinkedIncidentsMeta: vi.fn(async () => []),
+    } as unknown as PlatformDefectPgRepository
+
+    const reviewRepo = {
+      findRunningByDefectIdAndPrUrl: vi.fn(async () => null),
+      findLatestCompletedForPrUrl: vi.fn(async () => ({
+        id: 'rev-done',
+        defectId: readyDefect.id,
+        status: 'completed',
+        trigger: 'auto_ready',
+        prUrl: readyDefect.prUrl!,
+        branchName: readyDefect.branchName,
+        headSha: 'abc123',
+        investigationId: null,
+        dimensions: null,
+        recommendation: 'approve',
+        recommendationRationale: null,
+        ciSnapshot: null,
+        prReviewCommentUrl: null,
+        agentRunUrl: null,
+        failureDetails: null,
+        rawJson: {},
+        startedAt: '2026-10-05T12:00:00.000Z',
+        completedAt: '2026-10-05T12:01:00.000Z',
+        createdAt: '2026-10-05T12:00:00.000Z',
+      })),
+      findLatestByDefectId: vi.fn(async () => null),
+    } as unknown as DefectPrReviewPgRepository
+
+    const svc = new PlatformDefectPrReviewService(
+      defectRepo,
+      reviewRepo,
+      new PlatformDefectService(defectRepo),
+    )
+
+    const result = await svc.requestReview(readyDefect.id, { trigger: 'auto_ready' })
+    expect(result.outcome).toBe('skipped')
+    expect(result.reason).toBe('already_reviewed')
+  })
+
   it('processCallback persists review and returns latestReview summary', async () => {
     const defectRepo = {
       findById: vi.fn(async () => readyDefect),

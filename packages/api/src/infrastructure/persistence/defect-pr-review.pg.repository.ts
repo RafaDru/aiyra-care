@@ -140,6 +140,36 @@ export class DefectPrReviewPgRepository {
     return mapRow(res.rows[0] as Record<string, unknown>)
   }
 
+  async findRunningByDefectIdAndPrUrl(
+    defectId: string,
+    prUrl: string,
+  ): Promise<DefectPrReviewRecord | null> {
+    const res = await this.pool.query(
+      `SELECT * FROM defect_pr_reviews
+       WHERE defect_id = $1::uuid AND pr_url = $2 AND status IN ('pending', 'running')
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [defectId, prUrl],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async findLatestCompletedForPrUrl(
+    defectId: string,
+    prUrl: string,
+  ): Promise<DefectPrReviewRecord | null> {
+    const res = await this.pool.query(
+      `SELECT * FROM defect_pr_reviews
+       WHERE defect_id = $1::uuid AND pr_url = $2 AND status = 'completed'
+       ORDER BY completed_at DESC NULLS LAST
+       LIMIT 1`,
+      [defectId, prUrl],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
   async findLatestTerminalCompletedAt(defectId: string): Promise<string | null> {
     const res = await this.pool.query<{ completed_at: Date | null }>(
       `SELECT completed_at FROM defect_pr_reviews

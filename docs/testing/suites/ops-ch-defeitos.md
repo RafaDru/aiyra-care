@@ -32,7 +32,7 @@
 20. **Incidentes ao vivo:** lista recarrega a cada ~15s (sem F5); coluna **Defeito** + expand mostram `DEF-*` vinculado via `platform_defect_incidents`
 21. **Triagem → DEF fixed:** callback `link_defect` para defeito já `fixed` → INC **`resolved`** (vitest `ops-analysis-queue-triage-callback` / `triage-defect-pipeline-followup`)
 22. **Auto start-fix triagem:** com `CH_AUTO_START_FIX_ON_TRIAGE=1` + webhook Correção ready, após `new_defect` o DEF passa a `in_fix` quando dispatch `sent` (default env off)
-23. **R3 revisão agêntica:** defeito `ready_for_pr` + `prUrl` — expand **Revisão agêntica**; **Solicitar revisão** (`POST request-review`); mock `POST /api/platform-defects/review-callback` com `defect_pr_review_v1` → card mostra eficácia, risco, segurança, `recommendation`
+23. **R3 revisão agêntica:** defeito `ready_for_pr` + `prUrl` — expand **Revisão agêntica** (texto de auto-dispatch); transição/callback dispara Agent 3 (ou `POST request-review` em teste); mock `POST /api/platform-defects/review-callback` com `defect_pr_review_v1` → card mostra eficácia, risco, segurança, `recommendation`; segundo dispatch mesmo `pr_url` → `already_reviewed` (vitest)
 24. **R3 G3:** **Aprovar para merge** registra intent + abre GitHub; **Pedir mudanças** reabre defeito (`open`); merge continua manual no GitHub
 25. `GET /api/incident-dispatch/health` — `webhooks.defectPrReview.ready` quando `CURSOR_DEFECT_PR_REVIEW_*` configurados
 
