@@ -15,6 +15,8 @@
 
 Coluna de verdade: `platform_defects.last_fix_dispatch_sent_at` (webhook `defect_fix_v1` HTTP 2xx).
 
+**Após triagem (ops-console):** com `CH_AUTO_START_FIX_ON_TRIAGE=1`, callback `new_defect` / `link_defect` (DEF `open`|`in_fix`) dispara o mesmo fluxo que **Iniciar correção** (log `[triage-defect-pipeline] auto start-fix`). Default **off** — use também `CH_DEFECT_CORRECTION_BATCH_*` para lote periódico. `link_defect` em DEF **`fixed`** → incidente **`resolved`** (não fica `triaged`).
+
 ## Reconciliação automática
 
 `GET /api/platform-defects` e `GET /api/platform-defects/:id` revertem defeitos `in_fix` sem `last_fix_dispatch_sent_at` para `open` (limpa `fix_started_at`).

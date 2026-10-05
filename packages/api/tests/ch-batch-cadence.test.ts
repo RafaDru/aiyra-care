@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  autoStartFixOnTriage,
   defectCorrectionBatchAutoStartFix,
   defectCorrectionBatchIntervalMs,
   triageBatchIntervalMs,
@@ -26,6 +27,8 @@ describe('ch-batch-cadence config', () => {
     expect(defectCorrectionBatchAutoStartFix({ CH_DEFECT_CORRECTION_BATCH_AUTO_START_FIX: '1' })).toBe(
       true,
     )
+    expect(autoStartFixOnTriage({ CH_AUTO_START_FIX_ON_TRIAGE: '1' })).toBe(true)
+    expect(autoStartFixOnTriage({})).toBe(false)
   })
 })
 

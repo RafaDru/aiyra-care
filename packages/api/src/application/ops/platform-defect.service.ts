@@ -76,6 +76,10 @@ export class PlatformDefectService {
     return this.repo.findByReferenceCode(referenceCode)
   }
 
+  findById(id: string): Promise<PlatformDefectRecord | null> {
+    return this.repo.findById(id)
+  }
+
   searchForOps(query: string, limit = 50): Promise<PlatformDefectRecord[]> {
     return this.repo.searchForOps(query, limit)
   }
@@ -124,10 +128,11 @@ export class PlatformDefectService {
     defectId: string,
     incidentId: string,
     linkedBy: PlatformDefectIncidentLinkedBy,
-  ): Promise<void> {
+  ): Promise<PlatformDefectRecord> {
     const defect = await this.repo.findById(defectId)
     if (!defect) throw new PlatformDefectTransitionError('not_found')
     await this.repo.linkIncident(defectId, incidentId, linkedBy)
+    return defect
   }
 
   /** Somente após `dispatch.outcome === sent` (via start-fix). */
