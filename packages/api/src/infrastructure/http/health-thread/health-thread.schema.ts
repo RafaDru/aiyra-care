@@ -44,19 +44,19 @@ export const closeHealthThreadSchema = z.object({
 export const investigationWizardSchema = z.object({
   patientId: z.string().uuid(),
   title: z.string().trim().min(1).max(500),
-  reason: z.string().max(2000).nullish(),
-  workingHypothesis: z.string().max(500).nullish(),
-  symptoms: z.array(z.string().max(200)).nullish(),
-  plannedSteps: z.array(z.string().max(200)).nullish(),
+  reason: z.string().max(2000).nullish().transform((v) => v ?? undefined),
+  workingHypothesis: z.string().max(500).nullish().transform((v) => v ?? undefined),
+  symptoms: z.array(z.string().max(200)).nullish().transform((v) => v ?? undefined),
+  plannedSteps: z.array(z.string().max(200)).nullish().transform((v) => v ?? undefined),
 })
 
 export const taskWizardSchema = z.object({
   patientId: z.string().uuid(),
   title: z.string().trim().min(1).max(500),
-  summary: z.string().max(2000).nullish(),
-  assignee: z.string().max(255).nullish(),
-  location: z.string().max(255).nullish(),
-  dueDate: z.coerce.date().nullish(),
+  summary: z.string().max(2000).nullish().transform((v) => v ?? undefined),
+  assignee: z.string().max(255).nullish().transform((v) => v ?? undefined),
+  location: z.string().max(255).nullish().transform((v) => v ?? undefined),
+  dueDate: z.coerce.date().nullish().transform((v) => v ?? undefined),
 })
 
 export const addThreadEntrySchema = z.object({
