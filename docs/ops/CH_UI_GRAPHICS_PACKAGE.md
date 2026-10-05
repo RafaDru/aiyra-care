@@ -270,3 +270,93 @@ Ordem sugerida: **G1 → G2 → G4 → G3 → G5 → G6 → G7 → G8**.
 | Incidentes | `IncidentesPanel.tsx`, `ch-incident-display.ts` |
 | Geral | `App.tsx`, `api.ts` → `/api/alerts/check` |
 | SSE ref | `CH_INCIDENT_BOARD_SSE.md`, `sse-response.helper.ts`, `sync-completion.bus.ts` |
+
+---
+
+## 14. Anexo — copy PT (confirmações)
+
+Helper sugerido: `packages/ops-console/src/client/ch-transactional-confirm.tsx`
+
+| `actionId` | Título modal | Corpo (1–2 frases) | `okText` | `okDanger` |
+|------------|--------------|-------------------|----------|------------|
+| `defect.start_fix` | Iniciar correção? | O agente **Correção Dev** receberá o defeito e o status passará para **Em correção**. | Iniciar | false |
+| `defect.requeue_fix` | Reenfileirar correção? | Um novo disparo será enviado sem alterar o status atual. | Reenfileirar | false |
+| `defect.mark_ready_pr` | Marcar pronto para PR? | Use só se o PR já existir ou for criado manualmente. | Marcar pronto | false |
+| `defect.mark_fixed` | Marcar como corrigido? | O defeito será fechado no CH. Se o PR no GitHub ainda estiver aberto, faça o merge separadamente. | Marcar corrigido | true |
+| `defect.approve_merge` | Aprovar para merge? | Registra sua aprovação (G3) e abre o PR no GitHub. O merge continua manual. | Aprovar e abrir PR | false |
+| `defect.request_changes` | Pedir mudanças? | O defeito volta para **Aberto** para um novo ciclo de correção. | Reabrir defeito | true |
+| `incident.retry_dispatch` | Nova tentativa de triagem? | Reenvia o incidente para a fila de dispatch / automação. | Reenviar | false |
+
+`onOk` só executa o `POST` após `Modal.confirm` resolver.
+
+---
+
+## 15. Anexo — labels humanizados (review / enums)
+
+| Valor API | UI PT |
+|-----------|--------|
+| `plausible` | Plausível |
+| `uncertain` | Incerto |
+| `unlikely` | Improvável |
+| `approve` | Aprovar merge |
+| `request_changes` | Pedir mudanças |
+| `block` | Bloquear (advisory) |
+| `pass` | Ok |
+| `concerns` | Ressalvas |
+| `running` | Revisando… |
+| `pending` | Na fila |
+| `completed` | Concluída |
+| `failed` | Falhou |
+
+Função: `humanizeDefectReviewField()` em `ch-defect-display.ts` (ou `ch-review-display.ts`).
+
+---
+
+## 16. Anexo — componentes novos
+
+| Componente | Responsabilidade |
+|------------|------------------|
+| `ChCopyableRefTag` | `INC-*` / `DEF-*` — `Tag` + `CopyOutlined`; `stopPropagation` no clique copiar |
+| `ChLiveIndicator` | «Ao vivo» verde / «Reconectando…» âmbar / «Offline» cinza (SSE) |
+| `ChDetailSection` | Título + `children`; borda leve, `marginBottom: 12` |
+| `ChIncidentDetailBody` | Composição seções §6.1 |
+| `ChDefectDetailBody` | Composição seções §6.2 + `DefeitoAgenticReviewCard` |
+| `useIncidentBoardStream` | `EventSource`, patch `items`, reconnect backoff |
+| `useDefectBoardStream` | idem defeitos |
+
+**Tabela — interação linha:**
+
+```typescript
+onRow: (record) => ({
+  onClick: (e) => {
+    if ((e.target as HTMLElement).closest('[data-ch-no-row-toggle]')) return
+    toggleExpanded(record.id)
+  },
+  style: { cursor: 'pointer' },
+})
+```
+
+Marcar botões, links e `ChCopyableRefTag` com `data-ch-no-row-toggle`.
+
+---
+
+## 17. Anexo — SSE defeito (payload)
+
+```typescript
+export type DefectBoardChangeEvent = {
+  deploymentTier: string
+  defectId: string
+  referenceCode: string | null
+  status: PlatformDefectStatus
+  updatedAt: string
+  latestReview?: {
+    status: string
+    recommendation: string | null
+  } | null
+  suggestedStatusFilter: 'all_open' | 'ready_for_pr' | 'fixed' | 'all'
+}
+```
+
+Evento SSE: `defect_updated`. Publicar em: `PlatformDefectService` status patch, `platform-defect-pr-review.service` callback terminal, `start-fix` outcome que altera lista.
+
+**Deep link:** `?highlight=1` opcional para `ops-row-highlight`; default **sem** query = sem highlight (P3).
