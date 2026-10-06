@@ -12,6 +12,8 @@ describe('resolveClientErrorIncidentBridgeConfig', () => {
     expect(cfg.dedupeMs).toBe(15 * 60 * 1000)
     expect(cfg.minCount).toBe(1)
     expect(cfg.features.has('account_settings')).toBe(true)
+    expect(cfg.features.has('patient_integrations')).toBe(true)
+    expect(cfg.features.has('integrations')).toBe(true)
     expect(cfg.apiPathPrefixes).toEqual(['/auth', '/account', '/patients'])
   })
 

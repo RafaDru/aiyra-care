@@ -54,11 +54,14 @@ import { DefectPrReviewPgRepository } from '../../api/src/infrastructure/persist
 import { prReviewDispatchErrorMessage } from '../../api/src/application/ops/platform-defect-pr-review-dispatch.js'
 import { PlatformDefectMergeWebhookService } from '../../api/src/application/ops/platform-defect-merge-webhook.service.js'
 import { DefectCiPipelineService } from '../../api/src/application/ops/defect-ci-pipeline.service.js'
+import { DefectCiPollService } from '../../api/src/application/ops/defect-ci-poll.service.js'
 import { verifyGithubWebhookSignature } from '../../api/src/domain/ops/github-webhook-signature.js'
 import { resolveGithubDefectMergeWebhookSecret } from '../../api/src/application/ops/platform-defect-merge-webhook.config.js'
 import {
+  defectCiPollIntervalMs,
   isChG3RequireReviewApproveEnabled,
   resolveGithubDefectCiWebhookSecret,
+  resolveGithubOpsToken,
 } from '../../api/src/application/ops/defect-ci-pipeline.config.js'
 import { IncidentDefectCycleMetricsService } from '../../api/src/application/ops/incident-defect-cycle-metrics.service.js'
 import { IncidentDefectCycleMetricsPgRepository } from '../../api/src/infrastructure/persistence/incident-defect-cycle-metrics.pg.repository.js'
@@ -156,6 +159,7 @@ const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(
   resolveIncidentsWhenDefectFixed,
 )
 const defectCiPipelineService = new DefectCiPipelineService(platformDefectRepo)
+const defectCiPollService = new DefectCiPollService(platformDefectRepo, defectCiPipelineService)
 const incidentDefectCycleMetricsService = new IncidentDefectCycleMetricsService(
   new IncidentDefectCycleMetricsPgRepository(pool),
 )
@@ -898,6 +902,30 @@ async function main() {
     },
   )
 
+  fastify.post<{ Params: { id: string }; Body?: { force?: boolean } }>(
+    '/api/platform-defects/:id/refresh-ci',
+    async (req, reply) => {
+      if (!resolveGithubOpsToken()) {
+        return reply.status(412).send({ error: 'github_ops_token_required' })
+      }
+      const result = await defectCiPollService.refreshDefectById(req.params.id)
+      if (!result.ok) {
+        if (result.error === 'not_found') return reply.status(404).send({ error: result.error })
+        if (result.error === 'invalid_state') return reply.status(409).send({ error: result.error })
+        if (result.error === 'no_token') {
+          return reply.status(412).send({ error: 'github_ops_token_required' })
+        }
+        return reply.status(502).send({ error: result.error, reason: result.reason })
+      }
+      return {
+        ok: true,
+        idempotent: result.idempotent,
+        ...(result.reason ? { reason: result.reason } : {}),
+        item: result.defect,
+      }
+    },
+  )
+
   fastify.post<{ Params: { id: string }; Body: { force?: boolean } }>(
     '/api/platform-defects/:id/request-review',
     async (req, reply) => {
@@ -1069,6 +1097,7 @@ async function main() {
   let probeTimer: ReturnType<typeof setInterval> | undefined
   let dispatchTimer: ReturnType<typeof setInterval> | undefined
   let defectCorrectionBatchTimer: ReturnType<typeof setInterval> | undefined
+  let defectCiPollTimer: ReturnType<typeof setInterval> | undefined
   let shuttingDown = false
 
   const shutdown = async () => {
@@ -1077,6 +1106,7 @@ async function main() {
     if (probeTimer) clearInterval(probeTimer)
     if (dispatchTimer) clearInterval(dispatchTimer)
     if (defectCorrectionBatchTimer) clearInterval(defectCorrectionBatchTimer)
+    if (defectCiPollTimer) clearInterval(defectCiPollTimer)
     try {
       if (vite) await vite.close()
       await fastify.close()
@@ -1145,6 +1175,32 @@ async function main() {
     defectCorrectionBatchTimer = setInterval(runDefectBatch, defectBatchMs)
     defectCorrectionBatchTimer.unref()
     console.log(`[ops-console] defect correction batch every ${defectBatchMs}ms`)
+  }
+
+  const defectCiPollMs = defectCiPollIntervalMs()
+  if (defectCiPollMs > 0) {
+    const runDefectCiPoll = () => {
+      defectCiPollService
+        .reconcileReadyForPr()
+        .then((result) => {
+          if (!result.skipped && (result.updated > 0 || result.errors > 0)) {
+            console.log('[ops-console] defect CI poll reconcile', JSON.stringify(result))
+          }
+        })
+        .catch((err) => {
+          console.error(
+            '[ops-console] defect CI poll reconcile',
+            err instanceof Error ? err.message : err,
+          )
+        })
+    }
+    runDefectCiPoll()
+    defectCiPollTimer = setInterval(runDefectCiPoll, defectCiPollMs)
+    defectCiPollTimer.unref()
+    console.log(
+      `[ops-console] defect CI poll reconcile every ${defectCiPollMs}ms` +
+        (resolveGithubOpsToken() ? '' : ' (GITHUB_OPS_TOKEN missing — ticks no-op)'),
+    )
   }
 }
 

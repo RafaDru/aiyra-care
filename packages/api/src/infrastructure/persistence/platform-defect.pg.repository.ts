@@ -362,6 +362,20 @@ export class PlatformDefectPgRepository {
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
+  /** CI poll reconciler — `ready_for_pr` with registered GitHub PR URL. */
+  async listReadyForPrWithPrUrl(limit = 25): Promise<PlatformDefectRecord[]> {
+    const res = await this.pool.query(
+      `SELECT * FROM platform_defects
+       WHERE status = 'ready_for_pr'
+         AND pr_url IS NOT NULL
+         AND trim(pr_url) <> ''
+       ORDER BY last_ci_checked_at NULLS FIRST, updated_at ASC
+       LIMIT $1`,
+      [limit],
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
   async applyCiPipelineSnapshot(
     id: string,
     input: {

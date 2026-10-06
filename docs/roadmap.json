@@ -2417,19 +2417,19 @@
       "title": "Client errors — ingresso universal de falha",
       "summary": "Expandir bridge além do piloto account_settings/dashboard/ui: mapa web/mobile/integration_links, MIN_COUNT real, dedupe prod, fases rollout. Spec: CLIENT_ERROR_INCIDENT_BRIDGE.md § Universal failure ingress; gap: CH_OPS_GAP_AND_PRIORITY.md.",
       "status": "planned",
-      "statusLabel": "spec_ready — implementação por fase",
+      "statusLabel": "fase 1 defaults — fases 2–4 pendentes",
       "items": [
         {
           "id": "client-error-ingress-min-count",
           "title": "Aplicar CLIENT_ERROR_INCIDENT_MIN_COUNT no bridge",
-          "status": "planned",
-          "detail": "Janela contagem antes de enqueue; alinhar dedupe signals."
+          "status": "done",
+          "detail": "tryAcquireEnqueueSlot + vitest client-error-incident-bridge.service."
         },
         {
           "id": "client-error-ingress-phase1-web",
           "title": "Fase 1 — patient tabs web",
-          "status": "planned",
-          "detail": "Features patient_exams, patient_integrations, patient_wallet + allowlist env."
+          "status": "done",
+          "detail": "DEFAULT_FEATURES expandido (patient_* + integrations); doc notebook CLIENT_ERROR_INCIDENT_BRIDGE.md."
         },
         {
           "id": "client-error-ingress-phase2-mobile",
@@ -2452,7 +2452,7 @@
       "title": "CH — Fechamento de ciclo operacional (C1–C9)",
       "summary": "Declarar ritualmente o ciclo suporte/alerta → INC → DEF → review → merge → fixed + INC resolved: R2 CI no defeito (mig 086), gate G3 opcional, timeline, métricas fase, suite ops-ch-cycle-close. Spec: docs/ops/CH_CYCLE_CLOSE_SPEC.md. Depende de ops-planned-maintenance para deploys com bridge on.",
       "status": "planned",
-      "statusLabel": "C1 spec_ready — implementação C2–C9 pendente",
+      "statusLabel": "C1–C7 código — C8–C9 ritual pendente",
       "items": [
         {
           "id": "ch-cycle-close-c1",
@@ -2463,32 +2463,32 @@
         {
           "id": "ch-cycle-close-c2",
           "title": "C2 — Migration 086 pipeline_status",
-          "status": "planned",
+          "status": "done",
           "detail": "DDL platform_defects CI/pipeline + apply-migration-086.mjs."
         },
         {
           "id": "ch-cycle-close-c3",
           "title": "C3 — Webhook/poll CI GitHub",
-          "status": "planned",
-          "detail": "POST /api/webhooks/github/defect-ci; GITHUB_DEFECT_CI_WEBHOOK_SECRET; refresh-ci."
+          "status": "done",
+          "detail": "POST /api/webhooks/github/defect-ci; CH_DEFECT_CI_POLL_INTERVAL_MS reconciliador; refresh-ci."
         },
         {
           "id": "ch-cycle-close-c4",
           "title": "C4 — CI failed → in_fix",
-          "status": "planned",
-          "detail": "Transição + defect_fix_v1 enriquecido; alinha ch-solo-operator-r2."
+          "status": "done",
+          "detail": "applyCiFailureReopen + CH_DEFECT_CI_AUTO_REOPEN_ON_FAIL; defect_fix_v1 ciFailure."
         },
         {
           "id": "ch-cycle-close-c5",
           "title": "C5 — Gate CH_G3_REQUIRE_REVIEW_APPROVE",
-          "status": "planned",
-          "detail": "operator-approve-pr 409 + override auditável; default env 0 até decisão Rafael."
+          "status": "done",
+          "detail": "operator-approve-pr 409 + override auditável; default env 0 notebook."
         },
         {
           "id": "ch-cycle-close-c6",
           "title": "C6 — Timeline ciclo no expand DEF",
-          "status": "planned",
-          "detail": "Stepper INC→merge; banners CI/review."
+          "status": "done",
+          "detail": "ch-pipeline-display stepper + DefeitosPanel badges CI/review."
         },
         {
           "id": "ch-cycle-close-c7",

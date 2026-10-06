@@ -9,7 +9,7 @@ When enabled, qualifying `client_errors` fingerprints and unhandled **5xx** on c
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED` | `0` | `1` turns bridge on |
-| `CLIENT_ERROR_INCIDENT_FEATURES` | `account_settings,dashboard,ui` | Feature allowlist (pilot) |
+| `CLIENT_ERROR_INCIDENT_FEATURES` | phase 0+1 defaults (see § Universal) | Feature allowlist |
 | `CLIENT_ERROR_INCIDENT_DEDUPE_MS` | `900000` (15 min) | Max one auto-incident per fingerprint × deployment tier (piloto/teste; aumente em prod) |
 | `CLIENT_ERROR_INCIDENT_MIN_COUNT` | `1` | Ocorrências mínimas para abrir INC (piloto: **1** = cada fingerprint qualificada) |
 | `CLIENT_ERROR_INCIDENT_API_PREFIXES` | `/auth,/account,/patients` | Server 5xx hook paths |
@@ -25,7 +25,7 @@ node packages/api/scripts/apply-migration-078.mjs
 
 ```env
 CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED=1
-CLIENT_ERROR_INCIDENT_FEATURES=account_settings,dashboard,ui
+CLIENT_ERROR_INCIDENT_FEATURES=account_settings,dashboard,ui,patient_exams,patient_integrations,patient_wallet,patient_detail,integrations,family_hub
 CLIENT_ERROR_INCIDENT_DEDUPE_MS=900000
 CLIENT_ERROR_INCIDENT_MIN_COUNT=1
 ```
@@ -85,7 +85,7 @@ When `OPS_PLANNED_MAINTENANCE=1`, the bridge **does not** enqueue INC (client in
 
 | Ambiente | `CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED` | Features | `MIN_COUNT` | `DEDUPE_MS` |
 |----------|----------------------------------------|----------|-------------|-------------|
-| **Notebook / integração** | `1` para piloto | `account_settings,dashboard,ui` | `1` | `900000` (15m) |
+| **Notebook / integração** | `1` para piloto | phase 0+1 defaults (patient tabs + integrations) | `1` | `900000` (15m) |
 | **Preview** | `0` até validar suite | igual notebook quando `1` | `1` | `900000` |
 | **Prod (futuro)** | `1` após fase 2+ | mapa fase 1–3 | `3–5` | `21600000` (6h) |
 

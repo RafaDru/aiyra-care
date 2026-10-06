@@ -32,7 +32,11 @@ export class DefectCiPipelineService {
     if (!this.isEnabled()) {
       return { outcome: 'disabled', reason: 'webhook_disabled' }
     }
+    return this.ingestGithubCiEvent(payload)
+  }
 
+  /** Webhook + CI poll reconciler — does not require webhook secret. */
+  async ingestGithubCiEvent(payload: unknown): Promise<DefectCiPipelineHandleOutcome> {
     const parsed = parseGithubDefectCiEvent(payload)
     if (!parsed.eligible || !parsed.pipelineStatus) {
       return { outcome: 'ignored', reason: parsed.reason ?? 'not_eligible' }

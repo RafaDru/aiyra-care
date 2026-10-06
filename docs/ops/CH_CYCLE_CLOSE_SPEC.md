@@ -253,6 +253,16 @@ Ao re-dispatch após CI fail ou «Pedir mudanças», incluir:
 
 Reiniciar ops-console `:3013` após alterar `GITHUB_*` / `CH_*`.
 
+### 7.1 Reconciliador poll CI (§4.1 operacional)
+
+| Mecanismo | Uso |
+|-----------|-----|
+| `CH_DEFECT_CI_POLL_INTERVAL_MS` + `GITHUB_OPS_TOKEN` | Loop no ops-console `:3013`: varre `platform_defects` `ready_for_pr` com `pr_url`, consulta GitHub Actions (`head_sha` do PR), reusa `DefectCiPipelineService.ingestGithubCiEvent` |
+| `POST /api/platform-defects/:id/refresh-ci` | On-demand (notebook); **412** sem `GITHUB_OPS_TOKEN` |
+| Webhook `defect-ci` | Caminho preferido quando GitHub entrega eventos; poll é **fallback** |
+
+Ordem de prioridade por defeito: `last_ci_checked_at NULLS FIRST`, depois `updated_at ASC`. Limite por tick: `CH_DEFECT_CI_POLL_LIMIT` (default 25).
+
 ---
 
 ## 8. Rollout C1–C9 (ordem de implementação)

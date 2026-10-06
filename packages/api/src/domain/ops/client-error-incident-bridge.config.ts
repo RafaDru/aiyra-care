@@ -4,7 +4,20 @@ import type {
   ClientErrorIncidentRule,
 } from './client-error-incident-bridge.types.js'
 
-const DEFAULT_FEATURES = ['account_settings', 'dashboard', 'ui']
+/** Phase 0 pilot + phase 1 web patient/integrations surfaces — see CLIENT_ERROR_INCIDENT_BRIDGE.md */
+const DEFAULT_FEATURES = [
+  'account_settings',
+  'dashboard',
+  'ui',
+  'patient_exams',
+  'patient_integrations',
+  'patient_wallet',
+  'patient_detail',
+  'patient_context',
+  'integrations',
+  'family_hub',
+  'settings',
+]
 /** Piloto / teste: 15 min — produção pode subir via env (ex. 6h). */
 const DEFAULT_DEDUPE_MS = 15 * 60 * 1000
 const DEFAULT_API_PREFIXES = ['/auth', '/account', '/patients']
