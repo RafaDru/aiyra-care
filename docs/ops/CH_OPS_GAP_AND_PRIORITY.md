@@ -1,10 +1,19 @@
 # CH / Ops — gap analysis e prioridade (Rafael 2026-10-06)
 
-**Alinhamento operacional aprovado:** telemetria/falha → INC → triagem → DEF → correção → PR → review agêntico; **manual:** G3 «Aprovar para merge» no CH + merge GitHub humano.
+**Alinhamento operacional (pós-charter + #114/#115):** telemetria/falha → INC → triagem → DEF → correção → PR → review agêntico → **G3 agêntico** (`operator-approve-pr`) → **merge agêntico** `main` quando CI/QA passam — **sem** clique humano no CH nem merge manual por Rafael.
 
-**Hub narrativo:** [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md) · **Manutenção:** [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) · **Ciclo C1–C9:** [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md)
+**Hub narrativo:** [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md) · **G3 spec:** [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) · **Túnel/callbacks:** [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) · **Ingress prod:** [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) · **Manutenção:** [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) · **Ciclo C1–C9:** [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md) · **Carta:** [`OPS_SOLO_OPERATOR_CHARTER.md`](../OPS_SOLO_OPERATOR_CHARTER.md)
 
-**Prioridade de engenharia:** itens desta visão **não** em `main` ou **partial** abaixo vêm **antes** de trabalho genérico de produto.
+**Prioridade de engenharia:** itens **partial** ou specs P0/P1 abaixo vêm antes de produto genérico.
+
+---
+
+## Entregas recentes `main`
+
+| PR | Entrega |
+|----|---------|
+| [#114](https://github.com/RafaDru/aiyra-care/pull/114) | **C3–C8** cycle-close: webhook/poll CI, pipeline UI, G3 override UI, `register-pr`, métricas ciclo 7d |
+| [#115](https://github.com/RafaDru/aiyra-care/pull/115) | Universal ingress fases 2–4 (mobile, `integration_links`, `ava_companion`); `MIN_COUNT` ativo no bridge |
 
 ---
 
@@ -12,48 +21,47 @@
 
 | Capacidade | Status | Evidência (código / doc) | Lacuna / próximo passo |
 |------------|--------|---------------------------|-------------------------|
-| **Ingest `client_errors`** | exists | `POST /telemetry/client-errors` · `packages/api/src/application/telemetry/client-error.service.ts` · mig **051** · [`TELEMETRY.md`](./TELEMETRY.md) | Retention job 90d (backlog TELEMETRY) |
-| **Bridge client_error → INC** | exists | `ClientErrorIncidentBridgeService` · mig **078** · `MIN_COUNT` via `tryAcquireEnqueueSlot` · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Default `BRIDGE_ENABLED=0`; expandir fases 2–4 |
-| **Universal failure ingress** | exists | Fases 0–4: `resolveBridgeIngressFeature`, mobile parity, `/integration-links` 5xx, `ava_companion` · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Prod: `MIN_COUNT`/`DEDUPE_MS` + `SRE_FEATURES` por ambiente |
-| **API 5xx → INC (hook)** | partial | `registerClientErrorIncidentErrorHandler` · prefixos incl. `/integration-links` · vitest | Sem correlação `incident_id` degradado global |
-| **Manutenção planejada (suppress auto-INC)** | partial | `OPS_PLANNED_MAINTENANCE` · bridge/5xx gate · CH banner read-only (`/health` + ops-console) | opcional suppress ops_alert dispatch; tabela `ops_runtime_flags` v2 |
-| **Support reports (humano)** | exists | `POST /support/reports` · mig **061** · [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) · feature [`support-user-reports`](../features/support-user-reports.md) | Screenshot KMS backlog |
-| **Ops alerts → INC** | exists | `ops-alert-dispatch` / fila · [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | Manutenção: não suprimir alertas SRE por padrão (spec manutenção) |
-| **Incident dispatch (outbox)** | exists | `IncidentDispatchService` · mig **074–077** · [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) §4 | F4 SLA timers; D9–D10 atenção |
-| **Triagem Agent 1** | exists | Webhook triador · `analysis-queue-callback` · `triage-started` · vitest triage callback | Batch suporte 6h (modo batch) |
-| **DEF create + dedup** | exists | `platform-defect.service` · mig **071+** · [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) | — |
-| **Correção Agent 2 (G2)** | exists | `platform-defect-fix-dispatch` · `defect_fix_v1` · gate dispatch sent | Tier1 env documentado |
-| **PR review Agent 3 (R3)** | exists | `platform-defect-pr-review.service` · mig **085** · [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) | Roadmap `ch-solo-operator-r3` ainda `planned` (drift doc) |
-| **G3 approve merge (CH UI)** | delivered (C5) | Review card + override auditável quando gate `1` | Default notebook `CH_G3_REQUIRE_REVIEW_APPROVE=0` |
-| **R4 merge → fixed + INC resolved** | exists | `platform-defect-merge-webhook.service` · mig **081/084** | Métricas tempo fase (**C8**) |
-| **CI pipeline ↔ defeito (R2)** | partial | Mig **086** · webhook `defect-ci` · poll `CH_DEFECT_CI_POLL_INTERVAL_MS` · `refresh-ci` | `CH_PR_REVIEW_REQUIRE_CI_GREEN` opcional; métricas C8 |
-| **CH cycle-close C1–C9** | partial | C1–C7 código #114; poll CI; suite ritual | C8 métricas; C9 declaração piloto + `qa:run` notebook |
-| **Notebook callback auth** | partial | `resolveInvestigatorCallbackAuth` · `OPS_INVESTIGATOR_CALLBACK_KEY` · [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) §10 túnel | Sem `OPS_CONSOLE_PUBLIC_URL` + túnel, automações cloud **não** alcançam callback — blocker operacional documentado em [`CH_ACCESS.md`](./CH_ACCESS.md) + audit `ch-shell-callbackauth` 2026-09-28 |
-| **CH v2 / notebook worktree** | partial | CH v2 em `main` pós-#74; [`CH_ACCESS.md`](./CH_ACCESS.md) nota ch-shell | Validar `up.ps1` não sobrescreve ops-console legado |
+| **Ingest `client_errors`** | exists | `POST /telemetry/client-errors` · mig **051** · [`TELEMETRY.md`](./TELEMETRY.md) | Retention job 90d (backlog TELEMETRY) |
+| **Bridge client_error → INC** | exists | `ClientErrorIncidentBridgeService` · mig **078** · `MIN_COUNT` + dedupe · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Política preview/prod: [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) |
+| **Universal failure ingress** | exists (0–4) | #115 · `client-error-incident-bridge.config.ts` | Tuning env prod; Ava gate médico na política |
+| **API 5xx → INC (hook)** | exists | prefixos + `/integration-links` · manutenção gate | Correlação `incident_id` degradado global (backlog) |
+| **Manutenção planejada (suppress auto-INC)** | partial v1 | `OPS_PLANNED_MAINTENANCE` · CH banner · vitest | v2: `ops_runtime_flags` + suppress ops_alert — [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) § v2 stub |
+| **Support reports (humano)** | exists | mig **061** · [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) | Screenshot KMS backlog |
+| **Ops alerts → INC** | exists | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | v2 maintenance tag (stub) |
+| **Incident dispatch (outbox)** | exists | mig **074–077** · [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) | F4 SLA timers; D9–D10 |
+| **Triagem Agent 1** | exists | callback + `triage-started` | Batch suporte 6h |
+| **DEF create + dedup** | exists | [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) | — |
+| **Correção Agent 2 (G2)** | exists | `defect_fix_v1` | — |
+| **PR review Agent 3 (R3)** | exists | mig **085** · [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) | Roadmap `ch-solo-operator-r3` → marcar **done** (drift) |
+| **G3 approve merge** | partial | API `operator-approve-pr` + UI #114 | **Automação G3** sem UI — spec [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md); copy ops-console ainda diz «merge manual» |
+| **CI ↔ defeito (R2)** | partial | #114 webhook `defect-ci` + poll · mig **086** | `CH_PR_REVIEW_REQUIRE_CI_GREEN=1` em prod quando webhook estável |
+| **Merge → fixed + INC resolved** | exists | webhook `defect-merge` · mig **081/084** | Merge GitHub **agêntico** (charter); métricas C8 em uso |
+| **CH cycle-close C1–C9** | partial | C1–C8 código #114 | **C9** declaração piloto + `qa:run` ritual |
+| **Notebook callback / túnel** | documented | [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) · runbook §10 | Named tunnel + webhooks GitHub no notebook (execução agente) |
+| **CH v2 / notebook worktree** | partial | [`CH_ACCESS.md`](./CH_ACCESS.md) | Validar `up.ps1` vs ops-console legado |
 
 ---
 
 ## Fila de implementação (ordem)
 
-1. **`ops-planned-maintenance`** — env gate bridge + 5xx (**v1 código**); CH banner; QA `ops-planned-maintenance`.
-2. **`client-error-universal-ingress`** — expandir allowlist, mapa features, `MIN_COUNT` real, fases rollout.
-3. **Bridge hardening** — dedupe/noise policy, notebook vs prod defaults na spec bridge.
-4. **`ch-cycle-close` C2–C4** — CI ingest (webhook + poll); depende de `GITHUB_OPS_TOKEN` / secrets.
-5. **`ch-cycle-close` C5** — `CH_G3_REQUIRE_REVIEW_APPROVE` no ops-console.
-6. **`ch-cycle-close` C6–C9** — timeline, métricas, declaração piloto.
+1. **G3 agêntico + merge agêntico** — automation pós-`review-callback` chama `operator-approve-pr`; agente merge quando CI/QA OK (charter). Depende de túnel se review na nuvem.
+2. **`ch-cycle-close` C9** — piloto DEF/INC + suite `ops-ch-cycle-close` PASS documentado.
+3. **Ingress prod (política B)** — env preview/prod conforme [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md).
+4. **`ops-planned-maintenance` v2** — runtime flags + opcional suppress ops_alert (stub spec).
+5. **C8 métricas** — dashboards/alertas sobre tempos de fase (extensão opcional).
 
-**Paralelismo:** manutenção (1) e universal ingress (2) podem correr em paralelo com **C2** se times distintos; **recomendação:** fechar (1) antes de ligar bridge em prod durante deploys.
+**Paralelismo:** (3) e túnel/webhooks (4) podem correr em paralelo com (1); manutenção v1 já desbloqueia deploy com bridge on.
 
 ---
 
-## Decisões já tomadas (2026-10-06)
+## Decisões (atualizado pós-charter)
 
 | Tema | Decisão |
 |------|---------|
-| G3 gate env | `CH_G3_REQUIRE_REVIEW_APPROVE=0` no notebook; approve merge só na UI CH (humano) |
-| CI gate review | `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até C3 ingest CI |
-| Manutenção | Suprimir auto-INC telemetria + 5xx; ingest continua; support reports humanos **sim** (banner) |
-| Merge `main` | Sempre humano (GitHub) |
+| G3 | Agente chama `operator-approve-pr`; `CH_G3_REQUIRE_REVIEW_APPROVE=1` recomendado em prod solo |
+| CI gate review | `CH_PR_REVIEW_REQUIRE_CI_GREEN=1` quando defect-ci webhook ou poll ativo (#114) |
+| Manutenção | Suprimir auto-INC bridge + 5xx; ingest continua; support reports **sim** |
+| Merge `main` | **Agêntico** quando gates passam — [`OPS_SOLO_OPERATOR_CHARTER.md`](../OPS_SOLO_OPERATOR_CHARTER.md) |
 
 ---
 
@@ -61,9 +69,9 @@
 
 | Suite | Escopo |
 |-------|--------|
-| `client-error-ch-bridge` | Bridge piloto allowlist |
+| `client-error-ch-bridge` | Bridge + manutenção |
 | `ops-planned-maintenance` | Flag manutenção + bridge off |
-| `ops-ch-cycle-close` | Ciclo completo (manual + piloto) |
+| `ops-ch-cycle-close` | Ciclo completo incl. CI/G3 (#114) |
 | `support-user-report` | Entrada humana |
 
 Ver [`docs/testing/BUSINESS_ACTION_MATRIX.md`](../testing/BUSINESS_ACTION_MATRIX.md).

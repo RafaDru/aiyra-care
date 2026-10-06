@@ -16,7 +16,14 @@ import {
 } from './platform-defect-pr-review-dispatch.js'
 import { PlatformDefectService, PlatformDefectTransitionError } from './platform-defect.service.js'
 import { notifyDefectBoardFromRecord } from './defect-board-notify.js'
-import { isChG3RequireReviewApproveEnabled } from './defect-ci-pipeline.config.js'
+import {
+  isChG3RequireReviewApproveEnabled,
+  isChPrReviewRequireCiGreenEnabled,
+} from './defect-ci-pipeline.config.js'
+import {
+  evaluateG3AgenticApproveEligibility,
+  G3_AGENTIC_OPERATOR_NOTE,
+} from './ch-g3-agentic-approve.helper.js'
 
 export class PlatformDefectPrReviewError extends Error {
   readonly code:
@@ -115,7 +122,7 @@ export class PlatformDefectPrReviewService {
       }
     }
 
-    if (process.env.CH_PR_REVIEW_REQUIRE_CI_GREEN === '1') {
+    if (isChPrReviewRequireCiGreenEnabled()) {
       if (defect.pipelineStatus !== 'ci_success') {
         throw new PlatformDefectPrReviewError('ci_not_green')
       }
@@ -219,6 +226,27 @@ export class PlatformDefectPrReviewService {
     const refreshed = await this.defectRepo.findById(defectId)
     const withReview = await this.attachLatestReview(refreshed ?? defect)
     notifyDefectBoardFromRecord(withReview, withReview.latestReview)
+
+    const agentic = evaluateG3AgenticApproveEligibility(refreshed ?? defect, {
+      reviewStatus: status,
+      recommendation: input.recommendation ?? null,
+      ciSnapshot: input.ciSnapshot ?? null,
+    })
+    if (agentic.eligible) {
+      try {
+        const approved = await this.operatorApprovePr(defectId, { note: G3_AGENTIC_OPERATOR_NOTE })
+        return {
+          reviewId: updated.id,
+          defect: approved.defect,
+        }
+      } catch (err) {
+        console.warn(
+          '[platform-defect-pr-review] agentic G3 approve skipped:',
+          err instanceof Error ? err.message : err,
+        )
+      }
+    }
+
     return {
       reviewId: updated.id,
       defect: withReview,

@@ -21,22 +21,23 @@
                                  ▼
                     Review (Agent 3, advisory) ──► CI snapshot (R2, C2–C4)
                                  ▼
-              ┌── MANUAL: G3 «Aprovar para merge» (CH) — CH_G3_REQUIRE_REVIEW_APPROVE opcional
-              └── MANUAL: merge GitHub (Rafael)
+              ├── AGENTIC: G3 — `CH_G3_AGENTIC_AUTO_APPROVE` ou `ch:defect-operator-approve`
+              └── AGENTIC: merge GitHub quando CI + QA (charter)
                                  ▼
                     webhook merge → DEF fixed + INC resolved (R4)
 ```
 
-| Etapa | Automático | Manual obrigatório |
-|-------|------------|-------------------|
-| Telemetria → INC | Bridge + alertas (se habilitado) | — |
-| Triagem → DEF | Webhook + callback | G0 descartar / priorizar |
-| Correção → PR | Agent 2 | G2 «Iniciar correção» implícito no fluxo CH |
-| Review | `CH_AUTO_PR_REVIEW_ON_READY` | G3 approve CH (política env) |
-| Merge | — | GitHub humano |
-| Fechar INC | Após merge (webhook) | G4 confirmação se sem webhook |
+| Etapa | Automático / agêntico | Humano (só decisão §2 charter) |
+|-------|----------------------|--------------------------------|
+| Telemetria → INC | Bridge + alertas (se habilitado) | Política allowlist / MIN_COUNT |
+| Triagem → DEF | Webhook + callback | G0 estratégico raro |
+| Correção → PR | Agent 2 | — |
+| Review | `CH_AUTO_PR_REVIEW_ON_READY` | — |
+| G3 approve | `operator-approve-pr` (hook ou script) | Override reason = decisão explícita |
+| Merge | Agente após gates | Veto estratégico («pausar merges») |
+| Fechar INC | Após merge (webhook) | — |
 
-**Env notebook (aprovado):** `CH_G3_REQUIRE_REVIEW_APPROVE=0`; `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até ingest CI (C3).
+**Env notebook (piloto):** `CH_G3_REQUIRE_REVIEW_APPROVE=0`; `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até webhook CI estável. **Prod solo (meta):** `CH_G3_REQUIRE_REVIEW_APPROVE=1`, `CH_PR_REVIEW_REQUIRE_CI_GREEN=1` com #114 defect-ci.
 
 ---
 
@@ -49,6 +50,9 @@
 | INC/DEF máquinas de estado | [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) |
 | Fechamento C1–C9 | [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md) |
 | Review Agent 3 | [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) |
+| G3 agêntico | [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) |
+| Túnel + webhooks | [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) |
+| Ingress prod | [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) |
 | Suporte usuário | [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) |
 
 ---
@@ -69,4 +73,4 @@
 
 ## Blocker notebook (callback)
 
-Automações Cursor na nuvem exigem `OPS_CONSOLE_PUBLIC_URL` (túnel HTTPS) + `OPS_INVESTIGATOR_CALLBACK_KEY`. Sem isso, triagem/correção ficam em `dispatch_failed` ou SLA — ver [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) §10 e [`CH_ACCESS.md`](./CH_ACCESS.md).
+Automações Cursor na nuvem exigem `OPS_CONSOLE_PUBLIC_URL` (túnel HTTPS) + `OPS_INVESTIGATOR_CALLBACK_KEY`. Sem isso, triagem/correção ficam em `dispatch_failed` ou SLA — spec completa [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) · resumo [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) §10 · [`CH_ACCESS.md`](./CH_ACCESS.md).

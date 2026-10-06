@@ -35,8 +35,8 @@
 
 9. Auto review (`CH_AUTO_PR_REVIEW_ON_READY` default) ou `POST /api/platform-defects/:id/request-review` — card **Revisão agêntica** em `running` → `completed`
 10. Mock `POST /api/platform-defects/review-callback` com `recommendation: approve` — três dimensões visíveis; lista mostra badge review (#113)
-11. **Aprovar para merge** — registra intent, abre GitHub; merge **manual** (não automático)
-12. Se `CH_G3_REQUIRE_REVIEW_APPROVE=1` (pós-C5): sem review `approve`, botão bloqueado ou 409; override explícito documentado na spec
+11. **Aprovar para merge** — registra intent, abre GitHub; com `CH_G3_AGENTIC_AUTO_APPROVE=1`, callback `approve` dispara G3 sem clique (vitest); alternativa CLI `npm run ch:defect-operator-approve -- --ref DEF-*`
+12. Se `CH_G3_REQUIRE_REVIEW_APPROVE=1` (pós-C5): sem review `approve`, botão bloqueado ou 409; override explícito documentado na spec — ver [`CH_G3_AGENTIC_APPROVAL.md`](../../ops/CH_G3_AGENTIC_APPROVAL.md)
 
 ### E — CI (C3/C4)
 

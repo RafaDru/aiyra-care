@@ -206,7 +206,7 @@ WHERE o.incident_id = q.id AND o.status = 'dead'
 | **D** | `DefeitosPanel` + nav `defeitos` (**entregue**) |
 | **E** | Outbox write + worker + batch run (**entregue**) |
 
-Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /api/analysis-queue` (com `incidentPipelineStatus` + `dispatch`), `GET /api/incident-dispatch/health`, `POST /api/analysis-queue/:id/retry-dispatch`. **Agent 3 (R3):** [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) — `POST …/request-review`, `POST …/review-callback`, operador G3 `operator-approve-pr` / `operator-request-changes`.
+Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /api/analysis-queue` (com `incidentPipelineStatus` + `dispatch`), `GET /api/incident-dispatch/health`, `POST /api/analysis-queue/:id/retry-dispatch`. **Agent 3 (R3):** [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) — `POST …/request-review`, `POST …/review-callback`, operador G3 `operator-approve-pr` / `operator-request-changes`; G3 agêntico: [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md).
 
 ---
 
