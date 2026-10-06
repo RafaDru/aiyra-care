@@ -74,7 +74,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 ## QA
 
 - Suite: [`support-user-report`](../testing/suites/support-user-report.md)
-- Ciclo CH completo (pós-chamado até merge): [`ops-ch-cycle-close`](../testing/suites/ops-ch-cycle-close.md) — spec [`CH_CYCLE_CLOSE_SPEC.md`](../ops/CH_CYCLE_CLOSE_SPEC.md)
+- Ciclo CH completo (pós-chamado até merge): [`ops-ch-cycle-close`](../testing/suites/ops-ch-cycle-close.md) — spec [`CH_CYCLE_CLOSE_SPEC.md`](../ops/CH_CYCLE_CLOSE_SPEC.md); UI parcial: `npm run test:e2e:ops-ch-cycle-close`
 - Ops stack / gap: [`CH_OPS_GAP_AND_PRIORITY.md`](../ops/CH_OPS_GAP_AND_PRIORITY.md) · [`CH_AUTONOMOUS_OPS_STACK.md`](../ops/CH_AUTONOMOUS_OPS_STACK.md)
 - Manutenção (bridge off, suporte humano on): [`ops-planned-maintenance`](../testing/suites/ops-planned-maintenance.md) — [`OPS_PLANNED_MAINTENANCE.md`](../ops/OPS_PLANNED_MAINTENANCE.md)
 - Bridge telemetria (piloto): [`client-error-ch-bridge`](../testing/suites/client-error-ch-bridge.md)

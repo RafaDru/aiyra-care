@@ -9,6 +9,7 @@
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import { spawnSync } from 'child_process'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const catalogPath = resolve(root, 'docs/testing/suites/index.json')
@@ -125,7 +126,31 @@ async function cmdRun(suiteId, preview) {
     console.log(`\n(fixture ${suite.fixtureId} — sem JSON ou ops-local)`)
   }
 
-  await preflight(preview)
+  const envOk = await preflight(preview)
+
+  const autoCommand = suite.automation?.command
+  if (autoCommand && suite.automation?.status !== 'manual') {
+    console.log(`\n--- Automação ---`)
+    console.log(`Comando: ${autoCommand}`)
+    if (!envOk) {
+      console.log('\n❌ Pré-voo falhou — automação não executada.\n')
+      process.exit(1)
+    }
+    const result = spawnSync(autoCommand, {
+      cwd: root,
+      shell: true,
+      stdio: 'inherit',
+      env: { ...process.env },
+    })
+    if (result.status !== 0) {
+      console.log(`\n❌ Automação FAIL (exit ${result.status ?? 1})\n`)
+      process.exit(result.status ?? 1)
+    }
+    console.log(`\n✅ Automação PASS`)
+    console.log(`\nChecklist manual restante (se houver): ${suite.doc}`)
+    console.log(`\nRelatório: ver docs/testing/QA_PROCESS.md (formato PASS/FAIL)`)
+    return
+  }
 
   console.log(`\n--- Checklist ---`)
   console.log(`Abra e execute cada passo:`)

@@ -7,7 +7,9 @@
     "dev": "tsx src/server.ts",
     "dev:watch": "tsx watch src/server.ts",
     "build": "vite build && tsc -p tsconfig.server.json",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ops-ch-cycle-close": "playwright test e2e/ops-ch-cycle-close.spec.ts"
   },
   "dependencies": {
     "@aiyra-care/design-tokens": "*",
@@ -21,6 +23,7 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@ant-design/icons": "^6.3.2",
     "@types/pg": "^8.11.10",
     "@types/react": "^18.3.31",
