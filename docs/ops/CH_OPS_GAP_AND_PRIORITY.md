@@ -16,7 +16,7 @@
 | **Bridge client_error → INC** | exists | `ClientErrorIncidentBridgeService` · mig **078** · `MIN_COUNT` via `tryAcquireEnqueueSlot` · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Default `BRIDGE_ENABLED=0`; expandir fases 2–4 |
 | **Universal failure ingress** | partial | Fase 1 defaults em `client-error-incident-bridge.config.ts` + doc § Universal | Fases 2–4: mobile, `integration_links` 5xx, Ava |
 | **API 5xx → INC (hook)** | partial | `registerClientErrorIncidentErrorHandler` · `client-error-incident-bridge.plugin.ts` · vitest `client-error-incident-error-handler.test.ts` | Só prefixos env; sem correlação `incident_id` degradado global |
-| **Manutenção planejada (suppress auto-INC)** | partial | `OPS_PLANNED_MAINTENANCE` · bridge/5xx gate · CH banner read-only (`/health` + ops-console) | opcional suppress ops_alert dispatch; tabela `ops_runtime_flags` v2 |
+| **Manutenção planejada (suppress auto-INC)** | partial | `OPS_PLANNED_MAINTENANCE` · bridge/5xx gate · ops_alert auto-INC/dispatch · CH banner read-only (`/health` + ops-console) | tabela `ops_runtime_flags` + toggle CH |
 | **Support reports (humano)** | exists | `POST /support/reports` · mig **061** · [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) · feature [`support-user-reports`](../features/support-user-reports.md) | Screenshot KMS backlog |
 | **Ops alerts → INC** | exists | `ops-alert-dispatch` / fila · [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | Manutenção: não suprimir alertas SRE por padrão (spec manutenção) |
 | **Incident dispatch (outbox)** | exists | `IncidentDispatchService` · mig **074–077** · [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) §4 | F4 SLA timers; D9–D10 atenção |

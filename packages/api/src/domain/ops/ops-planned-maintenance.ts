@@ -3,3 +3,11 @@ export function isOpsPlannedMaintenanceActive(env: NodeJS.ProcessEnv = process.e
   const raw = env.OPS_PLANNED_MAINTENANCE?.trim().toLowerCase()
   return raw === '1' || raw === 'true' || raw === 'yes'
 }
+
+/** Auto ops_alert INC + dispatch; manual support reports and manual ops triage stay enabled. */
+export function shouldSuppressAutoIncDuringPlannedMaintenance(
+  trigger: 'auto' | 'manual',
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return trigger === 'auto' && isOpsPlannedMaintenanceActive(env)
+}

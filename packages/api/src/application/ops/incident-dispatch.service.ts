@@ -35,6 +35,7 @@ import {
 } from './incident-dispatch-payload.helper.js'
 import { triageBatchIntervalMs } from './ch-batch-cadence.config.js'
 import { notifyIncidentBoardById } from './incident-board-notify.js'
+import { shouldSuppressAutoIncDuringPlannedMaintenance } from '../../domain/ops/ops-planned-maintenance.js'
 
 const DISPATCH_KIND = 'triage_v1'
 const MAX_OUTBOX_ATTEMPTS = 8
@@ -132,6 +133,10 @@ export class IncidentDispatchService {
       trigger: 'auto' | 'manual'
     },
   ): Promise<OpsAlertInvestigatorDispatchResult> {
+    if (shouldSuppressAutoIncDuringPlannedMaintenance(options.trigger)) {
+      return { outcome: 'skipped', reason: 'planned_maintenance' }
+    }
+
     const callbackUrl = resolveInvestigatorCallbackUrl()
     const analysisQueue = resolveInvestigatorAnalysisQueueUrls(incidentId)
     const investigationTier = resolveOpsAlertInvestigationTier(alert, options.trigger)

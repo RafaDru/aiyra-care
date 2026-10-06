@@ -20,11 +20,12 @@
 | 2 | Forçar 5xx em rota `/auth/*` (test harness ou vitest) | Log server; **sem** INC bridge |
 | 3 | `OPS_PLANNED_MAINTENANCE=0` + repetir passo 1 | INC criado (se dedupe ok) |
 | 4 | `POST /support/reports` com manutenção `1` | INC de suporte **criado** (humano) |
+| 5 | Loop ops alerts com infra critical + `OPS_PLANNED_MAINTENANCE=1` | **Sem** novo `enqueueOpsAlert` / INC auto |
 
 ## Automação
 
 ```bash
-cd packages/api && npx vitest run tests/ops-planned-maintenance.test.ts tests/client-error-incident-bridge.service.test.ts
+cd packages/api && npx vitest run tests/ops-planned-maintenance.test.ts tests/ops-planned-maintenance-ops-alert.test.ts tests/client-error-incident-bridge.service.test.ts
 ```
 
 ## Relacionados
