@@ -2452,6 +2452,65 @@
       ]
     },
     {
+      "id": "failure-probes-ch",
+      "category": "tecnico",
+      "priority": "P0",
+      "title": "Failure Probes — captura CH default-on",
+      "summary": "MVP: SDK React web + React Native (default-on, opt-out), bridge blocklist. Pós-MVP doc: Angular, backend Fastify probe, nativo iOS/Android. Hook API 5xx por prefixo permanece bridge — não é produto probe. Spec: docs/ops/FAILURE_PROBES_CH.md.",
+      "status": "planned",
+      "statusLabel": "M0 spec done — MVP M1–M3 web+mobile",
+      "items": [
+        {
+          "id": "failure-probes-spec-m0",
+          "title": "Spec canônica + roadmap + cross-links",
+          "status": "done",
+          "detail": "FAILURE_PROBES_CH.md; feature card; HISTORICO 2026-10-06; política ingress §8.2–8.4 superseded pending decisões."
+        },
+        {
+          "id": "failure-probes-web-sdk",
+          "title": "Web SDK — evoluir client-errors + default-on",
+          "status": "planned",
+          "detail": "Extrair core; declared/probe_kind; VITE_FAILURE_PROBE_OPT_OUT."
+        },
+        {
+          "id": "failure-probes-angular-sketch",
+          "title": "Pós-MVP — Angular package (doc)",
+          "status": "planned",
+          "detail": "Post-MVP Rafael 2026-10-06: FailureProbeModule sketch; sem implementação no MVP."
+        },
+        {
+          "id": "failure-probes-mobile-rn",
+          "title": "Mobile SDK — React Native parity",
+          "status": "planned",
+          "detail": "packages/mobile client-errors → failure-probe-core."
+        },
+        {
+          "id": "failure-probes-native-mobile",
+          "title": "Pós-MVP — Native Android/iOS SDK (doc)",
+          "status": "planned",
+          "detail": "Post-MVP; após paridade RN. Crashlytics não substitui INC chain."
+        },
+        {
+          "id": "failure-probes-backend-fastify",
+          "title": "Pós-MVP — Backend Fastify probe (doc)",
+          "status": "planned",
+          "detail": "Post-MVP; hook 5xx por prefixo (bridge) permanece as-is — fora do produto probe MVP."
+        },
+        {
+          "id": "failure-probes-bridge-blocklist",
+          "title": "Bridge — FAILURE_PROBE_OPT_OUT_FEATURES",
+          "status": "planned",
+          "detail": "Substituir allowlist CLIENT_ERROR_INCIDENT_FEATURES; M2."
+        },
+        {
+          "id": "failure-probes-qa-suite",
+          "title": "Suite QA failure-probes-ch",
+          "status": "planned",
+          "detail": "default-on, opt-out, manutenção; após M2."
+        }
+      ]
+    },
+    {
       "id": "ch-cycle-close",
       "category": "tecnico",
       "priority": "P1",

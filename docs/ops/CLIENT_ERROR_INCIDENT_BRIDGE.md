@@ -1,6 +1,8 @@
 # Client errors → Command Hub incidents (bridge)
 
-**Status:** pilot (tier 0) · migration **078**
+**Status:** pilot (tier 0) · migration **078** · **evoluindo** para [Failure Probes](./FAILURE_PROBES_CH.md) (default-on + opt-out; esta doc permanece operacional até M2)
+
+> **Arquitetura alvo:** [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) — probes silenciosos, mesmo ingest `client_errors`, bridge INC com migração allowlist → blocklist.
 
 When enabled, qualifying `client_errors` fingerprints and unhandled **5xx** on critical API prefixes open an `INC-*` row in `ops_analysis_queue` and the standard incident dispatch outbox — **without** client stack traces or PHI in PG/webhook payloads.
 
@@ -95,5 +97,5 @@ During maintenance windows: `OPS_PLANNED_MAINTENANCE=1` regardless of bridge ena
 
 ## Related
 
-- [`TELEMETRY.md`](./TELEMETRY.md) · [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md)
+- [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) · [`TELEMETRY.md`](./TELEMETRY.md) · [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md)
 - QA suite: `docs/testing/suites/client-error-ch-bridge.md`

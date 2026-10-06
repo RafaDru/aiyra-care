@@ -82,7 +82,7 @@ LIMIT 50;
 
 **Matriz no console:** `product_events` (acesso) × `client_errors` (falha) → `ops-feature-health.ts`.
 
-**Bridge CH (piloto):** fingerprints allowlisted podem abrir `INC-*` automaticamente — [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md). QA: suite `client-error-ch-bridge`.
+**Bridge CH (piloto):** fingerprints allowlisted podem abrir `INC-*` automaticamente — [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md). **Alvo:** Failure Probes default-on — [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). QA: suite `client-error-ch-bridge`.
 
 ---
 
