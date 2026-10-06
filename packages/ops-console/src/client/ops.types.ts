@@ -547,6 +547,8 @@ export interface OpsMetricsResponse {
   runtime?: RuntimeDegradedView
   triage?: OpsAlertTriageRow[]
   alertAnalysis?: Record<string, OpsAlertAnalysisRecord>
+  plannedMaintenance?: boolean
+  readOnly?: boolean
 }
 
 export interface ProductLifecycleSnapshot {

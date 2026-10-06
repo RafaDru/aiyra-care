@@ -84,6 +84,30 @@ describe('ClientErrorIncidentBridgeService', () => {
     expect(attachQueueId).toHaveBeenCalledWith(fp, 'local', 'queue-1')
   })
 
+  it('waits for minCount before enqueue', async () => {
+    const tryAcquire = vi
+      .fn()
+      .mockResolvedValueOnce({ acquired: false, reason: 'min_count' })
+      .mockResolvedValueOnce({ acquired: true })
+    const enqueueClientErrorSignal = vi.fn(async () => ({ id: 'queue-1' }))
+    const bridge = new ClientErrorIncidentBridgeService(
+      { ...enabledConfig(), minCount: 2 },
+      { tryAcquireEnqueueSlot: tryAcquire, attachQueueId: vi.fn() } as never,
+      { enqueueClientErrorSignal } as never,
+    )
+    const fp = computeClientErrorFingerprint('account_settings', 'api', 'HTTP_500')
+    const error = {
+      fingerprint: fp,
+      feature: 'account_settings',
+      errorKind: 'api' as const,
+      errorCode: 'HTTP_500',
+    }
+    await bridge.onIngestedErrors([error], { accountId: null, deploymentTier: 'local' })
+    await bridge.onIngestedErrors([error], { accountId: null, deploymentTier: 'local' })
+    expect(enqueueClientErrorSignal).toHaveBeenCalledTimes(1)
+    expect(tryAcquire).toHaveBeenNthCalledWith(1, fp, 'local', 60_000, 2)
+  })
+
   it('skips features outside allowlist', async () => {
     const tryAcquire = vi.fn()
     const enqueueClientErrorSignal = vi.fn()

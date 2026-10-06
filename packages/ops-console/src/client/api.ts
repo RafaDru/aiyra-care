@@ -15,6 +15,8 @@ export type OpsConsoleHealth = {
   port: number
   deploymentTier: OpsDeploymentTier
   layoutVersion?: string
+  plannedMaintenance?: boolean
+  readOnly?: boolean
 }
 
 export type ChServicesStatusResponse = {

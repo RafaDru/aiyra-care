@@ -100,6 +100,7 @@ export class ClientErrorIncidentBridgeService {
       error.fingerprint,
       ctx.deploymentTier,
       this.config.dedupeMs,
+      rule.minCountWindow,
     )
     if (!slot.acquired) return
 

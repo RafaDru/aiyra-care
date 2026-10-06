@@ -84,6 +84,7 @@ import { writeSseResponseHead } from '../../api/src/infrastructure/http/sse-resp
 import { subscribeIncidentBoard } from '../../api/src/infrastructure/ops/incident-board.bus.js'
 import { subscribeDefectBoard } from '../../api/src/infrastructure/ops/platform-defect-board.bus.js'
 import { notifyIncidentBoardById } from '../../api/src/application/ops/incident-board-notify.js'
+import { isOpsConsoleReadOnly, resolvePlannedMaintenance } from './planned-maintenance.js'
 
 const CH_BOARD_SSE_HEARTBEAT_MS = 25_000
 
@@ -294,14 +295,20 @@ async function main() {
     return reply.redirect('/?mock=ch-layout')
   })
 
-  fastify.get('/health', async () => ({
-    service: 'aiyracare-ops-console',
-    status: 'ok',
-    port,
-    deploymentTier,
-    layoutVersion: 'ch-shell-v2',
-    commandHub: true,
-  }))
+  fastify.get('/health', async () => {
+    const maintenance = await resolvePlannedMaintenance(port)
+    return {
+      service: 'aiyracare-ops-console',
+      status: 'ok',
+      port,
+      deploymentTier,
+      layoutVersion: 'ch-shell-v2',
+      commandHub: true,
+      plannedMaintenance: maintenance.plannedMaintenance,
+      plannedMaintenanceSource: maintenance.source,
+      readOnly: maintenance.plannedMaintenance,
+    }
+  })
 
   fastify.get('/api/services/status', async () => fetchServicesStatus(port))
 
@@ -332,15 +339,24 @@ async function main() {
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
     const alertAnalysis = await alertAnalysisService.getAll()
+    const maintenance = await resolvePlannedMaintenance(port)
     return {
       ...payload,
       runtime,
       triage,
       alertAnalysis,
+      plannedMaintenance: maintenance.plannedMaintenance,
+      readOnly: maintenance.plannedMaintenance,
     }
   })
 
-  fastify.post('/api/alerts/check', async () => {
+  fastify.post('/api/alerts/check', async (_req, reply) => {
+    if (isOpsConsoleReadOnly()) {
+      return reply.status(503).send({
+        error: 'planned_maintenance',
+        message: 'Verificação de alertas desativada durante manutenção planejada.',
+      })
+    }
     await runProbeCycle()
     const result = await dispatchService.checkAndDispatch()
     const metricsPayload = await metricsService.getMetrics()
@@ -395,6 +411,12 @@ async function main() {
   fastify.get('/api/stack/status', async () => getStackStatus())
 
   const stackPost = (action: 'start' | 'stop' | 'restart') => async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
+    if (isOpsConsoleReadOnly()) {
+      return reply.status(503).send({
+        error: 'planned_maintenance',
+        message: 'Controle de stack desativado durante manutenção planejada.',
+      })
+    }
     try {
       return await runStackAction(req, action)
     } catch (err) {

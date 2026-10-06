@@ -1,6 +1,6 @@
 # Ops — manutenção planejada (suppress auto-INC)
 
-**Status:** v1 env + bridge gate (**implementado**); CH banner read-only **spec**  
+**Status:** v1 env + bridge gate + CH banner read-only (**implementado**)  
 **Épico roadmap:** `ops-planned-maintenance`  
 **Gap / prioridade:** [`CH_OPS_GAP_AND_PRIORITY.md`](./CH_OPS_GAP_AND_PRIORITY.md)
 

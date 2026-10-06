@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as fixDispatch from '../src/application/ops/platform-defect-fix-dispatch.js'
 import { finalizeTriageDefectPipeline } from '../src/application/ops/triage-defect-pipeline-followup.js'
 import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.types.js'
+import { platformDefectPipelineDefaults } from './fixtures/platform-defect-record.defaults.js'
 
 function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRecord {
   return {
@@ -30,6 +31,7 @@ function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRe
     prBatchId: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    ...platformDefectPipelineDefaults,
     ...overrides,
   }
 }

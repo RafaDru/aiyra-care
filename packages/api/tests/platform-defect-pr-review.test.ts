@@ -14,6 +14,7 @@ import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.typ
 import type { DefectPrReviewPgRepository } from '../src/infrastructure/persistence/defect-pr-review.pg.repository.js'
 import type { PlatformDefectPgRepository } from '../src/infrastructure/persistence/platform-defect.pg.repository.js'
 import { PlatformDefectService } from '../src/application/ops/platform-defect.service.js'
+import { platformDefectPipelineDefaults } from './fixtures/platform-defect-record.defaults.js'
 
 const readyDefect: PlatformDefectRecord = {
   id: '0e672818-72ec-4ef7-918e-312db34bbeb5',
@@ -43,6 +44,7 @@ const readyDefect: PlatformDefectRecord = {
   correctionFailedAt: null,
   createdAt: '2026-09-28T11:00:00.000Z',
   updatedAt: '2026-10-04T12:00:00.000Z',
+  ...platformDefectPipelineDefaults,
 }
 
 describe('platform-defect-pr-review-dispatch', () => {

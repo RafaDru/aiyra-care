@@ -11,6 +11,7 @@ import type { OpsDeploymentTier } from './theme/ops-environment.js'
 import { normalizeOpsDeploymentTier } from './theme/ops-environment.js'
 import { isChLayoutMock } from './ch-navigation.js'
 import { ChLayoutMockPage } from './mock/ChLayoutMockPage.js'
+import { ChPlannedMaintenanceBanner } from './components/ChPlannedMaintenanceBanner.js'
 
 const AUTO_REFRESH_MS = 60_000
 
@@ -20,6 +21,7 @@ function AppConsole() {
   const [data, setData] = useState<OpsMetricsResponse | null>(null)
   const [dispatching, setDispatching] = useState(false)
   const [deploymentTier, setDeploymentTier] = useState<OpsDeploymentTier>('integration')
+  const [readOnly, setReadOnly] = useState(false)
 
   const load = useCallback(async () => {
     setError(null)
@@ -29,6 +31,7 @@ function AppConsole() {
         opsApi.metrics(),
       ])
       setDeploymentTier(normalizeOpsDeploymentTier(health.deploymentTier, health.port))
+      setReadOnly(Boolean(health.readOnly ?? health.plannedMaintenance ?? result.readOnly))
       setData(result)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Falha ao carregar métricas'
@@ -92,6 +95,7 @@ function AppConsole() {
           icon={<ThunderboltOutlined />}
           onClick={runDispatch}
           loading={dispatching}
+          disabled={readOnly}
         >
           Verificar e acionar
         </Button>
@@ -124,6 +128,7 @@ function AppConsole() {
 
   return (
     <>
+      {readOnly && <ChPlannedMaintenanceBanner />}
       {error && (
         <Alert
           type="error"
@@ -151,7 +156,11 @@ function AppConsole() {
                   : 'API :3010 e web :5173 — app monitorado (dev local).'
               }
             >
-              <StackControlCard deploymentTier={deploymentTier} onStackChange={refresh} />
+              <StackControlCard
+                deploymentTier={deploymentTier}
+                onStackChange={refresh}
+                readOnly={readOnly}
+              />
             </OpsPanel>
           }
         />

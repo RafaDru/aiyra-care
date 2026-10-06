@@ -10,7 +10,16 @@ import { normalizeGithubPrUrlForMatch } from '../../domain/ops/platform-defect-p
 import type { PlatformDefectFixedVia } from '../../domain/ops/platform-defect.types.js'
 import type { CorrectionFailureDetails } from '../../domain/ops/platform-defect-correction-failure.js'
 import type { PlatformDefectFailureKind } from '../../domain/ops/platform-defect-correction-failure.js'
+import type {
+  DefectPipelineFailureDetails,
+  DefectPipelineStatus,
+} from '../../domain/ops/platform-defect-pipeline.types.js'
 import { allocateOpsReferenceCode } from './ops-reference-sequence.pg.js'
+
+function mapJsonObject(value: unknown): DefectPipelineFailureDetails | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  return value as DefectPipelineFailureDetails
+}
 
 function mapCorrectionFailureDetails(value: unknown): CorrectionFailureDetails | null {
   if (!value || typeof value !== 'object') return null
@@ -85,6 +94,14 @@ function mapRow(row: Record<string, unknown>): PlatformDefectRecord {
       row.operator_changes_requested_note != null
         ? String(row.operator_changes_requested_note)
         : null,
+    pipelineStatus:
+      row.pipeline_status != null ? (String(row.pipeline_status) as DefectPipelineStatus) : null,
+    lastFailureDetails: mapJsonObject(row.last_failure_details),
+    lastCiRunUrl: row.last_ci_run_url != null ? String(row.last_ci_run_url) : null,
+    lastCiSnapshot: mapJsonObject(row.last_ci_snapshot),
+    lastCiCheckedAt: row.last_ci_checked_at
+      ? new Date(String(row.last_ci_checked_at)).toISOString()
+      : null,
   }
 }
 

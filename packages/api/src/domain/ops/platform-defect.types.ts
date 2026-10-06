@@ -2,6 +2,10 @@ import type {
   CorrectionFailureDetails,
   PlatformDefectFailureKind,
 } from './platform-defect-correction-failure.js'
+import type {
+  DefectPipelineFailureDetails,
+  DefectPipelineStatus,
+} from './platform-defect-pipeline.types.js'
 
 export type PlatformDefectStatus = 'open' | 'in_fix' | 'ready_for_pr' | 'fixed'
 
@@ -50,6 +54,11 @@ export interface PlatformDefectRecord {
   operatorPrApprovedNote?: string | null
   operatorChangesRequestedAt?: string | null
   operatorChangesRequestedNote?: string | null
+  pipelineStatus: DefectPipelineStatus | null
+  lastFailureDetails: DefectPipelineFailureDetails | null
+  lastCiRunUrl: string | null
+  lastCiSnapshot: DefectPipelineFailureDetails | null
+  lastCiCheckedAt: string | null
 }
 
 export interface CreatePlatformDefectInput {

@@ -22,9 +22,11 @@ function serviceTag(label: string, up: boolean, port: number) {
 export function StackControlCard({
   deploymentTier = 'integration',
   onStackChange,
+  readOnly = false,
 }: {
   deploymentTier?: OpsDeploymentTier
   onStackChange?: () => void
+  readOnly?: boolean
 }) {
   const [status, setStatus] = useState<StackActionResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -66,7 +68,7 @@ export function StackControlCard({
   }
 
   const snap = status?.status
-  const disabled = Boolean(status?.error) && status?.platform !== 'win32'
+  const disabled = readOnly || (Boolean(status?.error) && status?.platform !== 'win32')
   const defaultApiPort = deploymentTier === 'preview' ? 3020 : 3010
   const defaultWebPort = deploymentTier === 'preview' ? 5174 : 5173
   const apiPortLabel = snap?.apiPort ?? defaultApiPort
