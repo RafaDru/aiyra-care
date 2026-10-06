@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   apiPathMatchesIncidentPrefixes,
   inferServerErrorBridgeFeature,
+  isClientErrorSreLaneTier,
   resolveBridgeIngressFeature,
   resolveClientErrorIncidentBridgeConfig,
   ruleForFeature,
@@ -73,12 +74,31 @@ describe('resolveBridgeIngressFeature', () => {
     ).toBe('ava_companion')
   })
 
-  it('routes integration_links to sre_support when configured', () => {
+  it('routes integration_links to sre_support only on production tier (4B)', () => {
     const cfg = resolveClientErrorIncidentBridgeConfig({
-      CLIENT_ERROR_INCIDENT_FEATURES: 'integration_links',
+      CLIENT_ERROR_INCIDENT_FEATURES: 'integration_links,patient_integrations',
       CLIENT_ERROR_INCIDENT_SRE_FEATURES: 'integration_links',
     })
-    const rule = ruleForFeature(cfg, 'integration_links')
-    expect(rule?.lane).toBe('sre_support')
+    expect(ruleForFeature(cfg, 'integration_links', undefined, { deploymentTier: 'integration' })?.lane).toBe(
+      'development_support',
+    )
+    expect(ruleForFeature(cfg, 'integration_links', undefined, { deploymentTier: 'preview' })?.lane).toBe(
+      'development_support',
+    )
+    expect(ruleForFeature(cfg, 'integration_links', undefined, { deploymentTier: 'production' })?.lane).toBe(
+      'sre_support',
+    )
+    expect(
+      ruleForFeature(cfg, 'api:integration_links', undefined, { deploymentTier: 'production' })?.lane,
+    ).toBe('sre_support')
+  })
+})
+
+describe('isClientErrorSreLaneTier', () => {
+  it('accepts production and prod aliases', () => {
+    expect(isClientErrorSreLaneTier('production')).toBe(true)
+    expect(isClientErrorSreLaneTier('prod')).toBe(true)
+    expect(isClientErrorSreLaneTier('preview')).toBe(false)
+    expect(isClientErrorSreLaneTier({ DEPLOYMENT_TIER: 'production' })).toBe(true)
   })
 })

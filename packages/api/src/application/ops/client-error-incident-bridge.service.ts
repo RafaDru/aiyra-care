@@ -96,7 +96,9 @@ export class ClientErrorIncidentBridgeService {
     if (!feature) return
 
     const bridgeFeature = resolveBridgeIngressFeature(feature, error.properties)
-    const rule = ruleForFeature(this.config, feature, error.properties)
+    const rule = ruleForFeature(this.config, feature, error.properties, {
+      deploymentTier: ctx.deploymentTier,
+    })
     if (!rule) return
 
     const slot = await this.signals.tryAcquireEnqueueSlot(
