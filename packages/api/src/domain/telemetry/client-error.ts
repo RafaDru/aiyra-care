@@ -11,6 +11,10 @@ export const CLIENT_ERROR_PROPERTY_KEYS = new Set([
   'http_status',
   'api_path',
   'component',
+  'probe_kind',
+  'probe_version',
+  'sdk_surface',
+  'declared',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret|stack/i

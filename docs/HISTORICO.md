@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Failure Probes M1 — Web SDK
+
+### Realizado
+- `packages/web`: probes default-on (`ui.unhandled` no `AppErrorBoundary`, HTTP 5xx sem `declaredFallback` no `api.ts`); ingest silencioso com `probe_kind` / `declared` / `sdk_surface`; opt-out build `VITE_FAILURE_PROBE_OPT_OUT` (alias `VITE_CLIENT_ERROR_INCIDENT_FEATURES_DISABLED`).
+- API: allowlist `properties` para metadados probe em `client_errors`.
+- Vitest: `packages/web/tests/failure-probe-policy.test.ts`.
+
 ## [2026-10-06] - CH Revisão Dev — CI visível sem gate (decisão 8C+notify)
 
 ### Decisão
@@ -27,8 +34,6 @@
 ### Realizado
 - `resolveDisabledBridgeFeatures` + `ruleForFeature` blocklist; vitest; docs [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md), bridge, `.env.example` (§ client errors); decisão em `project-context.json` (`failure-probes-ava-bridge-3a`).
 
-=======
->>>>>>> 2c43ad5fa583b12be2df6a25e09a2da51d81b97b
 ## [2026-10-06] - Ingress bridge §8.4 lane SRE (decisão 4B)
 
 ### Decisão

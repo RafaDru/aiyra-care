@@ -25,7 +25,11 @@ export class AppErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     const component = info.componentStack?.split('\n')[1]?.trim() ?? 'unknown'
-    reportUiBoundaryError(component, error.name || 'Error')
+    const route = typeof window !== 'undefined' ? window.location.pathname : undefined
+    reportUiBoundaryError(component, error.name || 'Error', {
+      feature: this.props.feature,
+      route,
+    })
   }
 
   private handleReload = () => {

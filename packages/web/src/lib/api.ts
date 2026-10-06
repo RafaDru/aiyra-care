@@ -33,7 +33,10 @@ export async function openAuthenticatedDownload(path: string): Promise<void> {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000)
 }
 
-async function request<T>(path: string, options?: RequestInit & { skipErrorReport?: boolean }): Promise<T> {
+async function request<T>(
+  path: string,
+  options?: RequestInit & { skipErrorReport?: boolean; declaredFallback?: boolean },
+): Promise<T> {
   const isFormData = options?.body instanceof FormData
   const headers: Record<string, string> = options?.body && !isFormData ? { 'Content-Type': 'application/json' } : {}
   const { ensureAccessToken, supabaseConfigured } = await import('./supabase.js')
@@ -43,6 +46,7 @@ async function request<T>(path: string, options?: RequestInit & { skipErrorRepor
   }
   if (token) headers.Authorization = `Bearer ${token}`
   const skipReport = options?.skipErrorReport || path.startsWith('/telemetry/')
+  const declaredFallback = options?.declaredFallback === true
   let res: Response
   try {
     res = await fetch(`${BASE_URL}${path}`, {
@@ -57,19 +61,34 @@ async function request<T>(path: string, options?: RequestInit & { skipErrorRepor
   }
   const contentType = res.headers.get('content-type') ?? ''
   if (!res.ok) {
-    if (!skipReport) {
-      void import('./client-errors.js').then((m) => m.reportApiClientError(path, res.status)).catch(() => undefined)
+    const isServerError = res.status >= 500 && res.status <= 599
+    if (!skipReport && isServerError && !declaredFallback) {
+      void import('./client-errors.js')
+        .then((m) => m.reportApiClientError(path, res.status, { declared: true, probeKind: 'api.unexpected' }))
+        .catch(() => undefined)
     }
     if (contentType.includes('application/json')) {
       const body = await res.json().catch(() => ({})) as { message?: string; code?: string; error?: unknown }
       const zodMsg = body.error && typeof body.error === 'object' && 'fieldErrors' in (body.error as object)
         ? JSON.stringify(body.error)
         : undefined
+      if (isServerError) {
+        const { deriveFeatureFromApiPath } = await import('./client-error-fingerprint.js')
+        const { getClientErrorPlaybookMessage } = await import('./client-error-playbook.js')
+        const feature = deriveFeatureFromApiPath(path)
+        throw new Error(getClientErrorPlaybookMessage(feature, `HTTP_${res.status}`))
+      }
       throw new Error(body.message || zodMsg || `HTTP ${res.status}`)
     }
     const text = await res.text().catch(() => '')
     if (text.trimStart().startsWith('<!DOCTYPE') || text.trimStart().startsWith('<html')) {
       throw new Error('API indisponível ou rota não encontrada — recarregue a página ou reinicie os serviços')
+    }
+    if (isServerError) {
+      const { deriveFeatureFromApiPath } = await import('./client-error-fingerprint.js')
+      const { getClientErrorPlaybookMessage } = await import('./client-error-playbook.js')
+      const feature = deriveFeatureFromApiPath(path)
+      throw new Error(getClientErrorPlaybookMessage(feature, `HTTP_${res.status}`))
     }
     throw new Error(text.slice(0, 120) || `HTTP ${res.status}`)
   }

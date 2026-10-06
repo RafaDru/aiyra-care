@@ -5,6 +5,11 @@ import {
   sanitizeErrorCode,
   type ClientErrorKind,
 } from './client-error-fingerprint.js'
+import {
+  getFailureProbeVersion,
+  isFailureProbeOptedOut,
+} from './failure-probe-policy.js'
+import type { FailureProbeKind } from './failure-probe-types.js'
 
 const SESSION_KEY = 'aiyracare.browser_session'
 const DEDUPE_MS = 15_000
@@ -70,6 +75,27 @@ export interface ReportClientErrorInput {
   patientId?: string
   apiPath?: string
   properties?: Record<string, unknown>
+  /** Failure Probes — falha user-impacting (default true quando omitido). */
+  declared?: boolean
+  probeKind?: FailureProbeKind
+}
+
+function buildProbeProperties(
+  input: ReportClientErrorInput,
+  extra?: Record<string, unknown>,
+): Record<string, unknown> {
+  const declared = input.declared !== false
+  const probeKind = input.probeKind
+    ?? (input.errorKind === 'ui_boundary' ? 'ui.unhandled' : 'api.unexpected')
+  return {
+    ...(input.apiPath ? { api_path: input.apiPath.split('?')[0].slice(0, 128) } : {}),
+    probe_version: getFailureProbeVersion(),
+    probe_kind: probeKind,
+    declared: declared ? 1 : 0,
+    sdk_surface: 'web',
+    ...input.properties,
+    ...extra,
+  }
 }
 
 /**
@@ -79,6 +105,7 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
   const route = input.route ?? (typeof window !== 'undefined' ? window.location.pathname : undefined)
   const feature = input.feature
     ?? (input.apiPath ? deriveFeatureFromApiPath(input.apiPath) : deriveFeatureFromRoute(route ?? '/'))
+  if (isFailureProbeOptedOut(feature)) return
   const errorCode = sanitizeErrorCode(input.errorCode)
   const fingerprint = await computeClientErrorFingerprint(feature, input.errorKind, errorCode)
   if (shouldDedupe(fingerprint)) return
@@ -95,10 +122,7 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
           sessionId: getBrowserSessionId(),
           route,
           patientId: input.patientId,
-          properties: {
-            ...(input.apiPath ? { api_path: input.apiPath.split('?')[0].slice(0, 128) } : {}),
-            ...input.properties,
-          },
+          properties: buildProbeProperties(input),
         }],
       },
       signal ? { signal } : undefined,
@@ -110,7 +134,13 @@ export async function reportClientError(input: ReportClientErrorInput): Promise<
 export function reportApiClientError(
   apiPath: string,
   status: number,
-  options?: { patientId?: string; route?: string; message?: string },
+  options?: {
+    patientId?: string
+    route?: string
+    message?: string
+    declared?: boolean
+    probeKind?: FailureProbeKind
+  },
 ): void {
   const errorCode = status > 0
     ? `HTTP_${status}`
@@ -121,6 +151,8 @@ export function reportApiClientError(
     apiPath,
     patientId: options?.patientId,
     route: options?.route,
+    declared: options?.declared,
+    probeKind: options?.probeKind ?? (status >= 500 && status <= 599 ? 'api.unexpected' : 'api.client'),
   }).catch(() => undefined)
 }
 
@@ -132,11 +164,18 @@ export function reportNetworkClientError(apiPath: string): void {
   }).catch(() => undefined)
 }
 
-export function reportUiBoundaryError(componentName: string, errorName: string): void {
+export function reportUiBoundaryError(
+  componentName: string,
+  errorName: string,
+  options?: { feature?: string; route?: string },
+): void {
   void reportClientError({
-    feature: 'ui',
+    feature: options?.feature ?? 'ui',
     errorKind: 'ui_boundary',
     errorCode: sanitizeErrorCode(errorName || 'ReactError'),
+    route: options?.route,
+    declared: true,
+    probeKind: 'ui.unhandled',
     properties: { component: componentName.slice(0, 64) },
   }).catch(() => undefined)
 }
@@ -158,6 +197,8 @@ export function reportAvaCompanionError(
     apiPath,
     patientId: options?.patientId,
     route: options?.route,
+    declared: true,
+    probeKind: 'companion.stream',
   }).catch(() => undefined)
 }
 
