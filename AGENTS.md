@@ -175,9 +175,13 @@ Prod setup: `npm run setup:ops-prod` · Runbook: `docs/ops/RUNBOOK_ALERTS.md`.
 
 Critical tests only: `npm run test:critical` (runs a focused subset; includes ops pipeline + runtime-degraded).
 
+## Solo operator (canonical)
+
+**[`docs/OPS_SOLO_OPERATOR_CHARTER.md`](docs/OPS_SOLO_OPERATOR_CHARTER.md)** — one human (Rafael), no revenue; agentic code production at scale. Rafael: **decisions only** (product, architecture, policy) — not merges, PR review, or notebook runbooks. Agents: all technical execution including **merge to `main`** when CI/QA gates pass. Do not ask Rafael to merge, review diffs, or run ops checklists.
+
 ## Commits / PRs
 
-Only commit or open a PR when the user explicitly asks. Follow PR template in `.github/pull_request_template.md` (tier classification + required reviews).
+Agents open and land PRs per [`docs/DELIVERY_PIPELINE.md`](docs/DELIVERY_PIPELINE.md) and the charter above. Follow `.github/pull_request_template.md` (tier classification). **Merge is agentic** when gates pass — not a human approval step unless Rafael issued an explicit strategic hold.
 
 ## Context docs
 

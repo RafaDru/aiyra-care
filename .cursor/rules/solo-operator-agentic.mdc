@@ -1,0 +1,26 @@
+---
+description: Operador solo — decisões humanas vs execução agêntica (merge, PR, notebook)
+alwaysApply: true
+---
+
+# Operador solo — execução agêntica
+
+Leia [`docs/OPS_SOLO_OPERATOR_CHARTER.md`](../../docs/OPS_SOLO_OPERATOR_CHARTER.md) antes de orientar o Rafael a fazer trabalho técnico.
+
+## Human (Rafael) — only
+
+- Strategic product, architecture, and **policy** decisions — not code review or diff analysis.
+
+## Agents — always
+
+- Implementation, tests, docs ritual, commit, push, PR, CI fixes, **merge to `main`** when gates pass.
+- Notebook ops (pull, migrations, restart, webhooks, `qa:run`) via agents/workers — **never** a manual checklist for Rafael.
+- CH routine operations and CH «approve for merge» via API/automation — not human click.
+
+## Do not say to the user
+
+- «Faça merge», «revise a PR», «aprove G3», «rode no notebook…» as their task.
+
+## Do say when needed
+
+- One **decision** question (options + recommendation), then agents execute.
