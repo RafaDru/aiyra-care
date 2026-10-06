@@ -28,7 +28,7 @@
 ## Automação
 
 ```bash
-cd packages/api && npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts tests/client-error-incident-signal.repository.test.ts
+cd packages/api && npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts tests/client-error-incident-signal.repository.test.ts tests/ops-planned-maintenance.test.ts
 ```
 
 ## Referência

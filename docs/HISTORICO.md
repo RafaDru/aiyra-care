@@ -1,6 +1,15 @@
 # Histórico do Projeto AiyraCare
 
-<<<<<<< Updated upstream
+## [2026-10-06] - Ops specs P0/P1 (G3 agêntico, túnel, ingress prod)
+
+### Realizado
+- Specs: [`CH_G3_AGENTIC_APPROVAL.md`](ops/CH_G3_AGENTIC_APPROVAL.md), [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](ops/CH_OPS_CALLBACK_TUNNEL_SPEC.md), [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md); stub v2 em [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md); gap alinhado #114/#115 + charter — [`CH_OPS_GAP_AND_PRIORITY.md`](ops/CH_OPS_GAP_AND_PRIORITY.md).
+
+## [2026-10-06] - Client errors: universal ingress fases 2–4
+
+### Realizado
+- Bridge CH: mobile feature parity, prefixo `/integration-links` 5xx, `ava_companion` + `resolveBridgeIngressFeature`; vitest allowlist — [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](ops/CLIENT_ERROR_INCIDENT_BRIDGE.md).
+
 ## [2026-10-06] - CH ops: gap, stack autônoma, manutenção planejada
 
 ### Decisão
@@ -29,7 +38,7 @@
 - `ChDetailSection` / corpo estruturado; `Modal.confirm` em mutações (defeitos, incidentes, suporte).
 - SSE `GET /api/analysis-queue/stream` e `GET /api/platform-defects/stream`; buses `incident-board` / `platform-defect-board`; indicador «Ao vivo».
 - Spec: `docs/ops/CH_UI_GRAPHICS_PACKAGE.md` · suite `ops-ch-ui-graphics`.
-=======
+
 ## [2026-10-06] - Carta operador solo + execução agêntica
 
 ### Decisão
@@ -39,7 +48,6 @@
 
 ### Realizado
 - `docs/OPS_SOLO_OPERATOR_CHARTER.md`, `docs/ops-agentic-operating-model.md`, regra `.cursor/rules/solo-operator-agentic.mdc`, `AGENTS.md`, `project-context.json`, bootstrap índice.
->>>>>>> Stashed changes
 
 ## [2026-10-04] - CH: incidente `resolved` + reincidência INC→INC (084)
 
