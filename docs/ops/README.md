@@ -26,7 +26,7 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 | 1c7 | [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) | Flag manutenção — suppress bridge auto-INC |
 | 1c8 | [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) | G3 via `operator-approve-pr` (sem clique CH) |
 | 1c9 | [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) | Túnel HTTPS, callbacks Automation, webhooks GitHub |
-| 1c10 | [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) | MIN_COUNT / dedupe / preview vs prod |
+| 1c10 | [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) | MIN_COUNT / dedupe / preview vs prod · **decisão §8.1 = 1A** (2026-10-06) |
 | 1d | [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) | **Operador solo** — gates G0–G4, falhas, pós-`ready_for_pr` (fatia R0) |
 | 2 | [`CONSOLE.md`](./CONSOLE.md) | Abas do console `:3013`, o que cada uma mede |
 | 3 | [`TELEMETRY.md`](./TELEMETRY.md) | Tabelas PG, LGPD, queries úteis |

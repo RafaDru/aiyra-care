@@ -46,7 +46,7 @@
 
 1. **G3 agêntico + merge agêntico** — automation pós-`review-callback` chama `operator-approve-pr`; agente merge quando CI/QA OK (charter). Depende de túnel se review na nuvem.
 2. **`ch-cycle-close` C9** — piloto DEF/INC + suite `ops-ch-cycle-close` PASS documentado.
-3. **Ingress prod (política B)** — env preview/prod conforme [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md).
+3. **Ingress prod (decisão §8.1 — trilha 1A)** — notebook/preview/prod com piloto agressivo (`BRIDGE=1`, `MIN_COUNT=1`, dedupe 15 min); ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) §5–§6.
 4. **`ops-planned-maintenance` v2** — runtime flags + opcional suppress ops_alert (stub spec).
 5. **C8 métricas** — dashboards/alertas sobre tempos de fase (extensão opcional).
 
