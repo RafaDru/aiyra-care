@@ -540,3 +540,171 @@
   color: #0f172a;
   margin-top: 4px;
 }
+
+/* Produto — quadro de maturidade */
+.ch-maturity-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #047857 0%, #059669 45%, #34d399 100%);
+  color: #ecfdf5;
+  font-size: 13px;
+  border: 1px solid color-mix(in srgb, #059669 40%, #065f46);
+  box-shadow: 0 1px 3px rgba(4, 120, 87, 0.2);
+}
+
+.ch-maturity-ribbon strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+.ch-maturity-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.ch-maturity-kpi {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--ops-border, #e2e8f0);
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+}
+
+.ch-maturity-kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.ch-maturity-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 4px;
+  color: #0f172a;
+}
+
+.ch-maturity-kpi--mature .ch-maturity-kpi-value {
+  color: #047857;
+}
+
+.ch-maturity-kpi--operational .ch-maturity-kpi-value {
+  color: #1d4ed8;
+}
+
+.ch-maturity-kpi--partial .ch-maturity-kpi-value {
+  color: #b45309;
+}
+
+.ch-maturity-kpi--pilot .ch-maturity-kpi-value {
+  color: #7c3aed;
+}
+
+.ch-maturity-kpi--planned .ch-maturity-kpi-value {
+  color: #64748b;
+}
+
+.ch-maturity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.ch-maturity-card {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--ops-border, #e2e8f0);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.ch-maturity-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ch-maturity-pill {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.ch-maturity-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.ch-maturity-card-note {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.ch-maturity-card-doc {
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.ch-maturity-card--mature {
+  border-color: #6ee7b7;
+  background: linear-gradient(180deg, #ecfdf5 0%, #fff 70%);
+}
+
+.ch-maturity-card--mature .ch-maturity-pill {
+  background: #059669;
+  color: #ecfdf5;
+}
+
+.ch-maturity-card--operational {
+  border-color: #93c5fd;
+  background: linear-gradient(180deg, #eff6ff 0%, #fff 70%);
+}
+
+.ch-maturity-card--operational .ch-maturity-pill {
+  background: #2563eb;
+  color: #eff6ff;
+}
+
+.ch-maturity-card--partial {
+  border-color: #fcd34d;
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 70%);
+}
+
+.ch-maturity-card--partial .ch-maturity-pill {
+  background: #d97706;
+  color: #fffbeb;
+}
+
+.ch-maturity-card--pilot {
+  border-color: #c4b5fd;
+  background: linear-gradient(180deg, #f5f3ff 0%, #fff 70%);
+}
+
+.ch-maturity-card--pilot .ch-maturity-pill {
+  background: #7c3aed;
+  color: #f5f3ff;
+}
+
+.ch-maturity-card--planned {
+  border-color: #cbd5e1;
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 70%);
+}
+
+.ch-maturity-card--planned .ch-maturity-pill {
+  background: #64748b;
+  color: #f8fafc;
+}

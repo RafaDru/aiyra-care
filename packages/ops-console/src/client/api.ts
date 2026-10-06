@@ -2,6 +2,7 @@ import type {
   OpsAlertsDispatchResult,
   OpsMetricsResponse,
   ProductLifecycleSnapshot,
+  ProductMaturityBoardSnapshot,
   StackActionResult,
   StrategyContentPayload,
   StrategyManifestResponse,
@@ -66,6 +67,8 @@ export const opsApi = {
       `/api/ops/incident-defect-cycle-metrics?windowDays=${encodeURIComponent(String(windowDays))}`,
     ),
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
+  productMaturityBoard: () =>
+    request<ProductMaturityBoardSnapshot>('/api/product-maturity-board'),
   strategyManifest: () => request<StrategyManifestResponse>('/api/strategy/manifest'),
   strategyContent: (section: StrategySectionId) =>
     request<StrategyContentPayload>(`/api/strategy/content/${encodeURIComponent(section)}`),

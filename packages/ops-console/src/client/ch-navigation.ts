@@ -11,6 +11,7 @@ import {
   FlagOutlined,
   BugOutlined,
   FundOutlined,
+  PieChartOutlined,
   ReadOutlined,
   RobotOutlined,
   SyncOutlined,
@@ -35,6 +36,7 @@ export type ChTabKey =
   | 'sync'
   | 'infra'
   | 'produto'
+  | 'maturidade'
   | 'product'
   | 'support'
   | 'business'
@@ -109,6 +111,12 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
         label: 'Ciclo de vida',
         description: 'Estágio e entregas de capacidades no produto.',
         icon: icon(DeploymentUnitOutlined),
+      },
+      {
+        tab: 'maturidade',
+        label: 'Maturidade',
+        description: 'Visão por domínio e superfície — quadro estratégico vivo.',
+        icon: icon(PieChartOutlined),
       },
       {
         tab: 'product',

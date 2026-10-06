@@ -1,0 +1,270 @@
+{
+  "updatedAt": "2026-10-06",
+  "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo.",
+  "surfaces": [
+    {
+      "id": "web",
+      "title": "Web (React/Vite)",
+      "maturity": "operational",
+      "note": "App principal em localhost:5173; paridade 80/20 com mobile; Ant Design 6."
+    },
+    {
+      "id": "mobile",
+      "title": "Mobile (Expo)",
+      "maturity": "partial",
+      "note": "Shell Expo com rotas centrais; integrações e Ava ainda em expansão.",
+      "doc": "docs/MOBILE_WEB_DUAL_DELIVERY.md"
+    },
+    {
+      "id": "ch",
+      "title": "Command Hub (ops-console)",
+      "maturity": "operational",
+      "note": "Console :3013 — Operação, Produto, Negócio, AI; ciclo INC/defeito/G3.",
+      "doc": "docs/ops/README.md"
+    },
+    {
+      "id": "api",
+      "title": "API (Fastify)",
+      "maturity": "mature",
+      "note": "Hexagonal, Postgres, scrapers Connect Fase 1, auth Supabase, billing Stripe."
+    },
+    {
+      "id": "python-agents",
+      "title": "Agentes Python",
+      "maturity": "pilot",
+      "note": "Serviços FastAPI (pediatria, integração, farmacêutico) — apoio, não fluxo crítico B2C.",
+      "doc": "docs/features/index.json"
+    }
+  ],
+  "domains": [
+    {
+      "id": "conta-familia",
+      "title": "Conta e família",
+      "items": [
+        {
+          "id": "account-profile",
+          "title": "Conta e perfil",
+          "maturity": "operational",
+          "note": "Supabase auth, account_profiles, compliance gate LGPD.",
+          "doc": "docs/FAMILY_ACCESS_MODEL.md"
+        },
+        {
+          "id": "patient-access-grants",
+          "title": "ACL conta × perfil de saúde",
+          "maturity": "operational",
+          "note": "Grants explícitos, titular owner_account_id, auditoria ACL."
+        },
+        {
+          "id": "care-circles-invites",
+          "title": "Círculos e convites",
+          "maturity": "operational",
+          "note": "UI /settings/family, aceite de convite, e-mail Resend."
+        },
+        {
+          "id": "family-mobile-parity",
+          "title": "Paridade mobile — família",
+          "maturity": "partial",
+          "note": "Fluxos principais no Expo; matriz de acesso ainda concentrada na web."
+        }
+      ]
+    },
+    {
+      "id": "dia-a-dia",
+      "title": "Dia a dia",
+      "items": [
+        {
+          "id": "patient-home",
+          "title": "Hoje e navegação do paciente",
+          "maturity": "operational",
+          "note": "Perfil, abas Carteira/Convênios/Integrações, telemetria product_events."
+        },
+        {
+          "id": "timeline",
+          "title": "Linha do tempo clínica",
+          "maturity": "operational",
+          "note": "Agregação determinística; encadeamento Neo4j opcional."
+        },
+        {
+          "id": "agenda",
+          "title": "Agenda e eventos",
+          "maturity": "operational",
+          "note": "scheduled_events, import ICS, lembretes."
+        },
+        {
+          "id": "calendar-sync",
+          "title": "Calendários Google/Microsoft",
+          "maturity": "operational",
+          "note": "OAuth por conta+paciente; sync bidirecional planejado em roadmap."
+        }
+      ]
+    },
+    {
+      "id": "carteira-integracoes",
+      "title": "Carteira e integrações",
+      "items": [
+        {
+          "id": "wallet-silent-sync",
+          "title": "Carteira e sync silencioso",
+          "maturity": "operational",
+          "note": "sessionReady, SSE progresso, delta sync por portal.",
+          "doc": "docs/SYNC_DELTA.md"
+        },
+        {
+          "id": "portals-unimed-amil",
+          "title": "Portais Unimed BH e Amil",
+          "maturity": "operational",
+          "note": "Login, plano, autorizações; worker agendado connect-worker."
+        },
+        {
+          "id": "portals-materdei-fleury",
+          "title": "Mater Dei e Grupo Fleury (Hermes Pardini)",
+          "maturity": "operational",
+          "note": "Exames e laudos; PKCE Fleury Precision Care."
+        },
+        {
+          "id": "conectesus",
+          "title": "ConecteSUS / gov.br",
+          "maturity": "partial",
+          "note": "Import guiado FHIR; reimport sem browser quando sessão válida.",
+          "doc": "docs/SUS_CONECTESUS.md"
+        },
+        {
+          "id": "connect-phase2",
+          "title": "Connect Fase 2 (scrapers fora da API)",
+          "maturity": "planned",
+          "note": "Contrato em packages/connect; migração incremental.",
+          "doc": "docs/CONNECT.md"
+        }
+      ]
+    },
+    {
+      "id": "clinico",
+      "title": "Clínico",
+      "items": [
+        {
+          "id": "patient-context",
+          "title": "Contexto e export clínico",
+          "maturity": "mature",
+          "note": "GET context/timeline sem LLM; export e share token 48h."
+        },
+        {
+          "id": "exam-artifacts-markers",
+          "title": "Laudos → marcadores",
+          "maturity": "operational",
+          "note": "Pipeline OCR/parser/LLM → exam_result_items; dashboard marcadores.",
+          "doc": "docs/EXAM_ARTIFACT_PIPELINE.md"
+        },
+        {
+          "id": "health-threads",
+          "title": "Trilhas de saúde",
+          "maturity": "operational",
+          "note": "HealthThread, acompanhamento, clinical_entity_links."
+        },
+        {
+          "id": "hygiene-dedup",
+          "title": "Higienização (dedup)",
+          "maturity": "operational",
+          "note": "Detectores vacina/exame; hygiene_candidates; bloqueio na inserção.",
+          "doc": "docs/DATA_HYGIENE.md"
+        },
+        {
+          "id": "emergency",
+          "title": "Emergência e guia",
+          "maturity": "operational",
+          "note": "Diretório emergência, contatos, medidas (037–039)."
+        }
+      ]
+    },
+    {
+      "id": "ava",
+      "title": "Ava",
+      "items": [
+        {
+          "id": "ava-global-dock",
+          "title": "Companion global (G1)",
+          "maturity": "operational",
+          "note": "Dock em todas as telas, lente de paciente, aceleradores read-only.",
+          "doc": "docs/AVA_OPERATIONAL.md"
+        },
+        {
+          "id": "ava-conversations",
+          "title": "Conversas persistidas e pins",
+          "maturity": "partial",
+          "note": "Migrações 047–048; sessões e entity pins em evolução.",
+          "doc": "docs/AVA_VISION.md"
+        },
+        {
+          "id": "ava-g3-actions",
+          "title": "Ações mutáveis (G3)",
+          "maturity": "pilot",
+          "note": "Proposed actions e approve agentic no CH — uso controlado.",
+          "doc": "docs/CH_G3_AGENTIC_APPROVAL.md"
+        },
+        {
+          "id": "ava-agents-python",
+          "title": "Agentes especializados (Python)",
+          "maturity": "pilot",
+          "note": "RAG e domínios verticais; não substituem contexto determinístico."
+        }
+      ]
+    },
+    {
+      "id": "monetizacao",
+      "title": "Monetização",
+      "items": [
+        {
+          "id": "stripe-billing",
+          "title": "Stripe checkout e entitlements",
+          "maturity": "operational",
+          "note": "Webhooks, créditos manuscrito, metering LLM cliente vs interno.",
+          "doc": "docs/BILLING.md"
+        },
+        {
+          "id": "family-plan-test",
+          "title": "Plano família (teste)",
+          "maturity": "pilot",
+          "note": "Ofertas e copy alinhadas a finance-strategy; checkout público limitado."
+        },
+        {
+          "id": "nfse-fiscal",
+          "title": "NFS-e e rotina Contabilizei",
+          "maturity": "planned",
+          "note": "Gates human-review fiscal antes de go-live B2C amplo."
+        }
+      ]
+    },
+    {
+      "id": "observabilidade",
+      "title": "Observabilidade",
+      "items": [
+        {
+          "id": "ops-console-metrics",
+          "title": "Command Hub e alertas ops",
+          "maturity": "operational",
+          "note": "Métricas, triagem INC, defeitos, pipeline G3, manutenção planejada.",
+          "doc": "docs/OBSERVABILITY.md"
+        },
+        {
+          "id": "product-events",
+          "title": "Telemetria product_events",
+          "maturity": "operational",
+          "note": "Ativação, features, client_errors; base para Negócio no CH."
+        },
+        {
+          "id": "failure-probes",
+          "title": "Failure probes (captura default-on)",
+          "maturity": "partial",
+          "note": "Web M1 em main — SDK React; bridge INC; mobile M2 e suite QA planejados.",
+          "doc": "docs/features/failure-probes-ch.md"
+        },
+        {
+          "id": "neo4j-lineage",
+          "title": "Projeção Neo4j (lineage)",
+          "maturity": "partial",
+          "note": "Associações PG→grafo; worker de backfill; leitura em Timeline.",
+          "doc": "docs/ARCHITECTURE_DATA_LAYERS.md"
+        }
+      ]
+    }
+  ]
+}

@@ -7,5 +7,10 @@
     "moduleResolution": "NodeNext",
     "jsx": "preserve"
   },
-  "include": ["src/server.ts", "src/strategy-content.ts"]
+  "include": [
+    "src/server.ts",
+    "src/strategy-content.ts",
+    "src/product-lifecycle.ts",
+    "src/product-maturity-board.ts"
+  ]
 }

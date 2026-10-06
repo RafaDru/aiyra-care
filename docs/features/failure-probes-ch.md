@@ -55,6 +55,10 @@ Camada **default-on** de captura de falhas user-impacting (UI sem fallback, API 
 - [`OPS_PLANNED_MAINTENANCE.md`](../ops/OPS_PLANNED_MAINTENANCE.md)
 - [`CH_AUTONOMOUS_OPS_STACK.md`](../ops/CH_AUTONOMOUS_OPS_STACK.md)
 
+## Status no quadro de produto
+
+Refletido em [`docs/product/PRODUCT_MATURITY_BOARD.json`](../product/PRODUCT_MATURITY_BOARD.json) (domínio **Observabilidade** → item `failure-probes`, maturidade **partial**, nota Web M1 main). UI: Command Hub **Produto → Maturidade**.
+
 ## QA
 
 - Regressão bridge: [`client-error-ch-bridge`](../testing/suites/client-error-ch-bridge.md)
