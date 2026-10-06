@@ -296,6 +296,25 @@
       "tags": ["mobile", "expo", "paridade", "ava"]
     },
     {
+      "id": "mobile-dual-entry-ux",
+      "epicId": "plat-mobile",
+      "title": "Mobile — dual entry (Registro rápido + Ava)",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/mobile-dual-entry-ux.md",
+      "domainDoc": "docs/MOBILE_WEB_DUAL_DELIVERY.md",
+      "routes": ["/(app)/(tabs)", "/(app)/patient/[id]", "/(app)/settings/family"],
+      "api": [
+        "POST /health-threads",
+        "POST /health-threads/:id/entries",
+        "POST /measurements/batch",
+        "POST /patients/:id/ava/chat"
+      ],
+      "helpTopics": [],
+      "tags": ["mobile", "expo", "ava", "quick-capture", "ux"]
+    },
+    {
       "id": "documentation-knowledge-base",
       "epicId": "documentation-knowledge-base",
       "title": "Base de conhecimento — features, ajuda e tracking",
