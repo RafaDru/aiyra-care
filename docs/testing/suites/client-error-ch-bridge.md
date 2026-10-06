@@ -15,6 +15,7 @@
 - [ ] API com `CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED=1`
 - [ ] `CLIENT_ERROR_INCIDENT_DEDUPE_MS=900000`, `CLIENT_ERROR_INCIDENT_MIN_COUNT=1`
 - [ ] `CLIENT_ERROR_INCIDENT_FEATURES` inclui feature do teste (ex. `account_settings`)
+- [ ] Decisão **3A:** `ava_companion` em `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (default) — não deve abrir INC; regressão em vitest `client-error-incident-bridge.config.test.ts`
 
 ## Passos (manual + PG)
 

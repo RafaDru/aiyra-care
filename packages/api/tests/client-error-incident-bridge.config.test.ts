@@ -19,7 +19,35 @@ describe('resolveClientErrorIncidentBridgeConfig', () => {
     expect(cfg.features.has('integrations')).toBe(true)
     expect(cfg.features.has('integration_links')).toBe(true)
     expect(cfg.features.has('ava_companion')).toBe(true)
+    expect(cfg.disabledFeatures.has('ava_companion')).toBe(true)
     expect(cfg.apiPathPrefixes).toEqual(['/auth', '/account', '/patients', '/integration-links'])
+  })
+
+  it('defaults disabled ava_companion for bridge INC (decision 3A)', () => {
+    const cfg = resolveClientErrorIncidentBridgeConfig({
+      CLIENT_ERROR_INCIDENT_FEATURES: 'ava_companion,ui',
+    })
+    expect(ruleForFeature(cfg, 'ava_companion')).toBeNull()
+    expect(ruleForFeature(cfg, 'api:ava')).toBeNull()
+    expect(ruleForFeature(cfg, 'ui')).not.toBeNull()
+  })
+
+  it('allows bridge INC for ava when disabled list cleared', () => {
+    const cfg = resolveClientErrorIncidentBridgeConfig({
+      CLIENT_ERROR_INCIDENT_FEATURES: 'ava_companion',
+      CLIENT_ERROR_INCIDENT_FEATURES_DISABLED: 'none',
+    })
+    expect(cfg.disabledFeatures.has('ava_companion')).toBe(false)
+    expect(ruleForFeature(cfg, 'ava_companion')?.feature).toBe('ava_companion')
+  })
+
+  it('parses CLIENT_ERROR_INCIDENT_FEATURES_DISABLED csv', () => {
+    const cfg = resolveClientErrorIncidentBridgeConfig({
+      CLIENT_ERROR_INCIDENT_FEATURES: 'ava_companion,ui',
+      CLIENT_ERROR_INCIDENT_FEATURES_DISABLED: 'ui,patient_wallet',
+    })
+    expect(ruleForFeature(cfg, 'ui')).toBeNull()
+    expect(ruleForFeature(cfg, 'ava_companion')?.feature).toBe('ava_companion')
   })
 
   it('parses enable flag and feature list', () => {

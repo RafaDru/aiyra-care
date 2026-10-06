@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Ingress bridge decisão 3A (Ava companion)
+
+### Decisão
+- **§8 item 3 — 3A:** telemetria/probe `ava_companion` permanece; bridge **não** abre INC — default `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED=ava_companion` ([`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.3).
+
+### Realizado
+- `resolveDisabledBridgeFeatures` + `ruleForFeature` blocklist; vitest; docs [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md), bridge, `.env.example` (§ client errors); decisão em `project-context.json` (`failure-probes-ava-bridge-3a`).
+
 ## [2026-10-06] - Failure Probes — spec CH (default-on)
 
 ### Decisão
