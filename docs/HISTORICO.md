@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - CH Revisão Dev — CI visível sem gate (decisão 8C+notify)
+
+### Decisão
+- Manter `CH_PR_REVIEW_REQUIRE_CI_GREEN=0`; ao concluir Revisão Dev, operador vê rótulo **`CI: verde` / `CI: falhou` / `CI: pendente`** no painel e na linha do tempo (snapshot de `pipeline_status` + merge com callback do agente).
+
+### Realizado
+- `defect-ci-status.helper.ts`; enrich dispatch/callback `platform-defect-pr-review`; badge ops-console; política [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8; vitest.
+
 ## [2026-10-06] - Manutenção planejada 7A+tag + ingress §8.5/6/7
 
 ### Decisão

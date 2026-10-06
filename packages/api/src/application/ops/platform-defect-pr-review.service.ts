@@ -24,6 +24,7 @@ import {
   evaluateG3AgenticApproveEligibility,
   G3_AGENTIC_OPERATOR_NOTE,
 } from './ch-g3-agentic-approve.helper.js'
+import { mergeReviewCiSnapshot } from '../../domain/ops/defect-ci-status.helper.js'
 
 export class PlatformDefectPrReviewError extends Error {
   readonly code:
@@ -203,12 +204,13 @@ export class PlatformDefectPrReviewService {
     if (!reviewId) throw new PlatformDefectPrReviewError('invalid_payload')
 
     const status = input.status === 'failed' ? 'failed' : 'completed'
+    const ciSnapshot = mergeReviewCiSnapshot(defect, input.ciSnapshot ?? null)
     const updated = await this.reviewRepo.completeFromCallback(reviewId, {
       status,
       dimensions: input.dimensions ?? null,
       recommendation: input.recommendation ?? null,
       recommendationRationale: input.recommendationRationale ?? null,
-      ciSnapshot: input.ciSnapshot ?? null,
+      ciSnapshot,
       prReviewCommentUrl: input.prReviewCommentUrl ?? null,
       agentRunUrl: input.agentRunUrl ?? null,
       headSha: input.headSha ?? null,
@@ -230,7 +232,7 @@ export class PlatformDefectPrReviewService {
     const agentic = evaluateG3AgenticApproveEligibility(refreshed ?? defect, {
       reviewStatus: status,
       recommendation: input.recommendation ?? null,
-      ciSnapshot: input.ciSnapshot ?? null,
+      ciSnapshot,
     })
     if (agentic.eligible) {
       try {

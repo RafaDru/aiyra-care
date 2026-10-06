@@ -71,6 +71,22 @@ describe('platform-defect-pr-review-dispatch', () => {
     expect(built.callbackUrl).toContain('/api/platform-defects/review-callback')
     expect(built.playbook).toBe(defectPrReviewPlaybookId(0))
     expect(built.text).toContain('Revisão PR')
+    expect(built.ciSnapshot.status).toBe('pending')
+    expect(built.ciStatus.label).toBe('CI: pendente')
+  })
+
+  it('dispatch ciSnapshot reflects ci_success on defect', () => {
+    process.env.OPS_INVESTIGATOR_CALLBACK_KEY = 'callback-secret'
+    const built = buildPlatformDefectPrReviewDispatchPayload({
+      defect: { ...readyDefect, pipelineStatus: 'ci_success', lastCiRunUrl: 'https://github.com/actions/runs/1' },
+      reviewId: 'rev-2',
+      investigationId: null,
+      linkedIncidents: [],
+      trigger: 'auto_ready',
+    })
+    if ('error' in built) throw new Error('expected payload')
+    expect(built.ciSnapshot.status).toBe('success')
+    expect(built.ciStatus.label).toBe('CI: verde')
   })
 
   it('skips dispatch when webhook missing', async () => {
