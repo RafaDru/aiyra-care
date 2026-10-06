@@ -629,9 +629,13 @@
       "parallelSafe": false,
       "fixtureId": "ops-local",
       "doc": "docs/testing/suites/ops-ch-cycle-close.md",
-      "coverage": "planned",
+      "coverage": "partial",
       "businessActions": ["ops.ch_cycle_close"],
-      "automation": { "status": "manual" },
+      "automation": {
+        "status": "partial",
+        "spec": "packages/ops-console/e2e/ops-ch-cycle-close.spec.ts",
+        "command": "npm run test:e2e:ops-ch-cycle-close"
+      },
       "estimatedMinutes": 45
     }
   ],

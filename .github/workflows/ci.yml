@@ -53,6 +53,23 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aiyracare_ci
 
+  ops-console-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Install Playwright Chromium
+        working-directory: packages/ops-console
+        run: npx playwright install chromium --with-deps
+      - name: CH cycle-close UI smoke (mock APIs)
+        working-directory: packages/ops-console
+        run: npm run test:e2e:ops-ch-cycle-close
+        env:
+          CI: 1
+
   web:
     runs-on: ubuntu-latest
     defaults:

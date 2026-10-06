@@ -2,7 +2,8 @@
 
 **Id:** `ops-ch-cycle-close`  
 **Lane:** ops (manual CH + opcional webhook simulado)  
-**Spec:** [`docs/ops/CH_CYCLE_CLOSE_SPEC.md`](../../ops/CH_CYCLE_CLOSE_SPEC.md)
+**Spec:** [`docs/ops/CH_CYCLE_CLOSE_SPEC.md`](../../ops/CH_CYCLE_CLOSE_SPEC.md)  
+**Automação (parcial):** `npm run test:e2e:ops-ch-cycle-close` — expand DEF, badges CI/review, card Ciclo CH (7d); APIs mockadas (sem GitHub/Postgres).
 
 ## Pré-requisitos
 
