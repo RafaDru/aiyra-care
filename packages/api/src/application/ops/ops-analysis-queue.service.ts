@@ -10,6 +10,7 @@ import type {
 } from '../../domain/ops/ops-analysis-queue.types.js'
 import type { PlatformDefectRecord } from '../../domain/ops/platform-defect.types.js'
 import { resolveDeploymentTier } from '../../domain/ops/investigator-environment.js'
+import { isOpsPlannedMaintenanceActive } from '../../domain/ops/ops-planned-maintenance.js'
 import { resolveInvestigationIdFromCallback } from '../../domain/ops/investigation-correlation.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
 import {
@@ -166,6 +167,7 @@ export class OpsAnalysisQueueService {
     alert: OpsAlert,
     options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
   ): Promise<OpsAnalysisQueueRecord> {
+    const maintenanceActive = isOpsPlannedMaintenanceActive()
     return this.repo.upsertQueued({
       sourceType: 'ops_alert',
       sourceId: alert.id,
@@ -178,6 +180,7 @@ export class OpsAnalysisQueueService {
         category: alert.category,
         incidentOrigin: 'alerta_ops',
         application: 'Ops',
+        ...(maintenanceActive ? { plannedMaintenanceActive: true } : {}),
         ...(alert.details ?? {}),
       },
       operatorNotes: options.operatorNotes,

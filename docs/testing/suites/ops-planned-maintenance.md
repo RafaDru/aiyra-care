@@ -20,7 +20,7 @@
 | 2 | Forçar 5xx em rota `/auth/*` (test harness ou vitest) | Log server; **sem** INC bridge |
 | 3 | `OPS_PLANNED_MAINTENANCE=0` + repetir passo 1 | INC criado (se dedupe ok) |
 | 4 | `POST /support/reports` com manutenção `1` | INC de suporte **criado** (humano) |
-| 5 | Loop ops alerts com infra critical + `OPS_PLANNED_MAINTENANCE=1` | **Sem** novo `enqueueOpsAlert` / INC auto |
+| 5 | Loop ops alerts com infra critical + `OPS_PLANNED_MAINTENANCE=1` | INC auto **criado** com tag CH «Em manutenção» (`plannedMaintenanceActive`) |
 
 ## Automação
 

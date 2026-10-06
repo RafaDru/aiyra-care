@@ -15,13 +15,11 @@ import { resolveInvestigatorEnvironmentContext } from '../../domain/ops/investig
 import type { OpsAlert } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsAlertTriageRow } from '../../domain/ops/ops-alert-triage.js'
 import { resolveOpsAlertDashboardUrl } from './ops-alert-dispatch.service.js'
-import { shouldSuppressAutoIncDuringPlannedMaintenance } from '../../domain/ops/ops-planned-maintenance.js'
-
 export type OpsAlertInvestigatorDispatchResult =
   | { outcome: 'sent' }
   | {
     outcome: 'skipped'
-    reason: 'webhook_not_configured' | 'webhook_key_missing' | 'auto_disabled' | 'pre_screen' | 'planned_maintenance'
+    reason: 'webhook_not_configured' | 'webhook_key_missing' | 'auto_disabled' | 'pre_screen'
   }
   | { outcome: 'failed'; error: string }
 
@@ -66,7 +64,6 @@ export function shouldAutoInvestigateOpsAlert(
   alert: OpsAlert,
   triage?: OpsAlertTriageRow,
 ): boolean {
-  if (shouldSuppressAutoIncDuringPlannedMaintenance('auto')) return false
   if (!isOpsAlertInvestigatorAutoEnabled()) return false
   if (alert.category !== 'infra') return false
   if (alert.severity !== 'critical') return false
@@ -154,9 +151,6 @@ export async function dispatchOpsAlertInvestigator(
     investigationTier?: InvestigationTier
   },
 ): Promise<OpsAlertInvestigatorDispatchResult> {
-  if (shouldSuppressAutoIncDuringPlannedMaintenance(options.trigger)) {
-    return { outcome: 'skipped', reason: 'planned_maintenance' }
-  }
   if (options.trigger === 'auto' && !isOpsAlertInvestigatorAutoEnabled()) {
     return { outcome: 'skipped', reason: 'auto_disabled' }
   }

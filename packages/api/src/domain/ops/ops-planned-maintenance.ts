@@ -4,7 +4,7 @@ export function isOpsPlannedMaintenanceActive(env: NodeJS.ProcessEnv = process.e
   return raw === '1' || raw === 'true' || raw === 'yes'
 }
 
-/** Auto ops_alert INC + dispatch; manual support reports and manual ops triage stay enabled. */
+/** Bridge client_errors + API 5xx auto-INC only (decisão 7A: ops_alert continua com tag). */
 export function shouldSuppressAutoIncDuringPlannedMaintenance(
   trigger: 'auto' | 'manual',
   env: NodeJS.ProcessEnv = process.env,

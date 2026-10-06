@@ -1,5 +1,16 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Manutenção planejada 7A+tag + ingress §8.5/6/7
+
+### Decisão
+- **`OPS_PLANNED_MAINTENANCE`:** manter suppress v1 (bridge `client_errors` + hook 5xx); **reverter** suppress v2 de ops_alert (#118). INC de ops_alert durante janela continua; `contextSnapshot.plannedMaintenanceActive: true` + tag CH «Em manutenção».
+- **Ingress §8:** **5A** (`CH_G3_AGENTIC_AUTO_APPROVE` off), **6C** (`CH_G3_REQUIRE_REVIEW_APPROVE` off por default), **7A+tag** (ops_alert não suprimido). **3A** já em `main` (Ava bridge blocklist).
+
+### Realizado
+- API: `enqueueOpsAlert` tag; remoção gates ops_alert em dispatch/investigate; vitest `ops-planned-maintenance-ops-alert.test.ts`.
+- CH: tag «Em manutenção» em lista/detalhe INC.
+- Docs: [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md), [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.5–8.7, gap doc, suite `ops-planned-maintenance`.
+
 ## [2026-10-06] - Ingress bridge decisão 3A (Ava companion)
 
 ### Decisão

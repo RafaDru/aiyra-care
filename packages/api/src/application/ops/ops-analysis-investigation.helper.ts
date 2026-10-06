@@ -21,8 +21,6 @@ import {
   type SupportInvestigatorDispatchResult,
 } from '../support-report/support-report-dispatch.js'
 import type { IncidentDispatchService } from './incident-dispatch.service.js'
-import { shouldSuppressAutoIncDuringPlannedMaintenance } from '../../domain/ops/ops-planned-maintenance.js'
-
 export async function investigateSupportReportWithQueue(
   queueService: OpsAnalysisQueueService,
   record: SupportReportRecord,
@@ -70,14 +68,6 @@ export async function investigateOpsAlertWithQueue(
   },
   incidentDispatch?: IncidentDispatchService,
 ): Promise<{ investigationId: string; queueId: string; dispatch: OpsAlertInvestigatorDispatchResult }> {
-  if (shouldSuppressAutoIncDuringPlannedMaintenance(options.trigger)) {
-    return {
-      investigationId: '',
-      queueId: '',
-      dispatch: { outcome: 'skipped', reason: 'planned_maintenance' },
-    }
-  }
-
   const item = await queueService.enqueueOpsAlert(alert, {
     operatorNotes: options.operatorNotes,
     trigger: options.trigger,
