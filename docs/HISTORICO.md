@@ -4,9 +4,11 @@
 
 ### Decisão
 - Manter `CH_PR_REVIEW_REQUIRE_CI_GREEN=0`; ao concluir Revisão Dev, operador vê rótulo **`CI: verde` / `CI: falhou` / `CI: pendente`** no painel e na linha do tempo (snapshot de `pipeline_status` + merge com callback do agente).
+- **Fila §8 encerrada:** índice único [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](ops/RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md) (8 respostas + env).
 
 ### Realizado
-- `defect-ci-status.helper.ts`; enrich dispatch/callback `platform-defect-pr-review`; badge ops-console; política [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8; vitest.
+- `defect-ci-status.helper.ts`; enrich dispatch/callback `platform-defect-pr-review`; badge ops-console; política [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.8; vitest.
+- Docs: gap [`CH_OPS_GAP_AND_PRIORITY.md`](ops/CH_OPS_GAP_AND_PRIORITY.md) (5A/6C/8C), hub [`ops/README.md`](ops/README.md).
 
 ## [2026-10-06] - Manutenção planejada 7A+tag + ingress §8.5/6/7
 
@@ -27,8 +29,6 @@
 ### Realizado
 - `resolveDisabledBridgeFeatures` + `ruleForFeature` blocklist; vitest; docs [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md), bridge, `.env.example` (§ client errors); decisão em `project-context.json` (`failure-probes-ava-bridge-3a`).
 
-=======
->>>>>>> 2c43ad5fa583b12be2df6a25e09a2da51d81b97b
 ## [2026-10-06] - Ingress bridge §8.4 lane SRE (decisão 4B)
 
 ### Decisão

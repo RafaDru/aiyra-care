@@ -60,8 +60,8 @@
 
 | Tema | Decisão |
 |------|---------|
-| G3 | Agente chama `operator-approve-pr`; `CH_G3_REQUIRE_REVIEW_APPROVE=1` recomendado em prod solo |
-| CI gate review | `CH_PR_REVIEW_REQUIRE_CI_GREEN=1` quando defect-ci webhook ou poll ativo (#114) |
+| Aprovar merge CH (5A/6C) | Sem auto-após-revisão; API sem trava obrigatória de review — ver [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) |
+| CI × revisão (8C) | `CH_PR_REVIEW_REQUIRE_CI_GREEN=0`; status CI visível no resultado da revisão |
 | Manutenção | Suprimir auto-INC bridge + 5xx; ops_alert INC **sim** com tag; support reports **sim** |
 | Merge `main` | **Agêntico** quando gates passam — [`OPS_SOLO_OPERATOR_CHARTER.md`](../OPS_SOLO_OPERATOR_CHARTER.md) |
 
