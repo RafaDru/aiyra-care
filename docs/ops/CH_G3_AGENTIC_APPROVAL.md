@@ -107,6 +107,26 @@ A nota persistida concatena `[override] {overrideReason}` + `note` em `operator_
 
 **Proibido:** override silencioso (`override` sem reason) — HTTP 400.
 
+### 4.3 Hook `CH_G3_AGENTIC_AUTO_APPROVE` (implementado)
+
+| Env | Comportamento |
+|-----|----------------|
+| `0` / omitido | Review callback **não** chama G3 — usar script ou passo automation |
+| `1` | Após `review-callback` com `status=completed` e `recommendation=approve`, `PlatformDefectPrReviewService.processCallback` chama `operatorApprovePr` com nota `[agentic] auto after review approve` |
+
+Eligibility (`evaluateG3AgenticApproveEligibility`): `ready_for_pr`, sem `operator_pr_approved_at` prévio; se `CH_PR_REVIEW_REQUIRE_CI_GREEN=1`, exige `pipeline_status=ci_success` **ou** `ciSnapshot.status/conclusion=success` no callback.
+
+`GET /health` (ops-console): `chG3AgenticAutoApprove`.
+
+### 4.4 Script CLI
+
+```bash
+npm run ch:defect-operator-approve -- --ref DEF-000042
+npm run ch:defect-operator-approve -- --id <uuid> --note "pós-review cloud agent"
+```
+
+`scripts/ch-defect-operator-approve.mjs` — base `OPS_CONSOLE_PUBLIC_URL` ou `http://127.0.0.1:$OPS_CONSOLE_PORT`; header opcional `x-internal-ops-key: $OPS_METRICS_KEY`; `--override --override-reason` quando gate G3 ativo.
+
 ---
 
 ## 5. `CH_PR_REVIEW_REQUIRE_CI_GREEN` (opcional, R2)
@@ -182,7 +202,7 @@ sequenceDiagram
 2. Tabela approve vs override reproduz comportamento vitest existente.
 3. `CH_PR_REVIEW_REQUIRE_CI_GREEN` documentado só em `request-review`, com política de merge separada.
 4. Link neste arquivo a partir de [`CH_OPS_GAP_AND_PRIORITY.md`](./CH_OPS_GAP_AND_PRIORITY.md) e hub stack.
-5. **Implementação P1 (opcional):** automation template `g3-approve-after-review` + auth header; suite `ops-ch-cycle-close` passo «G3 via API sem UI».
+5. **Implementação P1:** hook `CH_G3_AGENTIC_AUTO_APPROVE` + script `ch:defect-operator-approve` — vitest `ch-g3-agentic-approve.helper.test.ts`; suite `ops-ch-cycle-close` §D passo 11.
 
 ---
 
@@ -193,4 +213,5 @@ sequenceDiagram
 | `CH_G3_REQUIRE_REVIEW_APPROVE` | `0` | `1` |
 | `CH_PR_REVIEW_REQUIRE_CI_GREEN` | `0` até CI estável | `1` com defect-ci webhook |
 | `CH_AUTO_PR_REVIEW_ON_READY` | on | on |
+| `CH_G3_AGENTIC_AUTO_APPROVE` | `0` | `1` quando automação fecha ciclo sem worker dedicado |
 | `OPS_CONSOLE_PUBLIC_URL` | túnel se automação nuvem | URL estável preview/GCP |
