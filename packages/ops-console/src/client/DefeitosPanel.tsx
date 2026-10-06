@@ -35,6 +35,7 @@ import {
   defectPipelineCiRowBadge,
   defectPipelineReviewRowBadge,
   defectPipelineStatusRowBadge,
+  defectReviewCiStatusBadge,
   defectShowCiFailureBanner,
   defectShowReviewFailureBanner,
   formatCiFailureSummary,
@@ -939,6 +940,7 @@ function DefeitoAgenticReviewCard({
     chG3RequireReviewApprove
     && (!review || review.status !== 'completed' || review.recommendation !== 'approve')
   const canApprove = !reviewBlocksApprove || (overrideApprove && overrideReason.trim().length > 0)
+  const reviewCiBadge = defectReviewCiStatusBadge(review)
 
   return (
     <Card size="small" title="Revisão agêntica" style={{ marginTop: 16 }}>
@@ -956,6 +958,9 @@ function DefeitoAgenticReviewCard({
               <Tag color={reviewRecommendationColor(review.recommendation)}>
                 {humanizeDefectReviewField(review.recommendation)}
               </Tag>
+            )}
+            {reviewCiBadge && (
+              <Tag color={reviewCiBadge.color}>{reviewCiBadge.label}</Tag>
             )}
             {review.completedAt && (
               <Text type="secondary">

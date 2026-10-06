@@ -29,6 +29,8 @@ export type DefectPrReviewSummary = {
   completedAt: string | null
   prReviewCommentUrl: string | null
   agentRunUrl: string | null
+  ciStatusLabel?: string | null
+  ciStatusKind?: 'green' | 'failed' | 'pending' | null
 }
 
 export type IncidentDispatchHealth = {

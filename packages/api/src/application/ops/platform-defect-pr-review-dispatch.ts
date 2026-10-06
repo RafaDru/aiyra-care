@@ -13,6 +13,7 @@ import {
   resolveDefectPrReviewCallbackUrl,
   resolveInvestigatorCallbackAuth,
 } from './ops-analysis-callback-url.js'
+import { buildDefectCiSnapshotPayload } from '../../domain/ops/defect-ci-status.helper.js'
 
 export type PlatformDefectPrReviewDispatchResult =
   | { outcome: 'sent' }
@@ -49,7 +50,8 @@ export interface PlatformDefectPrReviewDispatchPayload {
     maxFiles: number
     notes: string
   }
-  ciSnapshot: { status: string; runUrl?: string; failedJobs?: string[] }
+  ciSnapshot: Record<string, unknown>
+  ciStatus: { kind: string; label: string }
   priorReview: null
   environment: InvestigatorEnvironmentContext
   callbackUrl: string
@@ -123,7 +125,11 @@ export function buildPlatformDefectPrReviewDispatchPayload(input: {
       maxFiles: 40,
       notes: 'Agente deve usar gh pr diff / API GitHub; não checkout PHI',
     },
-    ciSnapshot: { status: 'unknown' },
+    ...(() => {
+      const ciSnapshot = buildDefectCiSnapshotPayload(defect)
+      const ciStatus = ciSnapshot.ciStatus as { kind: string; label: string }
+      return { ciSnapshot, ciStatus }
+    })(),
     priorReview: null,
     environment: resolveInvestigatorEnvironmentContext(),
     callbackUrl: resolveDefectPrReviewCallbackUrl(),

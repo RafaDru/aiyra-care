@@ -183,9 +183,11 @@ Opção A: não suprimir (comportamento v1). Opção B: suprimir só alertas mar
 
 ### 8. Momento de exigir CI verde para disparar review (CH_PR_REVIEW_REQUIRE_CI_GREEN)
 
-O gate impede request-review enquanto pipeline do defeito não está em sucesso.
-Opção A: ligar no notebook assim que webhook defect-ci ou poll estiver estável. Opção B: ligar só após piloto C9 e suite ops-ch-cycle-close PASS. Opção C: manter desligado; agentes e merge seguem política própria.
+O gate impede `request-review` enquanto `pipeline_status` do defeito não está em sucesso.
+Opção A: ligar no notebook assim que webhook defect-ci ou poll estiver estável. Opção B: ligar só após piloto C9 e suite `ops-ch-cycle-close` PASS. Opção C: manter desligado; agentes e merge seguem política própria.
 **Default solo operator:** B no curto prazo; A após webhook CI confiável por 7 dias.
+
+**Decidido (Rafael 2026-10-06, §8 — 8C+notify):** manter **`CH_PR_REVIEW_REQUIRE_CI_GREEN=0`** (Opção C) — review dispara com CI pendente ou falho. **Obrigatório:** ao concluir Revisão Dev, o CH deve mostrar snapshot de CI no resultado (`ciSnapshot` + rótulo **`CI: verde` / `CI: falhou` / `CI: pendente`**) derivado de `pipeline_status` / último evento GitHub no defeito, mesclado com o que o agente reportar. Badge no painel de revisão e hint na linha do tempo do defeito. Implementação: `defect-ci-status.helper.ts`, `platform-defect-pr-review` dispatch/callback.
 
 ---
 

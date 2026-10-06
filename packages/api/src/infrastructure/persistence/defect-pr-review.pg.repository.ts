@@ -7,6 +7,7 @@ import type {
   DefectPrReviewSummary,
   DefectPrReviewTrigger,
 } from '../../domain/ops/defect-pr-review.types.js'
+import { extractCiStatusLabelFromSnapshot } from '../../domain/ops/defect-ci-status.helper.js'
 
 function mapDimensions(value: unknown): DefectPrReviewDimensions | null {
   if (!value || typeof value !== 'object') return null
@@ -64,6 +65,14 @@ export function toDefectPrReviewSummary(record: DefectPrReviewRecord): DefectPrR
     completedAt: record.completedAt,
     prReviewCommentUrl: record.prReviewCommentUrl,
     agentRunUrl: record.agentRunUrl,
+    ciStatusLabel: extractCiStatusLabelFromSnapshot(record.ciSnapshot),
+    ciStatusKind: (() => {
+      const nested = record.ciSnapshot?.ciStatus
+      if (!nested || typeof nested !== 'object' || nested === null) return null
+      const k = String((nested as { kind?: unknown }).kind ?? '')
+      if (k === 'green' || k === 'failed' || k === 'pending') return k
+      return null
+    })(),
   }
 }
 
