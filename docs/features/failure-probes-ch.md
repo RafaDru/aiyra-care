@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `failure-probes-ch` |
 | **Épico** | `failure-probes-ch` |
-| **Status** | `in_progress` (M1 web) |
+| **Status** | `in_progress` (M1 web, M3 mobile) |
 | **Categoria** | técnico |
 | **Prioridade** | P0 |
 | **Tier review** | 2 (ops + LGPD técnica; sem conteúdo clínico novo) |
@@ -57,12 +57,13 @@ Camada **default-on** de captura de falhas user-impacting (UI sem fallback, API 
 
 ## Status no quadro de produto
 
-Refletido em [`docs/product/PRODUCT_MATURITY_BOARD.json`](../product/PRODUCT_MATURITY_BOARD.json) (domínio **Observabilidade** → item `failure-probes`, maturidade **partial**, nota Web M1 main). UI: Command Hub **Produto → Maturidade**.
+Refletido em [`docs/product/PRODUCT_MATURITY_BOARD.json`](../product/PRODUCT_MATURITY_BOARD.json) (domínio **Observabilidade** → item `failure-probes`, maturidade **partial**, nota Web M1 + RN M3). UI: Command Hub **Produto → Maturidade**.
 
 ## QA
 
 - Regressão bridge: [`client-error-ch-bridge`](../testing/suites/client-error-ch-bridge.md)
 - M1 web: `cd packages/web && npx vitest run tests/failure-probe-policy.test.ts` + `cd packages/api && npx vitest run tests/client-error.test.ts`
+- M3 mobile: `cd packages/mobile && npm run test` + `npm run typecheck` (sem E2E device — validação unitária + typecheck)
 - Planejado (M2+): suite `failure-probes-ch`
 
 ## Reviews (tier 2)

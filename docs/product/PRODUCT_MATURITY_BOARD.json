@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-06",
+  "updatedAt": "2026-10-06T20:41:00Z",
   "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo.",
   "surfaces": [
     {
@@ -12,7 +12,7 @@
       "id": "mobile",
       "title": "Mobile (Expo)",
       "maturity": "partial",
-      "note": "Shell Expo com rotas centrais; integrações e Ava ainda em expansão.",
+      "note": "Shell Expo com rotas centrais; Failure Probes M3 RN (default-on); integrações e Ava em expansão.",
       "doc": "docs/MOBILE_WEB_DUAL_DELIVERY.md"
     },
     {
@@ -254,7 +254,7 @@
           "id": "failure-probes",
           "title": "Failure probes (captura default-on)",
           "maturity": "partial",
-          "note": "Web M1 em main — SDK React; bridge INC; mobile M2 e suite QA planejados.",
+          "note": "Web M1 + RN M3 — probes default-on (ui.unhandled, api 5xx); bridge INC; suite QA planejada.",
           "doc": "docs/features/failure-probes-ch.md"
         },
         {

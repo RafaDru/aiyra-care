@@ -10,7 +10,7 @@ Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:30
 
 1. **Atualizar código:** `git pull origin main`
 2. **Dependências (raiz do monorepo):** `npm install`
-3. **Variáveis:** `cd packages/mobile && cp .env.example .env` — Supabase + **IP LAN** em `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_WEB_APP_URL` e `EXPO_PUBLIC_OAUTH_REDIRECT_URI` (nunca `localhost` no celular). Ver `docs/SUPABASE.md`.
+3. **Variáveis:** `cd packages/mobile && cp .env.example .env` — Supabase + **IP LAN** em `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_WEB_APP_URL` e `EXPO_PUBLIC_OAUTH_REDIRECT_URI` (nunca `localhost` no celular). **Failure Probes (opcional):** `EXPO_PUBLIC_FAILURE_PROBE_OPT_OUT` (alias `EXPO_PUBLIC_CLIENT_ERROR_INCIDENT_FEATURES_DISABLED`) — ver `.env.example`. Ver `docs/SUPABASE.md`.
 4. **API local:** subir stack com API em **http://127.0.0.1:3010** (`npm run env:status` na raiz)
 5. **Expo web:** `npm run web` (ou na raiz `npm run mobile:web`)
 
@@ -30,6 +30,7 @@ Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:30
 cd packages/mobile
 npm run web            # Expo web (dev)
 npm run typecheck      # tsc --noEmit
+npm run test           # vitest (failure-probe-policy)
 npx expo export --platform web   # build estático web (smoke / screenshots)
 
 # Raiz do monorepo

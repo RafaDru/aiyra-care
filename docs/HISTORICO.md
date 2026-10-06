@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Failure Probes M3 — Mobile (React Native) SDK
+
+### Realizado
+- `packages/mobile`: paridade M1 web — `AppErrorBoundary` → `ui.unhandled` + `declared`; HTTP **500–599** no `api.ts` (opt-out `declaredFallback`); metadados `probe_kind` / `probe_version` / `sdk_surface: mobile`.
+- Opt-out build `EXPO_PUBLIC_FAILURE_PROBE_OPT_OUT` (aliases `EXPO_PUBLIC_CLIENT_ERROR_INCIDENT_FEATURES_DISABLED`, `EXPO_PUBLIC_FAILURE_PROBE_OPT_OUT_FEATURES`); `.env.example` documentado.
+- Vitest: `packages/mobile/tests/failure-probe-policy.test.ts`; quadro produto + feature card atualizados.
+
 ## [2026-10-06] - Failure Probes M1 — Web SDK
 
 ### Realizado
