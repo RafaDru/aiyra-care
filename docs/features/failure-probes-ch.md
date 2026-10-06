@@ -29,7 +29,7 @@ Camada **default-on** de captura de falhas user-impacting (UI sem fallback, API 
 
 - **Web:** React SDK — evoluir `packages/web/src/lib/client-errors.ts`
 - **Mobile:** React Native — `packages/mobile/src/lib/client-errors.ts`
-- Bridge blocklist + suite QA (após M2)
+- Bridge blocklist `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (M2 parcial — **3A** `ava_companion`) + suite QA (após M2 completo)
 
 ## Superfície técnica
 
@@ -65,4 +65,4 @@ Camada **default-on** de captura de falhas user-impacting (UI sem fallback, API 
 - Legal: minimização / sem PHI em PG — alinhado a telemetria existente
 - Security: auth ingest, sem stack em webhook
 - Business: [`aiyracare-review-business-domain`](../../.cursor/skills/aiyracare-review-business-domain/SKILL.md) — boundary Connect vs probe
-- Medical: apenas se `ava_companion` incluído no bridge prod (política Rafael)
+- Medical: **3A** — `ava_companion` fora do bridge INC (default disabled); ingest continua

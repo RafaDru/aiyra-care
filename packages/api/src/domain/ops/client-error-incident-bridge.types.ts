@@ -10,6 +10,8 @@ export interface ClientErrorIncidentRule {
 export interface ClientErrorIncidentBridgeConfig {
   enabled: boolean
   features: Set<string>
+  /** Bridge must not open INC for these keys (ingest / probes unchanged). */
+  disabledFeatures: Set<string>
   dedupeMs: number
   minCount: number
   apiPathPrefixes: string[]

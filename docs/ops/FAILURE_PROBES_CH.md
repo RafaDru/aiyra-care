@@ -12,7 +12,7 @@
 |------------------------|-------------------------------|
 | React **web** SDK (evoluir `client-errors`) | Backend probe / filter Fastify (`@aiyra-care/failure-probe-fastify`) |
 | React **Native** mobile SDK | Pacote **Angular** (CH / outros consumidores) |
-| Bridge blocklist `FAILURE_PROBE_OPT_OUT_FEATURES` (M2) | SDK **Android / iOS** nativos |
+| Bridge blocklist `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (M2 parcial; **3A** `ava_companion`) | SDK **Android / iOS** nativos |
 | Suite QA `failure-probes-ch` (após M2) | |
 
 **Fora do produto Failure Probes (permanece como hoje):** hook API **5xx por prefixo** (`CLIENT_ERROR_INCIDENT_API_PREFIXES` + ingest sintético no bridge) — ops/telemetria existente, **não** entra no MVP nem na migração de pacote probe.
@@ -147,7 +147,7 @@ Probe SDK → POST client-errors → insert PG
 | Knob | Hoje | Alvo |
 |------|------|------|
 | Master | `CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED` | Mantém |
-| Escopo features | **Allowlist** `CLIENT_ERROR_INCIDENT_FEATURES` | **Blocklist** `FAILURE_PROBE_OPT_OUT_FEATURES` (env) + default capture all declared |
+| Escopo features | **Allowlist** `CLIENT_ERROR_INCIDENT_FEATURES` | **Blocklist** `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (default `ava_companion`, decisão **3A**) + alias `FAILURE_PROBE_OPT_OUT_FEATURES`; ingest default-on |
 | Ruído | `MIN_COUNT`, `DEDUPE_MS` | Mantém; ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) |
 | Lane SRE | `CLIENT_ERROR_INCIDENT_SRE_FEATURES` | Mantém até probe policy unificada; **decisão 4B (2026-10-06):** `integration_links` → `sre_support` só em `DEPLOYMENT_TIER=production`; notebook/preview ficam `development_support` — ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.4 |
 | Manutenção | `OPS_PLANNED_MAINTENANCE=1` | Suprime enqueue INC; ingest continua |
@@ -215,7 +215,8 @@ Namespace alternativo longo prazo: pacotes publicados sob org **CH probe** se Ai
 |------|---------|
 | **M0 (esta PR)** | Spec + roadmap + cross-links; sem mudança de código obrigatória |
 | **M1** | `declared` + ingest sempre; bridge ainda allowlist (comportamento atual) |
-| **M2** | Env `FAILURE_PROBE_OPT_OUT_FEATURES`; bridge lê blocklist; deprecar expandir `CLIENT_ERROR_INCIDENT_FEATURES` |
+| **M2 (parcial)** | `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` no bridge (default `ava_companion`, decisão **3A**); alias `FAILURE_PROBE_OPT_OUT_FEATURES`; vitest `ruleForFeature` |
+| **M2 (resto)** | SDK `VITE_FAILURE_PROBE_OPT_OUT`; unificar nome env; deprecar expandir allowlist manual |
 | **M3** | Extrair `packages/failure-probe`; web/mobile importam core |
 | **Pós-MVP** | Angular package, Fastify plugin, nativo iOS/Android — spec §9.3–9.5 apenas |
 

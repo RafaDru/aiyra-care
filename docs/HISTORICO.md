@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Ingress bridge decisão 3A (Ava companion)
+
+### Decisão
+- **§8 item 3 — 3A:** telemetria/probe `ava_companion` permanece; bridge **não** abre INC — default `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED=ava_companion` ([`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8 item 3).
+
+### Realizado
+- `resolveDisabledBridgeFeatures` + `ruleForFeature` blocklist; vitest; docs [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md), bridge, `.env.example` (§ client errors); decisão em `project-context.json` (`failure-probes-ava-bridge-3a`).
+
 ## [2026-10-06] - Ingress bridge §8.4 lane SRE (decisão 4B)
 
 ### Decisão
@@ -13,7 +21,7 @@
 ### Decisão
 - **Failure Probes** como camada CH-centric de falhas user-impacting: captura silenciosa global, **opt-out por feature** (inverte allowlist do bridge); não inclui ops/SRE alerts v1; notificação «corrigido» só roadmap doc.
 - **MVP = Web (React) + Mobile (React Native) apenas**; pós-MVP documentado: backend probe, Angular, nativo Android/iOS. Hook API 5xx por prefixo (bridge) permanece as-is — fora do produto probe.
-- [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.2–§8.4 marcados superseded pelo modelo probes; §8.3–§8.8 decisões abertas até confirmação Rafael.
+- [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.2–§8.3 superseded + decisões **3A** / **4B**; §8.5–§8.8 abertas até confirmação Rafael.
 
 ### Realizado
 - Spec canônica [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md); épico `failure-probes-ch` em `roadmap.json`; feature card tier 2 [`failure-probes-ch.md`](features/failure-probes-ch.md).
