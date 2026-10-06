@@ -1,6 +1,7 @@
 import Constants from 'expo-constants'
 import type { AvaEntityPin } from './ava-entity-pin'
 import type { AvaActivityEvent, AvaChatResponse } from './api.types'
+import { reportAvaCompanionError } from './client-errors'
 import { ensureAccessToken, supabaseConfigured } from './supabase'
 
 const extra = Constants.expoConfig?.extra as Record<string, string | undefined> | undefined
@@ -46,6 +47,7 @@ export async function avaChatWithActivityStream(
 
   if (!res.ok) {
     const errBody = (await res.json().catch(() => ({}))) as { message?: string }
+    reportAvaCompanionError(`/patients/${patientId}/ava/chat`, res.status, { patientId })
     throw new Error(errBody.message || `HTTP ${res.status}`)
   }
 
@@ -84,6 +86,11 @@ export async function avaChatWithActivityStream(
       if (eventName === 'complete') result = payload as AvaChatResponse
       if (eventName === 'error') {
         const err = payload as { message?: string; code?: string }
+        reportAvaCompanionError(
+          `/patients/${patientId}/ava/chat`,
+          err.code || 'AVA_STREAM_ERROR',
+          { patientId },
+        )
         throw new Error(err.message || err.code || 'Ava chat failed')
       }
     }

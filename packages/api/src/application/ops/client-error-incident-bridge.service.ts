@@ -1,6 +1,8 @@
 import type { ClientErrorInput } from '../../domain/telemetry/client-error.js'
 import {
   apiPathMatchesIncidentPrefixes,
+  inferServerErrorBridgeFeature,
+  resolveBridgeIngressFeature,
   resolveClientErrorIncidentBridgeConfig,
   ruleForFeature,
 } from '../../domain/ops/client-error-incident-bridge.config.js'
@@ -68,7 +70,7 @@ export class ClientErrorIncidentBridgeService {
     if (input.statusCode < 500) return
     if (!apiPathMatchesIncidentPrefixes(input.path, this.config)) return
 
-    const feature = inferServerFeatureFromPath(input.path)
+    const feature = inferServerErrorBridgeFeature(input.path)
     const errorCode = sanitizeClientErrorCode(`HTTP_${input.statusCode}`)
     const errorKind = 'api' as const
     const fingerprint = computeClientErrorFingerprint(feature, errorKind, errorCode)
@@ -93,7 +95,8 @@ export class ClientErrorIncidentBridgeService {
     const feature = sanitizeClientErrorFeature(error.feature)
     if (!feature) return
 
-    const rule = ruleForFeature(this.config, feature)
+    const bridgeFeature = resolveBridgeIngressFeature(feature, error.properties)
+    const rule = ruleForFeature(this.config, feature, error.properties)
     if (!rule) return
 
     const slot = await this.signals.tryAcquireEnqueueSlot(
@@ -110,7 +113,7 @@ export class ClientErrorIncidentBridgeService {
 
     const item = await this.queueService.enqueueClientErrorSignal({
       fingerprint: error.fingerprint,
-      feature,
+      feature: bridgeFeature,
       errorCode: error.errorCode,
       errorKind: error.errorKind,
       route: error.route ?? null,
@@ -125,15 +128,4 @@ export class ClientErrorIncidentBridgeService {
       await this.incidentDispatch.ensureOutboxForQueueRecord(item).catch(() => undefined)
     }
   }
-}
-
-function inferServerFeatureFromPath(path: string): string {
-  const segment = path.split('?')[0].split('/').filter(Boolean)[0] ?? 'api'
-  const mapped: Record<string, string> = {
-    auth: 'account_settings',
-    account: 'account_settings',
-    patients: 'dashboard',
-  }
-  const feature = mapped[segment] ?? segment.replace(/[^a-z0-9_-]/g, '_').slice(0, 64)
-  return sanitizeClientErrorFeature(feature) ?? 'ui'
 }

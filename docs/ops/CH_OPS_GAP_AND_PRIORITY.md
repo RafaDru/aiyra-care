@@ -14,8 +14,8 @@
 |------------|--------|---------------------------|-------------------------|
 | **Ingest `client_errors`** | exists | `POST /telemetry/client-errors` · `packages/api/src/application/telemetry/client-error.service.ts` · mig **051** · [`TELEMETRY.md`](./TELEMETRY.md) | Retention job 90d (backlog TELEMETRY) |
 | **Bridge client_error → INC** | exists | `ClientErrorIncidentBridgeService` · mig **078** · `MIN_COUNT` via `tryAcquireEnqueueSlot` · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Default `BRIDGE_ENABLED=0`; expandir fases 2–4 |
-| **Universal failure ingress** | partial | Fase 1 defaults em `client-error-incident-bridge.config.ts` + doc § Universal | Fases 2–4: mobile, `integration_links` 5xx, Ava |
-| **API 5xx → INC (hook)** | partial | `registerClientErrorIncidentErrorHandler` · `client-error-incident-bridge.plugin.ts` · vitest `client-error-incident-error-handler.test.ts` | Só prefixos env; sem correlação `incident_id` degradado global |
+| **Universal failure ingress** | exists | Fases 0–4: `resolveBridgeIngressFeature`, mobile parity, `/integration-links` 5xx, `ava_companion` · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Prod: `MIN_COUNT`/`DEDUPE_MS` + `SRE_FEATURES` por ambiente |
+| **API 5xx → INC (hook)** | partial | `registerClientErrorIncidentErrorHandler` · prefixos incl. `/integration-links` · vitest | Sem correlação `incident_id` degradado global |
 | **Manutenção planejada (suppress auto-INC)** | partial | `OPS_PLANNED_MAINTENANCE` · bridge/5xx gate · CH banner read-only (`/health` + ops-console) | opcional suppress ops_alert dispatch; tabela `ops_runtime_flags` v2 |
 | **Support reports (humano)** | exists | `POST /support/reports` · mig **061** · [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) · feature [`support-user-reports`](../features/support-user-reports.md) | Screenshot KMS backlog |
 | **Ops alerts → INC** | exists | `ops-alert-dispatch` / fila · [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | Manutenção: não suprimir alertas SRE por padrão (spec manutenção) |

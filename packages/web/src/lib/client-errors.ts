@@ -141,6 +141,26 @@ export function reportUiBoundaryError(componentName: string, errorName: string):
   }).catch(() => undefined)
 }
 
+/** Ava / LLM boundary — stable `ava_companion` for CH bridge (phase 4). */
+export function reportAvaCompanionError(
+  apiPath: string,
+  statusOrCode: number | string,
+  options?: { patientId?: string; route?: string },
+): void {
+  const errorCode =
+    typeof statusOrCode === 'number' && statusOrCode > 0
+      ? `HTTP_${statusOrCode}`
+      : sanitizeErrorCode(String(statusOrCode))
+  void reportClientError({
+    feature: 'ava_companion',
+    errorKind: 'api',
+    errorCode,
+    apiPath,
+    patientId: options?.patientId,
+    route: options?.route,
+  }).catch(() => undefined)
+}
+
 /** Account/settings flows — stable `account_settings` feature for CH bridge pilot. */
 export function reportAccountSettingsFailure(
   apiPath: string,

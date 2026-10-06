@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ClientErrorIncidentBridgeService } from '../src/application/ops/client-error-incident-bridge.service.js'
+import { apiPathMatchesIncidentPrefixes } from '../src/domain/ops/client-error-incident-bridge.config.js'
 import { computeClientErrorFingerprint } from '../src/domain/telemetry/client-error.js'
 import type { ClientErrorIncidentBridgeConfig } from '../src/domain/ops/client-error-incident-bridge.types.js'
 
@@ -153,5 +154,57 @@ describe('ClientErrorIncidentBridgeService', () => {
       deploymentTier: 'local',
     })
     expect(enqueueClientErrorSignal).toHaveBeenCalledTimes(1)
+  })
+
+  it('maps api:patients:exams to patient_exams on enqueue', async () => {
+    const tryAcquire = vi.fn(async () => ({ acquired: true }))
+    const enqueueClientErrorSignal = vi.fn(async () => ({ id: 'q-exams' }))
+    const bridge = new ClientErrorIncidentBridgeService(
+      {
+        ...enabledConfig(),
+        features: new Set([...enabledConfig().features, 'patient_exams']),
+      },
+      { tryAcquireEnqueueSlot: tryAcquire, attachQueueId: vi.fn() } as never,
+      { enqueueClientErrorSignal } as never,
+    )
+    const fp = computeClientErrorFingerprint('api:patients:exams', 'api', 'HTTP_500')
+    await bridge.onIngestedErrors(
+      [{
+        fingerprint: fp,
+        feature: 'api:patients:exams',
+        errorKind: 'api',
+        errorCode: 'HTTP_500',
+        properties: { api_path: '/patients/p1/exams' },
+      }],
+      { accountId: null, deploymentTier: 'local' },
+    )
+    expect(enqueueClientErrorSignal).toHaveBeenCalledWith(
+      expect.objectContaining({ feature: 'patient_exams' }),
+    )
+  })
+
+  it('handleServerError enqueues for integration-links 5xx', async () => {
+    const cfg = {
+      ...enabledConfig(),
+      features: new Set([...enabledConfig().features, 'integration_links']),
+      apiPathPrefixes: ['/integration-links'],
+    }
+    expect(apiPathMatchesIncidentPrefixes('/integration-links/link-1/sync', cfg)).toBe(true)
+    const tryAcquire = vi.fn(async () => ({ acquired: true }))
+    const enqueueClientErrorSignal = vi.fn(async () => ({ id: 'q-sync' }))
+    const bridge = new ClientErrorIncidentBridgeService(
+      cfg,
+      { tryAcquireEnqueueSlot: tryAcquire, attachQueueId: vi.fn() } as never,
+      { enqueueClientErrorSignal } as never,
+    )
+    await bridge.handleServerError({
+      path: '/integration-links/link-1/sync',
+      statusCode: 502,
+      accountId: 'a1',
+      deploymentTier: 'local',
+    })
+    expect(enqueueClientErrorSignal).toHaveBeenCalledWith(
+      expect.objectContaining({ feature: 'integration_links', errorCode: 'HTTP_502' }),
+    )
   })
 })
