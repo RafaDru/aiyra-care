@@ -26,6 +26,17 @@ export function isChG3RequireReviewApproveEnabled(env: NodeJS.ProcessEnv = proce
   return raw === '1' || raw === 'true'
 }
 
+/** Após review `approve`, registra G3 no CH sem clique humano (merge GitHub continua separado). */
+export function isChG3AgenticAutoApproveEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  const raw = env.CH_G3_AGENTIC_AUTO_APPROVE?.trim()
+  return raw === '1' || raw === 'true'
+}
+
+export function isChPrReviewRequireCiGreenEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  const raw = env.CH_PR_REVIEW_REQUIRE_CI_GREEN?.trim()
+  return raw === '1' || raw === 'true'
+}
+
 export function resolveGithubOpsToken(env: NodeJS.ProcessEnv = process.env): string {
   return (
     env.GITHUB_OPS_TOKEN?.trim()

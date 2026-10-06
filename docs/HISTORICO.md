@@ -1,5 +1,11 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - CH G3 agêntico (approve pós-review)
+
+### Realizado
+- `CH_G3_AGENTIC_AUTO_APPROVE=1` — hook em `review-callback` chama `operator-approve-pr` quando `recommendation=approve` (CI opcional via `CH_PR_REVIEW_REQUIRE_CI_GREEN`).
+- Script `npm run ch:defect-operator-approve` — spec [`CH_G3_AGENTIC_APPROVAL.md`](ops/CH_G3_AGENTIC_APPROVAL.md).
+
 ## [2026-10-06] - Client errors: universal ingress fases 2–4
 
 ### Realizado

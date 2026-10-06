@@ -21,8 +21,8 @@
                                  ▼
                     Review (Agent 3, advisory) ──► CI snapshot (R2, C2–C4)
                                  ▼
-              ┌── MANUAL: G3 «Aprovar para merge» (CH) — CH_G3_REQUIRE_REVIEW_APPROVE opcional
-              └── MANUAL: merge GitHub (Rafael)
+              ┌── G3 «Aprovar para merge» — script `ch:defect-operator-approve` ou `CH_G3_AGENTIC_AUTO_APPROVE=1` pós-review
+              └── MANUAL: merge GitHub (agente após CI; não Rafael)
                                  ▼
                     webhook merge → DEF fixed + INC resolved (R4)
 ```
@@ -32,8 +32,9 @@
 | Telemetria → INC | Bridge + alertas (se habilitado) | — |
 | Triagem → DEF | Webhook + callback | G0 descartar / priorizar |
 | Correção → PR | Agent 2 | G2 «Iniciar correção» implícito no fluxo CH |
-| Review | `CH_AUTO_PR_REVIEW_ON_READY` | G3 approve CH (política env) |
-| Merge | — | GitHub humano |
+| Review | `CH_AUTO_PR_REVIEW_ON_READY` | — |
+| G3 approve CH | `CH_G3_AGENTIC_AUTO_APPROVE` + review `approve` | Override / gate `CH_G3_REQUIRE_REVIEW_APPROVE` |
+| Merge | — | Agente (GitHub); webhook R4 fecha DEF |
 | Fechar INC | Após merge (webhook) | G4 confirmação se sem webhook |
 
 **Env notebook (aprovado):** `CH_G3_REQUIRE_REVIEW_APPROVE=0`; `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até ingest CI (C3).
