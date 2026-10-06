@@ -16,6 +16,7 @@ import {
 } from './platform-defect-pr-review-dispatch.js'
 import { PlatformDefectService, PlatformDefectTransitionError } from './platform-defect.service.js'
 import { notifyDefectBoardFromRecord } from './defect-board-notify.js'
+import { isChG3RequireReviewApproveEnabled } from './defect-ci-pipeline.config.js'
 
 export class PlatformDefectPrReviewError extends Error {
   readonly code:
@@ -25,6 +26,8 @@ export class PlatformDefectPrReviewError extends Error {
     | 'cooldown'
     | 'ci_not_green'
     | 'invalid_payload'
+    | 'review_approval_required'
+    | 'review_missing'
 
   constructor(
     code:
@@ -33,7 +36,9 @@ export class PlatformDefectPrReviewError extends Error {
       | 'review_in_progress'
       | 'cooldown'
       | 'ci_not_green'
-      | 'invalid_payload',
+      | 'invalid_payload'
+      | 'review_approval_required'
+      | 'review_missing',
   ) {
     super(code)
     this.code = code
@@ -111,7 +116,9 @@ export class PlatformDefectPrReviewService {
     }
 
     if (process.env.CH_PR_REVIEW_REQUIRE_CI_GREEN === '1') {
-      throw new PlatformDefectPrReviewError('ci_not_green')
+      if (defect.pipelineStatus !== 'ci_success') {
+        throw new PlatformDefectPrReviewError('ci_not_green')
+      }
     }
 
     const linkedIds = await this.defectRepo.listLinkedIncidentIds(defectId)
@@ -220,14 +227,40 @@ export class PlatformDefectPrReviewService {
 
   async operatorApprovePr(
     defectId: string,
-    note?: string,
+    input?: { note?: string; override?: boolean; overrideReason?: string },
   ): Promise<{ prUrl: string | null; defect: PlatformDefectWithLatestReview }> {
     const defect = await this.defectRepo.findById(defectId)
     if (!defect) throw new PlatformDefectPrReviewError('not_found')
     if (defect.status !== 'ready_for_pr') {
       throw new PlatformDefectPrReviewError('invalid_state')
     }
-    await this.defectRepo.recordOperatorPrApproval(defectId, note?.trim() || null)
+
+    const override = input?.override === true
+    const overrideReason = input?.overrideReason?.trim() || ''
+    if (isChG3RequireReviewApproveEnabled()) {
+      const latest = await this.reviewRepo.findLatestCompletedForPrUrl(
+        defectId,
+        defect.prUrl!,
+      )
+      if (!override) {
+        if (!latest) {
+          throw new PlatformDefectPrReviewError('review_missing')
+        }
+        if (latest.recommendation !== 'approve') {
+          throw new PlatformDefectPrReviewError('review_approval_required')
+        }
+      } else if (!overrideReason) {
+        throw new PlatformDefectPrReviewError('invalid_payload')
+      }
+    }
+
+    const noteParts: string[] = []
+    if (override) {
+      noteParts.push(`[override] ${overrideReason}`)
+    }
+    const operatorNote = input?.note?.trim()
+    if (operatorNote) noteParts.push(operatorNote)
+    await this.defectRepo.recordOperatorPrApproval(defectId, noteParts.join(' — ') || null)
     const refreshed = await this.defectRepo.findById(defectId)
     const withReview = await this.attachLatestReview(refreshed ?? defect)
     notifyDefectBoardFromRecord(withReview, withReview.latestReview)

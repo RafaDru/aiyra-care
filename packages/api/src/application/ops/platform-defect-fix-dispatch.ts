@@ -40,6 +40,10 @@ export interface PlatformDefectFixDispatchPayload {
     summary: string | null
     details: Record<string, unknown>
   }
+  ciFailure?: {
+    runUrl: string
+    failedJobs: string[]
+  }
   environment: InvestigatorEnvironmentContext
   callbackUrl: string
   callbackAuth: { header: string; value: string }
@@ -96,6 +100,16 @@ export function buildPlatformDefectFixDispatchPayload(
           priorCorrectionFailure: {
             summary: defect.lastFailureSummary,
             details: { ...defect.lastCorrectionFailureDetails },
+          },
+        }
+      : {}),
+    ...(defect.lastFailureKind === 'ci' && defect.lastCiRunUrl
+      ? {
+          ciFailure: {
+            runUrl: defect.lastCiRunUrl,
+            failedJobs: Array.isArray(defect.lastFailureDetails?.failedJobs)
+              ? (defect.lastFailureDetails.failedJobs as unknown[]).map(String)
+              : [],
           },
         }
       : {}),

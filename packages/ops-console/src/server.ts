@@ -53,8 +53,13 @@ import {
 import { DefectPrReviewPgRepository } from '../../api/src/infrastructure/persistence/defect-pr-review.pg.repository.js'
 import { prReviewDispatchErrorMessage } from '../../api/src/application/ops/platform-defect-pr-review-dispatch.js'
 import { PlatformDefectMergeWebhookService } from '../../api/src/application/ops/platform-defect-merge-webhook.service.js'
+import { DefectCiPipelineService } from '../../api/src/application/ops/defect-ci-pipeline.service.js'
 import { verifyGithubWebhookSignature } from '../../api/src/domain/ops/github-webhook-signature.js'
 import { resolveGithubDefectMergeWebhookSecret } from '../../api/src/application/ops/platform-defect-merge-webhook.config.js'
+import {
+  isChG3RequireReviewApproveEnabled,
+  resolveGithubDefectCiWebhookSecret,
+} from '../../api/src/application/ops/defect-ci-pipeline.config.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
 import type { IncidentBoardFilter } from '../../api/src/domain/ops/incident-list-filter.js'
 import {
@@ -148,6 +153,7 @@ const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(
   platformDefectRepo,
   resolveIncidentsWhenDefectFixed,
 )
+const defectCiPipelineService = new DefectCiPipelineService(platformDefectRepo)
 const incidentDispatchService = createIncidentDispatchService(pool)
 const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
@@ -249,6 +255,11 @@ async function registerClientRoutes(fastify: FastifyInstance, vite?: ViteDevServ
 }
 
 const GITHUB_DEFECT_MERGE_WEBHOOK_PATH = '/api/webhooks/github/defect-merge'
+const GITHUB_DEFECT_CI_WEBHOOK_PATH = '/api/webhooks/github/defect-ci'
+const GITHUB_DEFECT_WEBHOOK_RAW_BODY_PATHS = new Set([
+  GITHUB_DEFECT_MERGE_WEBHOOK_PATH,
+  GITHUB_DEFECT_CI_WEBHOOK_PATH,
+])
 
 async function main() {
   const fastify = Fastify({ logger: false })
@@ -258,7 +269,7 @@ async function main() {
     { parseAs: 'buffer' },
     (req, body, done) => {
       const path = req.url?.split('?')[0] ?? ''
-      if (path === GITHUB_DEFECT_MERGE_WEBHOOK_PATH) {
+      if (GITHUB_DEFECT_WEBHOOK_RAW_BODY_PATHS.has(path)) {
         (req as { rawBody?: Buffer }).rawBody = body as Buffer
         done(null, body)
         return
@@ -307,6 +318,7 @@ async function main() {
       plannedMaintenance: maintenance.plannedMaintenance,
       plannedMaintenanceSource: maintenance.source,
       readOnly: maintenance.plannedMaintenance,
+      chG3RequireReviewApprove: isChG3RequireReviewApproveEnabled(),
     }
   })
 
@@ -657,6 +669,46 @@ async function main() {
     },
   )
 
+  fastify.post(GITHUB_DEFECT_CI_WEBHOOK_PATH, async (req, reply) => {
+    const secret = resolveGithubDefectCiWebhookSecret()
+    if (!defectCiPipelineService.isEnabled()) {
+      return reply.status(503).send({ error: 'webhook_disabled' })
+    }
+    const signature = req.headers['x-hub-signature-256'] as string | undefined
+    const rawBody =
+      (req as { rawBody?: Buffer }).rawBody ??
+      (Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body ?? {})))
+    if (!verifyGithubWebhookSignature(rawBody, signature, secret)) {
+      return reply.status(401).send({ error: 'invalid_signature' })
+    }
+    let payload: unknown
+    try {
+      payload = JSON.parse(rawBody.toString('utf8'))
+    } catch {
+      return reply.status(400).send({ error: 'invalid_json' })
+    }
+    const result = await defectCiPipelineService.handleGithubEvent(payload)
+    if (result.outcome === 'disabled') {
+      return reply.status(503).send({ error: result.reason })
+    }
+    if (result.outcome === 'ignored') {
+      return { ok: true, ignored: true, reason: result.reason }
+    }
+    return {
+      ok: true,
+      outcome: result.outcome,
+      idempotent: result.idempotent,
+      reopenedDefectIds: result.reopenedDefectIds,
+      defects: result.defects.map((d) => ({
+        id: d.id,
+        referenceCode: d.referenceCode,
+        status: d.status,
+        pipelineStatus: d.pipelineStatus,
+        lastCiRunUrl: d.lastCiRunUrl,
+      })),
+    }
+  })
+
   fastify.post(GITHUB_DEFECT_MERGE_WEBHOOK_PATH, async (req, reply) => {
     const secret = resolveGithubDefectMergeWebhookSecret()
     if (!secret) {
@@ -845,13 +897,16 @@ async function main() {
     },
   )
 
-  fastify.post<{ Params: { id: string }; Body: { note?: string } }>(
+  fastify.post<{
+    Params: { id: string }
+    Body: { note?: string; override?: boolean; overrideReason?: string }
+  }>(
     '/api/platform-defects/:id/operator-approve-pr',
     async (req, reply) => {
       try {
         const result = await platformDefectPrReviewService.operatorApprovePr(
           req.params.id,
-          req.body?.note,
+          req.body,
         )
         return {
           ok: true,
@@ -862,6 +917,10 @@ async function main() {
       } catch (err) {
         if (err instanceof PlatformDefectPrReviewError) {
           if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          if (err.code === 'invalid_payload') return reply.status(400).send({ error: err.code })
+          if (err.code === 'review_approval_required' || err.code === 'review_missing') {
+            return reply.status(409).send({ error: err.code })
+          }
           return reply.status(409).send({ error: err.code })
         }
         throw err

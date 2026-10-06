@@ -130,6 +130,23 @@ x-investigator-callback-key: {valor do OPS_*}
 - PG: `in_fix` → `open`, colunas `last_failure_*` + `correction_failed_at` (migration **082**).
 - CH: banner no expand + tag **Falha correção**; **Iniciar correção** / re-dispatch envia `priorCorrectionFailure` no webhook `defect_fix_v1`.
 
+### Re-dispatch após CI falhou (R2 / C4)
+
+Com `CH_DEFECT_CI_AUTO_REOPEN_ON_FAIL=1`, webhook `POST :3013/api/webhooks/github/defect-ci` move o DEF `ready_for_pr` → `in_fix` (`last_failure_kind=ci`). O próximo `defect_fix_v1` pode incluir:
+
+```json
+{
+  "priorCorrectionFailure": {
+    "summary": "CI falhou — jobs: api",
+    "details": { "message": "…", "code": "ci_failed", "runUrl": "https://github.com/…/actions/runs/…" }
+  },
+  "ciFailure": {
+    "runUrl": "https://github.com/…/actions/runs/…",
+    "failedJobs": ["api", "web"]
+  }
+}
+```
+
 ---
 
 ## 6. Pós-`ready_for_pr` — PR, CI, review (G3), merge, `fixed`

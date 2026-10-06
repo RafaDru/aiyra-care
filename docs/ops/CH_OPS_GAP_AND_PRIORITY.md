@@ -24,7 +24,7 @@
 | **DEF create + dedup** | exists | `platform-defect.service` · mig **071+** · [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) | — |
 | **Correção Agent 2 (G2)** | exists | `platform-defect-fix-dispatch` · `defect_fix_v1` · gate dispatch sent | Tier1 env documentado |
 | **PR review Agent 3 (R3)** | exists | `platform-defect-pr-review.service` · mig **085** · [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) | Roadmap `ch-solo-operator-r3` ainda `planned` (drift doc) |
-| **G3 approve merge (CH UI)** | partial | Review card CH · merge manual GitHub | `CH_G3_REQUIRE_REVIEW_APPROVE` **não** wired no ops-console (fatia **C5**) |
+| **G3 approve merge (CH UI)** | delivered (C5) | Review card + override auditável quando gate `1` | Default notebook `CH_G3_REQUIRE_REVIEW_APPROVE=0` |
 | **R4 merge → fixed + INC resolved** | exists | `platform-defect-merge-webhook.service` · mig **081/084** | Métricas tempo fase (**C8**) |
 | **CI pipeline ↔ defeito (R2)** | partial | Mig **086** (DDL + repo map) · spec §4–5 | C3–C4: webhook/poll GitHub, `ci_failed → in_fix` |
 | **CH cycle-close C1–C9** | partial | C1 spec + suite `ops-ch-cycle-close` **done** | C2–C9 implementação; `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até ingest CI |

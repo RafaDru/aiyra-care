@@ -17,6 +17,7 @@ export type OpsConsoleHealth = {
   layoutVersion?: string
   plannedMaintenance?: boolean
   readOnly?: boolean
+  chG3RequireReviewApprove?: boolean
 }
 
 export type ChServicesStatusResponse = {
@@ -218,7 +219,10 @@ export const opsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body ?? {}),
     }),
-  operatorApprovePlatformDefectPr: (id: string, body?: { note?: string }) =>
+  operatorApprovePlatformDefectPr: (
+    id: string,
+    body?: { note?: string; override?: boolean; overrideReason?: string },
+  ) =>
     request<{
       ok: boolean
       prUrl: string | null

@@ -132,6 +132,8 @@ export interface PlatformDefectItem {
   latestReview?: DefectPrReviewSummary | null
   operatorPrApprovedAt?: string | null
   operatorPrApprovedNote?: string | null
+  pipelineStatus?: string | null
+  lastCiRunUrl?: string | null
 }
 
 export interface OpsAnalysisAttentionCounts {

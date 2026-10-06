@@ -349,6 +349,107 @@ export class PlatformDefectPgRepository {
     return res.rows.map((row) => mapRow(row as Record<string, unknown>))
   }
 
+  async findActiveDefectsByPrUrls(normalizedPrUrls: string[]): Promise<PlatformDefectRecord[]> {
+    if (!normalizedPrUrls.length) return []
+    const res = await this.pool.query(
+      `SELECT * FROM platform_defects
+       WHERE pr_url IS NOT NULL
+         AND lower(regexp_replace(trim(pr_url), '/+$', '')) = ANY($1::text[])
+         AND status IN ('ready_for_pr', 'in_fix')
+       ORDER BY updated_at DESC`,
+      [normalizedPrUrls],
+    )
+    return res.rows.map((row) => mapRow(row as Record<string, unknown>))
+  }
+
+  async applyCiPipelineSnapshot(
+    id: string,
+    input: {
+      pipelineStatus: DefectPipelineStatus
+      lastCiRunUrl: string | null
+      lastCiSnapshot: DefectPipelineFailureDetails
+      failureKind?: PlatformDefectFailureKind
+      failureSummary?: string
+      failureDetails?: DefectPipelineFailureDetails
+    },
+  ): Promise<PlatformDefectRecord | null> {
+    const withFailure =
+      input.failureKind && input.failureSummary && input.failureDetails
+    const failurePatch = withFailure
+      ? `last_failure_kind = $5,
+          last_failure_summary = $6,
+          last_failure_details = $7::jsonb,`
+      : ''
+    const res = await this.pool.query(
+      `UPDATE platform_defects SET
+        pipeline_status = $2,
+        last_ci_run_url = $3,
+        last_ci_snapshot = $4::jsonb,
+        last_ci_checked_at = NOW(),
+        ${failurePatch}
+        updated_at = NOW()
+      WHERE id = $1::uuid
+        AND status IN ('ready_for_pr', 'in_fix')
+      RETURNING *`,
+      withFailure
+        ? [
+            id,
+            input.pipelineStatus,
+            input.lastCiRunUrl?.slice(0, 512) ?? null,
+            JSON.stringify(input.lastCiSnapshot),
+            input.failureKind,
+            input.failureSummary.slice(0, 2000),
+            JSON.stringify(input.failureDetails),
+          ]
+        : [
+            id,
+            input.pipelineStatus,
+            input.lastCiRunUrl?.slice(0, 512) ?? null,
+            JSON.stringify(input.lastCiSnapshot),
+          ],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async applyCiFailureReopen(
+    id: string,
+    input: {
+      failureSummary: string
+      failureDetails: DefectPipelineFailureDetails
+      correctionFailureDetails: CorrectionFailureDetails
+      lastCiRunUrl: string | null
+      lastCiSnapshot: DefectPipelineFailureDetails
+    },
+  ): Promise<PlatformDefectRecord | null> {
+    const res = await this.pool.query(
+      `UPDATE platform_defects SET
+        status = 'in_fix',
+        pipeline_status = 'ci_failed',
+        last_failure_kind = 'ci',
+        last_failure_summary = $2,
+        last_failure_details = $3::jsonb,
+        last_correction_failure_details = $4::jsonb,
+        last_ci_run_url = $5,
+        last_ci_snapshot = $6::jsonb,
+        last_ci_checked_at = NOW(),
+        updated_at = NOW()
+      WHERE id = $1::uuid
+        AND status = 'ready_for_pr'
+      RETURNING *`,
+      [
+        id,
+        input.failureSummary.slice(0, 2000),
+        JSON.stringify(input.failureDetails),
+        JSON.stringify(input.correctionFailureDetails),
+        input.lastCiRunUrl?.slice(0, 512) ?? null,
+        JSON.stringify(input.lastCiSnapshot),
+      ],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
   async findMergeCandidates(input: {
     mergedPrUrl: string
     referenceCodes: string[]
@@ -548,6 +649,7 @@ export class PlatformDefectPgRepository {
       `UPDATE platform_defects SET
         operator_pr_approved_at = NOW(),
         operator_pr_approved_note = $2,
+        pipeline_status = 'approved_for_merge',
         updated_at = NOW()
       WHERE id = $1::uuid`,
       [id, note?.slice(0, 4000) ?? null],

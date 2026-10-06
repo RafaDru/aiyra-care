@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Card,
+  Checkbox,
   Empty,
   Input,
   Space,
@@ -94,6 +95,13 @@ export function DefeitosPanel({
   } | null>(null)
   const [batchRunning, setBatchRunning] = useState(false)
   const [branchDraft, setBranchDraft] = useState<Record<string, string>>({})
+  const [chG3RequireReviewApprove, setChG3RequireReviewApprove] = useState(false)
+
+  useEffect(() => {
+    void opsApi.health().then((health) => {
+      setChG3RequireReviewApprove(health.chG3RequireReviewApprove === true)
+    })
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -370,6 +378,7 @@ export function DefeitosPanel({
                   )
                 }}
                 onReload={load}
+                chG3RequireReviewApprove={chG3RequireReviewApprove}
               />
             ),
           }}
@@ -542,6 +551,7 @@ function DefeitoDetail({
   onBranchChange,
   onDefectUpdated,
   onReload,
+  chG3RequireReviewApprove,
 }: {
   defectId: string
   row: PlatformDefectItem
@@ -549,6 +559,7 @@ function DefeitoDetail({
   onBranchChange: (value: string) => void
   onDefectUpdated: (defect: PlatformDefectItem) => void
   onReload: () => Promise<void>
+  chG3RequireReviewApprove: boolean
 }) {
   const [incidents, setIncidents] = useState<
     Array<{ id: string; title: string; referenceCode: string | null }>
@@ -577,9 +588,28 @@ function DefeitoDetail({
 
   const failure = row.lastCorrectionFailureDetails
   const showFailureBanner = defectHasCorrectionFailure(row)
+  const showCiFailureBanner = row.status === 'in_fix' && row.lastFailureKind === 'ci'
 
   return (
     <div style={{ maxWidth: 720 }}>
+      {showCiFailureBanner && (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 12 }}
+          message="CI falhou na branch do PR"
+          description={
+            <div>
+              {row.lastFailureSummary && <div>{row.lastFailureSummary}</div>}
+              {row.lastCiRunUrl && (
+                <Link href={row.lastCiRunUrl} target="_blank" rel="noreferrer">
+                  Abrir GitHub Actions
+                </Link>
+              )}
+            </div>
+          }
+        />
+      )}
       {showFailureBanner && (
         <Alert
           type="error"
@@ -708,21 +738,20 @@ function DefeitoDetail({
       <DefeitoAgenticReviewCard
         row={row}
         busy={reviewBusy}
-        onApprove={() => {
-          confirmTransactionalAction('defect.approve_merge', async () => {
-            setReviewBusy(true)
-            try {
-              const res = await opsApi.operatorApprovePlatformDefectPr(defectId)
-              message.success(res.message)
-              if (res.prUrl) window.open(res.prUrl, '_blank', 'noopener,noreferrer')
-              await refreshDetail()
-              await onReload()
-            } catch (err) {
-              message.error(err instanceof Error ? err.message : 'Falha ao registrar aprovação')
-            } finally {
-              setReviewBusy(false)
-            }
-          })
+        chG3RequireReviewApprove={chG3RequireReviewApprove}
+        onApprove={async (body) => {
+          setReviewBusy(true)
+          try {
+            const res = await opsApi.operatorApprovePlatformDefectPr(defectId, body)
+            message.success(res.message)
+            if (res.prUrl) window.open(res.prUrl, '_blank', 'noopener,noreferrer')
+            await refreshDetail()
+            await onReload()
+          } catch (err) {
+            message.error(err instanceof Error ? err.message : 'Falha ao registrar aprovação')
+          } finally {
+            setReviewBusy(false)
+          }
         }}
         onRequestChanges={() => {
           confirmTransactionalAction('defect.request_changes', async () => {
@@ -764,16 +793,24 @@ function riskLevelColor(level: DefectPrReviewSummary['riskLevel']): string {
 function DefeitoAgenticReviewCard({
   row,
   busy,
+  chG3RequireReviewApprove,
   onApprove,
   onRequestChanges,
 }: {
   row: PlatformDefectItem
   busy: boolean
-  onApprove: () => void
+  chG3RequireReviewApprove: boolean
+  onApprove: (body?: { override?: boolean; overrideReason?: string }) => Promise<void>
   onRequestChanges: () => void
 }) {
   const review = row.latestReview
   const showActions = row.status === 'ready_for_pr' && Boolean(row.prUrl)
+  const [overrideApprove, setOverrideApprove] = useState(false)
+  const [overrideReason, setOverrideReason] = useState('')
+  const reviewBlocksApprove =
+    chG3RequireReviewApprove
+    && (!review || review.status !== 'completed' || review.recommendation !== 'approve')
+  const canApprove = !reviewBlocksApprove || (overrideApprove && overrideReason.trim().length > 0)
 
   return (
     <Card size="small" title="Revisão agêntica" style={{ marginTop: 16 }}>
@@ -839,12 +876,42 @@ function DefeitoAgenticReviewCard({
           </Space>
         </Space>
       )}
+      {showActions && reviewBlocksApprove && (
+        <Space direction="vertical" size={8} style={{ marginTop: 12, width: '100%' }}>
+          <Checkbox
+            checked={overrideApprove}
+            onChange={(e) => setOverrideApprove(e.target.checked)}
+          >
+            Override sem review «Aprovar merge» (auditável)
+          </Checkbox>
+          {overrideApprove && (
+            <Input.TextArea
+              rows={2}
+              placeholder="Motivo do override (obrigatório)"
+              value={overrideReason}
+              onChange={(e) => setOverrideReason(e.target.value)}
+            />
+          )}
+        </Space>
+      )}
       {showActions && (
         <Space wrap style={{ marginTop: 12 }}>
           <Button href={row.prUrl!} target="_blank" rel="noreferrer">
             Abrir PR
           </Button>
-          <Button loading={busy} onClick={() => void onApprove()}>
+          <Button
+            loading={busy}
+            disabled={!canApprove}
+            onClick={() => {
+              confirmTransactionalAction('defect.approve_merge', () =>
+                onApprove(
+                  reviewBlocksApprove
+                    ? { override: true, overrideReason: overrideReason.trim() }
+                    : undefined,
+                ),
+              )
+            }}
+          >
             Aprovar para merge
           </Button>
           <Button danger loading={busy} onClick={() => void onRequestChanges()}>

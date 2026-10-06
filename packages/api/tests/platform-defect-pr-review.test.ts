@@ -246,6 +246,62 @@ describe('PlatformDefectPrReviewService', () => {
     expect(reviewRepo.syncDefectLastReview).toHaveBeenCalled()
   })
 
+  it('operatorApprovePr blocks without approve when CH_G3_REQUIRE_REVIEW_APPROVE=1', async () => {
+    process.env.CH_G3_REQUIRE_REVIEW_APPROVE = '1'
+    const defectRepo = {
+      findById: vi.fn(async () => readyDefect),
+      recordOperatorPrApproval: vi.fn(),
+    } as unknown as PlatformDefectPgRepository
+    const reviewRepo = {
+      findLatestCompletedForPrUrl: vi.fn(async () => ({
+        id: 'rev-1',
+        recommendation: 'request_changes',
+        status: 'completed',
+        prUrl: readyDefect.prUrl!,
+      })),
+      findLatestByDefectId: vi.fn(async () => null),
+    } as unknown as DefectPrReviewPgRepository
+    const svc = new PlatformDefectPrReviewService(
+      defectRepo,
+      reviewRepo,
+      new PlatformDefectService(defectRepo),
+    )
+    await expect(svc.operatorApprovePr(readyDefect.id)).rejects.toMatchObject({
+      code: 'review_approval_required',
+    })
+    delete process.env.CH_G3_REQUIRE_REVIEW_APPROVE
+  })
+
+  it('operatorApprovePr allows override when gate enabled', async () => {
+    process.env.CH_G3_REQUIRE_REVIEW_APPROVE = '1'
+    const defectRepo = {
+      findById: vi
+        .fn()
+        .mockResolvedValueOnce(readyDefect)
+        .mockResolvedValueOnce(readyDefect),
+      recordOperatorPrApproval: vi.fn(async () => undefined),
+    } as unknown as PlatformDefectPgRepository
+    const reviewRepo = {
+      findLatestCompletedForPrUrl: vi.fn(async () => null),
+      findLatestByDefectId: vi.fn(async () => null),
+    } as unknown as DefectPrReviewPgRepository
+    const svc = new PlatformDefectPrReviewService(
+      defectRepo,
+      reviewRepo,
+      new PlatformDefectService(defectRepo),
+    )
+    const result = await svc.operatorApprovePr(readyDefect.id, {
+      override: true,
+      overrideReason: 'piloto notebook',
+    })
+    expect(result.prUrl).toBe(readyDefect.prUrl)
+    expect(defectRepo.recordOperatorPrApproval).toHaveBeenCalledWith(
+      readyDefect.id,
+      '[override] piloto notebook',
+    )
+    delete process.env.CH_G3_REQUIRE_REVIEW_APPROVE
+  })
+
   it('rejects request-review when not ready_for_pr', async () => {
     const defectRepo = {
       findById: vi.fn(async () => ({ ...readyDefect, status: 'open' as const })),

@@ -72,6 +72,24 @@ describe('platform-defect-fix-dispatch', () => {
     expect(JSON.stringify(built)).not.toContain('patient')
   })
 
+  it('includes ciFailure when last_failure_kind is ci', () => {
+    process.env.OPS_INVESTIGATOR_CALLBACK_KEY = 'callback-secret'
+    const withCi = {
+      ...sampleDefect,
+      status: 'in_fix' as const,
+      lastFailureKind: 'ci' as const,
+      lastCiRunUrl: 'https://github.com/RafaDru/aiyra-care/actions/runs/100',
+      lastFailureDetails: { failedJobs: ['api', 'web'] },
+    }
+    const built = buildPlatformDefectFixDispatchPayload(withCi, [])
+    expect('error' in built).toBe(false)
+    if ('error' in built) return
+    expect(built.ciFailure).toEqual({
+      runUrl: 'https://github.com/RafaDru/aiyra-care/actions/runs/100',
+      failedJobs: ['api', 'web'],
+    })
+  })
+
   it('includes priorCorrectionFailure when defect returned from correction_failed', () => {
     process.env.OPS_INVESTIGATOR_CALLBACK_KEY = 'callback-secret'
     const withFailure = {
