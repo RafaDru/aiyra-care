@@ -221,8 +221,8 @@ export class OpsAnalysisQueuePgRepository {
     )
   }
 
-  async resolveIncidentsLinkedToDefect(defectId: string): Promise<number> {
-    const res = await this.pool.query(
+  async resolveIncidentsLinkedToDefect(defectId: string): Promise<string[]> {
+    const res = await this.pool.query<{ id: string }>(
       `UPDATE ops_analysis_queue q SET
         incident_pipeline_status = 'resolved',
         status = 'completed',
@@ -235,7 +235,7 @@ export class OpsAnalysisQueuePgRepository {
       RETURNING q.id`,
       [defectId],
     )
-    return res.rowCount ?? 0
+    return res.rows.map((row) => row.id)
   }
 
   async setIncidentPipelineStatus(id: string, status: IncidentPipelineStatus): Promise<void> {

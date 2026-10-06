@@ -199,6 +199,8 @@ Instruções do review agent (rascunho de requisito):
 
 ## 7. UI CH (mudanças planejadas)
 
+> **Pacote consolidado (autorizado):** [`CH_UI_GRAPHICS_PACKAGE.md`](./CH_UI_GRAPHICS_PACKAGE.md) — confirmações transacionais, detalhe em seções, tags copiáveis na linha, sidenav fixa, SSE sem polling, badges review na lista.
+
 | Tela | Mudança |
 |------|---------|
 | **Incidentes** | Manter Falha/retry; link `INC-*` em deep links |

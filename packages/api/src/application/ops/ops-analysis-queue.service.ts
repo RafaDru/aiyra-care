@@ -25,6 +25,7 @@ import {
 } from './platform-defect.service.js'
 import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
 import { finalizeTriageDefectPipeline } from './triage-defect-pipeline-followup.js'
+import { notifyIncidentBoardById } from './incident-board-notify.js'
 import { sanitizeAnalysisSummary } from '../../domain/support-report/support-report.types.js'
 import { sanitizeOpsAlertAnalysisSummary } from '../../domain/ops/ops-alert-analysis.types.js'
 
@@ -229,6 +230,9 @@ export class OpsAnalysisQueueService {
     if (record.status !== 'investigating' && record.status !== 'fix_proposed') {
       await this.repo.markInvestigating(queueId)
     }
+    if (this.platformDefectRepo) {
+      await notifyIncidentBoardById(this.repo, queueId, this.platformDefectRepo).catch(() => undefined)
+    }
     return { ok: true, incidentPipelineStatus: 'in_triage' }
   }
 
@@ -290,6 +294,11 @@ export class OpsAnalysisQueueService {
     await this.applySupportReportPatches(record, input)
     await this.applyTriagePipelineOutcome(record, summary, input)
     const refreshed = await this.repo.findById(record.id)
+    if (refreshed && this.platformDefectRepo) {
+      await notifyIncidentBoardById(this.repo, refreshed.id, this.platformDefectRepo).catch(
+        () => undefined,
+      )
+    }
     return { queue: refreshed ?? record, defect: defectRecord }
   }
 
@@ -309,6 +318,11 @@ export class OpsAnalysisQueueService {
 
     if (decision === 'dismiss') {
       await this.repo.markDismissed(record.id, summary)
+      if (this.platformDefectRepo) {
+        await notifyIncidentBoardById(this.repo, record.id, this.platformDefectRepo).catch(
+          () => undefined,
+        )
+      }
       return
     }
 
@@ -369,6 +383,11 @@ export class OpsAnalysisQueueService {
       decision === 'infra_failure'
     ) {
       await this.repo.setIncidentPipelineStatus(record.id, 'triaged')
+      if (this.platformDefectRepo) {
+        await notifyIncidentBoardById(this.repo, record.id, this.platformDefectRepo).catch(
+          () => undefined,
+        )
+      }
     }
   }
 
@@ -488,6 +507,11 @@ export class OpsAnalysisQueueService {
         analysisStatus: 'completed',
         analysisCompletedAt: new Date().toISOString(),
       }).catch(() => undefined)
+    }
+    if (this.platformDefectRepo) {
+      await notifyIncidentBoardById(this.repo, queueId, this.platformDefectRepo).catch(
+        () => undefined,
+      )
     }
     return true
   }

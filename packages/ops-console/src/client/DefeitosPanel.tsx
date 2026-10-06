@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   Button,
@@ -23,10 +23,24 @@ import {
   defectShortTag,
   defectHasCorrectionFailure,
   defectIsRecurrence,
+  defectReviewRowBadge,
   defectStatusColor,
   defectStatusLabel,
   formatBatchWindowHours,
+  humanizeDefectReviewField,
 } from './ch-defect-display.js'
+import {
+  DEFECT_BOARD_FILTER_LABELS,
+  DEFECT_OPEN_STATUS_LIST,
+  type DefectBoardStatusFilter,
+} from './ch-defect-board-filter.js'
+import { ChCopyableRefTag } from './components/ChCopyableRefTag.js'
+import { ChDetailSection } from './components/ChDetailSection.js'
+import { ChLiveIndicator } from './components/ChLiveIndicator.js'
+import { confirmTransactionalAction } from './ch-transactional-confirm.js'
+import { useDefectBoardStream } from './hooks/useDefectBoardStream.js'
+import type { OpsDeploymentTier } from './theme/ops-environment.js'
+import { inferOpsReferenceHref } from './ch-ops-deep-link.js'
 
 import {
   buildDefectDeepLink,
@@ -45,27 +59,33 @@ import type {
 
 const { Text, Paragraph, Link } = Typography
 
-const FILTER_STATUSES: Array<PlatformDefectStatus | 'all'> = [
-  'all',
+const FILTER_STATUSES: DefectBoardStatusFilter[] = [
+  'all_open',
   'open',
   'in_fix',
   'ready_for_pr',
   'fixed',
+  'all',
 ]
 
 export function DefeitosPanel({
   onRefresh,
   highlightDefectId,
+  deploymentTier = 'integration',
 }: {
   onRefresh?: () => void
   highlightDefectId?: string | null
+  deploymentTier?: OpsDeploymentTier
 }) {
   const [items, setItems] = useState<PlatformDefectItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState<PlatformDefectStatus | 'all'>('all')
+  const [statusFilter, setStatusFilter] = useState<DefectBoardStatusFilter>('all_open')
   const [searchText, setSearchText] = useState('')
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
-  const highlightRef = useRef<string | null>(null)
+  const highlightRow = useMemo(
+    () => new URLSearchParams(window.location.search).get('highlight') === '1',
+    [],
+  )
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [batchConfig, setBatchConfig] = useState<{
     intervalMs: number
@@ -80,7 +100,11 @@ export function DefeitosPanel({
     try {
       const includeFixed = statusFilter === 'all' || statusFilter === 'fixed'
       const statusParam =
-        statusFilter === 'all' ? 'open,in_fix,ready_for_pr,fixed' : statusFilter
+        statusFilter === 'all_open'
+          ? DEFECT_OPEN_STATUS_LIST
+          : statusFilter === 'all'
+            ? 'open,in_fix,ready_for_pr,fixed'
+            : statusFilter
       const [defects, config] = await Promise.all([
         opsApi.platformDefects({ status: statusParam, includeFixed }),
         opsApi.defectPrBatchConfig().catch(() => null),
@@ -98,18 +122,12 @@ export function DefeitosPanel({
     void load()
   }, [load])
 
-  useEffect(() => {
-    const needsPoll = items.some(
-      (d) =>
-        d.status === 'ready_for_pr'
-        && (d.latestReview?.status === 'running' || d.latestReview?.status === 'pending'),
-    )
-    if (!needsPoll) return
-    const timer = window.setInterval(() => {
-      void load()
-    }, 15_000)
-    return () => window.clearInterval(timer)
-  }, [items, load])
+  const { connection } = useDefectBoardStream({
+    deploymentTier,
+    statusFilter,
+    onPatch: setItems,
+    onReload: () => load(),
+  })
 
   useEffect(() => {
     if (!highlightDefectId) return
@@ -126,16 +144,6 @@ export function DefeitosPanel({
       })
       .catch(() => undefined)
   }, [highlightDefectId])
-
-  useEffect(() => {
-    if (!highlightDefectId || loading) return
-    if (highlightRef.current === highlightDefectId) return
-    const row = document.querySelector(`[data-defect-row-id="${highlightDefectId}"]`)
-    if (row) {
-      highlightRef.current = highlightDefectId
-      row.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }
-  }, [highlightDefectId, loading, items])
 
   const parsedSearch = useMemo(() => parseOpsSearchInput(searchText), [searchText])
   const visibleItems = useMemo(() => {
@@ -196,10 +204,6 @@ export function DefeitosPanel({
     }
   }
 
-  const openDetail = async (id: string) => {
-    setExpandedRowKeys((prev) => (prev.includes(id) ? prev : [...prev, id]))
-  }
-
   const runAction = async (id: string, fn: () => Promise<unknown>, okMsg: string) => {
     setUpdatingId(id)
     try {
@@ -214,47 +218,63 @@ export function DefeitosPanel({
     }
   }
 
-  const startFix = async (id: string, retry = false) => {
-    setUpdatingId(id)
-    try {
-      const res = await opsApi.startPlatformDefectFix(id)
-      if (res.ok) {
-        message.success(retry ? 'Correção reenfileirada' : 'Correção iniciada')
-      } else {
-        const detail =
-          res.dispatch?.outcome === 'skipped'
-            ? 'Dispatch ignorado — verifique webhook Correção Dev no .env'
-            : res.dispatch?.error ?? 'Dispatch não aceito'
-        message.warning(detail)
+  const startFix = (id: string, retry = false) => {
+    confirmTransactionalAction(retry ? 'defect.requeue_fix' : 'defect.start_fix', async () => {
+      setUpdatingId(id)
+      try {
+        const res = await opsApi.startPlatformDefectFix(id)
+        if (res.ok) {
+          message.success(retry ? 'Correção reenfileirada' : 'Correção iniciada')
+        } else {
+          const detail =
+            res.dispatch?.outcome === 'skipped'
+              ? 'Dispatch ignorado — verifique webhook Correção Dev no .env'
+              : res.dispatch?.error ?? 'Dispatch não aceito'
+          message.warning(detail)
+        }
+        await load()
+        await onRefresh?.()
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : 'Falha na ação')
+      } finally {
+        setUpdatingId(null)
       }
-      await load()
-      await onRefresh?.()
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Falha na ação')
-    } finally {
-      setUpdatingId(null)
-    }
+    })
   }
 
   const markReadyForPr = (id: string) => {
     const branchName = branchDraft[id]?.trim()
-    return runAction(
-      id,
-      () =>
-        opsApi.patchPlatformDefectStatus(id, {
-          status: 'ready_for_pr',
-          branchName: branchName || undefined,
-        }),
-      'Marcado pronto para PR',
+    confirmTransactionalAction('defect.mark_ready_pr', () =>
+      runAction(
+        id,
+        () =>
+          opsApi.patchPlatformDefectStatus(id, {
+            status: 'ready_for_pr',
+            branchName: branchName || undefined,
+          }),
+        'Marcado pronto para PR',
+      ),
     )
   }
 
-  const markFixed = (id: string) =>
-    runAction(
-      id,
-      () => opsApi.patchPlatformDefectStatus(id, { status: 'fixed', skipBatch: true }),
-      'Defeito marcado como corrigido',
+  const markFixed = (id: string, prUrl?: string | null) => {
+    confirmTransactionalAction(
+      'defect.mark_fixed',
+      () =>
+        runAction(
+          id,
+          () => opsApi.patchPlatformDefectStatus(id, { status: 'fixed', skipBatch: true }),
+          'Defeito marcado como corrigido',
+        ),
+      prUrl ? 'Há PR aberto neste defeito.' : undefined,
     )
+  }
+
+  const toggleExpanded = (id: string) => {
+    setExpandedRowKeys((prev) =>
+      prev.includes(id) ? prev.filter((k) => k !== id) : [...prev, id],
+    )
+  }
 
   return (
     <OpsPanel
@@ -297,7 +317,8 @@ export function DefeitosPanel({
         onSearch={(v) => void runSearch(v)}
       />
 
-      <Space wrap style={{ marginBottom: 12 }}>
+      <Space wrap style={{ marginBottom: 12 }} align="center">
+        <ChLiveIndicator state={connection} />
         {FILTER_STATUSES.map((s) => (
           <Button
             key={s}
@@ -305,7 +326,7 @@ export function DefeitosPanel({
             type={statusFilter === s ? 'primary' : 'default'}
             onClick={() => setStatusFilter(s)}
           >
-            {s === 'all' ? 'Todos' : defectStatusLabel(s)}
+            {DEFECT_BOARD_FILTER_LABELS[s]}
           </Button>
         ))}
       </Space>
@@ -319,11 +340,22 @@ export function DefeitosPanel({
           loading={loading}
           pagination={false}
           dataSource={visibleItems}
-          onRow={(row) => ({ 'data-defect-row-id': row.id })}
+          onRow={(row) => ({
+            'data-defect-row-id': row.id,
+            onClick: (e) => {
+              if ((e.target as HTMLElement).closest('[data-ch-no-row-toggle]')) return
+              if ((e.target as HTMLElement).closest('button, a, .ant-btn')) return
+              toggleExpanded(row.id)
+            },
+            style: { cursor: 'pointer' },
+          })}
           rowClassName={(row) =>
-            highlightDefectId && row.id === highlightDefectId ? 'ops-row-highlight' : ''
+            highlightRow && highlightDefectId && row.id === highlightDefectId
+              ? 'ops-row-highlight'
+              : ''
           }
           expandable={{
+            expandRowByClick: false,
             expandedRowKeys,
             onExpandedRowsChange: (keys) => setExpandedRowKeys(keys.map(String)),
             expandedRowRender: (row) => (
@@ -349,16 +381,18 @@ export function DefeitosPanel({
               align: 'center',
               render: (_: unknown, row) => (
                 <Space size={4} wrap style={{ justifyContent: 'center' }}>
-                  <OpsReferenceCodeTag code={row.referenceCode} compact />
-                  <Tooltip title={`${row.id} — clique para abrir`}>
-                    <a
-                      href={buildDefectDeepLink(row.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ fontFamily: 'monospace', fontSize: 11, color: 'inherit' }}
-                    >
-                      {defectShortTag(row.id)}
-                    </a>
-                  </Tooltip>
+                  {row.referenceCode ? (
+                    <ChCopyableRefTag
+                      code={row.referenceCode}
+                      href={inferOpsReferenceHref(row.referenceCode)}
+                      compact
+                    />
+                  ) : null}
+                  <ChCopyableRefTag
+                    code={defectShortTag(row.id)}
+                    href={buildDefectDeepLink(row.id)}
+                    compact
+                  />
                 </Space>
               ),
             },
@@ -402,6 +436,10 @@ export function DefeitosPanel({
                   {defectHasCorrectionFailure(row) && (
                     <Tag color="error">Falha correção</Tag>
                   )}
+                  {(() => {
+                    const badge = defectReviewRowBadge(row)
+                    return badge ? <Tag color={badge.color}>{badge.label}</Tag> : null
+                  })()}
                 </Space>
               ),
             },
@@ -417,7 +455,11 @@ export function DefeitosPanel({
                       type="text"
                       size="small"
                       icon={<UnorderedListOutlined />}
-                      onClick={() => void openDetail(row.id)}
+                      data-ch-no-row-toggle
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleExpanded(row.id)
+                      }}
                     />
                   </Tooltip>
                   {row.status === 'open' && (
@@ -425,7 +467,11 @@ export function DefeitosPanel({
                       type="link"
                       size="small"
                       loading={updatingId === row.id}
-                      onClick={() => void startFix(row.id)}
+                      data-ch-no-row-toggle
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void startFix(row.id)
+                      }}
                     >
                       Iniciar correção
                     </Button>
@@ -436,7 +482,11 @@ export function DefeitosPanel({
                         type="link"
                         size="small"
                         loading={updatingId === row.id}
-                        onClick={() => void startFix(row.id, true)}
+                        data-ch-no-row-toggle
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          void startFix(row.id, true)
+                        }}
                       >
                         Reenfileirar correção
                       </Button>
@@ -445,7 +495,11 @@ export function DefeitosPanel({
                         size="small"
                         icon={<PullRequestOutlined />}
                         loading={updatingId === row.id}
-                        onClick={() => void markReadyForPr(row.id)}
+                        data-ch-no-row-toggle
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          void markReadyForPr(row.id)
+                        }}
                       >
                         Marcar pronto p/ PR
                       </Button>
@@ -456,7 +510,11 @@ export function DefeitosPanel({
                       type="link"
                       size="small"
                       loading={updatingId === row.id}
-                      onClick={() => void markFixed(row.id)}
+                      data-ch-no-row-toggle
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void markFixed(row.id, row.prUrl)
+                      }}
                     >
                       Corrigido
                     </Button>
@@ -516,16 +574,6 @@ function DefeitoDetail({
       cancelled = true
     }
   }, [refreshDetail])
-
-  useEffect(() => {
-    const review = row.latestReview
-    if (row.status !== 'ready_for_pr' || !review) return
-    if (review.status !== 'running' && review.status !== 'pending') return
-    const timer = window.setInterval(() => {
-      void refreshDetail().catch(() => undefined)
-    }, 15_000)
-    return () => window.clearInterval(timer)
-  }, [row.status, row.latestReview, refreshDetail])
 
   const failure = row.lastCorrectionFailureDetails
   const showFailureBanner = defectHasCorrectionFailure(row)
@@ -660,32 +708,36 @@ function DefeitoDetail({
       <DefeitoAgenticReviewCard
         row={row}
         busy={reviewBusy}
-        onApprove={async () => {
-          setReviewBusy(true)
-          try {
-            const res = await opsApi.operatorApprovePlatformDefectPr(defectId)
-            message.success(res.message)
-            if (res.prUrl) window.open(res.prUrl, '_blank', 'noopener,noreferrer')
-            await refreshDetail()
-            await onReload()
-          } catch (err) {
-            message.error(err instanceof Error ? err.message : 'Falha ao registrar aprovação')
-          } finally {
-            setReviewBusy(false)
-          }
+        onApprove={() => {
+          confirmTransactionalAction('defect.approve_merge', async () => {
+            setReviewBusy(true)
+            try {
+              const res = await opsApi.operatorApprovePlatformDefectPr(defectId)
+              message.success(res.message)
+              if (res.prUrl) window.open(res.prUrl, '_blank', 'noopener,noreferrer')
+              await refreshDetail()
+              await onReload()
+            } catch (err) {
+              message.error(err instanceof Error ? err.message : 'Falha ao registrar aprovação')
+            } finally {
+              setReviewBusy(false)
+            }
+          })
         }}
-        onRequestChanges={async () => {
-          setReviewBusy(true)
-          try {
-            await opsApi.operatorRequestChangesPlatformDefectPr(defectId)
-            message.success('Mudanças solicitadas — defeito reaberto para correção')
-            await refreshDetail()
-            await onReload()
-          } catch (err) {
-            message.error(err instanceof Error ? err.message : 'Falha ao pedir mudanças')
-          } finally {
-            setReviewBusy(false)
-          }
+        onRequestChanges={() => {
+          confirmTransactionalAction('defect.request_changes', async () => {
+            setReviewBusy(true)
+            try {
+              await opsApi.operatorRequestChangesPlatformDefectPr(defectId)
+              message.success('Mudanças solicitadas — defeito reaberto para correção')
+              await refreshDetail()
+              await onReload()
+            } catch (err) {
+              message.error(err instanceof Error ? err.message : 'Falha ao pedir mudanças')
+            } finally {
+              setReviewBusy(false)
+            }
+          })
         }}
       />
     </div>
@@ -717,8 +769,8 @@ function DefeitoAgenticReviewCard({
 }: {
   row: PlatformDefectItem
   busy: boolean
-  onApprove: () => Promise<void>
-  onRequestChanges: () => Promise<void>
+  onApprove: () => void
+  onRequestChanges: () => void
 }) {
   const review = row.latestReview
   const showActions = row.status === 'ready_for_pr' && Boolean(row.prUrl)
@@ -734,10 +786,10 @@ function DefeitoAgenticReviewCard({
       ) : (
         <Space direction="vertical" size={8} style={{ width: '100%' }}>
           <Space wrap>
-            <Tag>{review.status}</Tag>
+            <Tag>{humanizeDefectReviewField(review.status)}</Tag>
             {review.recommendation && (
               <Tag color={reviewRecommendationColor(review.recommendation)}>
-                {review.recommendation}
+                {humanizeDefectReviewField(review.recommendation)}
               </Tag>
             )}
             {review.completedAt && (
@@ -749,19 +801,22 @@ function DefeitoAgenticReviewCard({
           {review.correctionEffectiveness && (
             <div>
               <Text strong>Eficácia:</Text>{' '}
-              <Tag>{review.correctionEffectiveness}</Tag>
+              <Tag>{humanizeDefectReviewField(review.correctionEffectiveness)}</Tag>
             </div>
           )}
           {review.riskLevel && (
             <div>
               <Text strong>Risco:</Text>{' '}
-              <Tag color={riskLevelColor(review.riskLevel)}>{review.riskLevel}</Tag>
+              <Tag color={riskLevelColor(review.riskLevel)}>
+                {humanizeDefectReviewField(review.riskLevel)}
+              </Tag>
               {review.riskSummary && <Text> — {review.riskSummary}</Text>}
             </div>
           )}
           {review.securityVerdict && (
             <div>
-              <Text strong>Segurança:</Text> <Tag>{review.securityVerdict}</Tag>
+              <Text strong>Segurança:</Text>{' '}
+              <Tag>{humanizeDefectReviewField(review.securityVerdict)}</Tag>
               {review.securitySummary && <Text> — {review.securitySummary}</Text>}
             </div>
           )}

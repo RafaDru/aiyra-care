@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Spin } from 'antd'
+import { Alert, Button, Spin, Tooltip } from 'antd'
 import { ReloadOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { OpsMetricsResponse } from './ops.types.js'
 import { OpsMetricsDashboard } from './OpsMetricsDashboard.js'
@@ -84,14 +84,18 @@ function AppConsole() {
       <Button icon={<ReloadOutlined />} onClick={refresh} loading={loading}>
         Atualizar
       </Button>
-      <Button
-        type="primary"
-        icon={<ThunderboltOutlined />}
-        onClick={runDispatch}
-        loading={dispatching}
+      <Tooltip
+        title="Executa a checagem de alertas ops (probe e regras). Alertas críticos de infra podem disparar a automação investigadora SRE. Não é triagem de INC nem correção de DEF."
       >
-        Verificar e acionar
-      </Button>
+        <Button
+          type="primary"
+          icon={<ThunderboltOutlined />}
+          onClick={runDispatch}
+          loading={dispatching}
+        >
+          Verificar e acionar
+        </Button>
+      </Tooltip>
     </>
   )
 

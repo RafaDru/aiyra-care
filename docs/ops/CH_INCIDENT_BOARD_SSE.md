@@ -1,6 +1,6 @@
 # CH — Incidentes: push em tempo real (SSE)
 
-**Status:** spec autorizada (Rafael, 2026-10-04) · **Implementação:** pendente  
+**Status:** spec autorizada (Rafael, 2026-10-04) · **Implementação:** concluída (pacote `ch-ui-graphics-package`)  
 **Relacionado:** [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · [`CH_INCIDENT_BOARD_FILTERS.md`](./CH_INCIDENT_BOARD_FILTERS.md) · poll 15s paliativo (`594de83`)
 
 ---

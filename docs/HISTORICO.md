@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-05] - CH: pacote UX gráfico (G1–G8)
+
+### Realizado
+- Layout sidenav fixa + scroll `ch-main-scroll`; listas INC/DEF com tags copiáveis, expand por clique na linha, filtro default «Em aberto».
+- `ChDetailSection` / corpo estruturado; `Modal.confirm` em mutações (defeitos, incidentes, suporte).
+- SSE `GET /api/analysis-queue/stream` e `GET /api/platform-defects/stream`; buses `incident-board` / `platform-defect-board`; indicador «Ao vivo».
+- Spec: `docs/ops/CH_UI_GRAPHICS_PACKAGE.md` · suite `ops-ch-ui-graphics`.
+
 ## [2026-10-04] - CH: incidente `resolved` + reincidência INC→INC (084)
 
 ### Decisão
