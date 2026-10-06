@@ -15,3 +15,6 @@
 {"ts":"2026-10-06T15:35:30.045Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts tests/ops-planned-maintenance.test.ts 2>&1 && npm run test:critical 2>&1"}
 {"ts":"2026-10-06T15:35:39.713Z","event":"bypass","command":"cd /workspace && npm run qa:run -- --suite client-error-ch-bridge 2>&1 | tail -30"}
 {"ts":"2026-10-06T15:35:39.716Z","event":"bypass","command":"cd /workspace && npm run test:ops 2>&1 | tail -15"}
+{"ts":"2026-10-06T15:47:17.327Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/ch-g3-agentic-approve.helper.test.ts tests/platform-defect-pr-review.test.ts 2>&1"}
+{"ts":"2026-10-06T15:47:26.281Z","event":"bypass","command":"cd /workspace && npm ci --ignore-scripts 2>&1 | tail -5 && cd packages/api && npm run test -- --run tests/ch-g3-agentic-approve.helper.test.ts tests/platform-defect-pr-review.test.ts 2>&1"}
+{"ts":"2026-10-06T15:47:58.180Z","event":"bypass","command":"cd /workspace/packages/api && npm run test:ops 2>&1 | tail -20"}

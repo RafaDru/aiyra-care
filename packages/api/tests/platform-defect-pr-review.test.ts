@@ -246,6 +246,58 @@ describe('PlatformDefectPrReviewService', () => {
     expect(reviewRepo.syncDefectLastReview).toHaveBeenCalled()
   })
 
+  it('processCallback auto operator-approve when CH_G3_AGENTIC_AUTO_APPROVE=1', async () => {
+    process.env.CH_G3_AGENTIC_AUTO_APPROVE = '1'
+    const defectRepo = {
+      findById: vi
+        .fn()
+        .mockResolvedValueOnce(readyDefect)
+        .mockResolvedValueOnce(readyDefect)
+        .mockResolvedValueOnce(readyDefect),
+      recordOperatorPrApproval: vi.fn(async () => undefined),
+      listLinkedIncidentIds: vi.fn(async () => []),
+      listLinkedIncidentsMeta: vi.fn(async () => []),
+    } as unknown as PlatformDefectPgRepository
+
+    const reviewRepo = {
+      findRunningByDefectId: vi.fn(async () => ({ id: 'rev-1' })),
+      completeFromCallback: vi.fn(async () => ({
+        id: 'rev-1',
+        recommendation: 'approve',
+        status: 'completed',
+      })),
+      syncDefectLastReview: vi.fn(async () => undefined),
+      findLatestByDefectId: vi.fn(async () => null),
+      findLatestCompletedForPrUrl: vi.fn(async () => ({
+        id: 'rev-1',
+        recommendation: 'approve',
+        status: 'completed',
+        prUrl: readyDefect.prUrl!,
+      })),
+    } as unknown as DefectPrReviewPgRepository
+
+    const svc = new PlatformDefectPrReviewService(
+      defectRepo,
+      reviewRepo,
+      new PlatformDefectService(defectRepo),
+    )
+
+    await svc.processCallback(
+      {
+        defectId: readyDefect.id,
+        status: 'completed',
+        recommendation: 'approve',
+      },
+      { kind: 'defect_pr_review_v1' },
+    )
+
+    expect(defectRepo.recordOperatorPrApproval).toHaveBeenCalledWith(
+      readyDefect.id,
+      '[agentic] auto after review approve',
+    )
+    delete process.env.CH_G3_AGENTIC_AUTO_APPROVE
+  })
+
   it('operatorApprovePr blocks without approve when CH_G3_REQUIRE_REVIEW_APPROVE=1', async () => {
     process.env.CH_G3_REQUIRE_REVIEW_APPROVE = '1'
     const defectRepo = {

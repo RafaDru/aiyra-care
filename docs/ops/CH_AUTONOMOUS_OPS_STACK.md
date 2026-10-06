@@ -21,7 +21,7 @@
                                  ▼
                     Review (Agent 3, advisory) ──► CI snapshot (R2, C2–C4)
                                  ▼
-              ├── AGENTIC: POST operator-approve-pr (G3) — ver CH_G3_AGENTIC_APPROVAL.md
+              ├── AGENTIC: G3 — `CH_G3_AGENTIC_AUTO_APPROVE` ou `ch:defect-operator-approve`
               └── AGENTIC: merge GitHub quando CI + QA (charter)
                                  ▼
                     webhook merge → DEF fixed + INC resolved (R4)
@@ -33,7 +33,7 @@
 | Triagem → DEF | Webhook + callback | G0 estratégico raro |
 | Correção → PR | Agent 2 | — |
 | Review | `CH_AUTO_PR_REVIEW_ON_READY` | — |
-| G3 approve | `operator-approve-pr` (agente/automation) | Override reason = decisão explícita |
+| G3 approve | `operator-approve-pr` (hook ou script) | Override reason = decisão explícita |
 | Merge | Agente após gates | Veto estratégico («pausar merges») |
 | Fechar INC | Após merge (webhook) | — |
 

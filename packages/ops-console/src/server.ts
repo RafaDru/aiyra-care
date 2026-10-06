@@ -59,6 +59,7 @@ import { verifyGithubWebhookSignature } from '../../api/src/domain/ops/github-we
 import { resolveGithubDefectMergeWebhookSecret } from '../../api/src/application/ops/platform-defect-merge-webhook.config.js'
 import {
   defectCiPollIntervalMs,
+  isChG3AgenticAutoApproveEnabled,
   isChG3RequireReviewApproveEnabled,
   resolveGithubDefectCiWebhookSecret,
   resolveGithubOpsToken,
@@ -328,6 +329,7 @@ async function main() {
       plannedMaintenanceSource: maintenance.source,
       readOnly: maintenance.plannedMaintenance,
       chG3RequireReviewApprove: isChG3RequireReviewApproveEnabled(),
+      chG3AgenticAutoApprove: isChG3AgenticAutoApproveEnabled(),
     }
   })
 

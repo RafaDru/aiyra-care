@@ -18,6 +18,7 @@ export type OpsConsoleHealth = {
   plannedMaintenance?: boolean
   readOnly?: boolean
   chG3RequireReviewApprove?: boolean
+  chG3AgenticAutoApprove?: boolean
 }
 
 export type ChServicesStatusResponse = {
