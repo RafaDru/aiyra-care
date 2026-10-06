@@ -1,6 +1,6 @@
 # Ops — manutenção planejada (suppress auto-INC)
 
-**Status:** v1 env + bridge gate + CH banner read-only (**implementado**)  
+**Status:** v1 env + bridge gate + CH banner read-only (**implementado**); v2 suppress auto-INC ops_alert dispatch (**implementado**)  
 **Épico roadmap:** `ops-planned-maintenance`  
 **Gap / prioridade:** [`CH_OPS_GAP_AND_PRIORITY.md`](./CH_OPS_GAP_AND_PRIORITY.md)
 
@@ -47,13 +47,14 @@ Chamados **Reportar problema** e alertas ops configurados permanecem permitidos 
 | `POST /telemetry/client-errors` | Sim (`client_errors`) | **Não** (bridge skip) |
 | API unhandled **5xx** (prefixos bridge) | Sim (`app.log.error`) | **Não** |
 | `POST /support/reports` | Sim | **Sim** (dispatch normal) |
-| Ops alerts → fila | Sim | **Sim** (v1; v2 opcional tag `maintenance_sensitive`) |
+| Ops alerts → fila (métricas / webhook Slack) | Sim | Webhook opcional; **auto-INC** (`enqueueOpsAlert` + dispatch) **não** |
 | Incident dispatch worker | — | Não altera INC já abertos |
 
-### Código v1
+### Código
 
-- `packages/api/src/domain/ops/ops-planned-maintenance.ts` — `isOpsPlannedMaintenanceActive()`
-- `ClientErrorIncidentBridgeService.onIngestedErrors` / `handleServerError` — early return
+- `packages/api/src/domain/ops/ops-planned-maintenance.ts` — `isOpsPlannedMaintenanceActive()`, `shouldSuppressAutoIncDuringPlannedMaintenance(trigger)`
+- `ClientErrorIncidentBridgeService.onIngestedErrors` / `handleServerError` — early return (v1)
+- **v2 ops_alert auto-INC:** `shouldAutoInvestigateOpsAlert`, `investigateOpsAlertWithQueue`, `IncidentDispatchService.dispatchOpsAlertTriage`, `dispatchOpsAlertInvestigator` — skip quando `trigger === 'auto'`; triagem **manual** e `POST /support/reports` inalterados
 
 ### Saúde / modo degradado
 
@@ -66,7 +67,7 @@ Chamados **Reportar problema** e alertas ops configurados permanecem permitidos 
 
 | Variável | Default | Efeito |
 |----------|---------|--------|
-| `OPS_PLANNED_MAINTENANCE` | `0` | `1` / `true` / `yes` → suppress bridge + 5xx INC |
+| `OPS_PLANNED_MAINTENANCE` | `0` | `1` / `true` / `yes` → suppress bridge + 5xx INC + auto ops_alert INC/dispatch |
 
 Template: `.env.example` (seção ops bridge).
 
@@ -85,9 +86,10 @@ Independente de `CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED` — bridge pode estar `1`
 
 ## Critérios de aceite
 
-- [ ] Com manutenção ativa, fingerprint allowlisted **não** cria `ops_analysis_queue` via bridge.
-- [ ] Com manutenção ativa, 5xx em `/auth/*` **não** cria INC sintético.
-- [ ] Com manutenção inativa, comportamento bridge inalterado (vitest).
+- [x] Com manutenção ativa, fingerprint allowlisted **não** cria `ops_analysis_queue` via bridge.
+- [x] Com manutenção ativa, 5xx em `/auth/*` **não** cria INC sintético.
+- [x] Com manutenção ativa, auto ops_alert **não** enfileira INC nem dispara triagem automática.
+- [x] Com manutenção inativa, comportamento bridge e ops_alert inalterado (vitest).
 - [ ] `POST /support/reports` ainda cria INC (teste manual ou e2e existente).
 - [ ] Documentação cross-link bridge + gap doc.
 
@@ -96,8 +98,8 @@ Independente de `CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED` — bridge pode estar `1`
 ## QA
 
 - Suite stub: [`docs/testing/suites/ops-planned-maintenance.md`](../testing/suites/ops-planned-maintenance.md)
-- Automação: `packages/api/tests/ops-planned-maintenance.test.ts`, `client-error-incident-bridge.service.test.ts`
-- Comando: `cd packages/api && npx vitest run tests/ops-planned-maintenance.test.ts tests/client-error-incident-bridge.service.test.ts`
+- Automação: `packages/api/tests/ops-planned-maintenance.test.ts`, `ops-planned-maintenance-ops-alert.test.ts`, `client-error-incident-bridge.service.test.ts`
+- Comando: `cd packages/api && npx vitest run tests/ops-planned-maintenance.test.ts tests/ops-planned-maintenance-ops-alert.test.ts tests/client-error-incident-bridge.service.test.ts`
 
 ---
 

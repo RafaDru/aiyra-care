@@ -25,9 +25,9 @@
 | **Bridge client_error → INC** | exists | `ClientErrorIncidentBridgeService` · mig **078** · `MIN_COUNT` + dedupe · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Política preview/prod: [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) |
 | **Universal failure ingress** | exists (0–4) | #115 · `client-error-incident-bridge.config.ts` | Tuning env prod; Ava gate médico na política |
 | **API 5xx → INC (hook)** | exists | prefixos + `/integration-links` · manutenção gate | Correlação `incident_id` degradado global (backlog) |
-| **Manutenção planejada (suppress auto-INC)** | partial v1 | `OPS_PLANNED_MAINTENANCE` · CH banner · vitest | v2: `ops_runtime_flags` + suppress ops_alert — [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) § v2 stub |
+| **Manutenção planejada (suppress auto-INC)** | partial v1+v2 | `OPS_PLANNED_MAINTENANCE` · bridge/5xx + ops_alert auto-INC (#118) · CH banner · vitest | `ops_runtime_flags` + toggle CH persistido |
 | **Support reports (humano)** | exists | mig **061** · [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) | Screenshot KMS backlog |
-| **Ops alerts → INC** | exists | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | v2 maintenance tag (stub) |
+| **Ops alerts → INC** | exists | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) · auto-INC gated em manutenção (#118) | Webhook Slack opcional segue; triagem manual ok |
 | **Incident dispatch (outbox)** | exists | mig **074–077** · [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) | F4 SLA timers; D9–D10 |
 | **Triagem Agent 1** | exists | callback + `triage-started` | Batch suporte 6h |
 | **DEF create + dedup** | exists | [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) | — |
