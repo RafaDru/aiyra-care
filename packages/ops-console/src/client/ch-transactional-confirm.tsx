@@ -6,6 +6,7 @@ export type ChTransactionalActionId =
   | 'defect.mark_ready_pr'
   | 'defect.mark_fixed'
   | 'defect.approve_merge'
+  | 'defect.register_pr'
   | 'defect.request_changes'
   | 'incident.retry_dispatch'
   | 'incident.mark_complete'
@@ -47,6 +48,11 @@ const COPY: Record<
     content:
       'Registra sua aprovação (G3) e abre o PR no GitHub. O merge continua manual.',
     okText: 'Aprovar e abrir PR',
+  },
+  'defect.register_pr': {
+    title: 'Registrar PR no defeito?',
+    content: 'Associa a URL do pull request GitHub — obrigatório para review e merge (G3).',
+    okText: 'Registrar PR',
   },
   'defect.request_changes': {
     title: 'Pedir mudanças?',

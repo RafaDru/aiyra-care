@@ -398,7 +398,7 @@ export class PlatformDefectPgRepository {
             input.lastCiRunUrl?.slice(0, 512) ?? null,
             JSON.stringify(input.lastCiSnapshot),
             input.failureKind,
-            input.failureSummary.slice(0, 2000),
+            input.failureSummary?.slice(0, 2000) ?? null,
             JSON.stringify(input.failureDetails),
           ]
         : [
@@ -585,6 +585,20 @@ export class PlatformDefectPgRepository {
         meta?.prUrl?.slice(0, 512) ?? null,
         meta?.prBatchId ?? null,
       ],
+    )
+    if (!res.rows[0]) return null
+    return mapRow(res.rows[0] as Record<string, unknown>)
+  }
+
+  async updatePrUrl(id: string, prUrl: string): Promise<PlatformDefectRecord | null> {
+    const res = await this.pool.query(
+      `UPDATE platform_defects SET
+        pr_url = $2,
+        pipeline_status = COALESCE(pipeline_status, 'ci_pending'),
+        updated_at = NOW()
+      WHERE id = $1::uuid AND status = 'ready_for_pr'
+      RETURNING *`,
+      [id, prUrl.slice(0, 512)],
     )
     if (!res.rows[0]) return null
     return mapRow(res.rows[0] as Record<string, unknown>)

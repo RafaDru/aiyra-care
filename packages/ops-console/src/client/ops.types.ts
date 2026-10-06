@@ -134,6 +134,23 @@ export interface PlatformDefectItem {
   operatorPrApprovedNote?: string | null
   pipelineStatus?: string | null
   lastCiRunUrl?: string | null
+  lastCiCheckedAt?: string | null
+  lastFailureDetails?: Record<string, unknown> | null
+}
+
+export interface IncidentDefectCycleMetrics {
+  windowDays: number
+  generatedAt: string
+  incidents: {
+    open: number
+    resolvedInWindow: number
+  }
+  defects: {
+    inFix: number
+    awaitingMerge: number
+    fixedInWindow: number
+    avgDaysToFixed: number | null
+  }
 }
 
 export interface OpsAnalysisAttentionCounts {

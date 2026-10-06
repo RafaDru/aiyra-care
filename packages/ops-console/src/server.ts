@@ -60,6 +60,8 @@ import {
   isChG3RequireReviewApproveEnabled,
   resolveGithubDefectCiWebhookSecret,
 } from '../../api/src/application/ops/defect-ci-pipeline.config.js'
+import { IncidentDefectCycleMetricsService } from '../../api/src/application/ops/incident-defect-cycle-metrics.service.js'
+import { IncidentDefectCycleMetricsPgRepository } from '../../api/src/infrastructure/persistence/incident-defect-cycle-metrics.pg.repository.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
 import type { IncidentBoardFilter } from '../../api/src/domain/ops/incident-list-filter.js'
 import {
@@ -154,6 +156,9 @@ const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(
   resolveIncidentsWhenDefectFixed,
 )
 const defectCiPipelineService = new DefectCiPipelineService(platformDefectRepo)
+const incidentDefectCycleMetricsService = new IncidentDefectCycleMetricsService(
+  new IncidentDefectCycleMetricsPgRepository(pool),
+)
 const incidentDispatchService = createIncidentDispatchService(pool)
 const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
 const analysisQueueService = new OpsAnalysisQueueService(
@@ -361,6 +366,15 @@ async function main() {
       readOnly: maintenance.plannedMaintenance,
     }
   })
+
+  fastify.get<{ Querystring: { windowDays?: string } }>(
+    '/api/ops/incident-defect-cycle-metrics',
+    async (req) => {
+      const parsed = Number(req.query.windowDays)
+      const windowDays = Number.isFinite(parsed) ? parsed : 7
+      return incidentDefectCycleMetricsService.getMetrics(windowDays)
+    },
+  )
 
   fastify.post('/api/alerts/check', async (_req, reply) => {
     if (isOpsConsoleReadOnly()) {
@@ -861,6 +875,28 @@ async function main() {
       throw err
     }
   })
+
+  fastify.post<{ Params: { id: string }; Body: { prUrl?: string } }>(
+    '/api/platform-defects/:id/register-pr',
+    async (req, reply) => {
+      const prUrl = req.body?.prUrl?.trim()
+      if (!prUrl) return reply.status(400).send({ error: 'invalid_payload' })
+      try {
+        const item = await platformDefectService.registerPrUrl(req.params.id, prUrl)
+        const withReview = await platformDefectPrReviewService.attachLatestReview(item)
+        return { ok: true, item: withReview }
+      } catch (err) {
+        if (err instanceof PlatformDefectTransitionError) {
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          if (err.code === 'pr_url_required') {
+            return reply.status(400).send({ error: 'pr_url_required' })
+          }
+          return reply.status(409).send({ error: err.code })
+        }
+        throw err
+      }
+    },
+  )
 
   fastify.post<{ Params: { id: string }; Body: { force?: boolean } }>(
     '/api/platform-defects/:id/request-review',

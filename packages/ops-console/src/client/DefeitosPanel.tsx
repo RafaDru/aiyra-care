@@ -6,6 +6,7 @@ import {
   Checkbox,
   Empty,
   Input,
+  Modal,
   Space,
   Table,
   Tag,
@@ -24,12 +25,22 @@ import {
   defectShortTag,
   defectHasCorrectionFailure,
   defectIsRecurrence,
-  defectReviewRowBadge,
   defectStatusColor,
   defectStatusLabel,
   formatBatchWindowHours,
   humanizeDefectReviewField,
 } from './ch-defect-display.js'
+import {
+  buildDefectCycleSteps,
+  defectPipelineCiRowBadge,
+  defectPipelineReviewRowBadge,
+  defectPipelineStatusRowBadge,
+  defectShowCiFailureBanner,
+  defectShowReviewFailureBanner,
+  formatCiFailureSummary,
+  humanizeDefectPipelineStatus,
+} from './ch-pipeline-display.js'
+import { ChPipelineTimeline } from './components/ChPipelineTimeline.js'
 import {
   DEFECT_BOARD_FILTER_LABELS,
   DEFECT_OPEN_STATUS_LIST,
@@ -446,8 +457,20 @@ export function DefeitosPanel({
                     <Tag color="error">Falha correção</Tag>
                   )}
                   {(() => {
-                    const badge = defectReviewRowBadge(row)
-                    return badge ? <Tag color={badge.color}>{badge.label}</Tag> : null
+                    const ciBadge = defectPipelineCiRowBadge(row)
+                    const reviewBadge = defectPipelineReviewRowBadge(row)
+                    const pipelineBadge = defectPipelineStatusRowBadge(row)
+                    return (
+                      <>
+                        {ciBadge ? <Tag color={ciBadge.color}>{ciBadge.label}</Tag> : null}
+                        {reviewBadge ? (
+                          <Tag color={reviewBadge.color}>{reviewBadge.label}</Tag>
+                        ) : null}
+                        {pipelineBadge ? (
+                          <Tag color={pipelineBadge.color}>{pipelineBadge.label}</Tag>
+                        ) : null}
+                      </>
+                    )
                   })()}
                 </Space>
               ),
@@ -588,10 +611,14 @@ function DefeitoDetail({
 
   const failure = row.lastCorrectionFailureDetails
   const showFailureBanner = defectHasCorrectionFailure(row)
-  const showCiFailureBanner = row.status === 'in_fix' && row.lastFailureKind === 'ci'
+  const showCiFailureBanner = defectShowCiFailureBanner(row)
+  const showReviewFailureBanner = defectShowReviewFailureBanner(row)
+  const ciFailureSummary = formatCiFailureSummary(row)
+  const pipelineSteps = buildDefectCycleSteps(row)
 
   return (
     <div style={{ maxWidth: 720 }}>
+      <ChPipelineTimeline steps={pipelineSteps} />
       {showCiFailureBanner && (
         <Alert
           type="error"
@@ -600,13 +627,31 @@ function DefeitoDetail({
           message="CI falhou na branch do PR"
           description={
             <div>
-              {row.lastFailureSummary && <div>{row.lastFailureSummary}</div>}
+              {ciFailureSummary && <div>{ciFailureSummary}</div>}
               {row.lastCiRunUrl && (
                 <Link href={row.lastCiRunUrl} target="_blank" rel="noreferrer">
                   Abrir GitHub Actions
                 </Link>
               )}
+              {row.lastFailureKind === 'ci' && (
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary">Última falha: ci</Text>
+                </div>
+              )}
             </div>
+          }
+        />
+      )}
+      {showReviewFailureBanner && (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 12 }}
+          message="Revisão agêntica pediu ajustes"
+          description={
+            row.pipelineStatus === 'review_failed'
+              ? humanizeDefectPipelineStatus(row.pipelineStatus)
+              : row.latestReview?.recommendationRationale
           }
         />
       )}
@@ -735,6 +780,15 @@ function DefeitoDetail({
           />
         </Paragraph>
       )}
+      {row.status === 'ready_for_pr' && !row.prUrl && (
+        <DefeitoRegisterPrCard
+          defectId={defectId}
+          onRegistered={async (defect) => {
+            onDefectUpdated(defect)
+            await onReload()
+          }}
+        />
+      )}
       <DefeitoAgenticReviewCard
         row={row}
         busy={reviewBusy}
@@ -773,6 +827,74 @@ function DefeitoDetail({
   )
 }
 
+function DefeitoRegisterPrCard({
+  defectId,
+  onRegistered,
+}: {
+  defectId: string
+  onRegistered: (defect: PlatformDefectItem) => Promise<void>
+}) {
+  const [open, setOpen] = useState(false)
+  const [prUrl, setPrUrl] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const submit = () => {
+    const trimmed = prUrl.trim()
+    if (!trimmed) {
+      message.warning('Informe a URL do PR GitHub')
+      return
+    }
+    confirmTransactionalAction('defect.register_pr', async () => {
+      setBusy(true)
+      try {
+        const res = await opsApi.registerPlatformDefectPr(defectId, trimmed)
+        message.success('PR registrado')
+        setOpen(false)
+        setPrUrl('')
+        await onRegistered(res.item)
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : 'Falha ao registrar PR')
+      } finally {
+        setBusy(false)
+      }
+    })
+  }
+
+  return (
+    <Alert
+      type="warning"
+      showIcon
+      style={{ marginBottom: 12 }}
+      message="PR GitHub ausente"
+      description={
+        <Space direction="vertical" size={8}>
+          <Text type="secondary">
+            Registre o pull request para habilitar review agêntica e aprovação G3.
+          </Text>
+          <Button type="primary" size="small" onClick={() => setOpen(true)}>
+            Registrar PR
+          </Button>
+          <Modal
+            title="Registrar PR GitHub"
+            open={open}
+            okText="Registrar"
+            cancelText="Cancelar"
+            confirmLoading={busy}
+            onCancel={() => setOpen(false)}
+            onOk={() => submit()}
+          >
+            <Input
+              placeholder="https://github.com/RafaDru/aiyra-care/pull/123"
+              value={prUrl}
+              onChange={(e) => setPrUrl(e.target.value)}
+            />
+          </Modal>
+        </Space>
+      }
+    />
+  )
+}
+
 function reviewRecommendationColor(
   rec: DefectPrReviewSummary['recommendation'],
 ): string {
@@ -807,6 +929,12 @@ function DefeitoAgenticReviewCard({
   const showActions = row.status === 'ready_for_pr' && Boolean(row.prUrl)
   const [overrideApprove, setOverrideApprove] = useState(false)
   const [overrideReason, setOverrideReason] = useState('')
+
+  useEffect(() => {
+    setOverrideApprove(false)
+    setOverrideReason('')
+  }, [row.id, review?.id, review?.status, review?.recommendation])
+
   const reviewBlocksApprove =
     chG3RequireReviewApprove
     && (!review || review.status !== 'completed' || review.recommendation !== 'approve')
@@ -905,7 +1033,7 @@ function DefeitoAgenticReviewCard({
             onClick={() => {
               confirmTransactionalAction('defect.approve_merge', () =>
                 onApprove(
-                  reviewBlocksApprove
+                  reviewBlocksApprove && overrideApprove
                     ? { override: true, overrideReason: overrideReason.trim() }
                     : undefined,
                 ),

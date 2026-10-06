@@ -218,6 +218,33 @@ export class PlatformDefectService {
     return updated
   }
 
+  /** G3/C7 — associa PR GitHub a defeito já em `ready_for_pr` (sem mudar status). */
+  async registerPrUrl(id: string, prUrl: string): Promise<PlatformDefectRecord> {
+    const current = await this.repo.findById(id)
+    if (!current) throw new PlatformDefectTransitionError('not_found')
+    if (current.status !== 'ready_for_pr') {
+      throw new PlatformDefectTransitionError('invalid_transition')
+    }
+    assertGithubPrUrlForReadyForPr(prUrl)
+    const updated = await this.repo.updatePrUrl(id, prUrl)
+    if (!updated) throw new PlatformDefectTransitionError('not_found')
+    const { isChAutoPrReviewOnReadyEnabled } = await import('./platform-defect-pr-review.service.js')
+    if (isChAutoPrReviewOnReadyEnabled() && !current.prUrl) {
+      const { DefectPrReviewPgRepository } = await import(
+        '../../infrastructure/persistence/defect-pr-review.pg.repository.js'
+      )
+      const { PlatformDefectPrReviewService } = await import('./platform-defect-pr-review.service.js')
+      const reviewService = new PlatformDefectPrReviewService(
+        this.repo,
+        new DefectPrReviewPgRepository(this.repo.getDbPool()),
+        this,
+      )
+      void reviewService.maybeAutoReviewOnReady(id)
+    }
+    notifyDefectBoardFromRecord(updated)
+    return updated
+  }
+
   async applyAgentStatusCallback(input: AgentAnalysisCallbackInput): Promise<PlatformDefectRecord> {
     const defectId = input.defectId?.trim()
     const defectStatus = input.defectStatus

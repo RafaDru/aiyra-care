@@ -37,11 +37,11 @@
 11. **Aprovar para merge** — registra intent, abre GitHub; merge **manual** (não automático)
 12. Se `CH_G3_REQUIRE_REVIEW_APPROVE=1` (pós-C5): sem review `approve`, botão bloqueado ou 409; override explícito documentado na spec
 
-### E — CI (pós-C3/C4 — skip até implementado)
+### E — CI (C3/C4)
 
-13. Com webhook CI ou **Atualizar CI**: badge **CI** na linha `ready_for_pr` reflete `ci_success` ou `ci_failed`
-14. Simular CI falho → DEF **Em correção**, banner com link Actions; **Reenfileirar correção** com confirmação Modal
-15. Se fatia C4 não mergeada: marcar passos 13–14 **N/A** e registrar no relatório
+13. Com webhook CI ou evento simulado: badge **CI** na linha `ready_for_pr` reflete `ci_success` ou `ci_failed` (via `ch-pipeline-display`)
+14. Simular CI falho → DEF **Em correção**, banner com link Actions no expand; **Reenfileirar correção** com confirmação Modal
+15. Timeline **Ciclo** no expand DEF/INC (`ChPipelineTimeline`) reflete fases detectado → merge / resolvido
 
 ### F — Merge → fixed → INC resolved (G4)
 
@@ -52,15 +52,16 @@
 ### G — UX / tempo real (regressão pacote #113)
 
 19. SSE **Ao vivo** em Incidentes e Defeitos — mudança de status sem F5 em &lt;5s
-20. Mutações críticas (start-fix, approve, pedir mudanças) exibem `Modal.confirm` antes do POST
+20. Mutações críticas (start-fix, approve, pedir mudanças, registrar PR) exibem `Modal.confirm` antes do POST
+21. CH **Geral** — card **Ciclo CH (7d)** via `GET /api/ops/incident-defect-cycle-metrics`
 
 ### H — Declaração piloto (C9)
 
-21. Confirmar piloto documentado (ex. DEF-000003 / INC-000007) em estado terminal **Corrigido** + **Resolvido** ou registrar defeito QA dedicado `QA-CYCLE-*`
-22. `npm run qa:run -- --suite ops-ch-defeitos` — PASS (regressão CH)
-23. `npm run test:ops` — PASS se alterações ops na mesma entrega
+22. Confirmar piloto documentado (ex. DEF-000003 / INC-000007) em estado terminal **Corrigido** + **Resolvido** ou registrar defeito QA dedicado `QA-CYCLE-*`
+23. `npm run qa:run -- --suite ops-ch-defeitos` — PASS (regressão CH)
+24. `npm run test:ops` — PASS se alterações ops na mesma entrega
 
 ## Critério
 
-- **PASS** se A→F (com E N/A documentado quando C3/C4 pendente), G e H.21 ok; merge humano verificado; nenhum estado mentiroso (`in_fix` sem dispatch, `ready_for_pr` sem `prUrl` no piloto completo)
+- **PASS** se A→F, G e H.22 ok; merge humano verificado; badges CI/review visíveis; nenhum estado mentiroso (`in_fix` sem dispatch, `ready_for_pr` sem `prUrl` no piloto completo salvo fluxo **Registrar PR** C7)
 - **FAIL** se INC não resolve após `fixed`, review invisível em `ready_for_pr`, ou regressão SSE/confirmações
