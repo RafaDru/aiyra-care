@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - CH ops: gap, stack autônoma, manutenção planejada
+
+### Decisão
+- Prioridade engenharia: visão ops autônoma (telemetria → INC → … → merge humano) **antes** de produto genérico — tabela em [`CH_OPS_GAP_AND_PRIORITY.md`](ops/CH_OPS_GAP_AND_PRIORITY.md).
+- Pipeline automático até PR + review agêntico; **manual:** G3 approve CH + merge GitHub (`CH_G3_REQUIRE_REVIEW_APPROVE=0` notebook; `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até CI C3).
+- **`OPS_PLANNED_MAINTENANCE=1`:** suprime auto-INC do bridge `client_errors` e hook 5xx; ingest continua; support reports humanos permitidos.
+
+### Realizado
+- Hub [`CH_AUTONOMOUS_OPS_STACK.md`](ops/CH_AUTONOMOUS_OPS_STACK.md); spec [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md); bridge ingress universal § em [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](ops/CLIENT_ERROR_INCIDENT_BRIDGE.md).
+- Código v1: `isOpsPlannedMaintenanceActive` + gate em `ClientErrorIncidentBridgeService`; vitest.
+- Roadmap: épicos `ops-planned-maintenance`, `client-error-universal-ingress`; links em `CH_CYCLE_CLOSE_SPEC` §14; suite `ops-planned-maintenance`.
+
 ## [2026-10-06] - CH: spec fechamento de ciclo operacional (C1–C9)
 
 ### Decisão

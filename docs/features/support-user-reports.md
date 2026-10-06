@@ -75,6 +75,9 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 
 - Suite: [`support-user-report`](../testing/suites/support-user-report.md)
 - Ciclo CH completo (pós-chamado até merge): [`ops-ch-cycle-close`](../testing/suites/ops-ch-cycle-close.md) — spec [`CH_CYCLE_CLOSE_SPEC.md`](../ops/CH_CYCLE_CLOSE_SPEC.md)
+- Ops stack / gap: [`CH_OPS_GAP_AND_PRIORITY.md`](../ops/CH_OPS_GAP_AND_PRIORITY.md) · [`CH_AUTONOMOUS_OPS_STACK.md`](../ops/CH_AUTONOMOUS_OPS_STACK.md)
+- Manutenção (bridge off, suporte humano on): [`ops-planned-maintenance`](../testing/suites/ops-planned-maintenance.md) — [`OPS_PLANNED_MAINTENANCE.md`](../ops/OPS_PLANNED_MAINTENANCE.md)
+- Bridge telemetria (piloto): [`client-error-ch-bridge`](../testing/suites/client-error-ch-bridge.md)
 - Comando: `npm run qa:run -- --suite support-user-report`
 - Automação: `packages/web/e2e/suites/support-user-report.spec.ts`
 - **Batch investigator (ops):** com `OPS_SUPPORT_INVESTIGATOR_MODE=batch`, `POST /support/reports` mantém toast e deixa `analysis_status=queued` até o job (`OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS`, padrão 6h no connect-worker). Botão **Analisar** no console continua imediato. Vitest: `support-report-batch.test.ts`, `support-report-dispatch.test.ts`.

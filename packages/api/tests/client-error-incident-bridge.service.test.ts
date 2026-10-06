@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ClientErrorIncidentBridgeService } from '../src/application/ops/client-error-incident-bridge.service.js'
 import { computeClientErrorFingerprint } from '../src/domain/telemetry/client-error.js'
 import type { ClientErrorIncidentBridgeConfig } from '../src/domain/ops/client-error-incident-bridge.types.js'
@@ -15,6 +15,39 @@ function enabledConfig(): ClientErrorIncidentBridgeConfig {
 }
 
 describe('ClientErrorIncidentBridgeService', () => {
+  afterEach(() => {
+    delete process.env.OPS_PLANNED_MAINTENANCE
+  })
+
+  it('skips enqueue when OPS_PLANNED_MAINTENANCE=1', async () => {
+    process.env.OPS_PLANNED_MAINTENANCE = '1'
+    const tryAcquire = vi.fn(async () => ({ acquired: true }))
+    const enqueueClientErrorSignal = vi.fn()
+    const bridge = new ClientErrorIncidentBridgeService(
+      enabledConfig(),
+      { tryAcquireEnqueueSlot: tryAcquire, attachQueueId: vi.fn() } as never,
+      { enqueueClientErrorSignal } as never,
+    )
+    const fp = computeClientErrorFingerprint('account_settings', 'api', 'HTTP_500')
+    await bridge.onIngestedErrors(
+      [{
+        fingerprint: fp,
+        feature: 'account_settings',
+        errorKind: 'api',
+        errorCode: 'HTTP_500',
+      }],
+      { accountId: null, deploymentTier: 'local' },
+    )
+    await bridge.handleServerError({
+      path: '/auth/profile',
+      statusCode: 500,
+      accountId: null,
+      deploymentTier: 'local',
+    })
+    expect(tryAcquire).not.toHaveBeenCalled()
+    expect(enqueueClientErrorSignal).not.toHaveBeenCalled()
+  })
+
   it('enqueues once per fingerprint; second call blocked by dedupe', async () => {
     const tryAcquire = vi
       .fn()

@@ -9,6 +9,8 @@
 
 **QA:** [`docs/testing/suites/ops-ch-cycle-close.md`](../testing/suites/ops-ch-cycle-close.md) · `npm run qa:run -- --suite ops-ch-cycle-close`
 
+**Hub ops (2026-10-06):** [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md) · gap e prioridade [`CH_OPS_GAP_AND_PRIORITY.md`](./CH_OPS_GAP_AND_PRIORITY.md) · manutenção [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md)
+
 ---
 
 ## 1. O que este épico fecha
@@ -314,3 +316,17 @@ Reiniciar ops-console `:3013` após alterar `GITHUB_*` / `CH_*`.
 1. Rafael confirma **D1** e **D4** (defaults G3 e piloto C9).
 2. Implementar **C2 → C3 → C4** na branch de trabalho ops (hexagonal `packages/api` + rotas ops-console).
 3. Executar **`npm run qa:run -- --suite ops-ch-cycle-close`** e registrar PASS/FAIL no chat de entrega.
+
+---
+
+## 14. Documentação hub e prioridade (2026-10-06)
+
+Alinhamento operacional aprovado: pipeline automático até PR + review agêntico; merge e G3 approve permanecem manuais.
+
+| Documento | Uso |
+|-----------|-----|
+| [`CH_OPS_GAP_AND_PRIORITY.md`](./CH_OPS_GAP_AND_PRIORITY.md) | Tabela exists/partial/missing + fila de implementação |
+| [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md) | Narrativa única + ordem fatias (manutenção antes de ruído em prod) |
+| [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) | Flag manutenção + suppress bridge |
+
+Épicos irmãos no roadmap: `ops-planned-maintenance`, `client-error-universal-ingress` (ingresso antes de expandir prod), `ch-cycle-close` (C2–C9).

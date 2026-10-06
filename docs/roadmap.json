@@ -2382,11 +2382,75 @@
       ]
     },
     {
+      "id": "ops-planned-maintenance",
+      "category": "tecnico",
+      "priority": "P0",
+      "title": "Ops — manutenção planejada (suppress auto-INC)",
+      "summary": "OPS_PLANNED_MAINTENANCE + CH banner read-only: durante janela de deploy, bridge client_errors e hook 5xx não abrem INC; ingest e support reports humanos seguem. Spec: docs/ops/OPS_PLANNED_MAINTENANCE.md.",
+      "status": "in_progress",
+      "statusLabel": "v1 env + bridge gate — CH banner pendente",
+      "items": [
+        {
+          "id": "ops-planned-maintenance-env",
+          "title": "Env OPS_PLANNED_MAINTENANCE + bridge/5xx gate",
+          "status": "done",
+          "detail": "ops-planned-maintenance.ts; ClientErrorIncidentBridgeService; vitest; .env.example."
+        },
+        {
+          "id": "ops-planned-maintenance-ch-banner",
+          "title": "CH banner read-only + health flag",
+          "status": "planned",
+          "detail": "Expor plannedMaintenance no ops-console; sem toggle write v1."
+        },
+        {
+          "id": "ops-planned-maintenance-qa",
+          "title": "Suite ops-planned-maintenance",
+          "status": "done",
+          "detail": "docs/testing/suites/ops-planned-maintenance.md; vitest bridge + maintenance."
+        }
+      ]
+    },
+    {
+      "id": "client-error-universal-ingress",
+      "category": "tecnico",
+      "priority": "P0",
+      "title": "Client errors — ingresso universal de falha",
+      "summary": "Expandir bridge além do piloto account_settings/dashboard/ui: mapa web/mobile/integration_links, MIN_COUNT real, dedupe prod, fases rollout. Spec: CLIENT_ERROR_INCIDENT_BRIDGE.md § Universal failure ingress; gap: CH_OPS_GAP_AND_PRIORITY.md.",
+      "status": "planned",
+      "statusLabel": "spec_ready — implementação por fase",
+      "items": [
+        {
+          "id": "client-error-ingress-min-count",
+          "title": "Aplicar CLIENT_ERROR_INCIDENT_MIN_COUNT no bridge",
+          "status": "planned",
+          "detail": "Janela contagem antes de enqueue; alinhar dedupe signals."
+        },
+        {
+          "id": "client-error-ingress-phase1-web",
+          "title": "Fase 1 — patient tabs web",
+          "status": "planned",
+          "detail": "Features patient_exams, patient_integrations, patient_wallet + allowlist env."
+        },
+        {
+          "id": "client-error-ingress-phase2-mobile",
+          "title": "Fase 2 — mobile shell parity",
+          "status": "planned",
+          "detail": "packages/mobile client-errors feature keys."
+        },
+        {
+          "id": "client-error-ingress-phase3-integration",
+          "title": "Fase 3 — integration_links 5xx",
+          "status": "planned",
+          "detail": "API prefixes + lane sre_support opcional."
+        }
+      ]
+    },
+    {
       "id": "ch-cycle-close",
       "category": "tecnico",
       "priority": "P1",
       "title": "CH — Fechamento de ciclo operacional (C1–C9)",
-      "summary": "Declarar ritualmente o ciclo suporte/alerta → INC → DEF → review → merge → fixed + INC resolved: R2 CI no defeito (mig 086), gate G3 opcional, timeline, métricas fase, suite ops-ch-cycle-close. Spec: docs/ops/CH_CYCLE_CLOSE_SPEC.md.",
+      "summary": "Declarar ritualmente o ciclo suporte/alerta → INC → DEF → review → merge → fixed + INC resolved: R2 CI no defeito (mig 086), gate G3 opcional, timeline, métricas fase, suite ops-ch-cycle-close. Spec: docs/ops/CH_CYCLE_CLOSE_SPEC.md. Depende de ops-planned-maintenance para deploys com bridge on.",
       "status": "planned",
       "statusLabel": "C1 spec_ready — implementação C2–C9 pendente",
       "items": [
