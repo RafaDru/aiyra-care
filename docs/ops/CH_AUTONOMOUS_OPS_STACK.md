@@ -9,9 +9,9 @@
 
 ```text
 [Sinais]
-  client_errors / 5xx (bridge) ──┐
-  support_reports (humano)     ├──► INC-* (ops_analysis_queue)
-  ops_alerts                     │
+  failure probes → client_errors / 5xx (bridge) ──┐
+  support_reports (humano)                        ├──► INC-* (ops_analysis_queue)
+  ops_alerts                                      │
                                  ▼
                     dispatch outbox → Triagem (Agent 1)
                                  ▼
@@ -29,7 +29,7 @@
 
 | Etapa | Automático / agêntico | Humano (só decisão §2 charter) |
 |-------|----------------------|--------------------------------|
-| Telemetria → INC | Bridge + alertas (se habilitado) | Política allowlist / MIN_COUNT |
+| Telemetria → INC | Bridge + alertas (se habilitado) | Política allowlist hoje → **Failure Probes** default-on ([`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md)) |
 | Triagem → DEF | Webhook + callback | G0 estratégico raro |
 | Correção → PR | Agent 2 | — |
 | Review | `CH_AUTO_PR_REVIEW_ON_READY` | — |
@@ -45,6 +45,7 @@
 
 | Peça | Doc |
 |------|-----|
+| Failure Probes (spec) | [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) |
 | Bridge telemetria | [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) |
 | Manutenção (noise gate) | [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) |
 | INC/DEF máquinas de estado | [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) |
@@ -60,7 +61,7 @@
 ## Ordem de implementação (fatias)
 
 1. **Manutenção v1** (`ops-planned-maintenance`) — baixo risco; desbloqueia deploys com bridge on.
-2. **Bridge hardening + universal ingress** (`client-error-universal-ingress`) — em **paralelo** com C2 se necessário; **antes** de expandir allowlist em prod.
+2. **Failure Probes M1–M2** (`failure-probes-ch`) — default-on + opt-out; substitui expansão manual de allowlist — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Universal ingress (0–4) **done**; tuning prod via política ingress.
 3. **C2** — migration 086 `pipeline_status`.
 4. **C3–C4** — webhook/poll CI + `ci_failed → in_fix`.
 5. **C5** — `CH_G3_REQUIRE_REVIEW_APPROVE` no ops-console.

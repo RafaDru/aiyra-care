@@ -86,6 +86,20 @@
       "tags": ["suporte", "lgpd", "observabilidade", "bugs"]
     },
     {
+      "id": "failure-probes-ch",
+      "epicId": "failure-probes-ch",
+      "title": "Failure Probes — captura CH default-on",
+      "status": "planned",
+      "category": "tecnico",
+      "priority": "P0",
+      "doc": "docs/features/failure-probes-ch.md",
+      "domainDoc": "docs/ops/FAILURE_PROBES_CH.md",
+      "routes": ["*"],
+      "api": ["POST /telemetry/client-errors"],
+      "helpTopics": [],
+      "tags": ["ops", "ch", "telemetria", "incidentes"]
+    },
+    {
       "id": "patient-clinical-export",
       "epicId": "family-day-to-day",
       "title": "Export clínico — Levar na consulta (link, QR, PDF)",

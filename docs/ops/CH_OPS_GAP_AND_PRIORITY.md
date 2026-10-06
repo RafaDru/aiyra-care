@@ -2,7 +2,7 @@
 
 **Alinhamento operacional (pós-charter + #114/#115):** telemetria/falha → INC → triagem → DEF → correção → PR → review agêntico → **G3 agêntico** (`operator-approve-pr`) → **merge agêntico** `main` quando CI/QA passam — **sem** clique humano no CH nem merge manual por Rafael.
 
-**Hub narrativo:** [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md) · **G3 spec:** [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) · **Túnel/callbacks:** [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) · **Ingress prod:** [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) · **Manutenção:** [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) · **Ciclo C1–C9:** [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md) · **Carta:** [`OPS_SOLO_OPERATOR_CHARTER.md`](../OPS_SOLO_OPERATOR_CHARTER.md)
+**Hub narrativo:** [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md) · **Failure Probes:** [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) · **G3 spec:** [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) · **Túnel/callbacks:** [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) · **Ingress prod:** [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) · **Manutenção:** [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) · **Ciclo C1–C9:** [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md) · **Carta:** [`OPS_SOLO_OPERATOR_CHARTER.md`](../OPS_SOLO_OPERATOR_CHARTER.md)
 
 **Prioridade de engenharia:** itens **partial** ou specs P0/P1 abaixo vêm antes de produto genérico.
 
@@ -22,8 +22,9 @@
 | Capacidade | Status | Evidência (código / doc) | Lacuna / próximo passo |
 |------------|--------|---------------------------|-------------------------|
 | **Ingest `client_errors`** | exists | `POST /telemetry/client-errors` · mig **051** · [`TELEMETRY.md`](./TELEMETRY.md) | Retention job 90d (backlog TELEMETRY) |
-| **Bridge client_error → INC** | exists | `ClientErrorIncidentBridgeService` · mig **078** · `MIN_COUNT` + dedupe · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Política preview/prod: [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) |
-| **Universal failure ingress** | exists (0–4) | #115 · `client-error-incident-bridge.config.ts` | Tuning env prod; Ava gate médico na política |
+| **Bridge client_error → INC** | exists | `ClientErrorIncidentBridgeService` · mig **078** · `MIN_COUNT` + dedupe · [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) | Evolui para **Failure Probes** default-on — [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md); política: [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) |
+| **Failure Probes (CH capture)** | spec M0 | [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) · épico `failure-probes-ch` | MVP M1–M3: web + RN SDK, blocklist; pós-MVP doc: backend/Angular/nativo |
+| **Universal failure ingress** | exists (0–4) | #115 · `client-error-incident-bridge.config.ts` | Superseded em prod por probes (opt-out); tuning até M2 |
 | **API 5xx → INC (hook)** | exists | prefixos + `/integration-links` · manutenção gate | Correlação `incident_id` degradado global (backlog) |
 | **Manutenção planejada (suppress auto-INC)** | partial v1+v2 | `OPS_PLANNED_MAINTENANCE` · bridge/5xx + ops_alert auto-INC (#118) · CH banner · vitest | `ops_runtime_flags` + toggle CH persistido |
 | **Support reports (humano)** | exists | mig **061** · [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) | Screenshot KMS backlog |
@@ -46,11 +47,12 @@
 
 1. **G3 agêntico + merge agêntico** — automation pós-`review-callback` chama `operator-approve-pr`; agente merge quando CI/QA OK (charter). Depende de túnel se review na nuvem.
 2. **`ch-cycle-close` C9** — piloto DEF/INC + suite `ops-ch-cycle-close` PASS documentado.
-3. **Ingress prod (decisão §8.1 — trilha 1A)** — notebook/preview/prod com piloto agressivo (`BRIDGE=1`, `MIN_COUNT=1`, dedupe 15 min); ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) §5–§6.
-4. **`ops-planned-maintenance` v2** — runtime flags + opcional suppress ops_alert (stub spec).
-5. **C8 métricas** — dashboards/alertas sobre tempos de fase (extensão opcional).
+3. **Failure Probes M1–M2** — default-on + `FAILURE_PROBE_OPT_OUT_FEATURES`; [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md).
+4. **Ingress prod (decisão §8.1 — trilha 1A)** — notebook/preview/prod com piloto agressivo (`BRIDGE=1`, `MIN_COUNT=1`, dedupe 15 min); ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) §5–§6 até bridge blocklist.
+5. **`ops-planned-maintenance` v2** — runtime flags + opcional suppress ops_alert (stub spec).
+6. **C8 métricas** — dashboards/alertas sobre tempos de fase (extensão opcional).
 
-**Paralelismo:** (3) e túnel/webhooks (4) podem correr em paralelo com (1); manutenção v1 já desbloqueia deploy com bridge on.
+**Paralelismo:** (3–4) e túnel/webhooks podem correr em paralelo com (1); manutenção v1 já desbloqueia deploy com bridge on.
 
 ---
 
