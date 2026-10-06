@@ -572,6 +572,31 @@ export interface OpsMetricsResponse {
   readOnly?: boolean
 }
 
+export type ProductMaturityLevel = 'mature' | 'operational' | 'partial' | 'pilot' | 'planned'
+
+export type ProductMaturityItem = {
+  id: string
+  title: string
+  maturity: ProductMaturityLevel
+  note: string
+  doc?: string
+}
+
+export type ProductMaturityDomain = {
+  id: string
+  title: string
+  items: ProductMaturityItem[]
+}
+
+export type ProductMaturityBoardSnapshot = {
+  updatedAt: string
+  summary: string
+  surfaces: ProductMaturityItem[]
+  domains: ProductMaturityDomain[]
+  loadedAt: string
+  sourceRelativePath: string
+}
+
 export interface ProductLifecycleSnapshot {
   loadedAt: string
   roadmapUpdatedAt?: string

@@ -81,6 +81,7 @@ import {
   isStackControlEnabled,
 } from './stack-control.js'
 import { loadProductLifecycle } from './product-lifecycle.js'
+import { loadProductMaturityBoard } from './product-maturity-board.js'
 import {
   loadStrategyContent,
   loadStrategyManifest,
@@ -340,6 +341,15 @@ async function main() {
   fastify.get('/api/product-lifecycle', async () => {
     productLifecycleCache = loadProductLifecycle(monorepoRoot)
     return productLifecycleCache
+  })
+
+  fastify.get('/api/product-maturity-board', async (req, reply) => {
+    try {
+      return loadProductMaturityBoard(monorepoRoot)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'product_maturity_board_load_failed'
+      return reply.status(500).send({ error: message })
+    }
   })
 
   fastify.get('/api/strategy/manifest', async () => loadStrategyManifest())
