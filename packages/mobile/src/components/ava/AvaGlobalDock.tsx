@@ -13,6 +13,7 @@ import {
   DUAL_ENTRY_FAB_BOTTOM_OFFSET,
   DUAL_ENTRY_FAB_RADIUS,
   DUAL_ENTRY_FAB_SHADOW,
+  DUAL_ENTRY_Z_INDEX_AVA,
 } from '@/lib/dual-entry-layout'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 100,
+    zIndex: DUAL_ENTRY_Z_INDEX_AVA,
   },
   fabLabel: { color: '#fff', fontWeight: '700', fontSize: 14 },
   sheet: { flex: 1, paddingHorizontal: 16, paddingBottom: 8 },

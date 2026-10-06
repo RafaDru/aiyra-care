@@ -9,6 +9,7 @@ import {
   DUAL_ENTRY_FAB_BOTTOM_OFFSET,
   DUAL_ENTRY_FAB_RADIUS,
   DUAL_ENTRY_FAB_SHADOW,
+  DUAL_ENTRY_Z_INDEX_QUICK_CAPTURE,
 } from '@/lib/dual-entry-layout'
 import {
   subscribeQuickCaptureOpen,
@@ -17,7 +18,7 @@ import {
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 import { QuickCaptureSheet } from './QuickCaptureSheet'
 
-/** FAB secundário de registro rápido (dual entry — ver `docs/mobile-dual-entry-ux-spec` no Project store). */
+/** FAB secundário de registro rápido — spec `docs/features/mobile-dual-entry-ux.md`. */
 export function QuickCaptureGlobal() {
   const { t } = useTranslation()
   const { configured, session } = useAuth()
@@ -35,7 +36,7 @@ export function QuickCaptureGlobal() {
     })
   }, [setPatientId])
 
-  if (!configured || !session || loading || !patientId) return null
+  if (!configured || !session || loading) return null
 
   const bottom = Math.max(insets.bottom, 16) + DUAL_ENTRY_FAB_BOTTOM_OFFSET
 
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 99,
+    zIndex: DUAL_ENTRY_Z_INDEX_QUICK_CAPTURE,
     elevation: 3,
   },
 })

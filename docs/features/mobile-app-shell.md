@@ -74,8 +74,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 ## Dual entry (Ava + Registro rápido)
 
-- **Spec UX (Project store):** `docs/mobile-dual-entry-ux-spec.md` — padrão **dual FAB** (registro inferior esquerdo, Ava inferior direito), alinhado ao web (`QuickCaptureGlobal` no header + orb Ava).
-- **Fundação:** `QuickCaptureGlobal` + `QuickCaptureSheet` — **nota**, **sintoma** e **medição** (vitals batch); medicação/agenda/documento em rollout.
+- **Spec canônica:** [`mobile-dual-entry-ux.md`](./mobile-dual-entry-ux.md) — dual FAB (registro inferior esquerdo, Ava inferior direito), paridade web (`QuickCaptureGlobal` no header + orb Ava).
+- **Fundação:** `QuickCaptureGlobal` + `QuickCaptureSheet` — **nota**, **sintoma** e **medição**; medicação/agenda/documento com UI e save «Em breve» (paridade kinds com web).
 - **Bus:** `packages/mobile/src/lib/quick-capture-bus.ts`
 
 ## Marco M6 (integrações / sync — sem Playwright)
@@ -86,7 +86,8 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 | Escopo | Comando |
 |--------|---------|
-| **Smoke mobile (manual + estrutural)** | [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run:mobile` |
+| **Smoke mobile (manual + estrutural, incl. dual FAB)** | [`mobile-shell-smoke`](../../docs/testing/suites/mobile-shell-smoke.md) · `npm run qa:run -- --suite mobile-shell-smoke` |
+| **Dual entry UX** | [`mobile-dual-entry-ux`](./mobile-dual-entry-ux.md) · mesma suite `mobile-shell-smoke` |
 | **Bloco 1 — alergias CRUD** | [`mobile-allergies-crud`](../../docs/testing/suites/mobile-allergies-crud.md) · `npm run qa:run -- --suite mobile-allergies-crud` |
 | **Bloco 1 — atendimentos CRUD** | [`mobile-medical-records-crud`](../../docs/testing/suites/mobile-medical-records-crud.md) · `npm run qa:run -- --suite mobile-medical-records-crud` |
 | **Bloco 1 — medicamentos CRUD** | [`mobile-medications-crud`](../../docs/testing/suites/mobile-medications-crud.md) · `npm run qa:run -- --suite mobile-medications-crud` |

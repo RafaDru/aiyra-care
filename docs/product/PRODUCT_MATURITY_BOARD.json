@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-06T20:41:00Z",
-  "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo.",
+  "updatedAt": "2026-10-06T21:00:00Z",
+  "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo. Mobile: dual FAB (registro + Ava) documentado e smoke em mobile-shell-smoke; first-visit-guided-ux permanece web-only até redesign onboarding.",
   "surfaces": [
     {
       "id": "web",
@@ -12,8 +12,8 @@
       "id": "mobile",
       "title": "Mobile (Expo)",
       "maturity": "partial",
-      "note": "Shell Expo com rotas centrais; Failure Probes M3 RN (default-on); integrações e Ava em expansão.",
-      "doc": "docs/MOBILE_WEB_DUAL_DELIVERY.md"
+      "note": "Shell Expo com rotas centrais; dual FAB global (QuickCapture + Ava) no layout autenticado; Failure Probes M3; kinds med/agenda/doc em rollout.",
+      "doc": "docs/features/mobile-dual-entry-ux.md"
     },
     {
       "id": "ch",
@@ -65,6 +65,20 @@
           "title": "Paridade mobile — família",
           "maturity": "partial",
           "note": "Fluxos principais no Expo; matriz de acesso ainda concentrada na web."
+        },
+        {
+          "id": "mobile-dual-entry",
+          "title": "Mobile — dual FAB (registro + Ava)",
+          "maturity": "operational",
+          "note": "QuickCaptureGlobal + AvaGlobalDock em (app)/_layout; tokens dual-entry-layout; spec canônica no repo.",
+          "doc": "docs/features/mobile-dual-entry-ux.md"
+        },
+        {
+          "id": "first-visit-guided-mobile",
+          "title": "Primeira visita — guia (mobile)",
+          "maturity": "planned",
+          "note": "Diferido: sem FirstVisitTour no Expo até redesign onboarding web; ver first-visit-guided-ux (web).",
+          "doc": "docs/features/first-visit-guided-ux.md"
         }
       ]
     },

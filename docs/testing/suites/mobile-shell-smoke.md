@@ -20,6 +20,7 @@
 
 ```bash
 cd packages/mobile && npm run typecheck
+cd packages/mobile && npx vitest run tests/dual-entry-layout.test.ts
 cd packages/mobile && npx expo export --platform web
 ```
 
@@ -33,7 +34,8 @@ Registrar PASS/FAIL antes do smoke manual.
 | 1b | Abrir app sem sessão | Tela **welcome** → Entrar ou Criar conta | |
 | 2a | Alternar **Criar conta** → cadastro e-mail/senha + aceite legal | Conta criada ou e-mail de confirmação (Supabase) | |
 | 2b | Login **e-mail/senha** (conta QA) | Lista Início com pacientes | |
-| 3 | Abrir um paciente | Seletor de seção/tab visível | |
+| 2c | Na aba **Início** (lista de pacientes) | FAB **+** (inferior esquerdo) e FAB **Ava** (inferior direito) visíveis acima da tab bar | |
+| 3 | Abrir um paciente | Seletor de seção/tab visível; **ambos FABs** ainda visíveis | |
 | 4 | Seção **Plano** → tab **Carteira** | Cartões CNS/convênio ou empty state; pull-to-refresh recarrega | |
 | 4b | Seção **Plano** → tab **Convênios** | Lista de planos ou empty state; link web | |
 | 5 | Seção **Clínico** → tab **Exames** | Lista de exames (data, laboratório, origem) ou empty state; pull-to-refresh | |

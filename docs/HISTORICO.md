@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Mobile dual FAB — spec canônica e smoke
+
+### Realizado
+- Spec [`docs/features/mobile-dual-entry-ux.md`](features/mobile-dual-entry-ux.md) no repo (substitui referência ao Project store); tokens `dual-entry-layout` com z-index nomeados; `QuickCaptureGlobal` visível com sessão mesmo sem `patientId` (paridade web).
+- Feature card + `docs/features/index.json`; maturidade CH (`mobile-dual-entry` operacional; first-visit mobile `planned`); `first-visit-guided-ux` explicita adiamento no Expo.
+- QA: passo dual FAB em `mobile-shell-smoke`; vitest `dual-entry-layout.test.ts`.
+
 ## [2026-10-06] - Failure Probes M3 — Mobile (React Native) SDK
 
 ### Realizado
