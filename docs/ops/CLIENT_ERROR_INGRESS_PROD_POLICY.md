@@ -40,9 +40,9 @@ Definir como ligar o bridge `client_errors` → `INC-*` em **preview** e **produ
 | Feature típica | Lane default | Com `CLIENT_ERROR_INCIDENT_SRE_FEATURES=integration_links` |
 |----------------|--------------|---------------------------------------------------------------|
 | UI / patient tabs | `development_support` | — |
-| `integration_links` (sync 5xx / client) | `development_support` | **`sre_support`** → automation triador SRE |
+| `integration_links` (sync 5xx / client) | `development_support` | **`sre_support`** em **`DEPLOYMENT_TIER=production`** apenas (decisão **4B**) |
 
-**Política:** só promover `integration_links` à lane SRE em produção quando runbook SRE e triagem batch estiverem validados — caso contrário manter em `development_support` com `MIN_COUNT` mais alto.
+**Decidido (Rafael 2026-10-06, §8.4 — 4B):** notebook (`integration`) e preview permanecem `development_support` mesmo com `CLIENT_ERROR_INCIDENT_SRE_FEATURES=integration_links`; produção roteia para triador SRE quando a env estiver setada. **Revisitar** após validação dev completa — triagem SRE ainda não exercitada em piloto.
 
 ---
 
@@ -106,7 +106,7 @@ Decisão estratégica pendente (§8.2): allowlist «todas as features» vs fasea
 |----------|----------|-------------|-------------|-------------------|-----|
 | Notebook | `1` | `1` | 15 min | 0–4 | — |
 | Preview | `1` (1A) | `1` | 15 min | 0–4 | — |
-| Prod | `1` quando ligar (1A) | `1` | 15 min | 0–4 | §8.4 pendente |
+| Prod | `1` quando ligar (1A) | `1` | 15 min | 0–4 | `CLIENT_ERROR_INCIDENT_SRE_FEATURES=integration_links` (lane SRE só em `production`) |
 
 *Opções B/C na §4 permanecem referência se a trilha for revisada.*
 
@@ -129,7 +129,7 @@ Sempre: `OPS_PLANNED_MAINTENANCE=1` durante migração/restart.
 
 Responder **um número por mensagem**; agentes aplicam env e docs após cada resposta.
 
-> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Os itens **§8.2–§8.4** (allowlist de features em prod, Ava companion no bridge, lane SRE para `integration_links`) ficam **supersedidos** por esse modelo até Rafael confirmar; decisões **§8.3–§8.8** permanecem abertas. Até M2 no código, o bridge continua governado por `CLIENT_ERROR_INCIDENT_FEATURES` (allowlist).
+> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Itens **§8.2–§8.3** superseded pelo modelo probes até confirmação Rafael; **§8.4 lane SRE** **decidido (4B)** e implementado no bridge. Decisões **§8.5–§8.8** abertas. Até M2 no código, o bridge continua governado por `CLIENT_ERROR_INCIDENT_FEATURES` (allowlist).
 
 ### 1. Trilha global do bridge (preview → prod)
 
@@ -153,13 +153,12 @@ Erros na borda Ava podem gerar INC com implicação de revisão clínica na tria
 Opção A: ingest sem bridge (só telemetria). Opção B: bridge com MIN_COUNT alto e dedupe longo. Opção C: bridge normal igual às outras features.
 **Default solo operator:** A até decisão médica explícita; depois B.
 
-### 4. Lane SRE para integration_links — *superseded por Failure Probes default-on*
-
-> **Pendente confirmação Rafael:** lane SRE via `CLIENT_ERROR_INCIDENT_SRE_FEATURES` permanece; escopo de captura passa a default-on com opt-out de feature, não allowlist faseada.
+### 4. Lane SRE para integration_links
 
 Falhas de sync podem ir para triagem dev ou triagem SRE.
 Opção A: sempre development_support. Opção B: SRE só em prod, dev em preview. Opção C: SRE em preview e prod quando bridge ligado.
 **Default solo operator:** A no notebook; B quando prod ligar integration_links no bridge.
+**Decidido (Rafael 2026-10-06):** **4B** — Opção B. Código: `CLIENT_ERROR_INCIDENT_SRE_FEATURES` só mapeia `sre_support` quando `DEPLOYMENT_TIER=production` (notebook/preview ignoram a env para lane). Revisitar após validação dev; triagem SRE não testada em piloto.
 
 ### 5. G3 agêntico automático após review (CH_G3_AGENTIC_AUTO_APPROVE)
 

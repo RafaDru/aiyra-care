@@ -15,7 +15,7 @@ When enabled, qualifying `client_errors` fingerprints and unhandled **5xx** on c
 | `CLIENT_ERROR_INCIDENT_DEDUPE_MS` | `900000` (15 min) | Max one auto-incident per fingerprint × deployment tier (piloto/teste; aumente em prod) |
 | `CLIENT_ERROR_INCIDENT_MIN_COUNT` | `1` | Ocorrências mínimas para abrir INC (piloto: **1** = cada fingerprint qualificada) |
 | `CLIENT_ERROR_INCIDENT_API_PREFIXES` | `/auth,/account,/patients` | Server 5xx hook paths |
-| `CLIENT_ERROR_INCIDENT_SRE_FEATURES` | *(empty)* | Features routed to `sre_support` lane |
+| `CLIENT_ERROR_INCIDENT_SRE_FEATURES` | *(empty)* | Features routed to `sre_support` lane **only when `DEPLOYMENT_TIER=production`** (decision 4B) |
 
 Apply migration:
 
@@ -67,7 +67,7 @@ When `OPS_PLANNED_MAINTENANCE=1`, the bridge **does not** enqueue INC (client in
 | **0 (atual)** | Web account/settings, dashboard shell, generic UI | `account_settings`, `dashboard`, `ui` | `development_support` |
 | **1** | Web patient tabs (exams, integrations, wallet) | `patient_exams`, `patient_integrations`, `patient_wallet` | dev |
 | **2 (done)** | Mobile shell | Paridade web (`ui`, `account_settings`, `app`, rotas paciente) · `packages/mobile/src/lib/client-errors.ts` | dev |
-| **3 (done)** | API integration sync | `integration_links` · default prefix `/integration-links` · client `api:integration_links` → `patient_integrations` | `sre_support` if `CLIENT_ERROR_INCIDENT_SRE_FEATURES` includes `integration_links` |
+| **3 (done)** | API integration sync | `integration_links` · default prefix `/integration-links` · client `api:integration_links` → `patient_integrations` | `sre_support` if `CLIENT_ERROR_INCIDENT_SRE_FEATURES` includes `integration_links` **and** tier `production` (4B) |
 | **4 (done)** | Ava / LLM boundary | `ava_companion` + `reportAvaCompanionError` (web/mobile stream) — **cautela** médica; dedupe longo em prod | dev + review triagem |
 
 ### Rollout phases

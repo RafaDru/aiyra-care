@@ -3,6 +3,7 @@ import type {
   ClientErrorIncidentBridgeConfig,
   ClientErrorIncidentRule,
 } from './client-error-incident-bridge.types.js'
+import { resolveDeploymentTier } from './investigator-environment.js'
 
 /** Phase 0–1 web + phase 2–4 mobile / integration_links / Ava — CLIENT_ERROR_INCIDENT_BRIDGE.md */
 const DEFAULT_FEATURES = [
@@ -98,16 +99,41 @@ export function resolveBridgeIngressFeature(
   return normalized
 }
 
+/** §8.4 decisão 4B — `CLIENT_ERROR_INCIDENT_SRE_FEATURES` só roteia SRE em produção. */
+export function isClientErrorSreLaneTier(
+  deploymentTierOrEnv?: string | NodeJS.ProcessEnv,
+): boolean {
+  if (typeof deploymentTierOrEnv === 'string') {
+    const tier = deploymentTierOrEnv.trim().toLowerCase()
+    return tier === 'production' || tier === 'prod'
+  }
+  return resolveDeploymentTier(deploymentTierOrEnv) === 'production'
+}
+
+function featureMappedToSreLane(
+  config: ClientErrorIncidentBridgeConfig,
+  normalized: string,
+): boolean {
+  if (config.sreFeatures.has(normalized)) return true
+  if (normalized === 'patient_integrations' && config.sreFeatures.has('integration_links')) {
+    return true
+  }
+  return false
+}
+
 export function ruleForFeature(
   config: ClientErrorIncidentBridgeConfig,
   feature: string,
   properties?: Record<string, unknown>,
+  options?: { deploymentTier?: string },
 ): ClientErrorIncidentRule | null {
   const normalized = resolveBridgeIngressFeature(feature, properties)
   if (!config.features.has(normalized)) return null
-  const lane: AnalysisQueueLane = config.sreFeatures.has(normalized)
-    ? 'sre_support'
-    : 'development_support'
+  const lane: AnalysisQueueLane =
+    featureMappedToSreLane(config, normalized) &&
+    isClientErrorSreLaneTier(options?.deploymentTier)
+      ? 'sre_support'
+      : 'development_support'
   return {
     feature: normalized,
     minCountWindow: config.minCount,

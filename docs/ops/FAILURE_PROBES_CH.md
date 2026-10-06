@@ -149,7 +149,7 @@ Probe SDK → POST client-errors → insert PG
 | Master | `CLIENT_ERROR_INCIDENT_BRIDGE_ENABLED` | Mantém |
 | Escopo features | **Allowlist** `CLIENT_ERROR_INCIDENT_FEATURES` | **Blocklist** `FAILURE_PROBE_OPT_OUT_FEATURES` (env) + default capture all declared |
 | Ruído | `MIN_COUNT`, `DEDUPE_MS` | Mantém; ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) |
-| Lane SRE | `CLIENT_ERROR_INCIDENT_SRE_FEATURES` | Mantém até probe policy unificada |
+| Lane SRE | `CLIENT_ERROR_INCIDENT_SRE_FEATURES` | Mantém até probe policy unificada; **decisão 4B (2026-10-06):** `integration_links` → `sre_support` só em `DEPLOYMENT_TIER=production`; notebook/preview ficam `development_support` — ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.4 |
 | Manutenção | `OPS_PLANNED_MAINTENANCE=1` | Suprime enqueue INC; ingest continua |
 
 **Transição:** até migração de config, allowlist atual continua válida; novos SDKs devem emitir `declared: true` para falhas qualificadas mesmo fora da allowlist (ingest sempre); bridge só abre INC quando política permitir.

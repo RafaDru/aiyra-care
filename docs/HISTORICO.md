@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Ingress bridge §8.4 lane SRE (decisão 4B)
+
+### Decisão
+- Falhas `integration_links` no bridge CH: **`sre_support` só em produção** (`DEPLOYMENT_TIER=production`); notebook e preview permanecem `development_support` mesmo com `CLIENT_ERROR_INCIDENT_SRE_FEATURES=integration_links`. Revisitar após validação dev — triagem SRE ainda não piloto.
+
+### Realizado
+- Gate em `client-error-incident-bridge.config.ts` (`isClientErrorSreLaneTier`); vitest; política [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.4 decidido; cross-link [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md); `.env.example`.
+
 ## [2026-10-06] - Failure Probes — spec CH (default-on)
 
 ### Decisão
