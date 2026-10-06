@@ -28,6 +28,7 @@ Definir como ligar o bridge `client_errors` → `INC-*` em **preview** e **produ
 | `CLIENT_ERROR_INCIDENT_MIN_COUNT` | `1` | Contagem na janela dedupe antes de enqueue |
 | `CLIENT_ERROR_INCIDENT_DEDUPE_MS` | `900000` (15 min) | Janela dedupe / contagem |
 | `CLIENT_ERROR_INCIDENT_FEATURES` | phase 0–4 set em config | Allowlist |
+| `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` | `ava_companion` | Blocklist bridge INC (ingest/probe continua) |
 | `CLIENT_ERROR_INCIDENT_SRE_FEATURES` | vazio | Subconjunto → lane SRE |
 | `OPS_PLANNED_MAINTENANCE` | `0` | Suprime enqueue independente do bridge |
 
@@ -129,7 +130,7 @@ Sempre: `OPS_PLANNED_MAINTENANCE=1` durante migração/restart.
 
 Responder **um número por mensagem**; agentes aplicam env e docs após cada resposta.
 
-> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Itens **§8.2–§8.3** superseded pelo modelo probes até confirmação Rafael; **§8.4 lane SRE** **decidido (4B)** e implementado no bridge. Decisões **§8.5–§8.8** abertas. Até M2 no código, o bridge continua governado por `CLIENT_ERROR_INCIDENT_FEATURES` (allowlist).
+> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Bridge INC: allowlist `CLIENT_ERROR_INCIDENT_FEATURES` + blocklist `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (M2 parcial; **3A** default `ava_companion`). **§8.4 lane SRE** decidido (**4B**). Decisões **§8.5–§8.8** abertas.
 
 ### 1. Trilha global do bridge (preview → prod)
 
@@ -145,13 +146,12 @@ Ao ligar o bridge em prod, a allowlist pode ser só abas paciente e shell ou já
 Opção A: fases 0–2 apenas (UI + patient tabs). Opção B: incluir integration_links sem Ava. Opção C: paridade completa 0–4 incluindo Ava companion.
 **Default solo operator:** A, depois B após uma semana de preview estável.
 
-### 3. Ava companion em prod (ingress) — *superseded por Failure Probes default-on*
-
-> **Pendente confirmação Rafael:** opt-out recomendado para `ava_companion` em prod até review médico, em vez de três opções de bridge isoladas. Decisões §8.5–§8.8 inalteradas.
+### 3. Ava companion em prod (ingress)
 
 Erros na borda Ava podem gerar INC com implicação de revisão clínica na triagem.
 Opção A: ingest sem bridge (só telemetria). Opção B: bridge com MIN_COUNT alto e dedupe longo. Opção C: bridge normal igual às outras features.
-**Default solo operator:** A até decisão médica explícita; depois B.
+**Default solo operator (spec):** A até decisão médica explícita; depois B.
+**Decidido (Rafael 2026-10-06):** **3A** — Opção A para o **bridge INC**: probes/ingest `ava_companion` permanecem; `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` default `ava_companion` (ou `none` para piloto explícito). Ver [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) MVP.
 
 ### 4. Lane SRE para integration_links
 
