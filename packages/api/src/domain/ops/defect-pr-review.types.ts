@@ -63,6 +63,9 @@ export interface DefectPrReviewSummary {
   completedAt: string | null
   prReviewCommentUrl: string | null
   agentRunUrl: string | null
+  /** Rótulo PT no momento da revisão — ex. «CI: verde». */
+  ciStatusLabel: string | null
+  ciStatusKind: 'green' | 'failed' | 'pending' | null
 }
 
 export interface DefectPrReviewCallbackInput {

@@ -243,7 +243,7 @@ Ao re-dispatch após CI fail ou «Pedir mudanças», incluir:
 | `GITHUB_DEFECT_CI_WEBHOOK_SECRET` | — | C3 | Valida webhook CI |
 | `GITHUB_OPS_TOKEN` | — | C3 | Polling checks / refresh-ci |
 | `CH_G3_REQUIRE_REVIEW_APPROVE` | **`0`** | C5 | `1` = gate §5.1 |
-| `CH_PR_REVIEW_REQUIRE_CI_GREEN` | `0` | C3 | `1` = `request-review` 412 sem CI verde |
+| `CH_PR_REVIEW_REQUIRE_CI_GREEN` | `0` | C3 | `1` = `request-review` 412 sem CI verde. **Decisão 8C+notify (2026-10-06):** permanece `0`; snapshot CI (`CI: verde` / `falhou` / `pendente`) no dispatch/callback Revisão Dev + badge CH — ver `CLIENT_ERROR_INGRESS_PROD_POLICY.md` §8. |
 | `CH_AUTO_PR_REVIEW_ON_READY` | on | R3 ✅ | Auto Agent 3 |
 | `CH_AUTO_START_FIX_ON_TRIAGE` | off | #108 | Auto G2 pós-triagem |
 | `CURSOR_DEFECT_FIX_*` | — | G2 | Correção Dev |

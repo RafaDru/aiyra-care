@@ -59,6 +59,21 @@ export function defectPipelineReviewRowBadge(item: PlatformDefectItem): ChRowBad
   return defectReviewRowBadge(item)
 }
 
+export function defectReviewCiStatusBadge(
+  review: PlatformDefectItem['latestReview'],
+): ChRowBadge | null {
+  if (!review || (review.status !== 'completed' && review.status !== 'failed')) return null
+  const label = review.ciStatusLabel?.trim()
+  if (!label) return null
+  const color =
+    review.ciStatusKind === 'green'
+      ? 'success'
+      : review.ciStatusKind === 'failed'
+        ? 'error'
+        : 'processing'
+  return { label, color }
+}
+
 export function defectPipelineStatusRowBadge(item: PlatformDefectItem): ChRowBadge | null {
   if (item.status !== 'ready_for_pr' && item.status !== 'fixed') return null
   if (!item.pipelineStatus) return null
@@ -166,7 +181,8 @@ export function buildDefectCycleSteps(item: PlatformDefectItem): ChPipelineStep[
       label: 'Review',
       state: stepState(reviewDoneStep, reviewFailed && !merged, currentIsReady && ciDone && !reviewDoneStep && !reviewFailed),
       at: item.latestReview?.completedAt ?? null,
-      hint: reviewRec ? reviewRec : item.latestReview?.status,
+      hint: [reviewRec, item.latestReview?.ciStatusLabel].filter(Boolean).join(' · ')
+        || item.latestReview?.status,
     },
     {
       key: 'merge',
