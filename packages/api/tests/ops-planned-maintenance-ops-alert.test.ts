@@ -3,6 +3,7 @@ import { shouldSuppressAutoIncDuringPlannedMaintenance } from '../src/domain/ops
 import { shouldAutoInvestigateOpsAlert } from '../src/application/ops/ops-alert-investigator-dispatch.js'
 import { investigateOpsAlertWithQueue } from '../src/application/ops/ops-analysis-investigation.helper.js'
 import { IncidentDispatchService } from '../src/application/ops/incident-dispatch.service.js'
+import { OpsAnalysisQueueService } from '../src/application/ops/ops-analysis-queue.service.js'
 import type { OpsAlert } from '../src/domain/ops/ops-metrics.types.js'
 
 const infraCritical: OpsAlert = {
@@ -22,12 +23,12 @@ const infraTriage = {
   reason: 'critical',
 }
 
-describe('ops_alert auto-INC during planned maintenance', () => {
+describe('ops_alert during planned maintenance (decisão 7A+tag)', () => {
   afterEach(() => {
     delete process.env.OPS_PLANNED_MAINTENANCE
   })
 
-  it('shouldSuppressAutoIncDuringPlannedMaintenance only for auto trigger', () => {
+  it('shouldSuppressAutoIncDuringPlannedMaintenance only for auto trigger (bridge/5xx)', () => {
     expect(
       shouldSuppressAutoIncDuringPlannedMaintenance('auto', { OPS_PLANNED_MAINTENANCE: '1' }),
     ).toBe(true)
@@ -36,31 +37,62 @@ describe('ops_alert auto-INC during planned maintenance', () => {
     ).toBe(false)
   })
 
-  it('shouldAutoInvestigateOpsAlert is false when maintenance active', () => {
+  it('shouldAutoInvestigateOpsAlert stays enabled when maintenance active', () => {
     process.env.OPS_PLANNED_MAINTENANCE = '1'
-    expect(shouldAutoInvestigateOpsAlert(infraCritical, infraTriage)).toBe(false)
+    expect(shouldAutoInvestigateOpsAlert(infraCritical, infraTriage)).toBe(true)
   })
 
-  it('investigateOpsAlertWithQueue skips enqueue for auto during maintenance', async () => {
+  it('investigateOpsAlertWithQueue enqueues during maintenance', async () => {
     process.env.OPS_PLANNED_MAINTENANCE = '1'
-    const enqueueOpsAlert = vi.fn()
+    const enqueueOpsAlert = vi.fn(async () => ({
+      id: 'q-1',
+      sourceType: 'ops_alert',
+      sourceId: infraCritical.id,
+      lane: 'sre_support',
+      status: 'queued',
+      incidentPipelineStatus: 'open',
+      priority: 'critical',
+      deploymentTier: 'integration',
+      title: 't',
+      errorSummary: null,
+      contextSnapshot: { plannedMaintenanceActive: true },
+      remediationSummary: null,
+      analysisArtifactPath: null,
+      prUrl: null,
+      analysisLastError: null,
+      operatorNotes: null,
+      investigationTrigger: 'auto',
+      queuedAt: new Date().toISOString(),
+      investigationRequestedAt: null,
+      completedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }))
     const queueService = { enqueueOpsAlert } as never
+    const dispatchOpsAlertTriage = vi.fn(async () => ({ outcome: 'skipped', reason: 'webhook_not_configured' }))
+    const incidentDispatch = { dispatchOpsAlertTriage } as never
 
     const result = await investigateOpsAlertWithQueue(
       queueService,
       infraCritical,
       { checkedAt: '2026-01-01T00:00:00.000Z', trigger: 'auto' },
+      incidentDispatch,
     )
 
-    expect(enqueueOpsAlert).not.toHaveBeenCalled()
-    expect(result.dispatch).toEqual({ outcome: 'skipped', reason: 'planned_maintenance' })
+    expect(enqueueOpsAlert).toHaveBeenCalled()
+    expect(result.investigationId).toBe('q-1')
+    expect(dispatchOpsAlertTriage).toHaveBeenCalled()
   })
 
-  it('dispatchOpsAlertTriage skips outbox for auto during maintenance', async () => {
+  it('dispatchOpsAlertTriage proceeds for auto during maintenance', async () => {
     process.env.OPS_PLANNED_MAINTENANCE = '1'
-    const insertIfAbsent = vi.fn()
+    const insertIfAbsent = vi.fn(async () => ({ id: 'out-1' }))
     const svc = new IncidentDispatchService(
-      { insertIfAbsent, findByIdempotencyKey: vi.fn() } as never,
+      {
+        insertIfAbsent,
+        findByIdempotencyKey: vi.fn(),
+        bumpAttempt: vi.fn(),
+      } as never,
       {} as never,
       {} as never,
     )
@@ -70,7 +102,42 @@ describe('ops_alert auto-INC during planned maintenance', () => {
       trigger: 'auto',
     })
 
-    expect(insertIfAbsent).not.toHaveBeenCalled()
-    expect(dispatch).toEqual({ outcome: 'skipped', reason: 'planned_maintenance' })
+    expect(insertIfAbsent).toHaveBeenCalled()
+    expect(dispatch).not.toEqual({ outcome: 'skipped', reason: 'planned_maintenance' })
+  })
+
+  it('enqueueOpsAlert sets plannedMaintenanceActive in contextSnapshot', async () => {
+    process.env.OPS_PLANNED_MAINTENANCE = '1'
+    const upsertQueued = vi.fn(async (input: { contextSnapshot: Record<string, unknown> }) => ({
+      id: 'q-2',
+      ...input,
+      sourceType: 'ops_alert',
+      sourceId: infraCritical.id,
+      lane: 'sre_support',
+      status: 'queued',
+      incidentPipelineStatus: 'open',
+      priority: 'critical',
+      deploymentTier: 'integration',
+      title: 't',
+      errorSummary: null,
+      remediationSummary: null,
+      analysisArtifactPath: null,
+      prUrl: null,
+      analysisLastError: null,
+      operatorNotes: null,
+      investigationTrigger: 'auto',
+      queuedAt: new Date().toISOString(),
+      investigationRequestedAt: null,
+      completedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }))
+    const svc = new OpsAnalysisQueueService({ upsertQueued } as never)
+    await svc.enqueueOpsAlert(infraCritical, { trigger: 'auto' })
+    expect(upsertQueued).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contextSnapshot: expect.objectContaining({ plannedMaintenanceActive: true }),
+      }),
+    )
   })
 })

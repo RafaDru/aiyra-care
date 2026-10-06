@@ -129,7 +129,7 @@ Sempre: `OPS_PLANNED_MAINTENANCE=1` durante migração/restart.
 
 Responder **um número por mensagem**; agentes aplicam env e docs após cada resposta.
 
-> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Itens **§8.2–§8.3** superseded pelo modelo probes até confirmação Rafael; **§8.4 lane SRE** **decidido (4B)** e implementado no bridge. Decisões **§8.5–§8.8** abertas. Até M2 no código, o bridge continua governado por `CLIENT_ERROR_INCIDENT_FEATURES` (allowlist).
+> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Itens **§8.2–§8.3** superseded pelo modelo probes; **§8.3 (3A)**, **§8.4 (4B)**, **§8.5 (5A)**, **§8.6 (6C)**, **§8.7 (7A+tag)** decididos 2026-10-06. **§8.8** aberto. Até M2 no código, o bridge continua governado por `CLIENT_ERROR_INCIDENT_FEATURES` (allowlist).
 
 ### 1. Trilha global do bridge (preview → prod)
 
@@ -147,11 +147,12 @@ Opção A: fases 0–2 apenas (UI + patient tabs). Opção B: incluir integratio
 
 ### 3. Ava companion em prod (ingress) — *superseded por Failure Probes default-on*
 
-> **Pendente confirmação Rafael:** opt-out recomendado para `ava_companion` em prod até review médico, em vez de três opções de bridge isoladas. Decisões §8.5–§8.8 inalteradas.
+> Opt-out `ava_companion` no bridge até review médico — ver implementação em PR #125 / `CLIENT_ERROR_INCIDENT_FEATURES`.
 
 Erros na borda Ava podem gerar INC com implicação de revisão clínica na triagem.
 Opção A: ingest sem bridge (só telemetria). Opção B: bridge com MIN_COUNT alto e dedupe longo. Opção C: bridge normal igual às outras features.
 **Default solo operator:** A até decisão médica explícita; depois B.
+**Decidido (Rafael 2026-10-06):** **3A** — Opção A (sem bridge INC para `ava_companion` até nova decisão médica).
 
 ### 4. Lane SRE para integration_links
 
@@ -165,18 +166,21 @@ Opção A: sempre development_support. Opção B: SRE só em prod, dev em previe
 Define se a automation de review deve chamar aprovação G3 no CH sem um segundo agente.
 Opção A: desligado — agente de entrega chama G3 após QA. Opção B: ligado só quando recomendação approve e CI verde. Opção C: ligado em todo approve da review, CI à parte.
 **Default solo operator:** B (reduz passos sem pular CI).
+**Decidido (Rafael 2026-10-06):** **5A** — Opção A; `CH_G3_AGENTIC_AUTO_APPROVE` permanece desligado (default código); agente de entrega chama G3 após QA.
 
 ### 6. Gate G3 exige review approve (CH_G3_REQUIRE_REVIEW_APPROVE)
 
 Complementa o item 5: endurecer API para bloquear G3 sem review ou override auditado.
 Opção A: desligado no notebook, ligado em prod. Opção B: ligado em todos os ambientes. Opção C: desligado sempre (só política do agente).
 **Default solo operator:** A.
+**Decidido (Rafael 2026-10-06):** **6C** — Opção C; gate API desligado por default em todos os ambientes; política do agente + override auditado no CH quando necessário.
 
 ### 7. Manutenção v2 — suprimir dispatch de ops_alert
 
 Na v2 de manutenção planejada, alertas ops ainda podem abrir INC durante deploy.
 Opção A: não suprimir (comportamento v1). Opção B: suprimir só alertas marcados sensíveis a manutenção. Opção C: suprimir todo auto-INC originado de ops_alert na janela.
 **Default solo operator:** B.
+**Decidido (Rafael 2026-10-06, com ressalva):** **7A+tag** — Opção A (não suprimir ops_alert → INC); bridge/5xx continuam suprimidos (v1). INC de ops_alert durante `OPS_PLANNED_MAINTENANCE=1` recebe `contextSnapshot.plannedMaintenanceActive: true` e tag CH «Em manutenção». Spec: [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md).
 
 ### 8. Momento de exigir CI verde para disparar review (CH_PR_REVIEW_REQUIRE_CI_GREEN)
 

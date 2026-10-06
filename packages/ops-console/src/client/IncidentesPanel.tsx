@@ -21,6 +21,8 @@ import {
 import {
   incidentApplicationLabel,
   incidentOriginLabel,
+  incidentPlannedMaintenanceActive,
+  INCIDENT_PLANNED_MAINTENANCE_LABEL,
   incidentPipelineLabel,
   incidentPipelineTagColor,
   INCIDENT_PRIORITY_LABEL,
@@ -440,7 +442,14 @@ export function IncidentesPanel({
               key: 'origin',
               width: 120,
               align: 'center',
-              render: (_: unknown, row) => <Tag>{incidentOriginLabel(row)}</Tag>,
+              render: (_: unknown, row) => (
+                <Space size={4} wrap>
+                  <Tag>{incidentOriginLabel(row)}</Tag>
+                  {incidentPlannedMaintenanceActive(row) && (
+                    <Tag color="orange">{INCIDENT_PLANNED_MAINTENANCE_LABEL}</Tag>
+                  )}
+                </Space>
+              ),
             },
             {
               title: 'Prioridade',

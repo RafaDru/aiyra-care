@@ -3,6 +3,8 @@ import {
   incidentApplicationLabel,
   incidentDispatchStatusLabel,
   incidentOriginLabel,
+  incidentPlannedMaintenanceActive,
+  INCIDENT_PLANNED_MAINTENANCE_LABEL,
   incidentPipelineLabel,
   incidentPipelineTagColor,
   incidentSourceFootnote,
@@ -56,6 +58,9 @@ export function ChIncidentDetailBody({ row }: { row: OpsAnalysisQueueItem }) {
         <Space size={[4, 4]} wrap style={{ marginBottom: 8 }}>
           <Tag>{INCIDENT_QUEUE_STATUS_LABEL[row.status]}</Tag>
           <Tag>{incidentOriginLabel(row)}</Tag>
+          {incidentPlannedMaintenanceActive(row) && (
+            <Tag color="orange">{INCIDENT_PLANNED_MAINTENANCE_LABEL}</Tag>
+          )}
         </Space>
         {row.errorSummary && (
           <Paragraph>

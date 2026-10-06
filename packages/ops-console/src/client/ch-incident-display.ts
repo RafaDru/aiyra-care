@@ -148,6 +148,12 @@ export function incidentTriageLabel(triage: IncidentTriageStatus): string {
   return triage === 'em_triagem' ? 'Em triagem' : 'Em aberto'
 }
 
+export function incidentPlannedMaintenanceActive(row: OpsAnalysisQueueItem): boolean {
+  return row.contextSnapshot?.plannedMaintenanceActive === true
+}
+
+export const INCIDENT_PLANNED_MAINTENANCE_LABEL = 'Em manutenção'
+
 export function incidentOriginLabel(row: OpsAnalysisQueueItem): string {
   const snap = row.contextSnapshot ?? {}
   const fromSnap = snap.incidentOrigin

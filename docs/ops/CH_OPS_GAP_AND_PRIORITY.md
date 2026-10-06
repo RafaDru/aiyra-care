@@ -26,9 +26,9 @@
 | **Failure Probes (CH capture)** | spec M0 | [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) · épico `failure-probes-ch` | MVP M1–M3: web + RN SDK, blocklist; pós-MVP doc: backend/Angular/nativo |
 | **Universal failure ingress** | exists (0–4) | #115 · `client-error-incident-bridge.config.ts` | Superseded em prod por probes (opt-out); tuning até M2 |
 | **API 5xx → INC (hook)** | exists | prefixos + `/integration-links` · manutenção gate | Correlação `incident_id` degradado global (backlog) |
-| **Manutenção planejada (suppress auto-INC)** | partial v1+v2 | `OPS_PLANNED_MAINTENANCE` · bridge/5xx + ops_alert auto-INC (#118) · CH banner · vitest | `ops_runtime_flags` + toggle CH persistido |
+| **Manutenção planejada (suppress auto-INC)** | partial v1 (7A+tag) | `OPS_PLANNED_MAINTENANCE` · bridge/5xx suppress · ops_alert INC + tag CH · banner · vitest | `ops_runtime_flags` + toggle CH persistido |
 | **Support reports (humano)** | exists | mig **061** · [`SUPPORT_REPORTS.md`](./SUPPORT_REPORTS.md) | Screenshot KMS backlog |
-| **Ops alerts → INC** | exists | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) · auto-INC gated em manutenção (#118) | Webhook Slack opcional segue; triagem manual ok |
+| **Ops alerts → INC** | exists | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) · tag «Em manutenção» se INC na janela (7A) | Webhook Slack opcional segue; triagem manual ok |
 | **Incident dispatch (outbox)** | exists | mig **074–077** · [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) | F4 SLA timers; D9–D10 |
 | **Triagem Agent 1** | exists | callback + `triage-started` | Batch suporte 6h |
 | **DEF create + dedup** | exists | [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) | — |
@@ -49,7 +49,7 @@
 2. **`ch-cycle-close` C9** — piloto DEF/INC + suite `ops-ch-cycle-close` PASS documentado.
 3. **Failure Probes M1–M2** — default-on + `FAILURE_PROBE_OPT_OUT_FEATURES`; [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md).
 4. **Ingress prod (decisão §8.1 — trilha 1A)** — notebook/preview/prod com piloto agressivo (`BRIDGE=1`, `MIN_COUNT=1`, dedupe 15 min); ver [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) §5–§6 até bridge blocklist.
-5. **`ops-planned-maintenance` v2** — runtime flags + opcional suppress ops_alert (stub spec).
+5. **`ops-planned-maintenance` v2** — runtime flags + toggle CH persistido (suppress ops_alert descartado — 7A+tag).
 6. **C8 métricas** — dashboards/alertas sobre tempos de fase (extensão opcional).
 
 **Paralelismo:** (3–4) e túnel/webhooks podem correr em paralelo com (1); manutenção v1 já desbloqueia deploy com bridge on.
@@ -62,7 +62,7 @@
 |------|---------|
 | G3 | Agente chama `operator-approve-pr`; `CH_G3_REQUIRE_REVIEW_APPROVE=1` recomendado em prod solo |
 | CI gate review | `CH_PR_REVIEW_REQUIRE_CI_GREEN=1` quando defect-ci webhook ou poll ativo (#114) |
-| Manutenção | Suprimir auto-INC bridge + 5xx; ingest continua; support reports **sim** |
+| Manutenção | Suprimir auto-INC bridge + 5xx; ops_alert INC **sim** com tag; support reports **sim** |
 | Merge `main` | **Agêntico** quando gates passam — [`OPS_SOLO_OPERATOR_CHARTER.md`](../OPS_SOLO_OPERATOR_CHARTER.md) |
 
 ---
