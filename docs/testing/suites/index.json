@@ -319,6 +319,21 @@
       "estimatedMinutes": 10
     },
     {
+      "id": "ops-planned-maintenance",
+      "domain": "ops",
+      "title": "Ops — manutenção planejada (suppress bridge)",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/ops-planned-maintenance.md",
+      "coverage": "partial",
+      "automation": {
+        "status": "done",
+        "spec": "packages/api/tests/ops-planned-maintenance.test.ts"
+      },
+      "estimatedMinutes": 5
+    },
+    {
       "id": "ops-health",
       "domain": "ops",
       "title": "Ops — health e métricas",
@@ -605,6 +620,19 @@
       "coverage": "planned",
       "automation": { "status": "manual" },
       "estimatedMinutes": 20
+    },
+    {
+      "id": "ops-ch-cycle-close",
+      "domain": "ops",
+      "title": "CH — fechamento de ciclo (suporte → merge → resolved)",
+      "lane": "ops",
+      "parallelSafe": false,
+      "fixtureId": "ops-local",
+      "doc": "docs/testing/suites/ops-ch-cycle-close.md",
+      "coverage": "planned",
+      "businessActions": ["ops.ch_cycle_close"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 45
     }
   ],
   "lanes": {

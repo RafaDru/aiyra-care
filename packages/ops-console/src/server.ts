@@ -53,8 +53,18 @@ import {
 import { DefectPrReviewPgRepository } from '../../api/src/infrastructure/persistence/defect-pr-review.pg.repository.js'
 import { prReviewDispatchErrorMessage } from '../../api/src/application/ops/platform-defect-pr-review-dispatch.js'
 import { PlatformDefectMergeWebhookService } from '../../api/src/application/ops/platform-defect-merge-webhook.service.js'
+import { DefectCiPipelineService } from '../../api/src/application/ops/defect-ci-pipeline.service.js'
+import { DefectCiPollService } from '../../api/src/application/ops/defect-ci-poll.service.js'
 import { verifyGithubWebhookSignature } from '../../api/src/domain/ops/github-webhook-signature.js'
 import { resolveGithubDefectMergeWebhookSecret } from '../../api/src/application/ops/platform-defect-merge-webhook.config.js'
+import {
+  defectCiPollIntervalMs,
+  isChG3RequireReviewApproveEnabled,
+  resolveGithubDefectCiWebhookSecret,
+  resolveGithubOpsToken,
+} from '../../api/src/application/ops/defect-ci-pipeline.config.js'
+import { IncidentDefectCycleMetricsService } from '../../api/src/application/ops/incident-defect-cycle-metrics.service.js'
+import { IncidentDefectCycleMetricsPgRepository } from '../../api/src/infrastructure/persistence/incident-defect-cycle-metrics.pg.repository.js'
 import type { AgentAnalysisCallbackInput } from '../../api/src/domain/ops/ops-analysis-queue.types.js'
 import type { IncidentBoardFilter } from '../../api/src/domain/ops/incident-list-filter.js'
 import {
@@ -84,6 +94,7 @@ import { writeSseResponseHead } from '../../api/src/infrastructure/http/sse-resp
 import { subscribeIncidentBoard } from '../../api/src/infrastructure/ops/incident-board.bus.js'
 import { subscribeDefectBoard } from '../../api/src/infrastructure/ops/platform-defect-board.bus.js'
 import { notifyIncidentBoardById } from '../../api/src/application/ops/incident-board-notify.js'
+import { isOpsConsoleReadOnly, resolvePlannedMaintenance } from './planned-maintenance.js'
 
 const CH_BOARD_SSE_HEARTBEAT_MS = 25_000
 
@@ -146,6 +157,11 @@ const platformDefectPrReviewService = new PlatformDefectPrReviewService(
 const platformDefectMergeWebhook = new PlatformDefectMergeWebhookService(
   platformDefectRepo,
   resolveIncidentsWhenDefectFixed,
+)
+const defectCiPipelineService = new DefectCiPipelineService(platformDefectRepo)
+const defectCiPollService = new DefectCiPollService(platformDefectRepo, defectCiPipelineService)
+const incidentDefectCycleMetricsService = new IncidentDefectCycleMetricsService(
+  new IncidentDefectCycleMetricsPgRepository(pool),
 )
 const incidentDispatchService = createIncidentDispatchService(pool)
 const defectPrBatchService = new DefectPrBatchService(pool, defectPrBatchRepo)
@@ -248,6 +264,11 @@ async function registerClientRoutes(fastify: FastifyInstance, vite?: ViteDevServ
 }
 
 const GITHUB_DEFECT_MERGE_WEBHOOK_PATH = '/api/webhooks/github/defect-merge'
+const GITHUB_DEFECT_CI_WEBHOOK_PATH = '/api/webhooks/github/defect-ci'
+const GITHUB_DEFECT_WEBHOOK_RAW_BODY_PATHS = new Set([
+  GITHUB_DEFECT_MERGE_WEBHOOK_PATH,
+  GITHUB_DEFECT_CI_WEBHOOK_PATH,
+])
 
 async function main() {
   const fastify = Fastify({ logger: false })
@@ -257,7 +278,7 @@ async function main() {
     { parseAs: 'buffer' },
     (req, body, done) => {
       const path = req.url?.split('?')[0] ?? ''
-      if (path === GITHUB_DEFECT_MERGE_WEBHOOK_PATH) {
+      if (GITHUB_DEFECT_WEBHOOK_RAW_BODY_PATHS.has(path)) {
         (req as { rawBody?: Buffer }).rawBody = body as Buffer
         done(null, body)
         return
@@ -294,14 +315,21 @@ async function main() {
     return reply.redirect('/?mock=ch-layout')
   })
 
-  fastify.get('/health', async () => ({
-    service: 'aiyracare-ops-console',
-    status: 'ok',
-    port,
-    deploymentTier,
-    layoutVersion: 'ch-shell-v2',
-    commandHub: true,
-  }))
+  fastify.get('/health', async () => {
+    const maintenance = await resolvePlannedMaintenance(port)
+    return {
+      service: 'aiyracare-ops-console',
+      status: 'ok',
+      port,
+      deploymentTier,
+      layoutVersion: 'ch-shell-v2',
+      commandHub: true,
+      plannedMaintenance: maintenance.plannedMaintenance,
+      plannedMaintenanceSource: maintenance.source,
+      readOnly: maintenance.plannedMaintenance,
+      chG3RequireReviewApprove: isChG3RequireReviewApproveEnabled(),
+    }
+  })
 
   fastify.get('/api/services/status', async () => fetchServicesStatus(port))
 
@@ -332,15 +360,33 @@ async function main() {
     const runtime = await runtimeService.getPublicView()
     const triage = triageOpsAlerts(payload.alerts)
     const alertAnalysis = await alertAnalysisService.getAll()
+    const maintenance = await resolvePlannedMaintenance(port)
     return {
       ...payload,
       runtime,
       triage,
       alertAnalysis,
+      plannedMaintenance: maintenance.plannedMaintenance,
+      readOnly: maintenance.plannedMaintenance,
     }
   })
 
-  fastify.post('/api/alerts/check', async () => {
+  fastify.get<{ Querystring: { windowDays?: string } }>(
+    '/api/ops/incident-defect-cycle-metrics',
+    async (req) => {
+      const parsed = Number(req.query.windowDays)
+      const windowDays = Number.isFinite(parsed) ? parsed : 7
+      return incidentDefectCycleMetricsService.getMetrics(windowDays)
+    },
+  )
+
+  fastify.post('/api/alerts/check', async (_req, reply) => {
+    if (isOpsConsoleReadOnly()) {
+      return reply.status(503).send({
+        error: 'planned_maintenance',
+        message: 'Verificação de alertas desativada durante manutenção planejada.',
+      })
+    }
     await runProbeCycle()
     const result = await dispatchService.checkAndDispatch()
     const metricsPayload = await metricsService.getMetrics()
@@ -395,6 +441,12 @@ async function main() {
   fastify.get('/api/stack/status', async () => getStackStatus())
 
   const stackPost = (action: 'start' | 'stop' | 'restart') => async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
+    if (isOpsConsoleReadOnly()) {
+      return reply.status(503).send({
+        error: 'planned_maintenance',
+        message: 'Controle de stack desativado durante manutenção planejada.',
+      })
+    }
     try {
       return await runStackAction(req, action)
     } catch (err) {
@@ -635,6 +687,46 @@ async function main() {
     },
   )
 
+  fastify.post(GITHUB_DEFECT_CI_WEBHOOK_PATH, async (req, reply) => {
+    const secret = resolveGithubDefectCiWebhookSecret()
+    if (!defectCiPipelineService.isEnabled()) {
+      return reply.status(503).send({ error: 'webhook_disabled' })
+    }
+    const signature = req.headers['x-hub-signature-256'] as string | undefined
+    const rawBody =
+      (req as { rawBody?: Buffer }).rawBody ??
+      (Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body ?? {})))
+    if (!verifyGithubWebhookSignature(rawBody, signature, secret)) {
+      return reply.status(401).send({ error: 'invalid_signature' })
+    }
+    let payload: unknown
+    try {
+      payload = JSON.parse(rawBody.toString('utf8'))
+    } catch {
+      return reply.status(400).send({ error: 'invalid_json' })
+    }
+    const result = await defectCiPipelineService.handleGithubEvent(payload)
+    if (result.outcome === 'disabled') {
+      return reply.status(503).send({ error: result.reason })
+    }
+    if (result.outcome === 'ignored') {
+      return { ok: true, ignored: true, reason: result.reason }
+    }
+    return {
+      ok: true,
+      outcome: result.outcome,
+      idempotent: result.idempotent,
+      reopenedDefectIds: result.reopenedDefectIds,
+      defects: result.defects.map((d) => ({
+        id: d.id,
+        referenceCode: d.referenceCode,
+        status: d.status,
+        pipelineStatus: d.pipelineStatus,
+        lastCiRunUrl: d.lastCiRunUrl,
+      })),
+    }
+  })
+
   fastify.post(GITHUB_DEFECT_MERGE_WEBHOOK_PATH, async (req, reply) => {
     const secret = resolveGithubDefectMergeWebhookSecret()
     if (!secret) {
@@ -788,6 +880,52 @@ async function main() {
     }
   })
 
+  fastify.post<{ Params: { id: string }; Body: { prUrl?: string } }>(
+    '/api/platform-defects/:id/register-pr',
+    async (req, reply) => {
+      const prUrl = req.body?.prUrl?.trim()
+      if (!prUrl) return reply.status(400).send({ error: 'invalid_payload' })
+      try {
+        const item = await platformDefectService.registerPrUrl(req.params.id, prUrl)
+        const withReview = await platformDefectPrReviewService.attachLatestReview(item)
+        return { ok: true, item: withReview }
+      } catch (err) {
+        if (err instanceof PlatformDefectTransitionError) {
+          if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          if (err.code === 'pr_url_required') {
+            return reply.status(400).send({ error: 'pr_url_required' })
+          }
+          return reply.status(409).send({ error: err.code })
+        }
+        throw err
+      }
+    },
+  )
+
+  fastify.post<{ Params: { id: string }; Body?: { force?: boolean } }>(
+    '/api/platform-defects/:id/refresh-ci',
+    async (req, reply) => {
+      if (!resolveGithubOpsToken()) {
+        return reply.status(412).send({ error: 'github_ops_token_required' })
+      }
+      const result = await defectCiPollService.refreshDefectById(req.params.id)
+      if (!result.ok) {
+        if (result.error === 'not_found') return reply.status(404).send({ error: result.error })
+        if (result.error === 'invalid_state') return reply.status(409).send({ error: result.error })
+        if (result.error === 'no_token') {
+          return reply.status(412).send({ error: 'github_ops_token_required' })
+        }
+        return reply.status(502).send({ error: result.error, reason: result.reason })
+      }
+      return {
+        ok: true,
+        idempotent: result.idempotent,
+        ...(result.reason ? { reason: result.reason } : {}),
+        item: result.defect,
+      }
+    },
+  )
+
   fastify.post<{ Params: { id: string }; Body: { force?: boolean } }>(
     '/api/platform-defects/:id/request-review',
     async (req, reply) => {
@@ -823,13 +961,16 @@ async function main() {
     },
   )
 
-  fastify.post<{ Params: { id: string }; Body: { note?: string } }>(
+  fastify.post<{
+    Params: { id: string }
+    Body: { note?: string; override?: boolean; overrideReason?: string }
+  }>(
     '/api/platform-defects/:id/operator-approve-pr',
     async (req, reply) => {
       try {
         const result = await platformDefectPrReviewService.operatorApprovePr(
           req.params.id,
-          req.body?.note,
+          req.body,
         )
         return {
           ok: true,
@@ -840,6 +981,10 @@ async function main() {
       } catch (err) {
         if (err instanceof PlatformDefectPrReviewError) {
           if (err.code === 'not_found') return reply.status(404).send({ error: err.code })
+          if (err.code === 'invalid_payload') return reply.status(400).send({ error: err.code })
+          if (err.code === 'review_approval_required' || err.code === 'review_missing') {
+            return reply.status(409).send({ error: err.code })
+          }
           return reply.status(409).send({ error: err.code })
         }
         throw err
@@ -952,6 +1097,7 @@ async function main() {
   let probeTimer: ReturnType<typeof setInterval> | undefined
   let dispatchTimer: ReturnType<typeof setInterval> | undefined
   let defectCorrectionBatchTimer: ReturnType<typeof setInterval> | undefined
+  let defectCiPollTimer: ReturnType<typeof setInterval> | undefined
   let shuttingDown = false
 
   const shutdown = async () => {
@@ -960,6 +1106,7 @@ async function main() {
     if (probeTimer) clearInterval(probeTimer)
     if (dispatchTimer) clearInterval(dispatchTimer)
     if (defectCorrectionBatchTimer) clearInterval(defectCorrectionBatchTimer)
+    if (defectCiPollTimer) clearInterval(defectCiPollTimer)
     try {
       if (vite) await vite.close()
       await fastify.close()
@@ -1028,6 +1175,32 @@ async function main() {
     defectCorrectionBatchTimer = setInterval(runDefectBatch, defectBatchMs)
     defectCorrectionBatchTimer.unref()
     console.log(`[ops-console] defect correction batch every ${defectBatchMs}ms`)
+  }
+
+  const defectCiPollMs = defectCiPollIntervalMs()
+  if (defectCiPollMs > 0) {
+    const runDefectCiPoll = () => {
+      defectCiPollService
+        .reconcileReadyForPr()
+        .then((result) => {
+          if (!result.skipped && (result.updated > 0 || result.errors > 0)) {
+            console.log('[ops-console] defect CI poll reconcile', JSON.stringify(result))
+          }
+        })
+        .catch((err) => {
+          console.error(
+            '[ops-console] defect CI poll reconcile',
+            err instanceof Error ? err.message : err,
+          )
+        })
+    }
+    runDefectCiPoll()
+    defectCiPollTimer = setInterval(runDefectCiPoll, defectCiPollMs)
+    defectCiPollTimer.unref()
+    console.log(
+      `[ops-console] defect CI poll reconcile every ${defectCiPollMs}ms` +
+        (resolveGithubOpsToken() ? '' : ' (GITHUB_OPS_TOKEN missing — ticks no-op)'),
+    )
   }
 }
 

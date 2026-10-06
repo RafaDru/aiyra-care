@@ -74,13 +74,17 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 ## QA
 
 - Suite: [`support-user-report`](../testing/suites/support-user-report.md)
+- Ciclo CH completo (pós-chamado até merge): [`ops-ch-cycle-close`](../testing/suites/ops-ch-cycle-close.md) — spec [`CH_CYCLE_CLOSE_SPEC.md`](../ops/CH_CYCLE_CLOSE_SPEC.md)
+- Ops stack / gap: [`CH_OPS_GAP_AND_PRIORITY.md`](../ops/CH_OPS_GAP_AND_PRIORITY.md) · [`CH_AUTONOMOUS_OPS_STACK.md`](../ops/CH_AUTONOMOUS_OPS_STACK.md)
+- Manutenção (bridge off, suporte humano on): [`ops-planned-maintenance`](../testing/suites/ops-planned-maintenance.md) — [`OPS_PLANNED_MAINTENANCE.md`](../ops/OPS_PLANNED_MAINTENANCE.md)
+- Bridge telemetria (piloto): [`client-error-ch-bridge`](../testing/suites/client-error-ch-bridge.md)
 - Comando: `npm run qa:run -- --suite support-user-report`
 - Automação: `packages/web/e2e/suites/support-user-report.spec.ts`
 - **Batch investigator (ops):** com `OPS_SUPPORT_INVESTIGATOR_MODE=batch`, `POST /support/reports` mantém toast e deixa `analysis_status=queued` até o job (`OPS_SUPPORT_INVESTIGATOR_BATCH_INTERVAL_MS`, padrão 6h no connect-worker). Botão **Analisar** no console continua imediato. Vitest: `support-report-batch.test.ts`, `support-report-dispatch.test.ts`.
 
 ## Ops — jornada após o chamado
 
-Chamados alimentam incidentes `INC-*` no Command Hub. Ciclo completo até correção mergeada: [`docs/ops/SOLO_OPERATOR_RUNBOOK.md`](../ops/SOLO_OPERATOR_RUNBOOK.md) (épico `ch-solo-operator-journey`). Decisões de pipeline (dedup, merge → `fixed`, reincidência, ops agêntico): [`docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md`](../ops/CH_DEFECT_PIPELINE_DECISIONS.md). Domínio INC/DEF em PG (`packages/api` ops); suite QA do fluxo CH: [`ops-ch-defeitos`](../testing/suites/ops-ch-defeitos.md).
+Chamados alimentam incidentes `INC-*` no Command Hub. Ciclo completo até correção mergeada: [`docs/ops/SOLO_OPERATOR_RUNBOOK.md`](../ops/SOLO_OPERATOR_RUNBOOK.md) (épico `ch-solo-operator-journey`); **fechamento ritual** (C1–C9, CI, G3): [`docs/ops/CH_CYCLE_CLOSE_SPEC.md`](../ops/CH_CYCLE_CLOSE_SPEC.md) (épico `ch-cycle-close`). Decisões de pipeline (dedup, merge → `fixed`, reincidência, ops agêntico): [`docs/ops/CH_DEFECT_PIPELINE_DECISIONS.md`](../ops/CH_DEFECT_PIPELINE_DECISIONS.md). Domínio INC/DEF em PG (`packages/api` ops); suites QA: [`ops-ch-defeitos`](../testing/suites/ops-ch-defeitos.md), [`ops-ch-cycle-close`](../testing/suites/ops-ch-cycle-close.md).
 
 ## Ver também
 

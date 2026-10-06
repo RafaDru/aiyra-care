@@ -1,5 +1,27 @@
 # Histórico do Projeto AiyraCare
 
+<<<<<<< Updated upstream
+## [2026-10-06] - CH ops: gap, stack autônoma, manutenção planejada
+
+### Decisão
+- Prioridade engenharia: visão ops autônoma (telemetria → INC → … → merge humano) **antes** de produto genérico — tabela em [`CH_OPS_GAP_AND_PRIORITY.md`](ops/CH_OPS_GAP_AND_PRIORITY.md).
+- Pipeline automático até PR + review agêntico; **manual:** G3 approve CH + merge GitHub (`CH_G3_REQUIRE_REVIEW_APPROVE=0` notebook; `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até CI C3).
+- **`OPS_PLANNED_MAINTENANCE=1`:** suprime auto-INC do bridge `client_errors` e hook 5xx; ingest continua; support reports humanos permitidos.
+
+### Realizado
+- Hub [`CH_AUTONOMOUS_OPS_STACK.md`](ops/CH_AUTONOMOUS_OPS_STACK.md); spec [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md); bridge ingress universal § em [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](ops/CLIENT_ERROR_INCIDENT_BRIDGE.md).
+- Código v1: `isOpsPlannedMaintenanceActive` + gate em `ClientErrorIncidentBridgeService`; vitest.
+- Roadmap: épicos `ops-planned-maintenance`, `client-error-universal-ingress`; links em `CH_CYCLE_CLOSE_SPEC` §14; suite `ops-planned-maintenance`.
+
+## [2026-10-06] - CH: spec fechamento de ciclo operacional (C1–C9)
+
+### Decisão
+- Épico **`ch-cycle-close`** autorizado em nível **spec** — ritualiza o ciclo suporte/alerta → `INC-*` → `DEF-*` → review (R3) → merge humano → `fixed` + INC **`resolved`**, sem expandir escopo além de R2/G3/métricas pendentes.
+- Rollout documentado **C1–C9**; migration **086** (sketch `pipeline_status` / CI no defeito); defaults propostos: `CH_G3_REQUIRE_REVIEW_APPROVE=0` no notebook até confirmação Rafael.
+
+### Realizado
+- [`docs/ops/CH_CYCLE_CLOSE_SPEC.md`](ops/CH_CYCLE_CLOSE_SPEC.md) · suite [`ops-ch-cycle-close`](testing/suites/ops-ch-cycle-close.md) · roadmap `ch-cycle-close` · cross-links ops/features/testing.
+
 ## [2026-10-05] - CH: pacote UX gráfico (G1–G8)
 
 ### Realizado
@@ -7,6 +29,17 @@
 - `ChDetailSection` / corpo estruturado; `Modal.confirm` em mutações (defeitos, incidentes, suporte).
 - SSE `GET /api/analysis-queue/stream` e `GET /api/platform-defects/stream`; buses `incident-board` / `platform-defect-board`; indicador «Ao vivo».
 - Spec: `docs/ops/CH_UI_GRAPHICS_PACKAGE.md` · suite `ops-ch-ui-graphics`.
+=======
+## [2026-10-06] - Carta operador solo + execução agêntica
+
+### Decisão
+- Projeto com **um único humano**, sem receita; viabilidade via **produção de código agêntica em larga escala**.
+- Rafael: **decisões** estratégicas (produto, arquitetura, política) — **não** merges, review de PR, análise de diff, nem checklists notebook/CH.
+- **Merges em `main`**, ciclo PR, ops no notebook e aprovação CH pré-merge: responsabilidade **agêntica** quando gates passam.
+
+### Realizado
+- `docs/OPS_SOLO_OPERATOR_CHARTER.md`, `docs/ops-agentic-operating-model.md`, regra `.cursor/rules/solo-operator-agentic.mdc`, `AGENTS.md`, `project-context.json`, bootstrap índice.
+>>>>>>> Stashed changes
 
 ## [2026-10-04] - CH: incidente `resolved` + reincidência INC→INC (084)
 

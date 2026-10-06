@@ -5,6 +5,7 @@ import {
 } from '../src/application/ops/platform-defect.service.js'
 import type { PlatformDefectPgRepository } from '../src/infrastructure/persistence/platform-defect.pg.repository.js'
 import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.types.js'
+import { platformDefectPipelineDefaults } from './fixtures/platform-defect-record.defaults.js'
 
 function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRecord {
   return {
@@ -35,6 +36,7 @@ function defect(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRe
     correctionFailedAt: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    ...platformDefectPipelineDefaults,
     ...overrides,
   }
 }

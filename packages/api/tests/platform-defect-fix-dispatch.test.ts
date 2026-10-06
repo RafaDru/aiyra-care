@@ -7,6 +7,7 @@ import {
 } from '../src/application/ops/platform-defect-fix-dispatch.js'
 import { PlatformDefectService } from '../src/application/ops/platform-defect.service.js'
 import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.types.js'
+import { platformDefectPipelineDefaults } from './fixtures/platform-defect-record.defaults.js'
 
 const sampleDefect: PlatformDefectRecord = {
   id: '0e672818-72ec-4ef7-918e-312db34bbeb5',
@@ -36,6 +37,7 @@ const sampleDefect: PlatformDefectRecord = {
   correctionFailedAt: null,
   createdAt: '2026-09-28T11:00:00.000Z',
   updatedAt: '2026-09-28T13:00:00.000Z',
+  ...platformDefectPipelineDefaults,
 }
 
 describe('platform-defect-fix-dispatch', () => {
@@ -68,6 +70,24 @@ describe('platform-defect-fix-dispatch', () => {
     expect(built.text).toBe('DEF-000001 · [defect:0e672818] Correção: Sync silent skip')
     expect(built.environment.deploymentTier).toBe('integration')
     expect(JSON.stringify(built)).not.toContain('patient')
+  })
+
+  it('includes ciFailure when last_failure_kind is ci', () => {
+    process.env.OPS_INVESTIGATOR_CALLBACK_KEY = 'callback-secret'
+    const withCi = {
+      ...sampleDefect,
+      status: 'in_fix' as const,
+      lastFailureKind: 'ci' as const,
+      lastCiRunUrl: 'https://github.com/RafaDru/aiyra-care/actions/runs/100',
+      lastFailureDetails: { failedJobs: ['api', 'web'] },
+    }
+    const built = buildPlatformDefectFixDispatchPayload(withCi, [])
+    expect('error' in built).toBe(false)
+    if ('error' in built) return
+    expect(built.ciFailure).toEqual({
+      runUrl: 'https://github.com/RafaDru/aiyra-care/actions/runs/100',
+      failedJobs: ['api', 'web'],
+    })
   })
 
   it('includes priorCorrectionFailure when defect returned from correction_failed', () => {

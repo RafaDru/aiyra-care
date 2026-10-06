@@ -14,6 +14,8 @@ import { defectStatusLabel } from '../ch-defect-display.js'
 import { buildDefectDeepLink, buildIncidentRefDeepLink } from '../ch-ops-deep-link.js'
 import { ChCopyableRefTag } from './ChCopyableRefTag.js'
 import { ChDetailSection } from './ChDetailSection.js'
+import { ChPipelineTimeline } from './ChPipelineTimeline.js'
+import { buildIncidentCycleSteps } from '../ch-pipeline-display.js'
 import { InvestigationIdTag } from './InvestigationIdTag.js'
 import { inferOpsReferenceHref } from '../ch-ops-deep-link.js'
 import type { OpsAnalysisQueueItem } from '../ops.types.js'
@@ -31,6 +33,7 @@ export function ChIncidentDetailBody({ row }: { row: OpsAnalysisQueueItem }) {
 
   return (
     <div style={{ maxWidth: 720 }}>
+      <ChPipelineTimeline steps={buildIncidentCycleSteps(row)} title="Ciclo INC" />
       <ChDetailSection title="Resumo">
         <Descriptions size="small" column={1} bordered>
           <Descriptions.Item label="Título">{row.title}</Descriptions.Item>

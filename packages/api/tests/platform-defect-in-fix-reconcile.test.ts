@@ -5,6 +5,7 @@ import {
 } from '../src/application/ops/platform-defect-in-fix-reconcile.js'
 import { PlatformDefectService } from '../src/application/ops/platform-defect.service.js'
 import type { PlatformDefectRecord } from '../src/domain/ops/platform-defect.types.js'
+import { platformDefectPipelineDefaults } from './fixtures/platform-defect-record.defaults.js'
 
 function row(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRecord {
   return {
@@ -35,6 +36,7 @@ function row(overrides: Partial<PlatformDefectRecord> = {}): PlatformDefectRecor
     correctionFailedAt: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    ...platformDefectPipelineDefaults,
     ...overrides,
   }
 }

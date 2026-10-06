@@ -106,6 +106,9 @@ Ver [`AVA_QA_SCOPE.md`](./AVA_QA_SCOPE.md).
 | Ação UI | CRUD | Suite | Cobertura |
 |---------|------|-------|-----------|
 | Reportar problema | C | `support-user-report` | ✅ |
+| CH — ciclo suporte → INC → DEF → merge → resolved | CRU | `ops-ch-cycle-close` | ⬜ |
+| CH — defeitos / incidentes (regressão parcial) | RU | `ops-ch-defeitos` | 🟡 |
+| CH — UX pacote gráfico (SSE, confirmações) | R | `ops-ch-ui-graphics` | 🟡 |
 | Roadmap `/roadmap` | R | `regression-smoke` | ✅ |
 | Ops console (interno) | R | `ops-health` | 🟡 |
 

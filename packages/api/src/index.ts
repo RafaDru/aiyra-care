@@ -51,7 +51,15 @@ app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, 
 })
 
 app.get('/health', async () => {
-  return { status: 'ok', version: '0.1.0', service: 'aiyracare-api' }
+  const { isOpsPlannedMaintenanceActive } = await import(
+    './domain/ops/ops-planned-maintenance.js'
+  )
+  return {
+    status: 'ok',
+    version: '0.1.0',
+    service: 'aiyracare-api',
+    plannedMaintenance: isOpsPlannedMaintenanceActive(),
+  }
 })
 
 app.get('/health/db', async () => {

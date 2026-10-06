@@ -7,6 +7,7 @@
 
 | # | Recurso | Para quê |
 |---|---------|----------|
+| 0 | **`docs/OPS_SOLO_OPERATOR_CHARTER.md`** | **Quem faz o quê:** Rafael = decisões; agentes = merge, PR, ops, CH rotineiro |
 | 1 | `GET /project/context` ou `docs/project-context.json` | Estado do app, domínios, decisões, features |
 | 2 | `docs/features/index.json` → card em `docs/features/<id>.md` | **Para quê** existe a capacidade |
 | 3 | `docs/roadmap.json` (item/épico relevante) | Status de entrega |
@@ -37,6 +38,7 @@ Ver `.cursor/rules/qa-delivery.mdc` e `docs/testing/QA_PROCESS.md`.
 | `docs/DELIVERY_PIPELINE.md` | Gates `promotion:gates`, preview |
 | `docs/testing/QA_PROCESS.md` | QA manual + paralelo + gate `main` |
 | `docs/FEATURE_REVIEW_FRAMEWORK.md` | Tier 0–3 antes de merge |
+| `docs/OPS_SOLO_OPERATOR_CHARTER.md` | Operador solo; merge agêntico; não delegar runbook ao Rafael |
 
 ## API rápida
 

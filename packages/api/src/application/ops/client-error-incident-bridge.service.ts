@@ -13,6 +13,7 @@ import {
   sanitizeClientErrorCode,
   sanitizeClientErrorFeature,
 } from '../../domain/telemetry/client-error.js'
+import { isOpsPlannedMaintenanceActive } from '../../domain/ops/ops-planned-maintenance.js'
 
 export interface ClientErrorBridgeContext {
   accountId: string | null
@@ -50,6 +51,7 @@ export class ClientErrorIncidentBridgeService {
     ctx: ClientErrorBridgeContext,
   ): Promise<void> {
     if (!this.config.enabled) return
+    if (isOpsPlannedMaintenanceActive()) return
     for (const error of errors) {
       await this.maybeEnqueueFromClientError(error, ctx).catch(() => undefined)
     }
@@ -62,6 +64,7 @@ export class ClientErrorIncidentBridgeService {
     deploymentTier: string
   }): Promise<void> {
     if (!this.config.enabled) return
+    if (isOpsPlannedMaintenanceActive()) return
     if (input.statusCode < 500) return
     if (!apiPathMatchesIncidentPrefixes(input.path, this.config)) return
 
@@ -97,6 +100,7 @@ export class ClientErrorIncidentBridgeService {
       error.fingerprint,
       ctx.deploymentTier,
       this.config.dedupeMs,
+      rule.minCountWindow,
     )
     if (!slot.acquired) return
 

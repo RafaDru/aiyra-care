@@ -15,6 +15,9 @@ export type OpsConsoleHealth = {
   port: number
   deploymentTier: OpsDeploymentTier
   layoutVersion?: string
+  plannedMaintenance?: boolean
+  readOnly?: boolean
+  chG3RequireReviewApprove?: boolean
 }
 
 export type ChServicesStatusResponse = {
@@ -57,6 +60,10 @@ export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
   servicesStatus: () => request<ChServicesStatusResponse>('/api/services/status'),
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
+  incidentDefectCycleMetrics: (windowDays = 7) =>
+    request<import('./ops.types.js').IncidentDefectCycleMetrics>(
+      `/api/ops/incident-defect-cycle-metrics?windowDays=${encodeURIComponent(String(windowDays))}`,
+    ),
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
   strategyManifest: () => request<StrategyManifestResponse>('/api/strategy/manifest'),
   strategyContent: (section: StrategySectionId) =>
@@ -216,7 +223,10 @@ export const opsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body ?? {}),
     }),
-  operatorApprovePlatformDefectPr: (id: string, body?: { note?: string }) =>
+  operatorApprovePlatformDefectPr: (
+    id: string,
+    body?: { note?: string; override?: boolean; overrideReason?: string },
+  ) =>
     request<{
       ok: boolean
       prUrl: string | null
@@ -236,6 +246,15 @@ export const opsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body ?? {}),
     }),
+  registerPlatformDefectPr: (id: string, prUrl: string) =>
+    request<{ ok: boolean; item: import('./ops.types.js').PlatformDefectItem }>(
+      `/api/platform-defects/${encodeURIComponent(id)}/register-pr`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prUrl }),
+      },
+    ),
   defectPrBatchConfig: () =>
     request<{
       intervalMs: number
