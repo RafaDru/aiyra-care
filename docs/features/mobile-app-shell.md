@@ -112,7 +112,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 ## Telemetria (paridade web)
 
-- `POST /telemetry/client-errors` com JWT — `packages/mobile/src/lib/client-errors.ts` (API/network, `ui_boundary`, auth pós-login)
+- `POST /telemetry/client-errors` com JWT — `packages/mobile/src/lib/client-errors.ts` (API/network, `ui_boundary` → feature `ui`, auth → `account_settings`, Ava → `ava_companion`; paridade bridge fase 2–4)
 - `AppErrorBoundary` + toast em falhas 5xx/rede (`service-failure-notify.ts`)
 - Erros de auth pós-login visíveis em telemetria produto (`client_errors`) — painel CH quando catalogado
 

@@ -3,3 +3,15 @@
 {"ts":"2026-10-06T13:36:06.411Z","event":"bypass","command":"cd /workspace && AIYRA_NO_RTK=1 npm run test:ops 2>&1 | tail -30"}
 {"ts":"2026-10-06T14:29:44.944Z","event":"bypass","command":"cd /workspace/packages/api && AIYRA_NO_RTK=1 npm run test:ops 2>&1 && AIYRA_NO_RTK=1 npm run test:critical 2>&1"}
 {"ts":"2026-10-06T14:30:18.063Z","event":"bypass","command":"cd /workspace/packages/api && AIYRA_NO_RTK=1 npm run test:ops 2>&1 && AIYRA_NO_RTK=1 npm run test:critical 2>&1 && AIYRA_NO_RTK=1 npx vitest run tests/defect-ci-poll.service.test.ts tests/github-defect-ci-poll.client.test.ts tests/defect-ci"}
+{"ts":"2026-10-06T15:32:31.380Z","event":"bypass","command":"cd /workspace && npm run test:ops 2>&1 && npm run test:critical 2>&1"}
+{"ts":"2026-10-06T15:33:04.647Z","event":"bypass","command":"cd /workspace && npm run test:ops 2>&1 && npm run test:critical 2>&1"}
+{"ts":"2026-10-06T15:33:08.889Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts tests/ops-planned-maintenance.test.ts 2>&1"}
+{"ts":"2026-10-06T15:33:41.177Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.service.test.ts -t \"integration-links\" 2>&1"}
+{"ts":"2026-10-06T15:33:53.565Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.service.test.ts -t \"integration-links\" 2>&1"}
+{"ts":"2026-10-06T15:34:22.305Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.service.test.ts -t \"integration-links\" 2>&1"}
+{"ts":"2026-10-06T15:34:32.083Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run -e \"\nimport { sanitizeClientErrorFeature } from './src/domain/telemetry/client-error.ts';\nconsole.log(sanitizeClientErrorFeature('integration_links'));\n\" 2>&1 || cd /workspace/packages/api && npx"}
+{"ts":"2026-10-06T15:34:51.838Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.service.test.ts -t \"integration-links\" 2>&1"}
+{"ts":"2026-10-06T15:35:11.193Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.config.test.ts -t \"infers integration\" 2>&1"}
+{"ts":"2026-10-06T15:35:30.045Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts tests/ops-planned-maintenance.test.ts 2>&1 && npm run test:critical 2>&1"}
+{"ts":"2026-10-06T15:35:39.713Z","event":"bypass","command":"cd /workspace && npm run qa:run -- --suite client-error-ch-bridge 2>&1 | tail -30"}
+{"ts":"2026-10-06T15:35:39.716Z","event":"bypass","command":"cd /workspace && npm run test:ops 2>&1 | tail -15"}

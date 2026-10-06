@@ -41,6 +41,10 @@ export async function avaChatWithActivityStream(
 
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({})) as { message?: string }
+    const apiPath = `/patients/${patientId}/ava/chat`
+    void import('./client-errors.js')
+      .then((m) => m.reportAvaCompanionError(apiPath, res.status, { patientId }))
+      .catch(() => undefined)
     throw new Error(errBody.message || `HTTP ${res.status}`)
   }
 
@@ -76,6 +80,13 @@ export async function avaChatWithActivityStream(
       if (eventName === 'complete') result = payload as AvaChatResponse
       if (eventName === 'error') {
         const err = payload as { message?: string; code?: string }
+        void import('./client-errors.js')
+          .then((m) =>
+            m.reportAvaCompanionError(`/patients/${patientId}/ava/chat`, err.code || 'AVA_STREAM_ERROR', {
+              patientId,
+            }),
+          )
+          .catch(() => undefined)
         throw new Error(err.message || err.code || 'Ava chat failed')
       }
     }

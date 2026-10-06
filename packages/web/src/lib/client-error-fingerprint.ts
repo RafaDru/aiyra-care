@@ -26,7 +26,9 @@ export function deriveFeatureFromApiPath(apiPath: string): string {
   const segments = base.split('/').filter(Boolean)
   if (!segments.length) return 'api:root'
   if (segments[0] === 'patients' && segments.length >= 3) {
-    return `api:patients:${segments[2] ?? 'resource'}`
+    const resource = segments[2] ?? 'resource'
+    if (resource === 'ava') return 'api:patients:ava'
+    return `api:patients:${resource}`
   }
   if (segments[0] === 'patients' && segments.length === 2) {
     return 'api:patients:item'

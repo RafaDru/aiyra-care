@@ -2416,8 +2416,8 @@
       "priority": "P0",
       "title": "Client errors — ingresso universal de falha",
       "summary": "Expandir bridge além do piloto account_settings/dashboard/ui: mapa web/mobile/integration_links, MIN_COUNT real, dedupe prod, fases rollout. Spec: CLIENT_ERROR_INCIDENT_BRIDGE.md § Universal failure ingress; gap: CH_OPS_GAP_AND_PRIORITY.md.",
-      "status": "planned",
-      "statusLabel": "fase 1 defaults — fases 2–4 pendentes",
+      "status": "done",
+      "statusLabel": "fases 0–4 — prod tuning (MIN_COUNT/dedupe/SRE) pendente",
       "items": [
         {
           "id": "client-error-ingress-min-count",
@@ -2434,14 +2434,20 @@
         {
           "id": "client-error-ingress-phase2-mobile",
           "title": "Fase 2 — mobile shell parity",
-          "status": "planned",
-          "detail": "packages/mobile client-errors feature keys."
+          "status": "done",
+          "detail": "mobile client-error-fingerprint + client-errors (ui/account_settings/app)."
         },
         {
           "id": "client-error-ingress-phase3-integration",
           "title": "Fase 3 — integration_links 5xx",
-          "status": "planned",
-          "detail": "API prefixes + lane sre_support opcional."
+          "status": "done",
+          "detail": "DEFAULT_API_PREFIXES /integration-links; resolveBridgeIngressFeature; SRE via env."
+        },
+        {
+          "id": "client-error-ingress-phase4-ava",
+          "title": "Fase 4 — ava_companion",
+          "status": "done",
+          "detail": "reportAvaCompanionError web/mobile; bridge key ava_companion."
         }
       ]
     },

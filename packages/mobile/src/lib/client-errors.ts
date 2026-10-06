@@ -117,13 +117,33 @@ export function reportNetworkClientError(apiPath: string): void {
   }).catch(() => undefined)
 }
 
+/** Ava / LLM boundary — stable `ava_companion` for CH bridge (phase 4). */
+export function reportAvaCompanionError(
+  apiPath: string,
+  statusOrCode: number | string,
+  options?: { patientId?: string; route?: string },
+): void {
+  const errorCode =
+    typeof statusOrCode === 'number' && statusOrCode > 0
+      ? `HTTP_${statusOrCode}`
+      : sanitizeErrorCode(String(statusOrCode))
+  void reportClientError({
+    feature: 'ava_companion',
+    errorKind: 'api',
+    errorCode,
+    apiPath,
+    patientId: options?.patientId,
+    route: options?.route,
+  }).catch(() => undefined)
+}
+
 export function reportUiBoundaryError(
   componentName: string,
   errorName: string,
   options?: { feature?: string; route?: string },
 ): void {
   void reportClientError({
-    feature: options?.feature ?? 'mobile_shell',
+    feature: options?.feature ?? 'ui',
     errorKind: 'ui_boundary',
     errorCode: sanitizeErrorCode(errorName || 'ReactError'),
     route: options?.route,
@@ -139,7 +159,7 @@ export async function reportAuthClientError(
   errorCode: string,
 ): Promise<void> {
   const fingerprint = await computeClientErrorFingerprint(
-    'mobile_shell',
+    'account_settings',
     'api',
     `mobile_auth_${context}_${errorCode.slice(0, 80)}`,
   )
@@ -153,7 +173,7 @@ export async function reportAuthClientError(
     await postClientErrors([
       {
         fingerprint,
-        feature: 'mobile_shell',
+        feature: 'account_settings',
         errorKind: 'api',
         errorCode: errorCode.slice(0, 200),
         sessionId,

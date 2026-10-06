@@ -64,9 +64,9 @@ When `OPS_PLANNED_MAINTENANCE=1`, the bridge **does not** enqueue INC (client in
 |------|------------|----------------------|--------------|
 | **0 (atual)** | Web account/settings, dashboard shell, generic UI | `account_settings`, `dashboard`, `ui` | `development_support` |
 | **1** | Web patient tabs (exams, integrations, wallet) | `patient_exams`, `patient_integrations`, `patient_wallet` | dev |
-| **2** | Mobile shell | same keys as web parity · `packages/mobile/src/lib/client-errors.ts` | dev |
-| **3** | API integration sync | `integration_links` · 5xx prefixes `/integration-links` | `sre_support` if `CLIENT_ERROR_INCIDENT_SRE_FEATURES` |
-| **4** | Ava / LLM boundary | `ava_companion` — **cautela** médica; dedupe longo | dev + review triagem |
+| **2 (done)** | Mobile shell | Paridade web (`ui`, `account_settings`, `app`, rotas paciente) · `packages/mobile/src/lib/client-errors.ts` | dev |
+| **3 (done)** | API integration sync | `integration_links` · default prefix `/integration-links` · client `api:integration_links` → `patient_integrations` | `sre_support` if `CLIENT_ERROR_INCIDENT_SRE_FEATURES` includes `integration_links` |
+| **4 (done)** | Ava / LLM boundary | `ava_companion` + `reportAvaCompanionError` (web/mobile stream) — **cautela** médica; dedupe longo em prod | dev + review triagem |
 
 ### Rollout phases
 

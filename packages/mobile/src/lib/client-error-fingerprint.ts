@@ -1,16 +1,19 @@
 export type ClientErrorKind = 'ui_boundary' | 'api' | 'network'
 
-/** Deriva feature a partir da rota Expo Router (sem expor UUID em fingerprint). */
+/** Deriva feature a partir da rota Expo Router — paridade com web `deriveFeatureFromRoute`. */
 export function deriveFeatureFromRoute(route: string): string {
-  const path = route.split('?')[0] || '/'
+  const path = route.split('?')[0].replace(/\/+$/, '') || '/'
   if (path.includes('settings/family')) return 'family_hub'
+  if (path.includes('settings/account')) return 'account_settings'
+  if (path.includes('settings/plan')) return 'billing'
   if (path.includes('(tabs)/settings') || path.endsWith('/settings')) return 'settings'
   if (path.includes('/onboarding')) return 'onboarding'
   if (path.includes('/compliance')) return 'compliance'
+  if (path.includes('/emergency')) return 'emergency'
   if (path.includes('/patient/')) return 'patient_detail'
   if (path.includes('(tabs)') || path.includes('/index')) return 'dashboard'
-  if (path.includes('/login') || path.includes('/welcome')) return 'auth'
-  return 'mobile_shell'
+  if (path.includes('/login') || path.includes('/welcome')) return 'account_settings'
+  return 'app'
 }
 
 export function deriveFeatureFromApiPath(apiPath: string): string {
@@ -18,7 +21,9 @@ export function deriveFeatureFromApiPath(apiPath: string): string {
   const segments = base.split('/').filter(Boolean)
   if (!segments.length) return 'api:root'
   if (segments[0] === 'patients' && segments.length >= 3) {
-    return `api:patients:${segments[2] ?? 'resource'}`
+    const resource = segments[2] ?? 'resource'
+    if (resource === 'ava') return 'api:patients:ava'
+    return `api:patients:${resource}`
   }
   if (segments[0] === 'patients' && segments.length === 2) return 'api:patients:item'
   if (segments[0] === 'integration-links') return 'api:integration_links'
