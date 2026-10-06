@@ -50,7 +50,10 @@ const BASE_URL =
   extra?.apiUrl ??
   'http://127.0.0.1:3010'
 
-async function request<T>(path: string, options?: RequestInit & { skipErrorReport?: boolean }): Promise<T> {
+async function request<T>(
+  path: string,
+  options?: RequestInit & { skipErrorReport?: boolean; declaredFallback?: boolean },
+): Promise<T> {
   const headers: Record<string, string> =
     options?.body && !(options.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}
   const token = await ensureAccessToken()
@@ -60,6 +63,7 @@ async function request<T>(path: string, options?: RequestInit & { skipErrorRepor
   if (token) headers.Authorization = `Bearer ${token}`
 
   const skipReport = options?.skipErrorReport || path.startsWith('/telemetry/')
+  const declaredFallback = options?.declaredFallback === true
   let res: Response
   try {
     res = await fetch(`${BASE_URL}${path}`, {
@@ -76,11 +80,10 @@ async function request<T>(path: string, options?: RequestInit & { skipErrorRepor
 
   const contentType = res.headers.get('content-type') ?? ''
   if (!res.ok) {
-    if (!skipReport) {
-      reportApiClientError(path, res.status)
-      if (res.status >= 500 || res.status === 503) {
-        notifyServiceFailure(getClientErrorToast(), 'api', `HTTP_${res.status}`)
-      }
+    const isServerError = res.status >= 500 && res.status <= 599
+    if (!skipReport && isServerError && !declaredFallback) {
+      reportApiClientError(path, res.status, { declared: true, probeKind: 'api.unexpected' })
+      notifyServiceFailure(getClientErrorToast(), 'api', `HTTP_${res.status}`)
     }
     if (contentType.includes('application/json')) {
       const body = (await res.json().catch(() => ({}))) as { message?: string }
