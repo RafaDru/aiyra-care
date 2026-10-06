@@ -26,7 +26,7 @@
 | **PR review Agent 3 (R3)** | exists | `platform-defect-pr-review.service` · mig **085** · [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) | Roadmap `ch-solo-operator-r3` ainda `planned` (drift doc) |
 | **G3 approve merge (CH UI)** | partial | Review card CH · merge manual GitHub | `CH_G3_REQUIRE_REVIEW_APPROVE` **não** wired no ops-console (fatia **C5**) |
 | **R4 merge → fixed + INC resolved** | exists | `platform-defect-merge-webhook.service` · mig **081/084** | Métricas tempo fase (**C8**) |
-| **CI pipeline ↔ defeito (R2)** | missing | Spec mig **086** · [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md) §4–5 | C2–C4: DDL, webhook/poll GitHub, `ci_failed → in_fix` |
+| **CI pipeline ↔ defeito (R2)** | partial | Mig **086** (DDL + repo map) · spec §4–5 | C3–C4: webhook/poll GitHub, `ci_failed → in_fix` |
 | **CH cycle-close C1–C9** | partial | C1 spec + suite `ops-ch-cycle-close` **done** | C2–C9 implementação; `CH_PR_REVIEW_REQUIRE_CI_GREEN=0` até ingest CI |
 | **Notebook callback auth** | partial | `resolveInvestigatorCallbackAuth` · `OPS_INVESTIGATOR_CALLBACK_KEY` · [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) §10 túnel | Sem `OPS_CONSOLE_PUBLIC_URL` + túnel, automações cloud **não** alcançam callback — blocker operacional documentado em [`CH_ACCESS.md`](./CH_ACCESS.md) + audit `ch-shell-callbackauth` 2026-09-28 |
 | **CH v2 / notebook worktree** | partial | CH v2 em `main` pós-#74; [`CH_ACCESS.md`](./CH_ACCESS.md) nota ch-shell | Validar `up.ps1` não sobrescreve ops-console legado |
