@@ -27,6 +27,8 @@
 ### Realizado
 - `resolveDisabledBridgeFeatures` + `ruleForFeature` blocklist; vitest; docs [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md), bridge, `.env.example` (§ client errors); decisão em `project-context.json` (`failure-probes-ava-bridge-3a`).
 
+=======
+>>>>>>> 2c43ad5fa583b12be2df6a25e09a2da51d81b97b
 ## [2026-10-06] - Ingress bridge §8.4 lane SRE (decisão 4B)
 
 ### Decisão
