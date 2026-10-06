@@ -2382,6 +2382,71 @@
       ]
     },
     {
+      "id": "ch-cycle-close",
+      "category": "tecnico",
+      "priority": "P1",
+      "title": "CH — Fechamento de ciclo operacional (C1–C9)",
+      "summary": "Declarar ritualmente o ciclo suporte/alerta → INC → DEF → review → merge → fixed + INC resolved: R2 CI no defeito (mig 086), gate G3 opcional, timeline, métricas fase, suite ops-ch-cycle-close. Spec: docs/ops/CH_CYCLE_CLOSE_SPEC.md.",
+      "status": "planned",
+      "statusLabel": "C1 spec_ready — implementação C2–C9 pendente",
+      "items": [
+        {
+          "id": "ch-cycle-close-c1",
+          "title": "C1 — Spec + QA ritual",
+          "status": "done",
+          "detail": "CH_CYCLE_CLOSE_SPEC.md; suite ops-ch-cycle-close; roadmap + cross-links; HISTORICO 2026-10-06."
+        },
+        {
+          "id": "ch-cycle-close-c2",
+          "title": "C2 — Migration 086 pipeline_status",
+          "status": "planned",
+          "detail": "DDL platform_defects CI/pipeline + apply-migration-086.mjs."
+        },
+        {
+          "id": "ch-cycle-close-c3",
+          "title": "C3 — Webhook/poll CI GitHub",
+          "status": "planned",
+          "detail": "POST /api/webhooks/github/defect-ci; GITHUB_DEFECT_CI_WEBHOOK_SECRET; refresh-ci."
+        },
+        {
+          "id": "ch-cycle-close-c4",
+          "title": "C4 — CI failed → in_fix",
+          "status": "planned",
+          "detail": "Transição + defect_fix_v1 enriquecido; alinha ch-solo-operator-r2."
+        },
+        {
+          "id": "ch-cycle-close-c5",
+          "title": "C5 — Gate CH_G3_REQUIRE_REVIEW_APPROVE",
+          "status": "planned",
+          "detail": "operator-approve-pr 409 + override auditável; default env 0 até decisão Rafael."
+        },
+        {
+          "id": "ch-cycle-close-c6",
+          "title": "C6 — Timeline ciclo no expand DEF",
+          "status": "planned",
+          "detail": "Stepper INC→merge; banners CI/review."
+        },
+        {
+          "id": "ch-cycle-close-c7",
+          "title": "C7 — reviewFeedback no defect_fix_v1",
+          "status": "planned",
+          "detail": "R3b pós Pedir mudanças."
+        },
+        {
+          "id": "ch-cycle-close-c8",
+          "title": "C8 — Métricas tempo por fase INC/DEF",
+          "status": "planned",
+          "detail": "GET /ops/metrics extensão; CH Geral strip opcional."
+        },
+        {
+          "id": "ch-cycle-close-c9",
+          "title": "C9 — Declaração piloto + qa:run",
+          "status": "planned",
+          "detail": "DEF/INC piloto fixed+resolved; npm run qa:run -- --suite ops-ch-cycle-close PASS."
+        }
+      ]
+    },
+    {
       "id": "business-analytics",
       "category": "negocio",
       "priority": "P2",

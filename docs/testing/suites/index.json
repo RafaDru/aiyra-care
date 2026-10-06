@@ -605,6 +605,19 @@
       "coverage": "planned",
       "automation": { "status": "manual" },
       "estimatedMinutes": 20
+    },
+    {
+      "id": "ops-ch-cycle-close",
+      "domain": "ops",
+      "title": "CH — fechamento de ciclo (suporte → merge → resolved)",
+      "lane": "ops",
+      "parallelSafe": false,
+      "fixtureId": "ops-local",
+      "doc": "docs/testing/suites/ops-ch-cycle-close.md",
+      "coverage": "planned",
+      "businessActions": ["ops.ch_cycle_close"],
+      "automation": { "status": "manual" },
+      "estimatedMinutes": 45
     }
   ],
   "lanes": {

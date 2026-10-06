@@ -20,6 +20,7 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 | 1c1 | [`CH_INCIDENT_BOARD_FILTERS.md`](./CH_INCIDENT_BOARD_FILTERS.md) | Chips **Incidentes** (`all_open` default, matriz pipeline × filtro) |
 | 1c2 | [`CH_INCIDENT_BOARD_SSE.md`](./CH_INCIDENT_BOARD_SSE.md) | Spec SSE lista incidentes (substituir poll 15s) |
 | 1c3 | [`CH_UI_GRAPHICS_PACKAGE.md`](./CH_UI_GRAPHICS_PACKAGE.md) | **Pacote UX CH** — layout, confirmações, detalhe, SSE, lista (autorizado 2026-10-05) |
+| 1c4 | [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md) | **Fechamento de ciclo** — suporte → merge → `fixed` + INC `resolved`; rollout C1–C9, mig 086, QA `ops-ch-cycle-close` |
 | 1d | [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) | **Operador solo** — gates G0–G4, falhas, pós-`ready_for_pr` (fatia R0) |
 | 2 | [`CONSOLE.md`](./CONSOLE.md) | Abas do console `:3013`, o que cada uma mede |
 | 3 | [`TELEMETRY.md`](./TELEMETRY.md) | Tabelas PG, LGPD, queries úteis |

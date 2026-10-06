@@ -6,6 +6,8 @@
 
 **Relacionado:** [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) · [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DEFECT_PIPELINE_DECISIONS.md) · [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) · [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.md) · [`DEFEITO_EM_CORRECAO.md`](./DEFEITO_EM_CORRECAO.md) · piloto **DEF-000001** (E2E Correção PASS 2026-10-01)
 
+**Épico de fechamento (ritual QA + R2/G3 restante):** [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md) — consolida declaração do ciclo completo (C1–C9), migration **086**, suite `ops-ch-cycle-close`; complementa fatias R2–R4 deste documento sem substituí-lo.
+
 ---
 
 ## 1. Objetivo
@@ -278,5 +280,6 @@ Decisões formalizadas (2026-10-04): [`CH_DEFECT_PIPELINE_DECISIONS.md`](./CH_DE
 
 ## 11. Próximo passo imediato
 
-1. Piloto **DEF-000001** (abrir PR da branch de correção, simular CI fail → definir UX antes de codar R2).
-2. Executar **R1** quando priorizado no roadmap.
+1. Seguir épico **`ch-cycle-close`** — [`CH_CYCLE_CLOSE_SPEC.md`](./CH_CYCLE_CLOSE_SPEC.md): C2+ (mig 086, CI, gate G3) e ritual `ops-ch-cycle-close`.
+2. Piloto **DEF-000003** / **INC-000007**: merge G3 (#109) + INC `resolved` para declarar C9.
+3. **R2** (`ch-solo-operator-r2`) implementado via fatias C2–C4 do cycle-close (mesmo escopo CI ↔ defeito).

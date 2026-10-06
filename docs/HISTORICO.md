@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - CH: spec fechamento de ciclo operacional (C1–C9)
+
+### Decisão
+- Épico **`ch-cycle-close`** autorizado em nível **spec** — ritualiza o ciclo suporte/alerta → `INC-*` → `DEF-*` → review (R3) → merge humano → `fixed` + INC **`resolved`**, sem expandir escopo além de R2/G3/métricas pendentes.
+- Rollout documentado **C1–C9**; migration **086** (sketch `pipeline_status` / CI no defeito); defaults propostos: `CH_G3_REQUIRE_REVIEW_APPROVE=0` no notebook até confirmação Rafael.
+
+### Realizado
+- [`docs/ops/CH_CYCLE_CLOSE_SPEC.md`](ops/CH_CYCLE_CLOSE_SPEC.md) · suite [`ops-ch-cycle-close`](testing/suites/ops-ch-cycle-close.md) · roadmap `ch-cycle-close` · cross-links ops/features/testing.
+
 ## [2026-10-05] - CH: pacote UX gráfico (G1–G8)
 
 ### Realizado
