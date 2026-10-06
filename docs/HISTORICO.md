@@ -1,5 +1,6 @@
 # Histórico do Projeto AiyraCare
 
+<<<<<<< Updated upstream
 ## [2026-10-06] - CH ops: gap, stack autônoma, manutenção planejada
 
 ### Decisão
@@ -28,6 +29,17 @@
 - `ChDetailSection` / corpo estruturado; `Modal.confirm` em mutações (defeitos, incidentes, suporte).
 - SSE `GET /api/analysis-queue/stream` e `GET /api/platform-defects/stream`; buses `incident-board` / `platform-defect-board`; indicador «Ao vivo».
 - Spec: `docs/ops/CH_UI_GRAPHICS_PACKAGE.md` · suite `ops-ch-ui-graphics`.
+=======
+## [2026-10-06] - Carta operador solo + execução agêntica
+
+### Decisão
+- Projeto com **um único humano**, sem receita; viabilidade via **produção de código agêntica em larga escala**.
+- Rafael: **decisões** estratégicas (produto, arquitetura, política) — **não** merges, review de PR, análise de diff, nem checklists notebook/CH.
+- **Merges em `main`**, ciclo PR, ops no notebook e aprovação CH pré-merge: responsabilidade **agêntica** quando gates passam.
+
+### Realizado
+- `docs/OPS_SOLO_OPERATOR_CHARTER.md`, `docs/ops-agentic-operating-model.md`, regra `.cursor/rules/solo-operator-agentic.mdc`, `AGENTS.md`, `project-context.json`, bootstrap índice.
+>>>>>>> Stashed changes
 
 ## [2026-10-04] - CH: incidente `resolved` + reincidência INC→INC (084)
 
