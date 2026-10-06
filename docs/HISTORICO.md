@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Ingress §8 encerrado (8C + índice decisões)
+
+### Decisão
+- **§8 item 8 — 8C + aviso:** revisão automática não exige CI verde; operador vê status do CI no resultado da revisão no CH.
+- Índice único [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](ops/RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md) com as 8 respostas e links.
+
+### Realizado
+- Docs: policy §8.8, gap doc (CI/revisão), hub [`ops/README.md`](ops/README.md).
+
 ## [2026-10-06] - Manutenção planejada 7A+tag + ingress §8.5/6/7
 
 ### Decisão

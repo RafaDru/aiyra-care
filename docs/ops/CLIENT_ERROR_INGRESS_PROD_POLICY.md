@@ -130,7 +130,7 @@ Sempre: `OPS_PLANNED_MAINTENANCE=1` durante migração/restart.
 
 Responder **um número por mensagem**; agentes aplicam env e docs após cada resposta.
 
-> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Bridge INC: allowlist `CLIENT_ERROR_INCIDENT_FEATURES` + blocklist `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (M2 parcial; **3A** default `ava_companion`). **§8.4 (4B)**, **§8.5 (5A)**, **§8.6 (6C)**, **§8.7 (7A+tag)** decididos 2026-10-06. **§8.8** aberto.
+> **Modelo Failure Probes (2026-10-06):** captura **default-on** com **opt-out por feature** — spec [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md). Bridge INC: allowlist `CLIENT_ERROR_INCIDENT_FEATURES` + blocklist `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (M2 parcial; **3A** default `ava_companion`). **Fila §8 encerrada (2026-10-06)** — índice [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](./RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md).
 
 ### 1. Trilha global do bridge (preview → prod)
 
@@ -186,6 +186,7 @@ Opção A: não suprimir (comportamento v1). Opção B: suprimir só alertas mar
 O gate impede request-review enquanto pipeline do defeito não está em sucesso.
 Opção A: ligar no notebook assim que webhook defect-ci ou poll estiver estável. Opção B: ligar só após piloto C9 e suite ops-ch-cycle-close PASS. Opção C: manter desligado; agentes e merge seguem política própria.
 **Default solo operator:** B no curto prazo; A após webhook CI confiável por 7 dias.
+**Decidido (Rafael 2026-10-06, com ressalva):** **8C + aviso** — Opção C; `CH_PR_REVIEW_REQUIRE_CI_GREEN` permanece desligado; ao concluir a **Revisão Dev**, o CH deve exibir o **status do CI** do defeito («verde», «pendente», «falhou») para contexto do operador.
 
 ---
 
