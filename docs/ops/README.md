@@ -25,8 +25,7 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 | 1c5 | [`CH_AUTONOMOUS_OPS_STACK.md`](./CH_AUTONOMOUS_OPS_STACK.md) | **Hub pipeline ops** — automático vs manual, ordem fatias |
 | 1c6 | [`CH_OPS_GAP_AND_PRIORITY.md`](./CH_OPS_GAP_AND_PRIORITY.md) | Gap exists/partial/missing + fila implementação |
 | 1c7 | [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md) | Flag manutenção — suppress bridge auto-INC |
-| 1c8 | [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](./RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md) | **Índice** das 8 decisões ingress/ops (2026-10-06) |
-| 1c9 | [`CH_GLOSSARY.md`](./CH_GLOSSARY.md) | Glossário CH — português, sem siglas soltas |
+| 1c7a | [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](./RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md) | **Índice** das 8 decisões ingress/ops (2026-10-06) |
 | 1c8 | [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) | G3 via `operator-approve-pr` (sem clique CH) |
 | 1c9 | [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) | Túnel HTTPS, callbacks Automation, webhooks GitHub |
 | 1c10 | [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) | MIN_COUNT / dedupe / preview vs prod · **decisão §8.1 = 1A** (2026-10-06) |

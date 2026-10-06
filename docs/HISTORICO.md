@@ -1,13 +1,14 @@
 # Histórico do Projeto AiyraCare
 
-## [2026-10-06] - Ingress §8 encerrado (8C + índice decisões)
+## [2026-10-06] - CH Revisão Dev — CI visível sem gate (decisão 8C+notify)
 
 ### Decisão
-- **§8 item 8 — 8C + aviso:** revisão automática não exige CI verde; operador vê status do CI no resultado da revisão no CH.
-- Índice único [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](ops/RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md) com as 8 respostas e links.
+- Manter `CH_PR_REVIEW_REQUIRE_CI_GREEN=0`; ao concluir Revisão Dev, operador vê rótulo **`CI: verde` / `CI: falhou` / `CI: pendente`** no painel e na linha do tempo (snapshot de `pipeline_status` + merge com callback do agente).
+- **Fila §8 encerrada:** índice único [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](ops/RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md) (8 respostas + env).
 
 ### Realizado
-- Docs: policy §8.8, gap doc (CI/revisão), hub [`ops/README.md`](ops/README.md).
+- `defect-ci-status.helper.ts`; enrich dispatch/callback `platform-defect-pr-review`; badge ops-console; política [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.8; vitest.
+- Docs: gap [`CH_OPS_GAP_AND_PRIORITY.md`](ops/CH_OPS_GAP_AND_PRIORITY.md) (5A/6C/8C), hub [`ops/README.md`](ops/README.md).
 
 ## [2026-10-06] - Manutenção planejada 7A+tag + ingress §8.5/6/7
 
