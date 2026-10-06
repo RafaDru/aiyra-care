@@ -71,7 +71,7 @@ When `OPS_PLANNED_MAINTENANCE=1`, the bridge **does not** enqueue INC (client in
 ### Rollout phases
 
 1. **Doc + env** — expand `CLIENT_ERROR_INCIDENT_FEATURES` por ambiente (preview ≠ prod).
-2. **MIN_COUNT** — implementar janela real no service (hoje config existe, enqueue ignora contagem).
+2. **MIN_COUNT** — implementado (`tryAcquireEnqueueSlot`); política por ambiente em [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md).
 3. **Noise policy** — subir `CLIENT_ERROR_INCIDENT_DEDUPE_MS` em prod (ex. 6h); manter 15m notebook.
 4. **Maintenance** — sempre respeitar `OPS_PLANNED_MAINTENANCE` antes de abrir INC.
 
