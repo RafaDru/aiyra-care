@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Ops specs P0/P1 (G3 agêntico, túnel, ingress prod)
+
+### Realizado
+- Specs: [`CH_G3_AGENTIC_APPROVAL.md`](ops/CH_G3_AGENTIC_APPROVAL.md), [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](ops/CH_OPS_CALLBACK_TUNNEL_SPEC.md), [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md); stub v2 em [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md); gap alinhado #114/#115 + charter — [`CH_OPS_GAP_AND_PRIORITY.md`](ops/CH_OPS_GAP_AND_PRIORITY.md).
+
 ## [2026-10-06] - Client errors: universal ingress fases 2–4
 
 ### Realizado

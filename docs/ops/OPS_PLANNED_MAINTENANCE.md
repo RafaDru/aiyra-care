@@ -24,6 +24,18 @@ Chamados **Reportar problema** e alertas ops configurados permanecem permitidos 
 
 **Recomendação:** ship **env v1** + banner read-only alimentado por leitura da mesma env no ops-console (proxy API) antes de DDL.
 
+### v2 roadmap (stub — não implementado)
+
+| Item | Objetivo | Notas |
+|------|----------|--------|
+| **`ops_runtime_flags` DDL** | Persistir `planned_maintenance` + audit (`updated_by`, `updated_at`) | Substitui env-only; API `:3010` fonte de verdade |
+| **CH toggle admin** | Ligar/desligar manutenção com confirmação + audit trail | Read-only v1 banner permanece fallback se flag ausente |
+| **Suppress `ops_alert` dispatch** | Tag `maintenance_sensitive` em regras de alerta — **não** enfileirar INC auto durante janela | v1 **não** suprime ops alerts (support + SRE paging continuam); opt-in v2 para evitar duplicar silêncio com bridge |
+| **`GET /ops/runtime-flags`** | Expor `{ plannedMaintenance, sources[] }` para CH + connect-worker | Unificar leitura com `isOpsPlannedMaintenanceActive()` |
+| **Worker reconcile** | connect-worker lê flag PG a cada tick scheduled sync / alertas | Evita drift API vs notebook env |
+
+**Prioridade:** após `ch-cycle-close` C9 e política ingress prod ([`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md)). Épico roadmap: `ops-planned-maintenance` fatia v2.
+
 ---
 
 ## Comportamento
