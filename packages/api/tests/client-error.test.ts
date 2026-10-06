@@ -23,10 +23,16 @@ describe('sanitizeClientErrorProperties', () => {
       api_path: '/exams/1',
       message: 'febre',
       http_status: 503,
+      probe_kind: 'api.unexpected',
+      declared: 1,
+      sdk_surface: 'web',
     })
     expect(out).toEqual({
       api_path: '/exams/1',
       http_status: 503,
+      probe_kind: 'api.unexpected',
+      declared: 1,
+      sdk_surface: 'web',
     })
   })
 })

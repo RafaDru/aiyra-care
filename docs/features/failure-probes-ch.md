@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `failure-probes-ch` |
 | **Épico** | `failure-probes-ch` |
-| **Status** | `planned` |
+| **Status** | `in_progress` (M1 web) |
 | **Categoria** | técnico |
 | **Prioridade** | P0 |
 | **Tier review** | 2 (ops + LGPD técnica; sem conteúdo clínico novo) |
@@ -57,8 +57,9 @@ Camada **default-on** de captura de falhas user-impacting (UI sem fallback, API 
 
 ## QA
 
-- Atual: [`client-error-ch-bridge`](../testing/suites/client-error-ch-bridge.md)
-- Planejado: suite `failure-probes-ch`
+- Regressão bridge: [`client-error-ch-bridge`](../testing/suites/client-error-ch-bridge.md)
+- M1 web: `cd packages/web && npx vitest run tests/failure-probe-policy.test.ts` + `cd packages/api && npx vitest run tests/client-error.test.ts`
+- Planejado (M2+): suite `failure-probes-ch`
 
 ## Reviews (tier 2)
 

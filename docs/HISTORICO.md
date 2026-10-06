@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-06] - Failure Probes M1 — Web SDK
+
+### Realizado
+- `packages/web`: probes default-on (`ui.unhandled` no `AppErrorBoundary`, HTTP 5xx sem `declaredFallback` no `api.ts`); ingest silencioso com `probe_kind` / `declared` / `sdk_surface`; opt-out build `VITE_FAILURE_PROBE_OPT_OUT` (alias `VITE_CLIENT_ERROR_INCIDENT_FEATURES_DISABLED`).
+- API: allowlist `properties` para metadados probe em `client_errors`.
+- Vitest: `packages/web/tests/failure-probe-policy.test.ts`.
+
 ## [2026-10-06] - CH Revisão Dev — CI visível sem gate (decisão 8C+notify)
 
 ### Decisão
