@@ -1,6 +1,6 @@
 # Client error ingress — política preview / produção
 
-**Status:** spec política (2026-10-06)  
+**Status:** spec política (2026-10-06) · **Trilha global (§8.1): decisão 1A** — piloto agressivo (Rafael 2026-10-06)  
 **Épico:** `client-error-universal-ingress` (fases 0–4 em `main` pós [#115](https://github.com/RafaDru/aiyra-care/pull/115))  
 **Implementação:** `client-error-incident-bridge.config.ts` · `ClientErrorIncidentBridgeService` · mig **078**  
 **Bridge técnico:** [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCIDENT_BRIDGE.md) · manutenção [`OPS_PLANNED_MAINTENANCE.md`](./OPS_PLANNED_MAINTENANCE.md)
@@ -87,16 +87,16 @@ Definir como ligar o bridge `client_errors` → `INC-*` em **preview** e **produ
 
 ---
 
-## 5. Recomendação (operador solo — 2026-10-06)
+## 5. Trilha adotada (decisão §8.1 — **1A**, Rafael 2026-10-06)
 
-**Adotar Opção B** como trilha padrão:
+**Opção A — piloto agressivo** como trilha global até revisão explícita (substitui recomendação solo B da redação inicial):
 
-1. **Integração notebook:** Opção A + manutenção em deploys.
-2. **Preview:** Opção B coluna preview — rodar `npm run qa:run -- --suite client-error-ch-bridge` e `ops-planned-maintenance` antes de `BRIDGE_ENABLED=1`.
-3. **Prod:** manter `BRIDGE_ENABLED=0` até preview estável; ao ligar, começar com `MIN_COUNT=3`, `DEDUPE_MS=21600000`, features fase 1–2; adicionar `ava_companion` só após critério médico em [`CH_PR_REVIEW_AGENT.md`](./CH_PR_REVIEW_AGENT.md) / triagem.
-4. **`integration_links`:** `SRE_FEATURES` em prod quando Opção C lane split for necessário; até lá preview com `MIN_COUNT=2`.
+1. **Notebook e preview:** `BRIDGE_ENABLED=1`, `MIN_COUNT=1`, `DEDUPE_MS=900000` (15 min), features fase 0–4 (defaults config), `SRE_FEATURES` vazio — ver `.env.example`.
+2. **Deploy / restart:** `OPS_PLANNED_MAINTENANCE=1` durante migração; validar com `npm run qa:run -- --suite client-error-ch-bridge` e `ops-planned-maintenance`.
+3. **Prod:** seguir mesma trilha 1A ao ligar o bridge (INC rápido, mais triagem humana/automation); ruído mitigado por triagem e manutenção — **não** adiar com perfil B/C salvo nova decisão §8.
+4. **Itens §8.2–8.8** permanecem com defaults solo operator até Rafael responder — allowlist prod, Ava, lane SRE, G3, etc.
 
-Decisão estratégica pendente (perguntar Rafael **uma vez**): allowlist «todas as features» vs faseada em prod — não bloquear implementação agente.
+Decisão estratégica pendente (§8.2): allowlist «todas as features» vs faseada em prod — não bloquear env 1A no notebook/preview.
 
 ---
 
@@ -105,8 +105,10 @@ Decisão estratégica pendente (perguntar Rafael **uma vez**): allowlist «todas
 | Ambiente | `BRIDGE` | `MIN_COUNT` | `DEDUPE_MS` | Features (inicial) | SRE |
 |----------|----------|-------------|-------------|-------------------|-----|
 | Notebook | `1` | `1` | 15 min | 0–4 | — |
-| Preview | `0`→`1` | `2` | 1 h | 0–2 | opcional `integration_links` |
-| Prod | `0`→`1` | `3` | 6 h | 0–2 → expandir | `integration_links` quando estável |
+| Preview | `1` (1A) | `1` | 15 min | 0–4 | — |
+| Prod | `1` quando ligar (1A) | `1` | 15 min | 0–4 | §8.4 pendente |
+
+*Opções B/C na §4 permanecem referência se a trilha for revisada.*
 
 Sempre: `OPS_PLANNED_MAINTENANCE=1` durante migração/restart.
 
@@ -130,8 +132,8 @@ Responder **um número por mensagem**; agentes aplicam env e docs após cada res
 ### 1. Trilha global do bridge (preview → prod)
 
 Telemetria de erro de cliente já cobre fases 0–4 no código; falta fixar o quanto de ruído INC é aceitável antes de ligar produção.
-Opção A: piloto agressivo (INC rápido, mais triagem). Opção B: preview espelho depois prod gradual (recomendada na §5). Opção C: prod conservador com lane SRE para integrações.
-**Default solo operator:** B.
+Opção A: piloto agressivo (INC rápido, mais triagem). Opção B: preview espelho depois prod gradual (recomendada na redação inicial §4). Opção C: prod conservador com lane SRE para integrações.
+**Default solo operator (spec):** B. **Decidido (Rafael 2026-10-06):** **1A** — Opção A; env e §5–§6 atualizados.
 
 ### 2. Allowlist de features em produção (primeiro corte)
 
@@ -179,7 +181,7 @@ Opção A: ligar no notebook assim que webhook defect-ci ou poll estiver estáve
 
 ## 9. Critérios de aceite (spec)
 
-1. Três opções documentadas com prós/contras e recomendação B.
+1. Três opções documentadas com prós/contras; trilha **1A** registrada (§5–§6).
 2. `MIN_COUNT` tratado como **implementado** (não backlog).
 3. Cross-link em gap doc, bridge doc, `HISTORICO.md`.
 4. Fila §8 «Decisões para Rafael» com defaults solo operator.

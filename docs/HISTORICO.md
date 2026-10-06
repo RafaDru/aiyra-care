@@ -2,6 +2,9 @@
 
 ## [2026-10-06] - CH G3 agêntico (código + specs)
 
+### Decisão
+- **Ingress bridge §8.1 — trilha 1A** (piloto agressivo: INC rápido, mais triagem): [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §5–§6; env comentado em `.env.example`.
+
 ### Realizado
 - Specs: [`CH_G3_AGENTIC_APPROVAL.md`](ops/CH_G3_AGENTIC_APPROVAL.md), [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](ops/CH_OPS_CALLBACK_TUNNEL_SPEC.md), [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md); stub v2 em [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md); gap alinhado #114/#115 + charter — [`CH_OPS_GAP_AND_PRIORITY.md`](ops/CH_OPS_GAP_AND_PRIORITY.md).
 - `CH_G3_AGENTIC_AUTO_APPROVE=1` — hook em `review-callback` → `operator-approve-pr`; script `npm run ch:defect-operator-approve`.
