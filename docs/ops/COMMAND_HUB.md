@@ -25,6 +25,7 @@ O termo legado **«Ops»** permanece em paths técnicos (`docs/ops/`, `test:ops`
 | Doc | Uso |
 |-----|-----|
 | [`README.md`](./README.md) | Hub da sessão Cursor CH |
+| [`CH_GLOSSARY.md`](./CH_GLOSSARY.md) | Siglas CH/INC/DEF, agentes 1–3, gates G0–G4 |
 | [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md) | Escopo MVP (preview pausado) |
 | [`CONSOLE.md`](./CONSOLE.md) | Layout CH + telas por grupo |
 | [`RUNBOOK_ALERTS.md`](./RUNBOOK_ALERTS.md) | Alertas |

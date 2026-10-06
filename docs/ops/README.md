@@ -15,6 +15,7 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 |---|-----------|-------------|
 | 1 | **Este README** | Contexto da sessão CH |
 | 1a | [`COMMAND_HUB.md`](./COMMAND_HUB.md) | Nome, acrônimo, mapa pacotes |
+| 1a1 | [`CH_GLOSSARY.md`](./CH_GLOSSARY.md) | **Glossário** — CH / INC / DEF, Agentes 1–3 ↔ Triagem / Correção Dev / Revisão Dev, gates G0–G4 |
 | 1b | [`OPS_MVP_SCOPE.md`](./OPS_MVP_SCOPE.md) | **Escopo MVP** — o que operar agora vs congelado |
 | 1c | [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md) | **Pipeline CH** incidentes → defeitos → lote PR (spec + fatias A–E) |
 | 1c1 | [`CH_INCIDENT_BOARD_FILTERS.md`](./CH_INCIDENT_BOARD_FILTERS.md) | Chips **Incidentes** (`all_open` default, matriz pipeline × filtro) |

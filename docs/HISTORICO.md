@@ -1,15 +1,23 @@
 # Histórico do Projeto AiyraCare
 
-## [2026-10-06] - Manutenção planejada 7A+tag + ingress §8.3/5/6/7
+## [2026-10-06] - Manutenção planejada 7A+tag + ingress §8.5/6/7
 
 ### Decisão
 - **`OPS_PLANNED_MAINTENANCE`:** manter suppress v1 (bridge `client_errors` + hook 5xx); **reverter** suppress v2 de ops_alert (#118). INC de ops_alert durante janela continua; `contextSnapshot.plannedMaintenanceActive: true` + tag CH «Em manutenção».
-- **Ingress §8:** **3A** (`ava_companion` sem bridge INC até review médico), **5A** (`CH_G3_AGENTIC_AUTO_APPROVE` off), **6C** (`CH_G3_REQUIRE_REVIEW_APPROVE` off por default), **7A+tag** (ops_alert não suprimido).
+- **Ingress §8:** **5A** (`CH_G3_AGENTIC_AUTO_APPROVE` off), **6C** (`CH_G3_REQUIRE_REVIEW_APPROVE` off por default), **7A+tag** (ops_alert não suprimido). **3A** já em `main` (Ava bridge blocklist).
 
 ### Realizado
 - API: `enqueueOpsAlert` tag; remoção gates ops_alert em dispatch/investigate; vitest `ops-planned-maintenance-ops-alert.test.ts`.
 - CH: tag «Em manutenção» em lista/detalhe INC.
-- Docs: [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md), [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.3–8.7, gap doc, suite `ops-planned-maintenance`.
+- Docs: [`OPS_PLANNED_MAINTENANCE.md`](ops/OPS_PLANNED_MAINTENANCE.md), [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.5–8.7, gap doc, suite `ops-planned-maintenance`.
+
+## [2026-10-06] - Ingress bridge decisão 3A (Ava companion)
+
+### Decisão
+- **§8 item 3 — 3A:** telemetria/probe `ava_companion` permanece; bridge **não** abre INC — default `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED=ava_companion` ([`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8 item 3).
+
+### Realizado
+- `resolveDisabledBridgeFeatures` + `ruleForFeature` blocklist; vitest; docs [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md), bridge, `.env.example` (§ client errors); decisão em `project-context.json` (`failure-probes-ava-bridge-3a`).
 
 ## [2026-10-06] - Ingress bridge §8.4 lane SRE (decisão 4B)
 
@@ -24,7 +32,7 @@
 ### Decisão
 - **Failure Probes** como camada CH-centric de falhas user-impacting: captura silenciosa global, **opt-out por feature** (inverte allowlist do bridge); não inclui ops/SRE alerts v1; notificação «corrigido» só roadmap doc.
 - **MVP = Web (React) + Mobile (React Native) apenas**; pós-MVP documentado: backend probe, Angular, nativo Android/iOS. Hook API 5xx por prefixo (bridge) permanece as-is — fora do produto probe.
-- [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.2–§8.4 marcados superseded pelo modelo probes; §8.3–§8.8 decisões abertas até confirmação Rafael.
+- [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) §8.2–§8.3 superseded + decisões **3A** / **4B**; §8.5–§8.8 abertas até confirmação Rafael.
 
 ### Realizado
 - Spec canônica [`FAILURE_PROBES_CH.md`](ops/FAILURE_PROBES_CH.md); épico `failure-probes-ch` em `roadmap.json`; feature card tier 2 [`failure-probes-ch.md`](features/failure-probes-ch.md).

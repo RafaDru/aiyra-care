@@ -149,7 +149,8 @@
     { "id": "pre-cnpj-platform", "date": "2026-09-02", "title": "Estruturação pré-CNPJ", "decision": "Ambiente 1 local; Ambiente 2 local até ritmo funcional, depois Preview GCP (openhealth-503119); Cursor Cloud fora de escopo", "status": "active" },
     { "id": "localhost-canonical", "date": "2026-09-08", "title": "URLs locais = localhost + portas", "decision": "DNS .test + Caddy pausados; up.ps1 sempre 127.0.0.1; ver LOCAL_HOSTNAMES.md", "status": "active" },
     { "id": "family-access-model-done", "date": "2026-09-04", "title": "Épico família MVP completo", "decision": "057–063, audit 062, e-mail Resend opcional, caso Mariana (profile share)", "status": "active" },
-    { "id": "solo-operator-agentic-charter", "date": "2026-10-06", "title": "Operador solo — execução agêntica", "decision": "Um humano, sem receita; merges/PR/ops/notebook são agentes; Rafael só decisões estratégicas. Ver docs/OPS_SOLO_OPERATOR_CHARTER.md", "status": "active" }
+    { "id": "solo-operator-agentic-charter", "date": "2026-10-06", "title": "Operador solo — execução agêntica", "decision": "Um humano, sem receita; merges/PR/ops/notebook são agentes; Rafael só decisões estratégicas. Ver docs/OPS_SOLO_OPERATOR_CHARTER.md", "status": "active" },
+    { "id": "failure-probes-ava-bridge-3a", "date": "2026-10-06", "title": "Ava companion — ingest sem bridge INC (3A)", "decision": "CLIENT_ERROR_INCIDENT_FEATURES_DISABLED default ava_companion; probes/ingest on. CLIENT_ERROR_INGRESS_PROD_POLICY §8 item 3; FAILURE_PROBES_CH MVP.", "status": "active" }
   ],
   "plannedWork": [
     { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "done", "priority": "P1", "note": "MVP completo — exclusão só titular (070); ver family-access-model.md" },

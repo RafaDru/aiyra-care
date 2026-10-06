@@ -8,6 +8,7 @@ function enabledConfig(): ClientErrorIncidentBridgeConfig {
   return {
     enabled: true,
     features: new Set(['account_settings', 'ui']),
+    disabledFeatures: new Set(),
     dedupeMs: 60_000,
     minCount: 1,
     apiPathPrefixes: ['/auth', '/account', '/patients'],

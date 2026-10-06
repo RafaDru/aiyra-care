@@ -27,6 +27,8 @@ const DEFAULT_DEDUPE_MS = 15 * 60 * 1000
 const DEFAULT_API_PREFIXES = ['/auth', '/account', '/patients', '/integration-links']
 /** Notebook default empty; prod may set `integration_links` for SRE lane — see bridge doc phase 3. */
 const DEFAULT_SRE_FEATURES: string[] = []
+/** Decision 3A (Rafael 2026-10-06): telemetry on, no auto-INC for Ava companion until medical review. */
+const DEFAULT_INCIDENT_BRIDGE_DISABLED = ['ava_companion']
 
 const BRIDGE_FEATURE_ALIASES: Record<string, string> = {
   mobile_shell: 'ui',
@@ -51,6 +53,19 @@ function parseFeatureSet(raw: string | undefined, fallback: string[]): Set<strin
   return new Set(parseCsv(raw, fallback).map((f) => f.toLowerCase()))
 }
 
+function resolveDisabledBridgeFeatures(env: NodeJS.ProcessEnv): Set<string> {
+  const explicit =
+    env.CLIENT_ERROR_INCIDENT_FEATURES_DISABLED ?? env.FAILURE_PROBE_OPT_OUT_FEATURES
+  if (explicit === undefined) {
+    return new Set(DEFAULT_INCIDENT_BRIDGE_DISABLED)
+  }
+  const text = explicit.trim()
+  if (text === '' || text.toLowerCase() === 'none') {
+    return new Set()
+  }
+  return new Set(parseCsv(explicit, []).map((f) => f.toLowerCase()))
+}
+
 export function resolveClientErrorIncidentBridgeConfig(
   env: NodeJS.ProcessEnv = process.env,
 ): ClientErrorIncidentBridgeConfig {
@@ -63,6 +78,7 @@ export function resolveClientErrorIncidentBridgeConfig(
   return {
     enabled,
     features: parseFeatureSet(env.CLIENT_ERROR_INCIDENT_FEATURES, DEFAULT_FEATURES),
+    disabledFeatures: resolveDisabledBridgeFeatures(env),
     dedupeMs: Number.isFinite(dedupeRaw) && dedupeRaw > 0 ? dedupeRaw : DEFAULT_DEDUPE_MS,
     minCount: Number.isFinite(minCountRaw) && minCountRaw > 0 ? Math.floor(minCountRaw) : 1,
     apiPathPrefixes,
@@ -128,6 +144,7 @@ export function ruleForFeature(
   options?: { deploymentTier?: string },
 ): ClientErrorIncidentRule | null {
   const normalized = resolveBridgeIngressFeature(feature, properties)
+  if (config.disabledFeatures.has(normalized)) return null
   if (!config.features.has(normalized)) return null
   const lane: AnalysisQueueLane =
     featureMappedToSreLane(config, normalized) &&
