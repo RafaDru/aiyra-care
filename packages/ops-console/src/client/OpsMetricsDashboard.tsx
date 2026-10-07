@@ -18,6 +18,7 @@ import { IncidentesPanel } from './IncidentesPanel.js'
 import { DefeitosPanel } from './DefeitosPanel.js'
 import { ProdutoLifecyclePanel } from './ProdutoLifecyclePanel.js'
 import { ProdutoMaturidadePanel } from './ProdutoMaturidadePanel.js'
+import { ProdutoCapilaridadePanel } from './ProdutoCapilaridadePanel.js'
 import {
   readStoredStrategySection,
   readStrategySectionFromUrl,
@@ -246,6 +247,8 @@ export function OpsMetricsDashboard({
         return <ProdutoLifecyclePanel />
       case 'maturidade':
         return <ProdutoMaturidadePanel />
+      case 'capilaridade':
+        return <ProdutoCapilaridadePanel />
       case 'product':
         return <ProductPanel data={data} />
       case 'support':

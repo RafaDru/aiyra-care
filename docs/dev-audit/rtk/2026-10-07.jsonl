@@ -1,0 +1,5 @@
+{"ts":"2026-10-07T15:23:26.012Z","event":"bypass","command":"cd /workspace/packages/api && AIYRA_NO_RTK=1 npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts 2>&1"}
+{"ts":"2026-10-07T15:24:17.625Z","event":"bypass","command":"cd /workspace/packages/api && AIYRA_NO_RTK=1 npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts 2>&1"}
+{"ts":"2026-10-07T15:24:28.507Z","event":"bypass","command":"cd /workspace/packages/api && AIYRA_NO_RTK=1 npx vitest run tests/client-error-incident-bridge.config.test.ts tests/client-error-incident-bridge.service.test.ts 2>&1"}
+{"ts":"2026-10-07T15:24:28.509Z","event":"bypass","command":"cd /workspace && AIYRA_NO_RTK=1 npm run qa:run -- --suite client-error-ch-bridge 2>&1 | tail -30"}
+{"ts":"2026-10-07T15:24:34.623Z","event":"bypass","command":"cd /workspace/packages/api && npm run build 2>&1 | tail -5"}

@@ -19,6 +19,9 @@ import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
 import { requestPatientCreateOpen } from '../../lib/patient-create-bus.js'
 import { requestAvaOpen } from '../../lib/ava-dock-bus.js'
 import { COMPLIANCE_ACCEPT_PATH } from '../../lib/legal-paths.js'
+import { isOnboardingJustCompleted } from '../../lib/onboarding-wizard-storage.js'
+import { subscribePostOnboardingWelcomeDismissed } from '../../lib/onboarding-welcome-bus.js'
+import { subscribeFirstVisitTourOpen } from '../../lib/first-visit-tour-bus.js'
 
 const { Paragraph, Text } = Typography
 
@@ -48,13 +51,26 @@ export function FirstVisitTourDrawer() {
 
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
+  const [welcomeBannerPending, setWelcomeBannerPending] = useState(() => isOnboardingJustCompleted())
 
   const shouldOffer = useMemo(() => {
     if (!configured || !user || loading) return false
     if (isFirstVisitTourCompleted()) return false
     if (isBlockedRoute(location.pathname)) return false
+    if (welcomeBannerPending) return false
     return true
-  }, [configured, user, loading, location.pathname])
+  }, [configured, user, loading, location.pathname, welcomeBannerPending])
+
+  useEffect(() => subscribePostOnboardingWelcomeDismissed(() => {
+    setWelcomeBannerPending(false)
+  }), [])
+
+  useEffect(() => subscribeFirstVisitTourOpen(() => {
+    if (isFirstVisitTourCompleted()) return
+    if (isBlockedRoute(location.pathname)) return
+    setWelcomeBannerPending(false)
+    setOpen(true)
+  }), [location.pathname])
 
   useEffect(() => {
     if (!shouldOffer) return

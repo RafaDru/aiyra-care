@@ -11,6 +11,7 @@ const STRATEGY_STORAGE_KEY = 'ops-console-strategy-section'
 
 const SECTION_ITEMS: { key: StrategySectionId; label: string }[] = [
   { key: 'mkt', label: 'Marketing' },
+  { key: 'gtm', label: 'Capilarização consultório' },
   { key: 'finance', label: 'Financeiro' },
   { key: 'cx', label: 'Experiência (CX)' },
 ]
@@ -87,7 +88,7 @@ export function StrategyPanel({
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <OpsPanel
         title="Estratégia — advisory interno"
-        description={`Snapshot ${content.updatedAt} · Marketing, Financeiro e CX (sem PHI) · fonte: content/strategy/`}
+        description={`Snapshot ${content.updatedAt} · Marketing, GTM consultório, Financeiro e CX (sem PHI) · fonte: content/strategy/`}
       >
         <Text type="secondary">
           Relatórios round 1 para alinhar Command Hub com advisors do Project store. Não substituem
@@ -131,12 +132,12 @@ export function StrategyPanel({
 
 export function readStoredStrategySection(): StrategySectionId | null {
   const saved = localStorage.getItem(STRATEGY_STORAGE_KEY)
-  if (saved === 'mkt' || saved === 'finance' || saved === 'cx') return saved
+  if (saved === 'mkt' || saved === 'finance' || saved === 'cx' || saved === 'gtm') return saved
   return null
 }
 
 export function readStrategySectionFromUrl(): StrategySectionId | null {
   const fromUrl = new URLSearchParams(window.location.search).get('strategy')
-  if (fromUrl === 'mkt' || fromUrl === 'finance' || fromUrl === 'cx') return fromUrl
+  if (fromUrl === 'mkt' || fromUrl === 'finance' || fromUrl === 'cx' || fromUrl === 'gtm') return fromUrl
   return null
 }

@@ -100,6 +100,20 @@
       "tags": ["ops", "ch", "telemetria", "incidentes"]
     },
     {
+      "id": "growth-consultorio-capilaridade",
+      "epicId": "b2b-partner-platform",
+      "title": "GTM — capilarização consultório (família → médico)",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/growth-consultorio-capilaridade.md",
+      "domainDoc": "docs/product/GROWTH_CONSULTORIO_CAPILARIDADE.md",
+      "routes": [],
+      "api": ["GET /api/growth-consultorio-board"],
+      "helpTopics": [],
+      "tags": ["gtm", "consultório", "referral", "médico", "growth"]
+    },
+    {
       "id": "patient-clinical-export",
       "epicId": "family-day-to-day",
       "title": "Export clínico — Levar na consulta (link, QR, PDF)",

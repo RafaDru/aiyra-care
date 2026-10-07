@@ -38,6 +38,10 @@ test.describe('onboarding', () => {
       timeout: 30_000,
     })
 
+    const welcome = page.getByTestId('post-onboarding-welcome')
+    await expect(welcome).toBeVisible({ timeout: 10_000 })
+    await welcome.getByRole('button', { name: /Entendi|Got it/i }).click()
+
     await expect(page.getByTestId('first-visit-tour-drawer')).toBeVisible({ timeout: 10_000 })
   })
 })

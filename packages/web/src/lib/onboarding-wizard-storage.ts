@@ -20,10 +20,20 @@ export function markOnboardingJustCompleted(): void {
   sessionStorage.setItem(ONBOARDING_JUST_COMPLETED_KEY, '1')
 }
 
-export function consumeOnboardingJustCompleted(): boolean {
+/** Session flag still set — welcome banner not dismissed yet. */
+export function isOnboardingJustCompleted(): boolean {
   if (typeof window === 'undefined') return false
-  if (sessionStorage.getItem(ONBOARDING_JUST_COMPLETED_KEY) !== '1') return false
+  return sessionStorage.getItem(ONBOARDING_JUST_COMPLETED_KEY) === '1'
+}
+
+export function clearOnboardingJustCompleted(): void {
   sessionStorage.removeItem(ONBOARDING_JUST_COMPLETED_KEY)
+}
+
+/** @deprecated Prefer `isOnboardingJustCompleted` + `clearOnboardingJustCompleted` on dismiss. */
+export function consumeOnboardingJustCompleted(): boolean {
+  if (!isOnboardingJustCompleted()) return false
+  clearOnboardingJustCompleted()
   return true
 }
 

@@ -6,6 +6,7 @@ import {
   resolveBridgeIngressFeature,
   resolveClientErrorIncidentBridgeConfig,
   ruleForFeature,
+  shouldEnqueueClientErrorIncident,
 } from '../src/domain/ops/client-error-incident-bridge.config.js'
 import { sanitizeClientErrorFeature } from '../src/domain/telemetry/client-error.js'
 
@@ -129,6 +130,36 @@ describe('resolveBridgeIngressFeature', () => {
     expect(
       ruleForFeature(cfg, 'api:integration_links', undefined, { deploymentTier: 'production' })?.lane,
     ).toBe('sre_support')
+  })
+})
+
+describe('shouldEnqueueClientErrorIncident', () => {
+  it('skips api.client probes (business 4xx)', () => {
+    expect(
+      shouldEnqueueClientErrorIncident('HTTP_409', { probe_kind: 'api.client' }),
+    ).toBe(false)
+    expect(
+      shouldEnqueueClientErrorIncident('HTTP_400', { probe_kind: 'api.client' }),
+    ).toBe(false)
+    expect(
+      shouldEnqueueClientErrorIncident('HTTP_404', { probe_kind: 'api.client' }),
+    ).toBe(false)
+  })
+
+  it('skips HTTP_400 and HTTP_409 without probe_kind (legacy ingest)', () => {
+    expect(shouldEnqueueClientErrorIncident('HTTP_409', {})).toBe(false)
+    expect(shouldEnqueueClientErrorIncident('HTTP_400', undefined)).toBe(false)
+  })
+
+  it('keeps technical probes enqueueable', () => {
+    expect(
+      shouldEnqueueClientErrorIncident('HTTP_500', { probe_kind: 'api.unexpected' }),
+    ).toBe(true)
+    expect(shouldEnqueueClientErrorIncident('HTTP_502', {})).toBe(true)
+    expect(
+      shouldEnqueueClientErrorIncident('ChunkLoadError', { probe_kind: 'ui.unhandled' }),
+    ).toBe(true)
+    expect(shouldEnqueueClientErrorIncident('NETWORK', {})).toBe(true)
   })
 })
 
