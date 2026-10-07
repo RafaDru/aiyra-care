@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import * as DocumentPicker from 'expo-document-picker'
 import {
   Modal,
   Pressable,
@@ -11,15 +12,24 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AvaPatientLensPicker } from '@/components/ava/AvaPatientLensPicker'
+import { MaskedField } from '@/components/form/MaskedField'
 import { useToast } from '@/contexts/ToastContext'
 import { api } from '@/lib/api'
+import type { ScheduledEventKind } from '@/lib/api.types'
 import { DUAL_ENTRY_FAB_RADIUS } from '@/lib/dual-entry-layout'
+import {
+  formatDateBrInput,
+  formatTimeBrInput,
+  isoToDateTimeBrParts,
+  parseDateTimeBrToIso,
+} from '@/lib/input-masks'
 import type { QuickCaptureKind } from '@/lib/quick-capture-bus'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 import type { Patient } from '@/lib/api.types'
 
 const KINDS: QuickCaptureKind[] = ['note', 'symptom', 'measurement', 'medication', 'agenda', 'document']
 const THREAD_ENTRY_KINDS: QuickCaptureKind[] = ['note', 'symptom']
+const AGENDA_KINDS: ScheduledEventKind[] = ['reminder', 'appointment', 'task']
 
 type Props = {
   visible: boolean
@@ -38,7 +48,18 @@ function parseOptionalNumber(raw: string): number | undefined {
   return Number.isFinite(n) ? n : undefined
 }
 
-/** Sheet de registro rápido — nota/sintoma (health thread) + medição (batch); demais kinds em rollout. */
+function defaultAgendaDateTime(): { date: string; time: string } {
+  const d = new Date()
+  d.setMinutes(0, 0, 0)
+  d.setHours(d.getHours() + 1)
+  return isoToDateTimeBrParts(d.toISOString())
+}
+
+function defaultNowDateTime(): { date: string; time: string } {
+  return isoToDateTimeBrParts(new Date().toISOString())
+}
+
+/** Sheet de registro rápido — paridade web (nota, sintoma, medição, medicação, agenda, documento). */
 export function QuickCaptureSheet({
   visible,
   onClose,
@@ -57,16 +78,43 @@ export function QuickCaptureSheet({
   const [temperature, setTemperature] = useState('')
   const [heartRate, setHeartRate] = useState('')
   const [spo2, setSpo2] = useState('')
+  const [medicationName, setMedicationName] = useState('')
+  const [doseGiven, setDoseGiven] = useState('')
+  const [medicationNotes, setMedicationNotes] = useState('')
+  const [medDateBr, setMedDateBr] = useState('')
+  const [medTimeBr, setMedTimeBr] = useState('')
+  const [agendaTitle, setAgendaTitle] = useState('')
+  const [agendaKind, setAgendaKind] = useState<ScheduledEventKind>('reminder')
+  const [agendaDescription, setAgendaDescription] = useState('')
+  const [agendaDateBr, setAgendaDateBr] = useState('')
+  const [agendaTimeBr, setAgendaTimeBr] = useState('')
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
-  useEffect(() => {
-    if (!visible) return
-    setKind(initialKind ?? 'note')
+  const resetForms = useCallback(() => {
     setNoteBody('')
     setTemperature('')
     setHeartRate('')
     setSpo2('')
-  }, [visible, initialKind])
+    setMedicationName('')
+    setDoseGiven('')
+    setMedicationNotes('')
+    const now = defaultNowDateTime()
+    setMedDateBr(now.date)
+    setMedTimeBr(now.time)
+    setAgendaTitle('')
+    setAgendaKind('reminder')
+    setAgendaDescription('')
+    const agendaWhen = defaultAgendaDateTime()
+    setAgendaDateBr(agendaWhen.date)
+    setAgendaTimeBr(agendaWhen.time)
+  }, [])
+
+  useEffect(() => {
+    if (!visible) return
+    setKind(initialKind ?? 'note')
+    resetForms()
+  }, [visible, initialKind, resetForms])
 
   const resolveThreadId = useCallback(async (): Promise<string> => {
     if (!patientId) throw new Error('no_patient')
@@ -133,6 +181,95 @@ export function QuickCaptureSheet({
     }
   }
 
+  const saveMedication = async () => {
+    if (!patientId) return
+    const name = medicationName.trim()
+    if (!name) {
+      toast.info(t('quickCapture.medicationNameRequired'))
+      return
+    }
+    const administeredIso = parseDateTimeBrToIso(medDateBr, medTimeBr)
+    if (!administeredIso) {
+      toast.info(t('quickCapture.invalidWhen'))
+      return
+    }
+    setSaving(true)
+    try {
+      await api.medicationAdministrations.create({
+        patientId,
+        medicationName: name,
+        administeredAt: administeredIso,
+        doseGiven: doseGiven.trim() || undefined,
+        notes: medicationNotes.trim() || undefined,
+      })
+      toast.success(t('quickCapture.saved'))
+      onClose()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('quickCapture.error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const saveAgenda = async () => {
+    if (!patientId) return
+    const title = agendaTitle.trim()
+    if (!title) {
+      toast.info(t('overview.agenda.titleRequired'))
+      return
+    }
+    if (title.length > 500) {
+      toast.info(t('overview.agenda.titleTooLong'))
+      return
+    }
+    const scheduledIso = parseDateTimeBrToIso(agendaDateBr, agendaTimeBr)
+    if (!scheduledIso) {
+      toast.info(t('overview.agenda.invalidWhen'))
+      return
+    }
+    setSaving(true)
+    try {
+      await api.scheduledEvents.create({
+        patientId,
+        title,
+        scheduledAt: scheduledIso,
+        kind: agendaKind,
+        description: agendaDescription.trim() || undefined,
+        status: 'planned',
+      })
+      toast.success(t('quickCapture.saved'))
+      onClose()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('quickCapture.error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const pickAndUploadDocument = async () => {
+    if (!patientId) {
+      toast.info(t('quickCapture.pickPatient'))
+      return
+    }
+    const result = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true, multiple: false })
+    if (result.canceled || !result.assets?.[0]) return
+    const asset = result.assets[0]
+    setUploading(true)
+    try {
+      await api.documents.upload(patientId, 'other', {
+        uri: asset.uri,
+        name: asset.name ?? 'documento',
+        mimeType: asset.mimeType,
+      })
+      toast.success(t('quickCapture.saved'))
+      onClose()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('quickCapture.error'))
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSave = () => {
     if (!patientId) {
       toast.info(t('quickCapture.pickPatient'))
@@ -146,11 +283,32 @@ export function QuickCaptureSheet({
       void saveMeasurement()
       return
     }
-    toast.info(t('quickCapture.comingSoon'))
+    if (kind === 'medication') {
+      void saveMedication()
+      return
+    }
+    if (kind === 'agenda') {
+      void saveAgenda()
+      return
+    }
   }
 
   const showThreadForm = THREAD_ENTRY_KINDS.includes(kind)
   const showMeasurementForm = kind === 'measurement'
+  const showMedicationForm = kind === 'medication'
+  const showAgendaForm = kind === 'agenda'
+  const showDocumentForm = kind === 'document'
+  const showSaveButton = !showDocumentForm
+
+  const inputStyle = [
+    styles.input,
+    {
+      borderColor: tokens.colorBorder,
+      backgroundColor: tokens.colorBgContainer,
+      color: tokens.colorTextBase,
+      borderRadius: DUAL_ENTRY_FAB_RADIUS,
+    },
+  ]
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -219,15 +377,7 @@ export function QuickCaptureSheet({
                 )}
                 placeholderTextColor={tokens.colorTextSecondary}
                 multiline
-                style={[
-                  styles.input,
-                  {
-                    borderColor: tokens.colorBorder,
-                    backgroundColor: tokens.colorBgContainer,
-                    color: tokens.colorTextBase,
-                    borderRadius: DUAL_ENTRY_FAB_RADIUS,
-                  },
-                ]}
+                style={inputStyle}
               />
             </View>
           ) : null}
@@ -247,15 +397,7 @@ export function QuickCaptureSheet({
                   keyboardType="decimal-pad"
                   placeholder="°C"
                   placeholderTextColor={tokens.colorTextSecondary}
-                  style={[
-                    styles.measureInput,
-                    {
-                      borderColor: tokens.colorBorder,
-                      backgroundColor: tokens.colorBgContainer,
-                      color: tokens.colorTextBase,
-                      borderRadius: DUAL_ENTRY_FAB_RADIUS,
-                    },
-                  ]}
+                  style={[styles.measureInput, inputStyle[1]]}
                 />
               </View>
               <View style={styles.measureRow}>
@@ -268,15 +410,7 @@ export function QuickCaptureSheet({
                   keyboardType="number-pad"
                   placeholder="bpm"
                   placeholderTextColor={tokens.colorTextSecondary}
-                  style={[
-                    styles.measureInput,
-                    {
-                      borderColor: tokens.colorBorder,
-                      backgroundColor: tokens.colorBgContainer,
-                      color: tokens.colorTextBase,
-                      borderRadius: DUAL_ENTRY_FAB_RADIUS,
-                    },
-                  ]}
+                  style={[styles.measureInput, inputStyle[1]]}
                 />
               </View>
               <View style={styles.measureRow}>
@@ -289,38 +423,187 @@ export function QuickCaptureSheet({
                   keyboardType="number-pad"
                   placeholder="%"
                   placeholderTextColor={tokens.colorTextSecondary}
-                  style={[
-                    styles.measureInput,
-                    {
-                      borderColor: tokens.colorBorder,
-                      backgroundColor: tokens.colorBgContainer,
-                      color: tokens.colorTextBase,
-                      borderRadius: DUAL_ENTRY_FAB_RADIUS,
-                    },
-                  ]}
+                  style={[styles.measureInput, inputStyle[1]]}
                 />
               </View>
             </View>
           ) : null}
 
-          {!showThreadForm && !showMeasurementForm ? (
-            <Text style={{ color: tokens.colorTextSecondary, marginTop: 12 }}>{t('quickCapture.comingSoon')}</Text>
+          {showMedicationForm ? (
+            <View style={{ marginTop: 12, gap: 12 }}>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('quickCapture.whenLabel')}</Text>
+                <View style={styles.dateTimeRow}>
+                  <MaskedField
+                    tokens={tokens}
+                    value={medDateBr}
+                    onChangeText={setMedDateBr}
+                    format={formatDateBrInput}
+                    placeholder="DD/MM/AAAA"
+                    keyboardType="number-pad"
+                    style={{ flex: 1, borderRadius: DUAL_ENTRY_FAB_RADIUS }}
+                  />
+                  <MaskedField
+                    tokens={tokens}
+                    value={medTimeBr}
+                    onChangeText={setMedTimeBr}
+                    format={formatTimeBrInput}
+                    placeholder="HH:MM"
+                    keyboardType="number-pad"
+                    style={{ width: 100, borderRadius: DUAL_ENTRY_FAB_RADIUS }}
+                  />
+                </View>
+              </View>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('quickCapture.medicationNameLabel')}</Text>
+                <TextInput
+                  value={medicationName}
+                  onChangeText={setMedicationName}
+                  placeholder={t('quickCapture.medicationNamePlaceholder')}
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={[styles.singleLineInput, inputStyle[1]]}
+                />
+              </View>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('quickCapture.doseLabel')}</Text>
+                <TextInput
+                  value={doseGiven}
+                  onChangeText={setDoseGiven}
+                  placeholder={t('quickCapture.dosePlaceholder')}
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={[styles.singleLineInput, inputStyle[1]]}
+                />
+              </View>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('quickCapture.notesLabel')}</Text>
+                <TextInput
+                  value={medicationNotes}
+                  onChangeText={setMedicationNotes}
+                  multiline
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={inputStyle}
+                />
+              </View>
+            </View>
           ) : null}
 
-          <Pressable
-            onPress={handleSave}
-            disabled={saving}
-            style={[
-              styles.saveBtn,
-              {
-                backgroundColor: tokens.colorPrimary,
-                opacity: saving ? 0.6 : 1,
-                borderRadius: DUAL_ENTRY_FAB_RADIUS,
-              },
-            ]}
-          >
-            <Text style={styles.saveLabel}>{t('quickCapture.save')}</Text>
-          </Pressable>
+          {showAgendaForm ? (
+            <View style={{ marginTop: 12, gap: 12 }}>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('overview.agenda.fieldTitle')}</Text>
+                <TextInput
+                  value={agendaTitle}
+                  onChangeText={setAgendaTitle}
+                  placeholder={t('quickCapture.agendaTitlePlaceholder')}
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={[styles.singleLineInput, inputStyle[1]]}
+                />
+              </View>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('overview.agenda.fieldKind')}</Text>
+                <View style={styles.kindRow}>
+                  {AGENDA_KINDS.map((k) => {
+                    const active = agendaKind === k
+                    return (
+                      <Pressable
+                        key={k}
+                        onPress={() => setAgendaKind(k)}
+                        style={[
+                          styles.kindChip,
+                          {
+                            borderColor: active ? tokens.colorPrimary : tokens.colorBorder,
+                            backgroundColor: active ? tokens.colorBgContainer : tokens.colorBgLayout,
+                            borderRadius: DUAL_ENTRY_FAB_RADIUS,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={{
+                            color: active ? tokens.colorPrimary : tokens.colorTextSecondary,
+                            fontSize: 12,
+                          }}
+                        >
+                          {t(`overview.agenda.kind.${k}`)}
+                        </Text>
+                      </Pressable>
+                    )
+                  })}
+                </View>
+              </View>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('overview.agenda.fieldWhen')}</Text>
+                <View style={styles.dateTimeRow}>
+                  <MaskedField
+                    tokens={tokens}
+                    value={agendaDateBr}
+                    onChangeText={setAgendaDateBr}
+                    format={formatDateBrInput}
+                    placeholder="DD/MM/AAAA"
+                    keyboardType="number-pad"
+                    style={{ flex: 1, borderRadius: DUAL_ENTRY_FAB_RADIUS }}
+                  />
+                  <MaskedField
+                    tokens={tokens}
+                    value={agendaTimeBr}
+                    onChangeText={setAgendaTimeBr}
+                    format={formatTimeBrInput}
+                    placeholder="HH:MM"
+                    keyboardType="number-pad"
+                    style={{ width: 100, borderRadius: DUAL_ENTRY_FAB_RADIUS }}
+                  />
+                </View>
+              </View>
+              <View style={{ gap: 6 }}>
+                <Text style={[styles.label, { color: tokens.colorTextBase }]}>{t('overview.agenda.fieldDescription')}</Text>
+                <TextInput
+                  value={agendaDescription}
+                  onChangeText={setAgendaDescription}
+                  multiline
+                  placeholderTextColor={tokens.colorTextSecondary}
+                  style={inputStyle}
+                />
+              </View>
+            </View>
+          ) : null}
+
+          {showDocumentForm ? (
+            <View style={{ marginTop: 12, gap: 12 }}>
+              <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>{t('quickCapture.documentHint')}</Text>
+              <Pressable
+                onPress={() => void pickAndUploadDocument()}
+                disabled={uploading || !patientId}
+                style={[
+                  styles.saveBtn,
+                  {
+                    backgroundColor: tokens.colorPrimary,
+                    opacity: uploading || !patientId ? 0.6 : 1,
+                    borderRadius: DUAL_ENTRY_FAB_RADIUS,
+                  },
+                ]}
+              >
+                <Text style={styles.saveLabel}>
+                  {uploading ? t('patient.documents.uploading') : t('quickCapture.uploadDocument')}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
+
+          {showSaveButton ? (
+            <Pressable
+              onPress={handleSave}
+              disabled={saving}
+              style={[
+                styles.saveBtn,
+                {
+                  backgroundColor: tokens.colorPrimary,
+                  opacity: saving ? 0.6 : 1,
+                  borderRadius: DUAL_ENTRY_FAB_RADIUS,
+                },
+              ]}
+            >
+              <Text style={styles.saveLabel}>{t('quickCapture.save')}</Text>
+            </Pressable>
+          ) : null}
         </ScrollView>
       </View>
     </Modal>
@@ -335,10 +618,12 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, fontWeight: '600' },
   kindRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   kindChip: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8 },
-  input: { borderWidth: 1, padding: 12, minHeight: 100, textAlignVertical: 'top' },
+  input: { borderWidth: 1, padding: 12, minHeight: 80, textAlignVertical: 'top' },
+  singleLineInput: { borderWidth: 1, padding: 12, fontSize: 16 },
   measureRow: { gap: 6 },
   measureLabel: { fontSize: 14, fontWeight: '600' },
   measureInput: { borderWidth: 1, padding: 12, fontSize: 16 },
+  dateTimeRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   saveBtn: { marginTop: 20, paddingVertical: 14, alignItems: 'center' },
   saveLabel: { color: '#fff', fontWeight: '700', fontSize: 16 },
 })

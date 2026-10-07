@@ -35,6 +35,8 @@ Registrar PASS/FAIL antes do smoke manual.
 | 2a | Alternar **Criar conta** → cadastro e-mail/senha + aceite legal | Conta criada ou e-mail de confirmação (Supabase) | |
 | 2b | Login **e-mail/senha** (conta QA) | Lista Início com pacientes | |
 | 2c | Na aba **Início** (lista de pacientes) | FAB **+** (inferior esquerdo) e FAB **Ava** (inferior direito) visíveis acima da tab bar | |
+| 2d | FAB **+** → kind **Medicação** ou **Agenda** → salvar (conta demo) | Toast «Registro salvo»; sem «Em breve» | |
+| 2e | FAB **+** → kind **Documento** → enviar PDF ou imagem pequena | Upload conclui com sucesso ou erro de rede claro | |
 | 3 | Abrir um paciente | Seletor de seção/tab visível; **ambos FABs** ainda visíveis | |
 | 4 | Seção **Plano** → tab **Carteira** | Cartões CNS/convênio ou empty state; pull-to-refresh recarrega | |
 | 4b | Seção **Plano** → tab **Convênios** | Lista de planos ou empty state; link web | |

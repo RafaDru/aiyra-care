@@ -321,6 +321,20 @@ export const api = {
       return request<WhoGrowthPayload>(`/measurements/who-growth?${qs}`)
     },
   },
+  medicationAdministrations: {
+    create: (data: {
+      patientId: string
+      medicationName: string
+      administeredAt: string
+      doseGiven?: string
+      healthThreadId?: string
+      notes?: string
+    }) =>
+      request<import('./api.types.js').MedicationAdministrationRow>('/medication-administrations', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+  },
   medications: {
     list: (patientId: string) =>
       request<Medication[]>(`/medications?patientId=${encodeURIComponent(patientId)}`),
@@ -499,6 +513,7 @@ export const api = {
       endAt?: string
       kind?: ScheduledEvent['kind']
       status?: ScheduledEvent['status']
+      healthThreadId?: string
     }) => request<ScheduledEvent>('/scheduled-events', { method: 'POST', body: JSON.stringify(data) }),
     update: (
       id: string,
