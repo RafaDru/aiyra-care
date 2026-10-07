@@ -9,6 +9,17 @@ export async function hideAvaDock(page: Page) {
   })
 }
 
+/** Banner pós-onboarding bloqueia o tour — dispensar antes de interagir no dashboard. */
+export async function dismissPostOnboardingWelcome(page: Page) {
+  const welcome = page.getByTestId('post-onboarding-welcome')
+  if (!(await welcome.isVisible({ timeout: 2_000 }).catch(() => false))) return
+  const gotIt = welcome.getByRole('button', { name: /Entendi|Got it/i })
+  if (await gotIt.isVisible().catch(() => false)) {
+    await gotIt.click()
+    await welcome.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
+  }
+}
+
 /** Modal de primeiros passos bloqueia cliques no dashboard — dispensar exceto no spec de onboarding. */
 export async function dismissFirstVisitTour(page: Page) {
   await page.evaluate(() => {

@@ -32,7 +32,16 @@ describe('onboarding-wizard-storage', () => {
     expect(mod.readOnboardingWizardStep()).toBe(0)
   })
 
-  it('consumes just-completed flag once', async () => {
+  it('tracks just-completed until cleared', async () => {
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    expect(mod.isOnboardingJustCompleted()).toBe(false)
+    mod.markOnboardingJustCompleted()
+    expect(mod.isOnboardingJustCompleted()).toBe(true)
+    mod.clearOnboardingJustCompleted()
+    expect(mod.isOnboardingJustCompleted()).toBe(false)
+  })
+
+  it('consumes just-completed flag once (legacy)', async () => {
     const mod = await import('../src/lib/onboarding-wizard-storage.js')
     expect(mod.consumeOnboardingJustCompleted()).toBe(false)
     mod.markOnboardingJustCompleted()

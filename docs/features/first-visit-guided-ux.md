@@ -24,6 +24,7 @@ Humaniza o primeiro contato após onboarding: disclaimer de apoio familiar com t
 2. **Sem alertas (primeira vez)** — paciente sem medidas/medicações/alergias: mensagem de boas-vindas com sugestões (cadastrar familiar, registro rápido, plano).
 3. **Sem alertas (retorno)** — com histórico clínico: mensagem anterior sobre continuar registrando para a consulta.
 4. **Guia Primeiros passos** — drawer lateral após login (exceto login/onboarding/compliance); dismissível; persiste `first_visit_tour_completed` em localStorage + `product_events`.
+5. **Alinhamento pós-onboarding (2026-10)** — banner `PostOnboardingWelcomeBanner` tem prioridade; o drawer só abre após dismiss do banner ou via CTA «Ver primeiros passos». Dashboard sem perfis: empty state com hint acolhedor (`patient.emptyFamilyWelcomeHint`).
 
 ## Superfície técnica
 
@@ -32,7 +33,8 @@ Humaniza o primeiro contato após onboarding: disclaimer de apoio familiar com t
 | Rotas web | `/`, layout autenticado |
 | API | `GET /patients/:id/family-support/insights` (`hasClinicalHistory`) |
 | Telemetria | `first_visit_tour_completed` |
-| UI principal | `FirstVisitTourDrawer`, `FamilySupportPanel` |
+| UI principal | `FirstVisitTourDrawer`, `PostOnboardingWelcomeBanner`, `FamilySupportPanel`, `dashboard.tsx` (empty) |
+| Bus | `onboarding-welcome-bus`, `first-visit-tour-bus` |
 
 ## Fora de escopo
 

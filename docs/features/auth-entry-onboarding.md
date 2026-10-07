@@ -22,7 +22,7 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 
 **Nota (passo 2):** após `POST /auth/complete-profile`, o wizard permanece em `/onboarding` até «Pular» ou «Ir para o início». O passo ativo persiste em `sessionStorage` via `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step`), gravado **antes** da API, para não redirecionar ao dashboard antes do passo de família (corrida com `refreshSync` / `needsProfile`). Redirect bloqueado também durante `submitting`.
 
-**Pós-onboarding:** banner leve no dashboard (`PostOnboardingWelcomeBanner`, flag `aiyracare.onboarding_just_completed` em session) — distinto do drawer `first-visit-guided-ux`.
+**Pós-onboarding:** banner leve no dashboard (`PostOnboardingWelcomeBanner`, flag `aiyracare.onboarding_just_completed` em session até dismiss) — distinto do drawer `first-visit-guided-ux`, que aguarda o banner ou abre via «Ver primeiros passos».
 
 ## Telemetria
 
