@@ -12,6 +12,13 @@ class InMemoryPatientRepo implements PatientRepository {
     return this.patients.get(id) ?? null
   }
 
+  async findByCpf(cpf: string) {
+    for (const patient of this.patients.values()) {
+      if (patient.cpf === cpf) return patient
+    }
+    return null
+  }
+
   async findAll() {
     return [...this.patients.values()]
   }

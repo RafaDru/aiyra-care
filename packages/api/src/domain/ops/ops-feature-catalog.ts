@@ -265,6 +265,7 @@ const EVENT_FEATURE_OVERRIDES: Record<string, string> = {
   sync_escalation_opened: 'settings',
   sync_escalation_resolved: 'settings',
   support_report_submitted: 'settings',
+  support_resolution_prompt: 'settings',
 }
 
 /** Atribui feature para agregar product_events. */

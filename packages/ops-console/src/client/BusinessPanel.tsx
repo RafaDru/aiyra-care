@@ -20,6 +20,7 @@ const { Text, Title } = Typography
 
 const SUPPORT_CATEGORY_LABEL: Record<string, string> = {
   technical_bug: 'Bug técnico',
+  account_login_cpf: 'Conta, login e CPF',
   incorrect_data: 'Dado incorreto',
   ux_confusion: 'Confusão UX',
   other: 'Outro',

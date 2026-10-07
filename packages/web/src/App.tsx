@@ -22,7 +22,9 @@ import { LegalDocumentPage } from './pages/legal-document.js'
 import { InviteAcceptPage } from './pages/invite-accept.js'
 import { ClinicalExportSharePage } from './pages/clinical-export-share.js'
 import { MobileOAuthReturnPage } from './pages/auth/mobile-oauth-return.js'
+import { CentralAtendimentoPage } from './pages/central-atendimento.js'
 import { CookieConsentBanner } from './components/legal/CookieConsentBanner.js'
+import { SUPPORT_CENTER_PATH } from './lib/support-center-path.js'
 
 export function App() {
   return (
@@ -35,6 +37,7 @@ export function App() {
         <Route path="/privacidade" element={<LegalDocumentPage kind="privacy_policy" />} />
         <Route path="/cookies" element={<LegalDocumentPage kind="cookie_policy" />} />
         <Route path="/consentimento-menor" element={<LegalDocumentPage kind="minor_guardian_consent" />} />
+        <Route path={SUPPORT_CENTER_PATH} element={<CentralAtendimentoPage />} />
         <Route path="/clinical-export/:token" element={<ClinicalExportSharePage />} />
         <Route element={<RequireAuth />}>
           <Route path="/compliance/accept" element={<ComplianceAcceptPage />} />

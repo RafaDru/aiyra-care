@@ -56,11 +56,14 @@ export class AuthController {
         needsProfile: result.needsProfile,
       })
     } catch (err) {
-      if (err instanceof ConflictError) return reply.status(409).send({ message: err.message })
+      if (err instanceof ConflictError) {
+        return reply.status(409).send({ message: err.message, code: err.code })
+      }
       if (isPostgresUniqueViolation(err, 'patients_cpf_key')) {
         return reply.status(409).send({
           message:
             'Este CPF já está cadastrado no AiyraCare. Entre com a conta que criou o perfil ou use outro CPF.',
+          code: 'CPF_ALREADY_LINKED',
         })
       }
       throw err

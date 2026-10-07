@@ -26,6 +26,7 @@ const { TextArea } = Input
 
 const CATEGORY_LABEL: Record<string, string> = {
   technical_bug: 'Erro técnico',
+  account_login_cpf: 'Conta, login e CPF',
   incorrect_data: 'Dado incorreto',
   ux_confusion: 'Confusão de UX',
   other: 'Outro',

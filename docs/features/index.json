@@ -329,6 +329,20 @@
       "tags": ["mobile", "expo", "ava", "quick-capture", "ux"]
     },
     {
+      "id": "central-atendimento",
+      "epicId": "platform-environments",
+      "title": "Central de atendimento — landing pública",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P2",
+      "doc": "docs/features/central-atendimento.md",
+      "domainDoc": "docs/help/central-atendimento.md",
+      "routes": ["/central-atendimento"],
+      "api": ["POST /auth/complete-profile", "POST /patients"],
+      "helpTopics": ["central-atendimento"],
+      "tags": ["onboarding", "suporte", "acesso"]
+    },
+    {
       "id": "documentation-knowledge-base",
       "epicId": "documentation-knowledge-base",
       "title": "Base de conhecimento — features, ajuda e tracking",

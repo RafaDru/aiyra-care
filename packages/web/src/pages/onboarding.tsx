@@ -18,6 +18,8 @@ import {
   persistOnboardingDependentsStep,
   readOnboardingWizardStep,
 } from '../lib/onboarding-wizard-storage.js'
+import { isApiResponseError } from '../lib/api-response-error.js'
+import { OnboardingErrorAlert } from '../components/onboarding/OnboardingErrorAlert.js'
 
 const { Title, Text } = Typography
 
@@ -42,6 +44,7 @@ export function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(readOnboardingWizardStep)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [cpfAlreadyLinked, setCpfAlreadyLinked] = useState(false)
   const [dependents, setDependents] = useState<DependentDraft[]>([])
   const dependentBirthDate = Form.useWatch('birthDate', dependentForm)
   const showMinorConsent = dependentBirthDate
@@ -101,6 +104,7 @@ export function OnboardingPage() {
   }) => {
     setSubmitting(true)
     setError(null)
+    setCpfAlreadyLinked(false)
     try {
       await api.auth.completeProfile({
         name: values.name,
@@ -123,7 +127,13 @@ export function OnboardingPage() {
       }
       clearOnboardingWizardStep()
       setCurrentStep(0)
-      setError(e instanceof Error ? e.message : t('onboarding.error'))
+      if (isApiResponseError(e) && e.code === 'CPF_ALREADY_LINKED') {
+        setCpfAlreadyLinked(true)
+        setError(null)
+      } else {
+        setCpfAlreadyLinked(false)
+        setError(e instanceof Error ? e.message : t('onboarding.error'))
+      }
     } finally {
       setSubmitting(false)
     }
@@ -138,6 +148,7 @@ export function OnboardingPage() {
   }) => {
     setSubmitting(true)
     setError(null)
+    setCpfAlreadyLinked(false)
     try {
       const birthDate = values.birthDate.toDate()
       if (isMinorBirthDate(birthDate)) {
@@ -153,7 +164,13 @@ export function OnboardingPage() {
       dependentForm.resetFields()
       trackProductEvent('onboarding_step', { step: 'dependent_added' })
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('onboarding.dependentError'))
+      if (isApiResponseError(e) && e.code === 'CPF_ALREADY_LINKED') {
+        setCpfAlreadyLinked(true)
+        setError(null)
+      } else {
+        setCpfAlreadyLinked(false)
+        setError(e instanceof Error ? e.message : t('onboarding.dependentError'))
+      }
     } finally {
       setSubmitting(false)
     }
@@ -179,7 +196,7 @@ export function OnboardingPage() {
         ]}
       />
 
-      {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
+      <OnboardingErrorAlert message={error} cpfAlreadyLinked={cpfAlreadyLinked} />
 
       {currentStep === 0 ? (
         <>

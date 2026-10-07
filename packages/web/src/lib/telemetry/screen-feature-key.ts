@@ -11,6 +11,7 @@ export function resolveScreenFeatureKey(pathname: string): string | null {
   if (path.startsWith('/settings')) return 'settings'
   if (path.startsWith('/invite/accept')) return 'family_invite'
   if (path.startsWith('/compliance')) return 'compliance'
+  if (path.startsWith('/central-atendimento')) return 'support_center'
   if (path.startsWith('/onboarding')) return 'onboarding'
   if (path.startsWith('/emergency')) return 'emergency'
   if (path.startsWith('/roadmap')) return 'roadmap'

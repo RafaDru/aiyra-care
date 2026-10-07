@@ -34,6 +34,7 @@ export const PRODUCT_EVENT_NAMES = [
   'notification_optin_changed',
   'app_screen_viewed',
   'support_report_submitted',
+  'support_resolution_prompt',
   'consult_visit_share_created',
   'consult_visit_link_copied',
   'consult_visit_print',
@@ -111,6 +112,9 @@ export const PRODUCT_EVENT_PROPERTY_KEYS = new Set([
   'email_skipped',
   'mode',
   'helpful',
+  'report_id',
+  'human_escalation_delta',
+  'human_escalation_score',
 ])
 
 const FORBIDDEN_PROPERTY_KEY = /message|text|content|password|token|ocr|reply|body|prompt|credential|secret/i
