@@ -419,6 +419,18 @@ export interface Medication {
   createdAt: string
 }
 
+export interface MedicationAdministrationRow {
+  id: string
+  patientId: string
+  medicationId: string | null
+  medicationName: string
+  administeredAt: string
+  doseGiven: string | null
+  healthThreadId: string | null
+  notes: string | null
+  createdAt: string
+}
+
 export interface Allergy {
   id: string
   patientId: string

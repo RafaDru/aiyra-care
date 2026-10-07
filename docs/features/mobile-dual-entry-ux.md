@@ -80,9 +80,9 @@ A11y: `accessibilityRole="button"`; labels `quickCapture.triggerA11y` / `ava.ope
 | `note` | ✅ | ✅ health thread entry |
 | `symptom` | (via thread) | ✅ health thread entry |
 | `measurement` | ✅ batch | ✅ `POST /measurements/batch` |
-| `medication` | ✅ | UI + «Em breve» |
-| `agenda` | ✅ | UI + «Em breve» |
-| `document` | ✅ upload | UI + «Em breve» |
+| `medication` | ✅ | ✅ `POST /medication-administrations` |
+| `agenda` | ✅ | ✅ `POST /scheduled-events` |
+| `document` | ✅ upload | ✅ `POST /documents/upload` (expo-document-picker) |
 
 ## Fora de escopo
 
@@ -96,7 +96,7 @@ A11y: `accessibilityRole="button"`; labels `quickCapture.triggerA11y` / `ava.ope
 |-------|--------|
 | **Suite** | [`mobile-shell-smoke`](../testing/suites/mobile-shell-smoke.md) (passo dual FAB) |
 | **Comando** | `npm run qa:run -- --suite mobile-shell-smoke` |
-| **Estrutural** | `cd packages/mobile && npm run typecheck` · `packages/mobile/tests/dual-entry-layout.test.ts` |
+| **Estrutural** | `cd packages/mobile && npm run typecheck` · `dual-entry-layout.test.ts` · `quick-capture-kinds.test.ts` |
 
 ## Ver também
 

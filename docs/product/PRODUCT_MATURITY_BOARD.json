@@ -70,7 +70,7 @@
           "id": "mobile-dual-entry",
           "title": "Mobile — dual FAB (registro + Ava)",
           "maturity": "operational",
-          "note": "QuickCaptureGlobal + AvaGlobalDock em (app)/_layout; tokens dual-entry-layout; spec canônica no repo.",
+          "note": "QuickCaptureGlobal + AvaGlobalDock; todos os kinds do registro rápido (nota→documento) salvam na API; spec mobile-dual-entry-ux.",
           "doc": "docs/features/mobile-dual-entry-ux.md"
         },
         {
