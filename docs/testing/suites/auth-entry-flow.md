@@ -43,8 +43,8 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
 | 1 | Reset `qa:reset-onboarding-user` + login onboarding | Wizard passo 1 | |
-| 2 | Perfil titular + **Continuar** | Passo «Quem você acompanha?» | |
-| 3 | **Pular por agora** | Dashboard **Sua família** com titular | |
+| 2 | Perfil titular + **Continuar** | Passo «Quem mais você cuida?» (testid `onboarding-step-dependents`) | |
+| 3 | **Pular por agora** | Dashboard **Sua família** com titular; banner de boas-vindas dismissível (opcional) | |
 
 **Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado»
 

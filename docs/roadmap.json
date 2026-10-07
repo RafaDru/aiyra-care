@@ -2755,6 +2755,12 @@
           "title": "FAQ + contato comercial / suporte",
           "status": "planned",
           "detail": "Link compliance/contact API; formulário lead opcional."
+        },
+        {
+          "id": "web-onboarding-refresh-2026-10",
+          "title": "Onboarding web v2 (cuidador familiar)",
+          "status": "done",
+          "detail": "Copy, progresso, OnboardingLayout, corrida passo 2, banner dashboard; ver WEB_ONBOARDING_REFRESH_2026-10.md. first-visit-guided-ux após ship."
         }
       ]
     },

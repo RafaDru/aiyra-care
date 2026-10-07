@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Alert, Button, Card, Form, Input, Select, Space, Spin, Steps, Typography } from 'antd'
+import { Alert, Button, Form, Input, Select, Space, Spin, Steps, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.js'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
@@ -10,8 +10,17 @@ import { api } from '../lib/api.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
 import { formatCpfInput } from '../lib/input-masks.js'
 import { trackProductEvent } from '../lib/product-events.js'
+import {
+  clearOnboardingWizardStep,
+  isOnboardingDependentsStepActive,
+  markOnboardingJustCompleted,
+  persistOnboardingDependentsStep,
+  readOnboardingWizardStep,
+} from '../lib/onboarding-wizard-storage.js'
 
 const { Title, Text } = Typography
+
+const WIZARD_STEP_COUNT = 2
 
 function isAdult(birthDate: Date): boolean {
   const age = (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
@@ -21,13 +30,6 @@ function isAdult(birthDate: Date): boolean {
 type DependentDraft = {
   id: string
   name: string
-}
-
-const ONBOARDING_WIZARD_STEP_KEY = 'aiyracare.onboarding_wizard_step'
-
-function readOnboardingWizardStep(): number {
-  if (typeof window === 'undefined') return 0
-  return sessionStorage.getItem(ONBOARDING_WIZARD_STEP_KEY) === '1' ? 1 : 0
 }
 
 export function OnboardingPage() {
@@ -46,11 +48,13 @@ export function OnboardingPage() {
     : false
 
   useEffect(() => {
-    trackProductEvent('onboarding_step', { step: 'step_1_viewed' })
-  }, [])
+    if (currentStep === 0) {
+      trackProductEvent('onboarding_step', { step: 'step_1_viewed' })
+    }
+  }, [currentStep])
 
   useEffect(() => {
-    if (!needsProfile && readOnboardingWizardStep() === 1 && currentStep === 0) {
+    if (!needsProfile && isOnboardingDependentsStepActive() && currentStep === 0) {
       setCurrentStep(1)
     }
   }, [needsProfile, currentStep])
@@ -69,19 +73,20 @@ export function OnboardingPage() {
 
   // Após completeProfile, needsProfile fica false mas o passo de dependentes ainda deve aparecer.
   // sessionStorage é gravado antes do refreshSync — evita corrida em que needsProfile atualiza antes do setState do passo 2.
-  const wizardOnDependentsStep = readOnboardingWizardStep() === 1
-  if (!needsProfile && currentStep === 0 && !wizardOnDependentsStep) {
+  const wizardOnDependentsStep = isOnboardingDependentsStepActive()
+  if (!needsProfile && currentStep === 0 && !wizardOnDependentsStep && !submitting) {
     return <Navigate to="/" replace />
   }
 
   const goToDependentsStep = () => {
-    sessionStorage.setItem(ONBOARDING_WIZARD_STEP_KEY, '1')
+    persistOnboardingDependentsStep()
     setCurrentStep(1)
     trackProductEvent('onboarding_step', { step: 'step_2_viewed' })
   }
 
   const finishOnboarding = (eventStep: 'dependents_skipped' | 'dependents_complete') => {
-    sessionStorage.removeItem(ONBOARDING_WIZARD_STEP_KEY)
+    clearOnboardingWizardStep()
+    markOnboardingJustCompleted()
     trackProductEvent('onboarding_step', { step: eventStep })
     navigate('/')
   }
@@ -96,6 +101,7 @@ export function OnboardingPage() {
     setSubmitting(true)
     setError(null)
     try {
+      goToDependentsStep()
       await api.auth.completeProfile({
         name: values.name,
         birthDate: values.birthDate.toDate().toISOString(),
@@ -104,9 +110,10 @@ export function OnboardingPage() {
         cns: values.cns?.replace(/\D/g, '') || undefined,
       })
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
-      goToDependentsStep()
       await refreshSync()
     } catch (e) {
+      clearOnboardingWizardStep()
+      setCurrentStep(0)
       setError(e instanceof Error ? e.message : t('onboarding.error'))
     } finally {
       setSubmitting(false)
@@ -143,145 +150,155 @@ export function OnboardingPage() {
     }
   }
 
+  const stepHuman = currentStep + 1
+
   return (
     <OnboardingLayout>
+      <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
+        {t('onboarding.stepProgress', { current: stepHuman, total: WIZARD_STEP_COUNT })}
+      </Text>
       <Steps
         current={currentStep}
-        style={{ marginBottom: 24 }}
+        style={{ marginBottom: 20 }}
         responsive
+        size="small"
         aria-label={t('onboarding.stepsAria')}
         data-testid="onboarding-wizard-steps"
         items={[
-          { title: t('onboarding.steps.profile') },
-          { title: t('onboarding.steps.dependents') },
+          { title: t('onboarding.steps.profile'), description: t('onboarding.steps.profileHint') },
+          { title: t('onboarding.steps.dependents'), description: t('onboarding.steps.dependentsHint') },
         ]}
       />
 
-      <Card variant="borderless" styles={{ body: { padding: 0 } }}>
-        {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
+      {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
 
-        {currentStep === 0 ? (
-          <>
-            <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.welcomeTitle')}</Title>
-            <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.welcomeSubtitle')}</Text>
+      {currentStep === 0 ? (
+        <>
+          <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.welcomeTitle')}</Title>
+          <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.welcomeSubtitle')}</Text>
 
-            <Form form={profileForm} layout="vertical" onFinish={onProfileFinish} requiredMark={false}>
-              <Form.Item name="name" label={t('onboarding.name')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
-                <Input size="large" autoComplete="name" />
-              </Form.Item>
-              <Form.Item
-                name="birthDate"
-                label={t('onboarding.birthDate')}
-                rules={[
-                  { required: true, message: t('onboarding.birthDateRequired') },
-                  {
-                    validator: (_, value) => {
-                      if (!value) return Promise.resolve()
-                      const date = value.toDate?.() ?? value
-                      return isAdult(date) ? Promise.resolve() : Promise.reject(t('onboarding.adultOnly'))
-                    },
+          <Form form={profileForm} layout="vertical" onFinish={onProfileFinish} requiredMark={false}>
+            <Form.Item name="name" label={t('onboarding.name')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
+              <Input size="large" autoComplete="name" />
+            </Form.Item>
+            <Form.Item
+              name="birthDate"
+              label={t('onboarding.birthDate')}
+              rules={[
+                { required: true, message: t('onboarding.birthDateRequired') },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve()
+                    const date = value.toDate?.() ?? value
+                    return isAdult(date) ? Promise.resolve() : Promise.reject(t('onboarding.adultOnly'))
                   },
-                ]}
-              >
-                <MaskedDatePicker style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item name="gender" label={t('onboarding.gender')} rules={[{ required: true, message: t('onboarding.genderRequired') }]}>
-                <Select
-                  size="large"
-                  options={[
-                    { value: 'male', label: t('patient.male') },
-                    { value: 'female', label: t('patient.female') },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item
-                name="cpf"
-                label="CPF"
-                rules={[
-                  { required: true, message: t('onboarding.cpfRequired') },
-                  { validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('onboarding.cpfInvalid')) },
-                ]}
-              >
-                <Input
-                  placeholder="000.000.000-00"
-                  maxLength={14}
-                  onChange={(e) => profileForm.setFieldValue('cpf', formatCpfInput(e.target.value))}
-                />
-              </Form.Item>
-              <Form.Item
-                name="cns"
-                label={t('onboarding.cnsLabel')}
-                extra={t('onboarding.cnsHint')}
-              >
-                <Input placeholder={t('onboarding.cnsPlaceholder')} maxLength={15} />
-              </Form.Item>
-              <Button type="primary" htmlType="submit" block size="large" loading={submitting}>
-                {t('onboarding.continue')}
-              </Button>
-            </Form>
-          </>
-        ) : (
-          <div data-testid="onboarding-step-dependents">
-            <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.dependentsTitle')}</Title>
-            <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.dependentsSubtitle')}</Text>
-
-            {dependents.length > 0 && (
-              <Alert
-                type="success"
-                showIcon
-                style={{ marginBottom: 16 }}
-                message={t('onboarding.dependentsAdded', { count: dependents.length })}
-                description={dependents.map((d) => d.name).join(', ')}
-              />
-            )}
-
-            <Form form={dependentForm} layout="vertical" onFinish={onAddDependent} requiredMark={false}>
-              <Form.Item name="name" label={t('onboarding.dependentName')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
-                <Input size="large" />
-              </Form.Item>
-              <Form.Item name="birthDate" label={t('onboarding.birthDate')} rules={[{ required: true, message: t('onboarding.birthDateRequired') }]}>
-                <MaskedDatePicker style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item name="gender" label={t('onboarding.gender')}>
-                <Select
-                  size="large"
-                  allowClear
-                  options={[
-                    { value: 'male', label: t('patient.male') },
-                    { value: 'female', label: t('patient.female') },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item
-                name="cpf"
-                label="CPF"
-                rules={[{ validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('onboarding.cpfInvalid')) }]}
-              >
-                <Input placeholder="000.000.000-00" maxLength={14} />
-              </Form.Item>
-              {showMinorConsent && <MinorGuardianConsentFormItem />}
-              <Button type="default" htmlType="submit" block size="large" loading={submitting}>
-                {t('onboarding.addDependent')}
-              </Button>
-            </Form>
-
-            <Space direction="vertical" style={{ width: '100%', marginTop: 16 }}>
-              <Button
-                type="primary"
-                block
+                },
+              ]}
+            >
+              <MaskedDatePicker style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="gender" label={t('onboarding.gender')} rules={[{ required: true, message: t('onboarding.genderRequired') }]}>
+              <Select
                 size="large"
-                disabled={dependents.length === 0}
-                onClick={() => finishOnboarding('dependents_complete')}
-              >
-                {t('onboarding.finish')}
-              </Button>
-              <Button type="link" block onClick={() => finishOnboarding('dependents_skipped')}>
-                {t('onboarding.skipDependents')}
-              </Button>
-            </Space>
-          </div>
-        )}
-      </Card>
+                placeholder={t('onboarding.genderPlaceholder')}
+                options={[
+                  { value: 'male', label: t('patient.male') },
+                  { value: 'female', label: t('patient.female') },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="cpf"
+              label={t('onboarding.cpfLabel')}
+              rules={[
+                { required: true, message: t('onboarding.cpfRequired') },
+                { validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('onboarding.cpfInvalid')) },
+              ]}
+            >
+              <Input
+                placeholder="000.000.000-00"
+                maxLength={14}
+                onChange={(e) => profileForm.setFieldValue('cpf', formatCpfInput(e.target.value))}
+              />
+            </Form.Item>
+            <Form.Item
+              name="cns"
+              label={t('onboarding.cnsLabel')}
+              extra={t('onboarding.cnsHint')}
+            >
+              <Input placeholder={t('onboarding.cnsPlaceholder')} maxLength={15} />
+            </Form.Item>
+            <Button type="primary" htmlType="submit" block size="large" loading={submitting}>
+              {t('onboarding.continue')}
+            </Button>
+          </Form>
+        </>
+      ) : (
+        <div data-testid="onboarding-step-dependents">
+          <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.dependentsTitle')}</Title>
+          <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.dependentsSubtitle')}</Text>
+
+          {dependents.length > 0 && (
+            <Alert
+              type="success"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message={t('onboarding.dependentsAdded', { count: dependents.length })}
+              description={dependents.map((d) => d.name).join(', ')}
+            />
+          )}
+
+          <Form form={dependentForm} layout="vertical" onFinish={onAddDependent} requiredMark={false}>
+            <Form.Item name="name" label={t('onboarding.dependentName')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
+              <Input size="large" />
+            </Form.Item>
+            <Form.Item name="birthDate" label={t('onboarding.birthDate')} rules={[{ required: true, message: t('onboarding.birthDateRequired') }]}>
+              <MaskedDatePicker style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="gender" label={t('onboarding.gender')}>
+              <Select
+                size="large"
+                allowClear
+                placeholder={t('onboarding.genderOptional')}
+                options={[
+                  { value: 'male', label: t('patient.male') },
+                  { value: 'female', label: t('patient.female') },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="cpf"
+              label={t('onboarding.cpfOptional')}
+              rules={[{ validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('onboarding.cpfInvalid')) }]}
+            >
+              <Input
+                placeholder="000.000.000-00"
+                maxLength={14}
+                onChange={(e) => dependentForm.setFieldValue('cpf', formatCpfInput(e.target.value))}
+              />
+            </Form.Item>
+            {showMinorConsent && <MinorGuardianConsentFormItem />}
+            <Button type="default" htmlType="submit" block size="large" loading={submitting}>
+              {t('onboarding.addDependent')}
+            </Button>
+          </Form>
+
+          <Space direction="vertical" style={{ width: '100%', marginTop: 16 }}>
+            <Button
+              type="primary"
+              block
+              size="large"
+              disabled={dependents.length === 0}
+              onClick={() => finishOnboarding('dependents_complete')}
+            >
+              {t('onboarding.finish')}
+            </Button>
+            <Button type="link" block onClick={() => finishOnboarding('dependents_skipped')}>
+              {t('onboarding.skipDependents')}
+            </Button>
+          </Space>
+        </div>
+      )}
     </OnboardingLayout>
   )
 }

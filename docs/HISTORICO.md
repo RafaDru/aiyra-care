@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-07] - Web onboarding refresh v2 (B2C cuidador)
+
+### Realizado
+- Spec [`docs/features/WEB_ONBOARDING_REFRESH_2026-10.md`](features/WEB_ONBOARDING_REFRESH_2026-10.md): auditoria do funil landing → login → wizard → dashboard; telemetria; escopo vs `first-visit-guided-ux`.
+- Web: `onboarding-wizard-storage.ts`, copy i18n pt/en, `OnboardingLayout` com card de marca, corrida passo 2 (session antes da API + guard `submitting`), `PostOnboardingWelcomeBanner` no dashboard.
+- Docs: `auth-entry-onboarding.md`, `PRODUCT_MATURITY_BOARD.json`, item `web-onboarding-refresh-2026-10` em `institutional-landing` no roadmap.
+- QA: suite `auth-entry-flow` (helper onboarding atualizado para novo título do passo 1).
+
 ## [2026-10-06] - Mobile dual FAB — spec canônica e smoke
 
 ### Realizado

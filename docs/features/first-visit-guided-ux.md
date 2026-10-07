@@ -39,6 +39,7 @@ Humaniza o primeiro contato após onboarding: disclaimer de apoio familiar com t
 - Tour guiado por spotlight/overlay em elementos DOM.
 - Sincronização cross-device do flag de tour via API dedicada.
 - **Mobile (Expo):** `FirstVisitTourDrawer` e expansão do guia «Primeiros passos» ficam **adiados** até o redesign do onboarding web — prioridade atual no mobile é dual FAB ([`mobile-dual-entry-ux.md`](./mobile-dual-entry-ux.md)), não tour na primeira visita.
+- **Pré-requisito web:** épico [`WEB_ONBOARDING_REFRESH_2026-10`](./WEB_ONBOARDING_REFRESH_2026-10.md) deve estar em `main` antes de expandir spotlight/tour neste card.
 
 ## QA (obrigatório ao entregar)
 
