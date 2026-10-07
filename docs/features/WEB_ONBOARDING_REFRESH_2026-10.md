@@ -64,6 +64,7 @@ Refresh focado do wizard web de onboarding B2C (cuidador familiar): copy mais cl
 | `dependents_complete` | «Ir para o início» com ≥1 dependente |
 | `dashboard_welcome_viewed` | Banner pós-onboarding exibido |
 | `dashboard_welcome_dismissed` | Fechar / «Entendi» no banner |
+| `dashboard_welcome_tour_cta` | «Ver primeiros passos» — abre `FirstVisitTourDrawer` |
 
 ## Superfície técnica
 

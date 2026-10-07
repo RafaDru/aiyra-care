@@ -192,9 +192,14 @@ export function Dashboard() {
       {patients.length === 0 && !loadError ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
+          data-testid="dashboard-empty-family"
           description={
             <span>
-              {t('patient.emptyFamily')}<br />
+              {t('patient.emptyFamily')}
+              <br />
+              <Text type="secondary" style={{ display: 'block', marginTop: 8, maxWidth: 420, marginInline: 'auto' }}>
+                {t('patient.emptyFamilyWelcomeHint')}
+              </Text>
               <Button type="link" icon={<PlusOutlined />} onClick={() => setModalOpen(true)} style={{ marginTop: 8 }}>
                 {t('patient.new')}
               </Button>
