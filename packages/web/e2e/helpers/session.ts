@@ -40,14 +40,21 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
   await dismissCookieBanner(page)
 
   const novoPaciente = dashboardAddFamilyButton(page)
-  const onboardingHeading = page.getByRole('heading', { name: 'Bem-vindo ao AiyraCare' })
+  const onboardingHeading = page.getByRole('heading', {
+    name: /Vamos começar pelo seu perfil|Let's start with your profile/i,
+  })
 
   await Promise.race([
     novoPaciente.waitFor({ state: 'visible', timeout: 30_000 }),
     onboardingHeading.waitFor({ state: 'visible', timeout: 30_000 }),
+    page.getByTestId('onboarding-wizard-steps').waitFor({ state: 'visible', timeout: 30_000 }),
   ])
 
-  if (await onboardingHeading.isVisible()) {
+  const onOnboardingWizard =
+    (await onboardingHeading.isVisible().catch(() => false)) ||
+    (await page.getByTestId('onboarding-wizard-steps').isVisible().catch(() => false))
+
+  if (onOnboardingWizard) {
     await completeOnboardingProfile(page, {
       name: 'QA E2E Titular',
       birthDate: '12/08/1987',
