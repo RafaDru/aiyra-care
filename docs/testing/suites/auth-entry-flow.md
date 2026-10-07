@@ -46,7 +46,7 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | 2 | Perfil titular + **Continuar** | Passo «Quem mais você cuida?» (testid `onboarding-step-dependents`) | |
 | 3 | **Pular por agora** | Dashboard **Sua família** com titular; banner de boas-vindas dismissível (opcional) | |
 
-**Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado»
+**Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado» · helper `session.ts` alinhado ao título v2 do passo 1
 
 ## Matriz
 
