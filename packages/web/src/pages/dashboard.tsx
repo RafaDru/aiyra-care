@@ -13,6 +13,7 @@ import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
 import { DayToDayDiscoveryHub } from '../components/dashboard/DayToDayDiscoveryHub.js'
 import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
+import { PostOnboardingWelcomeBanner } from '../components/onboarding/PostOnboardingWelcomeBanner.js'
 import { useAuth } from '../contexts/AuthContext.js'
 import { useActiveCareCircle } from '../contexts/ActiveCareCircleContext.js'
 import { reportApiClientError } from '../lib/client-errors.js'
@@ -170,6 +171,8 @@ export function Dashboard() {
         title={t('patient.title')}
         extra={<Button type="primary" icon={<PlusOutlined />} data-testid="dashboard-add-family" onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
       />
+
+      <PostOnboardingWelcomeBanner />
 
       {patients.length > 0 && <DashboardFamilyShortcut />}
       {patients.length === 0 && !loadError && <DayToDayDiscoveryHub hasPatients={false} />}

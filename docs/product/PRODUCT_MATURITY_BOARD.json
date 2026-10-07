@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-06T21:00:00Z",
-  "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo. Mobile: dual FAB (registro + Ava) documentado e smoke em mobile-shell-smoke; first-visit-guided-ux permanece web-only até redesign onboarding.",
+  "updatedAt": "2026-10-07T12:00:00Z",
+  "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo. Web: onboarding B2C refresh 2026-10 (wizard + banner pós-cadastro); first-visit-guided-ux (drawer tour) segue como épico separado.",
   "surfaces": [
     {
       "id": "web",
@@ -59,6 +59,13 @@
           "title": "Círculos e convites",
           "maturity": "operational",
           "note": "UI /settings/family, aceite de convite, e-mail Resend."
+        },
+        {
+          "id": "web-onboarding-b2c",
+          "title": "Onboarding web — cuidador familiar",
+          "maturity": "operational",
+          "note": "Wizard 2 passos, layout v2, banner pós-onboarding; spec WEB_ONBOARDING_REFRESH_2026-10.",
+          "doc": "docs/features/WEB_ONBOARDING_REFRESH_2026-10.md"
         },
         {
           "id": "family-mobile-parity",

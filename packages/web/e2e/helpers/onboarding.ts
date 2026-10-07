@@ -33,7 +33,7 @@ async function fillMaskedDate(page: Page, label: RegExp, value: string) {
 
 export async function completeOnboardingProfile(page: Page, profile: OnboardingProfileInput) {
   await page
-    .getByRole('heading', { name: /Bem-vindo ao AiyraCare|Welcome to AiyraCare/i })
+    .getByRole('heading', { name: /Vamos começar pelo seu perfil|Let's start with your profile/i })
     .waitFor({ timeout: 25_000 })
   await dismissCookieBanner(page)
 
