@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-07T12:00:00Z",
+  "updatedAt": "2026-10-07T20:00:00Z",
   "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo. Web: onboarding B2C refresh 2026-10 (wizard + banner pós-cadastro); first-visit-guided-ux (drawer tour) segue como épico separado.",
   "surfaces": [
     {
@@ -226,6 +226,33 @@
           "title": "Agentes especializados (Python)",
           "maturity": "pilot",
           "note": "RAG e domínios verticais; não substituem contexto determinístico."
+        }
+      ]
+    },
+    {
+      "id": "gtm-consultorio",
+      "title": "GTM consultório (capilarização)",
+      "items": [
+        {
+          "id": "share-consultorio",
+          "title": "Share consultório (Levar na consulta)",
+          "maturity": "operational",
+          "note": "Wizard link/QR/PDF/WhatsApp; referral_code no share (066).",
+          "doc": "docs/features/patient-clinical-export.md"
+        },
+        {
+          "id": "portal-medico",
+          "title": "Portal médico (extrato público D5)",
+          "maturity": "operational",
+          "note": "clinical-export/share/:token; feedback clinician_share_*.",
+          "doc": "docs/features/patient-clinical-export.md"
+        },
+        {
+          "id": "plano-profissional-mgm",
+          "title": "Plano profissional + MGM bilateral",
+          "maturity": "planned",
+          "note": "Fases B–D; billing/indicação após gate legal/fiscal.",
+          "doc": "docs/product/GROWTH_CONSULTORIO_CAPILARIDADE.md"
         }
       ]
     },

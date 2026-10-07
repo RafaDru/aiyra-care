@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-11",
+  "updatedAt": "2026-10-07",
   "description": "Índice de capacidades de produto — ver docs/DOCUMENTATION_SYSTEM.md",
   "features": [
     {
@@ -98,6 +98,20 @@
       "api": ["POST /telemetry/client-errors"],
       "helpTopics": [],
       "tags": ["ops", "ch", "telemetria", "incidentes"]
+    },
+    {
+      "id": "growth-consultorio-capilaridade",
+      "epicId": "b2b-partner-platform",
+      "title": "GTM — capilarização consultório (família → médico)",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/growth-consultorio-capilaridade.md",
+      "domainDoc": "docs/product/GROWTH_CONSULTORIO_CAPILARIDADE.md",
+      "routes": [],
+      "api": ["GET /api/growth-consultorio-board"],
+      "helpTopics": [],
+      "tags": ["gtm", "consultório", "referral", "médico", "growth"]
     },
     {
       "id": "patient-clinical-export",
