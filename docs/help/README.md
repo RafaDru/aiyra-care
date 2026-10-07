@@ -11,6 +11,7 @@
 | [`familia-multiplos-cuidadores.md`](./familia-multiplos-cuidadores.md) | Vários responsáveis na conta | Família |
 | [`duplicatas-exames-vacinas.md`](./duplicatas-exames-vacinas.md) | Registros duplicados | Família |
 | [`quem-pode-ver-perfil-saude.md`](./quem-pode-ver-perfil-saude.md) | Quem acessa os dados | Família / LGPD |
+| [`central-atendimento.md`](./central-atendimento.md) | CPF já cadastrado / acesso à conta | Família |
 
 ## Formato de cada arquivo
 

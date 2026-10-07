@@ -1,3 +1,5 @@
+import { ApiResponseError } from './api-response-error.js'
+
 /** Em dev o Vite faz proxy à API (porta 3010). Não usar localhost:3000 — conflita com outros apps. */
 const BASE_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'http://127.0.0.1:3010')
 
@@ -68,7 +70,11 @@ async function request<T>(
         .catch(() => undefined)
     }
     if (contentType.includes('application/json')) {
-      const body = await res.json().catch(() => ({})) as { message?: string; code?: string; error?: unknown }
+      const body = await res.json().catch(() => ({})) as {
+        message?: string
+        code?: string
+        error?: unknown
+      }
       const zodMsg = body.error && typeof body.error === 'object' && 'fieldErrors' in (body.error as object)
         ? JSON.stringify(body.error)
         : undefined
@@ -78,7 +84,11 @@ async function request<T>(
         const feature = deriveFeatureFromApiPath(path)
         throw new Error(getClientErrorPlaybookMessage(feature, `HTTP_${res.status}`))
       }
-      throw new Error(body.message || zodMsg || `HTTP ${res.status}`)
+      throw new ApiResponseError(
+        body.message || zodMsg || `HTTP ${res.status}`,
+        res.status,
+        typeof body.code === 'string' ? body.code : undefined,
+      )
     }
     const text = await res.text().catch(() => '')
     if (text.trimStart().startsWith('<!DOCTYPE') || text.trimStart().startsWith('<html')) {

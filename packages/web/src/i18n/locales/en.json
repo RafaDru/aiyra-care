@@ -206,7 +206,18 @@
     "finish": "Go to home",
     "submit": "Complete registration",
     "error": "Could not complete registration",
-    "dependentError": "Could not add profile"
+    "dependentError": "Could not add profile",
+    "cpfAlreadyLinked": "This CPF is already linked to an account. If you have trouble signing in, visit the <supportLink>support center</supportLink>."
+  },
+  "supportCenter": {
+    "title": "Support center",
+    "subtitle": "Help with registration, account access, and other AiyraCare questions.",
+    "cpfRegisteredHint": "If your CPF is already on file, you likely already have a linked account.",
+    "authProblemsHint": "Trouble signing in (password, confirmation email, or another login method)? Use this page as a reference while we publish official channels.",
+    "channelsTitle": "How to reach us",
+    "channelsPending": "We will soon publish official contact channels here (email, phone, and hours).",
+    "backToLogin": "Back to login",
+    "legalLinks": "<terms>Terms of use</terms> · <privacy>Privacy</privacy>"
   },
   "firstVisitTour": {
     "title": "First steps",

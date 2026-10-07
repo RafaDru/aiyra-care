@@ -206,7 +206,18 @@
     "finish": "Ir para o início",
     "submit": "Concluir cadastro",
     "error": "Não foi possível concluir o cadastro",
-    "dependentError": "Não foi possível adicionar o perfil"
+    "dependentError": "Não foi possível adicionar o perfil",
+    "cpfAlreadyLinked": "Este CPF já está vinculado a uma conta. Se você tem dificuldade para entrar, acesse a <supportLink>central de atendimento</supportLink>."
+  },
+  "supportCenter": {
+    "title": "Central de atendimento",
+    "subtitle": "Ajuda com cadastro, acesso à conta e outras dúvidas sobre o AiyraCare.",
+    "cpfRegisteredHint": "Se o seu CPF já consta em nossa base, é provável que já exista uma conta vinculada a ele.",
+    "authProblemsHint": "Problemas para entrar (senha, e-mail de confirmação ou outro método de login)? Use esta página como referência enquanto publicamos os canais oficiais.",
+    "channelsTitle": "Como falar conosco",
+    "channelsPending": "Em breve publicaremos aqui os canais oficiais de contato (e-mail, telefone e horários).",
+    "backToLogin": "Voltar ao login",
+    "legalLinks": "<terms>Termos de uso</terms> · <privacy>Privacidade</privacy>"
   },
   "firstVisitTour": {
     "title": "Primeiros passos",

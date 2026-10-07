@@ -39,6 +39,14 @@ export class PatientPgRepository implements PatientRepository {
     return rows.length ? rowToPatient(rows[0]) : null
   }
 
+  async findByCpf(cpf: string): Promise<Patient | null> {
+    const { rows } = await this.pool.query(
+      `SELECT ${COLUMNS} FROM patients WHERE cpf = $1 LIMIT 1`,
+      [cpf],
+    )
+    return rows.length ? rowToPatient(rows[0]) : null
+  }
+
   async findAll(): Promise<Patient[]> {
     const { rows } = await this.pool.query(
       `SELECT ${COLUMNS} FROM patients ORDER BY name`

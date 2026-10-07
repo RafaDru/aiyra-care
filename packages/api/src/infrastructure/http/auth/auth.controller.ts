@@ -55,7 +55,9 @@ export class AuthController {
         needsProfile: result.needsProfile,
       })
     } catch (err) {
-      if (err instanceof ConflictError) return reply.status(409).send({ message: err.message })
+      if (err instanceof ConflictError) {
+        return reply.status(409).send({ message: err.message, code: err.code })
+      }
       throw err
     }
   }
