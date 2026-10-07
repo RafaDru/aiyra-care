@@ -82,6 +82,7 @@ import {
 } from './stack-control.js'
 import { loadProductLifecycle } from './product-lifecycle.js'
 import { loadProductMaturityBoard } from './product-maturity-board.js'
+import { loadGrowthConsultorioBoard } from './growth-consultorio-board.js'
 import {
   loadStrategyContent,
   loadStrategyManifest,
@@ -352,11 +353,22 @@ async function main() {
     }
   })
 
+  fastify.get('/api/growth-consultorio-board', async (req, reply) => {
+    try {
+      return loadGrowthConsultorioBoard(monorepoRoot)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'growth_consultorio_board_load_failed'
+      return reply.status(500).send({ error: message })
+    }
+  })
+
   fastify.get('/api/strategy/manifest', async () => loadStrategyManifest())
+
+  const STRATEGY_SECTIONS: StrategySectionId[] = ['mkt', 'finance', 'cx', 'gtm']
 
   fastify.get<{ Params: { section: string } }>('/api/strategy/content/:section', async (req, reply) => {
     const section = req.params.section?.trim() as StrategySectionId
-    if (section !== 'mkt' && section !== 'finance' && section !== 'cx') {
+    if (!STRATEGY_SECTIONS.includes(section)) {
       return reply.status(400).send({ error: 'invalid_strategy_section' })
     }
     try {

@@ -2,6 +2,8 @@
 
 | Artefato | Uso |
 |----------|-----|
+| [`GROWTH_CONSULTORIO_CAPILARIDADE.md`](./GROWTH_CONSULTORIO_CAPILARIDADE.md) | GTM família → médico → consultório (tese, fases A–D, MGM gate legal). |
+| [`GROWTH_CONSULTORIO_BOARD.json`](./GROWTH_CONSULTORIO_BOARD.json) | Board machine-readable — CH **Produto → Capilarização** e estratégia GTM. |
 | [`PRODUCT_MATURITY_BOARD.json`](./PRODUCT_MATURITY_BOARD.json) | Quadro de maturidade por superfície e domínio — editável no repo; lido pelo Command Hub (**Produto → Maturidade**). |
 | [`../features/`](../features/index.json) | Feature cards e suites QA por capacidade. |
 | [`../roadmap.json`](../roadmap.json) | Épicos e prioridades de entrega. |

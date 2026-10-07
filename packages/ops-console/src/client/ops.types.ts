@@ -597,6 +597,49 @@ export type ProductMaturityBoardSnapshot = {
   sourceRelativePath: string
 }
 
+export type GrowthPhaseStatus = 'done' | 'partial' | 'planned'
+export type GrowthChannelStatus = 'done' | 'partial' | 'planned'
+
+export type GrowthConsultorioPhase = {
+  id: string
+  title: string
+  status: GrowthPhaseStatus
+  headline: string
+  note: string
+  doc?: string
+}
+
+export type GrowthConsultorioChannel = {
+  id: string
+  name: string
+  status: GrowthChannelStatus
+  featureRef?: string
+}
+
+export type GrowthNorthStarMetric = {
+  id: string
+  label: string
+  event: string
+  stage: string
+}
+
+export type GrowthOpenDecision = {
+  id: string
+  question: string
+  owner: string
+}
+
+export type GrowthConsultorioBoardSnapshot = {
+  updatedAt: string
+  summary: string
+  phases: GrowthConsultorioPhase[]
+  channels: GrowthConsultorioChannel[]
+  northStarMetrics: GrowthNorthStarMetric[]
+  openDecisions: GrowthOpenDecision[]
+  loadedAt: string
+  sourceRelativePath: string
+}
+
 export interface ProductLifecycleSnapshot {
   loadedAt: string
   roadmapUpdatedAt?: string
@@ -660,7 +703,7 @@ export interface StackActionResult {
   error?: string
 }
 
-export type StrategySectionId = 'mkt' | 'finance' | 'cx'
+export type StrategySectionId = 'mkt' | 'finance' | 'cx' | 'gtm'
 
 export type StrategyManifestResponse = {
   updatedAt: string

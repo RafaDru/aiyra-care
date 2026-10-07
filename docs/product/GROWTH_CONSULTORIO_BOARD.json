@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-10-07T20:00:00Z",
+  "summary": "GTM família → médico → consultório. Fonte canônica: docs/product/GROWTH_CONSULTORIO_CAPILARIDADE.md. Fases A–D; canais com status done|partial|planned; MGM em gate legal.",
+  "phases": [
+    {
+      "id": "A",
+      "title": "Gancho",
+      "status": "partial",
+      "headline": "Portal público + feedback + CTA pro",
+      "note": "Share D5 e referral_code entregues; marca d'água PDF e prompts contextuais em aberto.",
+      "doc": "docs/product/GROWTH_CONSULTORIO_CAPILARIDADE.md#fases-ad"
+    },
+    {
+      "id": "B",
+      "title": "Conta pro",
+      "status": "planned",
+      "headline": "Inbox, pacientes autorizados, notas",
+      "note": "RBAC organização (055); serviços diferenciados sem bloquear leitura do share.",
+      "doc": "docs/features/b2b-organizations-api.md"
+    },
+    {
+      "id": "C",
+      "title": "Consultório + IA apoio",
+      "status": "planned",
+      "headline": "Agenda leve e prontuário mínimo",
+      "note": "IA de apoio — gate ANVISA e revisão médica antes de escopo clínico.",
+      "doc": "docs/product/GROWTH_CONSULTORIO_CAPILARIDADE.md"
+    },
+    {
+      "id": "D",
+      "title": "Pricing MGM",
+      "status": "planned",
+      "headline": "Indicação bilateral e billing",
+      "note": "Discovery referral-growth-loop; código só após legal + fiscal.",
+      "doc": "docs/discovery/referral-growth-loop.md"
+    }
+  ],
+  "channels": [
+    {
+      "id": "pdf-watermark-qr",
+      "name": "PDF + marca d'água + QR",
+      "status": "partial",
+      "featureRef": "patient-clinical-export"
+    },
+    {
+      "id": "qr-normalized-portal",
+      "name": "QR → portal normalizado (D5)",
+      "status": "done",
+      "featureRef": "patient-clinical-export"
+    },
+    {
+      "id": "whatsapp-share",
+      "name": "WhatsApp / mensageria",
+      "status": "partial",
+      "featureRef": "patient-clinical-export"
+    },
+    {
+      "id": "in-app-share-cta",
+      "name": "«Levar na consulta» in-app",
+      "status": "done",
+      "featureRef": "patient-clinical-export"
+    },
+    {
+      "id": "contextual-prompts",
+      "name": "Prompts pós-sync / exame",
+      "status": "planned",
+      "featureRef": "growth-consultorio-capilaridade"
+    },
+    {
+      "id": "referral-attribution",
+      "name": "Link com ?ref= / referral_code",
+      "status": "partial",
+      "featureRef": "patient-clinical-export"
+    }
+  ],
+  "northStarMetrics": [
+    {
+      "id": "referral-link-opened",
+      "label": "Abertura link médico",
+      "event": "referral_link_opened",
+      "stage": "share"
+    },
+    {
+      "id": "pro-signup",
+      "label": "Signup conta profissional",
+      "event": "professional_signup_completed",
+      "stage": "convert"
+    },
+    {
+      "id": "first-linked-patient",
+      "label": "1º paciente vinculado (pro)",
+      "event": "clinician_first_patient_linked",
+      "stage": "activate"
+    },
+    {
+      "id": "cac-consultorio",
+      "label": "CAC por consultório",
+      "event": "ops_attribution",
+      "stage": "efficiency"
+    },
+    {
+      "id": "clinician-feedback",
+      "label": "Feedback pós-share",
+      "event": "clinician_share_feedback",
+      "stage": "quality"
+    }
+  ],
+  "openDecisions": [
+    {
+      "id": "watermark-spec",
+      "question": "Marca d'água: logo + URL fixa ou QR único por share?",
+      "owner": "Rafael"
+    },
+    {
+      "id": "mgm-first-incentive",
+      "question": "Primeiro incentivo monetário: só médico, só paciente, ou bilateral desde dia 1?",
+      "owner": "Rafael"
+    },
+    {
+      "id": "cfm-onboarding",
+      "question": "Validação CRM/CFM no onboarding pro — obrigatório ou progressivo?",
+      "owner": "Rafael"
+    }
+  ]
+}

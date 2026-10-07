@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
-export type StrategySectionId = 'mkt' | 'finance' | 'cx'
+export type StrategySectionId = 'mkt' | 'finance' | 'cx' | 'gtm'
 
 export type StrategyManifest = {
   updatedAt: string

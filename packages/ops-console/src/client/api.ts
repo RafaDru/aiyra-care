@@ -3,6 +3,7 @@ import type {
   OpsMetricsResponse,
   ProductLifecycleSnapshot,
   ProductMaturityBoardSnapshot,
+  GrowthConsultorioBoardSnapshot,
   StackActionResult,
   StrategyContentPayload,
   StrategyManifestResponse,
@@ -69,6 +70,8 @@ export const opsApi = {
   productLifecycle: () => request<ProductLifecycleSnapshot>('/api/product-lifecycle'),
   productMaturityBoard: () =>
     request<ProductMaturityBoardSnapshot>('/api/product-maturity-board'),
+  growthConsultorioBoard: () =>
+    request<GrowthConsultorioBoardSnapshot>('/api/growth-consultorio-board'),
   strategyManifest: () => request<StrategyManifestResponse>('/api/strategy/manifest'),
   strategyContent: (section: StrategySectionId) =>
     request<StrategyContentPayload>(`/api/strategy/content/${encodeURIComponent(section)}`),

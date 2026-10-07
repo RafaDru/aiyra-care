@@ -10,13 +10,13 @@
 
 ## Resumo
 
-Aba **Estratégia** no Command Hub (`packages/ops-console`) para leitura interna de relatórios round 1 (Marketing, Financeiro, CX) sem PHI — alinhado a advisors do Project store.
+Aba **Estratégia** no Command Hub (`packages/ops-console`) para leitura interna de relatórios round 1 (Marketing, **Capilarização consultório/GTM**, Financeiro, CX) sem PHI — alinhado a advisors do Project store.
 
 ## Superfície técnica
 
 | Tipo | Referência |
 |------|------------|
-| Console | `StrategyPanel.tsx`, `?tab=strategy&strategy=mkt\|finance\|cx` |
+| Console | `StrategyPanel.tsx`, `?tab=strategy&strategy=mkt\|gtm\|finance\|cx` |
 | Conteúdo | `packages/ops-console/content/strategy/` + `manifest.json` |
 | API | `GET /api/strategy/manifest`, `GET /api/strategy/content/:section` |
 

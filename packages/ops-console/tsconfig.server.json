@@ -11,6 +11,7 @@
     "src/server.ts",
     "src/strategy-content.ts",
     "src/product-lifecycle.ts",
-    "src/product-maturity-board.ts"
+    "src/product-maturity-board.ts",
+    "src/growth-consultorio-board.ts"
   ]
 }

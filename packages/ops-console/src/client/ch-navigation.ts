@@ -7,6 +7,7 @@ import {
   CustomerServiceOutlined,
   DashboardOutlined,
   DeploymentUnitOutlined,
+  BranchesOutlined,
   ExperimentOutlined,
   FlagOutlined,
   BugOutlined,
@@ -37,6 +38,7 @@ export type ChTabKey =
   | 'infra'
   | 'produto'
   | 'maturidade'
+  | 'capilaridade'
   | 'product'
   | 'support'
   | 'business'
@@ -119,6 +121,12 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
         icon: icon(PieChartOutlined),
       },
       {
+        tab: 'capilaridade',
+        label: 'Capilarização',
+        description: 'GTM família → médico → consultório — fases, canais e decisões.',
+        icon: icon(BranchesOutlined),
+      },
+      {
         tab: 'product',
         label: 'Produto e UX',
         description: 'Erros de cliente, features e matriz acesso × falha.',
@@ -147,7 +155,7 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
       {
         tab: 'strategy',
         label: 'Estratégia',
-        description: 'Leitura advisory Marketing, Financeiro e CX.',
+        description: 'Leitura advisory Marketing, GTM consultório, Financeiro e CX.',
         icon: icon(ReadOutlined),
       },
     ],
