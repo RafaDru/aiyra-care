@@ -110,6 +110,40 @@ describe('ClientErrorIncidentBridgeService', () => {
     expect(tryAcquire).toHaveBeenNthCalledWith(1, fp, 'local', 60_000, 2)
   })
 
+  it('skips business api.client and HTTP_409 ingest (decision 2026-10-07)', async () => {
+    const tryAcquire = vi.fn(async () => ({ acquired: true }))
+    const enqueueClientErrorSignal = vi.fn(async () => ({ id: 'q-biz' }))
+    const bridge = new ClientErrorIncidentBridgeService(
+      enabledConfig(),
+      { tryAcquireEnqueueSlot: tryAcquire, attachQueueId: vi.fn() } as never,
+      { enqueueClientErrorSignal } as never,
+    )
+    const fp409 = computeClientErrorFingerprint('account_settings', 'api', 'HTTP_409')
+    await bridge.onIngestedErrors(
+      [{
+        fingerprint: fp409,
+        feature: 'account_settings',
+        errorKind: 'api',
+        errorCode: 'HTTP_409',
+        properties: { probe_kind: 'api.client', api_path: '/auth/complete-profile' },
+      }],
+      { accountId: null, deploymentTier: 'local' },
+    )
+    const fp500 = computeClientErrorFingerprint('account_settings', 'api', 'HTTP_500')
+    await bridge.onIngestedErrors(
+      [{
+        fingerprint: fp500,
+        feature: 'account_settings',
+        errorKind: 'api',
+        errorCode: 'HTTP_500',
+        properties: { probe_kind: 'api.unexpected', api_path: '/auth/profile' },
+      }],
+      { accountId: null, deploymentTier: 'local' },
+    )
+    expect(tryAcquire).toHaveBeenCalledTimes(1)
+    expect(enqueueClientErrorSignal).toHaveBeenCalledTimes(1)
+  })
+
   it('skips features outside allowlist', async () => {
     const tryAcquire = vi.fn()
     const enqueueClientErrorSignal = vi.fn()

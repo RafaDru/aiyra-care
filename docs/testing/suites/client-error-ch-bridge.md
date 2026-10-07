@@ -16,6 +16,7 @@
 - [ ] `CLIENT_ERROR_INCIDENT_DEDUPE_MS=900000`, `CLIENT_ERROR_INCIDENT_MIN_COUNT=1`
 - [ ] `CLIENT_ERROR_INCIDENT_FEATURES` inclui feature do teste (ex. `account_settings`)
 - [ ] Decisão **3A:** `ava_companion` em `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (default) — não deve abrir INC; regressão em vitest `client-error-incident-bridge.config.test.ts`
+- [ ] Decisão **2026-10-07:** `HTTP_409` / `HTTP_400` ou `probe_kind=api.client` — ingest `202`, **sem** INC; vitest `shouldEnqueueClientErrorIncident`
 
 ## Passos (manual + PG)
 

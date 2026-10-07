@@ -30,6 +30,7 @@ Camada **default-on** de captura de falhas user-impacting (UI sem fallback, API 
 - **Web:** React SDK — evoluir `packages/web/src/lib/client-errors.ts`
 - **Mobile:** React Native — `packages/mobile/src/lib/client-errors.ts`
 - Bridge blocklist `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (M2 parcial — **3A** `ava_companion`) + suite QA (após M2 completo)
+- **INC só técnico (2026-10-07):** erros de negócio (`probe_kind=api.client`, `HTTP_400`/`HTTP_409`) → telemetria sim, bridge não enfileira — [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](../ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md) § negócio vs técnico
 
 ## Superfície técnica
 
