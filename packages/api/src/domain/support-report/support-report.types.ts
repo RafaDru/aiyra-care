@@ -2,6 +2,7 @@ export const SUPPORT_REPORT_CATEGORIES = [
   'technical_bug',
   'incorrect_data',
   'ux_confusion',
+  'account_login_cpf',
   'other',
 ] as const
 

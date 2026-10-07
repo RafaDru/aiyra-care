@@ -1,11 +1,21 @@
 import { Patient, type PatientProps } from '../../domain/patient/patient.entity.js'
 import type { PatientRepository } from '../../domain/patient/patient.repository.js'
-import { NotFoundError } from '../../domain/errors.js'
+import { ConflictError, NotFoundError } from '../../domain/errors.js'
+
+export const CPF_ALREADY_LINKED_CODE = 'CPF_ALREADY_LINKED'
+const CPF_ALREADY_LINKED_MESSAGE =
+  'Este CPF já está vinculado a uma conta. Se você tem dificuldade para entrar, use a central de atendimento.'
 
 export class PatientService {
   constructor(private readonly repo: PatientRepository) {}
 
   async create(data: PatientProps): Promise<Patient> {
+    if (data.cpf) {
+      const existing = await this.repo.findByCpf(data.cpf)
+      if (existing) {
+        throw new ConflictError(CPF_ALREADY_LINKED_MESSAGE, CPF_ALREADY_LINKED_CODE)
+      }
+    }
     const patient = Patient.create(data)
     return this.repo.save(patient)
   }

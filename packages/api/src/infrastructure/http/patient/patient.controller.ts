@@ -29,7 +29,7 @@ import {
   patientContextQuerySchema,
   patientTimelineQuerySchema,
 } from './patient.schema.js'
-import { NotFoundError } from '../../../domain/errors.js'
+import { ConflictError, NotFoundError } from '../../../domain/errors.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import {
   assertPatientAccess,
@@ -73,7 +73,15 @@ export class PatientController {
         throw err
       }
     }
-    const patient = await this.service.create(parsed.data)
+    let patient
+    try {
+      patient = await this.service.create(parsed.data)
+    } catch (err) {
+      if (err instanceof ConflictError) {
+        return reply.status(409).send({ message: err.message, code: err.code })
+      }
+      throw err
+    }
     if (req.accountId) {
       await this.service.setOwnerAccountId(patient.id, req.accountId)
       if (this.memberships) {

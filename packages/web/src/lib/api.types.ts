@@ -682,6 +682,7 @@ export type ProductEventName =
   | 'notification_optin_changed'
   | 'app_screen_viewed'
   | 'support_report_submitted'
+  | 'support_resolution_prompt'
   | 'consult_visit_share_created'
   | 'consult_visit_link_copied'
   | 'consult_visit_print'
@@ -700,6 +701,7 @@ export type SupportReportCategory =
   | 'technical_bug'
   | 'incorrect_data'
   | 'ux_confusion'
+  | 'account_login_cpf'
   | 'other'
 
 export interface SupportReportSummary {

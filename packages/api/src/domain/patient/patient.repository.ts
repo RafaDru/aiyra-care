@@ -2,6 +2,7 @@ import type { Patient } from './patient.entity.js'
 
 export interface PatientRepository {
   findById(id: string): Promise<Patient | null>
+  findByCpf(cpf: string): Promise<Patient | null>
   findAll(): Promise<Patient[]>
   findByIds(ids: readonly string[]): Promise<Patient[]>
   save(patient: Patient): Promise<Patient>

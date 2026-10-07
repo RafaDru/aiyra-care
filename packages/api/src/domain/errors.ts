@@ -6,8 +6,11 @@ export class NotFoundError extends Error {
 }
 
 export class ConflictError extends Error {
-  constructor(message: string) {
+  readonly code?: string
+
+  constructor(message: string, code?: string) {
     super(message)
     this.name = 'ConflictError'
+    this.code = code
   }
 }
