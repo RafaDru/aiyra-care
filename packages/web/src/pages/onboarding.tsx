@@ -101,7 +101,6 @@ export function OnboardingPage() {
     setSubmitting(true)
     setError(null)
     try {
-      goToDependentsStep()
       await api.auth.completeProfile({
         name: values.name,
         birthDate: values.birthDate.toDate().toISOString(),
@@ -109,6 +108,7 @@ export function OnboardingPage() {
         cpf: values.cpf.replace(/\D/g, ''),
         cns: values.cns?.replace(/\D/g, '') || undefined,
       })
+      goToDependentsStep()
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
       await refreshSync()
     } catch (e) {

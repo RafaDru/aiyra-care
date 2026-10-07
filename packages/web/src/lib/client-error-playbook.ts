@@ -24,6 +24,7 @@ const FEATURE_MESSAGES: Record<string, Record<string, string>> = {
   },
   onboarding: {
     default: 'Não conseguimos salvar seu perfil. Tente novamente.',
+    HTTP_409: 'Este CPF já está cadastrado. Use a conta original ou outro CPF.',
   },
   ui: {
     default: 'Algo inesperado aconteceu nesta página.',
