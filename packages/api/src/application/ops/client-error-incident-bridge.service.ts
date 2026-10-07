@@ -5,6 +5,7 @@ import {
   resolveBridgeIngressFeature,
   resolveClientErrorIncidentBridgeConfig,
   ruleForFeature,
+  shouldEnqueueClientErrorIncident,
 } from '../../domain/ops/client-error-incident-bridge.config.js'
 import type { ClientErrorIncidentBridgeConfig } from '../../domain/ops/client-error-incident-bridge.types.js'
 import type { OpsAnalysisQueueService } from './ops-analysis-queue.service.js'
@@ -94,6 +95,7 @@ export class ClientErrorIncidentBridgeService {
   ): Promise<void> {
     const feature = sanitizeClientErrorFeature(error.feature)
     if (!feature) return
+    if (!shouldEnqueueClientErrorIncident(error.errorCode, error.properties)) return
 
     const bridgeFeature = resolveBridgeIngressFeature(feature, error.properties)
     const rule = ruleForFeature(this.config, feature, error.properties, {

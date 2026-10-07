@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext.js'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
 import { OnboardingLayout } from '../layouts/OnboardingLayout.js'
+import { httpStatusFromError, reportAccountSettingsFailure } from '../lib/account-settings-errors.js'
 import { api } from '../lib/api.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
 import { formatCpfInput } from '../lib/input-masks.js'
@@ -112,6 +113,14 @@ export function OnboardingPage() {
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
       await refreshSync()
     } catch (e) {
+      const status = httpStatusFromError(e)
+      if (status) {
+        reportAccountSettingsFailure('profile_save', {
+          apiPath: '/auth/complete-profile',
+          status,
+          message: e instanceof Error ? e.message : undefined,
+        })
+      }
       clearOnboardingWizardStep()
       setCurrentStep(0)
       setError(e instanceof Error ? e.message : t('onboarding.error'))

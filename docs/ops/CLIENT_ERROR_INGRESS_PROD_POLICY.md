@@ -18,6 +18,15 @@ Definir como ligar o bridge `client_errors` → `INC-*` em **preview** e **produ
 
 **Princípio charter:** ruído = custo de atenção humano zero → preferir atrasar INC a criar fila falsa.
 
+### Negócio vs técnico (decisão Rafael 2026-10-07)
+
+| Categoria | Exemplos | `client_errors` ingest | Bridge → INC |
+|-----------|----------|------------------------|--------------|
+| **Técnico** | 5xx, rede, `ui.unhandled`, `api.unexpected` | Sim | Sim (allowlist + dedupe) |
+| **Negócio esperado** | 409 conflito (CPF duplicado), 400 validação; `probe_kind=api.client` | Sim | **Não** |
+
+Implementação: `shouldEnqueueClientErrorIncident()` em `client-error-incident-bridge.config.ts` — suprime `api.client` e `HTTP_400` / `HTTP_409` legados. Fluxos dedicados de erro de negócio no CH ficam para depois.
+
 ---
 
 ## 2. Knobs (referência)

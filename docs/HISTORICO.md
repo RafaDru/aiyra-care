@@ -1,5 +1,15 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-07] - CH bridge INC — só falha técnica
+
+### Decisão
+- Auto-INC no Command Hub apenas para falhas **técnicas** (5xx, rede, UI não tratada); erros de negócio esperados (409 CPF duplicado, 400 validação, `probe_kind=api.client`) continuam em `client_errors` sem abrir INC.
+
+### Realizado
+- API: `shouldEnqueueClientErrorIncident` no bridge; vitest config + service.
+- Web: telemetria em falha de `POST /auth/complete-profile` no onboarding (`account_settings`, `api.client` em 4xx).
+- Docs: `CLIENT_ERROR_INGRESS_PROD_POLICY.md`, `failure-probes-ch.md`.
+
 ## [2026-10-07] - Web onboarding refresh v2 (B2C cuidador)
 
 ### Realizado

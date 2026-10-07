@@ -173,6 +173,24 @@ export function ruleForFeature(
   }
 }
 
+/**
+ * Rafael 2026-10-07: auto-INC only for technical failures — not contract/business 4xx.
+ * Telemetry ingest continues; bridge skips enqueue.
+ */
+export function shouldEnqueueClientErrorIncident(
+  errorCode: string,
+  properties?: Record<string, unknown>,
+): boolean {
+  const probeKind =
+    typeof properties?.probe_kind === 'string' ? properties.probe_kind.trim() : undefined
+  if (probeKind === 'api.client') return false
+
+  const code = errorCode.trim().toUpperCase()
+  if (code === 'HTTP_400' || code === 'HTTP_409') return false
+
+  return true
+}
+
 export function apiPathMatchesIncidentPrefixes(
   path: string,
   config: ClientErrorIncidentBridgeConfig,

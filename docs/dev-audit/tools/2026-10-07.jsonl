@@ -1,0 +1,13 @@
+{"ts":"2026-10-07T15:22:42.085Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/src/domain/ops/client-error-incident-bridge.config.ts"}
+{"ts":"2026-10-07T15:22:42.085Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/src/application/ops/client-error-incident-bridge.service.ts"}
+{"ts":"2026-10-07T15:22:43.978Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/src/application/ops/client-error-incident-bridge.service.ts"}
+{"ts":"2026-10-07T15:22:54.966Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/tests/client-error-incident-bridge.service.test.ts"}
+{"ts":"2026-10-07T15:22:54.972Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/tests/client-error-incident-bridge.config.test.ts"}
+{"ts":"2026-10-07T15:22:59.409Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/tests/client-error-incident-bridge.config.test.ts"}
+{"ts":"2026-10-07T15:23:07.446Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/web/src/pages/onboarding.tsx"}
+{"ts":"2026-10-07T15:23:08.579Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/web/src/pages/onboarding.tsx"}
+{"ts":"2026-10-07T15:23:19.990Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/features/failure-probes-ch.md"}
+{"ts":"2026-10-07T15:23:19.990Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/ops/CLIENT_ERROR_INGRESS_PROD_POLICY.md"}
+{"ts":"2026-10-07T15:23:20.052Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/HISTORICO.md"}
+{"ts":"2026-10-07T15:24:17.812Z","event":"preToolUse","tool":"Write","path":"/workspace/docs/testing/suites/client-error-ch-bridge.md"}
+{"ts":"2026-10-07T15:24:25.027Z","event":"preToolUse","tool":"Write","path":"/workspace/packages/api/tests/client-error-incident-bridge.service.test.ts"}
