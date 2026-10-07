@@ -8,6 +8,7 @@ import { resolveDeploymentTier } from './investigator-environment.js'
 /** Phase 0–1 web + phase 2–4 mobile / integration_links / Ava — CLIENT_ERROR_INCIDENT_BRIDGE.md */
 const DEFAULT_FEATURES = [
   'account_settings',
+  'onboarding',
   'dashboard',
   'ui',
   'app',
@@ -35,6 +36,15 @@ const BRIDGE_FEATURE_ALIASES: Record<string, string> = {
   'api:integration_links': 'patient_integrations',
   'api:ava': 'ava_companion',
   'api:patients:ava': 'ava_companion',
+}
+
+function resolveAuthApiBridgeFeature(properties?: Record<string, unknown>): string {
+  const apiPath = typeof properties?.api_path === 'string' ? properties.api_path : undefined
+  const base = apiPath?.split('?')[0] ?? ''
+  if (base === '/auth/complete-profile' || base.endsWith('/auth/complete-profile')) {
+    return 'onboarding'
+  }
+  return 'account_settings'
 }
 
 const PATIENT_API_RESOURCE_BRIDGE: Record<string, string> = {
@@ -96,6 +106,10 @@ export function resolveBridgeIngressFeature(
   const normalized = feature.trim().toLowerCase()
   const alias = BRIDGE_FEATURE_ALIASES[normalized]
   if (alias) return alias
+
+  if (normalized === 'api:auth') {
+    return resolveAuthApiBridgeFeature(properties)
+  }
 
   if (normalized.startsWith('api:patients:')) {
     const resource = normalized.slice('api:patients:'.length)
@@ -174,7 +188,7 @@ export function inferServerErrorBridgeFeature(path: string): string {
   const segments = path.split('?')[0].split('/').filter(Boolean)
   const segment = segments[0] ?? 'api'
   const mapped: Record<string, string> = {
-    auth: 'account_settings',
+    auth: path.includes('complete-profile') ? 'onboarding' : 'account_settings',
     account: 'account_settings',
     patients: 'patient_detail',
     'integration-links': 'integration_links',

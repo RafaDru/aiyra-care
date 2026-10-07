@@ -16,6 +16,7 @@ describe('resolveClientErrorIncidentBridgeConfig', () => {
     expect(cfg.dedupeMs).toBe(15 * 60 * 1000)
     expect(cfg.minCount).toBe(1)
     expect(cfg.features.has('account_settings')).toBe(true)
+    expect(cfg.features.has('onboarding')).toBe(true)
     expect(cfg.features.has('patient_integrations')).toBe(true)
     expect(cfg.features.has('integrations')).toBe(true)
     expect(cfg.features.has('integration_links')).toBe(true)
@@ -90,6 +91,15 @@ describe('resolveBridgeIngressFeature', () => {
   it('infers integration_links from sync API path', () => {
     expect(inferServerErrorBridgeFeature('/integration-links/link-1/sync')).toBe('integration_links')
     expect(sanitizeClientErrorFeature('integration_links')).toBe('integration_links')
+  })
+
+  it('maps complete-profile auth API to onboarding bridge feature', () => {
+    expect(
+      resolveBridgeIngressFeature('api:auth', { api_path: '/auth/complete-profile' }),
+    ).toBe('onboarding')
+    expect(resolveBridgeIngressFeature('api:auth', { api_path: '/auth/sync' })).toBe('account_settings')
+    expect(inferServerErrorBridgeFeature('/auth/complete-profile')).toBe('onboarding')
+    expect(inferServerErrorBridgeFeature('/auth/sync')).toBe('account_settings')
   })
 
   it('maps mobile and API telemetry keys to bridge allowlist', () => {

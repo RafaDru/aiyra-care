@@ -4,6 +4,7 @@ import type { AccountDeletionService } from '../../../application/account/accoun
 import type { AuthenticatedRequest } from './auth.middleware.js'
 import { completeProfileSchema, deleteAccountSchema } from './auth.schema.js'
 import { ConflictError } from '../../../domain/errors.js'
+import { isPostgresUniqueViolation } from '../../persistence/pg-errors.js'
 
 export class AuthController {
   constructor(
@@ -56,6 +57,12 @@ export class AuthController {
       })
     } catch (err) {
       if (err instanceof ConflictError) return reply.status(409).send({ message: err.message })
+      if (isPostgresUniqueViolation(err, 'patients_cpf_key')) {
+        return reply.status(409).send({
+          message:
+            'Este CPF já está cadastrado no AiyraCare. Entre com a conta que criou o perfil ou use outro CPF.',
+        })
+      }
       throw err
     }
   }

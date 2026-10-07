@@ -33,6 +33,34 @@ export async function openAuthenticatedDownload(path: string): Promise<void> {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000)
 }
 
+function apiPathBase(path: string): string {
+  return path.split('?')[0]
+}
+
+/** Failure Probes 1A — user-blocking API failures (not only 5xx). */
+function shouldReportDeclaredApiFailure(path: string, status: number): boolean {
+  if (status >= 500 && status <= 599) return true
+  const base = apiPathBase(path)
+  if (base === '/auth/complete-profile' && (status === 409 || status === 400)) return true
+  return false
+}
+
+async function reportDeclaredApiFailure(path: string, status: number): Promise<void> {
+  const { reportClientError } = await import('./client-errors.js')
+  const { deriveFeatureFromRoute } = await import('./client-error-fingerprint.js')
+  const route = typeof window !== 'undefined' ? window.location.pathname : undefined
+  const feature = route ? deriveFeatureFromRoute(route) : undefined
+  void reportClientError({
+    feature,
+    errorKind: 'api',
+    errorCode: `HTTP_${status}`,
+    apiPath: path,
+    route,
+    declared: true,
+    probeKind: status >= 500 && status <= 599 ? 'api.unexpected' : 'api.client',
+  }).catch(() => undefined)
+}
+
 async function request<T>(
   path: string,
   options?: RequestInit & { skipErrorReport?: boolean; declaredFallback?: boolean },
@@ -62,10 +90,8 @@ async function request<T>(
   const contentType = res.headers.get('content-type') ?? ''
   if (!res.ok) {
     const isServerError = res.status >= 500 && res.status <= 599
-    if (!skipReport && isServerError && !declaredFallback) {
-      void import('./client-errors.js')
-        .then((m) => m.reportApiClientError(path, res.status, { declared: true, probeKind: 'api.unexpected' }))
-        .catch(() => undefined)
+    if (!skipReport && !declaredFallback && shouldReportDeclaredApiFailure(path, res.status)) {
+      void reportDeclaredApiFailure(path, res.status)
     }
     if (contentType.includes('application/json')) {
       const body = await res.json().catch(() => ({})) as { message?: string; code?: string; error?: unknown }
