@@ -441,7 +441,8 @@
       "created": "Family created",
       "createError": "Could not create family",
       "loadError": "Could not load families",
-      "empty": "No families yet — create one or accept a caregiver invite.",
+      "empty": "No families yet",
+      "emptyHint": "Create a family or accept a caregiver invite.",
       "profiles": "Health profiles",
       "noProfiles": "No linked profiles",
       "members": "Members",
@@ -466,7 +467,12 @@
       "otherProfiles": "Other profiles",
       "unassigned": "No family assigned",
       "organizeInFamily": "Organize in Family",
-      "sharedProfile": "Shared"
+      "sharedProfile": "Shared",
+      "delete": "Delete family",
+      "deleteTitle": "Delete this family?",
+      "deleteConfirm": "Health profiles are not deleted — only this grouping. This cannot be undone.",
+      "deleted": "Family deleted",
+      "deleteError": "Could not delete family"
     },
     "profileShare": {
       "title": "Share profile across families",

@@ -24,4 +24,6 @@ export interface CareCircleRepository {
   linkPatient(circleId: string, patientId: string): Promise<void>
   unlinkPatient(circleId: string, patientId: string): Promise<boolean>
   getDetail(circleId: string, accountId: string): Promise<CareCircleDetail | null>
+  deleteById(id: string): Promise<boolean>
+  countOwnedCircles(accountId: string): Promise<number>
 }
