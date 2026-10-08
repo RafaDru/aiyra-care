@@ -1,0 +1,13 @@
+{"ts":"2026-10-08T01:42:16.499Z","event":"beforeShellExecution","command":"cd /workspace && git fetch origin main && git branch -a && gh pr view 146 --json title,state,headRefName,baseRefName 2>/dev/null; gh pr view 147 --json title,state,headRefName,baseRefName 2>/dev/null"}
+{"ts":"2026-10-08T01:42:30.014Z","event":"beforeShellExecution","command":"cd /workspace && git fetch origin cursor/hide-roadmap-menu-15b3 cursor/user-menu-help-remove-ops-a12e && git log --oneline origin/main..origin/cursor/hide-roadmap-menu-15b3 && echo '---' && git log --oneline origin/main..origin/cursor/user-menu-help-remove-ops-a12e"}
+{"ts":"2026-10-08T01:42:38.128Z","event":"beforeShellExecution","command":"cd /workspace && git show origin/cursor/user-menu-help-remove-ops-a12e -p --stat | head -120"}
+{"ts":"2026-10-08T01:42:38.129Z","event":"beforeShellExecution","command":"cd /workspace && git show origin/cursor/hide-roadmap-menu-15b3 --stat && git show origin/cursor/hide-roadmap-menu-15b3 -p -- packages/web/src/components/layout/AppLayout.tsx | head -80"}
+{"ts":"2026-10-08T01:43:22.236Z","event":"beforeShellExecution","command":"cd /workspace && git checkout -b cursor/hide-roadmap-ops-end-user-aaf1 origin/main"}
+{"ts":"2026-10-08T01:44:38.396Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1"}
+{"ts":"2026-10-08T01:44:38.402Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npx vitest run tests/internal-product-ui.test.ts 2>&1"}
+{"ts":"2026-10-08T01:44:53.019Z","event":"beforeShellExecution","command":"test -f /tmp/cursor/async-install/install-user.status && cat /tmp/cursor/async-install/install-user.status; test -f /tmp/cursor/async-install/install-user.log && tail -3 /tmp/cursor/async-install/install-user.log"}
+{"ts":"2026-10-08T01:44:59.979Z","event":"beforeShellExecution","command":"cd /workspace && npm ci 2>&1"}
+{"ts":"2026-10-08T01:45:28.783Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1"}
+{"ts":"2026-10-08T01:45:28.885Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npx vitest run tests/internal-product-ui.test.ts 2>&1"}
+{"ts":"2026-10-08T01:45:46.310Z","event":"beforeShellExecution","command":"cd /workspace && npm run test:critical 2>&1"}
+{"ts":"2026-10-08T01:45:58.111Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"$(cat <<'EOF'\nfix(web): hide roadmap and observability from end-user UI\n\nConsolidates draft PRs #146 and #147: remove dev sidebar and settings\ndev tools, add Ajuda in user menu, gate /roadmap behind VITE_INTERNAL_ROADMAP\n(default redirect to /). Docs and regression-smoke updated.\nEOF\n)\""}

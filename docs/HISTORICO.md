@@ -1,5 +1,15 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-08] - Web família: ocultar Roadmap e Observabilidade
+
+### Decisão
+- App end-user (`packages/web`) não expõe Roadmap nem link ao console de observabilidade; ops usa `packages/ops-console` direto.
+- `/roadmap` redireciona para `/` por padrão; reativa com `VITE_INTERNAL_ROADMAP=1` (documentado em `DOCUMENTATION_SYSTEM.md`).
+
+### Realizado
+- Sidebar dev tools removida; card **Desenvolvimento** em Configurações → Geral removido; **Ajuda** no menu do usuário → `/central-atendimento`.
+- `internal-product-ui.ts`, teste vitest, docs e `regression-smoke` atualizados.
+
 ## [2026-10-07] - CH bridge INC — só falha técnica
 
 ### Decisão

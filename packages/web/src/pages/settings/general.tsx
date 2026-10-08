@@ -1,7 +1,5 @@
-import { Card, Select, Space, Switch, Typography, Button, Alert } from 'antd'
-import { MoonOutlined, SunOutlined, ProjectOutlined, LinkOutlined, RadarChartOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
-import { openOpsConsole } from '../../lib/ops-console-url.js'
+import { Card, Select, Space, Switch, Typography, Alert } from 'antd'
+import { MoonOutlined, SunOutlined, LinkOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme/ThemeProvider.js'
 import { setLanguage } from '../../i18n/index.js'
@@ -14,7 +12,6 @@ const { Text, Title, Link } = Typography
 
 export function SettingsGeneralPage() {
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
   const { darkMode, toggleDarkMode, accessibilityMode, setAccessibilityMode } = useTheme()
 
   return (
@@ -95,20 +92,6 @@ export function SettingsGeneralPage() {
         </div>
       </Card>
 
-      <Card>
-        <Title level={5} style={{ marginTop: 0 }}>{t('settings.devTools')}</Title>
-        <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-          {t('settings.devToolsHint')}
-        </Text>
-        <Space wrap>
-          <Button type="default" icon={<ProjectOutlined />} onClick={() => navigate('/roadmap')}>
-            {t('nav.roadmap')}
-          </Button>
-          <Button type="default" icon={<RadarChartOutlined />} onClick={() => openOpsConsole()}>
-            {t('nav.ops')}
-          </Button>
-        </Space>
-      </Card>
     </Space>
   )
 }

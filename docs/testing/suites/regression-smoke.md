@@ -20,7 +20,7 @@
 |---|------|-------------------|-------|
 | 1 | Abrir `/login` | Página renderiza; texto Entrar/Login/Aiyra visível | |
 | 2 | Abrir `/home` | Landing visível; sem erro 5xx no console | |
-| 3 | Abrir `/roadmap` (se auth não exigida) ou após login | Roadmap ou redirect coerente | |
+| 3 | Abrir `/roadmap` (logado) | Redirect para `/` (roadmap interno oculto no app família) | |
 
 ## Notas
 
