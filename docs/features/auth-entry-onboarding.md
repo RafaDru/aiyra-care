@@ -11,7 +11,7 @@
 
 ## Resumo
 
-Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onboarding (perfil titular → loop **família(s)** com nome + membros + «adicionar outra família») → dashboard «Sua família» agrupada por círculo.
+Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onboarding (perfil titular → loop **família(s)** com nome + membros + «adicionar outra família») → dashboard **Quem você cuida** (Início) com agrupamento por círculo/faixa etária.
 
 **Spec:** [`ONBOARDING_FAMILY_NAME_STEP.md`](./ONBOARDING_FAMILY_NAME_STEP.md) (aprovada 2026-10-08).
 
@@ -48,7 +48,7 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 
 Spec refresh: [`WEB_ONBOARDING_REFRESH_2026-10`](./WEB_ONBOARDING_REFRESH_2026-10.md)
 
-Suites: [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) · [`onboarding-flow`](../testing/suites/onboarding-flow.md)
+Suites: [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) · [`onboarding-flow`](../testing/suites/onboarding-flow.md) · [`dashboard-people-grouping`](../testing/suites/dashboard-people-grouping.md)
 
 ```powershell
 npm run qa:run -- --suite auth-entry-flow

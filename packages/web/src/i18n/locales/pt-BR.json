@@ -347,6 +347,9 @@
       "pending": "{{count}} pendência(s)",
       "action": "Abrir"
     },
+    "sidebar": {
+      "pending": "{{count}} pendência(s)"
+    },
     "glossary": {
       "caregiver": "Cuidador",
       "healthProfile": "Perfil de saúde",
@@ -461,6 +464,8 @@
       "unlinkError": "Não foi possível desvincular",
       "noLinkable": "Todos os seus perfis já estão nesta família.",
       "otherProfiles": "Outros perfis",
+      "unassigned": "Sem família definida",
+      "organizeInFamily": "Organizar em Família",
       "sharedProfile": "Compartilhado"
     },
     "profileShare": {
@@ -545,6 +550,22 @@
       "footer": "Detalhes e artefatos: docs/HUMAN_REVIEW_QUEUE.md no repositório."
     }
   },
+  "dashboard": {
+    "peopleTitle": "Quem você cuida",
+    "peopleSubtitle": "Perfis de saúde no seu dia a dia",
+    "groupByLabel": "Agrupar:",
+    "groupMode": {
+      "family": "Por família",
+      "age": "Por idade",
+      "alpha": "A–Z"
+    },
+    "alphaSectionTitle": "Todos",
+    "ageBand": {
+      "children": "Crianças",
+      "adolescents": "Adolescentes",
+      "adults": "Adultos"
+    }
+  },
   "patient": {
     "title": "Sua família",
     "new": "Adicionar à família",
@@ -601,7 +622,9 @@
       "cardOptional": "Nº da Carteirinha (opcional)",
       "photoLabel": "Foto de Perfil / Avatar (Upload ou URL)",
       "parents": "Pais/Responsáveis",
-      "cpfInvalid": "CPF deve ter 11 dígitos"
+      "cpfInvalid": "CPF deve ter 11 dígitos",
+      "careCircle": "Família",
+      "careCirclePlaceholder": "Selecione a família"
     }
   },
   "sections": {
