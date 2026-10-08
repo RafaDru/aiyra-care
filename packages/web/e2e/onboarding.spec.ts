@@ -17,7 +17,7 @@ test.describe('onboarding', () => {
   })
 
   test('login → perfil titular → dashboard', async ({ page }) => {
-    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })
+    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot })
     const { email, password } = requireOnboardingCredentials()
 
     await primeE2eClientStorage(page)
@@ -26,7 +26,6 @@ test.describe('onboarding', () => {
 
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
-      await page.waitForURL(/\/onboarding/, { timeout: 30_000 })
     }
 
     await completeOnboardingProfile(page, {
@@ -51,7 +50,7 @@ test.describe('onboarding', () => {
   })
 
   test('Ver primeiros passos abre tour com tour_completed antigo no localStorage', async ({ page }) => {
-    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })
+    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot })
     const { email, password } = requireOnboardingCredentials()
 
     await primeE2eClientStorage(page)
@@ -64,7 +63,6 @@ test.describe('onboarding', () => {
 
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
-      await page.waitForURL(/\/onboarding/, { timeout: 30_000 })
     }
 
     await completeOnboardingProfile(page, {

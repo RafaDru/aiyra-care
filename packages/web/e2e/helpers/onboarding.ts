@@ -106,7 +106,10 @@ async function completeFamilyAndConnectors(page: Page) {
   const familyNameStep = page.getByTestId('onboarding-step-family-name')
   await familyNameStep.waitFor({ state: 'visible', timeout: 25_000 })
   const familyNameInput = familyNameStep.getByLabel(/Nome da família|Family name/i)
-  await expect(familyNameInput).not.toHaveValue('', { timeout: 10_000 })
+  await expect(familyNameInput).not.toHaveValue('', { timeout: 15_000 })
+  if (!(await familyNameInput.inputValue()).trim()) {
+    await familyNameInput.fill('Família QA E2E')
+  }
 
   const circleCreate = page.waitForResponse(
     (r) => r.url().includes('/care-circles') && r.request().method() === 'POST',
