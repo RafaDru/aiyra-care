@@ -1,4 +1,5 @@
 import { Modal, Form, Input, DatePicker, Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
 import dayjs, { type Dayjs } from 'dayjs'
 
 const { Text } = Typography
@@ -22,6 +23,7 @@ interface FormValues {
 }
 
 export function AmilSyncOptionsModal({ open, loading, onCancel, onConfirm }: Props) {
+  const { t } = useTranslation()
   const [form] = Form.useForm<FormValues>()
 
   const handleOk = async () => {
@@ -36,7 +38,7 @@ export function AmilSyncOptionsModal({ open, loading, onCancel, onConfirm }: Pro
 
   return (
     <Modal
-      title="Sincronizar Amil — atendimentos"
+      title={t('modals.amilSyncVisits')}
       open={open}
       onCancel={onCancel}
       onOk={() => void handleOk()}
@@ -65,7 +67,7 @@ export function AmilSyncOptionsModal({ open, loading, onCancel, onConfirm }: Pro
           label="Marca ótica (beneficiário)"
           extra="Opcional — número da carteirinha/marca ótica Amil"
         >
-          <Input placeholder="Ex: 094995656" allowClear />
+          <Input placeholder={t('form.cardExample')} allowClear />
         </Form.Item>
       </Form>
     </Modal>

@@ -34,7 +34,7 @@ export function EntityFormModal({ open, title, successMsg, onClose, onSubmit, ch
       onClose()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      message.error(err instanceof Error ? err.message : 'Erro desconhecido')
+      message.error(err instanceof Error ? err.message : t('common.unknownError'))
     } finally {
       setSubmitting(false)
     }

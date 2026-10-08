@@ -53,7 +53,7 @@ export function InterpretHandwritingModal({ document, patientId, open, onClose, 
           : 'Interpretação concluída (pacote premium — modelos avançados)',
       )
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro na interpretação')
+      message.error(err instanceof Error ? err.message : t('toast.interpretError'))
     } finally {
       setLoading(false)
     }
@@ -82,10 +82,10 @@ export function InterpretHandwritingModal({ document, patientId, open, onClose, 
           startDate: interpretation.issueDate || undefined,
         })
       }
-      message.success('Medicações cadastradas — revise na aba Medicações')
+      message.success(t('toast.medsRegisteredReview'))
       onMedicationsCreated?.()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro ao cadastrar medicações')
+      message.error(err instanceof Error ? err.message : t('toast.registerMedsError'))
     } finally {
       setCreatingMeds(false)
     }
@@ -147,7 +147,7 @@ export function InterpretHandwritingModal({ document, patientId, open, onClose, 
         <Text type="secondary">{document.originalFilename}</Text>
 
         {interpretation ? (
-          <AiInsightCard size="small" title="Análise da IA">
+          <AiInsightCard size="small" title={t('modals.aiAnalysis')}>
             <Descriptions size="small" column={1} bordered>
               {interpretation.patientName && <Descriptions.Item label={t('family.glossary.healthProfile')}>{interpretation.patientName}</Descriptions.Item>}
               {interpretation.doctorName && <Descriptions.Item label="Médico">{interpretation.doctorName}</Descriptions.Item>}

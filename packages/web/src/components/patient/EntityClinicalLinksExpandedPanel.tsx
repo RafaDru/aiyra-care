@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Spin, Tag, Typography, message } from 'antd'
 import {
@@ -41,6 +42,7 @@ export function EntityClinicalLinksExpandedPanel({
   entityTitle,
   onUpdated,
 }: EntityClinicalLinksExpandedPanelProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [links, setLinks] = useState<ClinicalEntityLink[]>([])
   const [loading, setLoading] = useState(true)
@@ -62,7 +64,7 @@ export function EntityClinicalLinksExpandedPanel({
   const goToPeer = (peerType: ClinicalEntityType, peerId: string) => {
     const href = buildPatientEntityHref(patientId, peerType, peerId)
     if (!href) {
-      message.info('Este tipo ainda não tem aba dedicada no perfil.')
+      message.info(t('toast.noDedicatedTab'))
       return
     }
     navigate(href)

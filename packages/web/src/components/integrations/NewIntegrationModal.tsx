@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, List, Typography, Tag, Button, Space, Input } from 'antd'
 import { CheckCircleOutlined, RightOutlined, SearchOutlined } from '@ant-design/icons'
 import { BrandLogo } from '../brands/BrandLogo.js'
@@ -68,6 +69,7 @@ export function NewIntegrationModal({
   onImportConectesus,
   onImportCaderneta,
 }: Props) {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const groups = useMemo(
     () => groupIntegrationOptions(linkedPortals, search),
@@ -97,7 +99,7 @@ export function NewIntegrationModal({
 
   return (
     <Modal
-      title="Nova integração"
+      title={t('modals.newIntegration')}
       open={open}
       onCancel={handleClose}
       footer={null}
@@ -111,7 +113,7 @@ export function NewIntegrationModal({
       <Input
         allowClear
         prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-        placeholder="Buscar integração…"
+        placeholder={t('form.searchIntegration')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         style={{ marginBottom: 16 }}

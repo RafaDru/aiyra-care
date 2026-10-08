@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, Form, Input, Button } from 'antd'
 import { MaskedDatePicker } from '../ui/MaskedDatePicker.js'
 import { api } from '../../lib/api.js'
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function TaskWizardModal({ open, patientId, onClose, onCreated }: Props) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
 
@@ -43,7 +45,7 @@ export function TaskWizardModal({ open, patientId, onClose, onCreated }: Props) 
   return (
     <Modal
       open={open}
-      title="Novo plano de acompanhamento"
+      title={t('modals.newFollowUpPlan')}
       onCancel={handleClose}
       onOk={() => submit()}
       okText="Registrar plano"

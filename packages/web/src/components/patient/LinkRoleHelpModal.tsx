@@ -1,4 +1,5 @@
 import { Modal, Table, Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import { LINK_ROLE_META, LINK_ROLE_OPTIONS } from './health-thread-link-roles.js'
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function LinkRoleHelpModal({ open, onClose, entityType }: Props) {
+  const { t } = useTranslation()
   const rows = LINK_ROLE_OPTIONS.map((code) => ({
     key: code,
     papel: LINK_ROLE_META[code].label,
@@ -21,7 +23,7 @@ export function LinkRoleHelpModal({ open, onClose, entityType }: Props) {
   return (
     <Modal
       open={open}
-      title="Papéis do vínculo na trilha"
+      title={t('modals.linkRolesHelp')}
       onCancel={onClose}
       onOk={onClose}
       okText="Entendi"
