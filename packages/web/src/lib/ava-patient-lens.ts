@@ -19,17 +19,27 @@ export function writeAvaLastPatientId(patientId: string): void {
   }
 }
 
+export type AvaPatientLensResolveOptions = {
+  /**
+   * Início sem rota de paciente: titular vê o próprio «Hoje» primeiro;
+   * último escolhido no dropdown ainda vale na sessão (override) e em rotas de perfil.
+   */
+  preferSelfOnHome?: boolean
+}
+
 /** Resolve lente quando não há override explícito na UI. */
 export function resolveAvaPatientLens(
   patients: Patient[],
   routePatientId: string | null | undefined,
+  opts?: AvaPatientLensResolveOptions,
 ): string | null {
   if (routePatientId && patients.some((p) => p.id === routePatientId)) {
     return routePatientId
   }
+  const self = patients.find((p) => p.isSelf)
+  if (opts?.preferSelfOnHome && self) return self.id
   const last = readAvaLastPatientId()
   if (last && patients.some((p) => p.id === last)) return last
-  const self = patients.find((p) => p.isSelf)
   if (self) return self.id
   return patients[0]?.id ?? null
 }
