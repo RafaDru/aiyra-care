@@ -59,7 +59,20 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
     throw new Error(`complete-profile HTTP ${saveResponse.status()}: ${body.slice(0, 240)}`)
   }
 
-  await page.getByTestId('onboarding-step-dependents').waitFor({ state: 'visible', timeout: 25_000 })
-  await page.getByRole('button', { name: /Pular por agora|Skip for now/i }).click()
+  await page.getByTestId('onboarding-step-family-name').waitFor({ state: 'visible', timeout: 25_000 })
+
+  const circleCreate = page.waitForResponse(
+    (r) => r.url().includes('/care-circles') && r.request().method() === 'POST',
+    { timeout: 35_000 },
+  )
+  await page.getByRole('button', { name: /Continuar|Continue/i }).click()
+  const circleResponse = await circleCreate
+  if (!circleResponse.ok()) {
+    const body = await circleResponse.text().catch(() => '')
+    throw new Error(`care-circles HTTP ${circleResponse.status()}: ${body.slice(0, 240)}`)
+  }
+
+  await page.getByTestId('onboarding-step-family-members').waitFor({ state: 'visible', timeout: 25_000 })
+  await page.getByRole('button', { name: /Pular pessoas por agora|Skip people for now/i }).click()
   await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 25_000 })
 }

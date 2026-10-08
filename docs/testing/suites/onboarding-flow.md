@@ -7,7 +7,9 @@
 | **Lane** | `regression`, `business-full` |
 | **Fixture** | [`qa-onboarding`](../fixtures/qa-onboarding.json) |
 
-Fluxo completo de **primeiro acesso**: compliance (quando pendente) → wizard de onboarding (perfil titular + dependentes opcionais) → dashboard «Sua família» com perfil titular (`self`).
+Fluxo completo de **primeiro acesso**: compliance (quando pendente) → wizard (perfil titular → nome da família + membros, opcional multi-família) → dashboard «Sua família» com titular no 1º `care_circle`.
+
+Spec: [`ONBOARDING_FAMILY_NAME_STEP.md`](../../features/ONBOARDING_FAMILY_NAME_STEP.md).
 
 ## Pré-requisitos
 
@@ -28,8 +30,9 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 2 | Login e-mail/senha | Redireciona para `/compliance/accept` ou `/onboarding` | |
 | 3 | Aceitar termos (se gate) | Avança para `/onboarding` | |
 | 4 | Preencher nome, nascimento ≥18, sexo, CPF | Validação OK | |
-| 5 | **Continuar** → passo dependentes | Permanece em `/onboarding`; `data-testid="onboarding-step-dependents"`; título «Quem você acompanha?» | |
-| 6 | **Pular por agora** (ou adicionar dependente) | Dashboard `/` com heading «Sua família» | |
+| 5 | **Continuar** → nome da família | `data-testid="onboarding-step-family-name"` | |
+| 6 | **Continuar** → membros | `data-testid="onboarding-step-family-members"` | |
+| 7 | **Pular pessoas por agora** (ou adicionar dependente) | Dashboard `/` com heading «Sua família»; grupo com nome da família | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)
 

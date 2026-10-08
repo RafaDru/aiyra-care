@@ -1,5 +1,15 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-08] - Onboarding multi-família (`care_circles`)
+
+### Decisão
+- Rafael aprovou spec store/repo [`ONBOARDING_FAMILY_NAME_STEP.md`](features/ONBOARDING_FAMILY_NAME_STEP.md): após perfil titular, loop obrigatório ≥1 círculo (nome + membros + «adicionar outra família»); 1º círculo vincula `self`; 2º+ «Incluir você» default off.
+
+### Realizado
+- Web: `OnboardingFamilyLoop.tsx`, `onboarding-wizard-storage` (fase `name` | `members`), APIs `POST /care-circles` + link pacientes; link `/family` pós-onboarding.
+- Dashboard: layout por nome do círculo com um único grupo nomeado (evita «Outros perfis» órfão).
+- Docs/QA: `auth-entry-onboarding.md`, suites `auth-entry-flow` e `onboarding-flow`; E2E helper atualizado.
+
 ## [2026-10-07] - CH bridge INC — só falha técnica
 
 ### Decisão
