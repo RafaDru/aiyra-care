@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-08] - CH: guard ch-shell vs main no `up.ps1`
+
+### Decisão
+- `scripts/up.ps1` não usa ops-console do worktree `aiyra-care-ch-shell` quando o HEAD está atrás ou divergente do checkout principal; aviso com SHAs + `AIYRA_OPS_CONSOLE_FROM_MAIN=1` para forçar o principal. Ritual em `docs/ops/CH_ACCESS.md`.
+
 ## [2026-10-08] - CRUD care_circles no hub `/family`
 
 ### Realizado
