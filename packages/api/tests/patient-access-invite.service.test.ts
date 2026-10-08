@@ -117,6 +117,7 @@ describe('PatientAccessInviteService', () => {
     const memberships = {
       ensureMembership: vi.fn().mockResolvedValue(undefined),
       hasSelfProfile: vi.fn(),
+      findSelfPatientId: vi.fn(async () => null),
       listAccessiblePatientIds: vi.fn(),
       listRolesForAccount: vi.fn(),
       setSelfPatient: vi.fn(),

@@ -88,6 +88,10 @@ class InMemoryMemberships implements PatientMembershipRepository {
     return false
   }
 
+  async findSelfPatientId() {
+    return null
+  }
+
   async ensureMembership(accountId: string, patientId: string, role = 'guardian') {
     if (!this.rows.some((r) => r.accountId === accountId && r.patientId === patientId)) {
       this.rows.push({ accountId, patientId, role })
