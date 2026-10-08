@@ -6,6 +6,7 @@ import type { MeasurementService } from '../measurement/measurement.service.js'
 import type { CompleteProfileInput } from '../../infrastructure/http/auth/auth.schema.js'
 import { ConflictError } from '../../domain/errors.js'
 import type { Patient } from '../../domain/patient/patient.entity.js'
+import { isValidSelfProfileCpf } from '../../domain/patient/self-profile-cpf.js'
 
 export type SyncAccountResult = {
   account: AppAccount
@@ -53,7 +54,10 @@ export class AuthService {
   }
 
   private async needsProfile(accountId: string): Promise<boolean> {
-    return !(await this.memberships.hasSelfProfile(accountId))
+    const selfPatientId = await this.memberships.findSelfPatientId(accountId)
+    if (!selfPatientId) return true
+    const patient = await this.patients.findById(selfPatientId)
+    return !isValidSelfProfileCpf(patient.cpf)
   }
 
   async syncAccountFromToken(accessToken: string): Promise<SyncAccountResult | null> {
@@ -98,20 +102,35 @@ export class AuthService {
   }
 
   async completeProfile(accountId: string, data: CompleteProfileInput): Promise<CompleteProfileResult> {
-    if (await this.memberships.hasSelfProfile(accountId)) {
-      throw new ConflictError('Perfil já cadastrado para esta conta')
+    const existingSelfId = await this.memberships.findSelfPatientId(accountId)
+    if (existingSelfId) {
+      const existing = await this.patients.findById(existingSelfId)
+      if (isValidSelfProfileCpf(existing.cpf)) {
+        throw new ConflictError('Perfil já cadastrado para esta conta')
+      }
     }
 
-    const patient = await this.patients.create({
-      name: data.name,
-      birthDate: data.birthDate,
-      gender: data.gender,
-      bloodType: data.bloodType,
-      weightKg: data.weightKg,
-      heightCm: data.heightCm,
-      cpf: data.cpf,
-      cns: data.cns,
-    })
+    const patient = existingSelfId
+      ? await this.patients.update(existingSelfId, {
+          name: data.name,
+          birthDate: data.birthDate,
+          gender: data.gender,
+          bloodType: data.bloodType,
+          weightKg: data.weightKg,
+          heightCm: data.heightCm,
+          cpf: data.cpf,
+          cns: data.cns,
+        })
+      : await this.patients.create({
+          name: data.name,
+          birthDate: data.birthDate,
+          gender: data.gender,
+          bloodType: data.bloodType,
+          weightKg: data.weightKg,
+          heightCm: data.heightCm,
+          cpf: data.cpf,
+          cns: data.cns,
+        })
     await this.patients.setOwnerAccountId(patient.id, accountId)
     await this.memberships.ensureMembership(accountId, patient.id, 'self')
 

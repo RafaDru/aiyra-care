@@ -7,7 +7,6 @@ import {
   LogoutOutlined,
   UserOutlined,
   DashboardOutlined,
-  ProjectOutlined,
   PhoneOutlined,
   RadarChartOutlined,
   CustomerServiceOutlined,
@@ -67,8 +66,6 @@ export function AppLayout() {
           : location.pathname.startsWith('/settings')
             ? '/settings'
             : ''
-
-  const devSelectedKeys = location.pathname.startsWith('/roadmap') ? ['/roadmap'] : []
 
   const layout = (
     <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
@@ -131,9 +128,8 @@ export function AppLayout() {
             )}
             <Menu
               mode="inline"
-              selectedKeys={devSelectedKeys}
+              selectedKeys={[]}
               items={[
-                { key: '/roadmap', icon: <ProjectOutlined />, label: t('nav.roadmap') },
                 { key: 'ops-console', icon: <RadarChartOutlined />, label: t('nav.ops') },
               ]}
               onClick={({ key }) => {

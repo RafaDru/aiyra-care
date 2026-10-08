@@ -1,0 +1,30 @@
+.dashboard-day-to-day-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-day-to-day-section__cell {
+  min-width: 0;
+}
+
+.dashboard-day-to-day-section__cell--hub:empty {
+  display: none;
+}
+
+.dashboard-day-to-day-section__cell--hub .ant-card {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+@media (min-width: 992px) {
+  .dashboard-day-to-day-section {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .dashboard-day-to-day-section__cell {
+    flex: 1 1 0;
+  }
+}

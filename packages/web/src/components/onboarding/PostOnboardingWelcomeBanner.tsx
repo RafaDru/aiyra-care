@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Space } from 'antd'
+import { Button, Card, Space, Typography } from 'antd'
+import { CloseOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import {
   clearOnboardingJustCompleted,
@@ -8,6 +9,14 @@ import {
 import { notifyPostOnboardingWelcomeDismissed } from '../../lib/onboarding-welcome-bus.js'
 import { requestFirstVisitTourOpen } from '../../lib/first-visit-tour-bus.js'
 import { trackProductEvent } from '../../lib/product-events.js'
+
+const welcomeCardStyle = {
+  marginBottom: 16,
+  borderColor: '#d1fae5',
+  background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 55%)',
+} as const
+
+const { Paragraph, Title } = Typography
 
 /** Light one-time welcome after onboarding — defers FirstVisitTour until dismiss. */
 export function PostOnboardingWelcomeBanner() {
@@ -33,29 +42,36 @@ export function PostOnboardingWelcomeBanner() {
 
   const openFirstStepsGuide = () => {
     finishWelcome('dashboard_welcome_tour_cta')
-    requestFirstVisitTourOpen()
+    requestFirstVisitTourOpen({ force: true })
   }
 
   return (
-    <Alert
-      type="info"
-      showIcon
-      closable
-      onClose={dismissOnly}
+    <Card
+      size="small"
       data-testid="post-onboarding-welcome"
-      message={t('onboarding.dashboardWelcomeTitle')}
-      description={t('onboarding.dashboardWelcomeBody')}
-      action={
-        <Space wrap>
-          <Button size="small" type="primary" onClick={dismissOnly}>
-            {t('onboarding.dashboardWelcomeCta')}
-          </Button>
-          <Button size="small" type="default" onClick={openFirstStepsGuide}>
-            {t('onboarding.dashboardWelcomeTourCta')}
-          </Button>
-        </Space>
+      style={welcomeCardStyle}
+      title={<Title level={5} style={{ margin: 0 }}>{t('onboarding.dashboardWelcomeTitle')}</Title>}
+      extra={
+        <Button
+          type="text"
+          size="small"
+          icon={<CloseOutlined />}
+          aria-label={t('onboarding.dashboardWelcomeCta')}
+          onClick={dismissOnly}
+        />
       }
-      style={{ marginBottom: 16 }}
-    />
+    >
+      <Paragraph type="secondary" style={{ marginBottom: 12, fontSize: 13 }}>
+        {t('onboarding.dashboardWelcomeBody')}
+      </Paragraph>
+      <Space wrap>
+        <Button size="small" type="primary" onClick={dismissOnly}>
+          {t('onboarding.dashboardWelcomeCta')}
+        </Button>
+        <Button size="small" type="default" onClick={openFirstStepsGuide}>
+          {t('onboarding.dashboardWelcomeTourCta')}
+        </Button>
+      </Space>
+    </Card>
   )
 }

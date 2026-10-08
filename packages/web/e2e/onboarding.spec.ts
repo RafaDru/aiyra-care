@@ -44,4 +44,38 @@ test.describe('onboarding', () => {
 
     await expect(page.getByTestId('first-visit-tour-drawer')).toBeVisible({ timeout: 10_000 })
   })
+
+  test('Ver primeiros passos abre tour com tour_completed antigo no localStorage', async ({ page }) => {
+    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })
+    const { email, password } = requireOnboardingCredentials()
+
+    await page.addInitScript(() => {
+      localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
+    })
+
+    await loginViaPassword(page, email, password)
+    await page.waitForURL(/\/(onboarding|$)/, { timeout: 30_000 })
+
+    if (!page.url().includes('/onboarding')) {
+      await page.goto('/onboarding')
+    }
+
+    await completeOnboardingProfile(page, {
+      name: 'QA Onboarding Tour CTA',
+      birthDate: '15/03/1990',
+      genderLabel: 'Masculino',
+      cpf: uniqueQaCpf(),
+    })
+
+    await waitForDashboardReady(page)
+
+    const welcome = page.getByTestId('post-onboarding-welcome')
+    await expect(welcome).toBeVisible({ timeout: 10_000 })
+    await page.evaluate(() => {
+      localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
+    })
+    await welcome.getByRole('button', { name: /primeiros passos|first steps/i }).click()
+
+    await expect(page.getByTestId('first-visit-tour-drawer')).toBeVisible({ timeout: 10_000 })
+  })
 })

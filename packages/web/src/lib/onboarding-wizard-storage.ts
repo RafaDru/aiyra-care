@@ -1,5 +1,7 @@
 /** Session keys for the 2-step web onboarding wizard (titular profile → optional family). */
 
+import { clearFirstVisitTourCompleted } from './first-visit-tour-storage.js'
+
 export const ONBOARDING_WIZARD_STEP_KEY = 'aiyracare.onboarding_wizard_step'
 export const ONBOARDING_JUST_COMPLETED_KEY = 'aiyracare.onboarding_just_completed'
 
@@ -18,6 +20,7 @@ export function clearOnboardingWizardStep(): void {
 
 export function markOnboardingJustCompleted(): void {
   sessionStorage.setItem(ONBOARDING_JUST_COMPLETED_KEY, '1')
+  clearFirstVisitTourCompleted()
 }
 
 /** Session flag still set — welcome banner not dismissed yet. */
