@@ -79,10 +79,10 @@ function MedicationFormFields() {
     <>
       <Form.Item name="genericName" label={t('medication.genericName')} rules={[{ required: true }]}><Input /></Form.Item>
       <Form.Item name="brandName" label={t('medication.brandName')}><Input /></Form.Item>
-      <Form.Item name="dosage" label={t('medication.dosage')}><Input placeholder="250mg / 1 ampola" /></Form.Item>
-      <Form.Item name="frequency" label={t('medication.frequency')}><Input placeholder="8/8h / 12/12h" /></Form.Item>
-      <Form.Item name="route" label={t('medication.route')}><Input placeholder="oral, nebulização, IV…" /></Form.Item>
-      <Form.Item name="duration" label={t('medication.duration')}><Input placeholder="5 dias, 2 semanas…" /></Form.Item>
+      <Form.Item name="dosage" label={t('medication.dosage')}><Input placeholder={t('form.medDosage')} /></Form.Item>
+      <Form.Item name="frequency" label={t('medication.frequency')}><Input placeholder={t('form.medFrequency')} /></Form.Item>
+      <Form.Item name="route" label={t('medication.route')}><Input placeholder={t('form.medRoute')} /></Form.Item>
+      <Form.Item name="duration" label={t('medication.duration')}><Input placeholder={t('form.medDuration')} /></Form.Item>
       <Form.Item name="startDate" label={t('medication.prescribedDate')}>
         <MaskedDatePicker style={{ width: '100%' }} />
       </Form.Item>

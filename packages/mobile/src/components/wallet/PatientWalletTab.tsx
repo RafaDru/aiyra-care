@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { SectionCard } from '@/components/family/SectionCard'
 import { StatePanel } from '@/components/StatePanel'
 import { WalletCardFace } from '@/components/wallet/WalletCardFace'
@@ -38,6 +39,7 @@ function formatLastSync(iso: string | null | undefined): string | null {
 }
 
 export function PatientWalletTab({ patientId }: Props) {
+  const { t } = useTranslation()
   const { tokens } = useAiyraTheme()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [links, setLinks] = useState<IntegrationLink[]>([])
@@ -58,12 +60,12 @@ export function PatientWalletTab({ patientId }: Props) {
       setLinks(linkRows)
       setMemberships(membershipRows)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar carteira')
+      setError(err instanceof Error ? err.message : t('patient.wallet.loadError'))
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [patientId])
+  }, [patientId, t])
 
   useEffect(() => {
     setLoading(true)
@@ -75,7 +77,7 @@ export function PatientWalletTab({ patientId }: Props) {
     [links],
   )
 
-  const firstName = patient?.name.trim().split(/\s+/)[0] ?? 'paciente'
+  const firstName = patient?.name.trim().split(/\s+/)[0] ?? t('patient.wallet.patientFallback')
   const showCaderneta =
     patient?.ageCategory === 'children' ||
     patient?.ageCategory === 'adolescents'
@@ -91,7 +93,7 @@ export function PatientWalletTab({ patientId }: Props) {
   }
 
   if (!patient) {
-    return <StatePanel tokens={tokens} emptyMessage="Paciente não encontrado." />
+    return <StatePanel tokens={tokens} emptyMessage={t('patient.wallet.notFound')} />
   }
 
   return (
@@ -110,10 +112,10 @@ export function PatientWalletTab({ patientId }: Props) {
     >
       <View>
         <Text style={[styles.title, { color: tokens.colorTextBase }]}>
-          Carteira de {firstName}
+          {t('patient.wallet.title', { name: firstName })}
         </Text>
         <Text style={{ color: tokens.colorTextSecondary, fontSize: 14 }}>
-          Cartões e convênios sincronizados — somente leitura no app mobile.
+          {t('patient.wallet.subtitle')}
         </Text>
       </View>
 
@@ -122,19 +124,19 @@ export function PatientWalletTab({ patientId }: Props) {
         style={[styles.webHint, { borderColor: tokens.colorBorder, backgroundColor: tokens.colorBgContainer }]}
       >
         <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>
-          QR token Unimed, sincronização e coparticipação detalhada ficam no app web.
+          {t('patient.wallet.webHint')}
         </Text>
-        <Text style={{ color: tokens.colorPrimary, fontWeight: '600', fontSize: 14 }}>Abrir Carteira no navegador</Text>
+        <Text style={{ color: tokens.colorPrimary, fontWeight: '600', fontSize: 14 }}>{t('patient.wallet.openInBrowser')}</Text>
       </Pressable>
 
-      <SectionCard title="Sistema público">
+      <SectionCard title={t('patient.wallet.publicSystem')}>
         <View style={styles.cardStack}>
           <WalletCardFace
             brandKey="conectesus"
             holderName={patient.name}
-            numberLabel="CNS"
+            numberLabel={t('patient.wallet.cnsLabel')}
             numberValue={patient.cns ? formatCns(patient.cns) : '—'}
-            statusLabel={patient.cns ? 'Ativo' : 'Pendente'}
+            statusLabel={patient.cns ? t('patient.wallet.active') : t('patient.wallet.pending')}
             statusTone={patient.cns ? 'active' : 'pending'}
           />
           <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>
@@ -146,22 +148,22 @@ export function PatientWalletTab({ patientId }: Props) {
             <WalletCardFace
               brandKey="caderneta"
               holderName={patient.name}
-              numberLabel="Caderneta"
-              numberValue="Minha família"
-              statusLabel="gov.br"
+              numberLabel={t('patient.wallet.childBookLabel')}
+              numberValue={t('patient.wallet.myFamily')}
+              statusLabel={t('patient.wallet.govbr')}
               statusTone="pending"
             />
             <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>
-              Calendário vacinal e marcos — ver detalhes no web.
+              {t('patient.wallet.cadernetaHint')}
             </Text>
           </View>
         ) : null}
       </SectionCard>
 
-      <SectionCard title="Plano de saúde">
+      <SectionCard title={t('patient.wallet.healthPlan')}>
         {insuranceLinks.length === 0 ? (
           <Text style={{ color: tokens.colorTextSecondary }}>
-            Nenhum convênio vinculado. Conecte um portal na aba Integrações (web) e sincronize.
+            {t('patient.wallet.noInsurance')}
           </Text>
         ) : (
           <View style={styles.cardStack}>
@@ -176,23 +178,23 @@ export function PatientWalletTab({ patientId }: Props) {
                     brandKey={link.portalType}
                     planLabel={membership?.plan?.planName}
                     holderName={patient.name}
-                    numberLabel="Número do cartão"
+                    numberLabel={t('patient.wallet.cardNumberLabel')}
                     numberValue={cardNum}
-                    statusLabel={link.active ? 'Ativo' : 'Inativo'}
+                    statusLabel={link.active ? t('patient.wallet.active') : t('patient.wallet.inactive')}
                     statusTone={link.active ? 'active' : 'inactive'}
                   />
                   {membership?.plan?.networkName ? (
                     <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>
-                      Rede: {membership.plan.networkName}
+                      {t('patient.wallet.network', { name: membership.plan.networkName })}
                     </Text>
                   ) : null}
                   {lastSync ? (
                     <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>
-                      Atualizado em {lastSync}
+                      {t('patient.wallet.updatedAt', { when: lastSync })}
                     </Text>
                   ) : (
                     <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>
-                      Ainda sem sync — use o app web para importar o cartão.
+                      {t('patient.wallet.noSyncYet')}
                     </Text>
                   )}
                 </View>
@@ -202,8 +204,8 @@ export function PatientWalletTab({ patientId }: Props) {
         )}
       </SectionCard>
 
-      <SectionCard title="Plano odontológico">
-        <Text style={{ color: tokens.colorTextSecondary }}>Nenhum plano odontológico cadastrado.</Text>
+      <SectionCard title={t('patient.wallet.dentalPlan')}>
+        <Text style={{ color: tokens.colorTextSecondary }}>{t('patient.wallet.noDentalPlan')}</Text>
       </SectionCard>
     </ScrollView>
   )

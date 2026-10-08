@@ -316,7 +316,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
         title={t('modals.addExam')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createExam()}
-        okText="Salvar"
+        okText={t('common.save')}
         destroyOnClose
       >
         <Form form={examForm} layout="vertical" initialValues={{ role: 'ordered' }}>
@@ -341,7 +341,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
         title={t('modals.addVisit')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createRecord()}
-        okText="Salvar"
+        okText={t('common.save')}
         destroyOnClose
       >
         <Form form={recordForm} layout="vertical" initialValues={{ recordType: 'consulta', role: 'related' }}>
@@ -379,7 +379,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
         title={t('modals.addAuthorization')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createAuth()}
-        okText="Salvar"
+        okText={t('common.save')}
         destroyOnClose
       >
         <Form form={authForm} layout="vertical" initialValues={{ role: 'ordered' }}>
@@ -407,29 +407,29 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
         title={t('modals.addMedication')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createMedication()}
-        okText="Salvar"
+        okText={t('common.save')}
         destroyOnClose
       >
         <Form form={medForm} layout="vertical" initialValues={{ role: 'ordered' }}>
-          <Form.Item name="genericName" label="Medicamento" rules={[{ required: true }]}>
-            <Input placeholder="Nome genérico" />
+          <Form.Item name="genericName" label={t('medication.genericName')} rules={[{ required: true }]}>
+            <Input placeholder={t('form.genericMedName')} />
           </Form.Item>
-          <Form.Item name="brandName" label="Marca">
+          <Form.Item name="brandName" label={t('medication.brandName')}>
             <Input />
           </Form.Item>
-          <Form.Item name="dosage" label="Dosagem">
-            <Input placeholder="Ex.: 500mg" />
+          <Form.Item name="dosage" label={t('medication.dosage')}>
+            <Input placeholder={t('form.dosage500')} />
           </Form.Item>
-          <Form.Item name="frequency" label="Frequência">
-            <Input placeholder="Ex.: 8/8h" />
+          <Form.Item name="frequency" label={t('medication.frequency')}>
+            <Input placeholder={t('form.freq8h')} />
           </Form.Item>
-          <Form.Item name="startDate" label="Início">
+          <Form.Item name="startDate" label={t('medication.startDate')}>
             <MaskedDatePicker style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="prescribingDoctor" label="Prescritor">
+          <Form.Item name="prescribingDoctor" label={t('medication.doctor')}>
             <Input />
           </Form.Item>
-          <Form.Item name="notes" label="Observações">
+          <Form.Item name="notes" label={t('medication.notes')}>
             <Input.TextArea rows={2} />
           </Form.Item>
           {roleField('medication')}
@@ -441,7 +441,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
         title={t('modals.addVaccine')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createVaccine()}
-        okText="Salvar"
+        okText={t('common.save')}
         destroyOnClose
       >
         <Form form={vaccineForm} layout="vertical" initialValues={{ role: 'related' }}>

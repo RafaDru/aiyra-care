@@ -92,7 +92,8 @@
     "doneToast": "Profile created! You can use the app now.",
     "bannerTitle": "Finish your sign-up",
     "bannerBody": "Complete your holder profile to access coverage, exams, and family.",
-    "bannerAction": "Complete now"
+    "bannerAction": "Complete now",
+    "screenTitle": "Complete your sign-up"
   },
   "home": {
     "greeting": "Hello, {{name}}",
@@ -163,6 +164,49 @@
       "type_rg": "ID card",
       "type_cpf_card": "CPF",
       "type_cnh": "Driver license"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "subtitle": "Connected portal status. Login and sync with the browser (Playwright) stay in the web app — mobile does not run scrapers.",
+      "openInBrowser": "Open integrations in browser",
+      "empty": "No portal linked. Connect insurers or labs in the web app.",
+      "loadError": "Could not load integrations",
+      "inactive": "Inactive",
+      "syncOnWeb": "Sync in web app",
+      "syncDegraded": "Sync paused (portal degraded)",
+      "loginOnWeb": "Login required in web app",
+      "sessionReady": "Session ready for sync on web",
+      "firstSyncOnWeb": "First sync in web app",
+      "manageOnWeb": "Manage in web app",
+      "inProgress": "In progress: {{message}}",
+      "lastSync": "Last sync: {{when}}",
+      "planVia": "Plan via {{name}}"
+    },
+    "wallet": {
+      "title": "{{name}}'s wallet",
+      "subtitle": "Synced cards and plans — read-only in the mobile app.",
+      "webHint": "Unimed QR token, sync, and detailed copay are in the web app.",
+      "openInBrowser": "Open Wallet in browser",
+      "publicSystem": "Public health",
+      "cnsLabel": "National Health Card (CNS)",
+      "childBookLabel": "Child health booklet",
+      "myFamily": "My Family",
+      "govbr": "gov.br",
+      "cadernetaHint": "Vaccine schedule and milestones — see details on web.",
+      "healthPlan": "Health plan",
+      "noInsurance": "No plan linked. Connect a portal in Integrations (web) and sync.",
+      "cardNumberLabel": "Member ID",
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "network": "Network: {{name}}",
+      "updatedAt": "Updated {{when}}",
+      "noSyncYet": "No sync yet — use the web app to import the card.",
+      "dentalPlan": "Dental plan",
+      "noDentalPlan": "No dental plan on file.",
+      "notFound": "Profile not found.",
+      "loadError": "Could not load wallet",
+      "patientFallback": "profile"
     }
   },
   "family": {
