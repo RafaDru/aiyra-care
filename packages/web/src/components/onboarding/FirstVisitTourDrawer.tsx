@@ -65,8 +65,8 @@ export function FirstVisitTourDrawer() {
     setWelcomeBannerPending(false)
   }), [])
 
-  useEffect(() => subscribeFirstVisitTourOpen(() => {
-    if (isFirstVisitTourCompleted()) return
+  useEffect(() => subscribeFirstVisitTourOpen(({ force }) => {
+    if (!force && isFirstVisitTourCompleted()) return
     if (isBlockedRoute(location.pathname)) return
     setWelcomeBannerPending(false)
     setOpen(true)

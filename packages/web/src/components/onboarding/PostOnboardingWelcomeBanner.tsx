@@ -33,7 +33,7 @@ export function PostOnboardingWelcomeBanner() {
 
   const openFirstStepsGuide = () => {
     finishWelcome('dashboard_welcome_tour_cta')
-    requestFirstVisitTourOpen()
+    requestFirstVisitTourOpen({ force: true })
   }
 
   return (
