@@ -189,6 +189,8 @@
     "dashboardWelcomeCta": "Entendi",
     "dashboardWelcomeTourCta": "Ver primeiros passos",
     "name": "Nome completo",
+    "socialName": "Nome social (opcional)",
+    "socialNameHint": "Como prefere ser chamado(a). Em breve salvaremos no seu perfil.",
     "nameRequired": "Informe seu nome",
     "birthDate": "Data de nascimento",
     "birthDateRequired": "Informe sua data de nascimento",
