@@ -29,6 +29,22 @@ async function fillMaskedDate(page: Page, label: RegExp, value: string) {
   const input = page.getByLabel(label, { exact: false })
   await input.fill(value, { force: true })
   await input.press('Tab')
+  await input.blur()
+}
+
+async function selectBrazilianState(page: Page, uf: string) {
+  await expect(async () => {
+    const combo = page.getByRole('combobox', { name: /Estado|State/i })
+    await combo.click()
+    const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()
+    await dropdown.waitFor({ state: 'visible', timeout: 8_000 })
+    const titled = dropdown.locator(`[title="${uf}"]`)
+    if ((await titled.count()) > 0) {
+      await titled.first().click()
+      return
+    }
+    await dropdown.getByText(uf, { exact: true }).click()
+  }).toPass({ timeout: 20_000 })
 }
 
 async function skipConnectorSteps(page: Page) {
@@ -53,7 +69,7 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
   }).toPass({ timeout: 15_000 })
 
   await fillMaskedDate(page, /Data de nascimento|Date of birth/i, profile.birthDate)
-  await clickAntSelectOption(page, page.getByTestId('onboarding-gender-select'), profile.genderLabel)
+  await clickAntSelectOption(page, page.getByRole('combobox', { name: /Sexo|Gender/i }), profile.genderLabel)
   await page.getByRole('textbox', { name: /^CPF$/i }).fill(profile.cpf)
 
   await expect(async () => {
@@ -65,7 +81,7 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
   await page.getByTestId('onboarding-address-number').fill('100')
   await page.getByLabel(/Bairro|Neighborhood/i).fill('Centro')
   await page.getByLabel(/^Cidade|City$/i).fill('Belo Horizonte')
-  await clickAntSelectOption(page, page.getByTestId('onboarding-address-state'), 'MG')
+  await selectBrazilianState(page, 'MG')
   await page.getByTestId('onboarding-contact-mobile').fill('31999998888')
 
   const profileSave = page.waitForResponse(
