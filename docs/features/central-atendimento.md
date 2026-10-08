@@ -16,6 +16,7 @@ Página pública **sem autenticação** em `/central-atendimento` para orientar 
 | Superfície | Detalhe |
 |----------|---------|
 | Web | `CentralAtendimentoPage` — tom família, CTA login, nota sem e-mail público |
+| Menu usuário (logado) | **Ajuda** no dropdown do avatar → `/central-atendimento` (`nav.help`) |
 | Onboarding | HTTP 409 `CPF_ALREADY_LINKED` → i18n família + link `/central-atendimento` |
 | API | `PatientService.create` valida unicidade de CPF; 409 com `code` |
 | Suporte | Categoria `account_login_cpf` em `POST /support/reports` |
