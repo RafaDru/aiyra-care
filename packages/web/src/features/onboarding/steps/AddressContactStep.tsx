@@ -84,7 +84,13 @@ export function AddressContactStep({ form, submitting, accountEmail, onFinish }:
           <Input size="large" />
         </Form.Item>
         <Form.Item name="state" label={t('onboarding.address.state')} rules={[{ required: true, message: t('onboarding.address.stateRequired') }]}>
-          <Select size="large" options={UF_OPTIONS} showSearch optionFilterProp="label" />
+          <Select
+            size="large"
+            options={UF_OPTIONS}
+            showSearch
+            optionFilterProp="label"
+            data-testid="onboarding-address-state"
+          />
         </Form.Item>
 
         <Title level={5} style={{ marginTop: 8 }}>{t('onboarding.contact.title')}</Title>

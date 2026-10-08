@@ -39,16 +39,19 @@ export async function clickAntSelectOption(
   trigger: Locator,
   optionName: string,
 ) {
-  await trigger.scrollIntoViewIfNeeded()
-  await trigger.click()
-  const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()
-  await dropdown.waitFor({ state: 'attached', timeout: 15_000 })
-  const option = dropdown
-    .locator('.ant-select-item-option')
-    .filter({ hasText: optionName })
-    .first()
-  await option.waitFor({ state: 'attached', timeout: 15_000 })
-  await option.evaluate((node) => {
-    ;(node as HTMLElement).click()
-  })
+  await expect(async () => {
+    await trigger.waitFor({ state: 'attached', timeout: 5_000 })
+    await trigger.scrollIntoViewIfNeeded()
+    await trigger.click()
+    const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()
+    await dropdown.waitFor({ state: 'attached', timeout: 10_000 })
+    const option = dropdown
+      .locator('.ant-select-item-option')
+      .filter({ hasText: optionName })
+      .first()
+    await option.waitFor({ state: 'attached', timeout: 10_000 })
+    await option.evaluate((node) => {
+      ;(node as HTMLElement).click()
+    })
+  }).toPass({ timeout: 20_000 })
 }

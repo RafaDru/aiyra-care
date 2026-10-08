@@ -54,6 +54,7 @@ export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) 
           <Select
             size="large"
             placeholder={t('onboarding.genderPlaceholder')}
+            data-testid="onboarding-gender-select"
             options={[
               { value: 'male', label: t('patient.male') },
               { value: 'female', label: t('patient.female') },
@@ -77,7 +78,14 @@ export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) 
         <Form.Item name="cns" label={t('onboarding.cnsLabel')} extra={t('onboarding.cnsHint')}>
           <Input placeholder={t('onboarding.cnsPlaceholder')} maxLength={15} />
         </Form.Item>
-        <Button type="primary" htmlType="submit" block size="large" loading={submitting}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          size="large"
+          loading={submitting}
+          data-testid="onboarding-identity-continue"
+        >
           {t('onboarding.continue')}
         </Button>
       </Form>

@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import { selectAntOption } from './select'
+import { clickAntSelectOption, selectAntOption } from './select'
 
 const COOKIE_CONSENT_VERSION = '1.0'
 
@@ -53,18 +53,19 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
   }).toPass({ timeout: 15_000 })
 
   await fillMaskedDate(page, /Data de nascimento|Date of birth/i, profile.birthDate)
-  await selectAntOption(page, /Sexo|Gender/i, profile.genderLabel)
+  await clickAntSelectOption(page, page.getByTestId('onboarding-gender-select'), profile.genderLabel)
   await page.getByRole('textbox', { name: /^CPF$/i }).fill(profile.cpf)
 
-  await page.getByRole('button', { name: /Continuar|Continue/i }).click()
-
-  await page.getByTestId('onboarding-address-cep').waitFor({ state: 'visible', timeout: 25_000 })
+  await expect(async () => {
+    await page.getByTestId('onboarding-identity-continue').click()
+    await expect(page.getByTestId('onboarding-address-cep')).toBeVisible({ timeout: 8_000 })
+  }).toPass({ timeout: 30_000 })
   await page.getByTestId('onboarding-address-cep').locator('input').fill('30130010')
   await page.getByTestId('onboarding-address-street').fill('Rua Teste Onboarding')
   await page.getByTestId('onboarding-address-number').fill('100')
   await page.getByLabel(/Bairro|Neighborhood/i).fill('Centro')
   await page.getByLabel(/^Cidade|City$/i).fill('Belo Horizonte')
-  await selectAntOption(page, /^UF$|State/i, 'MG')
+  await clickAntSelectOption(page, page.getByTestId('onboarding-address-state'), 'MG')
   await page.getByTestId('onboarding-contact-mobile').fill('31999998888')
 
   const profileSave = page.waitForResponse(
