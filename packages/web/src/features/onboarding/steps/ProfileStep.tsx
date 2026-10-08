@@ -24,7 +24,7 @@ export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) 
 
       <Form form={form} layout="vertical" onFinish={onContinue} requiredMark={false}>
         <Form.Item name="name" label={t('onboarding.name')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
-          <Input size="large" autoComplete="name" />
+          <Input size="large" autoComplete="name" data-testid="onboarding-profile-name" />
         </Form.Item>
         <Form.Item
           name="socialName"
@@ -48,7 +48,7 @@ export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) 
             },
           ]}
         >
-          <MaskedDatePicker style={{ width: '100%' }} />
+          <MaskedDatePicker style={{ width: '100%' }} data-testid="onboarding-profile-birthdate" />
         </Form.Item>
         <Form.Item name="gender" label={t('onboarding.gender')} rules={[{ required: true, message: t('onboarding.genderRequired') }]}>
           <Select
@@ -72,6 +72,7 @@ export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) 
           <Input
             placeholder="000.000.000-00"
             maxLength={14}
+            data-testid="onboarding-profile-cpf"
             onChange={(e) => form.setFieldValue('cpf', formatCpfInput(e.target.value))}
           />
         </Form.Item>
