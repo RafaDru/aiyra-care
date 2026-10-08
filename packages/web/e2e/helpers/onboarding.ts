@@ -36,18 +36,7 @@ async function fillMaskedDate(page: Page, label: RegExp, value: string) {
 }
 
 async function selectBrazilianState(page: Page, uf: string) {
-  await expect(async () => {
-    const combo = page.getByRole('combobox', { name: /Estado|State/i })
-    await combo.click()
-    const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()
-    await dropdown.waitFor({ state: 'visible', timeout: 8_000 })
-    const titled = dropdown.locator(`[title="${uf}"]`)
-    if ((await titled.count()) > 0) {
-      await titled.first().click()
-      return
-    }
-    await dropdown.getByText(uf, { exact: true }).click()
-  }).toPass({ timeout: 20_000 })
+  await clickAntSelectOption(page, page.getByTestId('onboarding-address-state'), uf)
 }
 
 async function skipConnectorSteps(page: Page) {
