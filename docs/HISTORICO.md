@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-08] - i18n locales MVP
+
+### Decisão
+- **Espanhol (`es`) adiado** para pós-MVP; MVP exige apenas **pt-BR + en** com paridade via `npm run i18n:check`; política em [`docs/I18N_LOCALES.md`](I18N_LOCALES.md) (sem `es.json` por enquanto).
+
 ## [2026-10-07] - CH bridge INC — só falha técnica
 
 ### Decisão

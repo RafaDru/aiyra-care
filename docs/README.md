@@ -19,6 +19,7 @@
 ### Produto e negócio
 
 - [`product-terminology.md`](./product-terminology.md) — glossário UI B2C (família × clínico)
+- [`I18N_LOCALES.md`](./I18N_LOCALES.md) — locales MVP (pt-BR + en), `t()` e `i18n:check`
 - [`discovery/`](./discovery/) — discovery ativo (dia a dia, médico, indicação)
 - [`ECOSYSTEM.md`](./ECOSYSTEM.md) — personas, monetização
 - [`B2B_PARTNERS.md`](./B2B_PARTNERS.md) — parceiros B2B
