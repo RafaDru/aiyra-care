@@ -2,12 +2,22 @@
 
 const EVENT = 'aiyracare:first-visit-tour-open'
 
-export function requestFirstVisitTourOpen(): void {
-  window.dispatchEvent(new CustomEvent(EVENT))
+export type FirstVisitTourOpenOptions = {
+  /** Open even when `first_visit_tour_completed` is set (post-onboarding CTA). */
+  force?: boolean
 }
 
-export function subscribeFirstVisitTourOpen(handler: () => void): () => void {
-  const listener = () => handler()
+export function requestFirstVisitTourOpen(options?: FirstVisitTourOpenOptions): void {
+  window.dispatchEvent(new CustomEvent<FirstVisitTourOpenOptions>(EVENT, { detail: options ?? {} }))
+}
+
+export function subscribeFirstVisitTourOpen(
+  handler: (options: FirstVisitTourOpenOptions) => void,
+): () => void {
+  const listener = (ev: Event) => {
+    const detail = (ev as CustomEvent<FirstVisitTourOpenOptions>).detail ?? {}
+    handler(detail)
+  }
   window.addEventListener(EVENT, listener)
   return () => window.removeEventListener(EVENT, listener)
 }
