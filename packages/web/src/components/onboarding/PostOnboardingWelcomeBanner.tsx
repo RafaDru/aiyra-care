@@ -56,7 +56,7 @@ export function PostOnboardingWelcomeBanner() {
           type="text"
           size="small"
           icon={<CloseOutlined />}
-          aria-label={t('onboarding.dashboardWelcomeCta')}
+          aria-label={t('common.close')}
           onClick={dismissOnly}
         />
       }
