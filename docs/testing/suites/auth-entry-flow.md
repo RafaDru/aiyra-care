@@ -38,7 +38,7 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 
 > Signup real com e-mail descartável é **opcional** na CI (rate limit Supabase). Copy de confirmação por e-mail aparece no modo signup; ver nota no PR se `email_confirm` não estiver habilitado.
 
-### C — Onboarding guiado (wizard 2 passos)
+### C — Onboarding guiado (wizard 2 passos — **comportamento atual**)
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
@@ -47,6 +47,16 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | 3 | **Pular por agora** | Dashboard **Sua família** com titular; banner de boas-vindas dismissível (opcional) | |
 
 **Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado» · helper `session.ts` alinhado ao título v2 do passo 1
+
+### D — Onboarding multi-família — **planned** (pós [`ONBOARDING_FAMILY_NAME_STEP.md`](../../features/ONBOARDING_FAMILY_NAME_STEP.md))
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Após perfil titular | Tela nome família (`onboarding-step-family-name`) | |
+| 2 | Nome + **Continuar** | Membros no círculo (`onboarding-step-family-members`); titular no 1º círculo | |
+| 3 | **Adicionar outra família** + 2º nome + dependente | Dashboard com 2 grupos; `GET /care-circles` ≥ 2 | |
+
+> Até ship da spec: cenário D não roda na CI.
 
 ## Matriz
 
