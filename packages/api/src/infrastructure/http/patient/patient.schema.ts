@@ -1,10 +1,7 @@
 import { z } from 'zod'
-<<<<<<< HEAD
-import { validatePatientBirthDate } from '../../../domain/patient/birth-date-rules.js'
-=======
 import { isMinorBirthDate } from '../../../domain/patient/age-rules.js'
+import { validatePatientBirthDate } from '../../../domain/patient/birth-date-rules.js'
 import { isValidSelfProfileCpf, SELF_PROFILE_CPF_REQUIRED_MESSAGE } from '../../../domain/patient/self-profile-cpf.js'
->>>>>>> origin/main
 
 const genderEnum = z.enum(['male', 'female'])
 
