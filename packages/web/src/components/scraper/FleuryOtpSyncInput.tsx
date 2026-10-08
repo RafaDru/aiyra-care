@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Alert, Button, Input, Space, Typography } from 'antd'
 import { api } from '../../lib/api.js'
 
@@ -6,6 +7,7 @@ const { Text } = Typography
 
 /** Campo OTP in-app — envia código ao browser Playwright do sync Hermes Pardini. */
 export function FleuryOtpSyncInput({ jobId }: { jobId: string }) {
+  const { t } = useTranslation()
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,7 +50,7 @@ export function FleuryOtpSyncInput({ jobId }: { jobId: string }) {
                 setCode(e.target.value.replace(/\D/g, '').slice(0, 8))
                 setSent(false)
               }}
-              placeholder="Código de 6 dígitos"
+              placeholder={t('form.otpSix')}
               inputMode="numeric"
               autoComplete="one-time-code"
               maxLength={8}

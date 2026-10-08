@@ -24,12 +24,15 @@ const STATUS_COLOR: Record<string, string> = {
   unknown: 'warning',
 }
 
-const MATCH_LABEL: Record<CadernetaMatchReason, string> = {
-  cpf: 'CPF',
-  cns: 'CNS',
-  birth_date_name: 'Data + nome',
-  name_only: 'Nome',
-  unmatched: '—',
+function matchReasonLabel(t: (key: string) => string, reason: CadernetaMatchReason): string {
+  const keys: Record<CadernetaMatchReason, string> = {
+    cpf: 'publicHealth.matchCpf',
+    cns: 'publicHealth.matchCns',
+    birth_date_name: 'publicHealth.matchBirthDateName',
+    name_only: 'publicHealth.matchNameOnly',
+    unmatched: 'publicHealth.matchUnmatched',
+  }
+  return t(keys[reason])
 }
 
 interface Props {
@@ -123,7 +126,7 @@ export function PublicHealthIntegrationModal({
         if (session) setGovbrSession(session)
         const bundles = data.childBundles ?? []
         if (bundles.length === 0) {
-          setError('Nenhum dependente encontrado na Minha Família do gov.br.')
+          setError(t('publicHealth.noDependentsFound'))
           return
         }
         const familyPlan = await api.patients.cadernetaFamilyPlan(patientId, {
@@ -132,7 +135,10 @@ export function PublicHealthIntegrationModal({
         })
         setPlan(familyPlan)
         message.success(
-          `Caderneta: ${bundles.length} dependente(s), ${familyPlan.matches.length} vinculado(s) no app`,
+          t('publicHealth.cadernetaFetchSuccess', {
+            dependents: bundles.length,
+            linked: familyPlan.matches.length,
+          }),
         )
       }
     } catch (err) {
@@ -153,16 +159,26 @@ export function PublicHealthIntegrationModal({
           responsibleCpf: result.responsibleCpf,
         })
         const parts = [
-          r.totals.importedVaccines ? `${r.totals.importedVaccines} vacinas` : null,
-          r.totals.importedSchedule ? `${r.totals.importedSchedule} calendário` : null,
-          r.totals.importedMilestones ? `${r.totals.importedMilestones} marcos` : null,
-          r.totals.importedClinical ? `${r.totals.importedClinical} histórico` : null,
+          r.totals.importedVaccines
+            ? t('publicHealth.importPartVaccines', { count: r.totals.importedVaccines })
+            : null,
+          r.totals.importedSchedule
+            ? t('publicHealth.importPartSchedule', { count: r.totals.importedSchedule })
+            : null,
+          r.totals.importedMilestones
+            ? t('publicHealth.importPartMilestones', { count: r.totals.importedMilestones })
+            : null,
+          r.totals.importedClinical
+            ? t('publicHealth.importPartClinical', { count: r.totals.importedClinical })
+            : null,
         ].filter(Boolean)
         const who = r.byPatient.map((p) => p.patientName).join(', ')
         message.success(
           parts.length
-            ? `Importados para ${who}: ${parts.join(', ')}`
-            : `Nenhum dado novo (${who || 'sem correspondências'})`,
+            ? t('publicHealth.importSummaryFor', { who, parts: parts.join(', ') })
+            : t('publicHealth.importNothingNewFor', {
+                who: who || t('publicHealth.noMatches'),
+              }),
         )
       } else if (result) {
         const [existingVaccines, existingExams] = await Promise.all([
@@ -225,22 +241,22 @@ export function PublicHealthIntegrationModal({
   }
 
   const vaccineCols = [
-    { title: 'Vacina', dataIndex: 'vaccineName' },
-    { title: 'Dose', dataIndex: 'dose' },
-    { title: 'Data', dataIndex: 'applicationDate' },
-    { title: 'Próx. Dose', dataIndex: 'nextDoseDate', render: (v?: string) => v || '—' },
+    { title: t('publicHealth.vaccine'), dataIndex: 'vaccineName' },
+    { title: t('publicHealth.dose'), dataIndex: 'dose' },
+    { title: t('publicHealth.date'), dataIndex: 'applicationDate' },
+    { title: t('publicHealth.nextDose'), dataIndex: 'nextDoseDate', render: (v?: string) => v || '—' },
   ]
 
   const examCols = [
-    { title: 'Exame', dataIndex: 'examType' },
-    { title: 'Data', dataIndex: 'examDate' },
-    { title: 'Descrição', dataIndex: 'description', render: (v?: string) => v || '—' },
+    { title: t('publicHealth.exam'), dataIndex: 'examType' },
+    { title: t('publicHealth.date'), dataIndex: 'examDate' },
+    { title: t('publicHealth.description'), dataIndex: 'description', render: (v?: string) => v || '—' },
   ]
 
   const portalTitle = option?.title ?? 'SUS'
   const okText = hasPreview
-    ? (isCaderneta ? 'Importar para filhos vinculados' : t('patient.importForProfile'))
-    : (isCaderneta ? 'Buscar na Caderneta' : 'Buscar no ConecteSUS')
+    ? (isCaderneta ? t('publicHealth.importForLinkedChildren') : t('patient.importForProfile'))
+    : (isCaderneta ? t('publicHealth.fetchCaderneta') : t('publicHealth.fetchConectesus'))
 
   return (
     <Modal
@@ -248,7 +264,7 @@ export function PublicHealthIntegrationModal({
         <Space>
           <CloudDownloadOutlined />
           {portal && <BrandTag brand={option?.brand ?? portal}>{portalTitle}</BrandTag>}
-          <span>Importar dados</span>
+          <span>{t('publicHealth.importData')}</span>
         </Space>
       }
       open={open && portal != null}
@@ -256,7 +272,7 @@ export function PublicHealthIntegrationModal({
       onCancel={handleClose}
       confirmLoading={loading || importing}
       okText={okText}
-      cancelText="Fechar"
+      cancelText={t('publicHealth.close')}
       width={720}
       okButtonProps={{ disabled: hasPreview && !canImport }}
       destroyOnClose
@@ -276,7 +292,7 @@ export function PublicHealthIntegrationModal({
           message={t('patient.profileLabel', { name: patient.name })}
           description={
             isCaderneta && linkedChildrenCount > 0
-              ? `Login como responsável; os dados serão distribuídos entre ${linkedChildrenCount} filho(s) vinculado(s).`
+              ? t('publicHealth.cadernetaResponsibleHint', { count: linkedChildrenCount })
               : t('patient.importHint')
           }
         />
@@ -294,11 +310,11 @@ export function PublicHealthIntegrationModal({
                   {
                     validator: (_, v) => v && v.replace(/\D/g, '').length === 11
                       ? Promise.resolve()
-                      : Promise.reject('CPF deve ter 11 dígitos'),
+                      : Promise.reject(t('publicHealth.cpfElevenDigits')),
                   },
                 ]}
               >
-                <Input placeholder="000.000.000-00" maxLength={14} />
+                <Input placeholder={t('form.cpfMask')} maxLength={14} />
               </Form.Item>
             </Form>
           )}
@@ -308,10 +324,10 @@ export function PublicHealthIntegrationModal({
             icon={govbrReady ? <CloudDownloadOutlined /> : <ChromeOutlined />}
             message={
               govbrReady
-                ? 'Sessão gov.br ativa — a busca usa HTTP sem abrir navegador até a sessão expirar.'
+                ? t('publicHealth.govbrSessionActive')
                 : isCaderneta
-                  ? <>Na primeira vez, uma janela do navegador abre para login no <strong>gov.br</strong> como responsável. Depois, a sessão fica salva para reimportações.</>
-                  : <>Na primeira vez, uma janela abre para login no <strong>gov.br</strong>. Depois, reimportações usam a sessão salva (sem navegador).</>
+                  ? t('publicHealth.govbrSessionCadernetaFirst')
+                  : t('publicHealth.govbrSessionConecteFirst')
             }
           />
         </>
@@ -322,12 +338,12 @@ export function PublicHealthIntegrationModal({
           <Spin size="large" />
           <p style={{ marginTop: 16, fontSize: 15 }}>
             {govbrReady
-              ? <><CloudDownloadOutlined /> Buscando dados no ConecteSUS (sessão gov.br)...</>
-              : <><ChromeOutlined /> Uma janela do navegador foi aberta.</>}
+              ? <><CloudDownloadOutlined /> {t('publicHealth.fetchingConecte')}</>
+              : <><ChromeOutlined /> {t('publicHealth.browserWindowOpened')}</>}
           </p>
           {!govbrReady && (
             <p style={{ color: '#666' }}>
-              Faça o login no <strong>gov.br</strong> na janela e aguarde...
+              {t('publicHealth.waitGovbrLogin')}
             </p>
           )}
         </div>
@@ -346,7 +362,7 @@ export function PublicHealthIntegrationModal({
 
       {isCaderneta && plan && (
         <div style={{ marginTop: 8 }}>
-          <Text strong><LinkOutlined /> Correspondências</Text>
+          <Text strong><LinkOutlined /> {t('publicHealth.matchesTitle')}</Text>
           <Table
             size="small"
             style={{ marginTop: 8 }}
@@ -355,26 +371,26 @@ export function PublicHealthIntegrationModal({
             dataSource={plan.matches}
             columns={[
               {
-                title: 'Caderneta',
+                title: t('publicHealth.cadernetaColumn'),
                 render: (_, row) => (
                   <Space>
-                    <Text strong>{row.bundle.member.name ?? 'Sem nome'}</Text>
+                    <Text strong>{row.bundle.member.name ?? t('publicHealth.noName')}</Text>
                     {row.bundle.member.birthDate && <Text type="secondary">{row.bundle.member.birthDate}</Text>}
                   </Space>
                 ),
               },
               { title: t('patient.inAppProfileColumn'), dataIndex: 'patientName' },
               {
-                title: 'Critério',
+                title: t('publicHealth.matchCriteria'),
                 dataIndex: 'matchReason',
-                render: (v: CadernetaMatchReason) => <Tag>{MATCH_LABEL[v]}</Tag>,
+                render: (v: CadernetaMatchReason) => <Tag>{matchReasonLabel(t, v)}</Tag>,
               },
               {
-                title: 'Vacinas',
+                title: t('publicHealth.vaccinesColumn'),
                 render: (_, row) => row.bundle.vaccines.length,
               },
               {
-                title: 'Calendário',
+                title: t('publicHealth.scheduleColumn'),
                 render: (_, row) => row.bundle.vaccineSchedule?.length ?? 0,
               },
             ]}
@@ -384,7 +400,7 @@ export function PublicHealthIntegrationModal({
               type="warning"
               showIcon
               style={{ marginTop: 12 }}
-              message={`${plan.unmatched.length} dependente(s) sem correspondência`}
+              message={t('publicHealth.unmatchedDependents', { count: plan.unmatched.length })}
               description={plan.unmatched.map((u) => u.reason).join(' · ')}
             />
           )}
@@ -401,15 +417,15 @@ export function PublicHealthIntegrationModal({
           )}
           {result.patientCns && <Tag color="blue" style={{ marginBottom: 8 }}>CNS: {result.patientCns}</Tag>}
           <div style={{ marginBottom: 12 }}>
-            <Tag color="blue">{result.vaccines.length} vacinas</Tag>
-            <Tag color="cyan">{result.exams.length} exames</Tag>
+            <Tag color="blue">{t('publicHealth.vaccinesTag', { count: result.vaccines.length })}</Tag>
+            <Tag color="cyan">{t('publicHealth.examsTag', { count: result.exams.length })}</Tag>
           </div>
           <Collapse
             defaultActiveKey={result.vaccines.length ? 'vaccines' : undefined}
             items={[
               {
                 key: 'vaccines',
-                label: <span>Vacinas <Tag color="blue">{result.vaccines.length}</Tag></span>,
+                label: <span>{t('publicHealth.vaccinesColumn')} <Tag color="blue">{result.vaccines.length}</Tag></span>,
                 children: (
                   <Table
                     dataSource={result.vaccines}
@@ -422,7 +438,7 @@ export function PublicHealthIntegrationModal({
               },
               {
                 key: 'exams',
-                label: <span>Exames <Tag color="cyan">{result.exams.length}</Tag></span>,
+                label: <span>{t('publicHealth.exam')} <Tag color="cyan">{result.exams.length}</Tag></span>,
                 children: (
                   <Table
                     dataSource={result.exams}
@@ -445,7 +461,7 @@ export function PublicHealthIntegrationModal({
           items={[
             {
               key: 'family',
-              label: <><TeamOutlined /> Minha Família ({result.familyMembers?.length ?? 0})</>,
+              label: <><TeamOutlined /> {t('publicHealth.familySection', { count: result.familyMembers?.length ?? 0 })}</>,
               children: (
                 <List
                   size="small"
@@ -453,7 +469,7 @@ export function PublicHealthIntegrationModal({
                   renderItem={(m) => (
                     <List.Item>
                       <Space>
-                        <Text strong>{m.name ?? 'Sem nome'}</Text>
+                        <Text strong>{m.name ?? t('publicHealth.noName')}</Text>
                         {m.birthDate && <Text type="secondary">{m.birthDate}</Text>}
                         {m.cpf && <Tag>{m.cpf}</Tag>}
                       </Space>
@@ -464,7 +480,7 @@ export function PublicHealthIntegrationModal({
             },
             {
               key: 'schedule',
-              label: `Calendário vacinal (todos) (${result.vaccineSchedule?.length ?? 0})`,
+              label: t('publicHealth.scheduleAll', { count: result.vaccineSchedule?.length ?? 0 }),
               children: (
                 <Table
                   size="small"
@@ -472,10 +488,10 @@ export function PublicHealthIntegrationModal({
                   rowKey={(r) => r.externalKey ?? `${r.vaccineName}-${r.doseLabel}`}
                   dataSource={result.vaccineSchedule ?? []}
                   columns={[
-                    { title: 'Vacina', dataIndex: 'vaccineName' },
-                    { title: 'Dose', dataIndex: 'doseLabel', render: (v: string) => v ?? '—' },
+                    { title: t('publicHealth.vaccine'), dataIndex: 'vaccineName' },
+                    { title: t('publicHealth.dose'), dataIndex: 'doseLabel', render: (v: string) => v ?? '—' },
                     {
-                      title: 'Status',
+                      title: t('publicHealth.status'),
                       dataIndex: 'status',
                       render: (v: string) => <Tag color={STATUS_COLOR[v] ?? 'default'}>{v}</Tag>,
                     },

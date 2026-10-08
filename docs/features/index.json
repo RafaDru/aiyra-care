@@ -30,6 +30,18 @@
       "tags": ["conta", "lgpd", "família", "acl"]
     },
     {
+      "id": "dashboard-people-home",
+      "epicId": "family-day-to-day",
+      "title": "Início — grade de pessoas e agrupamento",
+      "status": "done",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/dashboard-people-home.md",
+      "routes": ["/"],
+      "api": ["GET /patients", "GET /care-circles/dashboard", "POST /care-circles/:id/patients"],
+      "tags": ["dashboard", "família", "onboarding"]
+    },
+    {
       "id": "beneficiary-view-filter",
       "epicId": "amil-routing-classifier",
       "title": "Sincronizar Amil — filtro período e beneficiário",

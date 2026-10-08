@@ -92,7 +92,8 @@
     "doneToast": "Perfil criado! Você já pode usar o app.",
     "bannerTitle": "Finalize seu cadastro",
     "bannerBody": "Complete seu perfil de titular para acessar carteira, exames e família.",
-    "bannerAction": "Completar agora"
+    "bannerAction": "Completar agora",
+    "screenTitle": "Complete seu cadastro"
   },
   "home": {
     "greeting": "Olá, {{name}}",
@@ -163,6 +164,49 @@
       "type_rg": "RG",
       "type_cpf_card": "CPF",
       "type_cnh": "CNH"
+    },
+    "integrations": {
+      "title": "Integrações",
+      "subtitle": "Status dos portais conectados. Login e sincronização com browser (Playwright) ficam no app web — o mobile não executa scrapers.",
+      "openInBrowser": "Abrir integrações no navegador",
+      "empty": "Nenhum portal vinculado. Conecte operadoras ou laboratórios no app web.",
+      "loadError": "Erro ao carregar integrações",
+      "inactive": "Inativo",
+      "syncOnWeb": "Sincronizar no app web",
+      "syncDegraded": "Sync pausado (portal degradado)",
+      "loginOnWeb": "Login necessário no app web",
+      "sessionReady": "Sessão pronta para sync no web",
+      "firstSyncOnWeb": "Primeiro sync no app web",
+      "manageOnWeb": "Gerenciar no app web",
+      "inProgress": "Em andamento: {{message}}",
+      "lastSync": "Último sync: {{when}}",
+      "planVia": "Plano via {{name}}"
+    },
+    "wallet": {
+      "title": "Carteira de {{name}}",
+      "subtitle": "Cartões e convênios sincronizados — somente leitura no app mobile.",
+      "webHint": "QR token Unimed, sincronização e coparticipação detalhada ficam no app web.",
+      "openInBrowser": "Abrir Carteira no navegador",
+      "publicSystem": "Sistema público",
+      "cnsLabel": "CNS",
+      "childBookLabel": "Caderneta da Criança",
+      "myFamily": "Minha família",
+      "govbr": "gov.br",
+      "cadernetaHint": "Calendário vacinal e marcos — ver detalhes no web.",
+      "healthPlan": "Plano de saúde",
+      "noInsurance": "Nenhum convênio vinculado. Conecte um portal na aba Integrações (web) e sincronize.",
+      "cardNumberLabel": "Número do cartão",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "pending": "Pendente",
+      "network": "Rede: {{name}}",
+      "updatedAt": "Atualizado em {{when}}",
+      "noSyncYet": "Ainda sem sync — use o app web para importar o cartão.",
+      "dentalPlan": "Plano odontológico",
+      "noDentalPlan": "Nenhum plano odontológico cadastrado.",
+      "notFound": "Paciente não encontrado.",
+      "loadError": "Erro ao carregar carteira",
+      "patientFallback": "paciente"
     }
   },
   "family": {

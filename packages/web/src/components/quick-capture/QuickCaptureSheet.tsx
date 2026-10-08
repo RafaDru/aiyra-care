@@ -270,7 +270,7 @@ export function QuickCaptureSheet({
             <AutoComplete options={COMMON_MEDS.map((m) => ({ value: m }))} placeholder={t('measurement.pickOrTypeMed')} filterOption />
           </Form.Item>
           <Form.Item name="doseGiven" label={t('measurement.dose')}>
-            <Input placeholder="5 ml, 1 comprimido…" />
+            <Input placeholder={t('form.dosageExample')} />
           </Form.Item>
           <Form.Item name="healthThreadId" label={t('measurement.acompanhamento')}>
             <Select allowClear loading={threadsLoading} options={threadOptions} />
