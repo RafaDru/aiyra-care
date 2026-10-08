@@ -22,15 +22,39 @@ describe('onboarding-wizard-storage', () => {
     vi.resetModules()
   })
 
-  it('tracks dependents step in sessionStorage', async () => {
+  it('tracks families step in sessionStorage', async () => {
     const mod = await import('../src/lib/onboarding-wizard-storage.js')
     expect(mod.readOnboardingWizardStep()).toBe(0)
-    expect(mod.isOnboardingDependentsStepActive()).toBe(false)
-    mod.persistOnboardingDependentsStep()
+    expect(mod.isOnboardingFamiliesStepActive()).toBe(false)
+    mod.persistOnboardingFamiliesStep()
     expect(mod.readOnboardingWizardStep()).toBe(1)
-    expect(mod.isOnboardingDependentsStepActive()).toBe(true)
+    expect(mod.isOnboardingFamiliesStepActive()).toBe(true)
     mod.clearOnboardingWizardStep()
     expect(mod.readOnboardingWizardStep()).toBe(0)
+  })
+
+  it('persists family sub-wizard state', async () => {
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    mod.persistOnboardingFamilyWizard({
+      phase: 'members',
+      circleIndex: 1,
+      activeCircleId: 'circle-1',
+      circleNames: ['Minha família', 'Família 2'],
+    })
+    const read = mod.readOnboardingFamilyWizard()
+    expect(read?.phase).toBe('members')
+    expect(read?.circleIndex).toBe(1)
+    expect(read?.activeCircleId).toBe('circle-1')
+    expect(read?.circleNames).toEqual(['Minha família', 'Família 2'])
+    mod.clearOnboardingWizardStep()
+    expect(mod.readOnboardingFamilyWizard()).toBeNull()
+  })
+
+  it('suggests default circle names', async () => {
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    expect(mod.defaultFamilyCircleName('Maria Silva Santos', 0, [])).toBe('Família Santos')
+    expect(mod.defaultFamilyCircleName('Maria', 0, [])).toBe('Minha família')
+    expect(mod.defaultFamilyCircleName('Maria', 1, ['Família 2'])).toBe('Família 3')
   })
 
   it('tracks just-completed until cleared', async () => {

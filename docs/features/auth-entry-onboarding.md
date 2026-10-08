@@ -11,41 +11,46 @@
 
 ## Resumo
 
-Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onboarding em 2 passos (perfil titular + dependentes opcionais) → dashboard «Sua família».
+Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onboarding (perfil titular → loop **família(s)** com nome + membros + «adicionar outra família») → dashboard «Sua família» agrupada por círculo.
+
+**Spec:** [`ONBOARDING_FAMILY_NAME_STEP.md`](./ONBOARDING_FAMILY_NAME_STEP.md) (aprovada 2026-10-08).
 
 ## Comportamento
 
 1. **Login** (`?mode=login`): título «Bem-vindo de volta»; após auth → compliance (se pendente) → dashboard ou onboarding se `needsProfile`
 2. **Signup** (`?mode=signup`): título «Crie sua conta»; copy de confirmação por e-mail (informativo); após signup → `/onboarding`
-3. **Onboarding passo 1:** perfil titular (CPF obrigatório; CNS opcional)
-4. **Onboarding passo 2:** adicionar dependentes via `POST /patients` ou pular
+3. **Onboarding passo 1:** perfil titular (CPF obrigatório; CNS opcional) → `POST /auth/complete-profile`
+4. **Onboarding passo 2 (loop):** para cada família — nome (`POST /care-circles`; 1º círculo vincula titular) → membros (`POST /patients` + `POST /care-circles/:id/patients`) → **Adicionar outra família** ou **Ir para o início**; gestão contínua em `/family`
 
-**Nota (passo 2):** após `POST /auth/complete-profile`, o wizard permanece em `/onboarding` até «Pular» ou «Ir para o início». O passo ativo persiste em `sessionStorage` via `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step`), gravado **antes** da API, para não redirecionar ao dashboard antes do passo de família (corrida com `refreshSync` / `needsProfile`). Redirect bloqueado também durante `submitting`.
+**Nota (famílias):** após `complete-profile`, o wizard permanece em `/onboarding` até concluir ≥1 círculo. Estado em `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step` + `aiyracare.onboarding_family_wizard`: fase `name` | `members`, índice, `activeCircleId`). Recarga reconcilia com `GET /care-circles`.
 
 **Pós-onboarding:** banner leve no dashboard (`PostOnboardingWelcomeBanner`, flag `aiyracare.onboarding_just_completed` em session até dismiss) — distinto do drawer `first-visit-guided-ux`, que aguarda o banner ou abre via «Ver primeiros passos».
 
 ## Telemetria
 
-`onboarding_step` — `step_1_viewed`, `profile_complete`, `step_2_viewed`, `dependent_added`, `dependents_skipped`, `dependents_complete`, `dashboard_welcome_viewed`, `dashboard_welcome_dismissed`
+`onboarding_step` — `step_1_viewed`, `profile_complete`, `step_3_family_name_viewed`, `family_circle_created`, `family_member_added`, `family_members_skipped`, `another_family_started`, `onboarding_families_complete`, `step_2_viewed` (membros), `dependent_added`, `dependents_skipped`, `dependents_complete`, `dashboard_welcome_viewed`, `dashboard_welcome_dismissed`
 
 ## Superfície técnica
 
 | Tipo | Referência |
 |------|------------|
 | Rotas | `/home`, `/login`, `/onboarding` |
-| UI | `landing.tsx`, `login.tsx`, `onboarding.tsx`, `OnboardingLayout.tsx`, `PostOnboardingWelcomeBanner.tsx` |
+| UI | `landing.tsx`, `login.tsx`, `onboarding.tsx`, `OnboardingFamilyLoop.tsx`, `OnboardingLayout.tsx`, `PostOnboardingWelcomeBanner.tsx` |
 | i18n | `auth.*`, `onboarding.*`, `patient.title`, `nav.dashboard` |
 
 ## Gap conhecido
 
-Confirmação de e-mail Supabase: copy informativa na UI; fluxo não bloqueia se `email_confirm` desabilitado no projeto.
+| Gap | Notas |
+|-----|--------|
+| Confirmação de e-mail Supabase | Copy informativa na UI; fluxo não bloqueia se `email_confirm` desabilitado no projeto |
 
 ## QA
 
 Spec refresh: [`WEB_ONBOARDING_REFRESH_2026-10`](./WEB_ONBOARDING_REFRESH_2026-10.md)
 
-Suite dedicada: [`auth-entry-flow`](../testing/suites/auth-entry-flow.md)
+Suites: [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) · [`onboarding-flow`](../testing/suites/onboarding-flow.md)
 
 ```powershell
 npm run qa:run -- --suite auth-entry-flow
+npm run qa:run -- --suite onboarding-flow
 ```

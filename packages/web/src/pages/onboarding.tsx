@@ -1,30 +1,31 @@
 import { useState, useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Alert, Button, Form, Input, Select, Space, Spin, Steps, Typography } from 'antd'
+import { Button, Form, Input, Select, Spin, Steps, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.js'
 import { MaskedDatePicker } from '../components/ui/MaskedDatePicker.js'
-import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianConsentField.js'
 import { OnboardingLayout } from '../layouts/OnboardingLayout.js'
 import { httpStatusFromError, reportAccountSettingsFailure } from '../lib/account-settings-errors.js'
 import { api } from '../lib/api.js'
 import { getBirthDateValidationIssue } from '../lib/birth-date-validation.js'
-import { isMinorBirthDate } from '../lib/patient-age.js'
 import { formatCpfInput } from '../lib/input-masks.js'
 import { trackProductEvent } from '../lib/product-events.js'
 import {
   clearOnboardingWizardStep,
-  isOnboardingDependentsStepActive,
+  isOnboardingFamiliesStepActive,
   markOnboardingJustCompleted,
-  persistOnboardingDependentsStep,
+  persistOnboardingFamiliesStep,
+  persistOnboardingFamilyWizard,
+  readOnboardingFamilyWizard,
   readOnboardingWizardStep,
 } from '../lib/onboarding-wizard-storage.js'
 import { isApiResponseError } from '../lib/api-response-error.js'
 import { OnboardingErrorAlert } from '../components/onboarding/OnboardingErrorAlert.js'
+import { OnboardingFamilyLoop } from '../components/onboarding/OnboardingFamilyLoop.js'
 
 const { Title, Text } = Typography
 
-const WIZARD_STEP_COUNT = 2
+const WIZARD_STEP_COUNT = 3
 
 function isAdult(birthDate: Date): boolean {
   const age = (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
@@ -49,26 +50,24 @@ function validateBirthDateField(value: unknown, t: (key: string) => string): Pro
   return message ? Promise.reject(new Error(message)) : Promise.resolve()
 }
 
-type DependentDraft = {
-  id: string
-  name: string
-}
-
 export function OnboardingPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { configured, loading, needsProfile, refreshSync } = useAuth()
   const [profileForm] = Form.useForm()
-  const [dependentForm] = Form.useForm()
   const [currentStep, setCurrentStep] = useState(readOnboardingWizardStep)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cpfAlreadyLinked, setCpfAlreadyLinked] = useState(false)
-  const [dependents, setDependents] = useState<DependentDraft[]>([])
-  const dependentBirthDate = Form.useWatch('birthDate', dependentForm)
-  const showMinorConsent = dependentBirthDate
-    ? isMinorBirthDate(dependentBirthDate.toDate?.() ?? dependentBirthDate)
-    : false
+  const [selfPatientId, setSelfPatientId] = useState<string | null>(null)
+  const [selfPatientName, setSelfPatientName] = useState('')
+  const [familyBootstrap, setFamilyBootstrap] = useState<{
+    phase: 'name' | 'members'
+    circleIndex: number
+    activeCircleId: string | null
+    circleNames: string[]
+  } | null>(null)
+  const [familyReady, setFamilyReady] = useState(false)
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -77,10 +76,70 @@ export function OnboardingPage() {
   }, [currentStep])
 
   useEffect(() => {
-    if (!needsProfile && isOnboardingDependentsStepActive() && currentStep === 0) {
+    if (!needsProfile && isOnboardingFamiliesStepActive() && currentStep === 0) {
       setCurrentStep(1)
     }
   }, [needsProfile, currentStep])
+
+  useEffect(() => {
+    if (currentStep !== 1 || familyReady) return
+    const stored = readOnboardingFamilyWizard()
+    if (stored) {
+      setFamilyBootstrap(stored)
+      setFamilyReady(true)
+      return
+    }
+    api.careCircles
+      .list()
+      .then((circles) => {
+        if (circles.length === 0) {
+          setFamilyBootstrap({
+            phase: 'name',
+            circleIndex: 0,
+            activeCircleId: null,
+            circleNames: [],
+          })
+        } else {
+          const names = circles.map((c) => c.name)
+          const last = circles[circles.length - 1]!
+          setFamilyBootstrap({
+            phase: 'members',
+            circleIndex: circles.length - 1,
+            activeCircleId: last.id,
+            circleNames: names,
+          })
+          persistOnboardingFamilyWizard({
+            phase: 'members',
+            circleIndex: circles.length - 1,
+            activeCircleId: last.id,
+            circleNames: names,
+          })
+        }
+      })
+      .catch(() => {
+        setFamilyBootstrap({
+          phase: 'name',
+          circleIndex: 0,
+          activeCircleId: null,
+          circleNames: [],
+        })
+      })
+      .finally(() => setFamilyReady(true))
+  }, [currentStep, familyReady])
+
+  useEffect(() => {
+    if (currentStep !== 1 || selfPatientId) return
+    api.patients
+      .list()
+      .then((rows) => {
+        const self = rows.find((p) => p.membershipRole === 'self') ?? rows[0]
+        if (self) {
+          setSelfPatientId(self.id)
+          setSelfPatientName(self.name)
+        }
+      })
+      .catch(() => undefined)
+  }, [currentStep, selfPatientId])
 
   if (!configured) return <Navigate to="/" replace />
 
@@ -94,23 +153,35 @@ export function OnboardingPage() {
     )
   }
 
-  // Após completeProfile, needsProfile fica false mas o passo de dependentes ainda deve aparecer.
-  // sessionStorage é gravado antes do refreshSync — evita corrida em que needsProfile atualiza antes do setState do passo 2.
-  const wizardOnDependentsStep = isOnboardingDependentsStepActive()
-  if (!needsProfile && currentStep === 0 && !wizardOnDependentsStep && !submitting) {
+  const wizardOnFamiliesStep = isOnboardingFamiliesStepActive()
+  if (!needsProfile && currentStep === 0 && !wizardOnFamiliesStep && !submitting) {
     return <Navigate to="/" replace />
   }
 
-  const goToDependentsStep = () => {
-    persistOnboardingDependentsStep()
+  const goToFamiliesStep = (patientId: string, patientName: string) => {
+    setSelfPatientId(patientId)
+    setSelfPatientName(patientName)
+    persistOnboardingFamiliesStep()
+    persistOnboardingFamilyWizard({
+      phase: 'name',
+      circleIndex: 0,
+      activeCircleId: null,
+      circleNames: [],
+    })
+    setFamilyBootstrap({
+      phase: 'name',
+      circleIndex: 0,
+      activeCircleId: null,
+      circleNames: [],
+    })
+    setFamilyReady(true)
     setCurrentStep(1)
-    trackProductEvent('onboarding_step', { step: 'step_2_viewed' })
+    trackProductEvent('onboarding_step', { step: 'step_3_family_name_viewed', circle_index: 0 })
   }
 
-  const finishOnboarding = (eventStep: 'dependents_skipped' | 'dependents_complete') => {
+  const finishOnboarding = () => {
     clearOnboardingWizardStep()
     markOnboardingJustCompleted()
-    trackProductEvent('onboarding_step', { step: eventStep })
     navigate('/')
   }
 
@@ -125,16 +196,16 @@ export function OnboardingPage() {
     setError(null)
     setCpfAlreadyLinked(false)
     try {
-      await api.auth.completeProfile({
+      const result = await api.auth.completeProfile({
         name: values.name,
         birthDate: values.birthDate.toDate().toISOString(),
         gender: values.gender,
         cpf: values.cpf.replace(/\D/g, ''),
         cns: values.cns?.replace(/\D/g, '') || undefined,
       })
-      goToDependentsStep()
       trackProductEvent('onboarding_step', { step: 'profile_complete' })
       await refreshSync()
+      goToFamiliesStep(result.patient.id, result.patient.name)
     } catch (e) {
       const status = httpStatusFromError(e)
       if (status) {
@@ -146,6 +217,7 @@ export function OnboardingPage() {
       }
       clearOnboardingWizardStep()
       setCurrentStep(0)
+      setFamilyReady(false)
       if (isApiResponseError(e) && e.code === 'CPF_ALREADY_LINKED') {
         setCpfAlreadyLinked(true)
         setError(null)
@@ -158,52 +230,15 @@ export function OnboardingPage() {
     }
   }
 
-  const onAddDependent = async (values: {
-    name: string
-    birthDate: { toDate: () => Date }
-    gender?: 'male' | 'female'
-    cpf?: string
-    minorGuardianConsent?: boolean
-  }) => {
-    setSubmitting(true)
-    setError(null)
-    setCpfAlreadyLinked(false)
-    try {
-      const birthDate = values.birthDate.toDate()
-      if (isMinorBirthDate(birthDate)) {
-        await api.compliance.accept({ kinds: ['minor_guardian_consent'] })
-      }
-      const created = await api.patients.create({
-        name: values.name,
-        birthDate: birthDate.toISOString(),
-        gender: values.gender || undefined,
-        cpf: values.cpf?.replace(/\D/g, '') || undefined,
-      })
-      setDependents((prev) => [...prev, { id: created.id, name: created.name }])
-      dependentForm.resetFields()
-      trackProductEvent('onboarding_step', { step: 'dependent_added' })
-    } catch (e) {
-      if (isApiResponseError(e) && e.code === 'CPF_ALREADY_LINKED') {
-        setCpfAlreadyLinked(true)
-        setError(null)
-      } else {
-        setCpfAlreadyLinked(false)
-        setError(e instanceof Error ? e.message : t('onboarding.dependentError'))
-      }
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const stepHuman = currentStep + 1
+  const stepsCurrent = currentStep === 0 ? 0 : 1
 
   return (
     <OnboardingLayout>
       <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
-        {t('onboarding.stepProgress', { current: stepHuman, total: WIZARD_STEP_COUNT })}
+        {t('onboarding.stepProgress', { current: stepsCurrent + 1, total: WIZARD_STEP_COUNT })}
       </Text>
       <Steps
-        current={currentStep}
+        current={stepsCurrent}
         style={{ marginBottom: 20 }}
         responsive
         size="small"
@@ -211,7 +246,8 @@ export function OnboardingPage() {
         data-testid="onboarding-wizard-steps"
         items={[
           { title: t('onboarding.steps.profile'), description: t('onboarding.steps.profileHint') },
-          { title: t('onboarding.steps.dependents'), description: t('onboarding.steps.dependentsHint') },
+          { title: t('onboarding.steps.families'), description: t('onboarding.steps.familiesHint') },
+          { title: t('onboarding.steps.complete'), description: t('onboarding.steps.completeHint') },
         ]}
       />
 
@@ -281,77 +317,21 @@ export function OnboardingPage() {
             </Button>
           </Form>
         </>
+      ) : familyReady && selfPatientId && familyBootstrap ? (
+        <OnboardingFamilyLoop
+          selfPatientId={selfPatientId}
+          selfPatientName={selfPatientName}
+          initialPhase={familyBootstrap.phase}
+          initialCircleIndex={familyBootstrap.circleIndex}
+          initialActiveCircleId={familyBootstrap.activeCircleId}
+          initialCircleNames={familyBootstrap.circleNames}
+          submitting={submitting}
+          setSubmitting={setSubmitting}
+          onFinish={finishOnboarding}
+        />
       ) : (
-        <div data-testid="onboarding-step-dependents">
-          <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.dependentsTitle')}</Title>
-          <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.dependentsSubtitle')}</Text>
-
-          {dependents.length > 0 && (
-            <Alert
-              type="success"
-              showIcon
-              style={{ marginBottom: 16 }}
-              message={t('onboarding.dependentsAdded', { count: dependents.length })}
-              description={dependents.map((d) => d.name).join(', ')}
-            />
-          )}
-
-          <Form form={dependentForm} layout="vertical" onFinish={onAddDependent} requiredMark={false}>
-            <Form.Item name="name" label={t('onboarding.dependentName')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
-              <Input size="large" />
-            </Form.Item>
-            <Form.Item
-              name="birthDate"
-              label={t('onboarding.birthDate')}
-              rules={[
-                { required: true, message: t('onboarding.birthDateRequired') },
-                { validator: (_, value) => validateBirthDateField(value, t) },
-              ]}
-            >
-              <MaskedDatePicker style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="gender" label={t('onboarding.gender')}>
-              <Select
-                size="large"
-                allowClear
-                placeholder={t('onboarding.genderOptional')}
-                options={[
-                  { value: 'male', label: t('patient.male') },
-                  { value: 'female', label: t('patient.female') },
-                ]}
-              />
-            </Form.Item>
-            <Form.Item
-              name="cpf"
-              label={t('onboarding.cpfOptional')}
-              rules={[{ validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('onboarding.cpfInvalid')) }]}
-            >
-              <Input
-                placeholder="000.000.000-00"
-                maxLength={14}
-                onChange={(e) => dependentForm.setFieldValue('cpf', formatCpfInput(e.target.value))}
-              />
-            </Form.Item>
-            {showMinorConsent && <MinorGuardianConsentFormItem />}
-            <Button type="default" htmlType="submit" block size="large" loading={submitting}>
-              {t('onboarding.addDependent')}
-            </Button>
-          </Form>
-
-          <Space direction="vertical" style={{ width: '100%', marginTop: 16 }}>
-            <Button
-              type="primary"
-              block
-              size="large"
-              disabled={dependents.length === 0}
-              onClick={() => finishOnboarding('dependents_complete')}
-            >
-              {t('onboarding.finish')}
-            </Button>
-            <Button type="link" block onClick={() => finishOnboarding('dependents_skipped')}>
-              {t('onboarding.skipDependents')}
-            </Button>
-          </Space>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+          <Spin size="large" />
         </div>
       )}
     </OnboardingLayout>

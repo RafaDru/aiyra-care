@@ -38,15 +38,23 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 
 > Signup real com e-mail descartável é **opcional** na CI (rate limit Supabase). Copy de confirmação por e-mail aparece no modo signup; ver nota no PR se `email_confirm` não estiver habilitado.
 
-### C — Onboarding guiado (wizard 2 passos)
+### C — Onboarding guiado (perfil + família)
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
 | 1 | Reset `qa:reset-onboarding-user` + login onboarding | Wizard passo 1 | |
-| 2 | Perfil titular + **Continuar** | Passo «Quem mais você cuida?» (testid `onboarding-step-dependents`) | |
-| 3 | **Pular por agora** | Dashboard **Sua família** com titular; banner de boas-vindas dismissível (opcional) | |
+| 2 | Perfil titular + **Continuar** | Tela nome família (`onboarding-step-family-name`) | |
+| 3 | Nome + **Continuar** | Membros (`onboarding-step-family-members`); titular no 1º círculo | |
+| 4 | **Pular pessoas por agora** | Dashboard **Sua família** com titular no grupo nomeado; banner opcional | |
 
-**Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado» · helper `session.ts` alinhado ao título v2 do passo 1
+**Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado» · helper `onboarding.ts`
+
+### D — Onboarding multi-família (manual / futuro E2E)
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Após 1º círculo | **Adicionar outra família** | |
+| 2 | 2º nome + dependente (sem «Incluir você») | Dashboard com 2 grupos; `GET /care-circles` ≥ 2 | |
 
 ## Matriz
 

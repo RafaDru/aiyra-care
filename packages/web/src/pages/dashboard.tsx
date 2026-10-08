@@ -159,8 +159,17 @@ export function Dashboard() {
 
   const useCircleLayout = useMemo(() => {
     if (hasMultipleCircles && circleSections.length > 0) return true
-    return groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0
-  }, [hasMultipleCircles, circleSections.length, groupedByCircle.sections.length, groupedByCircle.other.length])
+    if (groupedByCircle.sections.length > 1 || groupedByCircle.other.length > 0) return true
+    // Single care circle from onboarding — show named group instead of orphan «Outros perfis».
+    if (groupedByCircle.sections.length === 1 && circleGroups.length > 0) return true
+    return false
+  }, [
+    hasMultipleCircles,
+    circleSections.length,
+    groupedByCircle.sections.length,
+    groupedByCircle.other.length,
+    circleGroups.length,
+  ])
 
   if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
 
