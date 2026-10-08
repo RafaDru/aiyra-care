@@ -79,7 +79,8 @@ async function fillIdentityStep(page: Page, profile: OnboardingProfileInput) {
 
 async function fillAddressContactStep(page: Page) {
   await page.getByTestId('onboarding-address-cep').waitFor({ state: 'visible', timeout: 25_000 })
-  await page.getByTestId('onboarding-address-cep').getByRole('textbox').fill('30130-010')
+  const cepField = page.getByTestId('onboarding-address-cep')
+  await cepField.locator('input').first().fill('30130-010')
   await page.getByTestId('onboarding-address-street').fill('Rua Teste Onboarding')
   await page.getByTestId('onboarding-address-number').fill('100')
   await page.getByTestId('onboarding-address-district').fill('Centro')
