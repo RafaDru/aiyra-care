@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import { clickAntSelectOption, selectAntOption } from './select'
+import { clickAntSelectOption } from './select'
 
 const COOKIE_CONSENT_VERSION = '1.0'
 
@@ -29,9 +29,10 @@ export type OnboardingProfileInput = {
 
 async function fillMaskedDate(page: Page, label: RegExp, value: string) {
   const input = page.getByLabel(label, { exact: false })
+  await input.click({ clickCount: 3 })
   await input.fill(value, { force: true })
   await input.press('Tab')
-  await input.blur()
+  await expect(input).toHaveValue(value, { timeout: 10_000 })
 }
 
 async function selectBrazilianState(page: Page, uf: string) {
@@ -66,13 +67,19 @@ async function fillIdentityStep(page: Page, profile: OnboardingProfileInput) {
   }).toPass({ timeout: 15_000 })
 
   await fillMaskedDate(page, /Data de nascimento|Date of birth/i, profile.birthDate)
-  await clickAntSelectOption(page, page.getByRole('combobox', { name: /Sexo|Gender/i }), profile.genderLabel)
+  await clickAntSelectOption(page, page.getByTestId('onboarding-gender-select'), profile.genderLabel)
   await page.getByRole('textbox', { name: /^CPF$/i }).fill(profile.cpf)
 
   await expect(async () => {
     await page.getByTestId('onboarding-identity-continue').click()
+    const cepVisible = await page.getByTestId('onboarding-address-cep').isVisible().catch(() => false)
+    if (cepVisible) return
+    const errors = await page.locator('.ant-form-item-explain-error').allTextContents()
+    if (errors.length > 0) {
+      throw new Error(`Identity validation: ${errors.join('; ')}`)
+    }
     await expect(page.getByTestId('onboarding-address-cep')).toBeVisible({ timeout: 8_000 })
-  }).toPass({ timeout: 30_000 })
+  }).toPass({ timeout: 45_000 })
 }
 
 async function fillAddressContactStep(page: Page) {
@@ -135,7 +142,12 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
     page.getByTestId('onboarding-wizard-steps').waitFor({ state: 'visible', timeout: 25_000 }),
   ])
 
-  if (await profileHeading.isVisible().catch(() => false)) {
+  const onIdentityForm = await page
+    .getByRole('textbox', { name: /Nome completo|Full name/i })
+    .isVisible()
+    .catch(() => false)
+
+  if ((await profileHeading.isVisible().catch(() => false)) || onIdentityForm) {
     await fillIdentityStep(page, profile)
     await fillAddressContactStep(page)
   } else if (await addressHeading.isVisible().catch(() => false)) {
