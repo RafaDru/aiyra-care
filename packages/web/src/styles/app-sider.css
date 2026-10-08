@@ -17,10 +17,50 @@
   background: var(--sidebar-menu-selected) !important;
 }
 
-.app-sider .ant-layout-sider-trigger {
-  background: transparent !important;
-  color: var(--text-secondary);
+.app-sider-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   border-top: 1px solid var(--sidebar-border);
+  padding: 8px 12px;
+  flex-shrink: 0;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.app-sider-footer--collapsed {
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px;
+  gap: 4px;
+}
+
+.app-sider-footer__logout {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.app-sider-footer--collapsed .app-sider-footer__logout {
+  flex: 0 0 auto;
+  width: 100%;
+  justify-content: center;
+}
+
+.app-sider-footer__collapse {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.app-sider-footer--collapsed .app-sider-footer__collapse {
+  width: 100%;
+  justify-content: center;
+}
+
+.app-sider-footer:not(.app-sider-footer--collapsed) .app-sider-footer__collapse:not(:only-child) {
+  margin-left: auto;
 }
 
 .app-sider .app-sider-brand {

@@ -16,7 +16,9 @@
     "roadmap": "Roadmap",
     "ops": "Observabilidade",
     "session": "Sessões",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "collapseSidebar": "Recolher menu",
+    "expandSidebar": "Expandir menu"
   },
   "integrationsHub": {
     "subtitle": "Conecte portais de saúde ao perfil de quem você cuida",
