@@ -35,7 +35,7 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 | Tipo | Referência |
 |------|------------|
 | Rotas | `/home`, `/login`, `/onboarding` |
-| UI | `landing.tsx`, `login.tsx`, `onboarding.tsx`, `OnboardingFamilyLoop.tsx`, `OnboardingLayout.tsx`, `PostOnboardingWelcomeBanner.tsx` |
+| UI | `landing.tsx`, `login.tsx`, `onboarding.tsx`, `features/onboarding/*`, `AuthWizardShell.tsx`, `PostOnboardingWelcomeBanner.tsx` |
 | i18n | `auth.*`, `onboarding.*`, `patient.title`, `nav.dashboard` |
 
 ## Gap conhecido
