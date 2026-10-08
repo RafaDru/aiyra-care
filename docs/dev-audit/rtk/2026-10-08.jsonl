@@ -3,3 +3,5 @@
 {"ts":"2026-10-08T01:45:28.618Z","event":"bypass","command":"cd /workspace/packages/web && npm run build 2>&1"}
 {"ts":"2026-10-08T01:45:28.714Z","event":"bypass","command":"cd /workspace/packages/web && npx vitest run tests/internal-product-ui.test.ts 2>&1"}
 {"ts":"2026-10-08T01:45:46.125Z","event":"bypass","command":"cd /workspace && npm run test:critical 2>&1"}
+{"ts":"2026-10-08T13:41:36.509Z","event":"bypass","command":"cd /workspace && npm run i18n:check && cd packages/web && npm run build"}
+{"ts":"2026-10-08T13:41:42.766Z","event":"bypass","command":"cd /workspace && npm install --prefer-offline 2>&1 | tail -5 && cd packages/web && npm run build"}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Drawer,
   Timeline,
@@ -54,19 +55,20 @@ function timelineForDisplay(items: HealthThreadTimelineItem[]): HealthThreadTime
 }
 
 function TimelineEventContent({ item }: { item: HealthThreadTimelineItem }) {
+  const { t } = useTranslation()
   if (item.kind === 'entry') {
     return (
       <div>
         <Text style={{ fontSize: 12 }} type="secondary">{formatEventDate(item.occurredAt)}</Text>
         <div style={{ marginTop: 4 }}>
-          <Tag>Nota</Tag>
+          <Tag>{t('clinicalSequence.timelineNoteTag')}</Tag>
           <Text>{item.body}</Text>
         </div>
       </div>
     )
   }
 
-  const title = item.artifact?.title ?? item.entityType ?? 'Artefato'
+  const title = item.artifact?.title ?? item.entityType ?? t('clinicalSequence.artifactFallback')
   const roleMeta = item.linkRole
     ? LINK_ROLE_META[item.linkRole as HealthThreadLinkRole]
     : undefined
@@ -79,7 +81,7 @@ function TimelineEventContent({ item }: { item: HealthThreadTimelineItem }) {
       <Text style={{ fontSize: 12 }} type="secondary">
         {formatEventDate(item.occurredAt)}
         {linkedLater && (
-          <> · vinculado em {formatEventDate(item.linkedAt!)}</>
+          <> · {t('clinicalSequence.linkedOn', { date: formatEventDate(item.linkedAt!) })}</>
         )}
       </Text>
       <Space size={4} wrap style={{ marginTop: 4, marginBottom: 4 }}>
@@ -106,6 +108,7 @@ function TimelineEventContent({ item }: { item: HealthThreadTimelineItem }) {
 }
 
 export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdated }: Props) {
+  const { t } = useTranslation()
   const [detail, setDetail] = useState<HealthThreadDetail | null>(null)
   const [loading, setLoading] = useState(false)
   const [note, setNote] = useState('')
@@ -155,7 +158,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
       onUpdated?.()
       message.success(CLINICAL_SEQUENCE_COPY.noteSaved)
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     } finally {
       setNoteLoading(false)
     }
@@ -172,7 +175,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
       message.success(CLINICAL_SEQUENCE_COPY.allergyConverted)
       onClose()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -190,7 +193,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
       message.success(CLINICAL_SEQUENCE_COPY.diagnosisConverted)
       onClose()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -229,7 +232,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
 
             {threadEvents.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <ClinicalSequenceSectionHeader title="Agenda vinculada" />
+                <ClinicalSequenceSectionHeader title={t('modals.linkedAgenda')} />
                 <Space direction="vertical" size={4} style={{ width: '100%' }}>
                   {threadEvents.map((ev) => (
                     <div key={ev.id}>
@@ -255,7 +258,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
                         message.success(CLINICAL_SEQUENCE_COPY.removed)
                         load()
                       } catch (e) {
-                        message.error(e instanceof Error ? e.message : 'Erro ao remover')
+                        message.error(e instanceof Error ? e.message : t('clinicalSequence.removeLinkError'))
                       }
                     }}
                   />
@@ -276,12 +279,12 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
             <Space wrap style={{ marginBottom: 16 }}>
               {thread.kind === 'hypothesis' && (
                 <Button size="small" type="primary" ghost onClick={() => setConvertAllergyOpen(true)}>
-                  Confirmar alergia
+                  {t('clinicalSequence.confirmAllergyAction')}
                 </Button>
               )}
               {(thread.kind === 'hypothesis' || thread.kind === 'investigation') && (
                 <Button size="small" onClick={() => setConvertDiagnosisOpen(true)}>
-                  Registrar diagnóstico
+                  {t('clinicalSequence.registerDiagnosisAction')}
                 </Button>
               )}
             </Space>
@@ -321,7 +324,7 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
                 loading={noteLoading}
                 onClick={() => addNote()}
               >
-                Salvar nota
+                {t('clinicalSequence.saveNote')}
               </Button>
             </div>
           </>
@@ -332,26 +335,26 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
 
       <Modal
         open={convertAllergyOpen}
-        title="Confirmar como alergia"
+        title={t('modals.confirmAllergy')}
         onCancel={() => setConvertAllergyOpen(false)}
         onOk={() => confirmAllergy()}
-        okText="Confirmar"
+        okText={t('common.confirm')}
         destroyOnClose
       >
         <Form form={allergyForm} layout="vertical">
-          <Form.Item name="allergen" label="Alérgeno" rules={[{ required: true }]}>
-            <Input placeholder="Ex.: pólen, leite…" />
+          <Form.Item name="allergen" label={t('allergy.allergen')} rules={[{ required: true }]}>
+            <Input placeholder={t('form.allergen')} />
           </Form.Item>
-          <Form.Item name="reaction" label="Reação">
+          <Form.Item name="reaction" label={t('allergy.reaction')}>
             <Input />
           </Form.Item>
-          <Form.Item name="severity" label="Gravidade">
+          <Form.Item name="severity" label={t('allergy.severity')}>
             <Select
               allowClear
               options={[
-                { value: 'leve', label: 'Leve' },
-                { value: 'moderada', label: 'Moderada' },
-                { value: 'grave', label: 'Grave' },
+                { value: 'leve', label: t('allergy.mild') },
+                { value: 'moderada', label: t('allergy.moderate') },
+                { value: 'grave', label: t('allergy.severe') },
               ]}
             />
           </Form.Item>
@@ -360,23 +363,23 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
 
       <Modal
         open={convertDiagnosisOpen}
-        title="Registrar diagnóstico e encerrar trilha"
+        title={t('modals.registerDiagnosisClose')}
         onCancel={() => setConvertDiagnosisOpen(false)}
         onOk={() => confirmDiagnosis()}
-        okText="Registrar"
+        okText={t('common.save')}
         destroyOnClose
       >
         <Form form={diagnosisForm} layout="vertical" initialValues={{ status: 'active' }}>
-          <Form.Item name="diagnosisName" label="Diagnóstico" rules={[{ required: true }]}>
+          <Form.Item name="diagnosisName" label={t('diagnosis.name')} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="diagnosisCode" label="Código (CID)">
-            <Input placeholder="H66.9" />
+          <Form.Item name="diagnosisCode" label={t('diagnosis.code')}>
+            <Input placeholder={t('form.icdExample')} />
           </Form.Item>
-          <Form.Item name="description" label="Observações">
+          <Form.Item name="description" label={t('medication.notes')}>
             <Input.TextArea rows={2} />
           </Form.Item>
-          <Form.Item name="diagnosedDate" label="Data">
+          <Form.Item name="diagnosedDate" label={t('diagnosis.date')}>
             <MaskedDatePicker style={{ width: '100%' }} />
           </Form.Item>
         </Form>
