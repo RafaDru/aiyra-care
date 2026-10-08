@@ -60,21 +60,25 @@ export class AppAccountPgRepository implements AppAccountRepository {
 export class PatientMembershipPgRepository implements PatientMembershipRepository {
   constructor(private readonly pool: Pool) {}
 
-  async hasSelfProfile(accountId: string): Promise<boolean> {
+  async findSelfPatientId(accountId: string): Promise<string | null> {
     const { rows } = await this.pool.query(
-      `SELECT 1 AS ok
+      `SELECT patient_id AS id
        FROM patient_memberships
        WHERE account_id = $1 AND role = 'self'
        LIMIT 1`,
       [accountId],
     )
-    if (rows.length) return true
+    if (rows.length) return rows[0].id as string
 
     const owned = await this.pool.query(
-      `SELECT 1 AS ok FROM patients WHERE owner_account_id = $1 LIMIT 1`,
+      `SELECT id FROM patients WHERE owner_account_id = $1 ORDER BY created_at ASC LIMIT 1`,
       [accountId],
     )
-    return owned.rows.length > 0
+    return owned.rows.length ? (owned.rows[0].id as string) : null
+  }
+
+  async hasSelfProfile(accountId: string): Promise<boolean> {
+    return (await this.findSelfPatientId(accountId)) != null
   }
 
   async listAccessiblePatientIds(accountId: string): Promise<string[]> {

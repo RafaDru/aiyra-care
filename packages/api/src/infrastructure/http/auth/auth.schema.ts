@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { createPatientSchema } from '../patient/patient.schema.js'
+import { createPatientObjectSchema } from '../patient/patient.schema.js'
 import { isAdultBirthDate } from '../../../domain/patient/age-rules.js'
 
-export const completeProfileSchema = createPatientSchema
+export const completeProfileSchema = createPatientObjectSchema
   .extend({
     gender: z.enum(['male', 'female']),
     cpf: z.string().regex(/^\d{11}$/, 'CPF deve ter 11 dígitos'),
