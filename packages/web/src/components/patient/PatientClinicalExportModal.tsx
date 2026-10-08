@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { Button, Modal, Radio, message } from 'antd'
 import { LinkOutlined, PrinterOutlined } from '@ant-design/icons'
@@ -20,6 +21,7 @@ export function PatientClinicalExportModal({
   context,
   onClose,
 }: PatientClinicalExportModalProps) {
+  const { t } = useTranslation()
   const sheetRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'summary' | 'full'>('summary')
   const [exportData, setExportData] = useState<PatientClinicalExport | null>(null)
@@ -30,7 +32,7 @@ export function PatientClinicalExportModal({
     setLoading(true)
     api.patients.clinicalExport(patientId, mode)
       .then((data) => setExportData(data))
-      .catch((err) => message.error(err instanceof Error ? err.message : 'Falha ao carregar export'))
+      .catch((err) => message.error(err instanceof Error ? err.message : t('toast.exportLoadError')))
       .finally(() => setLoading(false))
   }, [open, patientId, mode])
 
@@ -52,7 +54,7 @@ export function PatientClinicalExportModal({
       }
       message.success(CLINICAL_EXPORT_COPY.shareCopied)
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Falha ao criar link')
+      message.error(err instanceof Error ? err.message : t('toast.shareLinkError'))
     }
   }
 

@@ -9,6 +9,8 @@ export interface AppAccountRepository {
 
 export interface PatientMembershipRepository {
   hasSelfProfile(accountId: string): Promise<boolean>
+  /** Paciente titular: membership `self`, ou fallback `patients.owner_account_id`. */
+  findSelfPatientId(accountId: string): Promise<string | null>
   ensureMembership(accountId: string, patientId: string, role?: string): Promise<void>
   listAccessiblePatientIds(accountId: string): Promise<string[]>
   listRolesForAccount(accountId: string): Promise<Record<string, string>>

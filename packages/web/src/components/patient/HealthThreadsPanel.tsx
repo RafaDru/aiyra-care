@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
@@ -43,6 +44,7 @@ export function HealthThreadsPanel({
   openThreadId,
   onOpenThreadIdChange,
 }: HealthThreadsPanelProps) {
+  const { t } = useTranslation()
   const isSidebar = layout === 'sidebar'
   const [threads, setThreads] = useState<HealthThread[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,7 +60,7 @@ export function HealthThreadsPanel({
     api.healthThreads
       .list(patientId, true)
       .then(setThreads)
-      .catch(() => message.error('Não foi possível carregar itens em acompanhamento'))
+      .catch(() => message.error(t('toast.followUpLoadError')))
       .finally(() => setLoading(false))
   }, [patientId])
 
@@ -90,10 +92,10 @@ export function HealthThreadsPanel({
       })
       setQuickTitle('')
       setQuickKind(null)
-      message.success('Registro salvo')
+      message.success(t('toast.recordSaved'))
       load()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro ao salvar')
+      message.error(e instanceof Error ? e.message : t('toast.saveError'))
     } finally {
       setQuickSubmitting(false)
     }
@@ -102,10 +104,10 @@ export function HealthThreadsPanel({
   const handleClose = async (id: string, status: 'resolved' | 'ruled_out') => {
     try {
       await api.healthThreads.close(id, status)
-      message.success(status === 'resolved' ? 'Marcado como concluído' : 'Marcado como descartado')
+      message.success(status === 'resolved' ? t('toast.markedResolved') : t('toast.markedDiscarded'))
       load()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro ao atualizar')
+      message.error(e instanceof Error ? e.message : t('toast.updateError'))
     }
   }
 
@@ -117,7 +119,7 @@ export function HealthThreadsPanel({
       cancelText: 'Cancelar',
       onOk: async () => {
         await api.healthThreads.delete(id)
-        message.success('Removido')
+        message.success(t('toast.removed'))
         load()
       },
     })
@@ -157,7 +159,7 @@ export function HealthThreadsPanel({
   return (
     <>
       <Card
-        title="Em acompanhamento"
+        title={t('modals.inFollowUp')}
         size="small"
         className={isSidebar ? 'health-threads-panel--sidebar' : undefined}
         style={{ marginBottom: isSidebar ? 0 : 16 }}
@@ -318,10 +320,10 @@ export function HealthThreadsPanel({
         open={investigationOpen}
         patientId={patientId}
         onClose={() => setInvestigationOpen(false)}
-        onCreated={(t) => {
-          message.success('Investigação aberta')
+        onCreated={(thread) => {
+          message.success(t('toast.investigationOpened'))
           load()
-          setDrawerThreadId(t.id)
+          setDrawerThreadId(thread.id)
         }}
       />
 
@@ -329,10 +331,10 @@ export function HealthThreadsPanel({
         open={accompanimentOpen}
         patientId={patientId}
         onClose={() => setAccompanimentOpen(false)}
-        onCreated={(t) => {
-          message.success('Plano de acompanhamento registrado')
+        onCreated={(thread) => {
+          message.success(t('toast.followUpPlanRegistered'))
           load()
-          setDrawerThreadId(t.id)
+          setDrawerThreadId(thread.id)
         }}
       />
 

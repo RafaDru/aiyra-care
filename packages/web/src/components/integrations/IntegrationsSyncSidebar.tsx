@@ -1,4 +1,5 @@
 import { Card, Divider, Typography } from 'antd'
+import { useTranslation } from 'react-i18next'
 import {
   SyncJobHistoryCard,
   SyncJobLiveCard,
@@ -36,6 +37,7 @@ export function IntegrationsSyncSidebar({
   activeHistory,
   onJobTerminal,
 }: Props) {
+  const { t } = useTranslation()
   const dockLinkIds = new Set(dockJobs.map((j) => j.linkId))
   const historyWithoutDock = groupedHistory.map((g) => ({
     ...g,
@@ -57,7 +59,7 @@ export function IntegrationsSyncSidebar({
     >
       <Card
         size="small"
-        title="Sincronizações"
+        title={t('modals.syncJobs')}
         styles={{
           body: {
             padding: '10px 12px',

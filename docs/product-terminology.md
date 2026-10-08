@@ -49,6 +49,6 @@ No app **B2C**, o usuário é um **cuidador familiar**, não um profissional de 
 
 ## Implementação
 
-- Chaves i18n: `packages/web/src/i18n/locales/pt-BR.json` e `en.json`.
+- Chaves i18n: `packages/web/src/i18n/locales/pt-BR.json` e `en.json` (MVP; `es` planejado — ver [`I18N_LOCALES.md`](./I18N_LOCALES.md)).
 - Código e API mantêm `patient` como identificador técnico.
 - Revisão contínua: `npm run i18n:check`.

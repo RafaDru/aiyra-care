@@ -19,10 +19,21 @@ describe('AuthService.syncAccountFromToken', () => {
   const authProvider = { verifyAccessToken: vi.fn() }
   const memberships = {
     hasSelfProfile: vi.fn(async () => true),
+    findSelfPatientId: vi.fn(async () => 'patient-self-1'),
     ensureMembership: vi.fn(),
     listAccessiblePatientIds: vi.fn(),
   }
-  const patients = { create: vi.fn(), setOwnerAccountId: vi.fn() }
+  const patients = {
+    create: vi.fn(),
+    findById: vi.fn(async () =>
+      Patient.create({
+        name: 'Bruno',
+        birthDate: new Date('1990-01-01'),
+        cpf: '12345678901',
+      }, 'patient-self-1'),
+    ),
+    setOwnerAccountId: vi.fn(),
+  }
   const accounts = {
     findByAuthSubject: vi.fn(),
     findById: vi.fn(),
@@ -61,15 +72,43 @@ describe('AuthService.syncAccountFromToken', () => {
     const saved = accounts.update.mock.calls[0]?.[0] as AppAccount
     expect(saved.displayName).toBe('Bruno')
   })
+
+  it('needsProfile stays true when self patient has no CPF', async () => {
+    const existing = AppAccount.create(
+      { authSubject: 'sub-1', email: 'legacy@example.com', displayName: 'Legacy' },
+      'account-1',
+    )
+    accounts.findByAuthSubject.mockResolvedValue(existing)
+    authProvider.verifyAccessToken.mockResolvedValue({
+      id: 'sub-1',
+      email: 'legacy@example.com',
+      displayName: 'Legacy',
+      avatarUrl: null,
+    })
+    memberships.findSelfPatientId.mockResolvedValue('patient-incomplete')
+    patients.findById.mockResolvedValue(
+      Patient.create({
+        name: 'Legacy',
+        birthDate: new Date('1990-01-01'),
+        cpf: null,
+      }, 'patient-incomplete'),
+    )
+
+    const result = await service.syncAccountFromToken('token')
+    expect(result?.needsProfile).toBe(true)
+  })
 })
 
 describe('AuthService.completeProfile', () => {
   const memberships = {
     hasSelfProfile: vi.fn(async () => false),
+    findSelfPatientId: vi.fn(async () => null),
     ensureMembership: vi.fn(async () => undefined),
   }
   const patients = {
     create: vi.fn(async () => makePatient()),
+    update: vi.fn(async () => makePatient()),
+    findById: vi.fn(),
     setOwnerAccountId: vi.fn(async () => undefined),
   }
   const measurements = {
@@ -139,7 +178,8 @@ describe('AuthService.completeProfile', () => {
   })
 
   it('rejects duplicate profile completion', async () => {
-    memberships.hasSelfProfile.mockResolvedValueOnce(true)
+    memberships.findSelfPatientId.mockResolvedValueOnce('patient-self-1')
+    patients.findById.mockResolvedValueOnce(makePatient())
 
     await expect(service.completeProfile('account-1', {
       name: 'Rafael',
@@ -147,5 +187,27 @@ describe('AuthService.completeProfile', () => {
       gender: 'male',
       cpf: '12345678901',
     })).rejects.toBeInstanceOf(ConflictError)
+  })
+
+  it('completes profile by updating self patient missing CPF', async () => {
+    const incomplete = Patient.create({
+      name: 'Legacy',
+      birthDate: new Date('1990-01-01'),
+      cpf: null,
+    }, 'patient-incomplete')
+    memberships.findSelfPatientId.mockResolvedValueOnce('patient-incomplete')
+    patients.findById.mockResolvedValueOnce(incomplete)
+    patients.update.mockResolvedValueOnce(makePatient())
+
+    const result = await service.completeProfile('account-1', {
+      name: 'Rafael',
+      birthDate: new Date('1990-01-01'),
+      gender: 'male',
+      cpf: '12345678901',
+    })
+
+    expect(patients.update).toHaveBeenCalledWith('patient-incomplete', expect.objectContaining({ cpf: '12345678901' }))
+    expect(patients.create).not.toHaveBeenCalled()
+    expect(result.needsProfile).toBe(false)
   })
 })

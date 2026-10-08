@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, Steps, Typography, Button, Space, Descriptions, List, Tag, Alert } from 'antd'
 import { CheckCircleFilled, CloseCircleFilled, LoadingOutlined, UserAddOutlined } from '@ant-design/icons'
 import { SyncDiagnosticsPanel, SyncDiagnosticMessage } from './SyncDiagnosticsPanel.js'
@@ -116,6 +117,7 @@ function SyncSummary({
   holderPatientId?: string
   onRegister: (b: UnmatchedBeneficiary) => void
 }) {
+  const { t } = useTranslation()
   const { summary } = profile
   const beneficiaries = result.beneficiaryDetails ?? []
   const unmatched = result.unmatchedBeneficiaries ?? []
@@ -125,7 +127,7 @@ function SyncSummary({
       {summary.showWarnings && warnings.length > 0 && (
         <SyncDiagnosticsPanel
           variant="warning"
-          title="Algumas etapas falharam"
+          title={t('modals.syncStepsFailed')}
           items={warnings}
           collapsedMaxHeight={96}
         />
@@ -263,6 +265,7 @@ export function SyncProgressModal({
   onError,
   onResync,
 }: Props) {
+  const { t } = useTranslation()
   const [resolvedPortal, setResolvedPortal] = useState<SyncablePortalType>(portalTypeProp ?? DEFAULT_PORTAL)
   const [currentStep, setCurrentStep] = useState(0)
   const [message, setMessage] = useState('')
@@ -500,7 +503,7 @@ export function SyncProgressModal({
           {message && !showInteractiveLoginHint && !showFleuryOtpHint && !showFleuryOtpInApp && status === 'failed' && message.length > 140 ? (
             <SyncDiagnosticMessage
               variant="error"
-              title="Erro na sincronização"
+              title={t('modals.syncError')}
               message={message}
               collapsedMaxHeight={96}
             />

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Alert, Button, Card, List, Spin, Tag, Typography } from 'antd'
 import { MedicineBoxOutlined, PrinterOutlined } from '@ant-design/icons'
 import { api } from '../../lib/api.js'
@@ -26,6 +27,7 @@ interface PatientContextPanelProps {
 }
 
 export function PatientContextPanel({ patientId, onOpenThread }: PatientContextPanelProps) {
+  const { t } = useTranslation()
   const [context, setContext] = useState<PatientContext | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -66,7 +68,7 @@ export function PatientContextPanel({ patientId, onOpenThread }: PatientContextP
   return (
     <>
       <Card
-        title="Resumo clínico"
+        title={t('modals.clinicalSummary')}
         size="small"
         style={{ marginBottom: 16 }}
         extra={

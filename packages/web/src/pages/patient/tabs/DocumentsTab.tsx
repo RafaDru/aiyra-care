@@ -157,7 +157,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
       ocrLayout: args.ocrLayout,
       ocrProcessed: true,
     })
-    message.success('OCR revisado e salvo')
+    message.success(t('toast.ocrReviewSaved'))
     const savedDoc = { ...visualReviewDoc, extractedText: args.extractedText, ocrLayout: args.ocrLayout }
     setVisualReviewDoc(null)
     reload()
@@ -168,7 +168,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
 
   const finishUploadFlow = (doc: Document_, type: string) => {
     if (isHandwritingClinicalType(type)) {
-      message.info('Manuscrito detectado: OCR local é limitado. Abrindo interpretação por IA…')
+      message.info(t('toast.handwritingLimitedOcr'))
       setInterpretDoc(doc)
     } else {
       openReviewForDoc(doc, doc.suggestedPatient)
@@ -236,13 +236,13 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
         if (reviewText !== (reviewDoc.extractedText || '')) {
           await api.documents.update(reviewDoc.id, { extractedText: reviewText })
         }
-        message.success('Arquivo salvo com revisão')
+        message.success(t('toast.fileSavedWithReview'))
       }
       setReviewOpen(false)
       setReviewDoc(null)
       reload()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro ao salvar revisão')
+      message.error(err instanceof Error ? err.message : t('toast.revisionSaveError'))
     } finally {
       setConfirming(false)
     }
@@ -251,7 +251,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
   const handleDelete = async (id: string) => {
     try {
       await api.documents.delete(id)
-      message.success('Arquivo excluído')
+      message.success(t('toast.fileDeleted'))
       reload()
     } catch (err) {
       message.error(err instanceof Error ? err.message : 'Erro ao excluir')
@@ -269,7 +269,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
           onClick={() => window.open(documentDownloadUrl(r.id), '_blank', 'noopener,noreferrer')}
         />
         {isHandwritingClinicalType(r.documentType) && (
-          <Tooltip title="Interpretar manuscrito (LLM)">
+          <Tooltip title={t('modals.interpretHandwriting')}>
             <Button type="text" icon={<BulbOutlined />} aria-label="Interpretar" onClick={() => setInterpretDoc(r)} />
           </Tooltip>
         )}
@@ -279,7 +279,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
           </Button>
         )}
         <Popconfirm
-          title="Excluir este arquivo?"
+          title={t('modals.deleteFileConfirm')}
           description={
             link
               ? 'Remove o arquivo do armazenamento. O registro do exame na aba Exames pode ficar sem laudo/imagem.'

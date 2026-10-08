@@ -2,7 +2,18 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, PhoneOutlined, CustomerServiceOutlined, TeamOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import {
+  SettingOutlined,
+  LogoutOutlined,
+  UserOutlined,
+  DashboardOutlined,
+  PhoneOutlined,
+  CustomerServiceOutlined,
+  TeamOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -14,6 +25,7 @@ import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
 import { SupportReportModal } from '../support/SupportReportModal.js'
 import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
+import { HeaderOrderRequestsMenu } from './HeaderOrderRequestsMenu.js'
 import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { SUPPORT_CENTER_PATH } from '../../lib/support-center-path.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
@@ -69,6 +81,8 @@ export function AppLayout() {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
+        trigger={null}
+        collapsedWidth={80}
         theme={darkMode ? 'dark' : 'light'}
         width={220}
         style={{
@@ -115,20 +129,28 @@ export function AppLayout() {
 
           <div style={{ flex: 1 }} />
 
-          {configured && user && (
-            <div style={{ borderTop: '1px solid var(--sidebar-border)', padding: collapsed ? 8 : 12 }}>
+          <div
+            className={`app-sider-footer${collapsed ? ' app-sider-footer--collapsed' : ''}`}
+          >
+            {configured && user && (
               <Button
                 type="text"
-                block
                 danger
+                className="app-sider-footer__logout"
                 icon={<LogoutOutlined />}
                 onClick={() => signOut()}
-                style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
               >
                 {!collapsed && t('auth.signOut')}
               </Button>
-            </div>
-          )}
+            )}
+            <Button
+              type="text"
+              className="app-sider-footer__collapse"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
+              onClick={() => setCollapsed(!collapsed)}
+            />
+          </div>
         </div>
       </Sider>
       <Layout style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
@@ -155,6 +177,7 @@ export function AppLayout() {
             <DeploymentEnvironmentBadge />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {configured && user && <HeaderOrderRequestsMenu />}
             {configured && user && <QuickCaptureGlobal />}
             {configured && user && (
               <Button
