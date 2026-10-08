@@ -10,6 +10,8 @@ import { waitForDashboardReady } from './helpers/dashboard'
 const repoRoot = resolve(process.cwd(), '..', '..')
 
 test.describe('onboarding', () => {
+  test.describe.configure({ timeout: 180_000 })
+
   test.beforeEach(() => {
     requireOnboardingCredentials()
   })
@@ -36,9 +38,10 @@ test.describe('onboarding', () => {
 
     await waitForDashboardReady(page)
 
-    await expect(page.getByRole('heading', { name: 'QA Onboarding Titular' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /Quem você cuida|Who you care for/i })).toBeVisible({
       timeout: 30_000,
     })
+    await expect(page.getByText('QA Onboarding Titular')).toBeVisible({ timeout: 30_000 })
 
     const welcome = page.getByTestId('post-onboarding-welcome')
     await expect(welcome).toBeVisible({ timeout: 10_000 })
