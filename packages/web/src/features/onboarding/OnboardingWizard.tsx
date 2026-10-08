@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Form, Spin } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -32,6 +32,7 @@ export function OnboardingWizard() {
   const navigate = useNavigate()
   const { needsProfile, refreshSync, account } = useAuth()
   const [profileForm] = Form.useForm<OnboardingProfileFormValues>()
+  const profileIdentityRef = useRef<Partial<OnboardingProfileFormValues>>({})
   const [currentStep, setCurrentStep] = useState(readOnboardingWizardStep)
   const [profileSubStep, setProfileSubStep] = useState<'identity' | 'address'>('identity')
   const [connectorIndex, setConnectorIndex] = useState(0)
@@ -160,7 +161,8 @@ export function OnboardingWizard() {
 
   const onProfileIdentityContinue = async () => {
     try {
-      await profileForm.validateFields(['name', 'birthDate', 'gender', 'cpf', 'socialName', 'cns'])
+      const identity = await profileForm.validateFields(['name', 'birthDate', 'gender', 'cpf', 'socialName', 'cns'])
+      profileIdentityRef.current = identity
       setProfileSubStep('address')
       trackProductEvent('onboarding_step', { step: 'address' })
     } catch {
@@ -173,11 +175,14 @@ export function OnboardingWizard() {
     setError(null)
     setCpfAlreadyLinked(false)
     try {
-      await profileForm.validateFields()
       const values = {
+        ...profileIdentityRef.current,
         ...profileForm.getFieldsValue(true),
         ...addressValues,
       } as OnboardingProfileFormValues
+      if (!values.name?.trim() || !values.birthDate || !values.gender || !values.cpf?.trim()) {
+        throw new Error('Dados de identidade ausentes ao salvar endereço — recarregue o passo inicial.')
+      }
       const result = await api.auth.completeProfile({
         name: values.name,
         socialName: values.socialName?.trim() || undefined,

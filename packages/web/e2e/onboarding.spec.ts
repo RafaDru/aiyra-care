@@ -20,10 +20,11 @@ test.describe('onboarding', () => {
 
     await primeE2eClientStorage(page)
     await loginViaPassword(page, email, password)
-    await page.waitForURL(/\/(onboarding|$)/, { timeout: 30_000 })
+    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30_000 })
 
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
+      await page.waitForURL(/\/onboarding/, { timeout: 30_000 })
     }
 
     await completeOnboardingProfile(page, {
@@ -56,10 +57,11 @@ test.describe('onboarding', () => {
     })
 
     await loginViaPassword(page, email, password)
-    await page.waitForURL(/\/(onboarding|$)/, { timeout: 30_000 })
+    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30_000 })
 
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
+      await page.waitForURL(/\/onboarding/, { timeout: 30_000 })
     }
 
     await completeOnboardingProfile(page, {
