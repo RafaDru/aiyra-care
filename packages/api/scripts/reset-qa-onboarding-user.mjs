@@ -72,6 +72,12 @@ try {
     console.log('  paciente self removido:', patientId)
   }
 
+  const { rowCount: circlesRemoved } = await client.query(
+    `DELETE FROM care_circles WHERE billing_owner_account_id = $1`,
+    [accountId],
+  )
+  if (circlesRemoved) console.log('  care_circles removidos:', circlesRemoved)
+
   if (!keepCompliance) {
     await client.query(`DELETE FROM legal_document_acceptances WHERE account_id = $1`, [accountId])
     const { rowCount } = await client.query(

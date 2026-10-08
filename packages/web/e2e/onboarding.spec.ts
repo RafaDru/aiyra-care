@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import { test, expect } from '@playwright/test'
 import { requireOnboardingCredentials } from './helpers/env'
 import { loginViaPassword } from './helpers/auth'
-import { completeOnboardingProfile } from './helpers/onboarding'
+import { completeOnboardingProfile, primeE2eClientStorage } from './helpers/onboarding'
 import { uniqueQaCpf } from './helpers/fixtures'
 import { waitForDashboardReady } from './helpers/dashboard'
 
@@ -18,6 +18,7 @@ test.describe('onboarding', () => {
     execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })
     const { email, password } = requireOnboardingCredentials()
 
+    await primeE2eClientStorage(page)
     await loginViaPassword(page, email, password)
     await page.waitForURL(/\/(onboarding|$)/, { timeout: 30_000 })
 
@@ -49,6 +50,7 @@ test.describe('onboarding', () => {
     execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })
     const { email, password } = requireOnboardingCredentials()
 
+    await primeE2eClientStorage(page)
     await page.addInitScript(() => {
       localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
     })
