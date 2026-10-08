@@ -5,6 +5,16 @@
 ### Decisão
 - **Espanhol (`es`) adiado** para pós-MVP; MVP exige apenas **pt-BR + en** com paridade via `npm run i18n:check`; política em [`docs/I18N_LOCALES.md`](I18N_LOCALES.md) (sem `es.json` por enquanto).
 
+## [2026-10-08] - Web família: ocultar Roadmap e Observabilidade
+
+### Decisão
+- App end-user (`packages/web`) não expõe Roadmap nem link ao console de observabilidade; ops usa `packages/ops-console` direto.
+- `/roadmap` redireciona para `/` por padrão; reativa com `VITE_INTERNAL_ROADMAP=1` (documentado em `DOCUMENTATION_SYSTEM.md`).
+
+### Realizado
+- Sidebar dev tools removida; card **Desenvolvimento** em Configurações → Geral removido; **Ajuda** no menu do usuário → `/central-atendimento`.
+- `internal-product-ui.ts`, teste vitest, docs e `regression-smoke` atualizados.
+
 ## [2026-10-08] - Onboarding multi-família (`care_circles`)
 
 ### Decisão

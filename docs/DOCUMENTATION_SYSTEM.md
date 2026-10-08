@@ -23,7 +23,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Tier 0 — ENTREGA          docs/roadmap.json + UI /roadmap   │
+│  Tier 0 — ENTREGA          docs/roadmap.json (+ UI interna)    │
 ├─────────────────────────────────────────────────────────────┤
 │  Tier 1 — SIGNIFICADO      docs/features/<id>.md             │
 │                            docs/features/index.json          │
@@ -36,6 +36,12 @@
 │  Máquina                   docs/project-context.json         │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### Roadmap na UI do app (end-user)
+
+- **Fonte de verdade** continua `docs/roadmap.json` e `GET /roadmap` na API.
+- O app **família** (`packages/web`) **não** expõe links de Roadmap nem Observabilidade (console ops é `packages/ops-console`).
+- Rota `/roadmap`: por padrão **redireciona para `/`** (evita 404 em refresh SPA). Ops e agentes reativam com **`VITE_INTERNAL_ROADMAP=1`** no build/env do web.
 
 ### Quando criar uma feature card?
 

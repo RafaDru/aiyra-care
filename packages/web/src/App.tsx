@@ -16,6 +16,7 @@ import { FamilyPage } from './pages/family.js'
 import { SettingsPlanPage } from './pages/settings/plan.js'
 import { SettingsLegalPage } from './pages/settings/legal.js'
 import { RoadmapPage } from './pages/roadmap.js'
+import { isInternalRoadmapEnabled } from './lib/internal-product-ui.js'
 import { EmergencyPage } from './pages/emergency.js'
 import { ComplianceAcceptPage } from './pages/compliance-accept.js'
 import { LegalDocumentPage } from './pages/legal-document.js'
@@ -25,6 +26,8 @@ import { MobileOAuthReturnPage } from './pages/auth/mobile-oauth-return.js'
 import { CentralAtendimentoPage } from './pages/central-atendimento.js'
 import { CookieConsentBanner } from './components/legal/CookieConsentBanner.js'
 import { SUPPORT_CENTER_PATH } from './lib/support-center-path.js'
+
+const internalRoadmap = isInternalRoadmapEnabled()
 
 export function App() {
   return (
@@ -46,11 +49,19 @@ export function App() {
             <Route element={<AppLayout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/patients/:id" element={<PatientDetail />} />
-              <Route path="/session" element={<Navigate to="/roadmap#dev-sessions" replace />} />
+              <Route
+                path="/session"
+                element={
+                  <Navigate to={internalRoadmap ? '/roadmap#dev-sessions' : '/'} replace />
+                }
+              />
               <Route path="/emergency" element={<EmergencyPage />} />
               <Route path="/family" element={<FamilyPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
-              <Route path="/roadmap" element={<RoadmapPage />} />
+              <Route
+                path="/roadmap"
+                element={internalRoadmap ? <RoadmapPage /> : <Navigate to="/" replace />}
+              />
               <Route path="/invite/accept" element={<InviteAcceptPage />} />
               <Route path="/settings" element={<SettingsLayout />}>
                 <Route index element={<Navigate to="general" replace />} />
