@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button, Dropdown, Form, Input, InputNumber, Modal, Select, Space, Typography, message } from 'antd'
 import { LinkOutlined, PlusOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
@@ -22,15 +23,6 @@ type LinkEntityType =
   | 'medication'
   | 'vaccine'
   | 'document'
-
-const ENTITY_LABEL: Record<LinkEntityType, string> = {
-  exam: 'Exame',
-  medical_record: 'Consulta',
-  authorization: 'Autorização',
-  medication: 'Medicamento',
-  vaccine: 'Vacina',
-  document: 'Documento',
-}
 
 const ADDABLE: LinkEntityType[] = [
   'exam',
@@ -57,6 +49,8 @@ interface Props {
 }
 
 export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, onReload }: Props) {
+  const { t } = useTranslation()
+  const entityLabel = (type: LinkEntityType) => t(`entityLabel.${type}`)
   const [addOpen, setAddOpen] = useState<LinkEntityType | null>(null)
   const [linkOpen, setLinkOpen] = useState(false)
   const [roleHelpOpen, setRoleHelpOpen] = useState(false)
@@ -138,9 +132,9 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
       setLinkOpen(false)
       linkForm.resetFields()
       reload()
-      message.success(`${ENTITY_LABEL[linkEntityType]} vinculado`)
+      message.success(t('toast.entityLinked', { entity: entityLabel(linkEntityType) }))
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -158,9 +152,9 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
       setAddOpen(null)
       examForm.resetFields()
       reload()
-      message.success('Exame registrado e vinculado')
+      message.success(t('toast.examRegisteredLinked'))
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -180,9 +174,9 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
       setAddOpen(null)
       recordForm.resetFields()
       reload()
-      message.success('Consulta registrada e vinculada')
+      message.success(t('toast.visitRegisteredLinked'))
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -201,9 +195,9 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
       setAddOpen(null)
       authForm.resetFields()
       reload()
-      message.success('Autorização registrada e vinculada')
+      message.success(t('toast.authRegisteredLinked'))
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -224,9 +218,9 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
       setAddOpen(null)
       medForm.resetFields()
       reload()
-      message.success('Medicamento registrado e vinculado')
+      message.success(t('toast.medRegisteredLinked'))
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -247,9 +241,9 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
       setAddOpen(null)
       vaccineForm.resetFields()
       reload()
-      message.success('Vacina registrada e vinculada')
+      message.success(t('toast.vaccineRegisteredLinked'))
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro')
+      message.error(e instanceof Error ? e.message : t('common.error'))
     }
   }
 
@@ -293,7 +287,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
           menu={{
             items: ADDABLE.map((key) => ({
               key,
-              label: `Adicionar ${ENTITY_LABEL[key].toLowerCase()}`,
+              label: t('healthThreadArtifact.add', { entity: entityLabel(key).toLowerCase() }),
               onClick: () => setAddOpen(key),
             })),
           }}
@@ -306,7 +300,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
           menu={{
             items: LINKABLE.map((key) => ({
               key,
-              label: `Vincular ${ENTITY_LABEL[key].toLowerCase()} existente`,
+              label: t('healthThreadArtifact.linkExisting', { entity: entityLabel(key).toLowerCase() }),
               onClick: () => openLink(key),
             })),
           }}
@@ -319,7 +313,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
 
       <Modal
         open={addOpen === 'exam'}
-        title="Adicionar exame"
+        title={t('modals.addExam')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createExam()}
         okText="Salvar"
@@ -344,7 +338,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
 
       <Modal
         open={addOpen === 'medical_record'}
-        title="Adicionar consulta"
+        title={t('modals.addVisit')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createRecord()}
         okText="Salvar"
@@ -382,7 +376,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
 
       <Modal
         open={addOpen === 'authorization'}
-        title="Adicionar autorização / pedido"
+        title={t('modals.addAuthorization')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createAuth()}
         okText="Salvar"
@@ -410,7 +404,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
 
       <Modal
         open={addOpen === 'medication'}
-        title="Adicionar medicamento / receita"
+        title={t('modals.addMedication')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createMedication()}
         okText="Salvar"
@@ -444,7 +438,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
 
       <Modal
         open={addOpen === 'vaccine'}
-        title="Adicionar vacina"
+        title={t('modals.addVaccine')}
         onCancel={() => setAddOpen(null)}
         onOk={() => createVaccine()}
         okText="Salvar"
@@ -478,14 +472,14 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
 
       <Modal
         open={linkOpen}
-        title={`Vincular ${ENTITY_LABEL[linkEntityType].toLowerCase()} existente`}
+        title={t('healthThreadArtifact.linkExisting', { entity: entityLabel(linkEntityType).toLowerCase() })}
         onCancel={() => setLinkOpen(false)}
         onOk={() => linkArtifact()}
         okText="Vincular"
         destroyOnClose
       >
         <Form form={linkForm} layout="vertical">
-          <Form.Item name="entityId" label={ENTITY_LABEL[linkEntityType]} rules={[{ required: true }]}>
+          <Form.Item name="entityId" label={entityLabel(linkEntityType)} rules={[{ required: true }]}>
             <Select showSearch optionFilterProp="label" options={linkOptions} />
           </Form.Item>
           {roleField(linkEntityType)}
@@ -495,7 +489,7 @@ export function HealthThreadArtifactActions({ threadId, patientId, onUpdated, on
       <LinkRoleHelpModal
         open={roleHelpOpen}
         onClose={() => setRoleHelpOpen(false)}
-        entityType={roleHelpEntity ? ENTITY_LABEL[roleHelpEntity as LinkEntityType] : undefined}
+        entityType={roleHelpEntity ? entityLabel(roleHelpEntity as LinkEntityType) : undefined}
       />
     </>
   )

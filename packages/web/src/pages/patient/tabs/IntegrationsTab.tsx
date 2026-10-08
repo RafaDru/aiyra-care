@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react'
 import {
   Typography, Button, Space, Tag, Modal, Form, Input, App, Alert, Table, Dropdown, Tooltip,
@@ -149,6 +150,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   onCardUpdated,
   linkedChildrenCount = 0,
 }, ref) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const { loading: authLoading, configured: authConfigured } = useAuth()
   const [dockJobs, setDockJobs] = useState<WalletDockJob[]>([])
@@ -214,7 +216,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       if (r.skipped) {
         trackSyncJobSkipped(portalType, r.reason ?? 'skipped', 'manual', patient.id)
         if (r.reason === 'session_required') {
-          message.info('Primeira conexão ou sessão expirada — Sincronizar pode abrir o portal')
+          message.info(t('toast.integrationSessionHint'))
         }
         return
       }
@@ -259,7 +261,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
 
   const syncAll = useCallback(async () => {
     if (syncTargets.length === 0) {
-      message.info('Vincule Unimed, Amil ou Mater Dei em Nova integração')
+      message.info(t('toast.integrationLinkHint'))
       return
     }
     if (syncAllBusy || dockJobsRef.current.length > 0) return
@@ -309,12 +311,12 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
       await api.integrationLinks.update(editLink.id, {
         cardNumber: values.cardNumber?.replace(/\s/g, '') || undefined,
       })
-      message.success('Carteirinha atualizada')
+      message.success(t('toast.healthCardUpdated'))
       setEditLink(null)
       onCardUpdated()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      message.error(err instanceof Error ? err.message : 'Erro ao atualizar carteirinha')
+      message.error(err instanceof Error ? err.message : t('toast.healthCardUpdateError'))
     } finally {
       setSavingCard(false)
     }
@@ -323,10 +325,10 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
   const removeLink = async (link: IntegrationLink) => {
     try {
       await api.integrationLinks.delete(link.id)
-      message.success('Vínculo removido')
+      message.success(t('toast.linkRemoved'))
       onRemoved()
     } catch {
-      message.error('Erro ao remover vínculo')
+      message.error(t('toast.linkRemoveError'))
     }
   }
 
@@ -488,7 +490,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
             key: 'qr',
             icon: <QrcodeOutlined />,
             label: 'QR na Carteira',
-            onClick: () => message.info('Abra a aba Carteira para QR / Token Unimed'),
+            onClick: () => message.info(t('toast.openWalletForQr')),
           },
           {
             key: 'remove',
@@ -624,7 +626,7 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
         />
 
         <Modal
-          title="Número da carteirinha"
+          title={t('modals.cardNumber')}
           open={!!editLink}
           onOk={saveCardNumber}
           confirmLoading={savingCard}
@@ -633,8 +635,8 @@ export const IntegrationsTab = forwardRef<IntegrationsTabHandle, Props>(function
           cancelText="Cancelar"
         >
           <Form form={form} layout="vertical" style={{ marginTop: 12 }}>
-            <Form.Item name="cardNumber" label="Nº da carteirinha" rules={[{ required: true }]}>
-              <Input placeholder="Ex: 094995656" />
+            <Form.Item name="cardNumber" label={t('modals.cardNumber')} rules={[{ required: true }]}>
+              <Input placeholder={t('form.cardExample')} />
             </Form.Item>
           </Form>
         </Modal>

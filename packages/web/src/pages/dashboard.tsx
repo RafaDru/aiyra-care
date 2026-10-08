@@ -96,7 +96,7 @@ export function Dashboard() {
       load()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      message.error(err instanceof Error ? err.message : 'Erro desconhecido')
+      message.error(err instanceof Error ? err.message : t('common.unknownError'))
     }
   }
 
@@ -247,19 +247,19 @@ export function Dashboard() {
 
       <Modal title={t('patient.new')} open={modalOpen} onOk={handleCreate} onCancel={() => setModalOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')}>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item name="name" label="Nome" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="birthDate" label="Data de Nascimento" rules={[{ required: true }]}>
+          <Form.Item name="name" label={t('patient.form.name')} rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="birthDate" label={t('patient.form.birthDate')} rules={[{ required: true }]}>
             <MaskedDatePicker style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="gender" label="Sexo">
+          <Form.Item name="gender" label={t('patient.form.gender')}>
             <Select options={[{ value: 'male', label: t('patient.male') }, { value: 'female', label: t('patient.female') }]} allowClear />
           </Form.Item>
-          <Form.Item name="weightKg" label={`Peso (${t('patient.weight')})`}><Input type="number" step="0.1" /></Form.Item>
-          <Form.Item name="heightCm" label={`Altura (${t('patient.height')})`}><Input type="number" step="0.1" /></Form.Item>
-          <Form.Item name="cpf" label="CPF" rules={[{ validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject('CPF deve ter 11 dígitos') }]}>
-            <Input placeholder="000.000.000-00" maxLength={14} />
+          <Form.Item name="weightKg" label={`${t('patient.form.weight')} (${t('patient.weight')})`}><Input type="number" step="0.1" /></Form.Item>
+          <Form.Item name="heightCm" label={`${t('patient.form.height')} (${t('patient.height')})`}><Input type="number" step="0.1" /></Form.Item>
+          <Form.Item name="cpf" label={t('patient.form.cpf')} rules={[{ validator: (_, v) => !v || v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('patient.form.cpfInvalid')) }]}>
+            <Input placeholder={t('form.cpfMask')} maxLength={14} />
           </Form.Item>
-          <Form.Item name="cns" label="CNS"><Input placeholder="Nº do Cartão SUS" maxLength={15} /></Form.Item>
+          <Form.Item name="cns" label={t('patient.form.cns')}><Input placeholder={t('form.cns')} maxLength={15} /></Form.Item>
           {showMarkAsSelf && (
             <Form.Item name="markAsSelf" valuePropName="checked" initialValue={false}>
               <Checkbox>{t('patient.markAsSelf')}</Checkbox>

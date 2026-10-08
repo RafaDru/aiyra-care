@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Modal, Form, Input, Steps, Button, Select, Space, message } from 'antd'
 import { api } from '../../lib/api.js'
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function InvestigationWizardModal({ open, patientId, onClose, onCreated }: Props) {
+  const { t } = useTranslation()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
@@ -37,7 +39,7 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
       await form.validateFields([...stepFieldNames[step]])
       setStep((s) => s + 1)
     } catch {
-      message.warning('Preencha os campos obrigatórios desta etapa')
+      message.warning(t('toast.investigationRequiredFields'))
     }
   }
 
@@ -46,7 +48,7 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
     try {
       values = await form.validateFields()
     } catch {
-      message.warning('Informe o título da investigação na primeira etapa')
+      message.warning(t('toast.investigationTitleRequired'))
       setStep(0)
       return
     }
@@ -74,7 +76,7 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
       onCreated(thread)
       handleClose()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Não foi possível abrir a investigação')
+      message.error(e instanceof Error ? e.message : t('toast.investigationOpenError'))
     } finally {
       setLoading(false)
     }
@@ -127,7 +129,7 @@ export function InvestigationWizardModal({ open, patientId, onClose, onCreated }
   return (
     <Modal
       open={open}
-      title="Nova investigação"
+      title={t('modals.newInvestigation')}
       onCancel={handleClose}
       width={560}
       footer={

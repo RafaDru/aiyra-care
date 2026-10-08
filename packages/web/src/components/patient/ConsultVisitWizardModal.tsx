@@ -55,7 +55,7 @@ export function ConsultVisitWizardModal({
       setExpiresAt(share.expiresAt)
       trackProductEvent('consult_visit_share_created', { mode, has_referral: Boolean(share.referralCode) }, { patientId })
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Falha ao gerar link')
+      message.error(err instanceof Error ? err.message : t('toast.consultLinkError'))
       setShareUrl(null)
       setReferralCode(null)
       setExpiresAt(null)
@@ -116,7 +116,7 @@ export function ConsultVisitWizardModal({
   const handleEmailDoctor = async () => {
     const email = doctorEmail.trim()
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      message.warning('Informe um e-mail válido do médico')
+      message.warning(t('toast.consultInvalidDoctorEmail'))
       return
     }
     setEmailLoading(true)
@@ -139,7 +139,7 @@ export function ConsultVisitWizardModal({
         { patientId },
       )
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Falha ao enviar e-mail')
+      message.error(err instanceof Error ? err.message : t('toast.consultEmailSendError'))
     } finally {
       setEmailLoading(false)
     }
@@ -269,13 +269,13 @@ export function ConsultVisitWizardModal({
         <Text strong>{CLINICAL_EXPORT_COPY.consultVisitEmailTitle}</Text>
         <Input
           type="email"
-          placeholder="medico@clinica.com.br"
+          placeholder={t('form.doctorEmail')}
           value={doctorEmail}
           onChange={(e) => setDoctorEmail(e.target.value)}
           disabled={shareLoading}
         />
         <Input
-          placeholder="Dr. Silva"
+          placeholder={t('form.doctorName')}
           value={doctorName}
           onChange={(e) => setDoctorName(e.target.value)}
           disabled={shareLoading}

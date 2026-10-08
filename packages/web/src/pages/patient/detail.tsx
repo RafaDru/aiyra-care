@@ -50,12 +50,6 @@ import '../../components/ava/ava-dock.css'
 
 const { Title, Text } = Typography
 
-const CATEGORY_LABEL: Record<string, string> = {
-  children: 'Criança',
-  adolescents: 'Adolescente',
-  adults: 'Adulto',
-}
-
 const SECTION_ICONS: Record<PatientSection, ReactNode> = {
   overview: <UserOutlined />,
   clinical: <MedicineBoxOutlined />,
@@ -251,7 +245,7 @@ export function PatientDetail() {
       if (r.skipped) {
         trackSyncJobSkipped(portalType, r.reason ?? 'skipped', mode, id)
         if (!opts?.silent && r.reason === 'session_required') {
-          message.info('Conecte ao portal com Sincronizar (primeira vez ou sessão expirada)')
+          message.info(t('toast.syncConnectPortal'))
         }
         return
       }
@@ -265,11 +259,11 @@ export function PatientDetail() {
       if (opts?.silent) {
         const msg = e instanceof Error ? e.message : String(e)
         if (/login|autentic|chrome|cdp|sess[aã]o|credenciais|portal do cliente|abra o/i.test(msg)) {
-          message.warning('Sincronização silenciosa falhou — pode ser necessário abrir o portal ou o Chrome (CDP)')
+          message.warning(t('toast.silentSyncFailedCdp'))
         }
         console.warn('Silent sync failed', e)
       } else {
-        const msg = e instanceof Error ? e.message : 'Erro na sincronização'
+        const msg = e instanceof Error ? e.message : t('modals.syncError')
         reportApiClientError(`/integration-links/${linkId}/sync`, 0, { patientId: id, message: msg })
         message.error(msg)
         setSyncPortalType(null)
@@ -311,12 +305,12 @@ export function PatientDetail() {
         cns: values.cns?.replace(/\D/g, '') || undefined,
         photoUrl: values.photoUrl?.trim() || undefined,
       })
-      message.success('Dados atualizados')
+      message.success(t('toast.dataRefreshed'))
       setEditOpen(false)
       load()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      message.error(err instanceof Error ? err.message : 'Erro ao salvar')
+      message.error(err instanceof Error ? err.message : t('toast.saveError'))
     }
   }
 
@@ -364,17 +358,17 @@ export function PatientDetail() {
               </div>
             </div>
             <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
-              <Descriptions.Item label="Nome">{patient.name}</Descriptions.Item>
-              <Descriptions.Item label="Data de Nascimento">{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : '-'}</Descriptions.Item>
-              <Descriptions.Item label="Sexo">{patient.gender === 'male' ? t('patient.male') : patient.gender === 'female' ? t('patient.female') : '-'}</Descriptions.Item>
-              <Descriptions.Item label="Tipo Sanguíneo">{patient.bloodType || '-'}</Descriptions.Item>
-              <Descriptions.Item label="Peso">{patient.weightKg ? `${patient.weightKg} ${t('patient.weight')}` : '-'}</Descriptions.Item>
-              <Descriptions.Item label="Altura">{patient.heightCm ? `${patient.heightCm} ${t('patient.height')}` : '-'}</Descriptions.Item>
-              <Descriptions.Item label="CPF">{patient.cpf ? `${patient.cpf.slice(0, 3)}.${patient.cpf.slice(3, 6)}.${patient.cpf.slice(6, 9)}-${patient.cpf.slice(9)}` : '-'}</Descriptions.Item>
-              <Descriptions.Item label="CNS">{patient.cns || '-'}</Descriptions.Item>
-              <Descriptions.Item label="Idade">{age}</Descriptions.Item>
-              <Descriptions.Item label="Categoria">
-                <Tag color="geekblue">{CATEGORY_LABEL[patient.ageCategory] || patient.ageCategory}</Tag>
+              <Descriptions.Item label={t('patient.form.name')}>{patient.name}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.birthDate')}>{patient.birthDate ? new Date(patient.birthDate).toLocaleDateString() : '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.gender')}>{patient.gender === 'male' ? t('patient.male') : patient.gender === 'female' ? t('patient.female') : '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.bloodType')}>{patient.bloodType || '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.weight')}>{patient.weightKg ? `${patient.weightKg} ${t('patient.weight')}` : '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.height')}>{patient.heightCm ? `${patient.heightCm} ${t('patient.height')}` : '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.cpf')}>{patient.cpf ? `${patient.cpf.slice(0, 3)}.${patient.cpf.slice(3, 6)}.${patient.cpf.slice(6, 9)}-${patient.cpf.slice(9)}` : '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.cns')}>{patient.cns || '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.age')}>{age}</Descriptions.Item>
+              <Descriptions.Item label={t('patient.form.category')}>
+                <Tag color="geekblue">{t(`patient.category.${patient.ageCategory}`, { defaultValue: patient.ageCategory })}</Tag>
               </Descriptions.Item>
             </Descriptions>
             {(parents.length > 0 || children.length > 0) && (
@@ -518,14 +512,14 @@ export function PatientDetail() {
               <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
               <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
               {patient.isOwner !== false && (
-              <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); message.success('OK'); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : 'Erro ao excluir') } }}>
+              <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); message.success(t('common.ok')); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : t('toast.deletePatientError')) } }}>
                 <Button size="small" danger icon={<DeleteOutlined />} />
               </Popconfirm>
               )}
             </div>
             <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <Tag>{age}</Tag>
-              <Tag color="geekblue">{CATEGORY_LABEL[patient.ageCategory] || patient.ageCategory}</Tag>
+              <Tag color="geekblue">{t(`patient.category.${patient.ageCategory}`, { defaultValue: patient.ageCategory })}</Tag>
               {patient.gender === 'male' && <Tag icon={<ManOutlined />} color="blue">{t('patient.male')}</Tag>}
               {patient.gender === 'female' && <Tag icon={<WomanOutlined />} color="pink">{t('patient.female')}</Tag>}
               {patient.weightKg && <Tag color="green">{patient.weightKg} {t('patient.weight')}</Tag>}
@@ -555,16 +549,16 @@ export function PatientDetail() {
               result.importedExams ? `${result.importedExams} exames` : null,
             ].filter(Boolean)
             if (result.skipped === 'session_required') {
-              message.warning('Faça login gov.br em Integrações antes de reimportar')
+              message.warning(t('toast.govbrLoginFirst'))
               setActiveTab('integrations')
             } else if (parts.length) {
-              message.success(`SUS: importados ${parts.join(' e ')}`)
+              message.success(t('patient.susImported', { parts: parts.join(' e ') }))
             } else {
-              message.info('SUS: nenhum dado novo')
+              message.info(t('toast.susNoNewData'))
             }
             load()
           } catch (e) {
-            message.error(e instanceof Error ? e.message : 'Erro ao reimportar SUS')
+            message.error(e instanceof Error ? e.message : t('patient.susReimportError'))
           }
         }}
       />
@@ -635,14 +629,14 @@ export function PatientDetail() {
           setLinkModalOpen(false)
           load()
           if (SYNCABLE_PORTALS.has(linkPortal)) {
-            message.success('Portal vinculado! Iniciando primeira sincronização...')
+            message.success(t('toast.portalLinkedSyncStart'))
             await startSync(link.id)
           } else {
-            message.success('Portal vinculado!')
+            message.success(t('toast.portalLinked'))
           }
         } catch (err) {
           if (err && typeof err === 'object' && 'errorFields' in err) return
-          message.error(err instanceof Error ? err.message : 'Erro ao vincular')
+          message.error(err instanceof Error ? err.message : t('patient.linkPortalError'))
         }
       }} onCancel={() => setLinkModalOpen(false)} okText={SYNCABLE_PORTALS.has(linkPortal) ? 'Vincular e sincronizar' : 'Vincular'} cancelText={t('common.cancel')} width={400}>
         <Form form={linkForm} layout="vertical" style={{ marginTop: 16 }}>
@@ -688,11 +682,11 @@ export function PatientDetail() {
               inputMode={CPF_LOGIN_PORTALS.has(linkPortal) ? 'numeric' : undefined}
             />
           </Form.Item>
-          <Form.Item name="password" label="Senha" rules={[{ required: true }]}>
-            <Input.Password placeholder="Senha do portal" />
+          <Form.Item name="password" label={t('patient.form.password')} rules={[{ required: true }]}>
+            <Input.Password placeholder={t('form.portalPassword')} />
           </Form.Item>
-          <Form.Item name="cardNumber" label="Nº da Carteirinha (opcional)">
-            <Input placeholder="Número da carteirinha" />
+          <Form.Item name="cardNumber" label={t('patient.form.cardOptional')}>
+            <Input placeholder={t('form.cardNumber')} />
           </Form.Item>
         </Form>
       </Modal>
@@ -712,24 +706,24 @@ export function PatientDetail() {
 
       <Modal title={t('patient.editModalTitle')} open={editOpen} onOk={handleEditSave} onCancel={() => setEditOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')} width={560}>
         <Form form={editForm} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item name="name" label="Nome" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="birthDate" label="Data de Nascimento" rules={[{ required: true }]}>
+          <Form.Item name="name" label={t('patient.form.name')} rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="birthDate" label={t('patient.form.birthDate')} rules={[{ required: true }]}>
             <MaskedDatePicker style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="gender" label="Sexo">
+          <Form.Item name="gender" label={t('patient.form.gender')}>
             <Select options={[{ value: 'male', label: t('patient.male') }, { value: 'female', label: t('patient.female') }]} allowClear />
           </Form.Item>
-          <Form.Item name="bloodType" label="Tipo Sanguíneo">
+          <Form.Item name="bloodType" label={t('patient.form.bloodType')}>
             <Select options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(v => ({ value: v, label: v }))} allowClear />
           </Form.Item>
           <Form.Item name="weightKg" label={`Peso (${t('patient.weight')})`}><Input type="number" step="0.1" /></Form.Item>
           <Form.Item name="heightCm" label={`Altura (${t('patient.height')})`}><Input type="number" step="0.1" /></Form.Item>
-          <Form.Item name="cpf" label="CPF"><Input placeholder="000.000.000-00" maxLength={14} /></Form.Item>
-          <Form.Item name="cns" label="CNS"><Input placeholder="Nº do Cartão SUS" maxLength={15} /></Form.Item>
-          <Form.Item name="photoUrl" label="Foto de Perfil / Avatar (Upload ou URL)">
+          <Form.Item name="cpf" label={t('patient.form.cpf')}><Input placeholder={t('form.cpfMask')} maxLength={14} /></Form.Item>
+          <Form.Item name="cns" label={t('patient.form.cns')}><Input placeholder={t('form.cns')} maxLength={15} /></Form.Item>
+          <Form.Item name="photoUrl" label={t('patient.form.photoLabel')}>
             <Space.Compact style={{ width: '100%' }}>
               <Form.Item name="photoUrl" noStyle>
-                <Input placeholder="Cole a URL ou faça upload de imagem (máx. 2 MB)" allowClear />
+                <Input placeholder={t('form.photoUrl')} allowClear />
               </Form.Item>
               <Upload
                 accept="image/png,image/jpeg,image/webp,image/gif"
@@ -737,7 +731,7 @@ export function PatientDetail() {
                 beforeUpload={(file) => {
                   const isLt2M = file.size / 1024 / 1024 < 2
                   if (!isLt2M) {
-                    message.error('A imagem de perfil deve ser menor que 2 MB')
+                    message.error(t('toast.profileImageTooLarge'))
                     return Upload.LIST_IGNORE
                   }
                   const reader = new FileReader()
@@ -745,7 +739,7 @@ export function PatientDetail() {
                     const base64 = e.target?.result as string
                     if (base64) {
                       editForm.setFieldValue('photoUrl', base64)
-                      message.success('Imagem carregada')
+                      message.success(t('toast.profileImageUploaded'))
                     }
                   }
                   reader.readAsDataURL(file)
@@ -756,11 +750,11 @@ export function PatientDetail() {
               </Upload>
             </Space.Compact>
           </Form.Item>
-          <Form.Item name="parentIds" label="Pais/Responsáveis">
+          <Form.Item name="parentIds" label={t('patient.form.parents')}>
             <Select
               mode="multiple"
-              placeholder="Selecione os pais/responsáveis"
-              options={allPatients.filter(p => p.id !== patient?.id).map(p => ({ value: p.id, label: `${p.name} (${CATEGORY_LABEL[p.ageCategory] || p.ageCategory})` }))}
+              placeholder={t('form.parents')}
+              options={allPatients.filter(p => p.id !== patient?.id).map(p => ({ value: p.id, label: `${p.name} (${t(`patient.category.${p.ageCategory}`, { defaultValue: p.ageCategory })})` }))}
             />
           </Form.Item>
         </Form>
