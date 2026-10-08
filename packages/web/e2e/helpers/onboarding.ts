@@ -103,13 +103,16 @@ async function fillAddressContactStep(page: Page) {
 }
 
 async function completeFamilyAndConnectors(page: Page) {
-  await page.getByTestId('onboarding-step-family-name').waitFor({ state: 'visible', timeout: 25_000 })
+  const familyNameStep = page.getByTestId('onboarding-step-family-name')
+  await familyNameStep.waitFor({ state: 'visible', timeout: 25_000 })
+  const familyNameInput = familyNameStep.getByLabel(/Nome da família|Family name/i)
+  await expect(familyNameInput).not.toHaveValue('', { timeout: 10_000 })
 
   const circleCreate = page.waitForResponse(
     (r) => r.url().includes('/care-circles') && r.request().method() === 'POST',
     { timeout: 35_000 },
   )
-  await page.getByRole('button', { name: /Continuar|Continue/i }).click()
+  await familyNameStep.getByRole('button', { name: /Continuar|Continue/i }).click()
   const circleResponse = await circleCreate
   if (!circleResponse.ok()) {
     const body = await circleResponse.text().catch(() => '')

@@ -168,11 +168,16 @@ export function OnboardingWizard() {
     }
   }
 
-  const onProfileFinish = async (values: OnboardingProfileFormValues) => {
+  const onProfileFinish = async (addressValues: OnboardingProfileFormValues) => {
     setSubmitting(true)
     setError(null)
     setCpfAlreadyLinked(false)
     try {
+      await profileForm.validateFields()
+      const values = {
+        ...profileForm.getFieldsValue(true),
+        ...addressValues,
+      } as OnboardingProfileFormValues
       const result = await api.auth.completeProfile({
         name: values.name,
         socialName: values.socialName?.trim() || undefined,
