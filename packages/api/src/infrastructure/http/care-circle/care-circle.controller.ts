@@ -24,6 +24,11 @@ function mapError(err: unknown, reply: FastifyReply) {
     CARE_CIRCLE_PATIENT_NOT_FOUND: [404, 'Perfil não encontrado no círculo'],
     CARE_CIRCLE_PATIENT_NOT_OWNED: [403, 'Perfil não pertence ao titular desta família'],
     CARE_CIRCLE_NAME_REQUIRED: [400, 'Informe um nome'],
+    CARE_CIRCLE_DELETE_FORBIDDEN: [403, 'Só o titular pode excluir a família'],
+    CARE_CIRCLE_LAST: [409, 'Mantenha pelo menos uma família na sua conta'],
+    CARE_CIRCLE_HAS_MEMBERS: [409, 'Remova os outros membros antes de excluir'],
+    CARE_CIRCLE_PENDING_INVITES: [409, 'Há convites pendentes nesta família'],
+    CARE_CIRCLE_HAS_SHARED_PROFILES: [409, 'Há perfis compartilhados nesta família'],
   }
   const hit = table[code]
   if (hit) return reply.status(hit[0]).send({ message: hit[1] })
@@ -109,6 +114,18 @@ export class CareCircleController {
     try {
       const updated = await this.service.updateName(params.data.id, req.accountId, body.data.name)
       return reply.send(serializeCircle(updated))
+    } catch (err) {
+      return mapError(err, reply)
+    }
+  }
+
+  async delete(req: AuthenticatedRequest, reply: FastifyReply) {
+    if (!req.accountId) return reply.status(401).send({ message: 'Não autenticado' })
+    const params = careCircleParamsSchema.safeParse(req.params)
+    if (!params.success) return reply.status(400).send({ error: params.error.flatten() })
+    try {
+      await this.service.delete(params.data.id, req.accountId)
+      return reply.status(204).send()
     } catch (err) {
       return mapError(err, reply)
     }

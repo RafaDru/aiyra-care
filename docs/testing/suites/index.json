@@ -63,6 +63,21 @@
       "estimatedMinutes": 10
     },
     {
+      "id": "dashboard-people-grouping",
+      "domain": "conta",
+      "title": "Início — agrupamento de perfis (Quem você cuida)",
+      "lane": "regression",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "requiredForMain": false,
+      "order": 3,
+      "doc": "docs/testing/suites/dashboard-people-grouping.md",
+      "coverage": "partial",
+      "businessActions": ["patient.list", "patient.create"],
+      "automation": { "status": "partial", "spec": "packages/web/e2e/suites/dashboard-people-grouping.spec.ts" },
+      "estimatedMinutes": 5
+    },
+    {
       "id": "core-patient-crud",
       "domain": "conta",
       "title": "Paciente — CRUD completo (criar, editar, excluir)",
@@ -92,6 +107,20 @@
       "businessActions": ["care_circle.invite", "grant.create", "grant.revoke", "profile_share"],
       "automation": { "status": "partial", "spec": "packages/web/e2e/suites/family-access-matrix.spec.ts" },
       "estimatedMinutes": 45
+    },
+    {
+      "id": "family-circles-crud",
+      "domain": "familia",
+      "title": "Famílias — criar, renomear, excluir (care_circles)",
+      "featureId": "family-access-model",
+      "lane": "feature",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/family-circles-crud.md",
+      "coverage": "partial",
+      "businessActions": ["care_circle.create", "care_circle.update", "care_circle.delete"],
+      "automation": { "status": "planned" },
+      "estimatedMinutes": 12
     },
     {
       "id": "patient-exams-crud",

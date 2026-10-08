@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Checkbox, Form, Input, Select, Space, Tag, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
+import { familyHubPath } from '../../../lib/family-paths.js'
 import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../../../components/legal/MinorGuardianConsentField.js'
 import { api } from '../../../lib/api.js'
@@ -386,7 +387,7 @@ export function FamilyWizardStep({
           {t('onboarding.skipMembersForCircle')}
         </Button>
         <Text type="secondary" style={{ fontSize: 12, textAlign: 'center', display: 'block' }}>
-          <Link to="/family">{t('onboarding.manageFamiliesLater')}</Link>
+          <Link to={familyHubPath(activeCircleId)}>{t('onboarding.manageFamiliesLater')}</Link>
         </Text>
       </Space>
     </div>

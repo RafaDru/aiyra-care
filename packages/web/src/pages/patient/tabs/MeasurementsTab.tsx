@@ -320,7 +320,7 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
           />
         </Form.Item>
         <Form.Item name="doseGiven" label={t('measurement.dose')}>
-          <Input placeholder="5 ml, 1 comprimido…" />
+          <Input placeholder={t('form.dosageExample')} />
         </Form.Item>
         <Form.Item name="healthThreadId" label={t('measurement.acompanhamento')} initialValue={healthThreadId}>
           <Select allowClear options={threadOptions} />
@@ -418,7 +418,7 @@ export function MeasurementsTab({ patientId, patientName, birthDate, gender, mon
           <InputNumber min={60} max={720} step={30} style={{ width: '100%' }} addonAfter="min" />
         </Form.Item>
         <Form.Item name="doseHint" label={t('measurement.dose')}>
-          <Input placeholder="5 ml, gotas…" />
+          <Input placeholder={t('form.dosageShort')} />
         </Form.Item>
       </EntityFormModal>
 

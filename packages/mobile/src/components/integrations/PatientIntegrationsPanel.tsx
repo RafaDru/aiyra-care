@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { SectionCard } from '@/components/family/SectionCard'
 import { StatePanel } from '@/components/StatePanel'
 import { useIntegrationLinkSyncStatus, type LinkSyncMeta } from '@/hooks/useIntegrationLinkSyncStatus'
@@ -14,18 +15,21 @@ type Props = {
   patientId: string
 }
 
-function sessionHint(link: IntegrationLink): { label: string; tone: 'ok' | 'warn' | 'muted' } {
-  if (link.syncDegraded) return { label: 'Sync pausado (portal degradado)', tone: 'warn' }
+function sessionHint(
+  link: IntegrationLink,
+  t: (key: string) => string,
+): { label: string; tone: 'ok' | 'warn' | 'muted' } {
+  if (link.syncDegraded) return { label: t('patient.integrations.syncDegraded'), tone: 'warn' }
   if (link.authAttention === 'credentials' || link.authAttention === 'session') {
-    return { label: 'Login necessário no app web', tone: 'warn' }
+    return { label: t('patient.integrations.loginOnWeb'), tone: 'warn' }
   }
   if (isSyncablePortal(link.portalType) && isLinkSessionReady(link)) {
-    return { label: 'Sessão pronta para sync no web', tone: 'ok' }
+    return { label: t('patient.integrations.sessionReady'), tone: 'ok' }
   }
   if (isSyncablePortal(link.portalType)) {
-    return { label: 'Primeiro sync no app web', tone: 'muted' }
+    return { label: t('patient.integrations.firstSyncOnWeb'), tone: 'muted' }
   }
-  return { label: 'Gerenciar no app web', tone: 'muted' }
+  return { label: t('patient.integrations.manageOnWeb'), tone: 'muted' }
 }
 
 function LinkRow({
@@ -37,8 +41,9 @@ function LinkRow({
   meta?: LinkSyncMeta
   onOpenWeb: () => void
 }) {
+  const { t } = useTranslation()
   const { tokens } = useAiyraTheme()
-  const hint = sessionHint(link)
+  const hint = sessionHint(link, t)
   const hintColor =
     hint.tone === 'ok' ? tokens.colorSuccess : hint.tone === 'warn' ? tokens.colorWarning : tokens.colorTextSecondary
 
@@ -47,17 +52,19 @@ function LinkRow({
       <View style={styles.rowHeader}>
         <Text style={[styles.portalTitle, { color: tokens.colorTextBase }]}>{portalTypeLabel(link.portalType)}</Text>
         {!link.active ? (
-          <Text style={[styles.badge, { color: tokens.colorTextSecondary }]}>Inativo</Text>
+          <Text style={[styles.badge, { color: tokens.colorTextSecondary }]}>{t('patient.integrations.inactive')}</Text>
         ) : null}
       </View>
       <Text style={{ color: hintColor, fontSize: 13 }}>{hint.label}</Text>
       {meta?.active ? (
         <Text style={{ color: tokens.colorPrimary, fontSize: 13, fontWeight: '600' }}>
-          Em andamento: {meta.message}
+          {t('patient.integrations.inProgress', { message: meta.message })}
         </Text>
       ) : null}
       {!meta?.active && meta?.lastSyncLabel ? (
-        <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>Último sync: {meta.lastSyncLabel}</Text>
+        <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>
+          {t('patient.integrations.lastSync', { when: meta.lastSyncLabel })}
+        </Text>
       ) : null}
       {!meta?.active && meta?.noveltyText ? (
         <Text style={{ color: tokens.colorTextSecondary, fontSize: 13 }}>{meta.noveltyText}</Text>
@@ -67,7 +74,7 @@ function LinkRow({
       ) : null}
       {link.managedByPatientName ? (
         <Text style={{ color: tokens.colorTextSecondary, fontSize: 12 }}>
-          Plano via {link.managedByPatientName}
+          {t('patient.integrations.planVia', { name: link.managedByPatientName })}
         </Text>
       ) : null}
       <Pressable
@@ -75,13 +82,16 @@ function LinkRow({
         style={[styles.webButton, { borderColor: tokens.colorPrimary, backgroundColor: tokens.colorBgContainer }]}
         accessibilityRole="link"
       >
-        <Text style={{ color: tokens.colorPrimary, fontWeight: '600', fontSize: 14 }}>Sincronizar no app web</Text>
+        <Text style={{ color: tokens.colorPrimary, fontWeight: '600', fontSize: 14 }}>
+          {t('patient.integrations.syncOnWeb')}
+        </Text>
       </Pressable>
     </View>
   )
 }
 
 export function PatientIntegrationsPanel({ patientId }: Props) {
+  const { t } = useTranslation()
   const { tokens } = useAiyraTheme()
   const [links, setLinks] = useState<IntegrationLink[]>([])
   const [loading, setLoading] = useState(true)
@@ -104,12 +114,12 @@ export function PatientIntegrationsPanel({ patientId }: Props) {
       setLinks(rows.filter((l) => l.active))
       setRefreshKey((k) => k + 1)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao carregar integrações')
+      setError(e instanceof Error ? e.message : t('patient.integrations.loadError'))
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [patientId])
+  }, [patientId, t])
 
   useEffect(() => {
     void load('initial')
@@ -136,21 +146,23 @@ export function PatientIntegrationsPanel({ patientId }: Props) {
       contentContainerStyle={styles.scroll}
     >
       <SectionCard
-        title="Integrações"
-        subtitle="Status dos portais conectados. Login e sincronização com browser (Playwright) ficam no app web — o mobile não executa scrapers."
+        title={t('patient.integrations.title')}
+        subtitle={t('patient.integrations.subtitle')}
       >
         <Pressable
           onPress={openWebIntegrations}
           style={[styles.primaryCta, { backgroundColor: tokens.colorPrimary }]}
         >
-          <Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center' }}>Abrir integrações no navegador</Text>
+          <Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center' }}>
+            {t('patient.integrations.openInBrowser')}
+          </Text>
         </Pressable>
       </SectionCard>
 
       {!links.length ? (
         <StatePanel
           tokens={tokens}
-          emptyMessage="Nenhum portal vinculado. Conecte operadoras ou laboratórios no app web."
+          emptyMessage={t('patient.integrations.empty')}
         />
       ) : (
         links.map((link) => (

@@ -136,20 +136,20 @@ function SyncSummary({
       {summary.showBeneficiaries && beneficiaries.length > 0 && (
         <List
           size="small"
-          header={<Text strong>Beneficiários do plano</Text>}
+          header={<Text strong>{t('syncProgress.beneficiariesHeader')}</Text>}
           style={{ marginTop: 12, background: '#fff', borderRadius: 6, padding: '0 8px' }}
           dataSource={beneficiaries}
           renderItem={(b) => (
             <List.Item>
               <Space wrap>
                 <Tag color={b.role === 'holder' ? 'blue' : 'purple'}>
-                  {b.role === 'holder' ? 'Titular' : 'Dependente'}
+                  {b.role === 'holder' ? t('syncProgress.roleHolder') : t('syncProgress.roleDependent')}
                 </Tag>
                 <Text strong>{formatBeneficiaryName(b.name)}</Text>
-                <Text type="secondary">→ {b.patientName}</Text>
-                <Tag color="green">{b.authorizationsImported} novas</Tag>
+                <Text type="secondary">{t('syncProgress.arrowTo')} {b.patientName}</Text>
+                <Tag color="green">{t('syncProgress.authorizationsNew', { count: b.authorizationsImported })}</Tag>
                 {b.authorizationsUpdated > 0 && (
-                  <Tag color="geekblue">{b.authorizationsUpdated} atualizadas</Tag>
+                  <Tag color="geekblue">{t('syncProgress.authorizationsUpdated', { count: b.authorizationsUpdated })}</Tag>
                 )}
               </Space>
             </List.Item>
@@ -162,8 +162,8 @@ function SyncSummary({
           <Alert
             type="info"
             showIcon
-            message="Dependentes no plano sem cadastro local"
-            description="Cadastre para importar guias e carteirinha na próxima sincronização."
+            message={t('syncProgress.unmatchedDependentsTitle')}
+            description={t('syncProgress.unmatchedDependentsDesc')}
             style={{ marginBottom: 8 }}
           />
           <List
@@ -179,14 +179,14 @@ function SyncSummary({
                     icon={<UserAddOutlined />}
                     onClick={() => onRegister(b)}
                   >
-                    Cadastrar
+                    {t('syncProgress.register')}
                   </Button>,
                 ] : undefined}
               >
                 <Space wrap>
                   <Text strong>{formatBeneficiaryName(b.name)}</Text>
-                  <Tag>{b.authorizationCount} guias no portal</Tag>
-                  {b.cpf && <Text type="secondary">CPF {b.cpf}</Text>}
+                  <Tag>{t('syncProgress.guidesOnPortal', { count: b.authorizationCount })}</Tag>
+                  {b.cpf && <Text type="secondary">{t('syncProgress.cpfPrefix', { cpf: b.cpf })}</Text>}
                 </Space>
               </List.Item>
             )}
@@ -196,50 +196,54 @@ function SyncSummary({
 
       <Descriptions column={1} size="small" style={{ marginTop: 12 }}>
       {summary.showExams && (
-        <Descriptions.Item label="Exames novos">{result.exams}</Descriptions.Item>
+        <Descriptions.Item label={t('syncProgress.newExams')}>{result.exams}</Descriptions.Item>
       )}
       {result.novelty && (
         <>
           {result.novelty.portalExams != null && (
-            <Descriptions.Item label="Exames no portal">{result.novelty.portalExams}</Descriptions.Item>
+            <Descriptions.Item label={t('syncProgress.examsOnPortal')}>{result.novelty.portalExams}</Descriptions.Item>
           )}
           {result.novelty.skippedExamRecords != null && (
-            <Descriptions.Item label="Exames já conhecidos">{result.novelty.skippedExamRecords}</Descriptions.Item>
+            <Descriptions.Item label={t('syncProgress.examsKnown')}>{result.novelty.skippedExamRecords}</Descriptions.Item>
           )}
           {result.novelty.filesDownloaded != null && (
-            <Descriptions.Item label="Arquivos baixados">{result.novelty.filesDownloaded}</Descriptions.Item>
+            <Descriptions.Item label={t('syncProgress.filesDownloaded')}>{result.novelty.filesDownloaded}</Descriptions.Item>
           )}
           {result.novelty.filesSkipped != null && (
-            <Descriptions.Item label="Arquivos já em cache">{result.novelty.filesSkipped}</Descriptions.Item>
+            <Descriptions.Item label={t('syncProgress.filesCached')}>{result.novelty.filesSkipped}</Descriptions.Item>
           )}
         </>
       )}
         {summary.showMedicalRecords && (
-          <Descriptions.Item label="Consultas novas">{result.medicalRecords}</Descriptions.Item>
+          <Descriptions.Item label={t('syncProgress.newConsults')}>{result.medicalRecords}</Descriptions.Item>
         )}
         {summary.showAuthorizations && (
           <>
-            <Descriptions.Item label="Autorizações novas">{result.authorizations}</Descriptions.Item>
-            <Descriptions.Item label="Autorizações atualizadas">{result.updatedAuthorizations}</Descriptions.Item>
-            <Descriptions.Item label="Itens/procedimentos">{result.authorizationItems}</Descriptions.Item>
+            <Descriptions.Item label={t('syncProgress.newAuthorizations')}>{result.authorizations}</Descriptions.Item>
+            <Descriptions.Item label={t('syncProgress.updatedAuthorizations')}>{result.updatedAuthorizations}</Descriptions.Item>
+            <Descriptions.Item label={t('syncProgress.itemsProcedures')}>{result.authorizationItems}</Descriptions.Item>
           </>
         )}
-        <Descriptions.Item label="Total alterado"><Text strong>{result.total}</Text></Descriptions.Item>
+        <Descriptions.Item label={t('syncProgress.totalChanged')}><Text strong>{result.total}</Text></Descriptions.Item>
       </Descriptions>
 
       {summary.showAuthorizations && result.authorizationDetails?.length > 0 && (
         <List
           size="small"
-          header={<Text strong>Pedidos sincronizados</Text>}
+          header={<Text strong>{t('syncProgress.syncedOrdersHeader')}</Text>}
           style={{ marginTop: 12, background: '#fff', borderRadius: 6, padding: '0 8px', maxHeight: 200, overflow: 'auto' }}
           dataSource={result.authorizationDetails}
           renderItem={(d) => (
             <List.Item>
               <Space wrap>
                 <Tag color={d.action === 'created' ? 'green' : 'blue'}>
-                  {d.action === 'created' ? 'Novo' : 'Atualizado'}
+                  {d.action === 'created' ? t('syncProgress.actionNew') : t('syncProgress.actionUpdated')}
                 </Tag>
-                <Text>{d.solicitationNumber ? `Pedido ${d.solicitationNumber}` : 'Sem número'}</Text>
+                <Text>
+                  {d.solicitationNumber
+                    ? t('syncProgress.orderNumber', { number: d.solicitationNumber })
+                    : t('syncProgress.noOrderNumber')}
+                </Text>
                 {d.beneficiaryName && (
                   <Text type="secondary">{formatBeneficiaryName(d.beneficiaryName)}</Text>
                 )}
@@ -251,7 +255,7 @@ function SyncSummary({
       )}
 
       {result.total === 0 && beneficiaries.length === 0 && unmatched.length === 0 && (
-        <Text type="warning" style={{ display: 'block', marginTop: 8 }}>Nenhuma alteração encontrada.</Text>
+        <Text type="warning" style={{ display: 'block', marginTop: 8 }}>{t('syncProgress.noChangesFound')}</Text>
       )}
     </>
   )
@@ -292,7 +296,7 @@ export function SyncProgressModal({
     startedAtRef.current = Date.now()
     lastEventAtRef.current = Date.now()
     setCurrentStep(0)
-    setMessage('Iniciando...')
+    setMessage(t('syncProgress.starting'))
     setStatus('running')
     setResult(null)
     setStepDetails({})
@@ -320,8 +324,8 @@ export function SyncProgressModal({
         if (finishedRef.current) return
         finishedRef.current = true
         setStatus('failed')
-        setMessage(p.message || 'Erro na sincronização')
-        onErrorRef.current(p.message || 'Erro na sincronização')
+        setMessage(p.message || t('modals.syncError'))
+        onErrorRef.current(p.message || t('modals.syncError'))
         return
       }
 
@@ -377,7 +381,7 @@ export function SyncProgressModal({
       closeStream()
       clearInterval(staleCheck)
     }
-  }, [jobId, portalTypeProp])
+  }, [jobId, portalTypeProp, t])
 
   const isOpen = !!jobId
   const canClose = true
@@ -416,12 +420,12 @@ export function SyncProgressModal({
 
           <Title level={4} style={{ marginTop: 16 }}>
             {status === 'running'
-              ? `Sincronizando ${profile.label}...`
+              ? t('syncProgress.syncingPortal', { portal: profile.label })
               : status === 'success'
-                ? 'Sincronização concluída'
+                ? t('syncProgress.syncComplete')
                 : status === 'partial'
-                  ? 'Sincronização parcial'
-                  : 'Erro na sincronização'}
+                  ? t('syncProgress.syncPartial')
+                  : t('syncProgress.syncFailed')}
           </Title>
 
           {showFleuryOtpInApp && jobId && (
@@ -441,7 +445,7 @@ export function SyncProgressModal({
               type="info"
               showIcon
               style={{ marginTop: 12, textAlign: 'left' }}
-              message="Login manual necessário"
+              message={t('syncProgress.manualLoginRequired')}
               description={loginDetail?.message || message}
             />
           )}
@@ -451,8 +455,8 @@ export function SyncProgressModal({
               type="info"
               showIcon
               style={{ marginTop: 12, textAlign: 'left' }}
-              message="Sincronização em andamento"
-              description="Pode levar vários minutos (laudos e imagens). Você pode fechar este diálogo — o status continua na aba Carteira."
+              message={t('syncProgress.syncInProgress')}
+              description={t('syncProgress.syncInProgressDesc')}
             />
           )}
 
@@ -518,7 +522,7 @@ export function SyncProgressModal({
 
           {(status === 'success' || status === 'partial') && (
             <div style={{ marginTop: 20, textAlign: 'left', background: '#f5f5f5', borderRadius: 8, padding: 16 }}>
-              <Text strong>Resumo da sincronização:</Text>
+              <Text strong>{t('syncProgress.summaryTitle')}</Text>
               {result ? (
                 <SyncSummary
                   profile={profile}
@@ -529,7 +533,7 @@ export function SyncProgressModal({
                 />
               ) : (
                 <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
-                  Concluído, mas o resumo não veio no progresso. Feche e recarregue a ficha se necessário.
+                  {t('syncProgress.summaryMissing')}
                 </Text>
               )}
             </div>
@@ -538,7 +542,7 @@ export function SyncProgressModal({
           {canClose && (
             <Space style={{ marginTop: 24 }}>
               <Button type="primary" onClick={onDone}>
-                {status === 'running' ? 'Fechar (continua em segundo plano)' : 'Fechar'}
+                {status === 'running' ? t('syncProgress.closeContinueBackground') : t('common.close')}
               </Button>
             </Space>
           )}

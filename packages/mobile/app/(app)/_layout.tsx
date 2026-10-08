@@ -1,4 +1,5 @@
 import { Redirect, Stack } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, View } from 'react-native'
 import { AvaGlobalDock } from '@/components/ava/AvaGlobalDock'
 import { QuickCaptureGlobal } from '@/components/quick-capture/QuickCaptureGlobal'
@@ -8,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
 export default function AppShellLayout() {
+  const { t } = useTranslation()
   const { loading, session, configured } = useAuth()
   const { tokens } = useAiyraTheme()
   const needsUnlock = useRequiresBiometricUnlock(Boolean(session))
@@ -36,7 +38,7 @@ export default function AppShellLayout() {
           <Stack.Screen name="patient/[id]" options={{ title: 'Perfil' }} />
           <Stack.Screen name="settings/family" options={{ title: 'Família e cuidadores' }} />
           <Stack.Screen name="compliance/accept" options={{ title: 'Termos e privacidade', headerBackVisible: false }} />
-          <Stack.Screen name="onboarding" options={{ title: 'Complete seu cadastro', headerBackVisible: false }} />
+          <Stack.Screen name="onboarding" options={{ title: t('onboarding.screenTitle'), headerBackVisible: false }} />
         </Stack>
         <QuickCaptureGlobal />
         <AvaGlobalDock />

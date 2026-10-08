@@ -123,14 +123,36 @@ class InMemoryCareCircleRepo implements CareCircleRepository {
       patients: await this.listPatients(circleId),
     }
   }
+
+  async deleteById(id: string) {
+    const before = this.circles.length
+    this.circles = this.circles.filter((c) => c.id !== id)
+    this.members = this.members.filter((m) => m.circleId !== id)
+    this.links = this.links.filter((l) => l.circleId !== id)
+    return this.circles.length < before
+  }
+
+  async countOwnedCircles(accountId: string) {
+    return this.members.filter((m) => m.accountId === accountId && m.role === 'owner').length
+  }
 }
 
 class FakePool {
   patients = new Map<string, string>()
+  pendingInvites = new Set<string>()
+  sharedCircleIds = new Set<string>()
 
   async query(sql: string, params?: unknown[]) {
     if (sql.includes('owner_account_id') && params?.[0]) {
       return { rows: [{ owner: this.patients.get(params[0] as string) ?? null }] }
+    }
+    if (sql.includes('patient_access_invites') && params?.[0]) {
+      const id = params[0] as string
+      return { rows: this.pendingInvites.has(id) ? [{ ok: 1 }] : [] }
+    }
+    if (sql.includes("link_kind = 'shared'") && params?.[0]) {
+      const id = params[0] as string
+      return { rows: this.sharedCircleIds.has(id) ? [{ ok: 1 }] : [] }
     }
     if (sql.includes('linkable')) {
       return { rows: [] }
@@ -161,6 +183,33 @@ describe('CareCircleService', () => {
     await svc.addMember(circle.id, ownerId, adminId, 'admin')
     await svc.addMember(circle.id, ownerId, c3, 'admin')
     await expect(svc.addMember(circle.id, ownerId, d4, 'admin')).rejects.toThrow('CARE_CIRCLE_ADMIN_LIMIT')
+  })
+
+  it('titular pode excluir círculo extra sem membros', async () => {
+    const repo = new InMemoryCareCircleRepo()
+    const pool = new FakePool()
+    const svc = new CareCircleService(repo, pool as never)
+    const a = await svc.create(ownerId, 'Família A')
+    const b = await svc.create(ownerId, 'Família B')
+    await svc.delete(b.id, ownerId)
+    const list = await svc.listForAccount(ownerId)
+    expect(list.map((c) => c.id)).toEqual([a.id])
+  })
+
+  it('não exclui última família do titular', async () => {
+    const repo = new InMemoryCareCircleRepo()
+    const svc = new CareCircleService(repo, new FakePool() as never)
+    const circle = await svc.create(ownerId, 'Única')
+    await expect(svc.delete(circle.id, ownerId)).rejects.toThrow('CARE_CIRCLE_LAST')
+  })
+
+  it('não exclui família com outros membros', async () => {
+    const repo = new InMemoryCareCircleRepo()
+    const svc = new CareCircleService(repo, new FakePool() as never)
+    const a = await svc.create(ownerId, 'A')
+    await svc.create(ownerId, 'B')
+    await svc.addMember(a.id, ownerId, adminId, 'admin')
+    await expect(svc.delete(a.id, ownerId)).rejects.toThrow('CARE_CIRCLE_HAS_MEMBERS')
   })
 
   it('admin não pode rebaixar o titular via upsert de membro', async () => {

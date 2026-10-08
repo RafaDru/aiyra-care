@@ -43,6 +43,38 @@ export class CareCircleService {
     return updated
   }
 
+  async delete(circleId: string, accountId: string) {
+    await this.requireOwner(circleId, accountId)
+    const circle = await this.repo.findById(circleId)
+    if (!circle) throw new Error('CARE_CIRCLE_NOT_FOUND')
+    if (circle.billingOwnerAccountId !== accountId) {
+      throw new Error('CARE_CIRCLE_DELETE_FORBIDDEN')
+    }
+
+    const ownedCount = await this.repo.countOwnedCircles(accountId)
+    if (ownedCount <= 1) throw new Error('CARE_CIRCLE_LAST')
+
+    const members = await this.repo.listMembers(circleId)
+    if (members.length > 1) throw new Error('CARE_CIRCLE_HAS_MEMBERS')
+
+    const { rows: inviteRows } = await this.pool.query(
+      `SELECT 1 FROM patient_access_invites
+       WHERE care_circle_id = $1 AND status = 'pending' AND expires_at > NOW()
+       LIMIT 1`,
+      [circleId],
+    )
+    if (inviteRows.length > 0) throw new Error('CARE_CIRCLE_PENDING_INVITES')
+
+    const { rows: sharedRows } = await this.pool.query(
+      `SELECT 1 FROM patient_circle_links WHERE circle_id = $1 AND link_kind = 'shared' LIMIT 1`,
+      [circleId],
+    )
+    if (sharedRows.length > 0) throw new Error('CARE_CIRCLE_HAS_SHARED_PROFILES')
+
+    const ok = await this.repo.deleteById(circleId)
+    if (!ok) throw new Error('CARE_CIRCLE_NOT_FOUND')
+  }
+
   async listMembers(circleId: string, accountId: string) {
     await this.requireMember(circleId, accountId)
     return this.repo.listMembers(circleId)
@@ -145,6 +177,12 @@ export class CareCircleService {
   private async requireOwnerOrAdmin(circleId: string, accountId: string) {
     const m = await this.requireMember(circleId, accountId)
     if (m.role !== 'owner' && m.role !== 'admin') throw new Error('CARE_CIRCLE_FORBIDDEN')
+    return m
+  }
+
+  private async requireOwner(circleId: string, accountId: string) {
+    const m = await this.requireMember(circleId, accountId)
+    if (m.role !== 'owner') throw new Error('CARE_CIRCLE_DELETE_FORBIDDEN')
     return m
   }
 

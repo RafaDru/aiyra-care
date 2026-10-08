@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-08] - CRUD care_circles no hub `/family`
+
+### Realizado
+- API `DELETE /care-circles/:id` — titular; guardas (última família, outros membros, convites pendentes, perfis compartilhados).
+- Web: excluir/renomear/criar no `CareCirclesPanel`; empty state; link `familyHubPath(?circle=)` desde onboarding.
+- QA: suite `family-circles-crud`.
+
 ## [2026-10-08] - i18n locales MVP
 
 ### Decisão

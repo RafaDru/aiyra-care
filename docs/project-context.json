@@ -103,6 +103,7 @@
     { "method": "POST", "path": "/organizations", "description": "Criar organização B2B" },
     { "method": "GET", "path": "/care-circles", "description": "Listar famílias da conta" },
     { "method": "GET", "path": "/care-circles/dashboard", "description": "Agrupamento família → patientIds (dashboard)" },
+    { "method": "DELETE", "path": "/care-circles/:id", "description": "Excluir família (titular; guardas MVP)" },
     { "method": "GET", "path": "/family-access/invites", "description": "Convites enviados (titular)" },
     { "method": "POST", "path": "/family-access/invites/accept", "description": "Aceitar convite de cuidador" },
     { "method": "GET", "path": "/patients/:id/access-grants", "description": "Listar concessões de acesso ao perfil" },

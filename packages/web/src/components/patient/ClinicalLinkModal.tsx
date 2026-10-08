@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CalendarOutlined } from '@ant-design/icons'
 import { Alert, Form, Modal, Select, Space, Tag, Typography } from 'antd'
 import { api } from '../../lib/api.js'
@@ -70,6 +71,7 @@ export function ClinicalLinkModal({
   onClose,
   onCreated,
 }: ClinicalLinkModalProps) {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
 
@@ -203,7 +205,7 @@ export function ClinicalLinkModal({
         >
           <Select
             options={selectOptions}
-            placeholder="Ex.: consulta com a médica"
+            placeholder={t('form.linkTitleConsult')}
             showSearch
             optionFilterProp="label"
             dropdownStyle={{ minWidth: 360, maxWidth: '90vw' }}
@@ -220,7 +222,7 @@ export function ClinicalLinkModal({
         >
           <Select
             options={selectOptions.filter((o) => o.value !== fromKey)}
-            placeholder="Ex.: pedido de autorização de exame"
+            placeholder={t('form.linkTitleAuth')}
             showSearch
             optionFilterProp="label"
             dropdownStyle={{ minWidth: 360, maxWidth: '90vw' }}

@@ -207,4 +207,18 @@ export class CareCirclePgRepository implements CareCircleRepository {
     const patients = await this.listPatients(circleId)
     return { circle, memberRole: member.role, members, patients }
   }
+
+  async deleteById(id: string) {
+    const { rowCount } = await this.pool.query(`DELETE FROM care_circles WHERE id = $1`, [id])
+    return (rowCount ?? 0) > 0
+  }
+
+  async countOwnedCircles(accountId: string) {
+    const { rows } = await this.pool.query(
+      `SELECT COUNT(*)::int AS c FROM care_circle_members
+       WHERE account_id = $1 AND role = 'owner'`,
+      [accountId],
+    )
+    return rows[0]?.c ?? 0
+  }
 }

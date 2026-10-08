@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
 import { Button, Card, Space, Tag, Typography } from 'antd'
 import { RightOutlined, TeamOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { api } from '../../lib/api.js'
 import { FAMILY_HUB_PATH } from '../../lib/family-paths.js'
+import { useFamilyPendingCount } from '../../hooks/useFamilyPendingCount.js'
 
 const { Text } = Typography
 
@@ -12,28 +11,7 @@ const { Text } = Typography
 export function DashboardFamilyShortcut() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [pendingCount, setPendingCount] = useState(0)
-
-  useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const [invites, incomingShares] = await Promise.all([
-          api.familyAccess.listInvites(),
-          api.familyAccess.listProfileSharesIncoming(),
-        ])
-        if (cancelled) return
-        const pendingInvites = invites.filter((i) => i.status === 'pending').length
-        const pendingShares = incomingShares.filter((s) => s.status === 'pending').length
-        setPendingCount(pendingInvites + pendingShares)
-      } catch {
-        if (!cancelled) setPendingCount(0)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  const pendingCount = useFamilyPendingCount()
 
   return (
     <Card

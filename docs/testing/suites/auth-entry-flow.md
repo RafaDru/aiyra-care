@@ -24,7 +24,7 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 |---|------|-------------------|-------|
 | 1 | `/home` → **Entrar** | `/login?mode=login` | |
 | 2 | Título «Bem-vindo de volta» | Modo login visível | |
-| 3 | Login `qa.e2e@…` | Dashboard com heading **Sua família** | |
+| 3 | Login `qa.e2e@…` | Dashboard com heading **Quem você cuida** | |
 
 **Automação:** `auth-entry-flow.spec.ts` — cenário «cliente existente»
 
@@ -46,7 +46,7 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | 2 | Perfil titular + **Continuar** → endereço/contato + **Continuar** | `POST /auth/complete-profile` (CEP, celular); tela nome família | |
 | 3 | Nome + **Continuar** | Membros (`onboarding-step-family-members`); titular no 1º círculo | |
 | 4 | **Pular pessoas por agora** | Passos opcionais conectores (SUS → convênios → labs → hospitais), cada um com **Pular** | |
-| 5 | Último conector **Pular** ou **Ir para o app** | Dashboard **Sua família** com titular no grupo nomeado; banner opcional | |
+| 5 | Último conector **Pular** ou **Ir para o app** | Dashboard **Quem você cuida** com titular no grupo nomeado; banner opcional | |
 
 **Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado» · helper `onboarding.ts`
 

@@ -171,22 +171,22 @@ export function ImportInsuranceModal({
       {!loading && !result && (
         <Form form={form} layout="vertical">
           {usesEmail ? (
-            <Form.Item name="email" label="E-mail de acesso" rules={[{ required: true, type: 'email' }]}>
-              <Input placeholder="seu@email.com" />
+            <Form.Item name="email" label={t('importInsurance.accessEmail')} rules={[{ required: true, type: 'email' }]}>
+              <Input placeholder={t('form.email')} />
             </Form.Item>
           ) : (
-            <Form.Item name="cpf" label="CPF do titular" rules={[
+            <Form.Item name="cpf" label={t('importInsurance.holderCpf')} rules={[
               { required: true },
-              { validator: (_, v) => v && v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject('CPF deve ter 11 dígitos') },
+              { validator: (_, v) => v && v.replace(/\D/g, '').length === 11 ? Promise.resolve() : Promise.reject(t('importInsurance.cpfElevenDigits')) },
             ]}>
-              <Input placeholder="000.000.000-00" maxLength={14} />
+              <Input placeholder={t('form.cpfMask')} maxLength={14} />
             </Form.Item>
           )}
-          <Form.Item name="password" label="Senha do portal" rules={[{ required: true }]}>
-            <Input.Password prefix={<KeyOutlined />} placeholder="Senha de acesso" />
+          <Form.Item name="password" label={t('form.portalPassword')} rules={[{ required: true }]}>
+            <Input.Password prefix={<KeyOutlined />} placeholder={t('form.portalPasswordShort')} />
           </Form.Item>
-          <Form.Item name="membership" label="Número de matrícula (opcional)">
-            <Input placeholder="Carteirinha / matrícula" />
+          <Form.Item name="membership" label={t('importInsurance.membershipOptional')}>
+            <Input placeholder={t('form.membershipId')} />
           </Form.Item>
           <DismissibleHint
             hintId="import-insurance.browser-login"

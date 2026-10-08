@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
+import { Layout, Menu, Button, Dropdown, Typography, Badge } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   SettingOutlined,
@@ -33,6 +33,7 @@ import { FirstVisitTourDrawer } from '../onboarding/FirstVisitTourDrawer.js'
 import { DeploymentEnvironmentBadge } from './DeploymentEnvironmentBadge.js'
 import { ActiveCareCircleProvider } from '../../contexts/ActiveCareCircleContext.js'
 import { CareCircleGlobalSelector } from '../family/CareCircleGlobalSelector.js'
+import { useFamilyPendingCount } from '../../hooks/useFamilyPendingCount.js'
 
 const { Sider, Content, Header } = Layout
 const { Text } = Typography
@@ -45,6 +46,7 @@ export function AppLayout() {
   const { t } = useTranslation()
   const { configured, user, signOut } = useAuth()
   const { darkMode } = useTheme()
+  const familyPendingCount = useFamilyPendingCount(configured && Boolean(user))
   useScreenTelemetry()
 
   const userMenuItems: MenuProps['items'] = [
@@ -114,7 +116,24 @@ export function AppLayout() {
             selectedKeys={[mainSelectedKey]}
             items={[
               { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
-              { key: '/family', icon: <TeamOutlined />, label: t('nav.yourFamily') },
+              {
+                key: '/family',
+                icon: <TeamOutlined />,
+                label: collapsed ? (
+                  t('nav.yourFamily')
+                ) : (
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, width: '100%' }}>
+                    <span>{t('nav.yourFamily')}</span>
+                    {familyPendingCount > 0 && (
+                      <Badge
+                        count={familyPendingCount}
+                        size="small"
+                        title={t('family.sidebar.pending', { count: familyPendingCount })}
+                      />
+                    )}
+                  </span>
+                ),
+              },
               {
                 key: '/emergency',
                 icon: <PhoneOutlined />,
