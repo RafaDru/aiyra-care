@@ -94,6 +94,20 @@
       "estimatedMinutes": 45
     },
     {
+      "id": "family-circles-crud",
+      "domain": "familia",
+      "title": "Famílias — criar, renomear, excluir (care_circles)",
+      "featureId": "family-access-model",
+      "lane": "feature",
+      "parallelSafe": true,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/family-circles-crud.md",
+      "coverage": "partial",
+      "businessActions": ["care_circle.create", "care_circle.update", "care_circle.delete"],
+      "automation": { "status": "planned" },
+      "estimatedMinutes": 12
+    },
+    {
       "id": "patient-exams-crud",
       "domain": "perfil-exames",
       "title": "Exames — adicionar, editar, excluir manual",

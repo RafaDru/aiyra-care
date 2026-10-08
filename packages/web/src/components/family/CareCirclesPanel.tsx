@@ -3,17 +3,19 @@ import {
   Button,
   Card,
   Collapse,
+  Empty,
   Form,
   Input,
   List,
   Modal,
+  Popconfirm,
   Select,
   Space,
   Tag,
   Typography,
   message,
 } from 'antd'
-import { EditOutlined, LinkOutlined, PlusOutlined, TeamOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, LinkOutlined, PlusOutlined, TeamOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import { useActiveCareCircle } from '../../contexts/ActiveCareCircleContext.js'
@@ -34,7 +36,8 @@ interface CircleDetail extends CircleSummary {
 
 export function CareCirclesPanel() {
   const { t } = useTranslation()
-  const { activeCircleId, setActiveCircleId, hasMultipleCircles, refreshCircles } = useActiveCareCircle()
+  const { activeCircleId, setActiveCircleId, hasMultipleCircles, refreshCircles, circles: contextCircles } =
+    useActiveCareCircle()
   const [circles, setCircles] = useState<CircleSummary[]>([])
   const [details, setDetails] = useState<Record<string, CircleDetail>>({})
   const [loading, setLoading] = useState(true)
@@ -80,14 +83,36 @@ export function CareCirclesPanel() {
   const createCircle = async () => {
     const values = await form.validateFields()
     try {
-      await api.careCircles.create(values.name)
+      const created = await api.careCircles.create(values.name)
       message.success(t('family.circles.created'))
       setCreateOpen(false)
       form.resetFields()
+      setActiveCircleId(created.id)
+      void load()
+      void refreshCircles()
+      void loadDetail(created.id)
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : t('family.circles.createError'))
+    }
+  }
+
+  const deleteCircle = async (circleId: string) => {
+    try {
+      await api.careCircles.delete(circleId)
+      message.success(t('family.circles.deleted'))
+      setDetails((d) => {
+        const next = { ...d }
+        delete next[circleId]
+        return next
+      })
+      if (activeCircleId === circleId) {
+        const remaining = circles.filter((c) => c.id !== circleId)
+        if (remaining[0]) setActiveCircleId(remaining[0].id)
+      }
       void load()
       void refreshCircles()
     } catch (e) {
-      message.error(e instanceof Error ? e.message : t('family.circles.createError'))
+      message.error(e instanceof Error ? e.message : t('family.circles.deleteError'))
     }
   }
 
@@ -149,6 +174,8 @@ export function CareCirclesPanel() {
   }
 
   const canManage = (role: string) => role === 'owner' || role === 'admin'
+  const canDelete = (detail: CircleDetail) =>
+    detail.memberRole === 'owner' && contextCircles.filter((c) => c.memberRole === 'owner').length > 1
 
   const visibleCircles =
     hasMultipleCircles && activeCircleId
@@ -179,7 +206,19 @@ export function CareCirclesPanel() {
         </div>
 
         {circles.length === 0 ? (
-          <Text type="secondary">{t('family.circles.empty')}</Text>
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <Space direction="vertical" size={4}>
+                <Text>{t('family.circles.empty')}</Text>
+                <Text type="secondary">{t('family.circles.emptyHint')}</Text>
+              </Space>
+            }
+          >
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+              {t('family.circles.create')}
+            </Button>
+          </Empty>
         ) : (
           <Collapse
             accordion
@@ -211,6 +250,24 @@ export function CareCirclesPanel() {
                       <Button size="small" icon={<LinkOutlined />} onClick={() => void openLinkModal(c.id)}>
                         {t('family.circles.linkProfile')}
                       </Button>
+                      {canDelete(details[c.id]) && (
+                        <Popconfirm
+                          title={t('family.circles.deleteTitle')}
+                          description={t('family.circles.deleteConfirm')}
+                          okText={t('family.circles.delete')}
+                          okButtonProps={{ danger: true }}
+                          onConfirm={() => void deleteCircle(c.id)}
+                        >
+                          <Button
+                            size="small"
+                            danger
+                            icon={<DeleteOutlined />}
+                            data-testid="care-circle-delete"
+                          >
+                            {t('family.circles.delete')}
+                          </Button>
+                        </Popconfirm>
+                      )}
                     </Space>
                   )}
                   <div>

@@ -944,6 +944,7 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify({ name }),
       }),
+    delete: (id: string) => request<void>(`/care-circles/${id}`, { method: 'DELETE' }),
     listLinkablePatients: (id: string) =>
       request<Array<{ id: string; name: string }>>(`/care-circles/${id}/linkable-patients`),
     linkPatient: (circleId: string, patientId: string) =>

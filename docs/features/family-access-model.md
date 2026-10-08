@@ -49,7 +49,7 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 - `GET /patients/:id/access-audit`
 - `GET/POST/DELETE /family-access/invites`, `POST /family-access/invites/accept`
 - `GET/POST/DELETE /family-access/profile-shares`, `POST .../profile-shares/:id/accept`
-- `GET/POST/PATCH /care-circles`, membros, vínculos de perfil
+- `GET/POST/PATCH/DELETE /care-circles`, membros, vínculos de perfil (`DELETE` só titular; guardas: última família, outros membros, convites pendentes, perfis compartilhados)
 - `GET /care-circles/dashboard`
 
 ## Pendente (fase 3+)
@@ -66,8 +66,8 @@ Modelar explicitamente a diferença entre **conta** (login e pagamento), **famí
 
 | Campo | Valor |
 |-------|--------|
-| **Suite** | [`docs/testing/suites/family-access-matrix.md`](../testing/suites/family-access-matrix.md) |
-| **Cobertura crítica** | Matriz de visibilidade + passos **15–17** (exclusão só titular; API 403 para cuidador) |
+| **Suite** | [`docs/testing/suites/family-access-matrix.md`](../testing/suites/family-access-matrix.md) · CRUD círculos: [`family-circles-crud.md`](../testing/suites/family-circles-crud.md) |
+| **Cobertura crítica** | Matriz de visibilidade + passos **15–17** (exclusão só titular; API 403 para cuidador); hub `/family` + `?circle=` pós-onboarding |
 | **Fixture** | [`docs/testing/fixtures/family-matrix.json`](../testing/fixtures/family-matrix.json) |
 | **Comando** | `npm run qa:run -- --suite family-access-matrix` |
 | **Automação** | `planned` — aguarda `seed-qa-family-matrix.mjs` |

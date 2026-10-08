@@ -26,6 +26,7 @@ export async function careCircleRoutes(app: FastifyInstance) {
   app.post('/care-circles', controller.create.bind(controller))
   app.get('/care-circles/:id', controller.get.bind(controller))
   app.patch('/care-circles/:id', controller.update.bind(controller))
+  app.delete('/care-circles/:id', controller.delete.bind(controller))
   app.get('/care-circles/:id/members', controller.listMembers.bind(controller))
   app.post('/care-circles/:id/members', controller.addMember.bind(controller))
   app.delete('/care-circles/:id/members/:memberId', controller.removeMember.bind(controller))

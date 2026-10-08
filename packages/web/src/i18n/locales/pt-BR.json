@@ -438,7 +438,8 @@
       "created": "Família criada",
       "createError": "Não foi possível criar a família",
       "loadError": "Não foi possível carregar famílias",
-      "empty": "Nenhuma família ainda — crie uma ou aceite um convite de cuidador.",
+      "empty": "Nenhuma família ainda",
+      "emptyHint": "Crie uma família ou aceite um convite de cuidador.",
       "profiles": "Perfis de saúde",
       "noProfiles": "Nenhum perfil vinculado",
       "members": "Membros",
@@ -461,7 +462,12 @@
       "unlinkError": "Não foi possível desvincular",
       "noLinkable": "Todos os seus perfis já estão nesta família.",
       "otherProfiles": "Outros perfis",
-      "sharedProfile": "Compartilhado"
+      "sharedProfile": "Compartilhado",
+      "delete": "Excluir família",
+      "deleteTitle": "Excluir esta família?",
+      "deleteConfirm": "Perfis de saúde não são apagados — só o agrupamento. Não é possível desfazer.",
+      "deleted": "Família excluída",
+      "deleteError": "Não foi possível excluir a família"
     },
     "profileShare": {
       "title": "Compartilhar perfil entre famílias",
