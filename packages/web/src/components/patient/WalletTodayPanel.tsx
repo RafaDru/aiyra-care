@@ -4,16 +4,13 @@ import {
   BellOutlined,
   CalendarOutlined,
   MedicineBoxOutlined,
-  PlusOutlined,
   ThunderboltOutlined,
-  CarryOutOutlined,
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { CareReminderRow, MonitoringTimelineRow, Patient, ScheduledEvent } from '../../lib/api.types.js'
 import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
-import { requestConsultVisitOpen } from '../../lib/clinical-export-bus.js'
 import { AvaPatientLensSelect } from '../ava/AvaPatientLensSelect.js'
 import './wallet-today-panel.css'
 
@@ -173,23 +170,6 @@ export function WalletTodayPanel({
             </Text>
           )}
         </div>
-        <Space wrap size="small">
-          <Button
-            size="small"
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => requestQuickCaptureOpen({ patientId })}
-          >
-            {t('quickCapture.trigger')}
-          </Button>
-          <Button
-            size="small"
-            icon={<CarryOutOutlined />}
-            onClick={() => requestConsultVisitOpen({ patientId })}
-          >
-            {t('walletToday.consultCta')}
-          </Button>
-        </Space>
       </div>
 
       {showPatientPicker && (
