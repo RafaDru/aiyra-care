@@ -10,14 +10,14 @@ import { uniqueQaCpf } from '../helpers/fixtures'
 const repoRoot = resolve(process.cwd(), '..', '..')
 
 test.describe('auth-entry-flow', () => {
-  test('cliente existente — landing → login → dashboard Sua família', async ({ page }) => {
+  test('cliente existente — landing → login → dashboard Quem você cuida', async ({ page }) => {
     requireQaTestCredentials()
     await page.goto('/home')
     await page.getByRole('button', { name: 'Entrar' }).first().click()
     await expect(page).toHaveURL(/\/login\?mode=login/)
     await expect(page.getByText('Bem-vindo de volta')).toBeVisible()
     await ensureQaE2eSession(page)
-    await expect(page.getByRole('heading', { name: 'Sua família' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'Quem você cuida' })).toBeVisible({ timeout: 30_000 })
   })
 
   test('novo cliente — landing → signup mode visível', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe('auth-entry-flow', () => {
       cpf: uniqueQaCpf(),
     })
 
-    await expect(page.getByRole('heading', { name: 'Sua família' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'Quem você cuida' })).toBeVisible({ timeout: 30_000 })
     await expect(page.getByText('QA Onboarding Titular')).toBeVisible()
   })
 })

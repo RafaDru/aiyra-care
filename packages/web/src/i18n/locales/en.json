@@ -347,6 +347,9 @@
       "pending": "{{count}} pending",
       "action": "Open"
     },
+    "sidebar": {
+      "pending": "{{count}} pending"
+    },
     "glossary": {
       "caregiver": "Caregiver",
       "healthProfile": "Health profile",
@@ -461,6 +464,8 @@
       "unlinkError": "Could not unlink",
       "noLinkable": "All your profiles are already in this family.",
       "otherProfiles": "Other profiles",
+      "unassigned": "No family assigned",
+      "organizeInFamily": "Organize in Family",
       "sharedProfile": "Shared"
     },
     "profileShare": {
@@ -545,6 +550,22 @@
       "footer": "Details and artifacts: docs/HUMAN_REVIEW_QUEUE.md in the repo."
     }
   },
+  "dashboard": {
+    "peopleTitle": "Who you care for",
+    "peopleSubtitle": "Health profiles in your day-to-day",
+    "groupByLabel": "Group by:",
+    "groupMode": {
+      "family": "By family",
+      "age": "By age",
+      "alpha": "A–Z"
+    },
+    "alphaSectionTitle": "All",
+    "ageBand": {
+      "children": "Children",
+      "adolescents": "Teens",
+      "adults": "Adults"
+    }
+  },
   "patient": {
     "title": "Your family",
     "new": "Add to family",
@@ -601,7 +622,9 @@
       "cardOptional": "Member ID (optional)",
       "photoLabel": "Profile photo / avatar (upload or URL)",
       "parents": "Parents/guardians",
-      "cpfInvalid": "CPF must have 11 digits"
+      "cpfInvalid": "CPF must have 11 digits",
+      "careCircle": "Family",
+      "careCirclePlaceholder": "Select a family"
     }
   },
   "sections": {

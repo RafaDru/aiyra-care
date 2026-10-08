@@ -17,7 +17,7 @@ Redundância «Sua família» (nav + título + card hub no Início); CTA «Adici
 | Fase | Entrega |
 |------|---------|
 | **P0** | Remove `DashboardFamilyShortcut`; CTA `patient.addPerson` (default button) |
-| **P1** | Título «Quem você cuida», seletor de agrupamento, badge pendências na nav, «Sem família definida» |
+| **P1** | Título «Quem você cuida», seletor de agrupamento, badge pendências na nav, «Sem família definida» — **shipped** (`dashboard-people-home`) |
 | **P2** | Cores por família, telemetria, polish mobile |
 
 ## P0 neste PR
