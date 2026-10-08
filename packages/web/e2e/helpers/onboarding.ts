@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import { selectAntOption } from './select'
+import { clickAntSelectOption } from './select'
 
 const COOKIE_CONSENT_VERSION = '1.0'
 
@@ -8,6 +8,8 @@ export async function primeE2eClientStorage(page: Page) {
   await page.addInitScript((version) => {
     localStorage.setItem('aiyracare_cookie_consent', version)
     localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
+    sessionStorage.removeItem('aiyracare.onboarding_wizard_step')
+    sessionStorage.removeItem('aiyracare.onboarding_family_wizard')
   }, COOKIE_CONSENT_VERSION)
 }
 
@@ -27,45 +29,99 @@ export type OnboardingProfileInput = {
 
 async function fillMaskedDate(page: Page, label: RegExp, value: string) {
   const input = page.getByLabel(label, { exact: false })
+  await input.click({ clickCount: 3 })
   await input.fill(value, { force: true })
   await input.press('Tab')
+  await expect(input).toHaveValue(value, { timeout: 10_000 })
 }
 
-export async function completeOnboardingProfile(page: Page, profile: OnboardingProfileInput) {
-  await page
-    .getByRole('heading', { name: /Vamos começar pelo seu perfil|Let's start with your profile/i })
-    .waitFor({ timeout: 25_000 })
-  await dismissCookieBanner(page)
-
-  const nameInput = page.getByRole('textbox', { name: /Nome completo|Full name/i })
+async function selectBrazilianState(page: Page, uf: string) {
   await expect(async () => {
+    const trigger = page
+      .getByTestId('onboarding-address-state')
+      .or(page.getByRole('combobox', { name: /Estado|State/i }))
+    await trigger.click()
+    await page.keyboard.type(uf, { delay: 40 })
+    await page.keyboard.press('Enter')
+    await expect(trigger).toContainText(uf, { timeout: 5_000 })
+  }).toPass({ timeout: 25_000 })
+}
+
+async function skipConnectorSteps(page: Page) {
+  for (const kind of ['sus', 'plans', 'labs', 'hospitals']) {
+    const step = page.getByTestId(`onboarding-connector-${kind}`)
+    await step.waitFor({ state: 'visible', timeout: 25_000 })
+    await page.getByTestId(`onboarding-connector-skip-${kind}`).click()
+  }
+}
+
+async function fillIdentityStep(page: Page, profile: OnboardingProfileInput) {
+  await expect(async () => {
+    const nameInput = page.getByTestId('onboarding-profile-name')
     await nameInput.click()
     await nameInput.fill(profile.name)
     await expect(nameInput).toHaveValue(profile.name)
-  }).toPass({ timeout: 15_000 })
 
-  await fillMaskedDate(page, /Data de nascimento|Date of birth/i, profile.birthDate)
-  await selectAntOption(page, /Sexo|Gender/i, profile.genderLabel)
-  await page.getByRole('textbox', { name: /^CPF$/i }).fill(profile.cpf)
+    const birthInput = page.getByTestId('onboarding-profile-birthdate')
+    await birthInput.click({ clickCount: 3 })
+    await birthInput.fill(profile.birthDate, { force: true })
+    await birthInput.press('Tab')
+    await expect(birthInput).toHaveValue(profile.birthDate, { timeout: 5_000 })
+
+    await clickAntSelectOption(page, page.getByTestId('onboarding-gender-select'), profile.genderLabel)
+    await page.getByTestId('onboarding-profile-cpf').fill(profile.cpf)
+
+    await page.getByTestId('onboarding-identity-continue').click()
+    const cepVisible = await page.getByTestId('onboarding-address-cep').isVisible().catch(() => false)
+    if (cepVisible) return
+    const errors = await page.locator('.ant-form-item-explain-error').allTextContents()
+    if (errors.length > 0) {
+      throw new Error(`Identity validation: ${errors.join('; ')}`)
+    }
+    await expect(page.getByTestId('onboarding-address-cep')).toBeVisible({ timeout: 5_000 })
+  }).toPass({ timeout: 60_000 })
+}
+
+async function fillAddressContactStep(page: Page) {
+  await page.getByTestId('onboarding-address-cep').waitFor({ state: 'visible', timeout: 25_000 })
+  const cepField = page.getByTestId('onboarding-address-cep')
+  await cepField.locator('input').first().fill('30130-010')
+  await page.getByTestId('onboarding-address-street').fill('Rua Teste Onboarding')
+  await page.getByTestId('onboarding-address-number').fill('100')
+  await page.getByTestId('onboarding-address-district').fill('Centro')
+  await page.getByTestId('onboarding-address-city').fill('Belo Horizonte')
+  await selectBrazilianState(page, 'MG')
+  await page.getByTestId('onboarding-contact-mobile').fill('31999998888')
+
+  const submit = page.getByTestId('onboarding-profile-submit')
+  await expect(submit).toBeEnabled({ timeout: 5_000 })
 
   const profileSave = page.waitForResponse(
     (r) => r.url().includes('/auth/complete-profile') && r.request().method() === 'POST',
     { timeout: 35_000 },
   )
-  await page.getByRole('button', { name: /Continuar|Continue/i }).click()
+  await submit.click()
   const saveResponse = await profileSave
   if (!saveResponse.ok()) {
     const body = await saveResponse.text().catch(() => '')
     throw new Error(`complete-profile HTTP ${saveResponse.status()}: ${body.slice(0, 240)}`)
   }
+}
 
-  await page.getByTestId('onboarding-step-family-name').waitFor({ state: 'visible', timeout: 25_000 })
+async function completeFamilyAndConnectors(page: Page) {
+  const familyNameStep = page.getByTestId('onboarding-step-family-name')
+  await familyNameStep.waitFor({ state: 'visible', timeout: 25_000 })
+  const familyNameInput = familyNameStep.getByLabel(/Nome da família|Family name/i)
+  await expect(familyNameInput).not.toHaveValue('', { timeout: 15_000 })
+  if (!(await familyNameInput.inputValue()).trim()) {
+    await familyNameInput.fill('Família QA E2E')
+  }
 
   const circleCreate = page.waitForResponse(
     (r) => r.url().includes('/care-circles') && r.request().method() === 'POST',
     { timeout: 35_000 },
   )
-  await page.getByRole('button', { name: /Continuar|Continue/i }).click()
+  await familyNameStep.getByRole('button', { name: /Continuar|Continue/i }).click()
   const circleResponse = await circleCreate
   if (!circleResponse.ok()) {
     const body = await circleResponse.text().catch(() => '')
@@ -74,5 +130,40 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
 
   await page.getByTestId('onboarding-step-family-members').waitFor({ state: 'visible', timeout: 25_000 })
   await page.getByRole('button', { name: /Pular pessoas por agora|Skip people for now/i }).click()
+
+  await skipConnectorSteps(page)
+
   await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 25_000 })
+}
+
+export async function completeOnboardingProfile(page: Page, profile: OnboardingProfileInput) {
+  await dismissCookieBanner(page)
+
+  const profileHeading = page.getByRole('heading', {
+    name: /Vamos começar pelo seu perfil|Let's start with your profile/i,
+  })
+  const addressHeading = page.getByRole('heading', { name: /Onde você mora|Where you live/i })
+  const familyName = page.getByTestId('onboarding-step-family-name')
+
+  await Promise.race([
+    profileHeading.waitFor({ state: 'visible', timeout: 25_000 }),
+    addressHeading.waitFor({ state: 'visible', timeout: 25_000 }),
+    familyName.waitFor({ state: 'visible', timeout: 25_000 }),
+    page.getByTestId('onboarding-wizard-steps').waitFor({ state: 'visible', timeout: 25_000 }),
+  ])
+
+  const onIdentityForm = await page.getByTestId('onboarding-profile-name').isVisible().catch(() => false)
+
+  if ((await profileHeading.isVisible().catch(() => false)) || onIdentityForm) {
+    await fillIdentityStep(page, profile)
+    await fillAddressContactStep(page)
+  } else if (await addressHeading.isVisible().catch(() => false)) {
+    await fillAddressContactStep(page)
+  }
+
+  if (!(await familyName.isVisible().catch(() => false))) {
+    await familyName.waitFor({ state: 'visible', timeout: 25_000 })
+  }
+
+  await completeFamilyAndConnectors(page)
 }

@@ -3,23 +3,26 @@ import { resolve } from 'path'
 import { test, expect } from '@playwright/test'
 import { requireOnboardingCredentials } from './helpers/env'
 import { loginViaPassword } from './helpers/auth'
-import { completeOnboardingProfile } from './helpers/onboarding'
+import { completeOnboardingProfile, primeE2eClientStorage } from './helpers/onboarding'
 import { uniqueQaCpf } from './helpers/fixtures'
 import { waitForDashboardReady } from './helpers/dashboard'
 
 const repoRoot = resolve(process.cwd(), '..', '..')
 
 test.describe('onboarding', () => {
+  test.describe.configure({ timeout: 180_000 })
+
   test.beforeEach(() => {
     requireOnboardingCredentials()
   })
 
   test('login → perfil titular → dashboard', async ({ page }) => {
-    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })
+    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot })
     const { email, password } = requireOnboardingCredentials()
 
+    await primeE2eClientStorage(page)
     await loginViaPassword(page, email, password)
-    await page.waitForURL(/\/(onboarding|$)/, { timeout: 30_000 })
+    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30_000 })
 
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
@@ -34,9 +37,10 @@ test.describe('onboarding', () => {
 
     await waitForDashboardReady(page)
 
-    await expect(page.getByRole('heading', { name: 'QA Onboarding Titular' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /Quem você cuida|Who you care for/i })).toBeVisible({
       timeout: 30_000,
     })
+    await expect(page.getByText('QA Onboarding Titular')).toBeVisible({ timeout: 30_000 })
 
     const welcome = page.getByTestId('post-onboarding-welcome')
     await expect(welcome).toBeVisible({ timeout: 10_000 })
@@ -46,15 +50,16 @@ test.describe('onboarding', () => {
   })
 
   test('Ver primeiros passos abre tour com tour_completed antigo no localStorage', async ({ page }) => {
-    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })
+    execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot })
     const { email, password } = requireOnboardingCredentials()
 
+    await primeE2eClientStorage(page)
     await page.addInitScript(() => {
       localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
     })
 
     await loginViaPassword(page, email, password)
-    await page.waitForURL(/\/(onboarding|$)/, { timeout: 30_000 })
+    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30_000 })
 
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')

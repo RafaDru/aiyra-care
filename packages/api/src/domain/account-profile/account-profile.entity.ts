@@ -10,6 +10,11 @@ export interface AccountProfileProps {
   gender?: string | null
   city?: string | null
   state?: string | null
+  postalCode?: string | null
+  street?: string | null
+  streetNumber?: string | null
+  addressComplement?: string | null
+  district?: string | null
   country?: string
   timezone?: string | null
   locale?: string | null
@@ -33,6 +38,11 @@ export interface AccountProfileData {
   gender: string | null
   city: string | null
   state: string | null
+  postalCode: string | null
+  street: string | null
+  streetNumber: string | null
+  addressComplement: string | null
+  district: string | null
   country: string
   timezone: string | null
   locale: string | null
@@ -62,6 +72,11 @@ export class AccountProfile {
       gender: null,
       city: null,
       state: null,
+      postalCode: null,
+      street: null,
+      streetNumber: null,
+      addressComplement: null,
+      district: null,
       country: 'BR',
       timezone: null,
       locale: null,
@@ -91,6 +106,11 @@ export class AccountProfile {
   get gender(): string | null { return this.data.gender }
   get city(): string | null { return this.data.city }
   get state(): string | null { return this.data.state }
+  get postalCode(): string | null { return this.data.postalCode }
+  get street(): string | null { return this.data.street }
+  get streetNumber(): string | null { return this.data.streetNumber }
+  get addressComplement(): string | null { return this.data.addressComplement }
+  get district(): string | null { return this.data.district }
   get country(): string { return this.data.country }
   get timezone(): string | null { return this.data.timezone }
   get locale(): string | null { return this.data.locale }
@@ -114,6 +134,11 @@ export class AccountProfile {
       gender: props.gender !== undefined ? props.gender ?? null : this.data.gender,
       city: props.city !== undefined ? props.city ?? null : this.data.city,
       state: props.state !== undefined ? props.state ?? null : this.data.state,
+      postalCode: props.postalCode !== undefined ? props.postalCode ?? null : this.data.postalCode,
+      street: props.street !== undefined ? props.street ?? null : this.data.street,
+      streetNumber: props.streetNumber !== undefined ? props.streetNumber ?? null : this.data.streetNumber,
+      addressComplement: props.addressComplement !== undefined ? props.addressComplement ?? null : this.data.addressComplement,
+      district: props.district !== undefined ? props.district ?? null : this.data.district,
       country: props.country ?? this.data.country,
       timezone: props.timezone !== undefined ? props.timezone ?? null : this.data.timezone,
       locale: props.locale !== undefined ? props.locale ?? null : this.data.locale,

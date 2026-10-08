@@ -6,22 +6,15 @@ import { isAdult, validateBirthDateField } from '../onboarding-validation.js'
 
 const { Title, Text } = Typography
 
-export type ProfileStepValues = {
-  name: string
-  socialName?: string
-  birthDate: { toDate: () => Date }
-  gender: 'male' | 'female'
-  cpf: string
-  cns?: string
-}
+import type { OnboardingProfileFormValues } from '../profile-form.types.js'
 
 type ProfileStepProps = {
-  form: FormInstance<ProfileStepValues>
+  form: FormInstance<OnboardingProfileFormValues>
   submitting: boolean
-  onFinish: (values: ProfileStepValues) => void
+  onContinue: () => void
 }
 
-export function ProfileStep({ form, submitting, onFinish }: ProfileStepProps) {
+export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) {
   const { t } = useTranslation()
 
   return (
@@ -29,9 +22,9 @@ export function ProfileStep({ form, submitting, onFinish }: ProfileStepProps) {
       <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.welcomeTitle')}</Title>
       <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.welcomeSubtitle')}</Text>
 
-      <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
+      <Form form={form} layout="vertical" onFinish={onContinue} requiredMark={false} preserve>
         <Form.Item name="name" label={t('onboarding.name')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
-          <Input size="large" autoComplete="name" />
+          <Input size="large" autoComplete="name" data-testid="onboarding-profile-name" />
         </Form.Item>
         <Form.Item
           name="socialName"
@@ -55,12 +48,13 @@ export function ProfileStep({ form, submitting, onFinish }: ProfileStepProps) {
             },
           ]}
         >
-          <MaskedDatePicker style={{ width: '100%' }} />
+          <MaskedDatePicker style={{ width: '100%' }} data-testid="onboarding-profile-birthdate" />
         </Form.Item>
         <Form.Item name="gender" label={t('onboarding.gender')} rules={[{ required: true, message: t('onboarding.genderRequired') }]}>
           <Select
             size="large"
             placeholder={t('onboarding.genderPlaceholder')}
+            data-testid="onboarding-gender-select"
             options={[
               { value: 'male', label: t('patient.male') },
               { value: 'female', label: t('patient.female') },
@@ -78,13 +72,21 @@ export function ProfileStep({ form, submitting, onFinish }: ProfileStepProps) {
           <Input
             placeholder="000.000.000-00"
             maxLength={14}
+            data-testid="onboarding-profile-cpf"
             onChange={(e) => form.setFieldValue('cpf', formatCpfInput(e.target.value))}
           />
         </Form.Item>
         <Form.Item name="cns" label={t('onboarding.cnsLabel')} extra={t('onboarding.cnsHint')}>
           <Input placeholder={t('onboarding.cnsPlaceholder')} maxLength={15} />
         </Form.Item>
-        <Button type="primary" htmlType="submit" block size="large" loading={submitting}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          size="large"
+          loading={submitting}
+          data-testid="onboarding-identity-continue"
+        >
           {t('onboarding.continue')}
         </Button>
       </Form>
