@@ -1,0 +1,24 @@
+/* Evita coluna flex full-width entre nome e tag «Você» no dropdown do Select. */
+.ava-patient-lens-select .ant-select-item-option-content {
+  display: block;
+}
+
+.ava-patient-lens-select__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.ava-patient-lens-select__option-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ava-patient-lens-select__selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}

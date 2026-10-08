@@ -30,7 +30,7 @@ Botão **Registro rápido** no header da aplicação abre um sheet com cinco tip
 
 | Tipo | Referência |
 |------|------------|
-| UI | `QuickCaptureGlobal.tsx`, `QuickCaptureSheet.tsx`, `AppLayout.tsx` |
+| UI | `QuickCaptureGlobal.tsx`, `QuickCaptureSheet.tsx`, `HeaderOrderRequestsMenu.tsx`, `AppLayout.tsx` |
 | Bus | `quick-capture-bus.ts` — `requestQuickCaptureOpen` |
 | API | `POST /health-threads/:id/entries`, `POST /measurements/batch`, `POST /medication-administrations`, `POST /scheduled-events`, `POST /documents/upload` |
 | Telemetria | `quick_capture_opened`, `quick_capture_saved` (`capture_kind`) |

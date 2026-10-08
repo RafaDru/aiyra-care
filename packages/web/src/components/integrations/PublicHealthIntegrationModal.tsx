@@ -109,7 +109,9 @@ export function PublicHealthIntegrationModal({
         setResult(data)
         const session = await api.account.govbrSession().catch(() => null)
         if (session) setGovbrSession(session)
-        message.success(`${data.vaccines.length} vacinas, ${data.exams.length} exames encontrados`)
+        message.success(
+          t('toast.importCountsFound', { vaccines: data.vaccines.length, exams: data.exams.length }),
+        )
       } else {
         setLoading(true)
         setError(null)
@@ -135,7 +137,7 @@ export function PublicHealthIntegrationModal({
       }
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      setError(err instanceof Error ? err.message : 'Erro ao conectar')
+      setError(err instanceof Error ? err.message : t('toast.connectError'))
     } finally {
       setLoading(false)
     }
@@ -209,12 +211,14 @@ export function PublicHealthIntegrationModal({
         const parts: string[] = []
         if (importedVaccines) parts.push(`${importedVaccines} vacinas`)
         if (importedExams) parts.push(`${importedExams} exames`)
-        message.success(parts.length ? `Importados ${parts.join(' e ')}` : 'Nenhum dado novo para importar')
+        message.success(
+          parts.length ? t('toast.importCountsDone', { parts: parts.join(' e ') }) : t('toast.importNothingNew'),
+        )
       }
       onImported?.()
       handleClose()
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro ao importar dados')
+      message.error(err instanceof Error ? err.message : t('toast.importDataError'))
     } finally {
       setImporting(false)
     }

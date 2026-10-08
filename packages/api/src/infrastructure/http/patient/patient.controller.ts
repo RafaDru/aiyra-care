@@ -5,6 +5,7 @@ import type { LegalComplianceService } from '../../../application/legal-complian
 import type { DataGenerationService } from '../../../application/data-generation/data-generation.service.js'
 import type { PatientMembershipRepository } from '../../../domain/auth/app-account.repository.js'
 import { isMinorBirthDate } from '../../../domain/patient/patient-age.js'
+import { isValidSelfProfileCpf, SELF_PROFILE_CPF_REQUIRED_MESSAGE } from '../../../domain/patient/self-profile-cpf.js'
 import { writeSseResponseHead } from '../sse-response.helper.js'
 
 function enrichPatientJson(
@@ -247,6 +248,16 @@ export class PatientController {
     if (!assertPatientAccess(req, reply, params.data.id)) return
     const body = updatePatientSchema.safeParse(req.body)
     if (!body.success) return reply.status(400).send({ error: body.error.flatten() })
+    if (req.accountId && this.memberships) {
+      const roleMap = await this.memberships.listRolesForAccount(req.accountId)
+      if (roleMap[params.data.id] === 'self') {
+        const existing = await this.service.findById(params.data.id)
+        const nextCpf = body.data.cpf !== undefined ? body.data.cpf : existing.cpf
+        if (!isValidSelfProfileCpf(nextCpf)) {
+          return reply.status(400).send({ message: SELF_PROFILE_CPF_REQUIRED_MESSAGE })
+        }
+      }
+    }
     try {
       const patient = await this.service.update(params.data.id, body.data)
       return reply.send(patient.toJSON())

@@ -4,16 +4,13 @@ import {
   BellOutlined,
   CalendarOutlined,
   MedicineBoxOutlined,
-  PlusOutlined,
   ThunderboltOutlined,
-  CarryOutOutlined,
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { CareReminderRow, MonitoringTimelineRow, Patient, ScheduledEvent } from '../../lib/api.types.js'
 import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
-import { requestConsultVisitOpen } from '../../lib/clinical-export-bus.js'
 import { AvaPatientLensSelect } from '../ava/AvaPatientLensSelect.js'
 import './wallet-today-panel.css'
 
@@ -67,6 +64,7 @@ export function WalletTodayPanel({
   const lensPatients = patients ?? []
   const showPatientPicker = lensPatients.length > 1 && Boolean(onPatientChange)
   const activePatient = lensPatients.find((p) => p.id === patientId) ?? null
+  const viewingSelf = Boolean(activePatient?.isSelf)
   const followingName = activePatient?.name.trim().split(/\s+/)[0] ?? activePatient?.name
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<TodayItem[]>([])
@@ -163,39 +161,31 @@ export function WalletTodayPanel({
     <Card className="wallet-today-panel" size="small">
       <div className="wallet-today-panel__header">
         <div>
-          <Title level={5} style={{ margin: 0 }}>{t('walletToday.title')}</Title>
+          <Title level={5} style={{ margin: 0 }}>
+            {viewingSelf ? t('walletToday.titleSelf') : t('walletToday.title')}
+          </Title>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            {t('walletToday.subtitle', { date: dayjs().format('dddd, DD/MM') })}
+            {viewingSelf
+              ? t('walletToday.subtitleSelf', { date: dayjs().format('dddd, DD/MM') })
+              : t('walletToday.subtitle', { date: dayjs().format('dddd, DD/MM') })}
           </Text>
-          {lensPatients.length === 1 && followingName && (
+          {lensPatients.length === 1 && followingName && !viewingSelf && (
+            <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 2 }}>
+              {t('walletToday.followingLine', { name: followingName })}
+            </Text>
+          )}
+          {showPatientPicker && followingName && !viewingSelf && (
             <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 2 }}>
               {t('walletToday.followingLine', { name: followingName })}
             </Text>
           )}
         </div>
-        <Space wrap size="small">
-          <Button
-            size="small"
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => requestQuickCaptureOpen({ patientId })}
-          >
-            {t('quickCapture.trigger')}
-          </Button>
-          <Button
-            size="small"
-            icon={<CarryOutOutlined />}
-            onClick={() => requestConsultVisitOpen({ patientId })}
-          >
-            {t('walletToday.consultCta')}
-          </Button>
-        </Space>
       </div>
 
       {showPatientPicker && (
         <div style={{ marginBottom: 12 }}>
           <Text type="secondary" style={{ display: 'block', marginBottom: 6, fontSize: 12 }}>
-            {t('walletToday.lensLabel')}
+            {viewingSelf ? t('walletToday.lensLabelSelf') : t('walletToday.lensLabel')}
           </Text>
           <AvaPatientLensSelect
             patients={lensPatients}
@@ -211,7 +201,7 @@ export function WalletTodayPanel({
       ) : items.length === 0 ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={t('walletToday.empty')}
+          description={viewingSelf ? t('walletToday.emptySelf') : t('walletToday.empty')}
           style={{ margin: '12px 0 4px' }}
         >
           <Button type="link" size="small" onClick={() => requestQuickCaptureOpen({ patientId, kind: 'note' })}>

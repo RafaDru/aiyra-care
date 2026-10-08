@@ -1,68 +1,201 @@
+/** Clinical export / consult visit UI — resolved via i18n (pt-BR / en). */
+
+import i18n from '../../i18n/index.js'
+
+const PREFIX = 'clinicalExport.'
+
+function exp(key: string): string {
+  return i18n.t(`${PREFIX}${key}`)
+}
+
 export const CLINICAL_EXPORT_COPY = {
-  title: 'Resumo para consulta médica',
-  subtitle: 'AiyraCare — histórico consolidado do paciente',
-  printButton: 'Imprimir / salvar PDF',
-  closeButton: 'Fechar',
-  previewTitle: 'Pré-visualização do resumo',
-  sectionAlerts: 'Alertas',
-  sectionPendencies: 'Pendências',
-  sectionFollowUp: 'Em acompanhamento',
-  sectionPlans: 'Planos de saúde',
-  sectionTimeline: 'Eventos recentes',
-  sectionSummary: 'Resumo',
-  footerDisclaimer:
-    'Documento gerado automaticamente a partir dos registros do cuidador. Não substitui prontuário oficial do serviço de saúde. Revise com o paciente antes da consulta.',
-  generatedAt: 'Gerado em',
-  noPendencies: 'Sem pendências registradas.',
-  noFollowUp: 'Sem acompanhamentos ativos.',
-  noTimeline: 'Sem eventos recentes no período.',
-  noPlans: 'Sem planos ativos registrados.',
-  shareButton: 'Compartilhar link',
-  shareCopied: 'Link copiado',
-  shareTitle: 'Link temporário para o médico',
-  consultVisitTitle: 'Levar na consulta',
-  consultVisitSubtitle: 'Compartilhe um resumo com o médico — link válido por 48 horas.',
-  consultVisitModeSummary: 'Para consulta',
-  consultVisitModeSummaryHint: 'Alertas, medicamentos, eventos recentes — recomendado',
-  consultVisitModeFull: 'Completo',
-  consultVisitModeFullHint: 'Inclui exames, laudos e autorizações',
-  consultVisitCopyLink: 'Copiar link',
-  consultVisitShowQr: 'QR Code para o médico',
-  consultVisitPrint: 'Salvar PDF / imprimir',
-  consultVisitWhatsapp: 'Enviar no WhatsApp',
-  consultVisitExpires: 'Válido até',
-  consultVisitPreview: 'Ver pré-visualização completa',
-  consultVisitQrHint: 'O médico escaneia na recepção — abre no celular sem instalar app.',
-  consultVisitWhatsappHint: 'Abre o WhatsApp com o link pronto para enviar.',
-  consultVisitEmailTitle: 'Enviar por e-mail ao médico',
-  consultVisitEmailLabel: 'E-mail do médico',
-  consultVisitDoctorNameLabel: 'Nome do médico (opcional)',
-  consultVisitEmailSend: 'Enviar e-mail',
-  consultVisitEmailSent: 'E-mail enviado ao médico',
-  consultVisitEmailQueued: 'Link preparado — e-mail será enviado em breve',
-  consultVisitReferralHint:
-    'O link inclui seu código de indicação AiyraCare — ajuda a reconhecer quem compartilhou.',
-  consultVisitReferralCode: 'Seu código:',
-  exportFullTitle: 'Prontuário completo para consulta',
-  sectionAllergies: 'Alergias',
-  sectionMedications: 'Medicamentos',
-  sectionVaccines: 'Vacinas',
-  sectionDiagnoses: 'Diagnósticos',
-  sectionDocuments: 'Arquivos',
-  sectionAuthorizations: 'Autorizações',
-  sectionMedicalRecords: 'Consultas e utilização',
-  sectionExams: 'Exames',
-  clinicianPortalTitle: 'Portal do médico',
-  clinicianPortalSubtitle: 'Resumo compartilhado pelo cuidador para apoiar a consulta',
-  clinicianPortalDisclaimer:
-    'Documento gerado automaticamente a partir dos registros do cuidador. Não substitui prontuário oficial. Revise com o paciente ou responsável.',
-  clinicianPortalModeSummary: 'Resumo para consulta',
-  clinicianPortalModeFull: 'Prontuário completo',
-  clinicianPortalCtaTitle: 'AiyraCare para consultórios',
-  clinicianPortalCtaBody: 'Receba resumos estruturados dos seus pacientes — sem instalar app no consultório.',
-  clinicianPortalCtaButton: 'Conhecer o AiyraCare',
-  clinicianFeedbackPrompt: 'Este resumo foi útil para a consulta?',
-  clinicianFeedbackYes: 'Sim, ajudou',
-  clinicianFeedbackNo: 'Pouco útil',
-  clinicianFeedbackThanks: 'Obrigado pelo retorno.',
+  get title() {
+    return exp('title')
+  },
+  get subtitle() {
+    return exp('subtitle')
+  },
+  get printButton() {
+    return exp('printButton')
+  },
+  get closeButton() {
+    return exp('closeButton')
+  },
+  get previewTitle() {
+    return exp('previewTitle')
+  },
+  get sectionAlerts() {
+    return exp('sectionAlerts')
+  },
+  get sectionPendencies() {
+    return exp('sectionPendencies')
+  },
+  get sectionFollowUp() {
+    return exp('sectionFollowUp')
+  },
+  get sectionPlans() {
+    return exp('sectionPlans')
+  },
+  get sectionTimeline() {
+    return exp('sectionTimeline')
+  },
+  get sectionSummary() {
+    return exp('sectionSummary')
+  },
+  get footerDisclaimer() {
+    return exp('footerDisclaimer')
+  },
+  get generatedAt() {
+    return exp('generatedAt')
+  },
+  get noPendencies() {
+    return exp('noPendencies')
+  },
+  get noFollowUp() {
+    return exp('noFollowUp')
+  },
+  get noTimeline() {
+    return exp('noTimeline')
+  },
+  get noPlans() {
+    return exp('noPlans')
+  },
+  get shareButton() {
+    return exp('shareButton')
+  },
+  get shareCopied() {
+    return exp('shareCopied')
+  },
+  get shareTitle() {
+    return exp('shareTitle')
+  },
+  get consultVisitTitle() {
+    return exp('consultVisitTitle')
+  },
+  get consultVisitSubtitle() {
+    return exp('consultVisitSubtitle')
+  },
+  get consultVisitModeSummary() {
+    return exp('consultVisitModeSummary')
+  },
+  get consultVisitModeSummaryHint() {
+    return exp('consultVisitModeSummaryHint')
+  },
+  get consultVisitModeFull() {
+    return exp('consultVisitModeFull')
+  },
+  get consultVisitModeFullHint() {
+    return exp('consultVisitModeFullHint')
+  },
+  get consultVisitCopyLink() {
+    return exp('consultVisitCopyLink')
+  },
+  get consultVisitShowQr() {
+    return exp('consultVisitShowQr')
+  },
+  get consultVisitPrint() {
+    return exp('consultVisitPrint')
+  },
+  get consultVisitWhatsapp() {
+    return exp('consultVisitWhatsapp')
+  },
+  get consultVisitExpires() {
+    return exp('consultVisitExpires')
+  },
+  get consultVisitPreview() {
+    return exp('consultVisitPreview')
+  },
+  get consultVisitQrHint() {
+    return exp('consultVisitQrHint')
+  },
+  get consultVisitWhatsappHint() {
+    return exp('consultVisitWhatsappHint')
+  },
+  get consultVisitEmailTitle() {
+    return exp('consultVisitEmailTitle')
+  },
+  get consultVisitEmailLabel() {
+    return exp('consultVisitEmailLabel')
+  },
+  get consultVisitDoctorNameLabel() {
+    return exp('consultVisitDoctorNameLabel')
+  },
+  get consultVisitEmailSend() {
+    return exp('consultVisitEmailSend')
+  },
+  get consultVisitEmailSent() {
+    return exp('consultVisitEmailSent')
+  },
+  get consultVisitEmailQueued() {
+    return exp('consultVisitEmailQueued')
+  },
+  get consultVisitReferralHint() {
+    return exp('consultVisitReferralHint')
+  },
+  get consultVisitReferralCode() {
+    return exp('consultVisitReferralCode')
+  },
+  get exportFullTitle() {
+    return exp('exportFullTitle')
+  },
+  get sectionAllergies() {
+    return exp('sectionAllergies')
+  },
+  get sectionMedications() {
+    return exp('sectionMedications')
+  },
+  get sectionVaccines() {
+    return exp('sectionVaccines')
+  },
+  get sectionDiagnoses() {
+    return exp('sectionDiagnoses')
+  },
+  get sectionDocuments() {
+    return exp('sectionDocuments')
+  },
+  get sectionAuthorizations() {
+    return exp('sectionAuthorizations')
+  },
+  get sectionMedicalRecords() {
+    return exp('sectionMedicalRecords')
+  },
+  get sectionExams() {
+    return exp('sectionExams')
+  },
+  get clinicianPortalTitle() {
+    return exp('clinicianPortalTitle')
+  },
+  get clinicianPortalSubtitle() {
+    return exp('clinicianPortalSubtitle')
+  },
+  get clinicianPortalDisclaimer() {
+    return exp('clinicianPortalDisclaimer')
+  },
+  get clinicianPortalModeSummary() {
+    return exp('clinicianPortalModeSummary')
+  },
+  get clinicianPortalModeFull() {
+    return exp('clinicianPortalModeFull')
+  },
+  get clinicianPortalCtaTitle() {
+    return exp('clinicianPortalCtaTitle')
+  },
+  get clinicianPortalCtaBody() {
+    return exp('clinicianPortalCtaBody')
+  },
+  get clinicianPortalCtaButton() {
+    return exp('clinicianPortalCtaButton')
+  },
+  get clinicianFeedbackPrompt() {
+    return exp('clinicianFeedbackPrompt')
+  },
+  get clinicianFeedbackYes() {
+    return exp('clinicianFeedbackYes')
+  },
+  get clinicianFeedbackNo() {
+    return exp('clinicianFeedbackNo')
+  },
+  get clinicianFeedbackThanks() {
+    return exp('clinicianFeedbackThanks')
+  },
 }

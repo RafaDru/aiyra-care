@@ -82,13 +82,13 @@ export function RegisterAmilDependentModal({
       onClose()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      message.error(err instanceof Error ? err.message : 'Erro ao cadastrar')
+      message.error(err instanceof Error ? err.message : t('toast.registerDependentError'))
     }
   }
 
   return (
     <Modal
-      title="Cadastrar dependente do plano"
+      title={t('modals.registerAmilDependent')}
       open={open}
       onOk={handleOk}
       onCancel={onClose}
@@ -111,7 +111,7 @@ export function RegisterAmilDependentModal({
           <MaskedDatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="cpf" label="CPF">
-          <Input placeholder="000.000.000-00" maxLength={14} />
+          <Input placeholder={t('form.cpfMask')} maxLength={14} />
         </Form.Item>
         <Form.Item name="cns" label="CNS">
           <Input maxLength={15} />

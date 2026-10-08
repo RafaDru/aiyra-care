@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-function createSessionStorageMock() {
+function createStorageMock() {
   const store = new Map<string, string>()
   return {
     getItem: (key: string) => (store.has(key) ? store.get(key)! : null),
@@ -17,7 +17,8 @@ function createSessionStorageMock() {
 describe('onboarding-wizard-storage', () => {
   beforeEach(() => {
     vi.stubGlobal('window', {})
-    vi.stubGlobal('sessionStorage', createSessionStorageMock())
+    vi.stubGlobal('sessionStorage', createStorageMock())
+    vi.stubGlobal('localStorage', createStorageMock())
     vi.resetModules()
   })
 
@@ -63,6 +64,15 @@ describe('onboarding-wizard-storage', () => {
     expect(mod.isOnboardingJustCompleted()).toBe(true)
     mod.clearOnboardingJustCompleted()
     expect(mod.isOnboardingJustCompleted()).toBe(false)
+  })
+
+  it('clears stale first-visit tour completed on markOnboardingJustCompleted', async () => {
+    const tour = await import('../src/lib/first-visit-tour-storage.js')
+    tour.markFirstVisitTourCompleted()
+    expect(tour.isFirstVisitTourCompleted()).toBe(true)
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    mod.markOnboardingJustCompleted()
+    expect(tour.isFirstVisitTourCompleted()).toBe(false)
   })
 
   it('consumes just-completed flag once (legacy)', async () => {

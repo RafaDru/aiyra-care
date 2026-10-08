@@ -127,7 +127,7 @@ export function ExamsTab({ patientId, highlightEntityId }: Props) {
     try {
       await openAuthenticatedDownload(path)
     } catch (e) {
-      message.error(e instanceof Error ? e.message : 'Erro ao abrir arquivo')
+      message.error(e instanceof Error ? e.message : t('toast.openFileError'))
     }
   }
 

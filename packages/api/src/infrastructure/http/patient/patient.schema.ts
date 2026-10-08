@@ -1,11 +1,24 @@
 import { z } from 'zod'
+<<<<<<< HEAD
+import { validatePatientBirthDate } from '../../../domain/patient/birth-date-rules.js'
+=======
+import { isMinorBirthDate } from '../../../domain/patient/age-rules.js'
+import { isValidSelfProfileCpf, SELF_PROFILE_CPF_REQUIRED_MESSAGE } from '../../../domain/patient/self-profile-cpf.js'
+>>>>>>> origin/main
 
 const genderEnum = z.enum(['male', 'female'])
+
+const patientBirthDateSchema = z.coerce.date().superRefine((d, ctx) => {
+  const message = validatePatientBirthDate(d)
+  if (message) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message })
+  }
+})
 const bloodTypeEnum = z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
 
-export const createPatientSchema = z.object({
+export const createPatientObjectSchema = z.object({
   name: z.string().min(1).max(255),
-  birthDate: z.coerce.date(),
+  birthDate: patientBirthDateSchema,
   gender: genderEnum.optional(),
   bloodType: bloodTypeEnum.optional(),
   weightKg: z.number().positive().max(999.99).optional(),
@@ -18,9 +31,20 @@ export const createPatientSchema = z.object({
   markAsSelf: z.boolean().optional(),
 })
 
+export const createPatientSchema = createPatientObjectSchema.superRefine((data, ctx) => {
+  const wantsSelf = Boolean(data.markAsSelf) && !isMinorBirthDate(data.birthDate)
+  if (wantsSelf && !isValidSelfProfileCpf(data.cpf)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: SELF_PROFILE_CPF_REQUIRED_MESSAGE,
+      path: ['cpf'],
+    })
+  }
+})
+
 export const updatePatientSchema = z.object({
   name: z.string().min(1).max(255).optional(),
-  birthDate: z.coerce.date().optional(),
+  birthDate: patientBirthDateSchema.optional(),
   gender: genderEnum.optional(),
   bloodType: bloodTypeEnum.optional(),
   weightKg: z.number().positive().max(999.99).optional(),
