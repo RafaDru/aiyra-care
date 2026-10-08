@@ -2,7 +2,17 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { SettingOutlined, LogoutOutlined, UserOutlined, DashboardOutlined, PhoneOutlined, RadarChartOutlined, CustomerServiceOutlined, TeamOutlined } from '@ant-design/icons'
+import {
+  SettingOutlined,
+  LogoutOutlined,
+  UserOutlined,
+  DashboardOutlined,
+  PhoneOutlined,
+  RadarChartOutlined,
+  CustomerServiceOutlined,
+  TeamOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useTheme } from '../../theme/ThemeProvider.js'
@@ -15,6 +25,7 @@ import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
 import { SupportReportModal } from '../support/SupportReportModal.js'
 import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
 import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
+import { SUPPORT_CENTER_PATH } from '../../lib/support-center-path.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 import { FirstVisitTourDrawer } from '../onboarding/FirstVisitTourDrawer.js'
@@ -36,6 +47,12 @@ export function AppLayout() {
   useScreenTelemetry()
 
   const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'help',
+      icon: <QuestionCircleOutlined />,
+      label: t('nav.help'),
+      onClick: () => navigate(SUPPORT_CENTER_PATH),
+    },
     {
       key: 'sign-out',
       icon: <LogoutOutlined />,
