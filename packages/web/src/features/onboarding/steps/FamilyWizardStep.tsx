@@ -380,7 +380,7 @@ export function FamilyWizardStep({
           {t('onboarding.addAnotherFamily')}
         </Button>
         <Button type="primary" block size="large" onClick={() => { skipMembers(); goFinish() }}>
-          {t('onboarding.finish')}
+          {t('onboarding.continue')}
         </Button>
         <Button type="link" block onClick={() => { skipMembers(); goFinish() }}>
           {t('onboarding.skipMembersForCircle')}

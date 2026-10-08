@@ -1,6 +1,7 @@
 export interface Patient {
   id: string
   name: string
+  socialName?: string | null
   birthDate: string
   gender: 'male' | 'female' | null
   bloodType: string | null
@@ -381,14 +382,29 @@ export interface AuthSyncResponse {
   needsProfile: boolean
 }
 
+export interface OnboardingAddressInput {
+  postalCode: string
+  street: string
+  number: string
+  complement?: string
+  district: string
+  city: string
+  state: string
+}
+
 export interface CompleteProfileInput {
   name: string
+  socialName?: string
   birthDate: string
   gender: 'male' | 'female'
   cpf: string
   cns?: string
   weightKg?: number
   heightCm?: number
+  phone?: string
+  phoneSecondary?: string
+  phoneIsWhatsapp?: boolean
+  address?: OnboardingAddressInput
 }
 
 export type PreferredContact = 'email' | 'phone' | 'whatsapp'
@@ -403,6 +419,11 @@ export interface AccountProfileFields {
   gender: string | null
   city: string | null
   state: string | null
+  postalCode: string | null
+  street: string | null
+  streetNumber: string | null
+  addressComplement: string | null
+  district: string | null
   country: string
   timezone: string | null
   locale: string | null
@@ -434,6 +455,11 @@ export interface UpdateAccountProfileInput {
   gender?: 'male' | 'female' | 'other' | 'prefer_not'
   city?: string
   state?: string
+  postalCode?: string
+  street?: string
+  streetNumber?: string
+  addressComplement?: string
+  district?: string
   country?: string
   timezone?: string
   locale?: string

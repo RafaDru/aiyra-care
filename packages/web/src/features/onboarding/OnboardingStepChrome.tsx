@@ -27,7 +27,7 @@ export function OnboardingWizardSteps({ stepsCurrent }: { stepsCurrent: number }
         items={[
           { title: t('onboarding.steps.profile'), description: t('onboarding.steps.profileHint') },
           { title: t('onboarding.steps.families'), description: t('onboarding.steps.familiesHint') },
-          { title: t('onboarding.steps.complete'), description: t('onboarding.steps.completeHint') },
+          { title: t('onboarding.steps.connectors'), description: t('onboarding.steps.connectorsHint') },
         ]}
       />
     </>

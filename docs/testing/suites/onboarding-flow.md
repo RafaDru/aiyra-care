@@ -29,10 +29,11 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 1 | Reset fixture (`qa:reset-onboarding-user`) | Sem membership `self`; aceites legais limpos | |
 | 2 | Login e-mail/senha | Redireciona para `/compliance/accept` ou `/onboarding` | |
 | 3 | Aceitar termos (se gate) | Avança para `/onboarding` | |
-| 4 | Preencher nome, nascimento ≥18, sexo, CPF | Validação OK | |
-| 5 | **Continuar** → nome da família | `data-testid="onboarding-step-family-name"` | |
+| 4 | Preencher nome, nascimento ≥18, sexo, CPF → **Continuar** | Sub-step endereço (CEP ViaCEP) + celular obrigatório | |
+| 5 | **Continuar** (complete-profile) → nome da família | `data-testid="onboarding-step-family-name"` | |
 | 6 | **Continuar** → membros | `data-testid="onboarding-step-family-members"` | |
-| 7 | **Pular pessoas por agora** (ou adicionar dependente) | Dashboard `/` com heading «Sua família»; grupo com nome da família | |
+| 7 | **Pular pessoas por agora** | Conectores opcionais (`onboarding-connector-*`); pular cada um | |
+| 8 | Concluir último conector | Dashboard `/` com heading «Sua família»; grupo com nome da família | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)
 

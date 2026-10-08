@@ -31,6 +31,14 @@ async function fillMaskedDate(page: Page, label: RegExp, value: string) {
   await input.press('Tab')
 }
 
+async function skipConnectorSteps(page: Page) {
+  for (const kind of ['sus', 'plans', 'labs', 'hospitals']) {
+    const step = page.getByTestId(`onboarding-connector-${kind}`)
+    await step.waitFor({ state: 'visible', timeout: 25_000 })
+    await page.getByTestId(`onboarding-connector-skip-${kind}`).click()
+  }
+}
+
 export async function completeOnboardingProfile(page: Page, profile: OnboardingProfileInput) {
   await page
     .getByRole('heading', { name: /Vamos começar pelo seu perfil|Let's start with your profile/i })
@@ -48,11 +56,22 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
   await selectAntOption(page, /Sexo|Gender/i, profile.genderLabel)
   await page.getByRole('textbox', { name: /^CPF$/i }).fill(profile.cpf)
 
+  await page.getByRole('button', { name: /Continuar|Continue/i }).click()
+
+  await page.getByTestId('onboarding-address-cep').waitFor({ state: 'visible', timeout: 25_000 })
+  await page.getByTestId('onboarding-address-cep').locator('input').fill('30130010')
+  await page.getByTestId('onboarding-address-street').fill('Rua Teste Onboarding')
+  await page.getByTestId('onboarding-address-number').fill('100')
+  await page.getByLabel(/Bairro|Neighborhood/i).fill('Centro')
+  await page.getByLabel(/^Cidade|City$/i).fill('Belo Horizonte')
+  await selectAntOption(page, /^UF$|State/i, 'MG')
+  await page.getByTestId('onboarding-contact-mobile').fill('31999998888')
+
   const profileSave = page.waitForResponse(
     (r) => r.url().includes('/auth/complete-profile') && r.request().method() === 'POST',
     { timeout: 35_000 },
   )
-  await page.getByRole('button', { name: /Continuar|Continue/i }).click()
+  await page.getByTestId('onboarding-profile-submit').click()
   const saveResponse = await profileSave
   if (!saveResponse.ok()) {
     const body = await saveResponse.text().catch(() => '')
@@ -74,5 +93,8 @@ export async function completeOnboardingProfile(page: Page, profile: OnboardingP
 
   await page.getByTestId('onboarding-step-family-members').waitFor({ state: 'visible', timeout: 25_000 })
   await page.getByRole('button', { name: /Pular pessoas por agora|Skip people for now/i }).click()
+
+  await skipConnectorSteps(page)
+
   await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 25_000 })
 }

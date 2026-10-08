@@ -4,7 +4,7 @@ import { Patient } from '../../domain/patient/patient.entity.js'
 import type { PatientData } from '../../domain/patient/patient.entity.js'
 
 const COLUMNS = `
-  id, name, birth_date, gender, blood_type,
+  id, name, social_name, birth_date, gender, blood_type,
   weight_kg, height_cm, photo_url, parent_ids,
   cpf, cns,
   created_at, updated_at
@@ -14,6 +14,7 @@ function rowToPatient(row: Record<string, unknown>): Patient {
   return Patient.restore({
     id: row.id as string,
     name: row.name as string,
+    socialName: row.social_name != null ? String(row.social_name) : null,
     birthDate: row.birth_date as Date,
     gender: row.gender as string | null,
     bloodType: row.blood_type as string | null,
@@ -65,11 +66,11 @@ export class PatientPgRepository implements PatientRepository {
 
   async save(patient: Patient): Promise<Patient> {
     const { rows } = await this.pool.query(
-      `INSERT INTO patients (id, name, birth_date, gender, blood_type, weight_kg, height_cm, photo_url, parent_ids, cpf, cns)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      `INSERT INTO patients (id, name, social_name, birth_date, gender, blood_type, weight_kg, height_cm, photo_url, parent_ids, cpf, cns)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING ${COLUMNS}`,
       [
-        patient.id, patient.name, patient.birthDate,
+        patient.id, patient.name, patient.socialName, patient.birthDate,
         patient.gender, patient.bloodType,
         patient.weightKg, patient.heightCm,
         patient.photoUrl, patient.parentIds,
@@ -82,14 +83,14 @@ export class PatientPgRepository implements PatientRepository {
   async update(patient: Patient): Promise<Patient> {
     const { rows } = await this.pool.query(
       `UPDATE patients SET
-        name = $1, birth_date = $2, gender = $3, blood_type = $4,
-        weight_kg = $5, height_cm = $6, photo_url = $7,
-        parent_ids = $8, cpf = $9, cns = $10,
+        name = $1, social_name = $2, birth_date = $3, gender = $4, blood_type = $5,
+        weight_kg = $6, height_cm = $7, photo_url = $8,
+        parent_ids = $9, cpf = $10, cns = $11,
         updated_at = NOW()
-       WHERE id = $11
+       WHERE id = $12
        RETURNING ${COLUMNS}`,
       [
-        patient.name, patient.birthDate,
+        patient.name, patient.socialName, patient.birthDate,
         patient.gender, patient.bloodType,
         patient.weightKg, patient.heightCm,
         patient.photoUrl, patient.parentIds,

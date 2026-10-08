@@ -19,10 +19,10 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 
 1. **Login** (`?mode=login`): título «Bem-vindo de volta»; após auth → compliance (se pendente) → dashboard ou onboarding se `needsProfile`
 2. **Signup** (`?mode=signup`): título «Crie sua conta»; copy de confirmação por e-mail (informativo); após signup → `/onboarding`
-3. **Onboarding passo 1:** perfil titular (CPF obrigatório; CNS opcional) → `POST /auth/complete-profile`
+3. **Onboarding passo 1:** perfil titular (identidade → endereço ViaCEP + celular obrigatório; nome social opcional) → `POST /auth/complete-profile`
 4. **Onboarding passo 2 (loop):** para cada família — nome (`POST /care-circles`; 1º círculo vincula titular) → membros (`POST /patients` + `POST /care-circles/:id/patients`) → **Adicionar outra família** ou **Ir para o início**; gestão contínua em `/family`
 
-**Nota (famílias):** após `complete-profile`, o wizard permanece em `/onboarding` até concluir ≥1 círculo. Estado em `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step` + `aiyracare.onboarding_family_wizard`: fase `name` | `members`, índice, `activeCircleId`). Recarga reconcilia com `GET /care-circles`.
+**Nota (famílias + conectores):** após `complete-profile`, o wizard permanece em `/onboarding` até concluir ≥1 círculo e os passos opcionais de conectores (SUS, convênios, labs, hospitais — deep link/modal, sem scraper embutido). Estado em `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step` + `aiyracare.onboarding_family_wizard`). Recarga reconcilia com `GET /care-circles`.
 
 **Pós-onboarding:** banner leve no dashboard (`PostOnboardingWelcomeBanner`, flag `aiyracare.onboarding_just_completed` em session até dismiss) — distinto do drawer `first-visit-guided-ux`, que aguarda o banner ou abre via «Ver primeiros passos».
 

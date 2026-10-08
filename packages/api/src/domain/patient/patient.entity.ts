@@ -2,6 +2,7 @@ export type AgeCategory = 'children' | 'adolescents' | 'adults'
 
 export interface PatientProps {
   name: string
+  socialName?: string | null
   birthDate: Date
   gender?: 'male' | 'female'
   bloodType?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
@@ -16,6 +17,7 @@ export interface PatientProps {
 export interface PatientData {
   id: string
   name: string
+  socialName: string | null
   birthDate: Date
   gender: string | null
   bloodType: string | null
@@ -43,6 +45,7 @@ export class Patient {
     return new Patient({
       id: id ?? crypto.randomUUID(),
       name: props.name,
+      socialName: props.socialName ?? null,
       birthDate: props.birthDate,
       gender: props.gender ?? null,
       bloodType: props.bloodType ?? null,
@@ -63,6 +66,7 @@ export class Patient {
 
   get id(): string { return this.data.id }
   get name(): string { return this.data.name }
+  get socialName(): string | null { return this.data.socialName }
   get birthDate(): Date { return this.data.birthDate }
   get gender(): string | null { return this.data.gender }
   get bloodType(): string | null { return this.data.bloodType }

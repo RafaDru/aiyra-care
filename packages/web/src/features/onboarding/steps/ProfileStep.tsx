@@ -6,22 +6,15 @@ import { isAdult, validateBirthDateField } from '../onboarding-validation.js'
 
 const { Title, Text } = Typography
 
-export type ProfileStepValues = {
-  name: string
-  socialName?: string
-  birthDate: { toDate: () => Date }
-  gender: 'male' | 'female'
-  cpf: string
-  cns?: string
-}
+import type { OnboardingProfileFormValues } from '../profile-form.types.js'
 
 type ProfileStepProps = {
-  form: FormInstance<ProfileStepValues>
+  form: FormInstance<OnboardingProfileFormValues>
   submitting: boolean
-  onFinish: (values: ProfileStepValues) => void
+  onContinue: () => void
 }
 
-export function ProfileStep({ form, submitting, onFinish }: ProfileStepProps) {
+export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) {
   const { t } = useTranslation()
 
   return (
@@ -29,7 +22,7 @@ export function ProfileStep({ form, submitting, onFinish }: ProfileStepProps) {
       <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.welcomeTitle')}</Title>
       <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.welcomeSubtitle')}</Text>
 
-      <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
+      <Form form={form} layout="vertical" onFinish={onContinue} requiredMark={false}>
         <Form.Item name="name" label={t('onboarding.name')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
           <Input size="large" autoComplete="name" />
         </Form.Item>

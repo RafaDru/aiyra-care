@@ -5,7 +5,8 @@ import type { AccountProfileRepository } from '../../domain/account-profile/acco
 
 const COLS = `
   account_id, full_name, phone, phone_secondary, whatsapp, cpf, birth_date, gender,
-  city, state, country, timezone, locale, bio, website_url, linkedin_url,
+  city, state, postal_code, street, street_number, address_complement, district,
+  country, timezone, locale, bio, website_url, linkedin_url,
   instagram_url, x_url, facebook_url, preferred_contact, created_at, updated_at
 `
 
@@ -21,6 +22,11 @@ function mapRow(row: Record<string, unknown>): AccountProfile {
     gender: row.gender != null ? String(row.gender) : null,
     city: row.city != null ? String(row.city) : null,
     state: row.state != null ? String(row.state) : null,
+    postalCode: row.postal_code != null ? String(row.postal_code) : null,
+    street: row.street != null ? String(row.street) : null,
+    streetNumber: row.street_number != null ? String(row.street_number) : null,
+    addressComplement: row.address_complement != null ? String(row.address_complement) : null,
+    district: row.district != null ? String(row.district) : null,
     country: String(row.country ?? 'BR'),
     timezone: row.timezone != null ? String(row.timezone) : null,
     locale: row.locale != null ? String(row.locale) : null,
@@ -50,10 +56,11 @@ export class AccountProfilePgRepository implements AccountProfileRepository {
     const { rows } = await this.pool.query(
       `INSERT INTO account_profiles (
          account_id, full_name, phone, phone_secondary, whatsapp, cpf, birth_date, gender,
-         city, state, country, timezone, locale, bio, website_url, linkedin_url,
+         city, state, postal_code, street, street_number, address_complement, district,
+         country, timezone, locale, bio, website_url, linkedin_url,
          instagram_url, x_url, facebook_url, preferred_contact
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
        )
        ON CONFLICT (account_id) DO UPDATE SET
          full_name = EXCLUDED.full_name,
@@ -65,6 +72,11 @@ export class AccountProfilePgRepository implements AccountProfileRepository {
          gender = EXCLUDED.gender,
          city = EXCLUDED.city,
          state = EXCLUDED.state,
+         postal_code = EXCLUDED.postal_code,
+         street = EXCLUDED.street,
+         street_number = EXCLUDED.street_number,
+         address_complement = EXCLUDED.address_complement,
+         district = EXCLUDED.district,
          country = EXCLUDED.country,
          timezone = EXCLUDED.timezone,
          locale = EXCLUDED.locale,
@@ -88,6 +100,11 @@ export class AccountProfilePgRepository implements AccountProfileRepository {
         props.gender ?? null,
         props.city ?? null,
         props.state?.toUpperCase() ?? null,
+        props.postalCode ?? null,
+        props.street ?? null,
+        props.streetNumber ?? null,
+        props.addressComplement ?? null,
+        props.district ?? null,
         props.country?.toUpperCase() ?? 'BR',
         props.timezone ?? null,
         props.locale ?? null,

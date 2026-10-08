@@ -19,6 +19,11 @@ export interface AccountProfileView {
     gender: string | null
     city: string | null
     state: string | null
+    postalCode: string | null
+    street: string | null
+    streetNumber: string | null
+    addressComplement: string | null
+    district: string | null
     country: string
     timezone: string | null
     locale: string | null
@@ -45,6 +50,11 @@ function profileToView(profile: AccountProfile): AccountProfileView['profile'] {
     gender: d.gender,
     city: d.city,
     state: d.state,
+    postalCode: d.postalCode,
+    street: d.street,
+    streetNumber: d.streetNumber,
+    addressComplement: d.addressComplement,
+    district: d.district,
     country: d.country,
     timezone: d.timezone,
     locale: d.locale,

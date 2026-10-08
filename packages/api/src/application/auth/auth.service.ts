@@ -4,6 +4,7 @@ import { AppAccount } from '../../domain/auth/app-account.entity.js'
 import type { PatientService } from '../patient/patient.service.js'
 import type { MeasurementService } from '../measurement/measurement.service.js'
 import type { CompleteProfileInput } from '../../infrastructure/http/auth/auth.schema.js'
+import type { AccountProfileRepository } from '../../domain/account-profile/account-profile.repository.js'
 import { ConflictError } from '../../domain/errors.js'
 import type { Patient } from '../../domain/patient/patient.entity.js'
 import { isValidSelfProfileCpf } from '../../domain/patient/self-profile-cpf.js'
@@ -46,6 +47,7 @@ export class AuthService {
     private readonly memberships: PatientMembershipRepository,
     private readonly patients: PatientService,
     private readonly measurements?: MeasurementService,
+    private readonly accountProfiles?: AccountProfileRepository,
     private readonly providerName = 'supabase',
   ) {}
 
@@ -110,27 +112,20 @@ export class AuthService {
       }
     }
 
+    const patientCore = {
+      name: data.name,
+      socialName: data.socialName?.trim() || null,
+      birthDate: data.birthDate,
+      gender: data.gender,
+      bloodType: data.bloodType,
+      weightKg: data.weightKg,
+      heightCm: data.heightCm,
+      cpf: data.cpf,
+      cns: data.cns,
+    }
     const patient = existingSelfId
-      ? await this.patients.update(existingSelfId, {
-          name: data.name,
-          birthDate: data.birthDate,
-          gender: data.gender,
-          bloodType: data.bloodType,
-          weightKg: data.weightKg,
-          heightCm: data.heightCm,
-          cpf: data.cpf,
-          cns: data.cns,
-        })
-      : await this.patients.create({
-          name: data.name,
-          birthDate: data.birthDate,
-          gender: data.gender,
-          bloodType: data.bloodType,
-          weightKg: data.weightKg,
-          heightCm: data.heightCm,
-          cpf: data.cpf,
-          cns: data.cns,
-        })
+      ? await this.patients.update(existingSelfId, patientCore)
+      : await this.patients.create(patientCore)
     await this.patients.setOwnerAccountId(patient.id, accountId)
     await this.memberships.ensureMembership(accountId, patient.id, 'self')
 
@@ -148,6 +143,27 @@ export class AuthService {
       await this.measurements.seedInitialAnthropometry(patient.id, {
         weightKg: data.weightKg,
         heightCm: data.heightCm,
+      })
+    }
+
+    if (this.accountProfiles && (data.phone || data.address)) {
+      const whatsapp = data.phoneIsWhatsapp && data.phone ? data.phone : undefined
+      await this.accountProfiles.upsert(accountId, {
+        fullName: data.name.trim(),
+        phone: data.phone ?? null,
+        phoneSecondary: data.phoneSecondary ?? null,
+        whatsapp: whatsapp ?? null,
+        cpf: data.cpf,
+        birthDate: data.birthDate,
+        gender: data.gender,
+        city: data.address?.city ?? null,
+        state: data.address?.state ?? null,
+        postalCode: data.address?.postalCode ?? null,
+        street: data.address?.street ?? null,
+        streetNumber: data.address?.number ?? null,
+        addressComplement: data.address?.complement ?? null,
+        district: data.address?.district ?? null,
+        preferredContact: data.phoneIsWhatsapp ? 'whatsapp' : data.phone ? 'phone' : null,
       })
     }
 

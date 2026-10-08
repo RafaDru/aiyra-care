@@ -3,3 +3,11 @@
 {"ts":"2026-10-08T01:45:28.618Z","event":"bypass","command":"cd /workspace/packages/web && npm run build 2>&1"}
 {"ts":"2026-10-08T01:45:28.714Z","event":"bypass","command":"cd /workspace/packages/web && npx vitest run tests/internal-product-ui.test.ts 2>&1"}
 {"ts":"2026-10-08T01:45:46.125Z","event":"bypass","command":"cd /workspace && npm run test:critical 2>&1"}
+{"ts":"2026-10-08T13:40:33.370Z","event":"bypass","command":"cd /workspace && node packages/api/scripts/apply-migration-088.mjs && cd packages/api && npm run build 2>&1 | tail -30"}
+{"ts":"2026-10-08T13:40:36.927Z","event":"bypass","command":"cd /workspace/packages/api && npm run build 2>&1 | tail -40"}
+{"ts":"2026-10-08T13:41:30.381Z","event":"bypass","command":"cd /workspace/packages/api && node scripts/apply-migration-088.mjs && npm run build && npx vitest run tests/auth.service.test.ts tests/patient-birth-date.schema.test.ts 2>&1 | tail -25"}
+{"ts":"2026-10-08T13:41:30.381Z","event":"bypass","command":"cd /workspace/packages/web && npm run build 2>&1 | tail -25"}
+{"ts":"2026-10-08T13:41:54.225Z","event":"bypass","command":"cd /workspace/packages/api && npm run build 2>&1 | tail -15 && cd /workspace/packages/web && npm run build 2>&1 | tail -15"}
+{"ts":"2026-10-08T13:42:45.757Z","event":"bypass","command":"cd /workspace/packages/web && npm run build 2>&1 | tail -12"}
+{"ts":"2026-10-08T13:43:06.722Z","event":"bypass","command":"cd /workspace && npm run test:critical 2>&1 | tail -20"}
+{"ts":"2026-10-08T13:43:06.722Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run tests/auth.service.test.ts 2>&1 | tail -15"}

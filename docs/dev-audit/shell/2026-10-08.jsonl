@@ -11,3 +11,15 @@
 {"ts":"2026-10-08T01:45:28.885Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npx vitest run tests/internal-product-ui.test.ts 2>&1"}
 {"ts":"2026-10-08T01:45:46.310Z","event":"beforeShellExecution","command":"cd /workspace && npm run test:critical 2>&1"}
 {"ts":"2026-10-08T01:45:58.111Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"$(cat <<'EOF'\nfix(web): hide roadmap and observability from end-user UI\n\nConsolidates draft PRs #146 and #147: remove dev sidebar and settings\ndev tools, add Ajuda in user menu, gate /roadmap behind VITE_INTERNAL_ROADMAP\n(default redirect to /). Docs and regression-smoke updated.\nEOF\n)\""}
+{"ts":"2026-10-08T13:34:26.756Z","event":"beforeShellExecution","command":"cd /workspace && git fetch origin main && git log --oneline -5 && git branch -a | head -20"}
+{"ts":"2026-10-08T13:35:22.981Z","event":"beforeShellExecution","command":"cd /workspace && git checkout -b cursor/onboarding-wizard-v2-phases-2-3-0262"}
+{"ts":"2026-10-08T13:40:33.607Z","event":"beforeShellExecution","command":"cd /workspace && node packages/api/scripts/apply-migration-088.mjs && cd packages/api && npm run build 2>&1 | tail -30"}
+{"ts":"2026-10-08T13:40:37.167Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npm run build 2>&1 | tail -40"}
+{"ts":"2026-10-08T13:40:43.118Z","event":"beforeShellExecution","command":"cd /workspace && npm install 2>&1 | tail -15"}
+{"ts":"2026-10-08T13:41:30.684Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && node scripts/apply-migration-088.mjs && npm run build && npx vitest run tests/auth.service.test.ts tests/patient-birth-date.schema.test.ts 2>&1 | tail -25"}
+{"ts":"2026-10-08T13:41:30.693Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1 | tail -25"}
+{"ts":"2026-10-08T13:41:54.742Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npm run build 2>&1 | tail -15 && cd /workspace/packages/web && npm run build 2>&1 | tail -15"}
+{"ts":"2026-10-08T13:42:46.077Z","event":"beforeShellExecution","command":"cd /workspace/packages/web && npm run build 2>&1 | tail -12"}
+{"ts":"2026-10-08T13:43:06.898Z","event":"beforeShellExecution","command":"cd /workspace && npm run test:critical 2>&1 | tail -20"}
+{"ts":"2026-10-08T13:43:06.899Z","event":"beforeShellExecution","command":"cd /workspace/packages/api && npx vitest run tests/auth.service.test.ts 2>&1 | tail -15"}
+{"ts":"2026-10-08T13:43:13.715Z","event":"beforeShellExecution","command":"cd /workspace && git add -A && git status && git commit -m \"feat(onboarding): wizard v2 phases 2-3 — address, contact, connectors\n\n- Migration 088: patients.social_name, account_profiles address columns\n- Extend POST /auth/complete-profile with socialName, phone, address\n- Web: identity → address/contact (ViaCEP), optional connector steps after family\n- QA docs: auth-entry-flow, onboarding-flow; E2E helper updated\""}
