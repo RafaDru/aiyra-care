@@ -1498,6 +1498,10 @@
       "card": "Carteirinha"
     }
   },
+  "headerOrderRequests": {
+    "trigger": "Fazer um pedido",
+    "prepareConsultSummary": "Preparar resumo para consulta"
+  },
   "quickCapture": {
     "trigger": "Registro rápido",
     "title": "Registro rápido",

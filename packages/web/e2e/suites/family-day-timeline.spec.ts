@@ -29,7 +29,7 @@ test.describe('family-day-timeline', () => {
 
     const todayCard = page.locator('[id*="panel-wallet"] .wallet-today-panel')
     await expect(todayCard.getByRole('heading', { name: 'Hoje' })).toBeVisible({ timeout: 20_000 })
-    await todayCard.getByRole('button', { name: 'Registro rápido' }).click()
+    await page.locator('header.app-header').getByRole('button', { name: 'Registro rápido' }).click()
 
     const drawer = page.getByRole('dialog', { name: 'Registro rápido' })
     await drawer.waitFor({ state: 'visible' })
@@ -42,6 +42,6 @@ test.describe('family-day-timeline', () => {
 
     const todayCard = page.locator('.wallet-today-panel').first()
     await expect(todayCard.getByText('Hoje', { exact: true })).toBeVisible({ timeout: 15_000 })
-    await expect(todayCard.getByRole('button', { name: 'Registro rápido' })).toBeVisible()
+    await expect(page.locator('header.app-header').getByRole('button', { name: 'Registro rápido' })).toBeVisible()
   })
 })

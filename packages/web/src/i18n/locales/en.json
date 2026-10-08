@@ -1498,6 +1498,10 @@
       "card": "Member ID"
     }
   },
+  "headerOrderRequests": {
+    "trigger": "Make a request",
+    "prepareConsultSummary": "Prepare summary for appointment"
+  },
   "quickCapture": {
     "trigger": "Quick log",
     "title": "Quick log",

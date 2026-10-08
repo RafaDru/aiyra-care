@@ -20,5 +20,5 @@
 |---|------|-------------------|-------|
 | 1 | Abrir perfil de paciente | Página do paciente carrega | |
 | 2 | Clicar aba **Carteira** | Aba ativa | |
-| 3 | Verificar bloco **Hoje** | Título «Hoje» + CTAs visíveis | |
-| 4 | Clicar **Registro rápido** no bloco | Drawer de captura abre | |
+| 3 | Verificar bloco **Hoje** | Título «Hoje» visível (sem botão duplicado de Registro rápido) | |
+| 4 | Clicar **Registro rápido** no header | Drawer de captura abre | |

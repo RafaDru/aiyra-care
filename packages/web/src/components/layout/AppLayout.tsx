@@ -26,6 +26,7 @@ import { HygieneLoginPrompt } from '../hygiene/HygieneLoginPrompt.js'
 import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
 import { SupportReportModal } from '../support/SupportReportModal.js'
 import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
+import { HeaderOrderRequestsMenu } from './HeaderOrderRequestsMenu.js'
 import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { SUPPORT_CENTER_PATH } from '../../lib/support-center-path.js'
 import { openOpsConsole } from '../../lib/ops-console-url.js'
@@ -201,6 +202,7 @@ export function AppLayout() {
             <DeploymentEnvironmentBadge />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {configured && user && <HeaderOrderRequestsMenu />}
             {configured && user && <QuickCaptureGlobal />}
             {configured && user && (
               <Button
