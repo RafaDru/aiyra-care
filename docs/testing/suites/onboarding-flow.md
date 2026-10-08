@@ -9,6 +9,8 @@
 
 Fluxo completo de **primeiro acesso**: compliance (quando pendente) → wizard de onboarding (perfil titular + dependentes opcionais) → dashboard «Sua família» com perfil titular (`self`).
 
+**Planejado (2026-10-08):** após perfil, loop **nome da família + membros** com «Adicionar outra família» (`care_circles`) — spec [`ONBOARDING_FAMILY_NAME_STEP.md`](../../features/ONBOARDING_FAMILY_NAME_STEP.md). Suites abaixo descrevem o **comportamento atual** até implementação.
+
 ## Pré-requisitos
 
 - [ ] API `:3010` e web `:5173` (ou preview `:5174`) no ar
@@ -29,6 +31,10 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 3 | Aceitar termos (se gate) | Avança para `/onboarding` | |
 | 4 | Preencher nome, nascimento ≥18, sexo, CPF | Validação OK | |
 | 5 | **Continuar** → passo dependentes | Permanece em `/onboarding`; `data-testid="onboarding-step-dependents"`; título «Quem você acompanha?» | |
+
+### A′ — Multi-família no wizard — **planned**
+
+Ver cenário D em [`auth-entry-flow.md`](./auth-entry-flow.md) e critérios em [`ONBOARDING_FAMILY_NAME_STEP.md`](../../features/ONBOARDING_FAMILY_NAME_STEP.md) §11.
 | 6 | **Pular por agora** (ou adicionar dependente) | Dashboard `/` com heading «Sua família» | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)
