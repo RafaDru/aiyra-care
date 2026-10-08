@@ -19,7 +19,7 @@ async function fillMaskedDate(page: Page, label: string, value: string) {
 }
 
 const newPatientDialog = (page: Page) =>
-  page.getByRole('dialog', { name: 'Adicionar à família' })
+  page.getByRole('dialog', { name: 'Adicionar pessoa' })
 
 export async function openNewPatientModal(page: Page) {
   await dismissFirstVisitTour(page)
