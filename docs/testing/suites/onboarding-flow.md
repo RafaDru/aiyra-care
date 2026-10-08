@@ -54,8 +54,9 @@ Conta recém-onboarded; `localStorage` sem `aiyracare.first_visit_tour_completed
 | 3 | Percorrer 4 etapas (família → pessoa → registro → Ava) | Textos i18n; etapa Ava desabilitada se zero pacientes | |
 | 4 | **Concluir** ou **Fechar guia** | Drawer fecha; flag localStorage; evento `first_visit_tour_completed` | |
 | 5 | Recarregar dashboard | Drawer não reaparece | |
+| 6 | Repetir onboarding com `localStorage` `first_visit_tour_completed=1` (sessão anterior) | **Ver primeiros passos** no banner abre o drawer | |
 
-**Automação:** `packages/web/e2e/onboarding.spec.ts` (assert `data-testid="first-visit-tour-drawer"`)
+**Automação:** `packages/web/e2e/onboarding.spec.ts` (drawer após **Entendi**; cenário 6 = CTA com flag antiga)
 
 ### C — Bloqueio menor de 18 (manual rápido)
 

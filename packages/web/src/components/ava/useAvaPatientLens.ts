@@ -56,11 +56,15 @@ export function useAvaPatientLens() {
     setOverrideId(null)
   }, [routePatientId])
 
+  const preferSelfOnHome =
+    !routePatientId &&
+    (location.pathname === '/' || location.pathname === '/dashboard')
+
   const patientId = useMemo(() => {
     if (patients.length === 0) return null
     if (overrideId && patients.some((p) => p.id === overrideId)) return overrideId
-    return resolveAvaPatientLens(patients, routePatientId)
-  }, [patients, overrideId, routePatientId])
+    return resolveAvaPatientLens(patients, routePatientId, { preferSelfOnHome })
+  }, [patients, overrideId, routePatientId, preferSelfOnHome])
 
   const setPatientId = useCallback(
     (id: string) => {

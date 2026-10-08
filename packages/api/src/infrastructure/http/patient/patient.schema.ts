@@ -1,5 +1,10 @@
 import { z } from 'zod'
+<<<<<<< HEAD
 import { validatePatientBirthDate } from '../../../domain/patient/birth-date-rules.js'
+=======
+import { isMinorBirthDate } from '../../../domain/patient/age-rules.js'
+import { isValidSelfProfileCpf, SELF_PROFILE_CPF_REQUIRED_MESSAGE } from '../../../domain/patient/self-profile-cpf.js'
+>>>>>>> origin/main
 
 const genderEnum = z.enum(['male', 'female'])
 
@@ -11,7 +16,7 @@ const patientBirthDateSchema = z.coerce.date().superRefine((d, ctx) => {
 })
 const bloodTypeEnum = z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
 
-export const createPatientSchema = z.object({
+export const createPatientObjectSchema = z.object({
   name: z.string().min(1).max(255),
   birthDate: patientBirthDateSchema,
   gender: genderEnum.optional(),
@@ -24,6 +29,17 @@ export const createPatientSchema = z.object({
   cns: z.string().optional(),
   /** Marca este paciente como o titular da conta (role membership `self`). Apenas adultos. */
   markAsSelf: z.boolean().optional(),
+})
+
+export const createPatientSchema = createPatientObjectSchema.superRefine((data, ctx) => {
+  const wantsSelf = Boolean(data.markAsSelf) && !isMinorBirthDate(data.birthDate)
+  if (wantsSelf && !isValidSelfProfileCpf(data.cpf)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: SELF_PROFILE_CPF_REQUIRED_MESSAGE,
+      path: ['cpf'],
+    })
+  }
 })
 
 export const updatePatientSchema = z.object({

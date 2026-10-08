@@ -15,3 +15,11 @@ export function markFirstVisitTourCompleted(): void {
     /* ignore */
   }
 }
+
+export function clearFirstVisitTourCompleted(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    /* ignore */
+  }
+}
