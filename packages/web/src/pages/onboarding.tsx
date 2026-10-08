@@ -8,6 +8,7 @@ import { MinorGuardianConsentFormItem } from '../components/legal/MinorGuardianC
 import { OnboardingLayout } from '../layouts/OnboardingLayout.js'
 import { httpStatusFromError, reportAccountSettingsFailure } from '../lib/account-settings-errors.js'
 import { api } from '../lib/api.js'
+import { getBirthDateValidationIssue } from '../lib/birth-date-validation.js'
 import { isMinorBirthDate } from '../lib/patient-age.js'
 import { formatCpfInput } from '../lib/input-masks.js'
 import { trackProductEvent } from '../lib/product-events.js'
@@ -28,6 +29,24 @@ const WIZARD_STEP_COUNT = 2
 function isAdult(birthDate: Date): boolean {
   const age = (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
   return age >= 18
+}
+
+function birthDateRangeMessage(
+  issue: ReturnType<typeof getBirthDateValidationIssue>,
+  t: (key: string) => string,
+): string | null {
+  if (!issue) return null
+  if (issue === 'future') return t('onboarding.birthDateFuture')
+  if (issue === 'too_old') return t('onboarding.birthDateTooOld')
+  return t('onboarding.birthDateInvalid')
+}
+
+function validateBirthDateField(value: unknown, t: (key: string) => string): Promise<void> {
+  if (!value) return Promise.resolve()
+  const date = (value as { toDate?: () => Date }).toDate?.() ?? (value as Date)
+  const issue = getBirthDateValidationIssue(date)
+  const message = birthDateRangeMessage(issue, t)
+  return message ? Promise.reject(new Error(message)) : Promise.resolve()
 }
 
 type DependentDraft = {
@@ -213,10 +232,13 @@ export function OnboardingPage() {
               rules={[
                 { required: true, message: t('onboarding.birthDateRequired') },
                 {
+                  validator: (_, value) => validateBirthDateField(value, t),
+                },
+                {
                   validator: (_, value) => {
                     if (!value) return Promise.resolve()
                     const date = value.toDate?.() ?? value
-                    return isAdult(date) ? Promise.resolve() : Promise.reject(t('onboarding.adultOnly'))
+                    return isAdult(date) ? Promise.resolve() : Promise.reject(new Error(t('onboarding.adultOnly')))
                   },
                 },
               ]}
@@ -278,7 +300,14 @@ export function OnboardingPage() {
             <Form.Item name="name" label={t('onboarding.dependentName')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
               <Input size="large" />
             </Form.Item>
-            <Form.Item name="birthDate" label={t('onboarding.birthDate')} rules={[{ required: true, message: t('onboarding.birthDateRequired') }]}>
+            <Form.Item
+              name="birthDate"
+              label={t('onboarding.birthDate')}
+              rules={[
+                { required: true, message: t('onboarding.birthDateRequired') },
+                { validator: (_, value) => validateBirthDateField(value, t) },
+              ]}
+            >
               <MaskedDatePicker style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item name="gender" label={t('onboarding.gender')}>
