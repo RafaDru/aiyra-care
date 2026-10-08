@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Modal, Input, Typography, Space, Tag, Alert, Button, Tooltip, Slider, List, App } from 'antd'
 import {
@@ -46,6 +47,7 @@ export function OcrRegionReviewModal({
   onClose,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation()
   const { message } = App.useApp()
   const { runLlmTask } = useLlmActivity()
   const imgRef = useRef<HTMLImageElement>(null)
@@ -152,9 +154,9 @@ export function OcrRegionReviewModal({
     try {
       const result = await runLlmTask(() => api.documents.interpretVaccineCard(document.id))
       setVaccineInterpretation(result.interpretation)
-      message.success('Carteira interpretada — revise vacinas e anotações manuscritas')
+      message.success(t('toast.walletInterpreted'))
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro na interpretação')
+      message.error(err instanceof Error ? err.message : t('toast.interpretError'))
     } finally {
       setInterpreting(false)
     }
@@ -192,16 +194,16 @@ export function OcrRegionReviewModal({
         created++
       }
       if (created > 0) {
-        message.success(`${created} vacina(s) cadastrada(s) — revise na aba Vacinas`)
+        message.success(t('toast.vaccinesAutoCreated', { count: created }))
       }
       if (skipped > 0) {
-        message.warning(`${skipped} entrada(s) sem data de aplicação — cadastre manualmente na aba Vacinas`)
+        message.warning(t('toast.vaccinesSkippedNoDate', { count: skipped }))
       }
       if (created === 0 && skipped === 0) {
-        message.info('Nenhuma vacina com dados suficientes para cadastro automático')
+        message.info(t('toast.vaccinesInsufficientData'))
       }
     } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Erro ao cadastrar vacinas')
+      message.error(err instanceof Error ? err.message : t('toast.vaccinesRegisterError'))
     } finally {
       setCreatingVaccines(false)
     }
@@ -265,7 +267,7 @@ export function OcrRegionReviewModal({
         </Space>
 
         <Space wrap align="center">
-          <Tooltip title="Diminuir zoom">
+          <Tooltip title={t('modals.zoomOut')}>
             <Button
               icon={<ZoomOutOutlined />}
               onClick={() => setZoom((z) => clampZoom(z - 0.25))}
@@ -281,7 +283,7 @@ export function OcrRegionReviewModal({
             style={{ width: 140, margin: '0 8px' }}
           />
           <Text type="secondary">{Math.round(zoom * 100)}%</Text>
-          <Tooltip title="Aumentar zoom">
+          <Tooltip title={t('modals.zoomIn')}>
             <Button
               icon={<ZoomInOutlined />}
               onClick={() => setZoom((z) => clampZoom(z + 0.25))}
