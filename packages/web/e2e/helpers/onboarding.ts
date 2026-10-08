@@ -36,7 +36,15 @@ async function fillMaskedDate(page: Page, label: RegExp, value: string) {
 }
 
 async function selectBrazilianState(page: Page, uf: string) {
-  await clickAntSelectOption(page, page.getByTestId('onboarding-address-state'), uf)
+  await expect(async () => {
+    const trigger = page
+      .getByTestId('onboarding-address-state')
+      .or(page.getByRole('combobox', { name: /Estado|State/i }))
+    await trigger.click()
+    await page.keyboard.type(uf, { delay: 40 })
+    await page.keyboard.press('Enter')
+    await expect(trigger).toContainText(uf, { timeout: 5_000 })
+  }).toPass({ timeout: 25_000 })
 }
 
 async function skipConnectorSteps(page: Page) {
