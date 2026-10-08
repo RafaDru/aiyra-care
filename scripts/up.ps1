@@ -44,6 +44,65 @@ function Stop-ListenerOnPort {
   }
 }
 
+function Get-GitHeadSha {
+  param([string]$RepoPath)
+  if (-not (Test-Path (Join-Path $RepoPath '.git'))) { return $null }
+  $sha = (& git -C $RepoPath rev-parse HEAD 2>$null | Out-String).Trim()
+  if (-not $sha -or $LASTEXITCODE -ne 0) { return $null }
+  return $sha
+}
+
+function Test-GitIsAncestor {
+  param([string]$RepoPath, [string]$AncestorSha, [string]$DescendantSha)
+  if (-not $AncestorSha -or -not $DescendantSha) { return $false }
+  if ($AncestorSha -eq $DescendantSha) { return $true }
+  & git -C $RepoPath merge-base --is-ancestor $AncestorSha $DescendantSha 2>$null | Out-Null
+  return $LASTEXITCODE -eq 0
+}
+
+# ch-shell só quando alinhado com main (mesmo SHA ou à frente). Atrás/divergente → checkout principal.
+function Resolve-ChShellOpsConsoleUp {
+  param(
+    [string]$MainRoot,
+    [string]$ChShellRoot,
+    [string]$RootOpsUp
+  )
+  $forceMain = $env:AIYRA_OPS_CONSOLE_FROM_MAIN -eq '1'
+  if ($forceMain) {
+    return @{ Script = $RootOpsUp; UseChShell = $false; Reason = 'AIYRA_OPS_CONSOLE_FROM_MAIN=1' }
+  }
+  $chShellOpsUp = Join-Path $ChShellRoot 'scripts\ops-console-up.ps1'
+  if (-not (Test-Path $chShellOpsUp)) {
+    return @{ Script = $RootOpsUp; UseChShell = $false; Reason = 'missing' }
+  }
+  $mainSha = Get-GitHeadSha -RepoPath $MainRoot
+  $shellSha = Get-GitHeadSha -RepoPath $ChShellRoot
+  if (-not $mainSha -or -not $shellSha) {
+    Write-Host "`n[CH] worktree sem HEAD git válido — ops-console do checkout principal." -ForegroundColor Yellow
+    if ($mainSha) { Write-Host "  main=$mainSha" -ForegroundColor Yellow }
+    if ($shellSha) { Write-Host "  ch-shell=$shellSha" -ForegroundColor Yellow }
+    return @{ Script = $RootOpsUp; UseChShell = $false; Reason = 'invalid-git' }
+  }
+  if ($mainSha -eq $shellSha) {
+    return @{ Script = $chShellOpsUp; UseChShell = $true; MainSha = $mainSha; ShellSha = $shellSha }
+  }
+  $shellBehind = Test-GitIsAncestor -RepoPath $MainRoot -AncestorSha $shellSha -DescendantSha $mainSha
+  $shellAhead = Test-GitIsAncestor -RepoPath $MainRoot -AncestorSha $mainSha -DescendantSha $shellSha
+  if ($shellBehind) {
+    Write-Host "`n[CH] ch-shell ATRÁS do repo principal — ops-console do checkout principal (evita UI antiga)." -ForegroundColor Yellow
+    Write-Host "  main=$mainSha  ch-shell=$shellSha" -ForegroundColor Yellow
+    Write-Host "  Ritual: docs/ops/CH_ACCESS.md (alinhar SHA ou AIYRA_OPS_CONSOLE_FROM_MAIN=1)" -ForegroundColor Yellow
+    return @{ Script = $RootOpsUp; UseChShell = $false; Reason = 'behind'; MainSha = $mainSha; ShellSha = $shellSha }
+  }
+  if (-not $shellAhead) {
+    Write-Host "`n[CH] ch-shell DIVERGENTE do repo principal — ops-console do checkout principal." -ForegroundColor Yellow
+    Write-Host "  main=$mainSha  ch-shell=$shellSha" -ForegroundColor Yellow
+    Write-Host "  Ritual: docs/ops/CH_ACCESS.md (alinhar SHA ou AIYRA_OPS_CONSOLE_FROM_MAIN=1)" -ForegroundColor Yellow
+    return @{ Script = $RootOpsUp; UseChShell = $false; Reason = 'diverged'; MainSha = $mainSha; ShellSha = $shellSha }
+  }
+  return @{ Script = $chShellOpsUp; UseChShell = $true; MainSha = $mainSha; ShellSha = $shellSha }
+}
+
 Write-Host "Starting API..." -NoNewline
 $apiPort = if ($Preview) { 3020 } else { 3010 }
 $webPort = if ($Preview) { 5174 } else { 5173 }
@@ -84,12 +143,22 @@ $chShellRoot = if ($env:AIYRA_CH_SHELL_ROOT) {
 } else {
   Join-Path (Split-Path $root -Parent) "aiyra-care-ch-shell"
 }
-$chShellOpsUp = Join-Path $chShellRoot "scripts\ops-console-up.ps1"
-if ((Test-Path $chShellOpsUp) -and -not $Preview) {
-  Write-Host " (CH v2 via ch-shell)" -ForegroundColor DarkCyan
-  & $chShellOpsUp | Out-Null
+$rootOpsUp = Join-Path $PSScriptRoot 'ops-console-up.ps1'
+if (-not $Preview) {
+  $chResolve = Resolve-ChShellOpsConsoleUp -MainRoot $root -ChShellRoot $chShellRoot -RootOpsUp $rootOpsUp
+  if ($chResolve.UseChShell) {
+    Write-Host " (CH via ch-shell @ $($chResolve.ShellSha.Substring(0, 12)))" -ForegroundColor DarkCyan
+    & $chResolve.Script | Out-Null
+  } else {
+    if ($chResolve.Reason -eq 'AIYRA_OPS_CONSOLE_FROM_MAIN=1') {
+      Write-Host " (ops-console checkout principal — AIYRA_OPS_CONSOLE_FROM_MAIN)" -ForegroundColor DarkCyan
+    } elseif ($chResolve.Reason -and $chResolve.Reason -ne 'missing') {
+      Write-Host " (ops-console checkout principal)" -ForegroundColor DarkCyan
+    }
+    & $chResolve.Script | Out-Null
+  }
 } else {
-  & (Join-Path $PSScriptRoot "ops-console-up.ps1") | Out-Null
+  & $rootOpsUp | Out-Null
 }
 try {
   $h = Invoke-RestMethod -Uri "http://127.0.0.1:$opsConsolePort/health" -ErrorAction Stop
