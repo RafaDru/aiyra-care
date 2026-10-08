@@ -12,7 +12,6 @@ import type { Patient } from '../lib/api.types.js'
 import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
 import { DayToDayDiscoveryHub } from '../components/dashboard/DayToDayDiscoveryHub.js'
-import { DashboardFamilyShortcut } from '../components/dashboard/DashboardFamilyShortcut.js'
 import { PostOnboardingWelcomeBanner } from '../components/onboarding/PostOnboardingWelcomeBanner.js'
 import { useAuth } from '../contexts/AuthContext.js'
 import { useActiveCareCircle } from '../contexts/ActiveCareCircleContext.js'
@@ -169,12 +168,11 @@ export function Dashboard() {
     <div>
       <PageHeader
         title={t('patient.title')}
-        extra={<Button type="primary" icon={<PlusOutlined />} data-testid="dashboard-add-family" onClick={() => setModalOpen(true)}>{t('patient.new')}</Button>}
+        extra={<Button type="default" icon={<PlusOutlined />} data-testid="dashboard-add-family" onClick={() => setModalOpen(true)}>{t('patient.addPerson')}</Button>}
       />
 
       <PostOnboardingWelcomeBanner />
 
-      {patients.length > 0 && <DashboardFamilyShortcut />}
       {patients.length === 0 && !loadError && <DayToDayDiscoveryHub hasPatients={false} />}
       {patients.length > 0 && <DashboardDayToDaySection />}
 
@@ -201,7 +199,7 @@ export function Dashboard() {
                 {t('patient.emptyFamilyWelcomeHint')}
               </Text>
               <Button type="link" icon={<PlusOutlined />} onClick={() => setModalOpen(true)} style={{ marginTop: 8 }}>
-                {t('patient.new')}
+                {t('patient.addPerson')}
               </Button>
             </span>
           }
@@ -245,7 +243,7 @@ export function Dashboard() {
         })
       )}
 
-      <Modal title={t('patient.new')} open={modalOpen} onOk={handleCreate} onCancel={() => setModalOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')}>
+      <Modal title={t('patient.addPerson')} open={modalOpen} onOk={handleCreate} onCancel={() => setModalOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')}>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="name" label={t('patient.form.name')} rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="birthDate" label={t('patient.form.birthDate')} rules={[{ required: true }]}>
