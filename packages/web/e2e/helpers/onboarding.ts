@@ -36,15 +36,10 @@ async function fillMaskedDate(page: Page, label: RegExp, value: string) {
 }
 
 async function selectBrazilianState(page: Page, uf: string) {
-  await expect(async () => {
-    const trigger = page
-      .getByTestId('onboarding-address-state')
-      .or(page.getByRole('combobox', { name: /Estado|State/i }))
-    await trigger.click()
-    await page.keyboard.type(uf, { delay: 40 })
-    await page.keyboard.press('Enter')
-    await expect(trigger).toContainText(uf, { timeout: 5_000 })
-  }).toPass({ timeout: 25_000 })
+  const trigger = page
+    .getByTestId('onboarding-address-state')
+    .or(page.getByRole('combobox', { name: /Estado|State/i }))
+  await clickAntSelectOption(page, trigger, uf)
 }
 
 async function skipConnectorSteps(page: Page) {
@@ -84,19 +79,22 @@ async function fillIdentityStep(page: Page, profile: OnboardingProfileInput) {
 
 async function fillAddressContactStep(page: Page) {
   await page.getByTestId('onboarding-address-cep').waitFor({ state: 'visible', timeout: 25_000 })
-  await page.getByTestId('onboarding-address-cep').locator('input').fill('30130010')
+  await page.getByTestId('onboarding-address-cep').getByRole('textbox').fill('30130-010')
   await page.getByTestId('onboarding-address-street').fill('Rua Teste Onboarding')
   await page.getByTestId('onboarding-address-number').fill('100')
-  await page.getByLabel(/Bairro|Neighborhood/i).fill('Centro')
-  await page.getByLabel(/^Cidade|City$/i).fill('Belo Horizonte')
+  await page.getByTestId('onboarding-address-district').fill('Centro')
+  await page.getByTestId('onboarding-address-city').fill('Belo Horizonte')
   await selectBrazilianState(page, 'MG')
   await page.getByTestId('onboarding-contact-mobile').fill('31999998888')
+
+  const submit = page.getByTestId('onboarding-profile-submit')
+  await expect(submit).toBeEnabled({ timeout: 5_000 })
 
   const profileSave = page.waitForResponse(
     (r) => r.url().includes('/auth/complete-profile') && r.request().method() === 'POST',
     { timeout: 35_000 },
   )
-  await page.getByTestId('onboarding-profile-submit').click()
+  await submit.click()
   const saveResponse = await profileSave
   if (!saveResponse.ok()) {
     const body = await saveResponse.text().catch(() => '')

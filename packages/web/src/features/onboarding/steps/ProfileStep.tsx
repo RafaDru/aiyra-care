@@ -22,7 +22,7 @@ export function ProfileStep({ form, submitting, onContinue }: ProfileStepProps) 
       <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.welcomeTitle')}</Title>
       <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.welcomeSubtitle')}</Text>
 
-      <Form form={form} layout="vertical" onFinish={onContinue} requiredMark={false}>
+      <Form form={form} layout="vertical" onFinish={onContinue} requiredMark={false} preserve>
         <Form.Item name="name" label={t('onboarding.name')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
           <Input size="large" autoComplete="name" data-testid="onboarding-profile-name" />
         </Form.Item>

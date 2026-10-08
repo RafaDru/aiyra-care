@@ -48,7 +48,7 @@ export function AddressContactStep({ form, submitting, accountEmail, onFinish }:
       <Title level={3} style={{ marginBottom: 4 }}>{t('onboarding.address.title')}</Title>
       <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>{t('onboarding.address.subtitle')}</Text>
 
-      <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
+      <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} preserve>
         <Form.Item
           name="postalCode"
           label={t('onboarding.address.cep')}
@@ -78,10 +78,10 @@ export function AddressContactStep({ form, submitting, accountEmail, onFinish }:
           <Input size="large" />
         </Form.Item>
         <Form.Item name="district" label={t('onboarding.address.district')} rules={[{ required: true, message: t('onboarding.address.districtRequired') }]}>
-          <Input size="large" />
+          <Input size="large" data-testid="onboarding-address-district" />
         </Form.Item>
         <Form.Item name="city" label={t('onboarding.address.city')} rules={[{ required: true, message: t('onboarding.address.cityRequired') }]}>
-          <Input size="large" />
+          <Input size="large" data-testid="onboarding-address-city" />
         </Form.Item>
         <Form.Item name="state" label={t('onboarding.address.state')} rules={[{ required: true, message: t('onboarding.address.stateRequired') }]}>
           <Select
