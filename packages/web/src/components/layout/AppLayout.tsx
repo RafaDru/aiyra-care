@@ -8,7 +8,6 @@ import {
   UserOutlined,
   DashboardOutlined,
   PhoneOutlined,
-  RadarChartOutlined,
   CustomerServiceOutlined,
   TeamOutlined,
   MenuFoldOutlined,
@@ -29,7 +28,6 @@ import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
 import { HeaderOrderRequestsMenu } from './HeaderOrderRequestsMenu.js'
 import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { SUPPORT_CENTER_PATH } from '../../lib/support-center-path.js'
-import { openOpsConsole } from '../../lib/ops-console-url.js'
 import { useScreenTelemetry } from '../../lib/telemetry/use-screen-telemetry.js'
 import { FirstVisitTourDrawer } from '../onboarding/FirstVisitTourDrawer.js'
 import { DeploymentEnvironmentBadge } from './DeploymentEnvironmentBadge.js'
@@ -128,29 +126,6 @@ export function AppLayout() {
             onClick={({ key }) => navigate(key)}
             style={{ borderRight: 0, background: 'transparent' }}
           />
-
-          <div className="app-sider-dev">
-            {!collapsed && (
-              <Text type="secondary" className="app-sider-dev__label">
-                {t('settings.devTools')}
-              </Text>
-            )}
-            <Menu
-              mode="inline"
-              selectedKeys={[]}
-              items={[
-                { key: 'ops-console', icon: <RadarChartOutlined />, label: t('nav.ops') },
-              ]}
-              onClick={({ key }) => {
-                if (key === 'ops-console') {
-                  openOpsConsole()
-                  return
-                }
-                navigate(key)
-              }}
-              style={{ borderRight: 0, background: 'transparent' }}
-            />
-          </div>
 
           <div style={{ flex: 1 }} />
 

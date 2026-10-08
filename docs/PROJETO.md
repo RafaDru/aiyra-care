@@ -796,7 +796,7 @@ Agentes devem preferir `/project/context` para estado atual; **feature card** (`
 
 ## Roadmap
 
-Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: `roadmap.json`). A UI do app lê via `GET /roadmap`. **Tracking:** [`DOCUMENTATION_SYSTEM.md`](./DOCUMENTATION_SYSTEM.md).
+Prioridades e épicos estruturados: **[ROADMAP.md](./ROADMAP.md)** (fonte JSON: `roadmap.json`). API `GET /roadmap`; UI interna no web só com `VITE_INTERNAL_ROADMAP=1` — ver [`DOCUMENTATION_SYSTEM.md`](./DOCUMENTATION_SYSTEM.md). **Tracking:** idem.
 
 ---
 
