@@ -43,6 +43,8 @@ export function LoginPage() {
     configured,
     session,
     loading: authLoading,
+    syncing,
+    needsProfile,
     rememberMe,
     setRememberMe,
     refreshSync,
@@ -73,11 +75,15 @@ export function LoginPage() {
   }
 
   useEffect(() => {
-    if (!configured || authLoading || !session) return
+    if (!configured || authLoading || syncing || !session) return
+    if (needsProfile) {
+      navigate('/onboarding', { replace: true })
+      return
+    }
     api.compliance.status()
       .then((s) => navigate(s.compliant ? '/' : COMPLIANCE_ACCEPT_PATH, { replace: true }))
       .catch(() => navigate('/', { replace: true }))
-  }, [configured, authLoading, session, navigate])
+  }, [configured, authLoading, syncing, needsProfile, session, navigate])
 
   if (!configured) {
     return (
@@ -92,7 +98,7 @@ export function LoginPage() {
     )
   }
 
-  if (authLoading || session) {
+  if (authLoading || (session && syncing)) {
     return (
       <AuthPageLayout>
         <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
