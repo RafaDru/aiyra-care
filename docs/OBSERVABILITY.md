@@ -59,6 +59,14 @@ product_events (
 
 **Web:** `trackProductEvent(name, props, { patientId })` em `packages/web/src/lib/product-events.ts`.
 
+### KPI «Sessões» vs contas (ops console)
+
+Na aba **Negócio** (`BusinessPanel`), a coluna **Sessões** em «Features mais usadas» e agregados derivados contam **`COUNT(DISTINCT session_id)`** em `product_events` — um identificador anônimo de browser gerado no cliente (`product-events.ts`), **não** a sessão JWT Supabase nem o wizard `sessionStorage`.
+
+- **Contas** usa `COUNT(DISTINCT account_id)` onde o evento foi enviado autenticado (`POST /telemetry/events`).
+- Eventos da landing e outros ingestos públicos podem ter **`account_id IS NULL`** mas ainda carregar `session_id` → **Sessões ≥ Contas** é esperado e não indica “usuários fantasmas” no Postgres.
+- WAU/MAU no painel de engajamento filtram eventos com conta associada.
+
 ### Métricas ops
 
 - `GET /ops/metrics` — Ava p50/p95 tokens, sync por portal, alertas derivados (workers/CLI; **não** é o dashboard).
