@@ -82,4 +82,48 @@ describe('onboarding-wizard-storage', () => {
     expect(mod.consumeOnboardingJustCompleted()).toBe(true)
     expect(mod.consumeOnboardingJustCompleted()).toBe(false)
   })
+
+  it('clearOnboardingWizardStorage removes all wizard session keys', async () => {
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    mod.persistOnboardingFamiliesStep()
+    mod.persistOnboardingFamilyWizard({
+      phase: 'name',
+      circleIndex: 0,
+      activeCircleId: null,
+      circleNames: [],
+    })
+    mod.markOnboardingJustCompleted()
+    mod.persistOnboardingWizardOwnerSub('user-a')
+    mod.clearOnboardingWizardStorage()
+    expect(mod.readOnboardingWizardStep()).toBe(0)
+    expect(mod.readOnboardingFamilyWizard()).toBeNull()
+    expect(mod.isOnboardingJustCompleted()).toBe(false)
+    expect(mod.readOnboardingWizardOwnerSub()).toBeNull()
+  })
+
+  it('reconcileOnboardingWizardStorageForAuthUser clears when owner sub differs', async () => {
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    mod.persistOnboardingWizardOwnerSub('user-a')
+    mod.persistOnboardingFamiliesStep()
+    mod.reconcileOnboardingWizardStorageForAuthUser('user-b')
+    expect(mod.readOnboardingWizardStep()).toBe(0)
+    expect(mod.readOnboardingWizardOwnerSub()).toBeNull()
+  })
+
+  it('reconcileOnboardingWizardStorageForAuthUser keeps storage when owner matches', async () => {
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    mod.persistOnboardingWizardOwnerSub('user-a')
+    mod.persistOnboardingFamiliesStep()
+    mod.reconcileOnboardingWizardStorageForAuthUser('user-a')
+    expect(mod.readOnboardingWizardStep()).toBe(1)
+    expect(mod.readOnboardingWizardOwnerSub()).toBe('user-a')
+  })
+
+  it('reconcileOnboardingWizardStorageForAuthUser ignores unset owner sub', async () => {
+    const mod = await import('../src/lib/onboarding-wizard-storage.js')
+    mod.persistOnboardingFamiliesStep()
+    mod.reconcileOnboardingWizardStorageForAuthUser('user-a')
+    expect(mod.readOnboardingWizardStep()).toBe(1)
+    expect(mod.readOnboardingWizardOwnerSub()).toBeNull()
+  })
 })

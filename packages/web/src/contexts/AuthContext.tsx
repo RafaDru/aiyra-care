@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [syncing, setSyncing] = useState(false)
   const [rememberMe, setRememberMeState] = useState(isRememberMeEnabled())
 
-  const syncAccount = useCallback(async (accessToken: string | undefined) => {
+  const syncAccount = useCallback(async (accessToken: string | undefined, authUserId?: string | null) => {
     if (!accessToken || !supabaseConfigured) {
       setAccount(null)
       setNeedsProfile(false)
@@ -55,15 +55,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await api.auth.sync()
     setAccount(result.account)
     setNeedsProfile(result.needsProfile)
+    if (authUserId) {
+      const { reconcileOnboardingWizardStorageForAuthUser } = await import('../lib/onboarding-wizard-storage.js')
+      reconcileOnboardingWizardStorageForAuthUser(authUserId)
+    }
     const { refreshAccountFreshness } = await import('../lib/account-freshness.js')
     await refreshAccountFreshness().catch(() => undefined)
   }, [])
 
-  const runSync = useCallback(async (accessToken: string | undefined) => {
+  const runSync = useCallback(async (accessToken: string | undefined, authUserId?: string | null) => {
     if (!supabaseConfigured) return
     setSyncing(true)
     try {
-      await syncAccount(accessToken)
+      await syncAccount(accessToken, authUserId)
     } catch {
       setAccount(null)
       setNeedsProfile(false)
@@ -73,8 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [syncAccount])
 
   const refreshSync = useCallback(async () => {
-    await runSync(session?.access_token)
-  }, [session?.access_token, runSync])
+    await runSync(session?.access_token, session?.user?.id ?? null)
+  }, [session?.access_token, session?.user?.id, runSync])
 
   useEffect(() => {
     const client = getSupabase()
@@ -91,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       initialResolved = true
       setSession(next)
       setMemoryAccessToken(next?.access_token ?? null)
-      await runSync(next?.access_token)
+      await runSync(next?.access_token, next?.user?.id ?? null)
       setLoading(false)
     }
 
@@ -102,6 +106,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
       if (event === 'SIGNED_OUT') {
+        const { clearOnboardingWizardStorage } = await import('../lib/onboarding-wizard-storage.js')
+        clearOnboardingWizardStorage()
         setSession(null)
         setMemoryAccessToken(null)
         setAccount(null)
@@ -115,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setSession(next)
       setMemoryAccessToken(next?.access_token ?? null)
-      await runSync(next?.access_token)
+      await runSync(next?.access_token, next?.user?.id ?? null)
     })
 
     client.auth.getSession().then(async ({ data }) => {
@@ -198,6 +204,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut: async () => {
       const client = getSupabase()
       if (!client) return
+      const { clearOnboardingWizardStorage } = await import('../lib/onboarding-wizard-storage.js')
+      clearOnboardingWizardStorage()
       await client.auth.signOut({ scope: 'local' })
       const { clearAccountFreshness } = await import('../lib/account-freshness.js')
       clearAccountFreshness()
