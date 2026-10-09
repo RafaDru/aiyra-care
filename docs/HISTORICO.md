@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-09] - Higiene sessionStorage do onboarding wizard v2
+
+### Realizado
+- Web: `clearOnboardingWizardStorage` + `onboarding_wizard_owner_sub` — limpeza no logout e quando o `user.id` do sync não coincide com o owner gravado; família/conectores **permanecem opcionais** após `complete-profile` (doc alinhada). Login com `needsProfile` redireciona direto para `/onboarding`. Ops: nota em `OBSERVABILITY.md` sobre KPI «Sessões» (`session_id`) vs contas.
+
 ## [2026-10-08] - CH: guard ch-shell vs main no `up.ps1`
 
 ### Decisão

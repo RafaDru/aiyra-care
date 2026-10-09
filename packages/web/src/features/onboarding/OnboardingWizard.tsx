@@ -15,6 +15,7 @@ import {
   persistOnboardingConnectorsStep,
   persistOnboardingFamiliesStep,
   persistOnboardingFamilyWizard,
+  persistOnboardingWizardOwnerSub,
   readOnboardingFamilyWizard,
   readOnboardingWizardStep,
 } from '../../lib/onboarding-wizard-storage.js'
@@ -30,7 +31,11 @@ import { ConnectorWizardStep } from './steps/ConnectorWizardStep.js'
 export function OnboardingWizard() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { needsProfile, refreshSync, account } = useAuth()
+  const { needsProfile, refreshSync, account, authUserId } = useAuth()
+
+  const bindWizardOwner = () => {
+    if (authUserId) persistOnboardingWizardOwnerSub(authUserId)
+  }
   const [profileForm] = Form.useForm<OnboardingProfileFormValues>()
   const profileIdentityRef = useRef<Partial<OnboardingProfileFormValues>>({})
   const [currentStep, setCurrentStep] = useState(readOnboardingWizardStep)
@@ -128,6 +133,7 @@ export function OnboardingWizard() {
   const goToFamiliesStep = (patientId: string, patientName: string) => {
     setSelfPatientId(patientId)
     setSelfPatientName(patientName)
+    bindWizardOwner()
     persistOnboardingFamiliesStep()
     persistOnboardingFamilyWizard({
       phase: 'name',
@@ -147,6 +153,7 @@ export function OnboardingWizard() {
   }
 
   const goToConnectorsStep = () => {
+    bindWizardOwner()
     persistOnboardingConnectorsStep()
     setConnectorIndex(0)
     setCurrentStep(2)

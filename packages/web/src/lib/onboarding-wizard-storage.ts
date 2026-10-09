@@ -5,6 +5,7 @@ import { clearFirstVisitTourCompleted } from './first-visit-tour-storage.js'
 export const ONBOARDING_WIZARD_STEP_KEY = 'aiyracare.onboarding_wizard_step'
 export const ONBOARDING_FAMILY_WIZARD_KEY = 'aiyracare.onboarding_family_wizard'
 export const ONBOARDING_JUST_COMPLETED_KEY = 'aiyracare.onboarding_just_completed'
+export const ONBOARDING_WIZARD_OWNER_SUB_KEY = 'aiyracare.onboarding_wizard_owner_sub'
 
 export type OnboardingFamilyPhase = 'name' | 'members'
 
@@ -67,6 +68,32 @@ export function clearOnboardingFamilyWizard(): void {
 export function clearOnboardingWizardStep(): void {
   sessionStorage.removeItem(ONBOARDING_WIZARD_STEP_KEY)
   clearOnboardingFamilyWizard()
+}
+
+export function readOnboardingWizardOwnerSub(): string | null {
+  if (typeof window === 'undefined') return null
+  return sessionStorage.getItem(ONBOARDING_WIZARD_OWNER_SUB_KEY)
+}
+
+export function persistOnboardingWizardOwnerSub(authUserId: string): void {
+  if (typeof window === 'undefined') return
+  sessionStorage.setItem(ONBOARDING_WIZARD_OWNER_SUB_KEY, authUserId)
+}
+
+/** Clears all onboarding wizard session keys (step, family sub-wizard, banner flag, owner binding). */
+export function clearOnboardingWizardStorage(): void {
+  if (typeof window === 'undefined') return
+  clearOnboardingWizardStep()
+  clearOnboardingJustCompleted()
+  sessionStorage.removeItem(ONBOARDING_WIZARD_OWNER_SUB_KEY)
+}
+
+/** After auth sync: drop wizard state that belonged to another Supabase user. */
+export function reconcileOnboardingWizardStorageForAuthUser(authUserId: string): void {
+  const stored = readOnboardingWizardOwnerSub()
+  if (stored !== null && stored !== authUserId) {
+    clearOnboardingWizardStorage()
+  }
 }
 
 export function markOnboardingJustCompleted(): void {

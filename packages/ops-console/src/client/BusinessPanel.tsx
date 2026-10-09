@@ -90,6 +90,7 @@ const integrationColumns: ColumnsType<BizIntegrationPortalRow> = [
   { title: 'Links', dataIndex: 'distinctLinks', key: 'distinctLinks', width: 80 },
 ]
 
+// Sessões = distinct product_events.session_id (browser); Contas = distinct account_id (auth). Ver docs/OBSERVABILITY.md.
 const featureColumns: ColumnsType<BizFeatureUsageRow> = [
   {
     title: 'Feature',

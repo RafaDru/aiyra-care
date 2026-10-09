@@ -1,10 +1,16 @@
+import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Spin } from 'antd'
 import { useAuth } from '../contexts/AuthContext.js'
+import { persistOnboardingWizardOwnerSub } from '../lib/onboarding-wizard-storage.js'
 import { OnboardingLayout } from '../layouts/OnboardingLayout.js'
 import { OnboardingWizard } from '../features/onboarding/OnboardingWizard.js'
 export function OnboardingPage() {
-  const { configured, loading } = useAuth()
+  const { configured, loading, authUserId } = useAuth()
+
+  useEffect(() => {
+    if (authUserId) persistOnboardingWizardOwnerSub(authUserId)
+  }, [authUserId])
 
   if (!configured) return <Navigate to="/" replace />
 
