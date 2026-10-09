@@ -22,7 +22,9 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 3. **Onboarding passo 1:** perfil titular (identidade → endereço ViaCEP + celular obrigatório; nome social opcional) → `POST /auth/complete-profile`
 4. **Onboarding passo 2 (loop):** para cada família — nome (`POST /care-circles`; 1º círculo vincula titular) → membros (`POST /patients` + `POST /care-circles/:id/patients`) → **Adicionar outra família** ou **Ir para o início**; gestão contínua em `/family`
 
-**Nota (famílias + conectores):** após `complete-profile`, o wizard permanece em `/onboarding` até concluir ≥1 círculo e os passos opcionais de conectores (SUS, convênios, labs, hospitais — deep link/modal, sem scraper embutido). Estado em `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step` + `aiyracare.onboarding_family_wizard`). Recarga reconcilia com `GET /care-circles`.
+**Famílias + conectores (opcionais após perfil):** `POST /auth/complete-profile` define `needsProfile: false` e libera o dashboard (`RequireCompliance` só força `/onboarding` enquanto `needsProfile`). O usuário **pode** continuar em `/onboarding` para criar círculos e percorrer conectores (SUS, convênios, labs, hospitais — deep link/modal, sem scraper embutido), mas não é obrigatório para entrar no app.
+
+**Higiene de sessão (wizard v2):** estado em `sessionStorage` via `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step`, `aiyracare.onboarding_family_wizard`, `aiyracare.onboarding_just_completed`, `aiyracare.onboarding_wizard_owner_sub`). Limpeza no logout e quando o Supabase `user.id` do sync não coincide com o owner gravado; ver [`onboarding-wizard-v2.md`](./onboarding-wizard-v2.md) e [`onboarding-session-hygiene-spec.md`](./onboarding-session-hygiene-spec.md). Recarga reconcilia família com `GET /care-circles`.
 
 **Pós-onboarding:** banner leve no dashboard (`PostOnboardingWelcomeBanner`, flag `aiyracare.onboarding_just_completed` em session até dismiss) — distinto do drawer `first-visit-guided-ux`, que aguarda o banner ou abre via «Ver primeiros passos».
 
@@ -43,6 +45,7 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 | Gap | Notas |
 |-----|--------|
 | Confirmação de e-mail Supabase | Copy informativa na UI; fluxo não bloqueia se `email_confirm` desabilitado no projeto |
+| Wizard `sessionStorage` entre contas (resolvido 2026-10-09) | Higiene em `AuthContext` + owner sub — spec `onboarding-session-hygiene-spec.md` |
 
 ## QA
 
