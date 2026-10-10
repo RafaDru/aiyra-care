@@ -1,4 +1,64 @@
-/* Evita coluna flex full-width entre nome e tag «Você» no dropdown do Select. */
+/* Closed selector + dropdown: nome e tag «Você» na mesma linha (Ant Design flex column no selection-item). */
+.ava-patient-lens-select.ant-select {
+  max-width: 100%;
+}
+
+.ava-patient-lens-select--block.ant-select {
+  width: 100%;
+  max-width: 100%;
+}
+
+.ava-patient-lens-select.ant-select:not(.ant-select-disabled) {
+  align-items: center;
+}
+
+.ava-patient-lens-select .ant-select-selector {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.ava-patient-lens-select .ant-select-selection-wrap,
+.ava-patient-lens-select .ant-select-selection-search {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+}
+
+.ava-patient-lens-select .ant-select-selection-item {
+  display: inline-flex !important;
+  flex-direction: row;
+  align-items: center;
+  align-self: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  height: auto !important;
+  line-height: 1.5715;
+}
+
+.ava-patient-lens-select .ant-select-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+}
+
+.ava-patient-lens-select .ant-select-content-value {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ava-patient-lens-select .ant-select-selection-item .ant-tag,
+.ava-patient-lens-select .ant-select-content .ant-tag {
+  flex-shrink: 0;
+  align-self: center;
+}
+
 .ava-patient-lens-select .ant-select-item-option-content {
   display: block;
 }
@@ -14,11 +74,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .ava-patient-lens-select__selector {
   display: inline-flex;
+  flex-direction: row;
   align-items: center;
   gap: 6px;
   max-width: 100%;
+  min-width: 0;
 }

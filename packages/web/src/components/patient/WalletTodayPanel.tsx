@@ -188,6 +188,7 @@ export function WalletTodayPanel({
             {viewingSelf ? t('walletToday.lensLabelSelf') : t('walletToday.lensLabel')}
           </Text>
           <AvaPatientLensSelect
+            block
             patients={lensPatients}
             value={patientId}
             onChange={onPatientChange!}
