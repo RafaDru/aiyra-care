@@ -1,0 +1,10 @@
+/* Registro rápido: evita que o Select de lente estique na coluna flex do Drawer (Ant Design Space). */
+.quick-capture-sheet__patient .ava-patient-lens-select.ant-select {
+  align-self: flex-start;
+  width: 100%;
+  max-width: 100%;
+}
+
+.quick-capture-sheet__patient .ava-patient-lens-select .ant-select-selector {
+  min-height: 24px;
+}
