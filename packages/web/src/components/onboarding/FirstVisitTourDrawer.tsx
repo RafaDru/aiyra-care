@@ -22,6 +22,7 @@ import { COMPLIANCE_ACCEPT_PATH } from '../../lib/legal-paths.js'
 import { isOnboardingJustCompleted } from '../../lib/onboarding-wizard-storage.js'
 import { subscribePostOnboardingWelcomeDismissed } from '../../lib/onboarding-welcome-bus.js'
 import { subscribeFirstVisitTourOpen } from '../../lib/first-visit-tour-bus.js'
+import './first-visit-tour-drawer.css'
 
 const { Paragraph, Text } = Typography
 
@@ -122,6 +123,8 @@ export function FirstVisitTourDrawer() {
 
   return (
     <Drawer
+      rootClassName="first-visit-tour-drawer"
+      push={false}
       title={t('firstVisitTour.title')}
       placement="right"
       width={360}

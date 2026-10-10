@@ -1,0 +1,14 @@
+/* Primeiros passos — evita scroll horizontal na página (push do Drawer desligado no TSX). */
+.first-visit-tour-drawer .ant-drawer-content-wrapper {
+  max-width: min(360px, 100vw);
+  overflow-x: hidden;
+}
+
+.first-visit-tour-drawer .ant-drawer-body {
+  overflow-x: hidden;
+}
+
+.first-visit-tour-drawer .ant-steps-vertical .ant-steps-item-title,
+.first-visit-tour-drawer .ant-steps-vertical .ant-steps-item-description {
+  overflow-wrap: anywhere;
+}
