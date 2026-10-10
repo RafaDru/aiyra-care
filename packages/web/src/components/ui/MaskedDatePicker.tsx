@@ -53,12 +53,15 @@ export function MaskedDatePicker({ value, onChange, placeholder, ...rest }: Prop
           return
         }
         if (text.length < 10) {
+          onChange?.(null)
           setText(formatDayjsToMask(value))
           return
         }
         const parsed = parseMaskedDate(text)
-        if (!parsed) setText(formatDayjsToMask(value))
-        else onChange?.(parsed)
+        if (!parsed) {
+          onChange?.(null)
+          setText(formatDayjsToMask(value))
+        } else onChange?.(parsed)
       }}
     />
   )

@@ -47,6 +47,7 @@ import {
   type DashboardLayoutSection,
 } from '../lib/dashboard/group-patients-for-dashboard.js'
 import { FAMILY_HUB_PATH } from '../lib/family-paths.js'
+import { patientBirthDateFormRules } from '../lib/patient-birth-date-form-rules.js'
 
 const { Title } = Typography
 
@@ -120,7 +121,11 @@ export function Dashboard() {
   const handleCreate = async () => {
     try {
       const values = await form.validateFields()
-      const birthDate = values.birthDate.toDate()
+      const birthDate = values.birthDate?.toDate?.()
+      if (!birthDate || Number.isNaN(birthDate.getTime())) {
+        form.setFields([{ name: 'birthDate', errors: [t('patient.form.birthDateInvalid')] }])
+        return
+      }
       if (isMinorBirthDate(birthDate)) {
         await api.compliance.accept({ kinds: ['minor_guardian_consent'] })
       }
@@ -146,7 +151,7 @@ export function Dashboard() {
       load()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      message.error(err instanceof Error ? err.message : t('common.unknownError'))
+      message.error(t('patient.createError'))
     }
   }
 
@@ -337,7 +342,7 @@ export function Dashboard() {
           <Form.Item name="name" label={t('patient.form.name')} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="birthDate" label={t('patient.form.birthDate')} rules={[{ required: true }]}>
+          <Form.Item name="birthDate" label={t('patient.form.birthDate')} rules={patientBirthDateFormRules(t)}>
             <MaskedDatePicker style={{ width: '100%' }} />
           </Form.Item>
           {showCareCircleField && (

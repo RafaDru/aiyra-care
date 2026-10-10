@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload, Badge } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
+import { patientBirthDateFormRules } from '../../lib/patient-birth-date-form-rules.js'
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
 import dayjs from 'dayjs'
@@ -707,7 +708,7 @@ export function PatientDetail() {
       <Modal title={t('patient.editModalTitle')} open={editOpen} onOk={handleEditSave} onCancel={() => setEditOpen(false)} okText={t('common.save')} cancelText={t('common.cancel')} width={560}>
         <Form form={editForm} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="name" label={t('patient.form.name')} rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="birthDate" label={t('patient.form.birthDate')} rules={[{ required: true }]}>
+          <Form.Item name="birthDate" label={t('patient.form.birthDate')} rules={patientBirthDateFormRules(t)}>
             <MaskedDatePicker style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="gender" label={t('patient.form.gender')}>
