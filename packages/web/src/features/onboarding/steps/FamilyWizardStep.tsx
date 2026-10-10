@@ -7,6 +7,7 @@ import { MaskedDatePicker } from '../../../components/ui/MaskedDatePicker.js'
 import { MinorGuardianConsentFormItem } from '../../../components/legal/MinorGuardianConsentField.js'
 import { api } from '../../../lib/api.js'
 import { isMinorBirthDate } from '../../../lib/patient-age.js'
+import { validateBirthDateField } from '../onboarding-validation.js'
 import { formatCpfInput } from '../../../lib/input-masks.js'
 import { trackProductEvent } from '../../../lib/product-events.js'
 import { isApiResponseError } from '../../../lib/api-response-error.js'
@@ -338,7 +339,14 @@ export function FamilyWizardStep({
         <Form.Item name="name" label={t('onboarding.dependentName')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
           <Input size="large" />
         </Form.Item>
-        <Form.Item name="birthDate" label={t('onboarding.birthDate')} rules={[{ required: true, message: t('onboarding.birthDateRequired') }]}>
+        <Form.Item
+          name="birthDate"
+          label={t('onboarding.birthDate')}
+          rules={[
+            { required: true, message: t('onboarding.birthDateRequired') },
+            { validator: (_, value) => validateBirthDateField(value, t) },
+          ]}
+        >
           <MaskedDatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="gender" label={t('onboarding.gender')}>

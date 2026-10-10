@@ -629,6 +629,7 @@
     "deleteConfirm": "Remover este perfil de saúde?",
     "notFound": "Perfil não encontrado",
     "createSuccess": "Perfil adicionado à família",
+    "createError": "Não foi possível adicionar o perfil. Tente de novo.",
     "loadListFailed": "Falha ao carregar os perfis",
     "loadListErrorTitle": "Não foi possível carregar sua família",
     "loadListRetry": "Tentar novamente",

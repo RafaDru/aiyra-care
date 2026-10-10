@@ -151,7 +151,7 @@ export function Dashboard() {
       load()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
-      message.error(err instanceof Error ? err.message : t('common.unknownError'))
+      message.error(t('patient.createError'))
     }
   }
 

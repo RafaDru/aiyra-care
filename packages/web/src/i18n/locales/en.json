@@ -629,6 +629,7 @@
     "deleteConfirm": "Remove this health profile?",
     "notFound": "Profile not found",
     "createSuccess": "Profile added to your family",
+    "createError": "Could not add the profile. Please try again.",
     "loadListFailed": "Could not load profiles",
     "loadListErrorTitle": "Could not load your family",
     "loadListRetry": "Try again",
