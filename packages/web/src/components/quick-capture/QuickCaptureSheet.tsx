@@ -28,6 +28,7 @@ import { uploadDocumentWithProgress } from '../../lib/document-upload.js'
 import { trackProductEvent } from '../../lib/product-events.js'
 import { AvaPatientLensSelect } from '../ava/AvaPatientLensSelect.js'
 import type { QuickCaptureKind } from '../../lib/quick-capture-bus.js'
+import './quick-capture-sheet.css'
 
 const { Text } = Typography
 
@@ -69,7 +70,6 @@ export function QuickCaptureSheet({
   const [uploading, setUploading] = useState(false)
   const [form] = Form.useForm()
 
-  const activePatient = patients.find((p) => p.id === patientId) ?? null
   const threadOptions = useMemo(
     () => threads.map((th) => ({ value: th.id, label: th.title })),
     [threads],
@@ -347,12 +347,13 @@ export function QuickCaptureSheet({
       }
     >
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <div>
+        <div className="quick-capture-sheet__patient">
           <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
             {t('quickCapture.patientLabel')}
           </Text>
           {patients.length > 0 && patientId ? (
             <AvaPatientLensSelect
+              block
               patients={patients}
               value={patientId}
               onChange={onPatientChange}
@@ -360,11 +361,6 @@ export function QuickCaptureSheet({
             />
           ) : (
             <Text>{t('quickCapture.noPatients')}</Text>
-          )}
-          {activePatient && (
-            <Text type="secondary" style={{ display: 'block', marginTop: 4, fontSize: 12 }}>
-              {activePatient.name}
-            </Text>
           )}
         </div>
 
