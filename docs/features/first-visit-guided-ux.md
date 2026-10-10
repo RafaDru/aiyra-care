@@ -23,7 +23,7 @@ Humaniza o primeiro contato após onboarding: disclaimer de apoio familiar com t
 1. **Disclaimer** — painel Apoio familiar mostra texto i18n acolhedor; API mantém equivalente para Ava.
 2. **Sem alertas (primeira vez)** — paciente sem medidas/medicações/alergias: mensagem de boas-vindas com sugestões (cadastrar familiar, registro rápido, plano).
 3. **Sem alertas (retorno)** — com histórico clínico: mensagem anterior sobre continuar registrando para a consulta.
-4. **Guia Primeiros passos** — drawer lateral após login (exceto login/onboarding/compliance); dismissível; persiste `first_visit_tour_completed` em localStorage + `product_events`.
+4. **Guia Primeiros passos** — drawer lateral após login (exceto login/onboarding/compliance); dismissível; persiste `first_visit_tour_completed` em localStorage + `product_events`. Drawer sem `push` do Ant Design (evita barra de rolagem horizontal na página).
 5. **Alinhamento pós-onboarding (2026-10)** — banner `PostOnboardingWelcomeBanner` tem prioridade; o drawer só abre após dismiss do banner ou via CTA «Ver primeiros passos». Dashboard sem perfis: empty state com hint acolhedor (`patient.emptyFamilyWelcomeHint`).
 
 ## Superfície técnica
