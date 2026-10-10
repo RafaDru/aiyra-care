@@ -18,7 +18,7 @@ Card **Dia a dia da família** no dashboard (Início) apresenta os três fluxos 
 2. **Registrar agora** abre o sheet global (ou modal de novo perfil se a família está vazia).
 3. **Ver o bloco Hoje** rola até `WalletTodayPanel` (quando há perfil na lente).
 4. **Preparar consulta** abre o wizard «Levar na consulta».
-5. Bloco **Hoje** no Início prioriza o perfil **Você** (titular) até escolher outro familiar no seletor; copy «Seu dia» / vazio próprio quando a lente é o titular.
+5. Bloco **Hoje** no Início prioriza o perfil **Você** (titular) até escolher outro familiar no seletor; copy «Seu dia» / «Seu perfil» / vazio próprio quando a lente é o titular; seletor de lente em linha (nome + tag «Você»).
 
 ## Superfície técnica
 

@@ -1,5 +1,6 @@
 import { Select, Tag } from 'antd'
 import type { SelectProps } from 'antd'
+import { clsx } from 'clsx'
 import { useTranslation } from 'react-i18next'
 import type { Patient } from '../../lib/api.types.js'
 import './ava-patient-lens-select.css'
@@ -11,6 +12,8 @@ interface Props {
   /** Rota fixa a um paciente — seletor ainda permite override com aviso visual. */
   routePatientId?: string | null
   disabled?: boolean
+  /** Largura total do controle (ex.: bloco Hoje no dashboard). */
+  block?: boolean
 }
 
 function patientFirstName(name: string): string {
@@ -43,6 +46,7 @@ export function AvaPatientLensSelect({
   onChange,
   routePatientId: _routePatientId,
   disabled,
+  block = false,
 }: Props) {
   const { t } = useTranslation()
   const active = patients.find((p) => p.id === value) ?? null
@@ -64,14 +68,18 @@ export function AvaPatientLensSelect({
 
   return (
     <Select
-      className="ava-patient-lens-select"
+      className={clsx('ava-patient-lens-select', block && 'ava-patient-lens-select--block')}
       size="small"
       value={value}
       disabled={disabled || patients.length <= 1}
       onChange={onChange}
-      popupMatchSelectWidth={false}
+      popupMatchSelectWidth={block}
       labelRender={labelRender}
-      style={{ minWidth: 160, maxWidth: 280 }}
+      style={
+        block
+          ? { width: '100%', maxWidth: '100%', minWidth: 0 }
+          : { minWidth: 160, maxWidth: 280 }
+      }
       options={patients.map((p) => ({
         value: p.id,
         label: optionPlainLabel(p),
