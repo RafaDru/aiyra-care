@@ -662,6 +662,10 @@
     "form": {
       "name": "Name",
       "birthDate": "Date of birth",
+      "birthDateRequired": "Enter date of birth",
+      "birthDateInvalid": "Invalid date of birth.",
+      "birthDateFuture": "That date is in the future — check day, month, and year.",
+      "birthDateTooOld": "Use a date of birth from 1900 onward.",
       "gender": "Sex",
       "bloodType": "Blood type",
       "weight": "Weight",

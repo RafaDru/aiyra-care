@@ -19,7 +19,7 @@ Proposta: [`dashboard-family-home-redesign-2026-10-08.md`](../product/dashboard-
 - Título `dashboard.peopleTitle` («Quem você cuida») + subtítulo curto.
 - Default de agrupamento: **por idade** com 1 círculo; **por família** com ≥2; persistência `localStorage` `aiyracare.dashboard_group_mode`.
 - Perfis sem círculo: grupo «Sem família definida» + link para `/family`.
-- CTA **Adicionar pessoa** (secundário); modal com select de família quando ≥2 círculos.
+- CTA **Adicionar pessoa** (secundário); modal com select de família quando ≥2 círculos; validação de nascimento alinhada ao onboarding (`patientBirthDateFormRules`).
 - Tags de família (cor por círculo) nos modos idade e A–Z.
 
 ## Superfície técnica

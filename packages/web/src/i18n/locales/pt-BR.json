@@ -662,6 +662,10 @@
     "form": {
       "name": "Nome",
       "birthDate": "Data de Nascimento",
+      "birthDateRequired": "Informe a data de nascimento",
+      "birthDateInvalid": "Data de nascimento inválida.",
+      "birthDateFuture": "Essa data ainda não chegou — confira dia, mês e ano de nascimento.",
+      "birthDateTooOld": "Use uma data de nascimento a partir de 1900.",
       "gender": "Sexo",
       "bloodType": "Tipo Sanguíneo",
       "weight": "Peso",
