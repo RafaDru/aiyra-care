@@ -472,7 +472,13 @@ async function main() {
       })
     }
     try {
-      return await runStackAction(req, action)
+      const result = await runStackAction(req, action)
+      if (action === 'start' || action === 'restart') {
+        await runProbeCycle()
+        const metricsPayload = await metricsService.getMetrics()
+        await runtimeService.applyFromOps(metricsPayload.alerts, metricsPayload.metrics.probe)
+      }
+      return result
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Falha no stack'
       if (msg.includes('Chave ops')) return reply.status(403).send({ error: msg })

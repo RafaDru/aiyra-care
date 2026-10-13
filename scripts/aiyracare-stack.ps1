@@ -100,8 +100,17 @@ function Get-StackStatus {
   }
 }
 
+function Resolve-StackHealthWaitSec {
+  $default = 45
+  $raw = $env:AIYRA_STACK_HEALTH_WAIT_SEC
+  if (-not $raw) { return $default }
+  $parsed = 0
+  if ([int]::TryParse($raw, [ref]$parsed) -and $parsed -gt 0) { return $parsed }
+  return $default
+}
+
 function Wait-ForStack {
-  param([int]$MaxSeconds = 20)
+  param([int]$MaxSeconds = (Resolve-StackHealthWaitSec))
   for ($i = 0; $i -lt $MaxSeconds; $i++) {
     Start-Sleep 1
     $s = Get-StackStatus
@@ -146,7 +155,7 @@ function Start-AiyraStack {
       status = $before
     }
   }
-  $after = Wait-ForStack 25
+  $after = Wait-ForStack
   return @{
     action = 'start'
     message = if ($after.api.up -and $after.web.up) { 'Stack iniciado' } else { 'Stack parcialmente iniciado - verifique logs' }
@@ -171,7 +180,7 @@ function Restart-AiyraStack {
   Start-Sleep 2
   Start-AiyraApi
   Start-AiyraWeb
-  $after = Wait-ForStack 25
+  $after = Wait-ForStack
   return @{
     action = 'restart'
     message = if ($after.api.up -and $after.web.up) { 'Stack reiniciado' } else { 'Reinicio incompleto - verifique logs' }
