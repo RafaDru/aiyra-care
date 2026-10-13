@@ -38,7 +38,7 @@ Pipeline ops de ponta a ponta:
 | **Aberto** | `open` | Insert fila / incidente criado |
 | **Encaminhado** | `forwarded` | Webhook investigador HTTP 2xx |
 | **Em fila** | `queued_worker` | Worker local claim do outbox |
-| **Em triagem** | `in_triage` | Automation step 0: `POST /api/analysis-queue/:id/triage-started` (sem tokens LLM) quando o run inicia; legado: agente + `investigating` |
+| **Em triagem** | `in_triage` | Servidor após webhook 2xx (auto `triage-started`, D9) ou Automation step 0 `POST /api/analysis-queue/:id/triage-started` (backup/idempotente); legado: agente + `investigating` |
 | **Falha** | `dispatch_failed` | Outbox `dead` (max tentativas) ou falha do worker com pipeline em dispatch |
 | *(interno)* Triado | `triaged` | Callback triagem + defeito criado/vinculado |
 | **Resolvido** | `resolved` | DEF vinculado em `fixed` (manual ou webhook R4) |
@@ -155,7 +155,7 @@ SQL canônico: `database/relational/071_platform_defects.sql` … `076_incident_
 
 ## 4. Outbox + worker
 
-Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → webhook síncrono → outbox `forwarded` + `incident_pipeline_status=forwarded` → **Automation HTTP** `triage-started` → `in_triage`; falha → outbox permanece `pending` com `attempt_count++`.
+Após enqueue investigador: `INSERT incident_dispatch_outbox` (`pending`) → webhook síncrono → outbox `forwarded` + auto-promoção servidor → `in_triage` (mesma lógica que `triage-started`; Automation HTTP opcional como backup); falha → outbox permanece `pending` com `attempt_count++`.
 
 Payload investigador inclui `analysisQueue.triageStartedUrl` (derivado do ops-console + `analysisQueue.id`), espelhando `callbackUrl` — ver `resolveInvestigatorTriageStartedUrl` em `ops-analysis-callback-url.ts`.
 

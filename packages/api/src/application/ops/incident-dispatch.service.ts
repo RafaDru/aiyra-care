@@ -40,6 +40,7 @@ import {
 } from './incident-dispatch-payload.helper.js'
 import { triageBatchIntervalMs } from './ch-batch-cadence.config.js'
 import { notifyIncidentBoardById } from './incident-board-notify.js'
+import { applyMarkTriageStarted } from './ops-mark-triage-started.core.js'
 
 const DISPATCH_KIND = 'triage_v1'
 const MAX_OUTBOX_ATTEMPTS = 8
@@ -177,8 +178,7 @@ export class IncidentDispatchService {
     dispatch: SupportInvestigatorDispatchResult | OpsAlertInvestigatorDispatchResult,
   ): Promise<void> {
     if (dispatch.outcome === 'sent') {
-      await this.outbox.markForwarded(outboxId)
-      await this.setPipelineAndNotify(incidentId, 'forwarded')
+      await this.completeSuccessfulDispatch(outboxId, incidentId)
       return
     }
     if (dispatch.outcome === 'failed') {
@@ -205,6 +205,20 @@ export class IncidentDispatchService {
   ): Promise<void> {
     await this.queueRepo.setIncidentPipelineStatus(incidentId, status)
     await notifyIncidentBoardById(this.queueRepo, incidentId).catch(() => undefined)
+  }
+
+  /** Outbox forwarded + pipeline `in_triage` (same as Automation HTTP triage-started). */
+  private async completeSuccessfulDispatch(outboxId: string, incidentId: string): Promise<void> {
+    await this.outbox.markForwarded(outboxId)
+    await this.setPipelineAndNotify(incidentId, 'forwarded')
+    const triage = await applyMarkTriageStarted(this.queueRepo, incidentId)
+    if (!triage.ok) {
+      console.warn(
+        `[incident-dispatch] auto triage-started incident=${incidentId} error=${triage.error}${
+          'message' in triage ? ` message=${triage.message}` : ''
+        }`,
+      )
+    }
   }
 
   private async recordWorkerDispatchFailure(
@@ -527,9 +541,7 @@ export class IncidentDispatchService {
         }
 
         if (dispatch.outcome === 'sent') {
-          await this.outbox.markForwarded(row.id)
-          await this.setPipelineAndNotify(row.incidentId, 'forwarded')
-          await this.queueRepo.markInvestigating(row.incidentId)
+          await this.completeSuccessfulDispatch(row.id, row.incidentId)
           sent += 1
         } else if (dispatch.outcome === 'failed') {
           await this.recordWorkerDispatchFailure(row.id, row.incidentId, dispatch.error)
