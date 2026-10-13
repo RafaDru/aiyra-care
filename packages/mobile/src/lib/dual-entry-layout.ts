@@ -3,6 +3,10 @@ import { AIYRACARE_TOKENS } from '@aiyra-care/design-tokens'
 /** Offset vertical compartilhado pelos FABs globais (acima da tab bar). */
 export const DUAL_ENTRY_FAB_BOTTOM_OFFSET = 56
 
+/** Padding inferior de listas/scroll no shell autenticado (FABs + tab bar). */
+export const DUAL_ENTRY_SCROLL_BOTTOM_PADDING =
+  DUAL_ENTRY_FAB_BOTTOM_OFFSET + 56 + AIYRACARE_TOKENS.padding
+
 /** Espaçamento horizontal dos FABs e chips de registro rápido (paridade `design-tokens`). */
 export const DUAL_ENTRY_EDGE_INSET = AIYRACARE_TOKENS.padding
 

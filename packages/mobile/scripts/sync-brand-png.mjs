@@ -3,7 +3,7 @@
  * Requer Inter (600) — mesmo do wordmark no SVG — via @expo-google-fonts/inter.
  * Uso: node packages/mobile/scripts/sync-brand-png.mjs
  */
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { copyFileSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Resvg } from '@resvg/resvg-js'
@@ -37,6 +37,9 @@ const PAIRS = [
   ['logo-square-dark.svg', 'logo-square-dark.png'],
 ]
 
+/** PNG estático do web — copiado sem raster (já otimizado). */
+const PNG_COPY = ['ava-avatar.png']
+
 const SCALE = 3
 
 for (const [svgName, pngName] of PAIRS) {
@@ -53,4 +56,14 @@ for (const [svgName, pngName] of PAIRS) {
   const png = resvg.render().asPng()
   writeFileSync(join(outDir, pngName), png)
   console.log(`wrote ${pngName} (${png.length} bytes)`)
+}
+
+for (const pngName of PNG_COPY) {
+  const src = join(webBrand, pngName)
+  if (!existsSync(src)) {
+    console.warn(`skip copy ${pngName} — missing in web brand`)
+    continue
+  }
+  copyFileSync(src, join(outDir, pngName))
+  console.log(`copied ${pngName}`)
 }

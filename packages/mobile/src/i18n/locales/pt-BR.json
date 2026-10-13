@@ -35,7 +35,20 @@
     "rememberMeHint": "Desligado: você precisará entrar de novo ao fechar o app.",
     "biometricUnlock": "Desbloquear com biometria",
     "biometricUnlockHint": "Exige manter conectado. Ao reabrir o app, use Face ID ou digital.",
-    "biometricNeedsRemember": "Ative \"Manter conectado\" para usar biometria."
+    "biometricNeedsRemember": "Ative \"Manter conectado\" para usar biometria.",
+    "signInRequired": "Faça login para ver seus perfis."
+  },
+  "nav": {
+    "home": "Início"
+  },
+  "dashboard": {
+    "peopleTitle": "Quem você cuida",
+    "peopleSubtitle": "Perfis de saúde no seu dia a dia",
+    "ageBand": {
+      "children": "Crianças",
+      "adolescents": "Adolescentes",
+      "adults": "Adultos"
+    }
   },
   "appLock": {
     "title": "Desbloquear AiyraCare",
@@ -101,6 +114,13 @@
   },
   "patient": {
     "you": "Você",
+    "addPerson": "Adicionar pessoa",
+    "emptyFamily": "Sua família ainda não tem perfis de saúde cadastrados.",
+    "loadListFailed": "Falha ao carregar os perfis",
+    "months": "meses",
+    "age": "anos",
+    "male": "Masculino",
+    "female": "Feminino",
     "home": {
       "add": "Adicionar perfil",
       "addTitle": "Novo perfil de saúde",

@@ -35,7 +35,20 @@
     "rememberMeHint": "When off, you will need to sign in again after closing the app.",
     "biometricUnlock": "Unlock with biometrics",
     "biometricUnlockHint": "Requires keep signed in. When reopening the app, use Face ID or fingerprint.",
-    "biometricNeedsRemember": "Turn on \"Keep me signed in\" to use biometrics."
+    "biometricNeedsRemember": "Turn on \"Keep me signed in\" to use biometrics.",
+    "signInRequired": "Sign in to see your health profiles."
+  },
+  "nav": {
+    "home": "Home"
+  },
+  "dashboard": {
+    "peopleTitle": "Who you care for",
+    "peopleSubtitle": "Health profiles in your day-to-day",
+    "ageBand": {
+      "children": "Children",
+      "adolescents": "Teens",
+      "adults": "Adults"
+    }
   },
   "appLock": {
     "title": "Unlock AiyraCare",
@@ -101,6 +114,13 @@
   },
   "patient": {
     "you": "You",
+    "addPerson": "Add person",
+    "emptyFamily": "Your family does not have health profiles yet.",
+    "loadListFailed": "Could not load profiles",
+    "months": "months",
+    "age": "years",
+    "male": "Male",
+    "female": "Female",
     "home": {
       "add": "Add profile",
       "addTitle": "New health profile",

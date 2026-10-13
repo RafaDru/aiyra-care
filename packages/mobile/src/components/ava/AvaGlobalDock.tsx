@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { AvaOrbButton } from './AvaOrbButton'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AvaChatPanel } from './AvaChatPanel'
@@ -11,8 +12,6 @@ import { useAvaPatientLens } from '@/hooks/useAvaPatientLens'
 import {
   DUAL_ENTRY_EDGE_INSET,
   DUAL_ENTRY_FAB_BOTTOM_OFFSET,
-  DUAL_ENTRY_FAB_RADIUS,
-  DUAL_ENTRY_FAB_SHADOW,
   DUAL_ENTRY_Z_INDEX_AVA,
 } from '@/lib/dual-entry-layout'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
@@ -76,23 +75,17 @@ export function AvaGlobalDock() {
 
   return (
     <>
-      <Pressable
-        accessibilityRole="button"
+      <AvaOrbButton
+        size={56}
         accessibilityLabel={t('ava.openChat')}
         onPress={() => setOpen(true)}
-        style={[
-          styles.fab,
-          DUAL_ENTRY_FAB_SHADOW,
-          {
-            backgroundColor: tokens.colorPrimary,
-            bottom: Math.max(insets.bottom, 16) + DUAL_ENTRY_FAB_BOTTOM_OFFSET,
-            right: DUAL_ENTRY_EDGE_INSET,
-            borderRadius: DUAL_ENTRY_FAB_RADIUS,
-          },
-        ]}
-      >
-        <Text style={styles.fabLabel}>{t('ava.title')}</Text>
-      </Pressable>
+        style={{
+          position: 'absolute',
+          bottom: Math.max(insets.bottom, 16) + DUAL_ENTRY_FAB_BOTTOM_OFFSET,
+          right: DUAL_ENTRY_EDGE_INSET,
+          zIndex: DUAL_ENTRY_Z_INDEX_AVA,
+        }}
+      />
 
       <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
         <View style={[styles.sheet, { backgroundColor: tokens.colorBgLayout, paddingTop: insets.top + 8 }]}>
@@ -143,15 +136,6 @@ export function AvaGlobalDock() {
 }
 
 const styles = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: DUAL_ENTRY_Z_INDEX_AVA,
-  },
-  fabLabel: { color: '#fff', fontWeight: '700', fontSize: 14 },
   sheet: { flex: 1, paddingHorizontal: 16, paddingBottom: 8 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   title: { fontSize: 22, fontWeight: '700' },
