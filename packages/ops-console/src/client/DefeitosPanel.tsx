@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Button,
@@ -588,27 +588,39 @@ function DefeitoDetail({
   const [incidents, setIncidents] = useState<
     Array<{ id: string; title: string; referenceCode: string | null }>
   >([])
-  const [loading, setLoading] = useState(true)
+  const [loadingIncidents, setLoadingIncidents] = useState(true)
   const [reviewBusy, setReviewBusy] = useState(false)
+  const onDefectUpdatedRef = useRef(onDefectUpdated)
+  onDefectUpdatedRef.current = onDefectUpdated
 
   const refreshDetail = useCallback(async () => {
     const d = await opsApi.platformDefectDetail(defectId)
     setIncidents(d.incidents)
-    onDefectUpdated(d.defect)
+    onDefectUpdatedRef.current(d.defect)
     return d.defect
-  }, [defectId, onDefectUpdated])
+  }, [defectId])
 
   useEffect(() => {
-    let cancelled = false
-    void refreshDetail()
-      .catch(() => undefined)
+    let active = true
+    setLoadingIncidents(true)
+    void opsApi
+      .platformDefectDetail(defectId)
+      .then((d) => {
+        if (!active) return
+        setIncidents(d.incidents)
+        onDefectUpdatedRef.current(d.defect)
+      })
+      .catch(() => {
+        if (!active) return
+        setIncidents([])
+      })
       .finally(() => {
-        if (!cancelled) setLoading(false)
+        if (active) setLoadingIncidents(false)
       })
     return () => {
-      cancelled = true
+      active = false
     }
-  }, [refreshDetail])
+  }, [defectId])
 
   const failure = row.lastCorrectionFailureDetails
   const showFailureBanner = defectHasCorrectionFailure(row)
@@ -618,7 +630,7 @@ function DefeitoDetail({
   const pipelineSteps = buildDefectCycleSteps(row)
 
   return (
-    <div style={{ maxWidth: 720 }}>
+    <div className="ch-defect-detail-body">
       <ChPipelineTimeline steps={pipelineSteps} />
       {showCiFailureBanner && (
         <Alert
@@ -750,7 +762,7 @@ function DefeitoDetail({
       <Paragraph>
         <Text strong>Incidentes vinculados</Text>
       </Paragraph>
-      {loading ? (
+      {loadingIncidents ? (
         <Text type="secondary">Carregando…</Text>
       ) : incidents.length === 0 ? (
         <Text type="secondary">Nenhum incidente vinculado ainda.</Text>

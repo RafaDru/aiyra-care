@@ -498,3 +498,48 @@ body {
     margin-right: 16px !important;
   }
 }
+
+.ch-defect-detail-body {
+  max-width: min(100%, 960px);
+}
+
+/* CH pipeline stepper — evita sobreposição Detectado / Em correção no expand DEF/INC */
+.ch-pipeline-timeline--detail .ch-pipeline-timeline__track {
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin: 0 -4px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.ch-pipeline-timeline--detail .ant-steps {
+  min-width: min(100%, 640px);
+}
+
+.ch-pipeline-timeline--detail .ant-steps-item {
+  flex: 1 1 0;
+  min-width: 72px;
+  padding-inline: 4px;
+}
+
+.ch-pipeline-timeline--detail .ant-steps-item-title {
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ch-pipeline-timeline__step-desc {
+  display: block;
+  font-size: 10px;
+  line-height: 1.3;
+  color: #64748b;
+  max-width: 9rem;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ch-pipeline-timeline--compact .ant-steps-item-title {
+  font-size: 11px;
+  white-space: nowrap;
+}

@@ -108,7 +108,17 @@ Checklist operacional pós-callback: [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECA
 | 3 | Aguardar CI verde; se falhar → corrigir na branch ou **reenfileirar correção** (G2) com notas da run |
 | 4 | (R3) Solicitar revisão agêntica antes do merge — agente **recomenda**, não mergeia |
 | 5 | **Merge aprovado** no GitHub (G3) |
-| 6 | CH → **Corrigido** (G4); incidentes ligados permanecem `triaged` |
+| 6 | CH → **Corrigido** (G4); incidentes ligados → **`resolved`** (084) |
+
+### Piloto QA-CYCLE (smoke, PR fake)
+
+Para encerrar **DEF-000005** (ou outro ref piloto) após smoke CI/G3 com PR de teste (`pull/999001`), sem merge em `main`:
+
+```bash
+npm run ch:qa-cycle-pilot-finalize -- --ref DEF-000005
+```
+
+Com `GITHUB_DEFECT_MERGE_WEBHOOK_SECRET`, dispara `POST /api/webhooks/github/defect-merge`; sem secret, fallback `PATCH` → `fixed` (`fixed_via=manual`) e resolução dos INC vinculados. Detalhe: [`investigations/2026-10-13-def-000005-qa-cycle-pilot-closure.md`](./investigations/2026-10-13-def-000005-qa-cycle-pilot-closure.md).
 
 ---
 
