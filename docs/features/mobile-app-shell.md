@@ -60,7 +60,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 - **Biometria** — `expo-local-authentication`; tela `/(auth)/unlock`; re-lock ao ir para background; toggle no login e em Configurações
 - **Logo PNG** — `npm run brand:sync-png` (mobile) rasteriza SVG do web com **Inter 600** (`@expo-google-fonts/inter`); rodar após mudar `packages/web/public/brand/*.svg`
 - **Rotas de paciente** — URL usa ref opaca `p_*` (mapa em memória no app); API continua com UUID. **Roadmap:** refs de sessão no BFF (estilo «handle» por login) para não expor IDs em tráfego de cliente — padrão comum em fintech; não substitui autorização no servidor.
-- Lista de pacientes via `GET /patients`, agrupada por faixa etária
+- Lista de pacientes via `GET /patients`, agrupada por faixa etária — UI alinhada ao web (`dashboard.peopleTitle`, cards com avatar/tags, Inter global)
 - Loading, erro com retry e pull-to-refresh na aba Início
 
 ## Marco M4 (família + compliance)

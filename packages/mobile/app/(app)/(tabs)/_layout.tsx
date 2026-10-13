@@ -1,12 +1,10 @@
 import { Tabs } from 'expo-router'
-import { Text } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { useTranslation } from 'react-i18next'
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 
-function TabIcon({ label }: { label: string }) {
-  return <Text style={{ fontSize: 18 }}>{label}</Text>
-}
-
 export default function TabLayout() {
+  const { t } = useTranslation()
   const { tokens } = useAiyraTheme()
   return (
     <Tabs
@@ -15,21 +13,28 @@ export default function TabLayout() {
         tabBarInactiveTintColor: tokens.colorTextSecondary,
         headerStyle: { backgroundColor: tokens.colorBgContainer },
         headerTintColor: tokens.colorPrimary,
-        tabBarStyle: { backgroundColor: tokens.colorBgContainer, borderTopColor: tokens.colorBorder },
+        tabBarStyle: {
+          backgroundColor: tokens.colorBgContainer,
+          borderTopColor: tokens.colorBorder,
+          height: 56,
+          paddingBottom: 6,
+        },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Início',
-          tabBarIcon: () => <TabIcon label="🏠" />,
+          title: t('nav.home'),
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Configurações',
-          tabBarIcon: () => <TabIcon label="⚙️" />,
+          title: t('settings.title'),
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
     </Tabs>

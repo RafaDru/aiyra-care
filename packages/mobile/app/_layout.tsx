@@ -13,6 +13,7 @@ import { AppearancePreferenceProvider } from '@/theme/AppearancePreferenceContex
 import { useAiyraTheme } from '@/theme/useAiyraTheme'
 import { logMobilePublicEnv } from '@/lib/log-mobile-public-env'
 import { getSupabaseOAuthRedirectUri } from '@/lib/oauth-redirect-url'
+import { useAiyraFonts } from '@/theme/useAiyraFonts'
 
 function RootStack() {
   const { tokens } = useAiyraTheme()
@@ -52,6 +53,7 @@ function AppProviders() {
 
 export default function RootLayout() {
   const [i18nReady, setI18nReady] = useState(false)
+  const fontsLoaded = useAiyraFonts()
 
   useEffect(() => {
     if (__DEV__) {
@@ -75,7 +77,7 @@ export default function RootLayout() {
     void bootI18n.finally(() => setI18nReady(true))
   }, [])
 
-  if (!i18nReady) {
+  if (!i18nReady || !fontsLoaded) {
     return (
       <SafeAreaProvider>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>

@@ -34,7 +34,7 @@ Registrar PASS/FAIL antes do smoke manual.
 | 1b | Abrir app sem sessão | Tela **welcome** → Entrar ou Criar conta | |
 | 2a | Alternar **Criar conta** → cadastro e-mail/senha + aceite legal | Conta criada ou e-mail de confirmação (Supabase) | |
 | 2b | Login **e-mail/senha** (conta QA) | Lista Início com pacientes | |
-| 2c | Na aba **Início** (lista de pacientes) | FAB **+** (inferior esquerdo) e FAB **Ava** (inferior direito) visíveis acima da tab bar | |
+| 2c | Na aba **Início** (lista de pacientes) | Título **Quem você cuida**; FAB **+** (inferior esquerdo) e **orb Ava** (avatar, inferior direito) acima da tab bar | |
 | 2d | FAB **+** → kind **Medicação** ou **Agenda** → salvar (conta demo) | Toast «Registro salvo»; sem «Em breve» | |
 | 2e | FAB **+** → kind **Documento** → enviar PDF ou imagem pequena | Upload conclui com sucesso ou erro de rede claro | |
 | 3 | Abrir um paciente | Seletor de seção/tab visível; **ambos FABs** ainda visíveis | |

@@ -60,7 +60,7 @@ Constantes em `packages/mobile/src/lib/dual-entry-layout.ts`:
 
 Posição vertical: `bottom = max(safeArea.bottom, 16) + DUAL_ENTRY_FAB_BOTTOM_OFFSET`.
 
-Tamanhos: Registro **48×48** (borda `colorPrimary`, fundo `colorBgContainer`); Ava **56×56** (fundo `colorPrimary`, label branca).
+Tamanhos: Registro **48×48** (borda `colorPrimary`, fundo `colorBgContainer`); Ava **56×56** orb com `ava-avatar.png` + anel primário (`AvaOrbButton`), paridade `AvaDockWidget` web.
 
 A11y: `accessibilityRole="button"`; labels `quickCapture.triggerA11y` / `ava.openChat` (pt-BR + en).
 
