@@ -48,18 +48,44 @@ export function StackControlCard({
     refresh()
   }, [refresh])
 
+  const pollStackUntilSettled = async (initial: StackActionResult) => {
+    const maxAttempts = 22
+    let latest = initial
+    for (let i = 0; i < maxAttempts; i++) {
+      const snap = latest.status
+      if (snap?.api.up && snap.web.up) break
+      await new Promise((r) => setTimeout(r, 2000))
+      try {
+        latest = await opsApi.stackStatus()
+        setStatus(latest)
+      } catch {
+        break
+      }
+    }
+    return latest
+  }
+
   const run = async (action: 'start' | 'stop' | 'restart') => {
     setActing(action)
     try {
       const result = await opsApi.stackAction(action)
       setStatus(result)
-      if (result.message) {
-        message.success(result.message)
+      const settled =
+        action === 'stop' ? result : await pollStackUntilSettled(result)
+      setStatus(settled)
+      if (settled.message) {
+        message.success(settled.message)
       }
-      if (result.error) {
-        message.warning(result.error)
+      if (settled.error) {
+        message.warning(settled.error)
       }
-      onStackChange?.()
+      const snap = settled.status
+      if (action !== 'stop' && snap && (!snap.api.up || !snap.web.up)) {
+        message.warning(
+          `Stack parcial após espera: API ${snap.api.up ? 'ok' : 'down'} · Web ${snap.web.up ? 'ok' : 'down'}`,
+        )
+      }
+      await onStackChange?.()
     } catch (err) {
       message.error(err instanceof Error ? err.message : 'Falha na operação')
     } finally {

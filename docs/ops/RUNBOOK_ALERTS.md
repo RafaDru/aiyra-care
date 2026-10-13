@@ -34,7 +34,7 @@ npm run ops:notifier:simulate -- --scenario=llm_cascade
 | **O que é** | Sonda `GET /health` falhou (API não responde OK). |
 | **Impacto** | App indisponível; leitura degradada D-1 pode acionar. |
 | **Verificar** | Console Infra → probe; `curl http://127.0.0.1:3010/health`; logs `api.log`. |
-| **Ações** | `scripts/up.ps1` ou reiniciar processo API; checar PG; disco/memória. |
+| **Ações** | `scripts/up.ps1` (stack completo: API, CH, notifier, web) **ou** CH → Infra → **Restart** (`aiyracare-stack.ps1`, só API+web). Cold start `tsx` pode levar &gt;12s — use `AIYRA_API_HEALTH_WAIT_SEC` / `AIYRA_STACK_HEALTH_WAIT_SEC` (padrão 45s). Checar PG; `api.log`. |
 | **Fallback** | `degraded_read` no manifest (banner no app). |
 | **Escalar** | Se PG ok mas API down → deploy/config. Se PG down → ver `infra_postgres_down`. |
 

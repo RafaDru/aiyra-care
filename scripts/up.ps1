@@ -125,14 +125,31 @@ $env:DEPLOYMENT_TIER = $deploymentTier
 $cmdApi = "set PORT=$apiPort&&set DEPLOYMENT_TIER=$deploymentTier&&set DATABASE_URL=$env:DATABASE_URL&&set LLM_QUOTA_UNLIMITED=$llmQuotaUnlimited&&set OPENCODE_GO_API_KEY=$env:OPENCODE_GO_API_KEY&&set OPENCODE_ZEN_API_KEY=$env:OPENCODE_ZEN_API_KEY&&set GEMINI_API_KEY=$env:GEMINI_API_KEY&&set GROQ_API_KEY=$env:GROQ_API_KEY&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
 cmd /c "start /B cmd /c `"$cmdApi`""
 
-for ($i = 0; $i -lt 12; $i++) {
+$apiHealthWaitSec = 45
+if ($env:AIYRA_API_HEALTH_WAIT_SEC) {
+  $parsedWait = 0
+  if ([int]::TryParse($env:AIYRA_API_HEALTH_WAIT_SEC, [ref]$parsedWait) -and $parsedWait -gt 0) {
+    $apiHealthWaitSec = $parsedWait
+  }
+}
+$apiHealthOk = $false
+for ($i = 0; $i -lt $apiHealthWaitSec; $i++) {
   Start-Sleep 1
   try {
     $h = Invoke-RestMethod -Uri "http://127.0.0.1:$apiPort/health" -ErrorAction Stop
-    if ($h.service -eq 'aiyracare-api' -or $h.service -eq 'aiyra-care-api') { Write-Host " OK ($($h.status))" -ForegroundColor Green; break }
+    if ($h.service -eq 'aiyracare-api' -or $h.service -eq 'aiyra-care-api') {
+      Write-Host " OK ($($h.status))" -ForegroundColor Green
+      $apiHealthOk = $true
+      break
+    }
     Write-Host "." -NoNewline
   }
-  catch { Write-Host "." -NoNewline; if ($i -eq 11) { Write-Host " FAIL" -ForegroundColor Red } }
+  catch {
+    Write-Host "." -NoNewline
+  }
+}
+if (-not $apiHealthOk) {
+  Write-Host " FAIL (sem /health em ${apiHealthWaitSec}s — API pode ainda subir; veja api$logSuffix.log)" -ForegroundColor Red
 }
 
 Write-Host "Starting Ops console..." -NoNewline
