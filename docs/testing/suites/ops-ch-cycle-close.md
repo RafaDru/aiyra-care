@@ -58,7 +58,7 @@
 
 ### H — Declaração piloto (C9)
 
-22. Confirmar piloto documentado (ex. DEF-000003 / INC-000007) em estado terminal **Corrigido** + **Resolvido** ou registrar defeito QA dedicado `QA-CYCLE-*`
+22. Confirmar piloto documentado (ex. DEF-000003 / INC-000007 ou **DEF-000005** QA-CYCLE) em estado terminal **Corrigido** + **Resolvido** — `npm run ch:qa-cycle-pilot-finalize -- --ref DEF-000005` quando aplicável
 23. `npm run qa:run -- --suite ops-ch-defeitos` — PASS (regressão CH)
 24. `npm run test:ops` — PASS se alterações ops na mesma entrega
 
