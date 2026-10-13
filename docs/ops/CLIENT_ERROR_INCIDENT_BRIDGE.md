@@ -40,7 +40,7 @@ Template comentado: `packages/api/.env.example` (fragmento bridge). Espelho dese
 1. Web/mobile `POST /telemetry/client-errors` → `client_errors` (unchanged).
 2. After successful insert, bridge evaluates allowlist + dedupe table `client_error_incident_signals`.
 3. Enqueue `ops_analysis_queue` with `source_id = client_error:{fingerprint}`, lane `development_support` (unless SRE feature map).
-4. `IncidentDispatchService.ensureOutboxForQueueRecord` — same CH pipeline as support/ops alerts ([`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md)).
+4. `IncidentDispatchService.ensureOutboxForQueueRecord` — mesmo pipeline CH; dispatch usa kind `client_error_bridge_triage_v1` → webhook **Triador Dev** (`CURSOR_DEVELOPMENT_SUPPORT_*`), payload sintético `support_report` (não SRE `ops_alert`). Ver [`CH_INCIDENT_DEFECT_PIPELINE.md`](./CH_INCIDENT_DEFECT_PIPELINE.md).
 5. Unhandled API **5xx** on allowlisted prefixes: stack logged **server-only** (`app.log.error`); synthetic `error_kind=api`, `error_code=HTTP_5xx`.
 
 Human triage → defeito unchanged. Dedupe does not block manual support reports.

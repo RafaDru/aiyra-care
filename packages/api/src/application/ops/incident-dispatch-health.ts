@@ -75,9 +75,9 @@ export async function getIncidentDispatchHealth(pool: Pool): Promise<IncidentDis
     deadCount,
     staleOpenWithoutOutboxCount,
     webhooks,
+    /** Triagem: basta uma lane pronta; correção exige defect_fix. */
     anyWebhookMissing:
-      !webhooks.developmentSupport.ready
-      || !webhooks.sreSupport.ready
+      (!webhooks.developmentSupport.ready && !webhooks.sreSupport.ready)
       || !webhooks.defectFix.ready,
   }
 }
