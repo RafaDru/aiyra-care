@@ -25,6 +25,11 @@ import { IncidentDispatchOutboxPgRepository } from '../../infrastructure/persist
 import { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
 import {
+  dispatchClientErrorBridgeInvestigator,
+  isClientErrorBridgeQueueRecord,
+} from './client-error-bridge-dispatch.js'
+import {
+  buildClientErrorBridgeDispatchPayload,
   buildOpsAlertDispatchPayload,
   buildSupportReportDispatchPayload,
   isQueueRecordEligibleForDispatchReconcile,
@@ -294,6 +299,9 @@ export class IncidentDispatchService {
     }
 
     if (record.sourceType === 'ops_alert') {
+      if (isClientErrorBridgeQueueRecord(record)) {
+        return buildClientErrorBridgeDispatchPayload(record)
+      }
       const alert = opsAlertFromQueueRecord(record)
       if (!alert) return null
       return buildOpsAlertDispatchPayload(record, alert)
@@ -466,6 +474,25 @@ export class IncidentDispatchService {
             continue
           }
           dispatch = await dispatchSupportReportInvestigator(record, {
+            operatorNotes: typeof payload.operatorNotes === 'string' ? payload.operatorNotes : null,
+            trigger: payload.trigger === 'manual' ? 'manual' : 'auto',
+            analysisQueue: {
+              id: row.incidentId,
+              callbackUrl: String(payload.callbackUrl ?? resolveInvestigatorCallbackUrl()),
+              triageStartedUrl: String(
+                payload.triageStartedUrl ?? resolveInvestigatorAnalysisQueueUrls(row.incidentId).triageStartedUrl,
+              ),
+            },
+            investigationTier: (payload.investigationTier as 0 | 1) ?? 0,
+          })
+        } else if (kind === 'client_error_bridge_triage_v1') {
+          const record = await this.queueRepo.findById(row.incidentId)
+          if (!record || !isClientErrorBridgeQueueRecord(record)) {
+            await this.recordWorkerDispatchFailure(row.id, row.incidentId, 'client_error_bridge_not_found')
+            failed += 1
+            continue
+          }
+          dispatch = await dispatchClientErrorBridgeInvestigator(record, {
             operatorNotes: typeof payload.operatorNotes === 'string' ? payload.operatorNotes : null,
             trigger: payload.trigger === 'manual' ? 'manual' : 'auto',
             analysisQueue: {

@@ -1,6 +1,7 @@
 import type { OpsAlert, OpsAlertSeverity } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsAnalysisQueueRecord } from '../../domain/ops/ops-analysis-queue.types.js'
 import type { SupportReportRecord } from '../../domain/support-report/support-report.types.js'
+import { isClientErrorBridgeQueueRecord } from './client-error-bridge-dispatch.js'
 import { resolveInvestigatorCallbackUrl } from './ops-analysis-callback-url.js'
 import {
   resolveOpsAlertInvestigationTier,
@@ -105,4 +106,17 @@ export function supportDispatchOptionsFromQueue(
 
 export function isSupportBatchQueueRecord(record: OpsAnalysisQueueRecord): boolean {
   return record.sourceType === 'support_report' && record.contextSnapshot.batch === true
+}
+
+export function buildClientErrorBridgeDispatchPayload(
+  record: OpsAnalysisQueueRecord,
+): Record<string, unknown> {
+  const trigger = record.investigationTrigger === 'manual' ? 'manual' : 'auto'
+  return {
+    kind: 'client_error_bridge_triage_v1',
+    trigger,
+    operatorNotes: record.operatorNotes ?? null,
+    callbackUrl: resolveInvestigatorCallbackUrl(),
+    investigationTier: 0,
+  }
 }
