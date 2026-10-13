@@ -50,7 +50,7 @@ export interface OpsAnalysisQueueItem {
   referenceCode: string | null
   sourceType: 'support_report' | 'ops_alert'
   sourceId: string
-  lane: 'development_support' | 'sre_support'
+  lane: 'development_support' | 'sre_support' | 'infra_env_regularization'
   status: 'queued' | 'investigating' | 'fix_proposed' | 'completed' | 'dismissed' | 'failed'
   incidentPipelineStatus?:
     | 'open'

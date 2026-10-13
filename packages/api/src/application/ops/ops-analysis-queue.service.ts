@@ -20,6 +20,7 @@ import {
 import type { OpsAnalysisQueuePgRepository } from '../../infrastructure/persistence/ops-analysis-queue.pg.repository.js'
 import type { SupportReportPgRepository } from '../../infrastructure/persistence/support-report.pg.repository.js'
 import type { OpsAlertAnalysisStore } from './ops-alert-analysis.store.js'
+import { usesInfraEnvRegularizationDispatch } from './ops-alert-investigator-dispatch.js'
 import {
   assertGithubPrUrlForReadyForPr,
   type PlatformDefectService,
@@ -31,7 +32,9 @@ import { sanitizeAnalysisSummary } from '../../domain/support-report/support-rep
 import { sanitizeOpsAlertAnalysisSummary } from '../../domain/ops/ops-alert-analysis.types.js'
 
 function laneLabel(lane: AnalysisQueueLane): string {
-  return lane === 'development_support' ? 'Suporte ao Desenvolvimento' : 'Suporte SRE'
+  if (lane === 'development_support') return 'Suporte ao Desenvolvimento'
+  if (lane === 'infra_env_regularization') return 'Regularização ambiente'
+  return 'Suporte SRE'
 }
 
 function supportTitle(record: SupportReportRecord): string {
@@ -168,10 +171,13 @@ export class OpsAnalysisQueueService {
     options: { operatorNotes?: string | null; trigger: 'auto' | 'manual' },
   ): Promise<OpsAnalysisQueueRecord> {
     const maintenanceActive = isOpsPlannedMaintenanceActive()
+    const lane: AnalysisQueueLane = usesInfraEnvRegularizationDispatch(alert)
+      ? 'infra_env_regularization'
+      : 'sre_support'
     return this.repo.upsertQueued({
       sourceType: 'ops_alert',
       sourceId: alert.id,
-      lane: 'sre_support',
+      lane,
       deploymentTier: resolveDeploymentTier(),
       title: `[${alert.severity}] ${alert.category}: ${alert.message}`.slice(0, 512),
       errorSummary: alert.message,

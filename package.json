@@ -42,6 +42,7 @@
     "ops:notifier:simulate": "cd packages/api && npm run ops:notifier:simulate",
     "ops:support-investigator:simulate": "node scripts/support-investigator-simulate.mjs",
     "ops:alert-investigator:simulate": "node scripts/ops-alert-investigator-simulate.mjs",
+    "ops:infra-env-regularization:simulate": "node scripts/ops-infra-env-regularization-simulate.mjs",
     "ch-incident-dispatch-worker": "cd packages/api && npx tsx scripts/ch-incident-dispatch-worker.mjs",
     "ch-incident-dispatch-worker:once": "cd packages/api && npx tsx scripts/ch-incident-dispatch-worker.mjs --once",
     "ch-incident-dispatch-backfill": "cd packages/api && npx tsx scripts/ch-incident-dispatch-backfill.mjs",

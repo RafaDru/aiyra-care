@@ -5,7 +5,8 @@ Duas automations, responsabilidades distintas, **dois pares** URL + key no `.env
 | Lane | Automation (nome no Cursor) | Payload `type` | Vars `.env` | Origem típica |
 |------|------------------------------|----------------|-------------|---------------|
 | **Suporte ao Desenvolvimento** | `AiCare - Suporte ao Desenvolvimento` | `support_report` | `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Reporte manual no app |
-| **Suporte SRE** | `AiCare - Suporte SRE` | `ops_alert` | `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Métricas / alertas ops |
+| **Suporte SRE** | `AiCare - Suporte SRE` | `ops_alert` | `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY` | Métricas / alertas ops (fallback `infra_api_down`) |
+| **Regularização ambiente** | `Aiyra — Regularização ambiente` | `ops_alert` + `alert_kind: infra_api_down` | `CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_URL`, `CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_KEY` | `infra_api_down` no CH — ver `docs/ops/INFRA_ENV_REGULARIZATION_AGENT.md` |
 | **Correção Dev** | `Aiyra - Correção Dev` | `defect_fix_v1` | `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEFECT_FIX_AUTOMATION_WEBHOOK_KEY` | `POST /api/platform-defects/:id/start-fix` (CH) |
 | **Revisão Dev** | `Aiyra - Revisão Dev` | `defect_pr_review_v1` | `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_URL`, `CURSOR_DEFECT_PR_REVIEW_AUTOMATION_WEBHOOK_KEY` (alias legado: `CURSOR_REVISOR_AUTOMATION_WEBHOOK_*`) | Auto ao `ready_for_pr` + `POST /api/platform-defects/:id/request-review` — spec: `docs/ops/CH_PR_REVIEW_AGENT.md` |
 

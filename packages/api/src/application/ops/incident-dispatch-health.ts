@@ -6,6 +6,8 @@ import {
   resolveDefectPrReviewAutomationWebhookUrl,
   resolveDevelopmentSupportAutomationWebhookKey,
   resolveDevelopmentSupportAutomationWebhookUrl,
+  resolveInfraEnvRegularizationAutomationWebhookKey,
+  resolveInfraEnvRegularizationAutomationWebhookUrl,
   resolveSreSupportAutomationWebhookKey,
   resolveSreSupportAutomationWebhookUrl,
 } from '../../domain/ops/cursor-automation-env.js'
@@ -23,6 +25,7 @@ export type IncidentDispatchHealth = {
     sreSupport: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
     defectFix: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
     defectPrReview: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
+    infraEnvRegularization: { urlConfigured: boolean; keyConfigured: boolean; ready: boolean }
   }
   /** true se alguma lane de triagem/correção não tem URL+key no processo atual */
   anyWebhookMissing: boolean
@@ -39,6 +42,8 @@ export function resolveIncidentDispatchWebhookFlags(
   const defectKey = resolveDefectFixAutomationWebhookKey(env)
   const defectReviewUrl = resolveDefectPrReviewAutomationWebhookUrl(env)
   const defectReviewKey = resolveDefectPrReviewAutomationWebhookKey(env)
+  const infraEnvUrl = resolveInfraEnvRegularizationAutomationWebhookUrl(env)
+  const infraEnvKey = resolveInfraEnvRegularizationAutomationWebhookKey(env)
   return {
     developmentSupport: {
       urlConfigured: Boolean(devUrl),
@@ -59,6 +64,11 @@ export function resolveIncidentDispatchWebhookFlags(
       urlConfigured: Boolean(defectReviewUrl),
       keyConfigured: Boolean(defectReviewKey),
       ready: Boolean(defectReviewUrl && defectReviewKey),
+    },
+    infraEnvRegularization: {
+      urlConfigured: Boolean(infraEnvUrl),
+      keyConfigured: Boolean(infraEnvKey),
+      ready: Boolean(infraEnvUrl && infraEnvKey),
     },
   }
 }

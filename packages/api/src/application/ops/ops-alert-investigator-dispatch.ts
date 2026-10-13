@@ -1,4 +1,7 @@
 import {
+  resolveCursorWorkerMachineHint,
+  resolveInfraEnvRegularizationAutomationWebhookKey,
+  resolveInfraEnvRegularizationAutomationWebhookUrl,
   resolveSreSupportAutomationWebhookKey,
   resolveSreSupportAutomationWebhookUrl,
 } from '../../domain/ops/cursor-automation-env.js'
@@ -23,10 +26,17 @@ export type OpsAlertInvestigatorDispatchResult =
   }
   | { outcome: 'failed'; error: string }
 
+export type OpsAlertInvestigatorAgentRole = 'sre_support' | 'infra_env_regularization'
+
 export interface OpsAlertInvestigatorPayload {
   type: 'ops_alert'
   investigationId?: string
   alertId: string
+  /** Estável para roteamento na Automation (espelha alertId canônico). */
+  alert_kind: string
+  /** Worker My Machines — ex. NotebookRafael (`CURSOR_WORKER_NAME`). */
+  machineHint: string
+  agentRole: OpsAlertInvestigatorAgentRole
   severity: OpsAlert['severity']
   category: OpsAlert['category']
   message: string
@@ -42,16 +52,40 @@ export interface OpsAlertInvestigatorPayload {
     id: string
     callbackUrl: string
     triageStartedUrl: string
-    lane: 'development_support' | 'sre_support'
+    lane: 'development_support' | 'sre_support' | 'infra_env_regularization'
   }
 }
 
-export function resolveOpsAlertInvestigatorWebhookUrl(): string | undefined {
+export function usesInfraEnvRegularizationDispatch(alert: OpsAlert): boolean {
+  return alert.id === 'infra_api_down'
+    && Boolean(resolveInfraEnvRegularizationAutomationWebhookUrl())
+}
+
+export function resolveOpsAlertInvestigatorWebhookUrl(alert?: OpsAlert): string | undefined {
+  if (alert && usesInfraEnvRegularizationDispatch(alert)) {
+    return resolveInfraEnvRegularizationAutomationWebhookUrl()
+  }
   return resolveSreSupportAutomationWebhookUrl()
 }
 
-export function resolveOpsAlertInvestigatorWebhookKey(): string | undefined {
+export function resolveOpsAlertInvestigatorWebhookKey(alert?: OpsAlert): string | undefined {
+  if (alert && usesInfraEnvRegularizationDispatch(alert)) {
+    return resolveInfraEnvRegularizationAutomationWebhookKey()
+  }
   return resolveSreSupportAutomationWebhookKey()
+}
+
+function resolveOpsAlertInvestigatorPlaybook(
+  alert: OpsAlert,
+  investigationTier: InvestigationTier | undefined,
+): string {
+  if ((investigationTier ?? 0) === 1) return tier1PlaybookId('sre_support')
+  if (usesInfraEnvRegularizationDispatch(alert)) return 'infra-env-regularization'
+  return 'ops-alert-tier0'
+}
+
+function resolveOpsAlertInvestigatorAgentRole(alert: OpsAlert): OpsAlertInvestigatorAgentRole {
+  return usesInfraEnvRegularizationDispatch(alert) ? 'infra_env_regularization' : 'sre_support'
 }
 
 export function isOpsAlertInvestigatorAutoEnabled(): boolean {
@@ -97,6 +131,9 @@ export function buildOpsAlertInvestigatorPayload(
     type: 'ops_alert',
     ...(options.investigationId ? { investigationId: options.investigationId } : {}),
     alertId: alert.id,
+    alert_kind: alert.id,
+    machineHint: resolveCursorWorkerMachineHint(),
+    agentRole: resolveOpsAlertInvestigatorAgentRole(alert),
     severity: alert.severity,
     category: alert.category,
     message: alert.message,
@@ -109,9 +146,7 @@ export function buildOpsAlertInvestigatorPayload(
     ...(options.operatorNotes ? { operatorNotes: options.operatorNotes.slice(0, 2000) } : {}),
     investigation: {
       tier: options.investigationTier ?? 0,
-      playbook: (options.investigationTier ?? 0) === 1
-        ? tier1PlaybookId('sre_support')
-        : 'ops-alert-tier0',
+      playbook: resolveOpsAlertInvestigatorPlaybook(alert, options.investigationTier),
       trigger: options.trigger,
     },
   }
@@ -133,9 +168,9 @@ export function analysisErrorFromOpsInvestigatorResult(
   if (result.outcome === 'skipped') {
     if (result.reason === 'auto_disabled') return null
     if (result.reason === 'webhook_not_configured') {
-      return 'CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_URL não configurado'
+      return 'Webhook Cursor não configurado (SRE ou INFRA_ENV_REGULARIZATION)'
     }
-    return 'CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_KEY não configurado'
+    return 'Webhook key Cursor ausente (SRE ou INFRA_ENV_REGULARIZATION)'
   }
   return null
 }
@@ -154,9 +189,9 @@ export async function dispatchOpsAlertInvestigator(
   if (options.trigger === 'auto' && !isOpsAlertInvestigatorAutoEnabled()) {
     return { outcome: 'skipped', reason: 'auto_disabled' }
   }
-  const webhook = resolveOpsAlertInvestigatorWebhookUrl()
+  const webhook = resolveOpsAlertInvestigatorWebhookUrl(alert)
   if (!webhook) return { outcome: 'skipped', reason: 'webhook_not_configured' }
-  const bearerKey = resolveOpsAlertInvestigatorWebhookKey()
+  const bearerKey = resolveOpsAlertInvestigatorWebhookKey(alert)
   if (!bearerKey) return { outcome: 'skipped', reason: 'webhook_key_missing' }
 
   const investigationId = options.analysisQueue?.id
@@ -176,7 +211,9 @@ export async function dispatchOpsAlertInvestigator(
             id: options.analysisQueue.id,
             callbackUrl: options.analysisQueue.callbackUrl,
             triageStartedUrl: options.analysisQueue.triageStartedUrl,
-            lane: 'sre_support' as const,
+            lane: usesInfraEnvRegularizationDispatch(alert)
+              ? ('infra_env_regularization' as const)
+              : ('sre_support' as const),
           },
         }
       : {}),
