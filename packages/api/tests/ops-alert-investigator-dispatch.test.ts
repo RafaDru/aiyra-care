@@ -3,6 +3,7 @@ import {
   buildOpsAlertInvestigatorPayload,
   dispatchOpsAlertInvestigator,
   shouldAutoInvestigateOpsAlert,
+  usesInfraEnvRegularizationDispatch,
 } from '../src/application/ops/ops-alert-investigator-dispatch.js'
 
 describe('ops-alert-investigator-dispatch', () => {
@@ -10,6 +11,9 @@ describe('ops-alert-investigator-dispatch', () => {
     delete process.env.CURSOR_OPS_ALERT_AUTOMATION_WEBHOOK_URL
     delete process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_URL
     delete process.env.CURSOR_SUPPORT_AUTOMATION_WEBHOOK_KEY
+    delete process.env.CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_URL
+    delete process.env.CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_KEY
+    delete process.env.CURSOR_WORKER_NAME
     delete process.env.OPS_ALERT_INVESTIGATOR_AUTO
     vi.unstubAllGlobals()
   })
@@ -33,6 +37,9 @@ describe('ops-alert-investigator-dispatch', () => {
     expect(payload.type).toBe('ops_alert')
     expect(payload.environment.deploymentTier).toBe('integration')
     expect(payload.alertId).toBe('infra_api_down')
+    expect(payload.alert_kind).toBe('infra_api_down')
+    expect(payload.machineHint).toBe('NotebookRafael')
+    expect(payload.agentRole).toBe('sre_support')
     expect(payload.investigation).toEqual({ tier: 0, playbook: 'ops-alert-tier0', trigger: 'manual' })
     expect(payload.operatorNotes).toBe('reiniciei stack')
     expect(payload.details).toEqual({ latencyMs: 9000 })
@@ -50,6 +57,58 @@ describe('ops-alert-investigator-dispatch', () => {
     expect(shouldAutoInvestigateOpsAlert(
       { id: 'llm_cascade_fail', severity: 'critical', category: 'llm', message: 'x', detectedAt: '2026-01-01T00:00:00.000Z' },
     )).toBe(false)
+  })
+
+  it('routes infra_api_down to env regularization webhook when configured', async () => {
+    process.env.CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_URL = 'http://127.0.0.1:3099/env-reg'
+    process.env.CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_KEY = 'crsr_env'
+    process.env.CURSOR_WORKER_NAME = 'NotebookRafael'
+    expect(usesInfraEnvRegularizationDispatch({
+      id: 'infra_api_down',
+      severity: 'critical',
+      category: 'infra',
+      message: 'x',
+      detectedAt: '2026-01-01T00:00:00.000Z',
+    })).toBe(true)
+
+    const payload = buildOpsAlertInvestigatorPayload(
+      {
+        id: 'infra_api_down',
+        severity: 'critical',
+        category: 'infra',
+        message: 'API down',
+        detectedAt: '2026-09-08T12:00:00.000Z',
+      },
+      { checkedAt: '2026-09-08T12:00:00.000Z', trigger: 'auto' },
+    )
+    expect(payload.agentRole).toBe('infra_env_regularization')
+    expect(payload.investigation?.playbook).toBe('infra-env-regularization')
+    expect(payload.machineHint).toBe('NotebookRafael')
+
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    await dispatchOpsAlertInvestigator(
+      {
+        id: 'infra_api_down',
+        severity: 'critical',
+        category: 'infra',
+        message: 'API down',
+        detectedAt: '2026-09-08T12:00:00.000Z',
+      },
+      {
+        checkedAt: '2026-09-08T12:00:00.000Z',
+        trigger: 'auto',
+        analysisQueue: {
+          id: 'inv-1',
+          callbackUrl: 'http://127.0.0.1:3013/api/analysis-queue/callback',
+          triageStartedUrl: 'http://127.0.0.1:3013/api/analysis-queue/triage-started',
+        },
+      },
+    )
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('http://127.0.0.1:3099/env-reg')
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))
+    expect(body.alert_kind).toBe('infra_api_down')
+    expect(body.analysisQueue.lane).toBe('infra_env_regularization')
   })
 
   it('dispatches when support automation webhook configured', async () => {

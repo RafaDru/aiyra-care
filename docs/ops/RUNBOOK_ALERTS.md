@@ -37,6 +37,7 @@ npm run ops:notifier:simulate -- --scenario=llm_cascade
 | **Ações** | `scripts/up.ps1` (stack completo: API, CH, notifier, web) **ou** CH → Infra → **Restart** (`aiyracare-stack.ps1`, só API+web). Cold start `tsx` pode levar &gt;12s — use `AIYRA_API_HEALTH_WAIT_SEC` / `AIYRA_STACK_HEALTH_WAIT_SEC` (padrão 45s). Checar PG; `api.log`. |
 | **Fallback** | `degraded_read` no manifest (banner no app). |
 | **Escalar** | Se PG ok mas API down → deploy/config. Se PG down → ver `infra_postgres_down`. |
+| **Agente** | Com `CURSOR_INFRA_ENV_REGULARIZATION_*`: CH dispara regularização (verify + 1× `up.ps1`/restart + re-probe, PASS/FAIL) — [`INFRA_ENV_REGULARIZATION_AGENT.md`](./INFRA_ENV_REGULARIZATION_AGENT.md). Sem essa lane → Suporte SRE Tier 0 (só investigação). |
 
 ### `infra_api_slow` (warning)
 

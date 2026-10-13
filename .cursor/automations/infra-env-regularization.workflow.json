@@ -1,0 +1,8 @@
+{
+  "name": "Aiyra — Regularização ambiente",
+  "description": "Webhook ops_alert infra_api_down — verificar portas, remediar stack notebook, re-probe, PASS/FAIL",
+  "trigger": "webhook",
+  "prompts": [
+    "Alerta infra_api_down — regularização Ambiente 1.\n\n0. HTTP POST analysisQueue.triageStartedUrl (auth callback).\n1. Playbook: docs/ops/automations/infra-env-regularization.prompt.md.\n2. Worker: machineHint no payload (My Machines).\n3. Artefato: docs/ops/investigations/YYYY-MM-DD-infra_api_down-env-reg.md.\n4. Callback com remediationSummary PASS: ou FAIL:."
+  ]
+}

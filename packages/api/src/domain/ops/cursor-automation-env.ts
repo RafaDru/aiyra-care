@@ -69,6 +69,29 @@ export function resolveSreSupportAutomationWebhookKey(
   return resolveDevelopmentSupportAutomationWebhookKey(env)
 }
 
+/** Lane regularização Ambiente 1 (`ops_alert` + `alert_kind: infra_api_down`) — My Machines notebook. */
+export function resolveInfraEnvRegularizationAutomationWebhookUrl(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  return readEnv(env, 'CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_URL')
+}
+
+export function resolveInfraEnvRegularizationAutomationWebhookKey(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  return cleanCursorAutomationKey(
+    readEnv(env, 'CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_KEY'),
+  )
+}
+
+/** Nome do worker My Machines sugerido no payload (default notebook Rafael). */
+export function resolveCursorWorkerMachineHint(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const raw = env.CURSOR_WORKER_NAME?.trim()
+  return raw && raw.length > 0 ? raw : 'NotebookRafael'
+}
+
 /** Lane Correção Dev — defeito de plataforma (`defect_fix_v1`). */
 export function resolveDefectFixAutomationWebhookUrl(
   env: NodeJS.ProcessEnv = process.env,

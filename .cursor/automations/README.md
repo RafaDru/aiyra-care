@@ -38,6 +38,7 @@ Para **atualizar** o prompt depois de mudança no repo: edite a Automation exist
 | Backend handoff | **AiCare - Backend handoff (Claude→Cursor)** | `backend-task-cursor-handoff.yaml` | `backend-task-cursor-handoff.workflow.json` |
 | Suporte Desenvolvimento | **AiCare - Suporte ao Desenvolvimento** | `support-report-investigator.yaml` | `support-report-investigator.workflow.json` |
 | Suporte SRE | **AiCare - Suporte SRE** | `ops-alert-investigator.workflow.json` → `prompts[0]` | `ops-alert-investigator.workflow.json` |
+| Regularização ambiente | **Aiyra — Regularização ambiente** | `docs/automations-aiyra-infra-env-regularization-instructions.md` | `infra-env-regularization.workflow.json` |
 
 ### Backend handoff (GitHub Actions)
 

@@ -5,7 +5,10 @@ import type {
 import type { CorrectionFailureDetails } from './platform-defect-correction-failure.js'
 
 export type AnalysisQueueSourceType = 'support_report' | 'ops_alert'
-export type AnalysisQueueLane = 'development_support' | 'sre_support'
+export type AnalysisQueueLane =
+  | 'development_support'
+  | 'sre_support'
+  | 'infra_env_regularization'
 export type AnalysisQueueStatus =
   | 'queued'
   | 'investigating'

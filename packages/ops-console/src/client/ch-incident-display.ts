@@ -12,6 +12,7 @@ export const INCIDENT_QUEUE_STATUS_LABEL: Record<OpsAnalysisQueueItem['status'],
 export const INCIDENT_LANE_LABEL: Record<OpsAnalysisQueueItem['lane'], string> = {
   development_support: 'Correção (Dev)',
   sre_support: 'Infra (SRE)',
+  infra_env_regularization: 'Regularização ambiente',
 }
 
 export const INCIDENT_PRIORITY_LABEL: Record<OpsAnalysisQueueItem['priority'], string> = {
