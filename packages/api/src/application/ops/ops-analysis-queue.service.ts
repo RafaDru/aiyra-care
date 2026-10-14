@@ -28,6 +28,10 @@ import {
 import type { PlatformDefectPgRepository } from '../../infrastructure/persistence/platform-defect.pg.repository.js'
 import { finalizeTriageDefectPipeline } from './triage-defect-pipeline-followup.js'
 import { notifyIncidentBoardById } from './incident-board-notify.js'
+import {
+  applyMarkTriageStarted,
+  type MarkTriageStartedResult,
+} from './ops-mark-triage-started.core.js'
 import { sanitizeAnalysisSummary } from '../../domain/support-report/support-report.types.js'
 import { sanitizeOpsAlertAnalysisSummary } from '../../domain/ops/ops-alert-analysis.types.js'
 
@@ -66,17 +70,7 @@ function alertPriority(alert: OpsAlert): 'low' | 'normal' | 'high' | 'critical' 
   return 'normal'
 }
 
-const TRIAGE_STARTED_NOOP_PIPELINE: IncidentPipelineStatus[] = [
-  'in_triage',
-  'triaged',
-  'resolved',
-  'dismissed',
-]
-
-export type MarkTriageStartedResult =
-  | { ok: true; incidentPipelineStatus: 'in_triage'; noop?: true }
-  | { ok: false; error: 'not_found' }
-  | { ok: false; error: 'invalid_state'; message: string }
+export type { MarkTriageStartedResult } from './ops-mark-triage-started.core.js'
 
 export class OpsAnalysisQueueService {
   constructor(
@@ -200,49 +194,7 @@ export class OpsAnalysisQueueService {
   }
 
   async markTriageStarted(queueId: string): Promise<MarkTriageStartedResult> {
-    const record = await this.repo.findById(queueId)
-    if (!record) return { ok: false, error: 'not_found' }
-
-    const pipeline = record.incidentPipelineStatus
-    if (TRIAGE_STARTED_NOOP_PIPELINE.includes(pipeline)) {
-      return { ok: true, incidentPipelineStatus: 'in_triage', noop: true }
-    }
-
-    const fromDispatch =
-      pipeline === 'forwarded' || pipeline === 'queued_worker'
-    const fromOpenInvestigating =
-      pipeline === 'open' && record.status === 'investigating'
-
-    if (!fromDispatch && !fromOpenInvestigating) {
-      if (pipeline === 'dispatch_failed') {
-        return {
-          ok: false,
-          error: 'invalid_state',
-          message: 'incident dispatch failed — retry dispatch before triage',
-        }
-      }
-      if (pipeline === 'open') {
-        return {
-          ok: false,
-          error: 'invalid_state',
-          message: 'incident not forwarded to automation yet',
-        }
-      }
-      return {
-        ok: false,
-        error: 'invalid_state',
-        message: `cannot start triage from pipeline ${pipeline}`,
-      }
-    }
-
-    await this.repo.markPipelineInTriage(queueId)
-    if (record.status !== 'investigating' && record.status !== 'fix_proposed') {
-      await this.repo.markInvestigating(queueId)
-    }
-    if (this.platformDefectRepo) {
-      await notifyIncidentBoardById(this.repo, queueId, this.platformDefectRepo).catch(() => undefined)
-    }
-    return { ok: true, incidentPipelineStatus: 'in_triage' }
+    return applyMarkTriageStarted(this.repo, queueId, this.platformDefectRepo)
   }
 
   async markFailed(queueId: string, error: string): Promise<void> {

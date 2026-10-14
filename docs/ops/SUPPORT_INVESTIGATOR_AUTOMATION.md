@@ -16,7 +16,7 @@ POST /support/reports
 
 Canais **independentes**: o notificador local e a Automation recebem o mesmo payload (investigator inclui `investigation: { tier: 0 }`).
 
-**Passo 0 (Automation HTTP, zero LLM):** antes do agente, configure uma ação HTTP `POST` em `analysisQueue.triageStartedUrl` do payload (ou `http://127.0.0.1:3013/api/analysis-queue/<investigationId>/triage-started`) com o mesmo header de auth do callback (`x-investigator-callback-key` / `x-internal-ops-key`). Isso move o incidente **Encaminhado → Em triagem** no CH. **Não** peça ao LLM para chamar essa URL — só a ação HTTP da Automation.
+**Em triagem no CH:** após webhook investigador **2xx**, a API promove o incidente **Encaminhado → Em triagem** (`in_triage`) no servidor — equivalente a `POST /api/analysis-queue/:id/triage-started` (CH D9). **Passo 0 (Automation HTTP, zero LLM, backup):** opcionalmente configure uma ação HTTP `POST` em `analysisQueue.triageStartedUrl` do payload (ou `http://127.0.0.1:3013/api/analysis-queue/<investigationId>/triage-started`) com o mesmo header de auth do callback (`x-investigator-callback-key` / `x-internal-ops-key`); idempotente se o servidor já promoveu. **Não** peça ao LLM para chamar essa URL — só a ação HTTP da Automation.
 
 **Ambiente:** `environment.deploymentTier` (`integration` \| `preview` \| `production`) vem de `DEPLOYMENT_TIER` na API que disparou — não infira pela porta. As vars `CURSOR_*_WEBHOOK_*` podem ficar **só no `.env`** (mesma Automation para dev e preview).
 
