@@ -2,6 +2,8 @@
 
 > Implementacao: `scripts/ops-notifier-toast-design.ps1`, `ops-toast-resolve.ps1`, `ops-alert-toast.ts`, `support-report-dispatch.ts`
 
+**Startup Windows:** por padrao so a bandeja **Dev** (`npm run startup:register`); bandeja Staging e opt-in (`npm run startup:register:staging-tray`). A task `AiyraCare-Stacks-Dev-Staging` continua subindo as duas stacks no logon.
+
 Tres familias de toast no mesmo receptor HTTP (`/ops-alert`) + acoes locais do farol.
 
 ## Matriz visual
