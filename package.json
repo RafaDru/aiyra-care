@@ -97,6 +97,7 @@
     "preview:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-preview-local.ps1",
     "up:both": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/up-both.ps1",
     "startup:register": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Register",
+    "startup:register:staging-tray": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Register -IncludeStagingNotifier",
     "startup:unregister": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Unregister",
     "startup:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-windows-startup.ps1 -Status",
     "validate:env-tier": "node scripts/validate-env-tier.mjs",
