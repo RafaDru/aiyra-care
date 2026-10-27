@@ -10,7 +10,36 @@ export async function primeE2eClientStorage(page: Page) {
     localStorage.setItem('aiyracare.first_visit_tour_completed', '1')
     sessionStorage.removeItem('aiyracare.onboarding_wizard_step')
     sessionStorage.removeItem('aiyracare.onboarding_family_wizard')
+    sessionStorage.removeItem('aiyracare.onboarding_just_completed')
+    sessionStorage.removeItem('aiyracare.onboarding_wizard_owner_sub')
   }, COOKIE_CONSENT_VERSION)
+}
+
+/** AuthContext `loading` esconde o wizard — não usar Promise.race em waitFor (rejeição precoce). */
+export async function waitForOnboardingWizardReady(page: Page, timeout = 60_000) {
+  const profileHeading = page.getByRole('heading', {
+    name: /Vamos começar pelo seu perfil|Let's start with your profile/i,
+  })
+  const addressHeading = page.getByRole('heading', { name: /Onde você mora|Where you live/i })
+  const wizardSteps = page.getByTestId('onboarding-wizard-steps')
+  const profileName = page.getByTestId('onboarding-profile-name')
+  const familyName = page.getByTestId('onboarding-step-family-name')
+  const familyMembers = page.getByTestId('onboarding-step-family-members')
+  const avaSummary = page.getByTestId('onboarding-step-ava-summary')
+  const addressCep = page.getByTestId('onboarding-address-cep')
+
+  await expect(async () => {
+    const ready =
+      (await profileHeading.isVisible().catch(() => false)) ||
+      (await addressHeading.isVisible().catch(() => false)) ||
+      (await wizardSteps.isVisible().catch(() => false)) ||
+      (await profileName.isVisible().catch(() => false)) ||
+      (await familyName.isVisible().catch(() => false)) ||
+      (await familyMembers.isVisible().catch(() => false)) ||
+      (await avaSummary.isVisible().catch(() => false)) ||
+      (await addressCep.isVisible().catch(() => false))
+    expect(ready).toBe(true)
+  }).toPass({ timeout })
 }
 
 export async function dismissCookieBanner(page: Page) {
@@ -106,61 +135,73 @@ async function fillAddressContactStep(page: Page) {
   }
 }
 
+async function waitForFamilyStepOrMembers(page: Page) {
+  const familyName = page.getByTestId('onboarding-step-family-name')
+  const familyMembers = page.getByTestId('onboarding-step-family-members')
+  await expect(async () => {
+    const visible =
+      (await familyName.isVisible().catch(() => false)) ||
+      (await familyMembers.isVisible().catch(() => false))
+    expect(visible).toBe(true)
+  }).toPass({ timeout: 60_000 })
+}
+
 async function completeFamilyAndConnectors(page: Page) {
-  const familyNameStep = page.getByTestId('onboarding-step-family-name')
-  await familyNameStep.waitFor({ state: 'visible', timeout: 25_000 })
-  const familyNameInput = familyNameStep.getByLabel(/Nome da família|Family name/i)
-  await expect(familyNameInput).not.toHaveValue('', { timeout: 15_000 })
-  if (!(await familyNameInput.inputValue()).trim()) {
-    await familyNameInput.fill('Família QA E2E')
+  await waitForFamilyStepOrMembers(page)
+
+  const familyMembers = page.getByTestId('onboarding-step-family-members')
+  if (!(await familyMembers.isVisible().catch(() => false))) {
+    const familyNameStep = page.getByTestId('onboarding-step-family-name')
+    const familyNameInput = familyNameStep.getByLabel(/Nome da família|Family name/i)
+    await expect(familyNameInput).not.toHaveValue('', { timeout: 20_000 })
+    if (!(await familyNameInput.inputValue()).trim()) {
+      await familyNameInput.fill('Família QA E2E')
+    }
+
+    await expect(async () => {
+      if (await familyMembers.isVisible().catch(() => false)) return
+
+      const circleCreate = page.waitForResponse(
+        (r) => r.url().includes('/care-circles') && r.request().method() === 'POST',
+        { timeout: 45_000 },
+      )
+      const continueBtn = familyNameStep.getByRole('button', { name: /Continuar|Continue/i })
+      await expect(continueBtn).toBeEnabled({ timeout: 5_000 })
+      await continueBtn.click()
+      const circleResponse = await circleCreate
+      if (!circleResponse.ok()) {
+        const body = await circleResponse.text().catch(() => '')
+        throw new Error(`care-circles HTTP ${circleResponse.status()}: ${body.slice(0, 240)}`)
+      }
+      await expect(familyMembers).toBeVisible({ timeout: 15_000 })
+    }).toPass({ timeout: 90_000 })
   }
 
-  const circleCreate = page.waitForResponse(
-    (r) => r.url().includes('/care-circles') && r.request().method() === 'POST',
-    { timeout: 35_000 },
-  )
-  await familyNameStep.getByRole('button', { name: /Continuar|Continue/i }).click()
-  const circleResponse = await circleCreate
-  if (!circleResponse.ok()) {
-    const body = await circleResponse.text().catch(() => '')
-    throw new Error(`care-circles HTTP ${circleResponse.status()}: ${body.slice(0, 240)}`)
-  }
-
-  await page.getByTestId('onboarding-step-family-members').waitFor({ state: 'visible', timeout: 25_000 })
   await page.getByRole('button', { name: /Pular pessoas por agora|Skip people for now/i }).click()
 
   await completeAvaSummaryStep(page)
 
-  await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 25_000 })
+  await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 45_000 })
 }
 
 export async function completeOnboardingProfile(page: Page, profile: OnboardingProfileInput) {
   await dismissCookieBanner(page)
+  await waitForOnboardingWizardReady(page)
 
   const profileHeading = page.getByRole('heading', {
     name: /Vamos começar pelo seu perfil|Let's start with your profile/i,
   })
   const addressHeading = page.getByRole('heading', { name: /Onde você mora|Where you live/i })
-  const familyName = page.getByTestId('onboarding-step-family-name')
-
-  await Promise.race([
-    profileHeading.waitFor({ state: 'visible', timeout: 25_000 }),
-    addressHeading.waitFor({ state: 'visible', timeout: 25_000 }),
-    familyName.waitFor({ state: 'visible', timeout: 25_000 }),
-    page.getByTestId('onboarding-wizard-steps').waitFor({ state: 'visible', timeout: 25_000 }),
-  ])
 
   const onIdentityForm = await page.getByTestId('onboarding-profile-name').isVisible().catch(() => false)
 
   if ((await profileHeading.isVisible().catch(() => false)) || onIdentityForm) {
     await fillIdentityStep(page, profile)
     await fillAddressContactStep(page)
+    await waitForFamilyStepOrMembers(page)
   } else if (await addressHeading.isVisible().catch(() => false)) {
     await fillAddressContactStep(page)
-  }
-
-  if (!(await familyName.isVisible().catch(() => false))) {
-    await familyName.waitFor({ state: 'visible', timeout: 25_000 })
+    await waitForFamilyStepOrMembers(page)
   }
 
   await completeFamilyAndConnectors(page)

@@ -1,9 +1,14 @@
 import { execSync } from 'child_process'
 import { resolve } from 'path'
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import { loginViaPassword, waitForSupabaseSession } from './auth'
 import { requireQaTestCredentials } from './env'
-import { completeOnboardingProfile, dismissCookieBanner, primeE2eClientStorage } from './onboarding'
+import {
+  completeOnboardingProfile,
+  dismissCookieBanner,
+  primeE2eClientStorage,
+  waitForOnboardingWizardReady,
+} from './onboarding'
 import { uniqueQaCpf } from './fixtures'
 import { hideAvaDock, dismissHygienePrompt, dismissFirstVisitTour } from './ui'
 import { dashboardAddFamilyButton, waitForDashboardReady } from './dashboard'
@@ -44,11 +49,13 @@ export async function ensureQaE2eSession(page: Page, opts?: EnsureSessionOptions
     name: /Vamos começar pelo seu perfil|Let's start with your profile/i,
   })
 
-  await Promise.race([
-    novoPaciente.waitFor({ state: 'visible', timeout: 30_000 }),
-    onboardingHeading.waitFor({ state: 'visible', timeout: 30_000 }),
-    page.getByTestId('onboarding-wizard-steps').waitFor({ state: 'visible', timeout: 30_000 }),
-  ])
+  await expect(async () => {
+    const onDashboard = await novoPaciente.isVisible().catch(() => false)
+    const onWizard =
+      (await onboardingHeading.isVisible().catch(() => false)) ||
+      (await page.getByTestId('onboarding-wizard-steps').isVisible().catch(() => false))
+    expect(onDashboard || onWizard).toBe(true)
+  }).toPass({ timeout: 60_000 })
 
   const onOnboardingWizard =
     (await onboardingHeading.isVisible().catch(() => false)) ||

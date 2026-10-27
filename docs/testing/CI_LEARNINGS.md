@@ -28,6 +28,7 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | Ava specs flaky no CI | Bolha visível antes do texto SSE; 2ª mensagem antes do composer liberar | `waitAvaComposerReady` + contagem de bolhas + `toContainText` 90s |
 | `FirstVisitTourDrawer` bloqueia CRUD / dashboard | Máscara Ant Design intercepta cliques | `dismissFirstVisitTour()` em helpers de sessão/paciente/Ava (exceto spec onboarding) |
 | Onboarding E2E passo 2 intermitente | `Continuar` antes de `POST /auth/complete-profile` ou redirect cedo para `/` | `waitForResponse` em complete-profile; ramo «Pular por agora» se ainda em `/onboarding` |
+| Onboarding E2E timeout no passo 1 / `care-circles` | `OnboardingPage` em `loading` sem chrome; `Promise.race` em `waitFor` rejeita cedo; família em bootstrap (Spin) | `waitForOnboardingWizardReady` + `toPass`; retry em `POST /care-circles`; limpar session keys no `primeE2eClientStorage` |
 | Ava FAB lento no CI | `useAvaDockIntro` (~6,4s) após login | `openAvaDock`: `waitForTimeout(7_000)` só em `CI`; retry abrir drawer com `toPass` |
 | Bolha Ava «vazia» no assert | SSE ainda streaming; placeholder sem texto | Ignorar bolhas com `innerText` vazio; aguardar `POST …/ava/chat` + loading do botão Enviar |
 | Spec onboarding tour | `data-testid` vs `role=dialog` | Drawer expõe `first-visit-tour-drawer`; helpers também aceitam «Primeiros passos» / modal |
