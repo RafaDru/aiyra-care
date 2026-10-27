@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-27] - Fila AC Queued closeout + fix exclusão de conta
+
+### Realizado
+- **DELETE /auth/account:** remove `care_circles` do titular antes de `app_accounts` (FK RESTRICT — INC-014/015).
+- **docs/ops/triagem-dev-automation-paste-kit.md** — kit Triagem DEV no monorepo (AC-5).
+- **docs/features/anel-b-progressive-profiling.md** — escopo Anel B pós-MVP (AC-6 backlog).
+- PRs obsoletas **#105**, **#143** fechadas; **#178** gate scrape mergeado.
+
 ## [2026-10-27] - Wave MVP passo 1 — gate onboarding e checklist go-live (docs)
 
 ### Decisão

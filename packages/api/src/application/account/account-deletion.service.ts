@@ -50,6 +50,9 @@ export class AccountDeletionService {
       )
       removedMemberships = membershipResult.rowCount ?? 0
 
+      // care_circles.billing_owner_account_id → app_accounts ON DELETE RESTRICT (059)
+      await client.query(`DELETE FROM care_circles WHERE billing_owner_account_id = $1`, [accountId])
+
       await client.query(`DELETE FROM handwriting_credit_events WHERE scope_id = $1`, [accountId])
       await client.query(`DELETE FROM handwriting_credit_accounts WHERE scope_id = $1`, [accountId])
 
