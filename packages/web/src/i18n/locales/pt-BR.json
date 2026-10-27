@@ -872,6 +872,19 @@
     }
   },
   "landing": {
+    "seo": {
+      "title": "AiyraCare — saúde da família em um só lugar",
+      "description": "Organize exames, consultas e histórico familiar com integrações e apoio de IA. Cadastro gratuito para começar."
+    },
+    "footerNavLabel": "Links institucionais",
+    "footerPublisherPending": "Razão social e CNPJ do responsável pelo tratamento constam nos documentos legais abaixo.",
+    "about": {
+      "title": "Quem somos",
+      "body": "Somos uma equipe brasileira construindo tecnologia para famílias que cuidam de pessoas queridas — centralizando histórico de saúde, integrações com convênios e ferramentas de apoio no dia a dia.",
+      "lgpd": "Tratamos dados de saúde com cuidado: criptografia, controle de acesso por perfil familiar e canal para titulares de dados. Leia nossa",
+      "trustTitle": "Privacidade e LGPD",
+      "trustBody": "Políticas públicas, aceite de termos no cadastro e cookies opcionais. Você pode solicitar informações sobre seus dados pelo canal indicado na política de privacidade."
+    },
     "ctaLogin": "Entrar",
     "ctaSignup": "Criar conta grátis",
     "heroTitle": "Saúde da família em um só lugar",
@@ -1009,27 +1022,24 @@
     },
     "pricing": {
       "title": "Planos e preços",
-      "subtitle": "Valores indicativos — confira na conta após o cadastro.",
-      "disclaimer": "Preços finais e benefícios do plano família podem mudar antes do go-live público. Não constitui oferta vinculante.",
+      "subtitle": "Comece sem compromisso. Valores comerciais serão confirmados antes da cobrança pública.",
+      "disclaimer": "Nenhum valor exibido aqui constitui oferta vinculante. Preços e pacotes podem mudar até a abertura oficial do billing.",
       "plans": [
         {
           "name": "Comece grátis",
-          "price": "R$ 0",
-          "period": "",
+          "priceLabel": "Sem custo inicial",
           "description": "Franquia mensal de interpretação de manuscritos e uso essencial do prontuário."
         },
         {
           "name": "Plano família",
-          "price": "Assinatura",
-          "period": "/mês",
-          "description": "Mais franquia de IA, mais pacientes e recursos premium — valor a confirmar.",
+          "priceLabel": "Valor sob confirmação",
+          "description": "Mais franquia de IA, mais pacientes e recursos premium — detalhes na conta quando o billing estiver ativo.",
           "highlight": true
         },
         {
           "name": "Pacotes de créditos",
-          "price": "R$ 29 · R$ 69",
-          "period": "",
-          "description": "Pacotes de 10 ou 30 interpretações avulsas quando precisar de mais volume."
+          "priceLabel": "Valores sob confirmação",
+          "description": "Pacotes avulsos de interpretação quando precisar de mais volume — preços publicados antes da venda."
         }
       ]
     },

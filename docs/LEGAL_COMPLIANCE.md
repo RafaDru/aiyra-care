@@ -159,6 +159,7 @@ node packages/api/scripts/seed-legal-documents.mjs
 | Banner cookies (`CookieConsentBanner`) | Implementado |
 | Consentimento menor no cadastro de paciente | Implementado |
 | Canal DPO em Configurações (`LegalContactCard`) | Implementado |
+| Footer institucional `/home` (`LandingInstitutionalFooter`) | Implementado — publisher via `GET /compliance/contact`; fallback build `VITE_LEGAL_ENTITY_NAME` / `VITE_LEGAL_CNPJ`; SEO `VITE_PUBLIC_SITE_URL` |
 
 ---
 

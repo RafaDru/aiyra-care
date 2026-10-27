@@ -345,6 +345,16 @@
   border-top: 1px solid var(--border, rgba(0, 0, 0, 0.06));
 }
 
+.landing-about-card {
+  height: 100%;
+}
+
+.landing-plan-price-label {
+  display: block;
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+
 .landing-pricing {
   padding-top: 48px;
   padding-bottom: 48px;
