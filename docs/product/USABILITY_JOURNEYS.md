@@ -23,6 +23,8 @@ Este documento descreve **como capacidades conversam no dia a dia** — não só
 
 ## MVP fluído — checklist mensurável
 
+**Gate de onboarding (Anel A):** [`ONBOARDING_MVP_GATE.md`](./ONBOARDING_MVP_GATE.md) · **Go-live beta:** [`MVP_GO_LIVE_CHECKLIST.md`](./MVP_GO_LIVE_CHECKLIST.md).
+
 Cadeia mínima para **`persona-parent-guardian`** no **web** (Ambiente 1 local ou preview):
 
 | # | Marco | Telas / rotas | Suite QA | Matriz |
