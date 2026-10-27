@@ -1,8 +1,9 @@
 # Ecossistema AiyraCare — personas, valor e plano de negócio
 
-> **Última atualização:** 2026-09-02  
+> **Última atualização:** 2026-10-26  
 > **Nota:** prioridades P0–P4 no roadmap **organizam temas** — não são uma fila rígida de execução.  
-> Complementa: [`B2B_PARTNERS.md`](./B2B_PARTNERS.md), [`roadmap.json`](./roadmap.json).
+> Complementa: [`B2B_PARTNERS.md`](./B2B_PARTNERS.md), [`roadmap.json`](./roadmap.json).  
+> **Personas operacionais (IDs + jornadas QA):** [`product/PERSONAS.md`](./product/PERSONAS.md), [`product/USABILITY_JOURNEYS.md`](./product/USABILITY_JOURNEYS.md).
 
 ## Visão em uma frase
 

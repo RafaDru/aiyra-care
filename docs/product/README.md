@@ -2,6 +2,8 @@
 
 | Artefato | Uso |
 |----------|-----|
+| [`PERSONAS.md`](./PERSONAS.md) | Personas oficiais (IDs estáveis, MVP P0–P2). |
+| [`USABILITY_JOURNEYS.md`](./USABILITY_JOURNEYS.md) | Jornadas dia a dia + ritual QA para agentes. |
 | [`GROWTH_CONSULTORIO_CAPILARIDADE.md`](./GROWTH_CONSULTORIO_CAPILARIDADE.md) | GTM família → médico → consultório (tese, fases A–D, MGM gate legal). |
 | [`GROWTH_CONSULTORIO_BOARD.json`](./GROWTH_CONSULTORIO_BOARD.json) | Board machine-readable — CH **Produto → Capilarização** e estratégia GTM. |
 | [`PRODUCT_MATURITY_BOARD.json`](./PRODUCT_MATURITY_BOARD.json) | Quadro de maturidade por superfície e domínio — editável no repo; lido pelo Command Hub (**Produto → Maturidade**). |
