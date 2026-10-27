@@ -28,6 +28,7 @@ Este diretório é a **fonte de verdade operacional** do épico `prod-run-intell
 | 1c7a | [`RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md`](./RAFAEL_STRATEGIC_DECISIONS_2026-10-06.md) | **Índice** das 8 decisões ingress/ops (2026-10-06) |
 | 1c8 | [`CH_G3_AGENTIC_APPROVAL.md`](./CH_G3_AGENTIC_APPROVAL.md) | G3 via `operator-approve-pr` (sem clique CH) |
 | 1c9 | [`CH_OPS_CALLBACK_TUNNEL_SPEC.md`](./CH_OPS_CALLBACK_TUNNEL_SPEC.md) | Túnel HTTPS, callbacks Automation, webhooks GitHub |
+| 1c9a | [`triagem-dev-automation-paste-kit.md`](./triagem-dev-automation-paste-kit.md) | **Kit colar** Triagem DEV (HTTP passo 0 + Instructions) — AC-5 / Automation UI |
 | 1c10 | [`CLIENT_ERROR_INGRESS_PROD_POLICY.md`](./CLIENT_ERROR_INGRESS_PROD_POLICY.md) | MIN_COUNT / dedupe / preview vs prod · **decisão §8.1 = 1A** (2026-10-06) |
 | 1c11 | [`FAILURE_PROBES_CH.md`](./FAILURE_PROBES_CH.md) | **Failure Probes** — captura default-on, opt-out, SDKs, migração bridge |
 | 1d | [`SOLO_OPERATOR_RUNBOOK.md`](./SOLO_OPERATOR_RUNBOOK.md) | **Operador solo** — gates G0–G4, falhas, pós-`ready_for_pr` (fatia R0) |
