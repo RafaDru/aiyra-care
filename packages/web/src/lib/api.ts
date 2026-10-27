@@ -947,10 +947,14 @@ export const api = {
     delete: (id: string) => request<void>(`/care-circles/${id}`, { method: 'DELETE' }),
     listLinkablePatients: (id: string) =>
       request<Array<{ id: string; name: string }>>(`/care-circles/${id}/linkable-patients`),
-    linkPatient: (circleId: string, patientId: string) =>
+    linkPatient: (
+      circleId: string,
+      patientId: string,
+      careRelation?: 'guardian' | 'parent' | 'grandparent' | 'uncle_aunt' | 'other' | 'self',
+    ) =>
       request<void>(`/care-circles/${circleId}/patients`, {
         method: 'POST',
-        body: JSON.stringify({ patientId }),
+        body: JSON.stringify({ patientId, careRelation }),
       }),
     unlinkPatient: (circleId: string, patientId: string) =>
       request<void>(`/care-circles/${circleId}/patients/${patientId}`, { method: 'DELETE' }),

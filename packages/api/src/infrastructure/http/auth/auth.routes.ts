@@ -11,6 +11,7 @@ import { MeasurementService } from '../../../application/measurement/measurement
 import { WhoGrowthService } from '../../../application/measurement/who-growth.service.js'
 import { MeasurementPgRepository } from '../../persistence/measurement.pg.repository.js'
 import { AccountProfilePgRepository } from '../../persistence/account-profile.pg.repository.js'
+import { CareCirclePgRepository } from '../../persistence/care-circle.pg.repository.js'
 import { GcsFileStorage } from '../../storage/gcs.storage.js'
 import { AuthController } from './auth.controller.js'
 import { createAuthHook } from './auth.middleware.js'
@@ -29,6 +30,7 @@ function buildAuthService(): AuthService | null {
     new PatientService(patientRepo),
     measurements,
     new AccountProfilePgRepository(pgPool),
+    new CareCirclePgRepository(pgPool),
   )
 }
 

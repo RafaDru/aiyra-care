@@ -9,29 +9,28 @@ import { api } from '../../lib/api.js'
 import { trackProductEvent } from '../../lib/product-events.js'
 import {
   clearOnboardingWizardStep,
-  isOnboardingConnectorsStepActive,
   isOnboardingFamiliesStepActive,
+  isOnboardingSummaryStepActive,
   markOnboardingJustCompleted,
-  persistOnboardingConnectorsStep,
   persistOnboardingFamiliesStep,
   persistOnboardingFamilyWizard,
+  persistOnboardingSummaryStep,
   persistOnboardingWizardOwnerSub,
   readOnboardingFamilyWizard,
   readOnboardingWizardStep,
 } from '../../lib/onboarding-wizard-storage.js'
 import { isApiResponseError } from '../../lib/api-response-error.js'
-import { ONBOARDING_CONNECTOR_STEPS } from './onboarding-catalog.js'
 import { OnboardingStepChrome } from './OnboardingStepChrome.js'
 import { ProfileStep } from './steps/ProfileStep.js'
 import { AddressContactStep } from './steps/AddressContactStep.js'
 import type { OnboardingProfileFormValues } from './profile-form.types.js'
 import { FamilyWizardStep } from './steps/FamilyWizardStep.js'
-import { ConnectorWizardStep } from './steps/ConnectorWizardStep.js'
+import { AvaSummaryStep } from './steps/AvaSummaryStep.js'
 
 export function OnboardingWizard() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { needsProfile, refreshSync, account, authUserId } = useAuth()
+  const { needsProfile, needsOnboardingSetup, refreshSync, account, authUserId } = useAuth()
 
   const bindWizardOwner = () => {
     if (authUserId) persistOnboardingWizardOwnerSub(authUserId)
@@ -40,7 +39,6 @@ export function OnboardingWizard() {
   const profileIdentityRef = useRef<Partial<OnboardingProfileFormValues>>({})
   const [currentStep, setCurrentStep] = useState(readOnboardingWizardStep)
   const [profileSubStep, setProfileSubStep] = useState<'identity' | 'address'>('identity')
-  const [connectorIndex, setConnectorIndex] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cpfAlreadyLinked, setCpfAlreadyLinked] = useState(false)
@@ -64,10 +62,20 @@ export function OnboardingWizard() {
     if (!needsProfile && isOnboardingFamiliesStepActive() && currentStep === 0) {
       setCurrentStep(1)
     }
-    if (!needsProfile && isOnboardingConnectorsStepActive() && currentStep < 2) {
+    if (!needsProfile && isOnboardingSummaryStepActive() && currentStep < 2) {
       setCurrentStep(2)
     }
-  }, [needsProfile, currentStep])
+    if (
+      !needsProfile &&
+      needsOnboardingSetup &&
+      currentStep === 0 &&
+      !isOnboardingFamiliesStepActive() &&
+      !isOnboardingSummaryStepActive()
+    ) {
+      persistOnboardingFamiliesStep()
+      setCurrentStep(1)
+    }
+  }, [needsProfile, needsOnboardingSetup, currentStep])
 
   useEffect(() => {
     if (currentStep !== 1 || familyReady) return
@@ -152,17 +160,17 @@ export function OnboardingWizard() {
     trackProductEvent('onboarding_step', { step: 'step_3_family_name_viewed', circle_index: 0 })
   }
 
-  const goToConnectorsStep = () => {
+  const goToSummaryStep = () => {
     bindWizardOwner()
-    persistOnboardingConnectorsStep()
-    setConnectorIndex(0)
+    persistOnboardingSummaryStep()
     setCurrentStep(2)
-    trackProductEvent('onboarding_step', { step: 'connector-sus' })
+    trackProductEvent('onboarding_step', { step: 'onboarding_families_complete' })
   }
 
-  const finishOnboarding = () => {
+  const finishOnboarding = async () => {
     clearOnboardingWizardStep()
     markOnboardingJustCompleted()
+    await refreshSync()
     navigate('/')
   }
 
@@ -242,20 +250,19 @@ export function OnboardingWizard() {
   }
 
   const wizardOnFamiliesStep = isOnboardingFamiliesStepActive()
-  const wizardOnConnectorsStep = isOnboardingConnectorsStepActive()
-  if (!needsProfile && currentStep === 0 && !wizardOnFamiliesStep && !wizardOnConnectorsStep && !submitting) {
+  const wizardOnSummaryStep = isOnboardingSummaryStepActive()
+  const onboardingIncomplete = needsProfile || needsOnboardingSetup
+  if (
+    !onboardingIncomplete &&
+    currentStep === 0 &&
+    !wizardOnFamiliesStep &&
+    !wizardOnSummaryStep &&
+    !submitting
+  ) {
     return <Navigate to="/" replace />
   }
 
   const stepsCurrent = currentStep === 0 ? 0 : currentStep === 1 ? 1 : 2
-
-  const advanceConnector = () => {
-    if (connectorIndex >= ONBOARDING_CONNECTOR_STEPS.length - 1) {
-      finishOnboarding()
-      return
-    }
-    setConnectorIndex((i) => i + 1)
-  }
 
   return (
     <OnboardingStepChrome stepsCurrent={stepsCurrent}>
@@ -282,16 +289,13 @@ export function OnboardingWizard() {
           initialCircleNames={familyBootstrap.circleNames}
           submitting={submitting}
           setSubmitting={setSubmitting}
-          onFinish={goToConnectorsStep}
+          onFinish={goToSummaryStep}
         />
-      ) : currentStep === 2 && selfPatientId ? (
-        <ConnectorWizardStep
-          kind={ONBOARDING_CONNECTOR_STEPS[connectorIndex]!.id}
-          connectorIndex={connectorIndex}
-          selfPatientId={selfPatientId}
-          onSkip={advanceConnector}
-          onContinue={advanceConnector}
-          isLast={connectorIndex >= ONBOARDING_CONNECTOR_STEPS.length - 1}
+      ) : currentStep === 2 ? (
+        <AvaSummaryStep
+          submitting={submitting}
+          setSubmitting={setSubmitting}
+          onFinish={() => void finishOnboarding()}
         />
       ) : (
         <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>

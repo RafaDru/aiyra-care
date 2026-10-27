@@ -181,7 +181,12 @@ export class CareCircleController {
     const body = linkPatientSchema.safeParse(req.body)
     if (!body.success) return reply.status(400).send({ error: body.error.flatten() })
     try {
-      await this.service.linkPatient(params.data.id, req.accountId, body.data.patientId)
+      await this.service.linkPatient(
+        params.data.id,
+        req.accountId,
+        body.data.patientId,
+        body.data.careRelation ?? null,
+      )
       return reply.status(204).send()
     } catch (err) {
       return mapError(err, reply)

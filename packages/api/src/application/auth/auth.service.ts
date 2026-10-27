@@ -1,5 +1,6 @@
 import type { AuthProviderPort, AuthUser } from '../../domain/auth/auth-provider.port.js'
 import type { AppAccountRepository, PatientMembershipRepository } from '../../domain/auth/app-account.repository.js'
+import type { CareCircleRepository } from '../../domain/care-circle/care-circle.repository.js'
 import { AppAccount } from '../../domain/auth/app-account.entity.js'
 import type { PatientService } from '../patient/patient.service.js'
 import type { MeasurementService } from '../measurement/measurement.service.js'
@@ -13,6 +14,8 @@ export type SyncAccountResult = {
   account: AppAccount
   isNew: boolean
   needsProfile: boolean
+  /** Perfil titular OK, mas falta círculo ou paciente acessível (onboarding Anel A). */
+  needsOnboardingSetup: boolean
 }
 
 export type CompleteProfileResult = {
@@ -48,6 +51,7 @@ export class AuthService {
     private readonly patients: PatientService,
     private readonly measurements?: MeasurementService,
     private readonly accountProfiles?: AccountProfileRepository,
+    private readonly careCircles?: CareCircleRepository,
     private readonly providerName = 'supabase',
   ) {}
 
@@ -60,6 +64,22 @@ export class AuthService {
     if (!selfPatientId) return true
     const patient = await this.patients.findById(selfPatientId)
     return !isValidSelfProfileCpf(patient.cpf)
+  }
+
+  /** Gate MVP: titular completo + ≥1 care_circle + ≥1 paciente na conta. */
+  async needsOnboardingSetup(accountId: string): Promise<boolean> {
+    if (await this.needsProfile(accountId)) return false
+    if (!this.careCircles) return false
+    const circles = await this.careCircles.listForAccount(accountId)
+    if (circles.length === 0) return true
+    const patientIds = await this.memberships.listAccessiblePatientIds(accountId)
+    return patientIds.length === 0
+  }
+
+  private async syncFlags(accountId: string) {
+    const needsProfile = await this.needsProfile(accountId)
+    const needsOnboardingSetup = needsProfile ? false : await this.needsOnboardingSetup(accountId)
+    return { needsProfile, needsOnboardingSetup }
   }
 
   async syncAccountFromToken(accessToken: string): Promise<SyncAccountResult | null> {
@@ -80,10 +100,11 @@ export class AuthService {
         updatedAt: new Date(),
       })
       const saved = await this.accounts.update(updated)
+      const flags = await this.syncFlags(saved.id)
       return {
         account: saved,
         isNew: false,
-        needsProfile: await this.needsProfile(saved.id),
+        ...flags,
       }
     }
 
@@ -100,6 +121,7 @@ export class AuthService {
       account: created,
       isNew: true,
       needsProfile: true,
+      needsOnboardingSetup: false,
     }
   }
 

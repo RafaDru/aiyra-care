@@ -22,8 +22,11 @@ export const circleMemberParamsSchema = z.object({
   memberId: z.string().uuid(),
 })
 
+export const careRelationEnum = z.enum(['guardian', 'parent', 'grandparent', 'uncle_aunt', 'other', 'self'])
+
 export const linkPatientSchema = z.object({
   patientId: z.string().uuid(),
+  careRelation: careRelationEnum.optional(),
 })
 
 export const patientLinkParamsSchema = z.object({
