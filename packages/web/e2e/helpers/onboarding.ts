@@ -47,12 +47,10 @@ async function selectBrazilianState(page: Page, uf: string) {
   }).toPass({ timeout: 25_000 })
 }
 
-async function skipConnectorSteps(page: Page) {
-  for (const kind of ['sus', 'plans', 'labs', 'hospitals']) {
-    const step = page.getByTestId(`onboarding-connector-${kind}`)
-    await step.waitFor({ state: 'visible', timeout: 25_000 })
-    await page.getByTestId(`onboarding-connector-skip-${kind}`).click()
-  }
+async function completeAvaSummaryStep(page: Page) {
+  const summary = page.getByTestId('onboarding-step-ava-summary')
+  await summary.waitFor({ state: 'visible', timeout: 25_000 })
+  await page.getByTestId('onboarding-ava-summary-skip').click()
 }
 
 async function fillIdentityStep(page: Page, profile: OnboardingProfileInput) {
@@ -131,7 +129,7 @@ async function completeFamilyAndConnectors(page: Page) {
   await page.getByTestId('onboarding-step-family-members').waitFor({ state: 'visible', timeout: 25_000 })
   await page.getByRole('button', { name: /Pular pessoas por agora|Skip people for now/i }).click()
 
-  await skipConnectorSteps(page)
+  await completeAvaSummaryStep(page)
 
   await page.waitForURL((url) => !url.pathname.includes('/onboarding'), { timeout: 25_000 })
 }

@@ -17,6 +17,7 @@ export class AuthController {
       account: synced.account.toJSON(),
       isNew: synced.isNew,
       needsProfile: synced.needsProfile,
+      needsOnboardingSetup: synced.needsOnboardingSetup,
     }
   }
 

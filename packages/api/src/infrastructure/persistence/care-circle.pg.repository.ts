@@ -182,11 +182,11 @@ export class CareCirclePgRepository implements CareCircleRepository {
     )
   }
 
-  async linkPatient(circleId: string, patientId: string) {
+  async linkPatient(circleId: string, patientId: string, careRelation?: string | null) {
     await this.pool.query(
-      `INSERT INTO patient_circle_links (patient_id, circle_id) VALUES ($1, $2)
-       ON CONFLICT DO NOTHING`,
-      [patientId, circleId],
+      `INSERT INTO patient_circle_links (patient_id, circle_id, care_relation) VALUES ($1, $2, $3)
+       ON CONFLICT (patient_id, circle_id) DO UPDATE SET care_relation = COALESCE(EXCLUDED.care_relation, patient_circle_links.care_relation)`,
+      [patientId, circleId, careRelation ?? null],
     )
   }
 

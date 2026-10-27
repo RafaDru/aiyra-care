@@ -32,8 +32,8 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 4 | Preencher nome, nascimento ≥18, sexo, CPF → **Continuar** | Sub-step endereço (CEP ViaCEP) + celular obrigatório | |
 | 5 | **Continuar** (complete-profile) → nome da família | `data-testid="onboarding-step-family-name"` | |
 | 6 | **Continuar** → membros | `data-testid="onboarding-step-family-members"` | |
-| 7 | **Pular pessoas por agora** | Conectores opcionais (`onboarding-connector-*`); pular cada um | |
-| 8 | Concluir último conector | Dashboard `/` com heading «Sua família»; grupo com nome da família | |
+| 7 | **Pular pessoas por agora** → resumo Ava (opcional) | `data-testid="onboarding-step-ava-summary"`; **Pular e ir ao início** ou salvar texto | |
+| 8 | Concluir resumo | Dashboard `/` com heading «Quem você cuida»; grupo com nome da família; gate só libera com ≥1 `care_circle` + paciente | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)
 

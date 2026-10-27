@@ -40,6 +40,9 @@ describe('AuthService.syncAccountFromToken', () => {
     save: vi.fn(),
     update: vi.fn(async (a: AppAccount) => a),
   }
+  const careCircles = {
+    listForAccount: vi.fn(async () => [{ id: 'circle-1', name: 'Família' }]),
+  }
 
   let service: AuthService
 
@@ -50,7 +53,11 @@ describe('AuthService.syncAccountFromToken', () => {
       accounts as never,
       memberships as never,
       patients as never,
+      undefined,
+      undefined,
+      careCircles as never,
     )
+    memberships.listAccessiblePatientIds = vi.fn(async () => ['patient-self-1'])
   })
 
   it('keeps onboarding displayName when provider only sends email', async () => {
@@ -96,6 +103,33 @@ describe('AuthService.syncAccountFromToken', () => {
 
     const result = await service.syncAccountFromToken('token')
     expect(result?.needsProfile).toBe(true)
+    expect(result?.needsOnboardingSetup).toBe(false)
+  })
+
+  it('needsOnboardingSetup when profile ok but no care circle', async () => {
+    const existing = AppAccount.create(
+      { authSubject: 'sub-1', email: 'bruno@example.com', displayName: 'Bruno' },
+      'account-1',
+    )
+    accounts.findByAuthSubject.mockResolvedValue(existing)
+    authProvider.verifyAccessToken.mockResolvedValue({
+      id: 'sub-1',
+      email: 'bruno@example.com',
+      displayName: 'Bruno',
+      avatarUrl: null,
+    })
+    careCircles.listForAccount.mockResolvedValue([])
+    patients.findById.mockResolvedValue(
+      Patient.create({
+        name: 'Bruno',
+        birthDate: new Date('1990-01-01'),
+        cpf: '12345678901',
+      }, 'patient-self-1'),
+    )
+
+    const result = await service.syncAccountFromToken('token')
+    expect(result?.needsProfile).toBe(false)
+    expect(result?.needsOnboardingSetup).toBe(true)
   })
 })
 

@@ -45,8 +45,8 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | 1 | Reset `qa:reset-onboarding-user` + login onboarding | Wizard passo 1 | |
 | 2 | Perfil titular + **Continuar** → endereço/contato + **Continuar** | `POST /auth/complete-profile` (CEP, celular); tela nome família | |
 | 3 | Nome + **Continuar** | Membros (`onboarding-step-family-members`); titular no 1º círculo | |
-| 4 | **Pular pessoas por agora** | Passos opcionais conectores (SUS → convênios → labs → hospitais), cada um com **Pular** | |
-| 5 | Último conector **Pular** ou **Ir para o app** | Dashboard **Quem você cuida** com titular no grupo nomeado; banner opcional | |
+| 4 | **Pular pessoas por agora** (ou **Sou eu o paciente**) | Relação de cuidado no dependente; sem passo de convênio no wizard | |
+| 5 | Resumo Ava (opcional) **Pular** ou **Ir para o início** | Dashboard **Quem você cuida** com titular no grupo nomeado; banner opcional | |
 
 **Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado» · helper `onboarding.ts`
 

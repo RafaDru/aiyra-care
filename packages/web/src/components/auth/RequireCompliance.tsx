@@ -16,7 +16,7 @@ import { trackProductEvent } from '../../lib/product-events.js'
  * Spinner em cada clique — o "refresh completo" percebido pelo usuário.
  */
 export function RequireCompliance() {
-  const { configured, loading: authLoading, session, authUserId, needsProfile } = useAuth()
+  const { configured, loading: authLoading, session, authUserId, needsProfile, needsOnboardingSetup } = useAuth()
   const location = useLocation()
   const [checking, setChecking] = useState(true)
   const [compliant, setCompliant] = useState(true)
@@ -67,7 +67,7 @@ export function RequireCompliance() {
     return <Navigate to={COMPLIANCE_ACCEPT_PATH} replace state={{ from: location.pathname }} />
   }
 
-  if (compliant && needsProfile && location.pathname !== '/onboarding') {
+  if (compliant && (needsProfile || needsOnboardingSetup) && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />
   }
 

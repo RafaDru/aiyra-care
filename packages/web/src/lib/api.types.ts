@@ -380,6 +380,7 @@ export interface AuthSyncResponse {
   account: AppAccount
   isNew: boolean
   needsProfile: boolean
+  needsOnboardingSetup: boolean
 }
 
 export interface OnboardingAddressInput {

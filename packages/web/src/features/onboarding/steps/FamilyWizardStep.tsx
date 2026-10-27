@@ -17,6 +17,10 @@ import {
   type OnboardingFamilyPhase,
 } from '../../../lib/onboarding-wizard-storage.js'
 import { OnboardingErrorAlert } from '../../../components/onboarding/OnboardingErrorAlert.js'
+import {
+  ONBOARDING_CARE_RELATION_OPTIONS,
+  type OnboardingCareRelation,
+} from '../onboarding-care-relations.js'
 
 const { Title, Text } = Typography
 
@@ -132,7 +136,7 @@ export function FamilyWizardStep({
       const created = await api.careCircles.create(name)
       trackProductEvent('onboarding_step', { step: 'family_circle_created', circle_index: circleIndex })
       if (circleIndex === 0) {
-        await api.careCircles.linkPatient(created.id, selfPatientId)
+        await api.careCircles.linkPatient(created.id, selfPatientId, 'self')
       }
       setCircleNames((prev) => [...prev, name])
       setActiveCircleId(created.id)
@@ -169,6 +173,7 @@ export function FamilyWizardStep({
     birthDate: { toDate: () => Date }
     gender?: 'male' | 'female'
     cpf?: string
+    careRelation?: OnboardingCareRelation
     minorGuardianConsent?: boolean
   }) => {
     if (!activeCircleId) return
@@ -186,7 +191,7 @@ export function FamilyWizardStep({
         gender: values.gender || undefined,
         cpf: values.cpf?.replace(/\D/g, '') || undefined,
       })
-      await api.careCircles.linkPatient(activeCircleId, created.id)
+      await api.careCircles.linkPatient(activeCircleId, created.id, values.careRelation ?? 'guardian')
       setMembers((prev) => [...prev, { id: created.id, name: created.name }])
       memberForm.resetFields()
       trackProductEvent('onboarding_step', { step: 'family_member_added', circle_index: circleIndex })
@@ -238,11 +243,26 @@ export function FamilyWizardStep({
   }
 
   const goFinish = () => {
-    trackProductEvent('onboarding_step', { step: 'onboarding_families_complete' })
     trackProductEvent('onboarding_step', {
       step: members.length > 0 ? 'dependents_complete' : 'dependents_skipped',
     })
     onFinish()
+  }
+
+  const onImThePatient = async () => {
+    if (!activeCircleId) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await api.careCircles.linkPatient(activeCircleId, selfPatientId, 'self')
+      setIncludeSelf(true)
+      await loadCircleMembers(activeCircleId)
+      trackProductEvent('onboarding_step', { step: 'onboarding_self_patient_accelerator' })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('onboarding.error'))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (phase === 'name') {
@@ -335,9 +355,35 @@ export function FamilyWizardStep({
         />
       )}
 
-      <Form form={memberForm} layout="vertical" onFinish={onAddMember} requiredMark={false}>
+      <Button
+        type="default"
+        block
+        size="large"
+        style={{ marginBottom: 16 }}
+        loading={submitting}
+        onClick={() => void onImThePatient()}
+        data-testid="onboarding-im-the-patient"
+      >
+        {t('onboarding.imThePatient')}
+      </Button>
+
+      <Form form={memberForm} layout="vertical" onFinish={onAddMember} requiredMark={false} initialValues={{ careRelation: 'guardian' }}>
         <Form.Item name="name" label={t('onboarding.dependentName')} rules={[{ required: true, message: t('onboarding.nameRequired') }]}>
           <Input size="large" />
+        </Form.Item>
+        <Form.Item
+          name="careRelation"
+          label={t('onboarding.careRelationLabel')}
+          rules={[{ required: true, message: t('onboarding.careRelationRequired') }]}
+        >
+          <Select
+            size="large"
+            data-testid="onboarding-care-relation"
+            options={ONBOARDING_CARE_RELATION_OPTIONS.map((value) => ({
+              value,
+              label: t(`onboarding.careRelation.${value}`),
+            }))}
+          />
         </Form.Item>
         <Form.Item
           name="birthDate"

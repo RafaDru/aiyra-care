@@ -19,6 +19,7 @@ type AuthContextValue = {
   user: User | null
   account: AppAccount | null
   needsProfile: boolean
+  needsOnboardingSetup: boolean
   rememberMe: boolean
   setRememberMe: (remember: boolean) => void
   refreshSync: () => Promise<void>
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [account, setAccount] = useState<AppAccount | null>(null)
   const [needsProfile, setNeedsProfile] = useState(false)
+  const [needsOnboardingSetup, setNeedsOnboardingSetup] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [rememberMe, setRememberMeState] = useState(isRememberMeEnabled())
 
@@ -49,12 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!accessToken || !supabaseConfigured) {
       setAccount(null)
       setNeedsProfile(false)
+      setNeedsOnboardingSetup(false)
       return
     }
     const { api } = await import('../lib/api.js')
     const result = await api.auth.sync()
     setAccount(result.account)
     setNeedsProfile(result.needsProfile)
+    setNeedsOnboardingSetup(result.needsOnboardingSetup ?? false)
     if (authUserId) {
       const { reconcileOnboardingWizardStorageForAuthUser } = await import('../lib/onboarding-wizard-storage.js')
       reconcileOnboardingWizardStorageForAuthUser(authUserId)
@@ -71,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       setAccount(null)
       setNeedsProfile(false)
+      setNeedsOnboardingSetup(false)
     } finally {
       setSyncing(false)
     }
@@ -112,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setMemoryAccessToken(null)
         setAccount(null)
         setNeedsProfile(false)
+        setNeedsOnboardingSetup(false)
         return
       }
       if (event === 'TOKEN_REFRESHED') {
@@ -149,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: session?.user ?? null,
     account,
     needsProfile,
+    needsOnboardingSetup,
     rememberMe,
     setRememberMe: (remember: boolean) => {
       setRememberMeState(remember)
@@ -213,9 +220,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setMemoryAccessToken(null)
       setAccount(null)
       setNeedsProfile(false)
+      setNeedsOnboardingSetup(false)
       window.location.assign('/login')
     },
-  }), [loading, syncing, session, account, needsProfile, rememberMe, refreshSync])
+  }), [loading, syncing, session, account, needsProfile, needsOnboardingSetup, rememberMe, refreshSync])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
