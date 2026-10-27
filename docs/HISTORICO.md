@@ -1,5 +1,17 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-27] - Wave MVP passo 1 — gate onboarding e checklist go-live (docs)
+
+### Decisão
+- **Anel A:** conta (CPF, nome, e-mail, telefone, endereço), 1 família + 1 pessoa, `self`, relação de cuidado; convênio e SUS **sem passo** no 1º onboarding; pagamento fora do gate; senha pós-OAuth **P1**.
+- **Anel B:** progressive profiling (integrações, co-responsável, billing, etc.).
+- Go-live beta: cinco pilares documentados (institucional, gate, PJ/legal, domínio, deploy).
+
+### Realizado
+- **docs/product/ONBOARDING_MVP_GATE.md** — spec do gate + suites J1.
+- **docs/product/MVP_GO_LIVE_CHECKLIST.md** — checkboxes com refs `LEGAL_COMPLIANCE.md`, `DEPLOY_BETA_RUNBOOK.md`, épico `institutional-landing`.
+- Hub **docs/product/README.md** atualizado.
+
 ## [2026-10-26] - Personas oficiais e jornadas de usabilidade (MVP família)
 
 ### Decisão
