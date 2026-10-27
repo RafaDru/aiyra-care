@@ -25,6 +25,8 @@ import { LandingScreenshot, LandingScreenshotFrame } from '../components/landing
 import { LandingShowcaseSection } from '../components/landing/LandingShowcaseSection.js'
 import { LANDING_PHOTOS, LANDING_SCREENSHOTS } from '../lib/landing-media.js'
 import { trackLandingEvent } from '../lib/landing-events.js'
+import { LandingInstitutionalFooter } from '../components/landing/LandingInstitutionalFooter.js'
+import { PageMeta } from '../components/seo/PageMeta.js'
 import './landing.css'
 
 const { Title, Paragraph, Text } = Typography
@@ -60,8 +62,7 @@ export function LandingPage() {
   const features = t('landing.features.items', { returnObjects: true }) as Array<{ title: string; body: string }>
   const plans = t('landing.pricing.plans', { returnObjects: true }) as Array<{
     name: string
-    price: string
-    period?: string
+    priceLabel: string
     description: string
     highlight?: boolean
   }>
@@ -76,6 +77,11 @@ export function LandingPage() {
 
   return (
     <div className="landing-page">
+      <PageMeta
+        title={t('landing.seo.title')}
+        description={t('landing.seo.description')}
+        canonicalPath="/home"
+      />
       <header className="landing-header">
         <AppLogo variant="sidebar" height={36} style={{ maxWidth: 200 }} />
         <Space>
@@ -261,6 +267,31 @@ export function LandingPage() {
         <Paragraph type="secondary" className="landing-ava-note">{t('landing.avaDisclaimer')}</Paragraph>
       </section>
 
+      <section className="landing-section landing-about" id="about">
+        <Row gutter={[32, 24]} align="middle">
+          <Col xs={24} md={14}>
+            <Title level={2}>{t('landing.about.title')}</Title>
+            <Paragraph type="secondary" className="landing-lead">{t('landing.about.body')}</Paragraph>
+            <Paragraph type="secondary" style={{ marginBottom: 0 }}>
+              {t('landing.about.lgpd')}
+              {' '}
+              <Link to="/privacidade">{t('legal.privacyLink')}</Link>
+              {' · '}
+              <Link to="/cookies">{t('legal.cookiePolicyLink')}</Link>
+            </Paragraph>
+          </Col>
+          <Col xs={24} md={10}>
+            <Card size="small" className="landing-card landing-about-card">
+              <Space direction="vertical" size={8}>
+                <SafetyOutlined style={{ fontSize: 28, color: 'var(--brand-primary, #0d9488)' }} />
+                <Text strong>{t('landing.about.trustTitle')}</Text>
+                <Text type="secondary">{t('landing.about.trustBody')}</Text>
+              </Space>
+            </Card>
+          </Col>
+        </Row>
+      </section>
+
       <section className="landing-section landing-pricing" id="pricing">
         <div className="landing-pricing-inner">
           <Title level={2}>{t('landing.pricing.title')}</Title>
@@ -272,10 +303,7 @@ export function LandingPage() {
                   className={plan.highlight ? 'landing-card landing-plan-highlight' : 'landing-card'}
                   title={plan.name}
                 >
-                  <Title level={3} style={{ marginTop: 0 }}>
-                    {plan.price}
-                    {plan.period && <Text type="secondary" style={{ fontSize: 14 }}> {plan.period}</Text>}
-                  </Title>
+                  <Text strong className="landing-plan-price-label">{plan.priceLabel}</Text>
                   <Paragraph type="secondary">{plan.description}</Paragraph>
                 </Card>
               </Col>
@@ -311,16 +339,7 @@ export function LandingPage() {
         </Button>
       </section>
 
-      <footer className="landing-footer">
-        <Space split={<span>·</span>} wrap size="small">
-          <Link to="/termos" onClick={() => trackCta('terms', 'footer')}>{t('legal.termsLink')}</Link>
-          <Link to="/privacidade" onClick={() => trackCta('privacy', 'footer')}>{t('legal.privacyLink')}</Link>
-          <Link to="/cookies" onClick={() => trackCta('cookies', 'footer')}>{t('legal.cookiePolicyLink')}</Link>
-          <Link to="/login?mode=login" onClick={() => trackCta('login', 'footer')}>{t('landing.ctaLogin')}</Link>
-        </Space>
-        <Text type="secondary" className="landing-footer-line">{t('landing.footerNote')}</Text>
-        <Text type="secondary" className="landing-footer-line landing-footer-small">{t('landing.photoCredit')}</Text>
-      </footer>
+      <LandingInstitutionalFooter />
     </div>
   )
 }

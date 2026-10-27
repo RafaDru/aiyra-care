@@ -854,6 +854,19 @@
     }
   },
   "landing": {
+    "seo": {
+      "title": "AiyraCare — family health in one place",
+      "description": "Organize exams, visits and family health history with integrations and AI support. Free signup to get started."
+    },
+    "footerNavLabel": "Institutional links",
+    "footerPublisherPending": "Controller identification is published in the legal documents below.",
+    "about": {
+      "title": "Who we are",
+      "body": "We are a Brazilian team building technology for families who care for loved ones — centralizing health history, insurance integrations and everyday support tools.",
+      "lgpd": "We handle health data carefully: encryption, family-scoped access and a channel for data subjects. Read our",
+      "trustTitle": "Privacy and LGPD",
+      "trustBody": "Public policies, terms acceptance at signup and optional cookies. You can request information about your data through the channel in our privacy policy."
+    },
     "ctaLogin": "Sign in",
     "ctaSignup": "Create free account",
     "heroTitle": "Family health in one place",
@@ -991,27 +1004,24 @@
     },
     "pricing": {
       "title": "Plans and pricing",
-      "subtitle": "Indicative values — check your account after signup.",
-      "disclaimer": "Final prices and family plan benefits may change before public launch. Not a binding offer.",
+      "subtitle": "Start with no commitment. Commercial pricing will be confirmed before public billing.",
+      "disclaimer": "Nothing shown here is a binding offer. Prices and packs may change until billing goes live.",
       "plans": [
         {
           "name": "Start free",
-          "price": "R$ 0",
-          "period": "",
+          "priceLabel": "No upfront cost",
           "description": "Monthly handwriting interpretation allowance and essential chart features."
         },
         {
           "name": "Family plan",
-          "price": "Subscription",
-          "period": "/month",
-          "description": "More AI allowance, more patients and premium features — price to confirm.",
+          "priceLabel": "Price to be confirmed",
+          "description": "More AI allowance, more patients and premium features — details in your account when billing is active.",
           "highlight": true
         },
         {
           "name": "Credit packs",
-          "price": "R$ 29 · R$ 69",
-          "period": "",
-          "description": "10 or 30 interpretation packs when you need more volume."
+          "priceLabel": "Prices to be confirmed",
+          "description": "Add-on interpretation packs when you need more volume — prices published before sale."
         }
       ]
     },
