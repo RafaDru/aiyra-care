@@ -108,7 +108,12 @@ export class CareCircleService {
     if (!ok) throw new Error('CARE_CIRCLE_MEMBER_NOT_FOUND')
   }
 
-  async linkPatient(circleId: string, actorId: string, patientId: string) {
+  async linkPatient(
+    circleId: string,
+    actorId: string,
+    patientId: string,
+    careRelation?: string | null,
+  ) {
     await this.requireOwnerOrAdmin(circleId, actorId)
     const circle = await this.repo.findById(circleId)
     if (!circle) throw new Error('CARE_CIRCLE_NOT_FOUND')
@@ -121,7 +126,7 @@ export class CareCircleService {
     if (owner !== circle.billingOwnerAccountId) {
       throw new Error('CARE_CIRCLE_PATIENT_NOT_OWNED')
     }
-    await this.repo.linkPatient(circleId, patientId)
+    await this.repo.linkPatient(circleId, patientId, careRelation)
   }
 
   async unlinkPatient(circleId: string, actorId: string, patientId: string) {

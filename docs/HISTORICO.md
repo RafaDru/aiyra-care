@@ -1,5 +1,30 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-27] - Wave MVP passo 1 — gate onboarding e checklist go-live (docs)
+
+### Decisão
+- **Anel A:** conta (CPF, nome, e-mail, telefone, endereço), 1 família + 1 pessoa, `self`, relação de cuidado; convênio e SUS **sem passo** no 1º onboarding; pagamento fora do gate; senha pós-OAuth **P1**.
+- **Anel B:** progressive profiling (integrações, co-responsável, billing, etc.).
+- Go-live beta: cinco pilares documentados (institucional, gate, PJ/legal, domínio, deploy).
+
+### Realizado
+- **docs/product/ONBOARDING_MVP_GATE.md** — spec do gate + suites J1.
+- **docs/product/MVP_GO_LIVE_CHECKLIST.md** — checkboxes com refs `LEGAL_COMPLIANCE.md`, `DEPLOY_BETA_RUNBOOK.md`, épico `institutional-landing`.
+- Hub **docs/product/README.md** atualizado.
+
+## [2026-10-26] - Personas oficiais e jornadas de usabilidade (MVP família)
+
+### Decisão
+- **Primeira persona operacional:** `persona-parent-guardian` (pai/mãe/ascendente cuidando de crianças), com `persona-co-parent-invited` em **P0** (convite co-responsável).
+- Entrada B2C: self-care, cuidador terceiro e filho cuidando de idoso em **P1**; médico/consultório/profissionais saúde em **P2** (B2B).
+- **MVP fluído** definido como cadeia mensurável onboarding → paciente → integração → carteira + dia a dia (checklist em `docs/product/USABILITY_JOURNEYS.md`).
+- Domínios produto: registro de **www.aiyra-care.com.br** e **www.aiyracare.com.br** após regularização CNPJ — sem mudança de escopo técnico imediato.
+
+### Realizado
+- **docs/product/PERSONAS.md** — IDs estáveis, goals, dores, conta×família, prioridade MVP.
+- **docs/product/USABILITY_JOURNEYS.md** — cinco jornadas pai/mãe passo a passo, ligação a suites QA, ritual «Como agentes testam usabilidade».
+- Hub **docs/product/README.md** e **docs/README.md** atualizados.
+
 ## [2026-10-09] - Higiene sessionStorage do onboarding wizard v2
 
 ### Realizado

@@ -18,6 +18,8 @@
 
 ### Produto e negócio
 
+- [`product/PERSONAS.md`](./product/PERSONAS.md) — personas oficiais (MVP P0 pai/mãe)
+- [`product/USABILITY_JOURNEYS.md`](./product/USABILITY_JOURNEYS.md) — jornadas + checklist fluidez + QA
 - [`product-terminology.md`](./product-terminology.md) — glossário UI B2C (família × clínico)
 - [`I18N_LOCALES.md`](./I18N_LOCALES.md) — locales MVP (pt-BR + en), `t()` e `i18n:check`
 - [`discovery/`](./discovery/) — discovery ativo (dia a dia, médico, indicação)

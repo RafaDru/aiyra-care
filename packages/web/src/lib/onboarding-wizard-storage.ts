@@ -20,7 +20,7 @@ export type OnboardingFamilyWizardState = {
 export function readOnboardingWizardStep(): number {
   if (typeof window === 'undefined') return 0
   const raw = sessionStorage.getItem(ONBOARDING_WIZARD_STEP_KEY)
-  if (raw === '2' || raw === 'connectors') return 2
+  if (raw === '2' || raw === 'connectors' || raw === 'summary') return 2
   if (raw === '1' || raw === 'families') return 1
   return 0
 }
@@ -31,6 +31,10 @@ export function persistOnboardingFamiliesStep(): void {
 
 export function persistOnboardingConnectorsStep(): void {
   sessionStorage.setItem(ONBOARDING_WIZARD_STEP_KEY, 'connectors')
+}
+
+export function persistOnboardingSummaryStep(): void {
+  sessionStorage.setItem(ONBOARDING_WIZARD_STEP_KEY, 'summary')
 }
 
 /** @deprecated Use `persistOnboardingFamiliesStep` */
@@ -124,6 +128,13 @@ export function isOnboardingFamiliesStepActive(): boolean {
 
 export function isOnboardingConnectorsStepActive(): boolean {
   return readOnboardingWizardStep() === 2
+}
+
+export function isOnboardingSummaryStepActive(): boolean {
+  const step = readOnboardingWizardStep()
+  if (step !== 2) return false
+  const raw = sessionStorage.getItem(ONBOARDING_WIZARD_STEP_KEY)
+  return raw === 'summary' || raw === '2'
 }
 
 /** @deprecated Use `isOnboardingFamiliesStepActive` */

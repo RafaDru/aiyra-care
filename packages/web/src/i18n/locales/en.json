@@ -178,6 +178,8 @@
       "familiesHint": "Name and profiles",
       "connectors": "Connections",
       "connectorsHint": "Optional",
+      "summary": "Context for Ava",
+      "summaryHint": "Optional",
       "complete": "Finish",
       "completeHint": "Go to dashboard"
     },
@@ -242,6 +244,22 @@
     "selfInFirstCircle": "You ({{name}}) are already in this family.",
     "cancelDraftFamily": "Cancel this family",
     "manageFamiliesLater": "Manage families later under Family & caregivers",
+    "imThePatient": "I'm the patient",
+    "careRelationLabel": "Your care relationship",
+    "careRelationRequired": "Select how you care for this person",
+    "careRelation": {
+      "guardian": "Guardian / caregiver",
+      "parent": "Parent",
+      "grandparent": "Grandparent",
+      "uncle_aunt": "Aunt or uncle",
+      "other": "Other"
+    },
+    "avaSummaryTitle": "Tell Ava a little",
+    "avaSummarySubtitle": "In one or two sentences, what matters most in your family's care right now? Ava uses this only to personalize support — you can change it later in your profile.",
+    "avaSummaryLabel": "Summary (optional)",
+    "avaSummaryHint": "E.g. “My daughter has mild asthma; I track visits and vaccines.”",
+    "avaSummaryTooLong": "Use up to 500 characters",
+    "avaSummarySkip": "Skip and go to home",
     "address": {
       "title": "Where you live",
       "subtitle": "Full address for contact and future documents.",
