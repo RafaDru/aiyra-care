@@ -23,8 +23,18 @@ import {
   submitHermesPardiniOtpCode,
 } from '../../scraper/hermes-pardini-otp-session.js'
 import { writeSseResponseHead } from '../sse-response.helper.js'
+import {
+  isPrivateScrapeAllowedInDeployment,
+  isPrivateScrapePortal,
+} from '../../../domain/connect/private-scrape-portal.policy.js'
 
 const syncLocks = new Set<string>()
+
+const SCRAPE_DISABLED_BODY = {
+  error: 'CONNECT_PRIVATE_SCRAPE_DISABLED',
+  message:
+    'Integrações automáticas com operadoras e laboratórios privados estão desativadas neste ambiente. Use ConecteSUS, importação manual ou ambiente de demonstração.',
+}
 
 const SYNC_STREAM_HEARTBEAT_MS = Number(process.env.SYNC_STREAM_HEARTBEAT_MS ?? '25000')
 
@@ -61,6 +71,12 @@ export class IntegrationLinkController {
     const parsed = createIntegrationLinkSchema.safeParse(req.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     if (!assertPatientAccess(req, reply, parsed.data.patientId)) return
+    if (
+      isPrivateScrapePortal(parsed.data.portalType)
+      && !isPrivateScrapeAllowedInDeployment()
+    ) {
+      return reply.status(403).send(SCRAPE_DISABLED_BODY)
+    }
     const { password, ...rest } = parsed.data
     const encryptedPassword = password ? encrypt(password) : undefined
     const link = IntegrationLink.create({ ...rest, encryptedPassword })
@@ -159,6 +175,9 @@ export class IntegrationLinkController {
 
     if (result.skipped && result.reason === 'unsupported_portal') {
       return reply.status(400).send({ message: `Sincronização automática ainda não disponível para ${link.portalType}` })
+    }
+    if (result.skipped && result.reason === 'scrape_disabled_production') {
+      return reply.status(403).send(SCRAPE_DISABLED_BODY)
     }
     if (result.skipped && result.reason === 'missing_credentials') {
       return reply.status(400).send({ message: 'Credenciais incompletas' })

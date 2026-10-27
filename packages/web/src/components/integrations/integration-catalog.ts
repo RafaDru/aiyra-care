@@ -6,6 +6,7 @@ import {
   FLEURY_LAB_BRANDS,
   matchesFleurySearch,
 } from '../brands/fleury-group-config.js'
+import { applyPrivateScrapeCatalogPolicy } from '../../lib/connect-private-scrape-policy.js'
 
 export type LinkablePortal = 'unimed' | 'amil' | 'bradesco_saude' | 'mater_dei' | 'hermes_pardini'
 
@@ -179,6 +180,7 @@ export function groupIntegrationOptions(
     options: INTEGRATION_OPTIONS
       .filter((o) => o.groupId === group.id)
       .filter((o) => matchesIntegrationSearch(o, searchQuery))
+      .map((o) => applyPrivateScrapeCatalogPolicy(o))
       .map((o) => ({
         ...o,
         linked: o.portalType != null && linkedPortals.has(o.portalType),
