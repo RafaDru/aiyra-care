@@ -57,12 +57,17 @@ import {
   classifyPortalSyncFailure,
 } from './portal-sync-auth.helper.js'
 import { getRuntimeDegradedService } from '../ops/runtime-degraded.factory.js'
+import {
+  isPrivateScrapeAllowedInDeployment,
+  isPrivateScrapePortal,
+} from '../../domain/connect/private-scrape-portal.policy.js'
 
 const SYNCABLE_PORTALS = new Set<string>(['unimed', 'amil', 'mater_dei', 'hermes_pardini', 'bradesco_saude'])
 const RECENT_SYNC_MS = Number(process.env.SYNC_MIN_INTERVAL_MS ?? String(30 * 60 * 1000))
 
 export type IntegrationLinkSyncSkipReason =
   | 'unsupported_portal'
+  | 'scrape_disabled_production'
   | 'missing_credentials'
   | 'active_job'
   | 'lock'
@@ -135,6 +140,9 @@ export class IntegrationLinkSyncService {
 
     if (!SYNCABLE_PORTALS.has(link.portalType)) {
       return { jobId: null, skipped: true, reason: 'unsupported_portal' }
+    }
+    if (isPrivateScrapePortal(link.portalType) && !isPrivateScrapeAllowedInDeployment()) {
+      return { jobId: null, skipped: true, reason: 'scrape_disabled_production' }
     }
     if (!link.email || !link.encryptedPassword) {
       return { jobId: null, skipped: true, reason: 'missing_credentials' }

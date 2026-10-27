@@ -3,7 +3,11 @@ import { resolve } from 'path'
 import { test, expect } from '@playwright/test'
 import { requireOnboardingCredentials } from './helpers/env'
 import { loginViaPassword } from './helpers/auth'
-import { completeOnboardingProfile, primeE2eClientStorage } from './helpers/onboarding'
+import {
+  completeOnboardingProfile,
+  primeE2eClientStorage,
+  waitForOnboardingWizardReady,
+} from './helpers/onboarding'
 import { uniqueQaCpf } from './helpers/fixtures'
 import { waitForDashboardReady } from './helpers/dashboard'
 
@@ -27,6 +31,7 @@ test.describe('onboarding', () => {
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
     }
+    await waitForOnboardingWizardReady(page)
 
     await completeOnboardingProfile(page, {
       name: 'QA Onboarding Titular',
@@ -64,6 +69,7 @@ test.describe('onboarding', () => {
     if (!page.url().includes('/onboarding')) {
       await page.goto('/onboarding')
     }
+    await waitForOnboardingWizardReady(page)
 
     await completeOnboardingProfile(page, {
       name: 'QA Onboarding Tour CTA',

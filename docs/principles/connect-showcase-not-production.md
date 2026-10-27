@@ -23,3 +23,15 @@ Integrações **payer / provider** que dependem de **scraper ou sessão não con
 
 - Marketing que implique sync automático de convênio em prod sem parceria.
 - Escalar scrapers como diferencial competitivo de go-live.
+
+## Gates técnicos (API + web)
+
+| Variável | Onde | Efeito |
+|----------|------|--------|
+| `DEPLOYMENT_TIER=production` | API | Bloqueia create/sync de links **payer/provider** (scraper) |
+| `CONNECT_PRIVATE_SCRAPE_ENABLED=1` | API | Opt-in explícito (ex.: demo showcase em host prod-like) |
+| `CONNECT_SHOWCASE_MODE=1` | API | Permite scrape em produção só para ambiente de demonstração |
+| `VITE_DEPLOYMENT_TIER=production` | Web | Desabilita cartões de integração privada no catálogo |
+| `VITE_CONNECT_PRIVATE_SCRAPE_ENABLED` | Web | Override espelhando a API |
+
+Implementação: `packages/api/src/domain/connect/private-scrape-portal.policy.ts` · `packages/web/src/lib/connect-private-scrape-policy.ts`
