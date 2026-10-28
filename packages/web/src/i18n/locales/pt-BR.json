@@ -162,6 +162,10 @@
     "saveError": "Não foi possível salvar o perfil",
     "loadError": "Não foi possível carregar o perfil"
   },
+  "progressiveProfile": {
+    "integrationsCta": "Vincular convênio ou SUS",
+    "familyInviteCta": "Convidar co-responsável"
+  },
   "onboarding": {
     "title": "Complete seu cadastro",
     "subtitle": "Precisamos de alguns dados para criar seu perfil. O cadastro é permitido apenas para maiores de 18 anos.",

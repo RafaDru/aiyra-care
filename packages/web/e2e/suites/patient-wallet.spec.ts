@@ -36,6 +36,11 @@ test.describe('patient-wallet', () => {
     const emptyOrCard = page.getByText(/Nenhuma carteirinha|Nº da carteirinha/)
     await expect(emptyOrCard.first()).toBeVisible({ timeout: 10_000 })
 
+    const walletEmptyCta = page.getByTestId('wallet-empty-integrations-cta')
+    if (await walletEmptyCta.isVisible().catch(() => false)) {
+      await expect(walletEmptyCta).toContainText(/Vincular convênio ou SUS/)
+    }
+
     const todayPanel = page.locator('.wallet-today-panel')
     await expect(todayPanel.getByRole('heading', { name: 'Hoje' })).toBeVisible()
   })

@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-28] - Anel B slice 1 + checklist go-live unificado
+
+### Realizado
+- **Anel B (AC-6):** CTAs pós-onboarding (Integrações + família) e empty Carteira → Integrações; telemetria `onboarding_step` com `progressive_profile_*`.
+- **docs/product/MVP_GO_LIVE_CHECKLIST.md** — merge conflict resolvido; itens eng #177/#178 marcados.
+- Suite **patient-wallet** — assert CTA empty.
+
 ## [2026-10-27] - Fila AC Queued closeout + fix exclusão de conta
 
 ### Realizado
