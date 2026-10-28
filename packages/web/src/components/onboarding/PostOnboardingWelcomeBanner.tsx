@@ -89,7 +89,10 @@ export function PostOnboardingWelcomeBanner() {
           to={FAMILY_HUB_PATH}
           data-testid="post-onboarding-family-cta"
           onClick={() =>
-            trackProductEvent('onboarding_step', { step: 'progressive_profile_family_cta', surface: 'post_onboarding_welcome' })
+            trackProductEvent('progressive_profile_cta_click', {
+              step: 'progressive_profile_family_cta',
+              surface: 'post_onboarding_welcome',
+            })
           }
         >
           <Button size="small" type="default">

@@ -252,6 +252,7 @@ const EVENT_FEATURE_OVERRIDES: Record<string, string> = {
   hygiene_prompt_shown: 'patient_detail',
   hygiene_resolved: 'patient_detail',
   onboarding_step: 'onboarding',
+  progressive_profile_cta_click: 'onboarding',
   landing_page_view: 'app',
   landing_cta_click: 'app',
   family_invite_created: 'settings_family',

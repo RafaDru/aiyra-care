@@ -43,5 +43,12 @@ test.describe('patient-wallet', () => {
 
     const todayPanel = page.locator('.wallet-today-panel')
     await expect(todayPanel.getByRole('heading', { name: 'Hoje' })).toBeVisible()
+
+    await page.goto(`/patients/${patientId}?section=plan&tab=coverage`)
+    await expect(page.getByText(/Convênios de /)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText('Nenhum plano sincronizado ainda')).toBeVisible()
+    const coverageCta = page.getByTestId('coverage-empty-integrations-cta')
+    await expect(coverageCta).toBeVisible()
+    await expect(coverageCta).toContainText(/Vincular convênio ou SUS/)
   })
 })
