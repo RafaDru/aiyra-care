@@ -1,118 +1,67 @@
 # Foco atual — tracking vivo
 
-> **Última atualização:** 2026-09-16  
-> Documento de acompanhamento entre sessões — complementa `roadmap.json` e `HISTORICO.md`.  
-> Atualizar a cada entrega relevante ou mudança de prioridade.
+> **Última atualização:** 2026-10-28  
+> Complementa `roadmap.json` e `HISTORICO.md`. Duas frentes ativas — **não** abrir terceira lane sem pausar uma (`docs/PARALLEL_WORK.md`).
 
 ---
 
-## Trabalhos em paralelo (set/2026)
+## Frentes (out/2026)
 
-Apenas **duas** frentes ativas — não abrir terceira lane sem fechar ou pausar uma delas.
+| Frente | Lane | Escopo | Onde acompanhar |
+|--------|------|--------|-----------------|
+| **A — MVP beta go-live** | `#produto` | Pilares go-live, Anel A em produto, **Anel B** backlog + slice contínuo, validação **J1** no notebook | [`product/MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md), [`product/ONBOARDING_MVP_GATE.md`](./product/ONBOARDING_MVP_GATE.md), [`features/anel-b-progressive-profiling.md`](./features/anel-b-progressive-profiling.md) |
+| **B — Ops CH / automations** | `#ops` | Command Hub, investigationId, alertas, paste ritual Automations, dev-audit | [`ops/README.md`](./ops/README.md), [`ops/AUTOMATIONS_LANES.md`](./ops/AUTOMATIONS_LANES.md), [`ops/triagem-dev-automation-paste-kit.md`](./ops/triagem-dev-automation-paste-kit.md) |
 
-| Frente | Escopo | Onde acompanhar |
-|--------|--------|-----------------|
-| **Produto** | Épico `family-day-to-day` fechado (D1–D5); Ava G4; referral billing (pós-jurídico) | Esta seção + `docs/features/` + suites QA |
-| **Ops** | investigationId, Automations Dev/SRE, Tier 1 opt-in, tray/console | `docs/ops/INVESTIGATION_CORRELATION.md`, `AUTOMATIONS_LANES.md` |
-| **Tooling** | Cursor Projects + My Machines (`NotebookRafael`, autostart login) | `docs/CURSOR_WORKSPACE.md` |
-
-**Ops — estado atual:** Fase 1–2 + **investigationId**; Tier 1 opt-in (`OPS_INVESTIGATOR_TIER1`). WIP ops em paralelo — commits separados do produto.
-
-**Produto — em `main` (set/15):** D1–D5 + dossiê jurídico + Ava G3 + RBAC 067 + suites QA alinhadas.
-
-**Tooling — configurado (set/16):** worker local para Projects; ver `scripts/cursor-worker-*.ps1`.
+**Regra:** PRs **separadas** — não misturar Anel B UI com refactor CH grande na mesma PR.
 
 ---
 
-## Prioridades do produto (Rafael — set/2026)
+## Frente A — Produto (MVP beta)
 
-| # | Frente | Intenção | Épicos / docs |
-|---|--------|----------|----------------|
-| 1 | **Dia a dia da família** | Registrar eventos do cotidiano (sintoma, medida, medicação, consulta, lembrete) com mínimo esforço | `agenda-calendario`, health threads (`acompanhamento`), `MEASUREMENTS.md`, `CareReminderBanner` |
-| 2 | **Ava parceira** | Consolidar Ava como companheira contínua — não só chat, mas contexto, proatividade e confiança | `ava-companion-platform`, `AVA_OPERATIONAL.md` (G2–G4), `AVA_PATIENT_LENS.md`, `AVA_EXPRESSIONS.md` |
-| 3 | **Ambiente do profissional** | Preparar superfície médica/clínica sem comprometer o núcleo família | `b2b-partner-platform`, `B2B_PARTNERS.md`, org/RBAC (055), export/share clínico |
+### Wave mergeada em `main` (out/2026)
 
-### 1 — Dia a dia (família registrando eventos)
+| PR | Entrega |
+|----|---------|
+| [#175](https://github.com/RafaDru/aiyra-care/pull/175) | Docs gate onboarding + checklist go-live |
+| [#176](https://github.com/RafaDru/aiyra-care/pull/176) | Landing institucional `/home` |
+| [#177](https://github.com/RafaDru/aiyra-care/pull/177) | **Anel A** — convênio/SUS **fora** do 1º onboarding |
+| [#178](https://github.com/RafaDru/aiyra-care/pull/178) | Gate scrape **Fase 2** (prod tier) |
+| [#179](https://github.com/RafaDru/aiyra-care/pull/179) | `DELETE /auth/account` — FK `care_circles` (LGPD) |
+| [#180](https://github.com/RafaDru/aiyra-care/pull/180) | **Anel B slice 1** — CTAs pós-onboarding (integrações) |
 
-**Já existe (base):**
+### Próximo trabalho produto
 
-- Agenda + `scheduled_events` (CRUD, ICS, Google/Outlook OAuth)
-- Acompanhamentos (`health_threads`, kind `acompanhamento`)
-- Medidas, medicações, vacinas, exames (CRUD + sync)
-- Lembretes (`CareReminderBanner`, notificações)
+1. **Checklist go-live** — pilares 1–5 em [`MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md) (institucional, gate, PJ/legal, domínio, deploy).
+2. **Anel B** — progressive profiling (integrações, co-responsável, billing) sem reabrir gate; card [`anel-b-progressive-profiling.md`](./features/anel-b-progressive-profiling.md).
+3. **Notebook (J1)** — após `pull` ≥ `2111042`, migration **089**, `scripts/up.ps1`; suites J1 + `patient-wallet` com E2E real (`QA_TEST_*` ou CI `e2e-regression`).
 
-**Discovery (2026-09-11):** [`discovery/day-to-day-clinician-access.md`](./discovery/day-to-day-clinician-access.md) — captura rápida + «Levar na consulta» (link/QR/PDF) + tiers de extrato.
+**Definition of Done (tier ≥1):** suite QA da feature card com E2E real — CI verde **ou** notebook com PASS reportado. Cloud `qa:run` pré-voo **não** substitui DoD.
 
-**Gaps → MVP proposto:**
-
-- **D1** Wizard «Levar na consulta» — **entregue** (link + QR + PDF + rota pública)
-- **D2** «+ Registro rápido» (5 tipos) — **entregue** (header global + sheet)
-- **D3** Bloco «Hoje» na Carteira + dashboard — **entregue** (`WalletTodayPanel`)
-- **D4** E-mail ao médico + código referral no link — **entregue** (MVP atribuição; sem billing)
-- **D5** Portal médico leve (página pública) — **entregue**
-- Programa de indicação bilateral (descontos) — debate: [`discovery/referral-growth-loop.md`](./discovery/referral-growth-loop.md)
-- Suites QA dia a dia: `patient-clinical-export`, `family-quick-capture`, `family-day-timeline`, `patient-health-thread`, `patient-wallet` — **todas com spec**
-- Referral billing bilateral — **fora do MVP** (atribuição D4 ok; descontos aguardam jurídico)
-
-### 2 — Consolidação Ava parceira
-
-**Entregue recentemente:**
-
-- Dock global, conversas persistidas, lente de paciente, guardrails, pins G1
-- CI: `AVA_TEST_MODE=1` + specs `ava-companion-smoke`, `ava-guardrail-smoke`
-
-**Próximo (operacional):**
-
-- **G4:** tool calling mutável amplo (`agent-runtime` — parcial)
-- Expressão visual + narrativa (`AVA_EXPRESSIONS.md`)
-- Não julgar qualidade LLM em QA — só comportamento determinístico (`AVA_QA_SCOPE.md`)
-- Estabilizar flake Ava no `business-full` (composer idle + retries) — draft `cursor/ava-smoke-stabilize-cde2`
-
-### 3 — Ambiente profissional da medicina
-
-**Já existe:**
-
-- Primitives org (`055`), export clínico PDF, share token 48h
-- Discovery B2B documentado
-
-**Próximo:**
-
-- Escopos RBAC por paciente na org (clínico vê pacientes da clínica)
-- Referral com billing (após parecer jurídico formal)
-- Console parceiro vs ops-console interno
-- Revisões tier 2+: legal + medical antes de go-live B2B
+Decisões estratégicas (CNPJ, beta público, jurídico billing): **Rafael** — ver charter [`OPS_SOLO_OPERATOR_CHARTER.md`](./OPS_SOLO_OPERATOR_CHARTER.md).
 
 ---
 
-## Entregas técnicas recentes (2026-09-15/16)
+## Frente B — Ops
 
-| Commit / entrega | Resumo |
-|------------------|--------|
-| `aa43ba7` | D4 e-mail/referral + D5 portal médico + dossiê jurídico PDF + suite `patient-health-thread` |
-| `90f357b` | Ava G3 confirmação de ações + RBAC org audit (067) |
-| *(local, set/16)* | Cursor My Machines `NotebookRafael` + autostart Windows + scripts `cursor-worker-*` |
+- **Estado:** investigationId + lanes Automations; Tier 1 opt-in (`OPS_INVESTIGATOR_TIER1`); AC-1 = colar Instructions na UI Cursor (humano até import as code).
+- **DoD ops:** `test:ops` / smoke ops quando tocar pipeline CH.
+- **AC-23:** validar gate scrape **#178** com `DEPLOYMENT_TIER=production` no ambiente beta GCP (matriz regulatório × MVP no Project store).
 
 ---
 
-## CI E2E — status
+## Histórico arquivado (não é foco «atual»)
 
-| Workflow | Run | Resultado | Notas |
-|----------|-----|-----------|-------|
-| E2E regression | [34857415954](https://github.com/RafaDru/aiyra-care/actions/runs/34857415954) | **PASS** | smoke + onboarding + core-patient + 2 Ava |
-| E2E business-full | [34857416100](https://github.com/RafaDru/aiyra-care/actions/runs/34857416100) | **PASS** | 11 passed, 2 flaky Ava (`ava-companion-smoke`, `ava-guardrail-smoke`) |
-| E2E business-full | [34634817991](https://github.com/RafaDru/aiyra-care/actions/runs/34634817991) | FAIL | pré-fix Select — histórico |
-
-**Meta:** 7 semanas verdes no `business-full` (agendado **sexta 06:00 BRT**) antes de gate em PR (`AUTOMATION_ROADMAP.md`). **Progresso: 1/7** (run `34857416100`, quando era diário).
+Épico **family-day-to-day D1–D5** (set/2026), prioridades Ava G4 / B2B discovery e runs CI de set/2026 permanecem em [`HISTORICO.md`](./HISTORICO.md) e feature cards — **não** reabrir como lane principal.
 
 ---
 
 ## Ritual de atualização
 
-Ao fechar uma sessão ou entrega:
+Ao fechar entrega ou mudar prioridade:
 
-1. Esta seção **Entregas técnicas** + tabela **CI**
+1. Esta página + lane correta no Project `notes.md`
 2. `docs/HISTORICO.md` — decisões
-3. `docs/roadmap.json` — `status` / `detail` dos itens tocados
-4. Feature card em `docs/features/` se mudou produto
+3. `docs/project-context.json` — decisões ativas
+4. `docs/roadmap.json` — status dos épicos tocados
 
-Ver também: [`AGENT_BOOTSTRAP.md`](./AGENT_BOOTSTRAP.md), [`testing/CI_LEARNINGS.md`](./testing/CI_LEARNINGS.md).
+Ver também: [`AGENT_BOOTSTRAP.md`](./AGENT_BOOTSTRAP.md), [`CURSOR_WORK_MODEL.md`](./CURSOR_WORK_MODEL.md), [`testing/QA_PROCESS.md`](./testing/QA_PROCESS.md).
