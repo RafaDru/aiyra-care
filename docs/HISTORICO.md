@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-28] - Skills operacionais Cursor (P1-1)
+
+### Realizado
+- **`.cursor/skills/`** — `aiyracare-wave-closeout`, `aiyracare-mvp-go-live`, `aiyracare-qa-notebook`; índice em [`CURSOR_WORK_MODEL.md`](./CURSOR_WORK_MODEL.md).
+
 ## [2026-10-28] - Modelo de trabalho Cursor (docs P0)
 
 ### Realizado

@@ -42,15 +42,15 @@ Estados Project: **Queued** · **For Review** (PR ou ação humana) · **Done** 
 | `computerUse` | Só **My Machines** — não substitui notebook Windows |
 | `cursor-subscriptions` | Pós-PR tier ≥1 — CI, não polling manual |
 
-## Skills a criar (P1)
+## Skills (repo `.cursor/skills/`)
 
 | Skill | Gatilho |
 |-------|---------|
-| `aiyracare-wave-closeout` | Fechar fila AC-n, PRs superseded, notes, HISTORICO |
-| `aiyracare-mvp-go-live` | Pilares `MVP_GO_LIVE_CHECKLIST.md` |
-| `aiyracare-qa-notebook` | Migrations, `QA_TEST_*`, `qa:run` / `qa:run-all` |
+| [`aiyracare-wave-closeout`](../.cursor/skills/aiyracare-wave-closeout/SKILL.md) | Fechar wave / fila AC-n: PRs superseded, `notes.md`, `HISTORICO`, relatório curto |
+| [`aiyracare-mvp-go-live`](../.cursor/skills/aiyracare-mvp-go-live/SKILL.md) | Pilares [`MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md); humano vs agente; lanes `#produto` / `#ops` |
+| [`aiyracare-qa-notebook`](../.cursor/skills/aiyracare-qa-notebook/SKILL.md) | My Machines: pull, migration, `up.ps1`, `QA_TEST_*`, `qa:run` / `qa:run-all --lane regression`, `AIYRA_NO_RTK`; DoD E2E tier ≥1 |
 
-Manter: `aiyracare-feature-release` + reviews — tier 2–3 only.
+**Release (tier):** [`aiyracare-feature-release`](../.cursor/skills/aiyracare-feature-release/SKILL.md) + `aiyracare-review-*` — usar antes de merge em tier **2–3** (não substituir wave-closeout).
 
 ## Contexto vivo (P0 hábito)
 
