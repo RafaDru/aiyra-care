@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-28] - Modelo de trabalho Cursor (docs P0)
+
+### Realizado
+- **`docs/CURSOR_WORK_MODEL.md`** — resumo executivo (lanes, DoD QA, agentes, skills P1); spec completa no Project store.
+- **`docs/FOCO_ATUAL.md`** — duas frentes: (A) MVP beta go-live + Anel B + J1 notebook; (B) Ops CH/automations; foco set/2026 D1–D5 arquivado.
+- **`docs/project-context.json`** — decisões out/2026 (#175–#180, Anel A/B, scrape gate, delete account).
+- **`docs/AGENT_BOOTSTRAP.md`** — link para `CURSOR_WORK_MODEL.md`.
+
 ## [2026-10-28] - Anel B slice 1 + checklist go-live unificado
 
 ### Realizado

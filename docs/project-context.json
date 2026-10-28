@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-08",
+  "generatedAt": "2026-10-28",
   "application": {
     "name": "AiyraCare",
     "repository": "https://github.com/RafaDru/aiyra-care",
@@ -15,7 +15,7 @@
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Épico família (ACL, círculos, caso Mariana, e-mail Resend) entregue. URLs locais canônicas: localhost:5173/5174. Connect Fase 1; billing Stripe; compliance LGPD.",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Wave MVP out/2026: landing #176, Anel A gate #177 (convênio/SUS fora do 1º onboarding), scrape prod gate #178, delete account #179, Anel B slice 1 #180; docs go-live #175. Foco vivo: MVP beta checklist + Ops CH. Connect Fase 1; billing Stripe; compliance LGPD.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
     "postgresRole": "Fonte da verdade — entidades clínicas, conversas Ava (planejado), billing, legal, telemetria llm_usage + product_events (planejado)",
@@ -151,7 +151,14 @@
     { "id": "localhost-canonical", "date": "2026-09-08", "title": "URLs locais = localhost + portas", "decision": "DNS .test + Caddy pausados; up.ps1 sempre 127.0.0.1; ver LOCAL_HOSTNAMES.md", "status": "active" },
     { "id": "family-access-model-done", "date": "2026-09-04", "title": "Épico família MVP completo", "decision": "057–063, audit 062, e-mail Resend opcional, caso Mariana (profile share)", "status": "active" },
     { "id": "solo-operator-agentic-charter", "date": "2026-10-06", "title": "Operador solo — execução agêntica", "decision": "Um humano, sem receita; merges/PR/ops/notebook são agentes; Rafael só decisões estratégicas. Ver docs/OPS_SOLO_OPERATOR_CHARTER.md", "status": "active" },
-    { "id": "failure-probes-ava-bridge-3a", "date": "2026-10-06", "title": "Ava companion — ingest sem bridge INC (3A)", "decision": "CLIENT_ERROR_INCIDENT_FEATURES_DISABLED default ava_companion; probes/ingest on. CLIENT_ERROR_INGRESS_PROD_POLICY §8 item 3; FAILURE_PROBES_CH MVP.", "status": "active" }
+    { "id": "failure-probes-ava-bridge-3a", "date": "2026-10-06", "title": "Ava companion — ingest sem bridge INC (3A)", "decision": "CLIENT_ERROR_INCIDENT_FEATURES_DISABLED default ava_companion; probes/ingest on. CLIENT_ERROR_INGRESS_PROD_POLICY §8 item 3; FAILURE_PROBES_CH MVP.", "status": "active" },
+    { "id": "mvp-wave-175-180-merged", "date": "2026-10-28", "title": "Wave MVP docs + produto mergeada", "decision": "PRs #175 (gate/go-live docs), #176 (landing), #177 (Anel A), #178 (scrape gate prod), #179 (DELETE /auth/account), #180 (Anel B slice 1 CTAs). Ver FOCO_ATUAL.md e MVP_GO_LIVE_CHECKLIST.md.", "status": "active" },
+    { "id": "onboarding-mvp-gate-anel-a", "date": "2026-10-27", "title": "Anel A — gate onboarding MVP", "decision": "Conta + ≥1 care_circle + ≥1 pessoa + self + relação de cuidado. Convênio, SUS e pagamento fora do 1º fluxo. Spec ONBOARDING_MVP_GATE.md; produto #177.", "status": "active" },
+    { "id": "convenio-outside-first-onboarding", "date": "2026-10-27", "title": "Convênio fora do 1º onboarding", "decision": "Sem passo obrigatório de plano/convênio no wizard inicial; coleta via Anel B (Integrações, empty states). Não reintroduzir gate.", "status": "active" },
+    { "id": "scrape-prod-gate-178", "date": "2026-10-27", "title": "Gate scrape Fase 2 em produção", "decision": "PR #178 — política DEPLOYMENT_TIER=production para rotas scrape; validação AC-23 no ambiente beta GCP.", "status": "active" },
+    { "id": "anel-b-progressive-profiling", "date": "2026-10-28", "title": "Anel B — progressive profiling", "decision": "Pós Anel A: integrações, gov.br, co-responsável, billing via CTAs/empty states (#180 slice 1). Card anel-b-progressive-profiling.md; não bloqueia Início.", "status": "active" },
+    { "id": "delete-account-care-circles-179", "date": "2026-10-27", "title": "Exclusão conta LGPD", "decision": "DELETE /auth/account remove care_circles do titular antes de app_accounts (FK RESTRICT INC-014/015). PR #179.", "status": "active" },
+    { "id": "cursor-work-model-docs", "date": "2026-10-28", "title": "Modelo de trabalho Cursor documentado", "decision": "Lanes #produto/#ops, DoD E2E real tier ≥1, Cloud vs notebook. Repo: CURSOR_WORK_MODEL.md + FOCO_ATUAL; spec completa Project store.", "status": "active" }
   ],
   "plannedWork": [
     { "id": "family-access-model", "title": "Família — múltiplos cuidadores e ACL", "status": "done", "priority": "P1", "note": "MVP completo — exclusão só titular (070); ver family-access-model.md" },
@@ -191,6 +198,10 @@
     { "path": "docs/CONNECT.md", "role": "Boundary Connect vs Core; vault e sessões" },
     { "path": "docs/features/index.json", "role": "Catálogo de capacidades (features)" },
     { "path": "docs/AGENT_BOOTSTRAP.md", "role": "Índice obrigatório pós-compactação (hooks)" },
+    { "path": "docs/CURSOR_WORK_MODEL.md", "role": "Lanes Cursor, DoD QA, Cloud vs notebook" },
+    { "path": "docs/FOCO_ATUAL.md", "role": "Frentes MVP beta + Ops (tracking vivo)" },
+    { "path": "docs/product/MVP_GO_LIVE_CHECKLIST.md", "role": "Pilares go-live beta B2C" },
+    { "path": "docs/product/ONBOARDING_MVP_GATE.md", "role": "Spec Anel A gate onboarding" },
     { "path": "docs/help/", "role": "FAQ usuário + base Ava" },
     { "path": "docs/FAMILY_ACCESS_MODEL.md", "role": "Discovery conta × família × perfil" },
     { "path": "AGENTS.md", "role": "Instruções agentes Cursor" }
