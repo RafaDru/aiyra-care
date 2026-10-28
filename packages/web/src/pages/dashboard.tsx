@@ -34,6 +34,7 @@ import { PageHeader } from '../components/ui/PageHeader.js'
 import { DashboardDayToDaySection } from '../components/dashboard/DashboardDayToDaySection.js'
 import { DayToDayDiscoveryHub } from '../components/dashboard/DayToDayDiscoveryHub.js'
 import { PostOnboardingWelcomeBanner } from '../components/onboarding/PostOnboardingWelcomeBanner.js'
+import { ProgressiveProfileDashboardHint } from '../components/onboarding/ProgressiveProfileDashboardHint.js'
 import { DashboardPeopleToolbar } from '../components/dashboard/DashboardPeopleToolbar.js'
 import { DashboardPatientCard } from '../components/dashboard/DashboardPatientCard.js'
 import { useAuth } from '../contexts/AuthContext.js'
@@ -277,6 +278,9 @@ export function Dashboard() {
       />
 
       <PostOnboardingWelcomeBanner />
+      {patients.length > 0 && !loadError && (
+        <ProgressiveProfileDashboardHint hasPatients={patients.length > 0} />
+      )}
 
       {patients.length === 0 && !loadError && <DayToDayDiscoveryHub hasPatients={false} />}
       {patients.length > 0 && <DashboardDayToDaySection />}

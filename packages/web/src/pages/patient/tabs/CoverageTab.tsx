@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Typography, Button, Space, Tag, Empty,
 } from 'antd'
@@ -11,7 +12,8 @@ import { brandOrFallback } from '../../../components/brands/brand-config.js'
 import { GroupedAlignedTables } from '../../../components/layout/GroupedAlignedTables.js'
 import { AlignedFieldGrid } from '../../../components/layout/AlignedFieldGrid.js'
 import { ALIGNED_COL } from '../../../components/layout/aligned-table-columns.js'
-import { formatCardNumber, formatCns } from './wallet-shared.js'
+import { formatCardNumber, formatCns, INSURANCE_PORTALS } from './wallet-shared.js'
+import { ProgressiveProfileIntegrationsLink } from '../../../components/onboarding/ProgressiveProfileIntegrationsLink.js'
 import '../../../components/brands/brand-tint-table.css'
 
 const { Text, Title } = Typography
@@ -44,7 +46,12 @@ function buildDetailFields(m: PlanMembershipWithPlan): Array<{ label: string; va
 }
 
 export function CoverageTab({ patient, links, onViewCard }: Props) {
+  const { t } = useTranslation()
   const [memberships, setMemberships] = useState<PlanMembershipWithPlan[]>([])
+  const insuranceLinks = useMemo(
+    () => links.filter((l) => INSURANCE_PORTALS.has(l.portalType)),
+    [links],
+  )
 
   useEffect(() => {
     api.planMemberships.list(patient.id).then(setMemberships).catch(() => setMemberships([]))
@@ -182,7 +189,19 @@ export function CoverageTab({ patient, links, onViewCard }: Props) {
             Cobertura, rede e carências sincronizadas dos operadores. Vincule e sincronize em Integrações.
           </Text>
         </div>
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum plano sincronizado ainda" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum plano sincronizado ainda">
+          {insuranceLinks.length === 0 ? (
+            <ProgressiveProfileIntegrationsLink
+              patientId={patient.id}
+              surface="coverage_empty"
+              variant="button"
+              buttonType="primary"
+              testId="coverage-empty-integrations-cta"
+            >
+              {t('progressiveProfile.integrationsCta')}
+            </ProgressiveProfileIntegrationsLink>
+          ) : null}
+        </Empty>
       </Space>
     )
   }

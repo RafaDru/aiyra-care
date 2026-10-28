@@ -164,7 +164,9 @@
   },
   "progressiveProfile": {
     "integrationsCta": "Vincular convênio ou SUS",
-    "familyInviteCta": "Convidar co-responsável"
+    "familyInviteCta": "Convidar co-responsável",
+    "dashboardHintTitle": "Vincule convênio ou SUS quando quiser",
+    "dashboardHintBody": "Seu perfil já está pronto. Conecte operadoras e o ConecteSUS na aba Integrações — sem passo obrigatório no cadastro."
   },
   "onboarding": {
     "title": "Complete seu cadastro",

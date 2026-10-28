@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |-------|--------|
-| **Status** | `in_progress` |
+| **Status** | `in_progress` (slice 2) |
 | **Épico** | `institutional-landing` / onboarding |
 | **Gate** | [`ONBOARDING_MVP_GATE.md`](../product/ONBOARDING_MVP_GATE.md) |
 
@@ -28,15 +28,22 @@ Fases 2–3 do wizard v2 (conectores no fluxo guiado) foram **substituídas** pe
 | Carteira vazia | CTA primário → aba Integrações do paciente |
 | Componentes | `ProgressiveProfileIntegrationsLink`, `useSelfPatientId` |
 
+## Shipped (slice 2 — AC-27)
+
+| Superfície | Comportamento |
+|------------|----------------|
+| Aba **Convênios** | Empty sem links de operadora → CTA `[data-testid=coverage-empty-integrations-cta]` |
+| **Início** | Alert dismissível titular sem links → `[data-testid=dashboard-progressive-profile-cta]` |
+| Telemetria | `progressive_profile_cta_click` (`step`, `surface`) na allowlist API |
+
 ## Backlog
 
-1. Empty states adicionais (Convênios, dashboard com perfis sem links).
-2. Não reabrir passo obrigatório de convênio no `/onboarding`.
-3. Eventos `progressive_profile_*` dedicados na allowlist API (opcional).
+1. Não reabrir passo obrigatório de convênio no `/onboarding`.
+2. Empty states por paciente no grid do Início (além do titular).
 
 ## QA
 
-- [`patient-wallet`](../testing/suites/patient-wallet.md) — empty com `[data-testid=wallet-empty-integrations-cta]`
+- [`patient-wallet`](../testing/suites/patient-wallet.md) — Carteira + Convênios empty CTAs
 - Regressão J1 inalterada; estender `onboarding-flow` só se critério Anel A mudar.
 
 ```bash

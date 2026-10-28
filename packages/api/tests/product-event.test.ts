@@ -52,5 +52,17 @@ describe('PRODUCT_EVENT_NAME_SET', () => {
     expect(PRODUCT_EVENT_NAME_SET.has('family_invite_created')).toBe(true)
     expect(PRODUCT_EVENT_NAME_SET.has('landing_page_view')).toBe(true)
     expect(PRODUCT_EVENT_NAME_SET.has('first_visit_tour_completed')).toBe(true)
+    expect(PRODUCT_EVENT_NAME_SET.has('progressive_profile_cta_click')).toBe(true)
+  })
+
+  it('preserves surface on progressive profile CTA', () => {
+    const out = sanitizeProductEventProperties({
+      step: 'progressive_profile_integrations_cta',
+      surface: 'coverage_empty',
+    })
+    expect(out).toEqual({
+      step: 'progressive_profile_integrations_cta',
+      surface: 'coverage_empty',
+    })
   })
 })

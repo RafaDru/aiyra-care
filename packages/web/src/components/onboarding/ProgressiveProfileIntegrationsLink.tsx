@@ -26,7 +26,7 @@ export function ProgressiveProfileIntegrationsLink({
   const href = buildPatientTabHref(patientId, 'integrations')
 
   const onClick = () => {
-    trackProductEvent('onboarding_step', {
+    trackProductEvent('progressive_profile_cta_click', {
       step: 'progressive_profile_integrations_cta',
       surface,
     }, { patientId })

@@ -30,6 +30,7 @@ Fora de escopo: validar QR Unimed, WAF Amil/Unimed, import ConecteSUS guiado.
 | 3 | Verificar cabeçalho «Carteira de …» | Título + subtítulo de credenciais | |
 | 4 | Verificar bloco **Sistema público** | Card CNS (ativo ou pendente) | |
 | 5 | Verificar bloco **Plano de saúde** | Empty «vincule em Integrações» **ou** grid de carteirinhas | |
+| 5b | Aba **Convênios** (`tab=coverage`) | Empty «Nenhum plano sincronizado» + CTA `[data-testid=coverage-empty-integrations-cta]` quando sem links | |
 | 6 | Verificar bloco **Hoje** (`walletToday`) | Painel «Hoje» visível (ver `family-day-timeline`) | |
 | 7 | (Com link demo + `sessionReady`) Abrir Carteira novamente | Sem modal de sync; status «Atualizado» ou spinner breve — silent sync dispara | |
 | 8 | Sem sessão válida | Empty ou hint «Sincronize em Integrações na primeira vez» — **sem** erro de portal | |
@@ -49,6 +50,7 @@ Fora de escopo: validar QR Unimed, WAF Amil/Unimed, import ConecteSUS guiado.
 | Painel Hoje | `.wallet-today-panel` |
 | Card CNS | `#wallet-card-conectesus` |
 | Empty planos | texto `Nenhuma carteirinha` + CTA `[data-testid=wallet-empty-integrations-cta]` |
+| Empty Convênios | `[data-testid=coverage-empty-integrations-cta]` |
 | Grid carteirinhas | `[id^="wallet-card-"]` (exceto conectesus/caderneta) |
 | Banner sync | `[data-testid="wallet-sync-banner"]` |
 | CTA Integrações | `[data-testid="wallet-sync-banner-cta"]` |
