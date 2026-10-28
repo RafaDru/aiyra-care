@@ -8,7 +8,11 @@ import {
 } from '../../lib/onboarding-wizard-storage.js'
 import { notifyPostOnboardingWelcomeDismissed } from '../../lib/onboarding-welcome-bus.js'
 import { requestFirstVisitTourOpen } from '../../lib/first-visit-tour-bus.js'
+import { Link } from 'react-router-dom'
 import { trackProductEvent } from '../../lib/product-events.js'
+import { FAMILY_HUB_PATH } from '../../lib/family-paths.js'
+import { useSelfPatientId } from '../../hooks/useSelfPatientId.js'
+import { ProgressiveProfileIntegrationsLink } from './ProgressiveProfileIntegrationsLink.js'
 
 const welcomeCardStyle = {
   marginBottom: 16,
@@ -22,6 +26,7 @@ const { Paragraph, Title } = Typography
 export function PostOnboardingWelcomeBanner() {
   const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
+  const selfPatientId = useSelfPatientId(visible)
 
   useEffect(() => {
     if (!isOnboardingJustCompleted()) return
@@ -71,6 +76,26 @@ export function PostOnboardingWelcomeBanner() {
         <Button size="small" type="default" onClick={openFirstStepsGuide}>
           {t('onboarding.dashboardWelcomeTourCta')}
         </Button>
+        {selfPatientId ? (
+          <ProgressiveProfileIntegrationsLink
+            patientId={selfPatientId}
+            surface="post_onboarding_welcome"
+            testId="post-onboarding-integrations-cta"
+          >
+            {t('progressiveProfile.integrationsCta')}
+          </ProgressiveProfileIntegrationsLink>
+        ) : null}
+        <Link
+          to={FAMILY_HUB_PATH}
+          data-testid="post-onboarding-family-cta"
+          onClick={() =>
+            trackProductEvent('onboarding_step', { step: 'progressive_profile_family_cta', surface: 'post_onboarding_welcome' })
+          }
+        >
+          <Button size="small" type="default">
+            {t('progressiveProfile.familyInviteCta')}
+          </Button>
+        </Link>
       </Space>
     </Card>
   )

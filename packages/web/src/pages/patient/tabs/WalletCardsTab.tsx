@@ -29,6 +29,7 @@ import {
   walletSyncBannerMessage,
   walletSyncBannerNeedsIntegrationsCta,
 } from '../../../lib/wallet-sync-banner.js'
+import { ProgressiveProfileIntegrationsLink } from '../../../components/onboarding/ProgressiveProfileIntegrationsLink.js'
 import { buildPatientTabHref } from '../../../lib/patient-navigation.js'
 import { isLinkSessionReady } from '../../../lib/silent-sync.js'
 import { isWalletLinkDataStale } from '../../../lib/wallet-sync-banner.js'
@@ -259,7 +260,20 @@ export function WalletCardsTab({
           />
         )}
         {insuranceLinks.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('walletCards.noCards')} />
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={t('walletCards.noCards')}
+          >
+            <ProgressiveProfileIntegrationsLink
+              patientId={patient.id}
+              surface="wallet_empty"
+              variant="button"
+              buttonType="primary"
+              testId="wallet-empty-integrations-cta"
+            >
+              {t('progressiveProfile.integrationsCta')}
+            </ProgressiveProfileIntegrationsLink>
+          </Empty>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {insuranceLinks.map((link) => {

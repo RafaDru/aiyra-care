@@ -162,6 +162,10 @@
     "saveError": "Could not save profile",
     "loadError": "Could not load profile"
   },
+  "progressiveProfile": {
+    "integrationsCta": "Link insurance or SUS",
+    "familyInviteCta": "Invite co-parent"
+  },
   "onboarding": {
     "title": "Complete your profile",
     "subtitle": "We need a few details to create your profile. Registration is only available for adults 18 or older.",

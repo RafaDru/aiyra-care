@@ -48,7 +48,7 @@ Fora de escopo: validar QR Unimed, WAF Amil/Unimed, import ConecteSUS guiado.
 | Aba Carteira | `getByRole('tab', { name: 'Carteira' })` |
 | Painel Hoje | `.wallet-today-panel` |
 | Card CNS | `#wallet-card-conectesus` |
-| Empty planos | texto `Nenhuma carteirinha` |
+| Empty planos | texto `Nenhuma carteirinha` + CTA `[data-testid=wallet-empty-integrations-cta]` |
 | Grid carteirinhas | `[id^="wallet-card-"]` (exceto conectesus/caderneta) |
 | Banner sync | `[data-testid="wallet-sync-banner"]` |
 | CTA Integrações | `[data-testid="wallet-sync-banner-cta"]` |

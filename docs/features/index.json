@@ -269,6 +269,19 @@
       "tags": ["conta", "onboarding", "b2c", "família"]
     },
     {
+      "id": "anel-b-progressive-profiling",
+      "epicId": "institutional-landing",
+      "title": "Anel B — progressive profiling pós-gate",
+      "status": "in_progress",
+      "category": "negocio",
+      "priority": "P1",
+      "doc": "docs/features/anel-b-progressive-profiling.md",
+      "routes": ["/", "/patients/:id", "/family"],
+      "api": ["GET /patients", "POST /telemetry/events"],
+      "helpTopics": [],
+      "tags": ["onboarding", "integrações", "família"]
+    },
+    {
       "id": "landing-marketing",
       "epicId": "landing-page-refresh",
       "title": "Landing pública — marketing e funil",
