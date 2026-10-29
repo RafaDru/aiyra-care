@@ -5,6 +5,18 @@
 ### Realizado
 - **`docs/infra/CURSOR_CLOUD_ENV_SNAPSHOT.md`** — proposta de build/snapshot (PG, deps, RTK opcional, secrets Portal); seção Environment em [`CURSOR_WORK_MODEL.md`](./CURSOR_WORK_MODEL.md).
 
+## [2026-10-29] - Política dev-audit gitignore (P1-2)
+
+### Realizado
+- **`.gitignore`** — `docs/dev-audit/**/*.jsonl` (logs de hooks só locais).
+- **`docs/dev-audit/README.md`** — não commitar JSONL, rotação semanal sugerida, bridge PG em staging (`dev-audit:bridge`).
+- **`docs/CURSOR_WORK_MODEL.md`** — parágrafo dev-audit local vs bridge.
+
+## [2026-10-29] - AGENTS.md enxuto (P1-3)
+
+### Realizado
+- **`AGENTS.md`** (~16KB → ~5KB): mantém stack, serviços, ponteiros de bootstrap; tabelas longas (sync/portais, env, migrations, context docs) substituídas por links a **`GET /project/context`**, [`AGENT_BOOTSTRAP.md`](./AGENT_BOOTSTRAP.md), [`PROJETO.md`](./PROJETO.md), [`CURSOR_WORK_MODEL.md`](./CURSOR_WORK_MODEL.md).
+
 ## [2026-10-28] - Skills operacionais Cursor (P1-1)
 
 ### Realizado

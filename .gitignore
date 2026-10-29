@@ -30,6 +30,9 @@ packages/api/tmp-*
 # Cursor hook ephemeral state (post-compact flags, doc-ritual pending)
 .cursor/state/
 
+# Cursor dev-audit — JSONL local only (hooks append daily); see docs/dev-audit/README.md
+docs/dev-audit/**/*.jsonl
+
 # Fleury Precision Care PoC — tokens locais (nunca commitar)
 packages/api/scripts/output/*.json
 

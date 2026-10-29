@@ -70,6 +70,8 @@ Hooks: manter bootstrap, stop ritual QA/docs, RTK bypass QA — ver `.cursor/hoo
 | Portal Environment secrets | Valores de [`../.env.example`](../.env.example) / [`AUTH_TESTING.md`](./testing/AUTH_TESTING.md) — nunca no git |
 | Fallback E2E tier ≥1 | Skill [`aiyracare-qa-notebook`](./../.cursor/skills/aiyracare-qa-notebook/SKILL.md) em **NotebookRafael** |
 
+**Dev-audit:** hooks appendam JSONL em `docs/dev-audit/` na máquina de dev; arquivos `*.jsonl` ficam fora do Git (`.gitignore`). Rotação local sugerida (semanal); correlacionar com staging via `npm run dev-audit:bridge` — [`dev-audit/README.md`](./dev-audit/README.md).
+
 ## Referências
 
 - QA: [`testing/QA_PROCESS.md`](./testing/QA_PROCESS.md)
