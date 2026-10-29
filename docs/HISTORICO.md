@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-29] - Política dev-audit gitignore (P1-2)
+
+### Realizado
+- **`.gitignore`** — `docs/dev-audit/**/*.jsonl` (logs de hooks só locais).
+- **`docs/dev-audit/README.md`** — não commitar JSONL, rotação semanal sugerida, bridge PG em staging (`dev-audit:bridge`).
+- **`docs/CURSOR_WORK_MODEL.md`** — parágrafo dev-audit local vs bridge.
+
 ## [2026-10-29] - AGENTS.md enxuto (P1-3)
 
 ### Realizado

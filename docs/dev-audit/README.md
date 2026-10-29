@@ -1,8 +1,8 @@
 # Auditoria de desenvolvimento (Cursor hooks)
 
-> **Última atualização:** 2026-09-03
+> **Última atualização:** 2026-10-29
 
-Registro lastrável de sessões, edições e comandos shell disparados por agentes/IDE.
+Registro lastrável de sessões, edições e comandos shell disparados por agentes/IDE — **somente na máquina local** (ou VM de dev). Não versionar os arquivos `.jsonl`.
 
 ## Origem
 
@@ -15,15 +15,22 @@ Hooks em `.cursor/hooks.json` (pré/pós) — ver `docs/DELIVERY_PIPELINE.md` e 
 | `sessions/` | `sessionStart` | Início de sessão agente (+ bootstrap injetado) |
 | `compaction/` | `preCompact` | Compactação de contexto (uso %, trigger) |
 | `doc-ritual/` | `afterFileEdit` / `stop` | Ritual de docs pendente ou follow-up |
+| `qa-ritual/` | hooks QA | Toque em suite doc / execução / stop follow-up |
 | `edits/` | `afterFileEdit` | Arquivo editado + ferramenta |
 | `shell/` | `beforeShellExecution` | Comando terminal (antes de executar) |
 | `tools/` | `preToolUse` | Ferramentas Write/StrReplace/Delete |
+| `rtk/` | `pre-tool-shell-rtk` | Reescrita RTK / bypass QA |
 
-Arquivos: `YYYY-MM-DD.jsonl` (uma linha JSON por evento).
+Arquivos gerados: `YYYY-MM-DD.jsonl` (uma linha JSON por evento). Pastas vazias usam `.gitkeep`; **não commitar** `*.jsonl` (entrada em `.gitignore`).
 
-## Bridge staging (`run-dev-audit-bridge`)
+## Rotação (sugestão)
 
-Correlaciona estes logs com `product_events` no PostgreSQL (preview/staging):
+- **Semanal:** apagar ou arquivar localmente JSONL com mais de ~30 dias (por pasta ou `find docs/dev-audit -name '*.jsonl' -mtime +30`).
+- Antes de limpar, opcional: rodar o bridge (abaixo) se quiser correlacionar com telemetria no PG.
+
+## Bridge staging (`dev-audit:bridge`)
+
+Correlaciona estes logs **locais** com `product_events` no PostgreSQL (preview/staging):
 
 ```powershell
 npm run dev-audit:bridge
@@ -35,13 +42,13 @@ Saída: `packages/api/scripts/output/dev-audit-bridge-last.json`
 
 API ops (header `x-internal-ops-key`): `GET /ops/dev-audit-bridge?hours=24`
 
-Sem PHI — apenas metadados (paths, nomes de eventos, contagens por hora).
+Sem PHI — apenas metadados (paths, nomes de eventos, contagens por hora). Ver também `docs/ops/TELEMETRY.md`.
 
 ## Política
 
-- **Não** incluir PHI, tokens, corpo de prompts ou conteúdo de arquivos.
-- Somente metadados: timestamp, path, nome da ferramenta, comando shell.
-- Commits podem incluir estas linhas — são metadados de processo, não dados clínicos.
+- **Não commitar** arquivos `docs/dev-audit/**/*.jsonl` — ruído em PRs e diffs irrelevantes para o produto.
+- **Não** incluir PHI, tokens, corpo de prompts ou conteúdo de arquivos nos eventos.
+- Somente metadados: timestamp, path, nome da ferramenta, comando shell (truncado nos hooks).
 
 ## Guard-rails ativos
 

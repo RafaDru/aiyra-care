@@ -1,2 +1,0 @@
-{"ts":"2026-10-13T16:29:21.956Z","event":"bypass","command":"cd /workspace/packages/api && npx vitest run ops-alert-investigator-dispatch.test.ts incident-dispatch-health.test.ts 2>&1"}
-{"ts":"2026-10-13T16:29:39.720Z","event":"bypass","command":"cd /workspace && npm install 2>&1 | tail -5 && cd packages/api && npx vitest run ops-alert-investigator-dispatch.test.ts incident-dispatch-health.test.ts 2>&1"}

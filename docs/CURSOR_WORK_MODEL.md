@@ -62,6 +62,8 @@ Estados Project: **Queued** · **For Review** (PR ou ação humana) · **Done** 
 
 Hooks: manter bootstrap, stop ritual QA/docs, RTK bypass QA — ver `.cursor/hooks.json`.
 
+**Dev-audit:** hooks appendam JSONL em `docs/dev-audit/` na máquina de dev; arquivos `*.jsonl` ficam fora do Git (`.gitignore`). Rotação local sugerida (semanal); correlacionar com staging via `npm run dev-audit:bridge` — [`dev-audit/README.md`](./dev-audit/README.md).
+
 ## Referências
 
 - QA: [`testing/QA_PROCESS.md`](./testing/QA_PROCESS.md)
