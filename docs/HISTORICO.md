@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-29] - AGENTS.md enxuto (P1-3)
+
+### Realizado
+- **`AGENTS.md`** (~16KB → ~5KB): mantém stack, serviços, ponteiros de bootstrap; tabelas longas (sync/portais, env, migrations, context docs) substituídas por links a **`GET /project/context`**, [`AGENT_BOOTSTRAP.md`](./AGENT_BOOTSTRAP.md), [`PROJETO.md`](./PROJETO.md), [`CURSOR_WORK_MODEL.md`](./CURSOR_WORK_MODEL.md).
+
 ## [2026-10-28] - Skills operacionais Cursor (P1-1)
 
 ### Realizado
