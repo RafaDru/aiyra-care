@@ -166,7 +166,8 @@
     "integrationsCta": "Vincular convênio ou SUS",
     "familyInviteCta": "Convidar co-responsável",
     "dashboardHintTitle": "Vincule convênio ou SUS quando quiser",
-    "dashboardHintBody": "Seu perfil já está pronto. Conecte operadoras e o ConecteSUS na aba Integrações — sem passo obrigatório no cadastro."
+    "dashboardHintBody": "Seu perfil já está pronto. Conecte operadoras e o ConecteSUS na aba Integrações — sem passo obrigatório no cadastro.",
+    "patientCardHint": "Sem convênio ou SUS vinculado ainda"
   },
   "onboarding": {
     "title": "Complete seu cadastro",

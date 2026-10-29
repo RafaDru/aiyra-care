@@ -22,6 +22,10 @@ test.describe('patient-wallet', () => {
       cpf: uniqueQaCpf(suffix),
     })
 
+    const cardIntegrationsCta = page.getByTestId('dashboard-patient-card-integrations-cta')
+    await expect(cardIntegrationsCta).toBeVisible({ timeout: 15_000 })
+    await expect(cardIntegrationsCta).toContainText(/Vincular convênio ou SUS/)
+
     await openPatientByName(page, patientName)
     const patientId = page.url().match(/\/patients\/([^?]+)/)?.[1]
     if (!patientId) throw new Error('ID do paciente não encontrado na URL')

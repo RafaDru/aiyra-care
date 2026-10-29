@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |-------|--------|
-| **Status** | `in_progress` (slice 2) |
+| **Status** | `in_progress` (slice 3) |
 | **Épico** | `institutional-landing` / onboarding |
 | **Gate** | [`ONBOARDING_MVP_GATE.md`](../product/ONBOARDING_MVP_GATE.md) |
 
@@ -36,14 +36,22 @@ Fases 2–3 do wizard v2 (conectores no fluxo guiado) foram **substituídas** pe
 | **Início** | Alert dismissível titular sem links → `[data-testid=dashboard-progressive-profile-cta]` |
 | Telemetria | `progressive_profile_cta_click` (`step`, `surface`) na allowlist API |
 
+## Shipped (slice 3 — AC-43)
+
+| Superfície | Comportamento |
+|------------|----------------|
+| **Início** — grid pacientes | Dependentes sem links → hint + CTA `[data-testid=dashboard-patient-card-integrations-cta]` no card (titular continua no alert global) |
+| Telemetria | `surface=dashboard_patient_card` |
+
 ## Backlog
 
 1. Não reabrir passo obrigatório de convênio no `/onboarding`.
-2. Empty states por paciente no grid do Início (além do titular).
+2. ~~Empty states por paciente no grid do Início (além do titular).~~ → slice 3
+3. Co-responsável / billing CTAs dedicados (backlog)
 
 ## QA
 
-- [`patient-wallet`](../testing/suites/patient-wallet.md) — Carteira + Convênios empty CTAs
+- [`patient-wallet`](../testing/suites/patient-wallet.md) — Carteira + Convênios empty CTAs; card Início (dependente)
 - Regressão J1 inalterada; estender `onboarding-flow` só se critério Anel A mudar.
 
 ```bash

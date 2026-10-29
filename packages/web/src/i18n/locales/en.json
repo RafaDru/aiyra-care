@@ -166,7 +166,8 @@
     "integrationsCta": "Link insurance or SUS",
     "familyInviteCta": "Invite co-parent",
     "dashboardHintTitle": "Link insurance or SUS when you are ready",
-    "dashboardHintBody": "Your profile is set up. Connect carriers and ConecteSUS from Integrations — no required step during signup."
+    "dashboardHintBody": "Your profile is set up. Connect carriers and ConecteSUS from Integrations — no required step during signup.",
+    "patientCardHint": "No insurance or SUS linked yet"
   },
   "onboarding": {
     "title": "Complete your profile",
