@@ -2,9 +2,22 @@
 
 ## What is this project
 
-**AiyraCare** — monorepo `aiyra-care` (`@aiyra-care/*`). Workspace: `%USERPROFILE%\workspace\aiyra-care` — ver `docs/CURSOR_WORKSPACE.md`. Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: `docs/PROJETO.md`; decision log: `docs/HISTORICO.md`.
+**AiyraCare** — monorepo `aiyra-care` (`@aiyra-care/*`). Workspace: `%USERPROFILE%\workspace\aiyra-care` — ver [`docs/CURSOR_WORKSPACE.md`](docs/CURSOR_WORKSPACE.md). Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: [`docs/PROJETO.md`](docs/PROJETO.md); decision log: [`docs/HISTORICO.md`](docs/HISTORICO.md).
 
-**Context for LLMs/agents:** `GET http://127.0.0.1:3010/project/context` — structured app snapshot + decisions + parsed `HISTORICO.md` + migrations list + **features catalog** (`docs/features/index.json`). Curated source: `docs/project-context.json` (update on architecture/roadmap changes). **Documentation model:** `docs/DOCUMENTATION_SYSTEM.md`. **Bootstrap (pós-compactação):** `docs/AGENT_BOOTSTRAP.md` — re-injetado via hooks `sessionStart` + `postToolUse`. **Prioritized roadmap:** `docs/roadmap.json` + UI menu (`GET /roadmap`).
+**Work model (lanes, DoD, Cloud vs notebook):** [`docs/CURSOR_WORK_MODEL.md`](docs/CURSOR_WORK_MODEL.md).
+
+## Context for agents (read first)
+
+Compactação de contexto e waves grandes: seguir **[`docs/AGENT_BOOTSTRAP.md`](docs/AGENT_BOOTSTRAP.md)** (ordem de leitura + ritual de entrega).
+
+| Recurso | Uso |
+|---------|-----|
+| `GET http://127.0.0.1:3010/project/context` | Snapshot estruturado: domínios, decisões, migrations, catálogo `docs/features/index.json` |
+| [`docs/project-context.json`](docs/project-context.json) | Fonte curada (atualizar em mudanças de arquitetura/roadmap) |
+| [`docs/DOCUMENTATION_SYSTEM.md`](docs/DOCUMENTATION_SYSTEM.md) | Tiers, feature cards, help |
+| [`docs/roadmap.json`](docs/roadmap.json) + `GET /roadmap` | Entrega priorizada |
+
+Detalhe de integrações, env vars, fluxos de sync e schema: **`docs/PROJETO.md`** e cards em **`docs/features/`** — não duplicar tabelas longas aqui.
 
 ## Monorepo structure
 
@@ -32,175 +45,48 @@ powershell -File "$env:USERPROFILE\workspace\aiyra-care\scripts\up.ps1" *>$null
 
 Always use `*>$null` to suppress output so the chat doesn't get stuck.
 
-## Dev servers
-
-- **API:** http://127.0.0.1:3010/health — `cd packages/api && npm run dev` (tsx watch)
-- **Web:** http://localhost:5173 — `cd packages/web && npm run dev` (vite)
-- **Logs:** `api.log` and `web.log` in project root
-- **DB:** `postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare`
+**Dev servers:** API http://127.0.0.1:3010/health (`cd packages/api && npm run dev`) · Web http://localhost:5173 (`cd packages/web && npm run dev`) · Logs `api.log` / `web.log` · DB `postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare`
 
 ## Build, test, lint
 
 ```powershell
-# API build + tests
-cd packages/api && npm run build    # tsc
-cd packages/api && npx vitest run   # tests
-
-# Web build
-cd packages/web && npm run build    # tsc --noEmit && vite build
-
-# Connect typecheck
+cd packages/api && npm run build && npx vitest run
+cd packages/web && npm run build
 cd packages/connect && npm run typecheck
-
-# Python agents (CI check)
 cd packages/agents/<name> && pip install -r requirements.txt && python -c "from main import app; print('OK')"
 ```
 
-There is **no top-level lint or typecheck** — root `npm run lint` is a no-op (`echo 'linting'`).
+Root `npm run lint` is a no-op. Ops: `npm run test:ops` · smoke `npm run ops:smoke` · critical subset `npm run test:critical` · runbook [`docs/ops/RUNBOOK_ALERTS.md`](docs/ops/RUNBOOK_ALERTS.md).
 
-## API architecture (hexagonal)
+## Architecture pointers
 
-`packages/api`: `domain/` → `application/` → `infrastructure/`
+**API (hexagonal):** `packages/api` — `domain/` → `application/` → `infrastructure/`. Auth Supabase + escopo paciente: [`docs/SUPABASE.md`](docs/SUPABASE.md). Connect boundary: [`docs/CONNECT.md`](docs/CONNECT.md).
 
-- **Integration links:** `IntegrationLink` (credentials + session) → scrapers → `InsurancePlanService.upsertFromPortal` + import of `Authorization` / `MedicalRecord` / `Exam`
-- **Async sync:** `POST /integration-links/:id/sync` returns `jobId`; query `silent=1` (no modal) or `force=1` (ignore interval). UI: auto silent in **Carteira** tab (`useSilentWalletSync`); modal only on **Sincronizar** button in Integrações. Polling: `GET /integration-links/:id/sync-status` (15s; pauses on dock/SSE) + `sync-progress/:jobId/stream`.
-- **Incremental sync:** `sync-delta.helper.ts` — Unimed: 2 months extract + auth detail since `lastSync−14d`; Amil: `PostTokens` since `lastSync−14d` (or 2 months), **no** plan/eligibility fetch; Mater Dei: exams since `max(exam_date)−14d`; Hermes Pardini: `GET /pedidos` since `max(exam_date)−14d` + `/pedidos/{id}/exames`. Manual/`force` = full window.
-- **Sync jobs Postgres-only:** `createJob`/`updateJob`/`getJob` persist in PG; SSE via `publishSyncJobEvent`; heartbeat reconciles with `findById`.
-- **Scheduled sync:** `IntegrationLinkSyncService.runScheduledBatch()` — `trigger=scheduled`, silent + `sessionReady`; `packages/connect-worker` (loop) or `run-scheduled-syncs.mjs`; built-in API loop only if `SYNC_SCHEDULED_INTERVAL_MS` set and no `CONNECT_WORKER_EXTERNAL=1`.
-- **Credentials:** AES-256-GCM via `CRYPTO_KEY` in `.env` (`crypto-helper.ts`)
-- **Auth:** Supabase (`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE`), global hook in `security.plugin.ts`; per-patient scope via `patient_memberships` + `owner_account_id` (`patient-access.guard.ts`). See `docs/SUPABASE.md`.
-- **Connect boundary:** `packages/connect` is the canonical contract; scrapers remain in `packages/api` until Phase 2. See `docs/CONNECT.md`.
+**Sync & portais** (Unimed, Amil, Mater Dei, Hermes, ConecteSUS, Bradesco): tabelas, env vars, delta incremental, SSE — [`docs/PROJETO.md`](docs/PROJETO.md), [`docs/SYNC_DELTA.md`](docs/SYNC_DELTA.md), [`docs/SUS_CONECTESUS.md`](docs/SUS_CONECTESUS.md), [`docs/FLEURY_PRECISION_CARE.md`](docs/FLEURY_PRECISION_CARE.md). Lista de migrations: **`GET /project/context`** ou `database/relational/` + feature docs (ex. [`docs/FAMILY_ACCESS_MODEL.md`](docs/FAMILY_ACCESS_MODEL.md), [`docs/AVA_VISION.md`](docs/AVA_VISION.md)).
 
-## Sync by portal
+**Neo4j (só associações):** [`docs/ARCHITECTURE_DATA_LAYERS.md`](docs/ARCHITECTURE_DATA_LAYERS.md) · worker `neo4j-lineage-worker` · `NEO4J_SYNC_ENABLED=1`.
 
-| Portal | Auto sync | Auth method | Imports |
-|--------|-----------|-------------|---------|
-| **Unimed BH** | Yes | Playwright login `acesso.unimedbh.com.br` | Extract (consults/copay), authorizations (OutSystems APIs), plan (Virtual Card), QR/token |
-| **Amil** | Yes (validated) | Saved JWT → CDP Chrome → Playwright (fallback) | Plan, eligibility, guides/tokens → `Authorization` |
-| **Bradesco Saúde** | No (link + manual import only) | — | — |
-| **ConecteSUS** | Import guiado gov.br (`govbr_sessions`) | Interactive FHIR; reimport sem browser se sessão válida | Vaccines, exams |
-| **Mater Dei** | Yes | Scraper + JSON session | Exams, visits, reports/images |
-| **Hermes Pardini** | Yes (PKCE session) | Browser OAuth PKCE (+ HTTP refresh) | Exams via Grupo Fleury Precision Care — UI «Grupo Fleury»; `portal_type` `hermes_pardini` — ver `docs/FLEURY_PRECISION_CARE.md` |
-
-**Silent sync on Carteira:** auto-sync only fires with valid persisted session (`sessionReady`); first login always via **Sincronizar** button (may open portal/Chrome). API ignores `silent=1` without session (`skipped: session_required`).
-
-**Sync progress (UI):** push-first via SSE `GET /integration-links/sync-progress/:jobId/stream` (heartbeat ~25s); GET `/sync-progress/:jobId` only reconciles if stream silent >45s. **Terminal sync per patient:** SSE `GET /patients/:id/sync-completions/stream` (`completed`/`failed`) → refresh context + wallet. See `docs/SYNC_DELTA.md` for per-portal incremental sync.
-
-### Key env vars
-
-| Variable | Default | Effect |
-|----------|---------|--------|
-| `AMIL_CDP_URL` | `http://127.0.0.1:9222` | CDP endpoint; `0` disables |
-| `AMIL_ALLOW_BROWSER` | `false` | `1` enables Playwright (WAF often blocks) |
-| `SYNC_MIN_INTERVAL_MS` | `1800000` (30 min) | Skip sync if last OK job recent (unless `force=1`) |
-| `SYNC_SCHEDULED_INTERVAL_MS` | `0` (off) | Built-in scheduled loop (use `0` with external worker) |
-| `CONNECT_WORKER_EXTERNAL` | `0` | `1` disables built-in loop — run `packages/connect-worker` |
-| `OPS_METRICS_KEY` | — | Protege `GET /ops/metrics` e `/ops/alerts`; header `x-internal-ops-key` |
-| `OPS_ALERT_WEBHOOK_URL` | — | Slack webhook; `npm run ops:alerts-check`; ver `docs/infra/OPS_ALERTS_PRODUCTION.md` |
-| `OPS_ALERTS_INTERVAL_MS` | `0` | Loop alertas no connect-worker (preferido) ou API single-instance |
-| `VITE_SILENT_SYNC_STALE_MS` | `21600000` (6h) | Web auto silent sync on Carteira open **only with `sessionReady`** |
-
-### Key files per integration
-
-- **Unimed:** `unimedbh-login.helper.ts`, `unimedbh-sync.scraper.ts`, `unimedbh-cartao-virtual.scraper.ts`
-- **Amil:** Amil flow priority: (1) `encrypted_session_token` HTTP-only, (2) `AuthOGS/Login` API, (3) CDP cookie read, (4) CDP fill + in-page API, (5) Playwright. JWT: `objeto.login` (not `marcaOtica`).
-- **Hermes Pardini:** `hermes-pardini.portal.ts`, `hermes-pardini-bff.service.ts`, `hermes-pardini-exam-persist.ts`
-- **Delta sync:** `sync-delta.helper.ts` — `computeUnimedExtratoMonths`, `computeUnimedAuthorizationSince`, `computeHermesPardiniExamStartDate`
-
-## Neo4j — associations only
-
-Entities and attributes live in **Postgres**; Neo4j stores **associations** between PG IDs (paths, Ava pins, dedup). See `docs/ARCHITECTURE_DATA_LAYERS.md`.
-
-- `NEO4J_SYNC_ENABLED=1` — projects entities, links, lineage (Doctor/Procedure) after sync/import
-- `neo4j-lineage-worker` — backfill `import_raw_records`; scripts `npm run neo4j-lineage-worker:once|backfill`
-- Read: `GET /patients/:id/graph/clinical-paths`, `/timeline/graph`; UI Timeline → **Encacheamento**
-- Migration: `025_neo4j_projection_state.sql`
-
-## Frontend — where to edit
-
-- Patient profile: `packages/web/src/pages/patient/detail.tsx` (tabs **Carteira**, **Convênios**, **Integrações**)
-- **Ava global:** `AvaGlobalDock` em `AppLayout.tsx` — orb fixo (FAB) em todas as telas; chat em drawer (`AvaDockWidget`, `AvaChatPanel`); lente de paciente (`useAvaPatientLens`, `AvaPatientLensSelect`); aceleradores G1 (`AvaAcceleratorButton`, `ava-dock-bus.ts`, `entityPin` na API)
-- Exam markers dashboard: `ExamMarkersDashboard.tsx`, sub-aba em `ExamsTab.tsx`
-- Silent wallet: `useSilentWalletSync.ts`, `useWalletLinkSyncStatus.ts`, `silent-sync.ts`
-- Sync modal: `packages/web/src/components/scraper/SyncProgressModal.tsx`
-- Link plan: modal in `detail.tsx` + `ImportInsuranceModal.tsx`
-- **Família:** `packages/web/src/pages/settings/family.tsx`, `/invite/accept`, `packages/web/src/components/family/`
-- API client: `packages/web/src/lib/api.ts`
-
-**UI grouped lists rule:** new screens with **card/row groups** must keep horizontal alignment between groups. Use `GroupedAlignedTables`, `ALIGNED_COL` (`aligned-table-columns.ts`), `AlignedFieldGrid`. Logos: `packages/web/public/brands/`.
-
-## Migrations
-
-SQL in `database/relational/`. Scripts: `apply-migration-NNN.mjs`. Medidas: **037–038**; emergência: **039**; metering LLM Ava: **040**; pedidos de exame: **041**; higienização: **042** — ver `docs/EMERGENCY.md`, `docs/LLM_USAGE.md`, `docs/DATA_HYGIENE.md`, `docs/EXAM_ARTIFACT_PIPELINE.md`. Orçamento LLM interno (cliente vs interno + teto R$100): **043** — ver `docs/LLM_USAGE.md#custo-cliente-vs-interno-migration-043`. Catálogo semântico dinâmico: **044**. Marcadores de exame (`exam_result_items`): **045**; idempotência + `source_document_id`: **046**. Ava conversas: **047**; pins sessão: **048** — ver `docs/AVA_VISION.md`. Telemetria produto: **049**; gerações domínio: **050**; client errors: **051**; runtime degraded: **052**. **gov.br sessão SUS + auth_attention:** **053** — ver `docs/SUS_CONECTESUS.md`, `docs/CONNECT.md`. **Família / acesso:** grants **057**, convites **058**, care circles **059**, convites↔círculo **060**, audit ACL **062**, titular `owner_account_id` backfill **070** — ver `docs/FAMILY_ACCESS_MODEL.md`, UI `/settings/family`. **Suporte:** reportar problema **061** — ver `docs/features/support-user-reports.md`.
+**Web entry points:** perfil paciente `packages/web/src/pages/patient/detail.tsx` (Carteira, Convênios, Integrações) · Ava global `AppLayout.tsx` · alinhamento de listas `GroupedAlignedTables` / `ALIGNED_COL` · hub UI em [`docs/PROJETO.md`](docs/PROJETO.md).
 
 ## Legal / LGPD
 
-- Canonical docs: `docs/legal/` (versioned markdown); architecture: `docs/LEGAL_COMPLIANCE.md`.
-- `GET /compliance/documents/:kind/current` (public); `POST /compliance/accept` (auth).
-- Seed after migration: `node packages/api/scripts/seed-legal-documents.mjs`.
-- Production: `COMPLIANCE_GATE_ENABLED=1` in API `.env` (UI `RequireCompliance`).
+[`docs/LEGAL_COMPLIANCE.md`](docs/LEGAL_COMPLIANCE.md) · docs versionados em `docs/legal/` · `GET /compliance/documents/:kind/current` · seed `node packages/api/scripts/seed-legal-documents.mjs` · prod `COMPLIANCE_GATE_ENABLED=1`.
 
-## Feature reviews (skills)
+## Delivery, QA, hooks
 
-For tier 2+ features, use skills in `.cursor/skills/aiyracare-*` — see `docs/FEATURE_REVIEW_FRAMEWORK.md`. Orchestrator: `aiyracare-feature-release`. **Don't** run four analyses on every typo — use the tier matrix.
+- Hooks: `.cursor/hooks.json` — [`docs/CURSOR_AGENT_OPS.md`](docs/CURSOR_AGENT_OPS.md)
+- QA: [`docs/testing/QA_PROCESS.md`](docs/testing/QA_PROCESS.md) — `npm run qa:run -- --suite <id>` · gate `main`: `qa:run-all -- --lane regression`
+- Pipeline / preview / ambientes: [`docs/DELIVERY_PIPELINE.md`](docs/DELIVERY_PIPELINE.md), [`docs/infra/TWO_ENV_MODEL.md`](docs/infra/TWO_ENV_MODEL.md), [`docs/infra/ENVIRONMENTS.md`](docs/infra/ENVIRONMENTS.md)
+- Tier 2+ reviews: [`.cursor/skills/aiyracare-feature-release`](.cursor/skills/aiyracare-feature-release/SKILL.md) + [`docs/FEATURE_REVIEW_FRAMEWORK.md`](docs/FEATURE_REVIEW_FRAMEWORK.md)
 
-## Cursor hooks + entrega
+## Solo operator
 
-- Hooks: `.cursor/hooks.json` — auditoria em `docs/dev-audit/`; ver `docs/CURSOR_AGENT_OPS.md`.
-- **Projects / execução local:** My Machines worker — `docs/CURSOR_WORKSPACE.md`, `scripts/cursor-worker-start.ps1`.
-- **Ambientes não prod:** [`docs/infra/TWO_ENV_MODEL.md`](docs/infra/TWO_ENV_MODEL.md) — Ambiente 1 **local**; Ambiente 2 **local** (`up:preview`) até ritmo funcional, depois **GCP**; matriz [`docs/infra/ENVIRONMENTS.md`](docs/infra/ENVIRONMENTS.md).
-- Antes de pedir aprovação Preview: `npm run promotion:gates` + [`docs/TESTING_VERTICALS.md`](docs/TESTING_VERTICALS.md).
-- Antes de push `main`: `npm run qa:run-all -- --lane regression` — ver [`docs/testing/QA_PROCESS.md`](docs/testing/QA_PROCESS.md).
-- QA por feature: `npm run qa:run -- --suite <id>` · catálogo: `npm run qa:list`
-- Teste completo UI: `npm run qa:run-all -- --lane business-full` · Ava: `--lane ava`.
-- Preview local (após aprovação): `npm run up:preview` — PG `aiyracare_preview`, API `:3020`, web `:5174`, ops `:3023`.
-- Ritual staging: `npm run preview:validate` · guia [`docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md`](docs/infra/PREVIEW_LOCAL_TEST_GUIDE.md).
-- Hostnames locais (pausado): [`docs/infra/LOCAL_HOSTNAMES.md`](docs/infra/LOCAL_HOSTNAMES.md) — hoje use `localhost:5173` / `:5174`.
-- Status stack: `npm run env:status` · pacientes demo: `$env:AUTH_SUBJECT="<sub>"; npm run link:demo-patients`.
-- GCP preview (quando secrets prontos): `provision:preview:gcp`, `deploy:preview:gcp`, `deploy:preview:worker` — [`docs/infra/GCP_PREVIEW_RUNBOOK.md`](docs/infra/GCP_PREVIEW_RUNBOOK.md).
-- Ciclo merge: `docs/DELIVERY_PIPELINE.md` — tier review → `test:critical` → QA regressão → CI.
-- Roadmap entrega: épicos `dev-delivery-pipeline`, `prod-run-intelligence`, `platform-environments`.
-
-## Tests API
-
-```powershell
-cd packages/api && npx vitest run
-```
-
-Ops suite (alertas, triagem, fallbacks, pipeline): `npm run test:ops` (root or `packages/api`).
-
-Smoke HTTP: `npm run ops:smoke`; full stack `OPS_SMOKE_FULL=1`; CI uses `OPS_SMOKE_SKIP_HTTP=1`.
-
-Prod setup: `npm run setup:ops-prod` · Runbook: `docs/ops/RUNBOOK_ALERTS.md`.
-
-Critical tests only: `npm run test:critical` (runs a focused subset; includes ops pipeline + runtime-degraded).
-
-## Solo operator (canonical)
-
-**[`docs/OPS_SOLO_OPERATOR_CHARTER.md`](docs/OPS_SOLO_OPERATOR_CHARTER.md)** — one human (Rafael), no revenue; agentic code production at scale. Rafael: **decisions only** (product, architecture, policy) — not merges, PR review, or notebook runbooks. Agents: all technical execution including **merge to `main`** when CI/QA gates pass. Do not ask Rafael to merge, review diffs, or run ops checklists.
+One human (Rafael) decides product, architecture, and policy; agents own implementation, PRs, ops, and **merge to `main`** when CI/QA gates pass — [`docs/OPS_SOLO_OPERATOR_CHARTER.md`](docs/OPS_SOLO_OPERATOR_CHARTER.md).
 
 ## Commits / PRs
 
-Agents open and land PRs per [`docs/DELIVERY_PIPELINE.md`](docs/DELIVERY_PIPELINE.md) and the charter above. Follow `.github/pull_request_template.md` (tier classification). **Merge is agentic** when gates pass — not a human approval step unless Rafael issued an explicit strategic hold.
+Follow [`.github/pull_request_template.md`](.github/pull_request_template.md) (tier classification) and [`docs/DELIVERY_PIPELINE.md`](docs/DELIVERY_PIPELINE.md). Merge is agentic when gates pass unless Rafael issued an explicit strategic hold.
 
-## Context docs
+## More docs
 
-| Doc | Content |
-|-----|---------|
-| `docs/DOCUMENTATION_SYSTEM.md` | Tiers de docs, feature cards, help, GitHub Projects |
-| `docs/README.md` | Hub de navegação da documentação |
-| `docs/features/` | Ficha por capacidade + `index.json` |
-| `docs/help/` | FAQ para usuário e base Ava |
-| `docs/FAMILY_ACCESS_MODEL.md` | Conta × família × perfil de saúde (discovery) |
-| `docs/AVA_VISION.md` | Global companion, sessions, pins, moonshot |
-| `docs/AVA_OPERATIONAL.md` | Fases G1–G4 Ava operacional (aceleradores, ações) |
-| `docs/AVA_EXPRESSIONS.md` | Expressões visuais + linha narrativa (nome do cuidador) |
-| `docs/AVA_PATIENT_LENS.md` | Lente de paciente, layout conversacional, tokens |
-| `docs/ARCHITECTURE_DATA_LAYERS.md` | Postgres entities vs Neo4j associations |
-| `docs/DATA_HYGIENE.md` | Dedup (Google Photos style) |
-| `docs/CLASSIFICATION_ENGINE.md` | Operator label classification engine |
-| `docs/OBSERVABILITY.md` | Proactive monitoring, product_events |
-| `docs/OPS_FALLBACKS_AND_ALERTS.md` | Diagramas alertas, triagem, fallbacks, roadmap |
-| `docs/OPERATION_MODEL.md` | Operação enxuta: fases §13, P0 §14, cache, fallbacks |
-| `docs/PARALLEL_WORK.md` | Paralelizar ops vs PoC Fleury |
-| `docs/roadmap.json` | Epics `ava-*`, `observability-platform`, `data-hygiene-dedup` |
+Hub: [`docs/README.md`](docs/README.md) · índice completo via [`docs/AGENT_BOOTSTRAP.md`](docs/AGENT_BOOTSTRAP.md).
