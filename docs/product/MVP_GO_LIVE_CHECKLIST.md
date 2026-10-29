@@ -1,6 +1,6 @@
 # Checklist go-live — MVP B2C família
 
-> **Última atualização:** 2026-10-28  
+> **Última atualização:** 2026-10-29  
 > **Persona:** [`persona-parent-guardian`](./PERSONAS.md)  
 > **Onboarding gate:** [`ONBOARDING_MVP_GATE.md`](./ONBOARDING_MVP_GATE.md)  
 > **Jornadas:** [`USABILITY_JOURNEYS.md`](./USABILITY_JOURNEYS.md)
@@ -62,12 +62,14 @@ Spec: [`ONBOARDING_MVP_GATE.md`](./ONBOARDING_MVP_GATE.md).
 
 ## Pilar 4 — Domínio e presença pública
 
+> **Rebrand (2026-10-29):** registro de domínio **pausado** até Phase 0 (nome final + INPI/advogado). Itens 4.1–4.4 abaixo referem-se ao plano **pré-rebrand** (AiyraCare); **não registrar** até novo domínio definido. Status e links: [`REBRAND_STATUS.md`](./REBRAND_STATUS.md) · AC-28 pausado.
+
 | # | Item | Status |
 |---|------|--------|
-| 4.1 | Registro **www.aiyra-care.com.br** e/ou **www.aiyracare.com.br** (decisão 2026-10-26 em [`HISTORICO.md`](../HISTORICO.md)) | [ ] |
-| 4.2 | DNS → host beta (Cloud Run / CDN) com TLS válido | [ ] |
-| 4.3 | `API_PUBLIC_URL` e callbacks Supabase/OAuth atualizados para o domínio | [ ] |
-| 4.4 | E-mail transacional (confirmação, convites família) no domínio ou SPF/DKIM documentado | [ ] |
+| 4.1 | Registro **www.aiyra-care.com.br** e/ou **www.aiyracare.com.br** (decisão 2026-10-26 em [`HISTORICO.md`](../HISTORICO.md)) — **congelado (rebrand)** | [ ] **blocked — rebrand Phase 0** |
+| 4.2 | DNS → host beta (Cloud Run / CDN) com TLS válido | [ ] **blocked — rebrand Phase 0** |
+| 4.3 | `API_PUBLIC_URL` e callbacks Supabase/OAuth atualizados para o domínio | [ ] **blocked — rebrand Phase 0** |
+| 4.4 | E-mail transacional (confirmação, convites família) no domínio ou SPF/DKIM documentado | [ ] **blocked — rebrand Phase 0** |
 
 ---
 
