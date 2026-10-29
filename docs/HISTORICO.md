@@ -1,5 +1,10 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-29] - P0-5 Cloud Environment snapshot (docs)
+
+### Realizado
+- **`docs/infra/CURSOR_CLOUD_ENV_SNAPSHOT.md`** — proposta de build/snapshot (PG, deps, RTK opcional, secrets Portal); seção Environment em [`CURSOR_WORK_MODEL.md`](./CURSOR_WORK_MODEL.md).
+
 ## [2026-10-29] - Política dev-audit gitignore (P1-2)
 
 ### Realizado
