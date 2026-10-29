@@ -1,5 +1,9 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-29] - Rebrand Phase 0 (decisão Rafael)
+
+- **Decisão:** rebrand completo da marca de produto (não manter AiyraCare); nome final TBD; Ava inalterada; AC-28/domínio pausados até Phase 0 — stub [`docs/product/REBRAND_STATUS.md`](./product/REBRAND_STATUS.md); detalhes no Project store (`rebrand-decision-log`, shortlist, fases).
+
 ## [2026-10-29] - P0-5 Cloud Environment snapshot (docs)
 
 ### Realizado

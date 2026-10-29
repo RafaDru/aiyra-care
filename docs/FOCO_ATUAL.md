@@ -1,6 +1,6 @@
 # Foco atual — tracking vivo
 
-> **Última atualização:** 2026-10-28  
+> **Última atualização:** 2026-10-29  
 > Complementa `roadmap.json` e `HISTORICO.md`. Duas frentes ativas — **não** abrir terceira lane sem pausar uma (`docs/PARALLEL_WORK.md`).
 
 ---
@@ -11,8 +11,9 @@
 |--------|------|--------|-----------------|
 | **A — MVP beta go-live** | `#produto` | Pilares go-live, Anel A em produto, **Anel B** backlog + slice contínuo, validação **J1** no notebook | [`product/MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md), [`product/ONBOARDING_MVP_GATE.md`](./product/ONBOARDING_MVP_GATE.md), [`features/anel-b-progressive-profiling.md`](./features/anel-b-progressive-profiling.md) |
 | **B — Ops CH / automations** | `#ops` | Command Hub, investigationId, alertas, paste ritual Automations, dev-audit | [`ops/README.md`](./ops/README.md), [`ops/AUTOMATIONS_LANES.md`](./ops/AUTOMATIONS_LANES.md), [`ops/triagem-dev-automation-paste-kit.md`](./ops/triagem-dev-automation-paste-kit.md) |
+| **C — Rebrand Phase 0** | `#produto` | Nome final, shortlist Rafael, INPI/advogado; **sem** rename `packages/*`; AC-28 pausado | [`product/REBRAND_STATUS.md`](./product/REBRAND_STATUS.md) · store `/cursor/stores/self/docs/rebrand-*.md` |
 
-**Regra:** PRs **separadas** — não misturar Anel B UI com refactor CH grande na mesma PR.
+**Regra:** PRs **separadas** — não misturar Anel B UI com refactor CH grande na mesma PR. Rebrand (lane C) — tier 0 docs até nome locked; depois waves de copy/legal conforme [`REBRAND_STATUS.md`](./product/REBRAND_STATUS.md).
 
 ---
 
