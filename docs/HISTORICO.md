@@ -1,5 +1,13 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-29] - Beta prep Sessão B (legal + J1 ritual)
+
+### Realizado
+- **`docs/product/BETA_PREP_WITHOUT_BRAND_LOCK.md`** — ritual notebook: `beta:bootstrap-legal`, suites J1, env placeholder sem domínio final.
+- **`npm run beta:bootstrap-legal`** — alias seed legal documents.
+- **E2E `auth-entry-flow`** — cenário footer termos/privacidade; `data-testid` no footer da landing.
+- Checklist go-live pilar 1.4 eng marcado; links para ritual beta em `FOCO_ATUAL`, `landing-marketing`, suite `auth-entry-flow`.
+
 ## [2026-10-29] - P0-5 Cloud Environment snapshot (docs)
 
 ### Realizado

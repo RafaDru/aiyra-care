@@ -26,7 +26,8 @@ Página pública `/home` com hero, dores da família, showcases de produto, bloc
 
 ## QA
 
-- Suite [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) — landing → login/signup mode + dashboard «Sua família»
+- Suite [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) — landing → login/signup mode + dashboard «Sua família»; footer → termos/privacidade (documentos seed)
+- Ritual beta Sessão B: [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](../product/BETA_PREP_WITHOUT_BRAND_LOCK.md)
 - Smoke: `regression-smoke` — `/home` render
 
 ## Roadmap

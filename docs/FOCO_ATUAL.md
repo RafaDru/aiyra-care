@@ -31,7 +31,7 @@
 
 ### Próximo trabalho produto
 
-1. **Checklist go-live** — pilares 1–5 em [`MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md) (institucional, gate, PJ/legal, domínio, deploy).
+1. **Checklist go-live** — pilares 1–5 em [`MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md); ritual **beta sem marca** em [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](./product/BETA_PREP_WITHOUT_BRAND_LOCK.md).
 2. **Anel B** — progressive profiling (integrações, co-responsável, billing) sem reabrir gate; card [`anel-b-progressive-profiling.md`](./features/anel-b-progressive-profiling.md).
 3. **Notebook (J1)** — após `pull` ≥ `2111042`, migration **089**, `scripts/up.ps1`; suites J1 + `patient-wallet` com E2E real (`QA_TEST_*` ou CI `e2e-regression`).
 

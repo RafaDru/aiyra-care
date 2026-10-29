@@ -36,9 +36,9 @@ export function LandingInstitutionalFooter() {
     <footer className="landing-footer">
       <nav aria-label={t('landing.footerNavLabel')}>
         <Space split={<span aria-hidden="true">·</span>} wrap size="small">
-          <Link to="/termos" onClick={() => trackCta('terms')}>{t('legal.termsLink')}</Link>
-          <Link to="/privacidade" onClick={() => trackCta('privacy')}>{t('legal.privacyLink')}</Link>
-          <Link to="/cookies" onClick={() => trackCta('cookies')}>{t('legal.cookiePolicyLink')}</Link>
+          <Link to="/termos" data-testid="landing-footer-link-terms" onClick={() => trackCta('terms')}>{t('legal.termsLink')}</Link>
+          <Link to="/privacidade" data-testid="landing-footer-link-privacy" onClick={() => trackCta('privacy')}>{t('legal.privacyLink')}</Link>
+          <Link to="/cookies" data-testid="landing-footer-link-cookies" onClick={() => trackCta('cookies')}>{t('legal.cookiePolicyLink')}</Link>
           <Link to="/login?mode=login" onClick={() => trackCta('login')}>{t('landing.ctaLogin')}</Link>
         </Space>
       </nav>
