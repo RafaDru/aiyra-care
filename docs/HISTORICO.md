@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-29] - AC-28 wave go-live beta (prep docs)
+
+### Realizado
+- **`docs/infra/GO_LIVE_BETA_WAVE.md`** — sequência A→D (publisher/seed, DNS/TLS/URLs, tier production + scrape, smoke J1); agente vs Rafael.
+- **`docs/product/MVP_GO_LIVE_CHECKLIST.md`** — refs eng #176/#177/#178; `[ ]` explícitos CNPJ/env, jurídico, DNS.
+- **`.env.example`** — mapa `COMPLIANCE_PUBLISHER_*` → `LEGAL_*` + `VITE_LEGAL_*` / `VITE_PUBLIC_SITE_URL` (placeholders).
+
 ## [2026-10-29] - P0-5 Cloud Environment snapshot (docs)
 
 ### Realizado
