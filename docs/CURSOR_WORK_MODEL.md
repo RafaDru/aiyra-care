@@ -62,6 +62,14 @@ Estados Project: **Queued** · **For Review** (PR ou ação humana) · **Done** 
 
 Hooks: manter bootstrap, stop ritual QA/docs, RTK bypass QA — ver `.cursor/hooks.json`.
 
+## Environment (Cloud Agent snapshot)
+
+| Artefato | Uso |
+|----------|-----|
+| [`infra/CURSOR_CLOUD_ENV_SNAPSHOT.md`](./infra/CURSOR_CLOUD_ENV_SNAPSHOT.md) | **P0-5** — PG + `npm ci` + RTK opcional no build; `QA_TEST_*` e Supabase só no Portal; ferramentas `cursor-cloud` (build/snapshot/propose); tabela notebook vs snapshot por DoD |
+| Portal Environment secrets | Valores de [`../.env.example`](../.env.example) / [`AUTH_TESTING.md`](./testing/AUTH_TESTING.md) — nunca no git |
+| Fallback E2E tier ≥1 | Skill [`aiyracare-qa-notebook`](./../.cursor/skills/aiyracare-qa-notebook/SKILL.md) em **NotebookRafael** |
+
 ## Referências
 
 - QA: [`testing/QA_PROCESS.md`](./testing/QA_PROCESS.md)
