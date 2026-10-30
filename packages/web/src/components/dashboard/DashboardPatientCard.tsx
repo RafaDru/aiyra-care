@@ -3,6 +3,7 @@ import { ManOutlined, WomanOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { Patient } from '../../lib/api.types.js'
 import type { PatientCircleMeta } from '../../lib/dashboard/group-patients-for-dashboard.js'
+import { ProgressiveProfilePatientCardHint } from '../onboarding/ProgressiveProfilePatientCardHint.js'
 
 const { Title, Text } = Typography
 
@@ -67,6 +68,7 @@ export function DashboardPatientCard({
         {patient.weightKg && <Tag color="green">{patient.weightKg} {t('patient.weight')}</Tag>}
         {patient.heightCm && <Tag color="cyan">{patient.heightCm} {t('patient.height')}</Tag>}
       </div>
+      <ProgressiveProfilePatientCardHint patientId={patient.id} isSelf={patient.isSelf} />
     </Card>
   )
 }
