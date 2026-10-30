@@ -42,6 +42,25 @@ npm run qa:run-all -- --lane regression
 
 Cloud Agent: build + `test:e2e:ci` quando PG/Supabase disponíveis; **DoD** permanece notebook com `QA_TEST_*`.
 
+---
+
+## Estado (pós-merge main)
+
+| Data | Entrega |
+|------|---------|
+| 2026-10-30 | [#189](https://github.com/RafaDru/aiyra-care/pull/189) Anel B slice 3 · [#190](https://github.com/RafaDru/aiyra-care/pull/190) ritual beta + E2E footer legal |
+| CI | `e2e-regression` verde (incl. `auth-entry-flow.spec.ts`) |
+| Cloud `promotion:gates` | ✅ com skips esperados sem `DATABASE_URL` / staging local |
+
+## Próximo — Preview (Ambiente 2)
+
+1. Notebook: `scripts/up.ps1` → `beta:bootstrap-legal` → suites J1 (passo 4 acima) → `promotion:gates` **sem** skips de DB.
+2. Local preview: [`OPS_PREP_CHECKLIST.md`](../infra/OPS_PREP_CHECKLIST.md) §5 — `up:preview`, `preview:validate`.
+3. GCP: [`GCP_PREVIEW_RUNBOOK.md`](../infra/GCP_PREVIEW_RUNBOOK.md) — secrets Environment `preview`, `promote-preview.yml`, `preview:post-deploy`.
+4. **AC-23:** no host beta/preview com `DEPLOYMENT_TIER=production`, validar gate scrape [#178](https://github.com/RafaDru/aiyra-care/pull/178).
+
+Aprovação Rafael em `promotion-report-last.md` antes de promover preview GCP (charter).
+
 ## Variáveis beta (placeholder marca)
 
 API (`.env`) — valores de **prep**, não go-live público:

@@ -1,5 +1,12 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-30] - Merge wave beta + Anel B (#189, #190)
+
+### Realizado
+- **#189** — Anel B slice 3 (CTA integrações card dependente Início).
+- **#190** — Ritual `BETA_PREP_WITHOUT_BRAND_LOCK.md`, `beta:bootstrap-legal`, E2E footer legal em `auth-entry-flow`.
+- CI `e2e-regression` verde; checklist go-live 1.8/1.10 eng parcial atualizado.
+
 ## [2026-10-29] - Beta prep Sessão B (legal + J1 ritual)
 
 ### Realizado

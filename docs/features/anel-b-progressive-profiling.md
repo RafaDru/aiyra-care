@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |-------|--------|
-| **Status** | `in_progress` (slice 3) |
+| **Status** | `in_progress` (slice 4 backlog) |
 | **Épico** | `institutional-landing` / onboarding |
 | **Gate** | [`ONBOARDING_MVP_GATE.md`](../product/ONBOARDING_MVP_GATE.md) |
 
