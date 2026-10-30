@@ -15,7 +15,7 @@
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Wave MVP out/2026: landing #176, Anel A gate #177 (convênio/SUS fora do 1º onboarding), scrape prod gate #178, delete account #179, Anel B slice 1 #180; docs go-live #175. Foco vivo: MVP beta checklist + Ops CH. Connect Fase 1; billing Stripe; compliance LGPD.",
+  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Wave MVP out/2026 mergeada (#175–#180, #189–#190): landing, Anel A/B, beta prep ritual, scrape gate #178. Foco: preview Ambiente 2 + J1 notebook. Connect Fase 1; billing Stripe; compliance LGPD.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
     "postgresRole": "Fonte da verdade — entidades clínicas, conversas Ava (planejado), billing, legal, telemetria llm_usage + product_events (planejado)",
