@@ -18,13 +18,13 @@ Lista de pilares para abrir **beta público** (domínio + famílias externas), s
 | 1.1 | Rota pública `/home` sem auth | [x] eng ([#177](https://github.com/RafaDru/aiyra-care/pull/177)) |
 | 1.2 | Hero + CTAs cadastro/login com tracking (`landing_cta_click`) | [x] eng |
 | 1.3 | Copy alinhada a personas P0 (família, não B2B clínica) | [ ] revisão conteúdo |
-| 1.4 | Links legais (termos/privacidade) apontando para documentos versionados | [ ] |
+| 1.4 | Links legais (termos/privacidade) apontando para documentos versionados | [x] eng (rotas `/termos` `/privacidade` `/cookies` + footer `/home`) |
 | 1.5 | Feature card [`landing-marketing`](../features/landing-marketing.md) revisada para tier de conteúdo | [ ] |
-| 1.6 | `LEGAL_ENTITY_NAME`, `LEGAL_CNPJ`, `LEGAL_PRIVACY_EMAIL` na API (footer e documentos legais) | [ ] |
-| 1.7 | Opcional build web: `VITE_LEGAL_ENTITY_NAME`, `VITE_LEGAL_CNPJ`, `VITE_PUBLIC_SITE_URL` (SEO canonical/OG) | [ ] |
-| 1.8 | Termos, privacidade e cookies publicados (`seed-legal-documents`) | [ ] |
+| 1.6 | `LEGAL_ENTITY_NAME`, `LEGAL_CNPJ`, `LEGAL_PRIVACY_EMAIL` na API (footer e documentos legais) | [ ] prep — ver [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](./BETA_PREP_WITHOUT_BRAND_LOCK.md) |
+| 1.7 | Opcional build web: `VITE_LEGAL_ENTITY_NAME`, `VITE_LEGAL_CNPJ`, `VITE_PUBLIC_SITE_URL` (SEO canonical/OG) | [ ] preview URL ok; prod domínio pausado |
+| 1.8 | Termos, privacidade e cookies publicados (`seed-legal-documents`) | [ ] eng seed — `npm run beta:bootstrap-legal` no ambiente |
 | 1.9 | Preços na landing sem valores vinculantes até billing público | [ ] |
-| 1.10 | Suite QA [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) | [ ] |
+| 1.10 | Suite QA [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) | [ ] notebook/CI — incl. footer legal (E2E) |
 
 **Referência técnica:** [`auth-entry-onboarding`](../features/auth-entry-onboarding.md) (funil landing → login).
 
@@ -40,7 +40,7 @@ Spec: [`ONBOARDING_MVP_GATE.md`](./ONBOARDING_MVP_GATE.md).
 | 2.2 | ≥1 `care_circle` + ≥1 pessoa + `self` + relação de cuidado | [ ] |
 | 2.3 | Convênio e SUS **fora** do 1º onboarding (sem passo / sem «não tenho») | [x] eng ([#177](https://github.com/RafaDru/aiyra-care/pull/177)) |
 | 2.4 | Pagamento **fora** do gate | [x] eng |
-| 2.5 | Jornada **J1** — suites `auth-entry-flow`, `onboarding-flow`, `core-patient-crud`, `dashboard-people-grouping` verdes | [ ] |
+| 2.5 | Jornada **J1** — suites `auth-entry-flow`, `onboarding-flow`, `core-patient-crud`, `dashboard-people-grouping` verdes | [ ] notebook — ritual em [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](./BETA_PREP_WITHOUT_BRAND_LOCK.md) |
 | 2.6 | Regressão lane `regression` ou `business-full` conforme [`QA_PROCESS.md`](../testing/QA_PROCESS.md) | [ ] |
 
 ---

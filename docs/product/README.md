@@ -6,6 +6,7 @@
 | [`USABILITY_JOURNEYS.md`](./USABILITY_JOURNEYS.md) | Jornadas dia a dia + ritual QA para agentes. |
 | [`ONBOARDING_MVP_GATE.md`](./ONBOARDING_MVP_GATE.md) | Anel A (gate obrigatório) vs Anel B (progressive profiling); critérios done + QA J1. |
 | [`MVP_GO_LIVE_CHECKLIST.md`](./MVP_GO_LIVE_CHECKLIST.md) | Pilares go-live beta: site, onboarding, PJ/legal, domínio, deploy. |
+| [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](./BETA_PREP_WITHOUT_BRAND_LOCK.md) | Ritual Sessão B: legal seed, J1, preview — **sem** lock de marca/domínio. |
 | [`GROWTH_CONSULTORIO_CAPILARIDADE.md`](./GROWTH_CONSULTORIO_CAPILARIDADE.md) | GTM família → médico → consultório (tese, fases A–D, MGM gate legal). |
 | [`GROWTH_CONSULTORIO_BOARD.json`](./GROWTH_CONSULTORIO_BOARD.json) | Board machine-readable — CH **Produto → Capilarização** e estratégia GTM. |
 | [`PRODUCT_MATURITY_BOARD.json`](./PRODUCT_MATURITY_BOARD.json) | Quadro de maturidade por superfície e domínio — editável no repo; lido pelo Command Hub (**Produto → Maturidade**). |

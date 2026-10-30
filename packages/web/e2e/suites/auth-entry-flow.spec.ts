@@ -28,6 +28,18 @@ test.describe('auth-entry-flow', () => {
     await expect(page.getByRole('button', { name: 'Criar conta' })).toBeVisible()
   })
 
+  test('landing footer — documentos legais publicados', async ({ page }) => {
+    await page.goto('/home')
+    await page.getByTestId('landing-footer-link-terms').click()
+    await expect(page).toHaveURL(/\/termos/)
+    await expect(page.getByRole('heading', { level: 2 })).toContainText(/Termos de Uso/i, { timeout: 20_000 })
+
+    await page.goto('/home')
+    await page.getByTestId('landing-footer-link-privacy').click()
+    await expect(page).toHaveURL(/\/privacidade/)
+    await expect(page.getByRole('heading', { level: 2 })).toContainText(/Privacidade/i, { timeout: 20_000 })
+  })
+
   test('onboarding guiado — login QA onboarding → wizard → dashboard', async ({ page }) => {
     requireOnboardingCredentials()
     execSync('npm run qa:reset-onboarding-user', { cwd: repoRoot, stdio: 'ignore' })

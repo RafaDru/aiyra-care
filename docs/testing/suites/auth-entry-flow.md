@@ -57,6 +57,17 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | 1 | Após 1º círculo | **Adicionar outra família** | |
 | 2 | 2º nome + dependente (sem «Incluir você») | Dashboard com 2 grupos; `GET /care-circles` ≥ 2 | |
 
+### E — Footer legal (público, sem auth)
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | `/home` → link **Termos** | `/termos` com heading do documento vigente (`GET /compliance/documents/terms_of_use/current`) | |
+| 2 | `/home` → **Privacidade** | `/privacidade` com política publicada | |
+
+**Pré:** `npm run beta:bootstrap-legal` (ou CI regression seed).
+
+**Automação:** `auth-entry-flow.spec.ts` — cenário «landing footer — documentos legais publicados»
+
 ## Matriz
 
 [`BUSINESS_ACTION_MATRIX.md`](../BUSINESS_ACTION_MATRIX.md) — «Onboarding / perfil titular» + entrada auth.
