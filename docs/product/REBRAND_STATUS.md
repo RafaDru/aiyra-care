@@ -4,7 +4,8 @@
 
 | Campo | Valor |
 |-------|--------|
-| **Marca / agente (UI)** | **Ananeri** |
+| **Marca plataforma (UI)** | **Ananeri** |
+| **Agente (chat/dock/FAB)** | **Neri** |
 | **Phase** | **1 — em progresso** (slices 1–2 no repo) |
 | **INPI / ®** | **Adiado** — gate financeiro (ver Project store `ananeri-phase0-lock.md`) |
 | **npm scope / repo** | Sem rename — `@aiyra-care/*` e `aiyra-care` (Phase 3A defer) |

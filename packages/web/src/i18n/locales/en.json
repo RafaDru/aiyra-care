@@ -172,7 +172,7 @@
   "onboarding": {
     "title": "Complete your profile",
     "subtitle": "We need a few details to create your profile. Registration is only available for adults 18 or older.",
-    "layoutTagline": "Organize your family's care in one place — insurance, labs, and Ananeri support.",
+    "layoutTagline": "Organize your family's care in one place — insurance, labs, and support from Neri.",
     "stepProgress": "Step {{current}} of {{total}}",
     "welcomeTitle": "Let's start with your profile",
     "welcomeSubtitle": "You're the account holder (caregiver). We need a few details for your health profile. Adults 18+ only.",
@@ -185,7 +185,7 @@
       "familiesHint": "Name and profiles",
       "connectors": "Connections",
       "connectorsHint": "Optional",
-      "summary": "Context for Ananeri",
+      "summary": "Context for Neri",
       "summaryHint": "Optional",
       "complete": "Finish",
       "completeHint": "Go to dashboard"
@@ -261,8 +261,8 @@
       "uncle_aunt": "Aunt or uncle",
       "other": "Other"
     },
-    "avaSummaryTitle": "Tell Ananeri a little",
-    "avaSummarySubtitle": "In one or two sentences, what matters most in your family's care right now? Ananeri uses this only to personalize support — you can change it later in your profile.",
+    "avaSummaryTitle": "Tell Neri a little",
+    "avaSummarySubtitle": "Neri is Ananeri's intelligent assistant. In one or two sentences, what matters most in your family's care right now? She uses this only to personalize support — you can change it later in your profile.",
     "avaSummaryLabel": "Summary (optional)",
     "avaSummaryHint": "E.g. “My daughter has mild asthma; I track visits and vaccines.”",
     "avaSummaryTooLong": "Use up to 500 characters",
@@ -310,7 +310,8 @@
       "skip": "Skip for now",
       "finish": "Go to the app",
       "profileLink": "Open integrations on profile"
-    }
+    },
+    "agentPlatformLink": "Neri is Ananeri's intelligent assistant."
   },
   "supportCenter": {
     "title": "Support center",
@@ -331,7 +332,7 @@
     "back": "Back",
     "next": "Next",
     "complete": "Finish",
-    "noPatientsHint": "Start by adding someone you care for — then quick capture and Ananeri work better.",
+    "noPatientsHint": "Start by adding someone you care for — then quick capture and Neri work better.",
     "avaSeedMessage": "Hi! Help me understand how you can support my family's care.",
     "steps": {
       "family": {
@@ -347,15 +348,15 @@
         "description": "Log vitals, medications, or daily notes — without opening the full record."
       },
       "ava": {
-        "title": "Ananeri, your companion",
-        "description": "Ananeri is always nearby to organize context and help you prepare for conversations with your doctor."
+        "title": "Neri, your companion",
+        "description": "Neri is always nearby to organize context and help you prepare for conversations with your doctor."
       }
     },
     "actions": {
       "family": "Go to your family",
       "addPerson": "Add a person",
       "today": "Open quick capture",
-      "ava": "Meet Ananeri"
+      "ava": "Meet Neri"
     }
   },
   "settings": {
@@ -733,14 +734,14 @@
     "integrations": "Integrations",
     "timeline": "Timeline",
     "agenda": "Agenda",
-    "ava": "Ananeri"
+    "ava": "Neri"
   },
   "ava": {
-    "title": "Ananeri — Ananeri AI agent",
-    "subtitle": "Ananeri AI agent",
-    "name": "Ananeri",
+    "title": "Neri — Ananeri assistant",
+    "subtitle": "Ananeri's intelligent assistant",
+    "name": "Neri",
     "you": "You",
-    "intro": "Describe what is going on. Ananeri organizes record context and helps prepare the visit with the pediatrician — not a replacement for medical care.",
+    "intro": "Describe what is going on. Neri organizes record context and helps prepare the visit with the pediatrician — not a replacement for medical care.",
     "introPersonal": "{{name}}, describe what is going on. I'll organize the record context and help prepare the visit with the pediatrician — not a replacement for medical care.",
     "placeholder": "E.g. Fever since yesterday and refusing to eat…",
     "quotaHint": "AI balance: ~{{credits}} credits ({{tokens}} tokens est.)",
@@ -754,17 +755,17 @@
     "quotaBypassed": "AI allowance disabled for testing (no limit on this account).",
     "upgradePlan": "View plan",
     "revised": "revised",
-    "defaultDisclaimer": "Ananeri supports communication — not a substitute for medical evaluation.",
-    "openChat": "Open chat with Ananeri",
+    "defaultDisclaimer": "Neri supports communication — not a substitute for medical evaluation.",
+    "openChat": "Open chat with Neri",
     "dockHint": "Help preparing for the pediatrician",
-    "dockGreeting": "Hi, I'm Ananeri!",
-    "dockGreetingPersonal": "Hi {{name}}, I'm Ananeri!",
+    "dockGreeting": "Hi, I'm Neri!",
+    "dockGreetingPersonal": "Hi {{name}}, I'm Neri!",
     "dockOffer": "If you need me, I'm here to help",
     "dockOfferPersonal": "{{name}}, if you need me, I'm here to help",
-    "dockCta": "Talk to Ananeri",
+    "dockCta": "Talk to Neri",
     "chatDisclaimerShort": "Family support — not a substitute for medical care. Emergency: 192 (SAMU).",
     "thinking": "Organizing context…",
-    "thinkingStatusHint": "Processing status (not Ananeri's reply)",
+    "thinkingStatusHint": "Processing status (not Neri's reply)",
     "thinkingPhrases": {
       "pensando": "Thinking…",
       "analisando": "Reviewing the medical record…",
@@ -787,7 +788,7 @@
     "imageAttachWarningDontShow": "Don't show again",
     "imageAttachUploading": "Uploading document…",
     "imageAttachFailed": "Could not upload document",
-    "contextPinsLabel": "In Ananeri's context",
+    "contextPinsLabel": "In Neri's context",
     "contextPinType": {
       "exam": "Exam",
       "exam_order": "Order",
@@ -805,7 +806,7 @@
     "patientSwitchKeep": "Keep in context",
     "patientSwitchRemove": "Remove old pins",
     "inactivityHint": "It's been a while since your last message — pinned records are still in context. Remove chips if the topic changed.",
-    "accelerator": "Ask Ananeri",
+    "accelerator": "Ask Neri",
     "acceleratorExam": "What does this exam mean in the context of the medical record?",
     "acceleratorOrder": "What does this exam order indicate and how should I interpret the results?",
     "acceleratorMarker": "What does this marker mean and how should I interpret the trend?",
@@ -822,11 +823,11 @@
     "openIntegrations": "View integrations",
     "platformDocumentsMessage": "Need help using a document from this tab for the pediatrician visit?",
     "platformExportMessage": "Before printing or sharing, want me to highlight what matters most in the record?",
-    "liteModeBanner": "Ananeri is in simplified mode — responses without automatic review. Confirm important information with your pediatrician.",
+    "liteModeBanner": "Neri is in simplified mode — responses without automatic review. Confirm important information with your pediatrician.",
     "thinkingStatusAriaLabel": "Processing status",
     "reportPrint": {
       "generatedAt": "Report generated by Ananeri · {{date}}",
-      "footer": "Ananeri supports family communication — not a substitute for medical evaluation. Emergency: SAMU 192.",
+      "footer": "Neri supports family communication — not a substitute for medical evaluation. Emergency: SAMU 192.",
       "printPdf": "Print / Save PDF",
       "empty": "Nothing to show yet."
     },
@@ -895,7 +896,7 @@
     "ctaLogin": "Sign in",
     "ctaSignup": "Create free account",
     "heroTitle": "Family health in one place",
-    "heroSubtitle": "An updated health history, a timeline that follows family life, and immediate support at medical visits. Centralizes exams, appointments, reminders and calendar — connected to Google Calendar and Outlook. Ananeri, our AI agent, helps families organize faster.",
+    "heroSubtitle": "An updated health history, a timeline that follows family life, and immediate support at medical visits. Centralizes exams, appointments, reminders and calendar — connected to Google Calendar and Outlook. Neri, Ananeri's intelligent assistant, helps families organize faster.",
     "heroNote": "Features in use by real families. Copy and pricing still under review.",
     "pains": {
       "title": "You're not alone in this",
@@ -932,8 +933,8 @@
         "body": "Clinical export with vaccines, recent exams, medications and timeline — real chart data so you arrive prepared for your health professional."
       },
       "ava": {
-        "title": "Ananeri — your pocket companion at the visit",
-        "body": "Our AI agent supports families with everyday questions, organizes context from real chart data, and helps you prepare the conversation faster."
+        "title": "Neri — your pocket companion at the visit",
+        "body": "Ananeri's assistant supports everyday questions, organizes context from real chart data, and helps you prepare for visits faster."
       },
       "timeline": {
         "title": "A timeline that follows the family",
@@ -942,7 +943,7 @@
     },
     "gallery": {
       "title": "Inside the platform",
-      "subtitle": "Real Ananeri screens — history, agenda, exams and Ananeri conversation.",
+      "subtitle": "Real Ananeri screens — history, agenda, exams and chat with Neri.",
       "items": [
         {
           "key": "dashboard",
@@ -956,7 +957,7 @@
         },
         {
           "key": "avaChat",
-          "title": "Chat with Ananeri",
+          "title": "Chat with Neri",
           "altKey": "landing.screenshots.avaChat"
         }
       ]
@@ -967,9 +968,9 @@
       "timeline": "Clinical timeline",
       "agenda": "Agenda and calendar",
       "exams": "Exams and markers",
-      "avaChat": "Ananeri — chat with chart context"
+      "avaChat": "Neri — chat with chart context"
     },
-    "avaDisclaimer": "Ananeri guides you using your chart and everyday questions. Ananeri does not perform exams, issue diagnoses, or replace medical evaluation or emergency care (SAMU 192).",
+    "avaDisclaimer": "Neri guides you using your chart and everyday questions. Neri does not perform exams, issue diagnoses, or replace medical evaluation or emergency care (SAMU 192).",
     "useCases": {
       "title": "How families use it today",
       "stepLabel": "Step {{n}}",
@@ -980,7 +981,7 @@
         },
         {
           "title": "Arrive prepared",
-          "body": "Review what changed, export the summary and use Ananeri to list questions before the visit."
+          "body": "Review what changed, export the summary and use Neri to list questions before the visit."
         },
         {
           "title": "Grow with the family",
@@ -1001,8 +1002,8 @@
           "body": "Deterministic clinical summary, PDF and temporary link to share with doctors and other professionals."
         },
         {
-          "title": "Ananeri — AI agent",
-          "body": "Pocket companion at the visit: answers questions, organizes context and speeds up what you need before the appointment."
+          "title": "Neri — AI agent",
+          "body": "Ananeri's assistant at the visit: answers questions, organizes context, and speeds up what you review before seeing your doctor."
         },
         {
           "title": "Agenda and calendar",
@@ -1023,7 +1024,7 @@
       "items": [
         "Evidence-based clinical agents (after regulatory review)",
         "Expanded measurements and milestones",
-        "Ananeri guardrails — health focus and safety",
+        "Neri guardrails — health focus and safety",
         "Dynamic pricing on the page and public go-live"
       ]
     },
@@ -1075,7 +1076,7 @@
           "age": "8 years"
         }
       ],
-      "avaTitle": "Ananeri",
+      "avaTitle": "Neri",
       "avaLines": [
         "What should I bring to Ana's visit next week?",
         "Vaccines on track, March blood work and current meds. Want me to build an export summary?",
@@ -1674,7 +1675,7 @@
     "reportSubmit": "Send help request",
     "reportSuccess": "Ticket registered (#{{id}}). Thank you for trusting us.",
     "reportError": "We couldn't send this right now. Please try again shortly.",
-    "reportPrivacyHint": "By default we do not send exams or Ananeri chats — only what you allow for investigation.",
+    "reportPrivacyHint": "By default we do not send exams or Neri chats — only what you allow for investigation.",
     "resolutionPromptQuestion": "Did this resolve your question or issue?",
     "resolutionPromptYes": "Yes, resolved",
     "resolutionPromptNo": "Not yet",

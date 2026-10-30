@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 import { dismissFirstVisitTour } from './ui'
 
-const AVA_FAB_LABEL = /Abrir conversa com Ananeri|Open chat with Ananeri/i
+const AVA_FAB_LABEL = /Abrir conversa com Neri|Open chat with Neri/i
 const AVA_COMPOSER_PLACEHOLDER = /febre|fever|Ex\.:|E\.g\./i
 const AVA_NEW_CONVERSATION = /^(Nova conversa|New conversation)$/
 
@@ -123,7 +123,7 @@ export async function waitForAvaAssistantReply(
     let matched = false
     for (let i = count - 1; i >= 0; i--) {
       const body = bodies.nth(i)
-      const text = (await body.innerText()).replace(/^Ananeri\s*/i, '').trim()
+      const text = (await body.innerText()).replace(/^Neri\s*/i, '').trim()
       if (text.length === 0) continue
       await expect(body).toContainText(pattern)
       matched = true
@@ -136,7 +136,7 @@ export async function waitForAvaAssistantReply(
   const count = await bodies.count()
   for (let i = count - 1; i >= 0; i--) {
     const body = bodies.nth(i)
-    const text = (await body.innerText()).replace(/^Ava\s*/i, '').trim()
+    const text = (await body.innerText()).replace(/^Neri\s*/i, '').trim()
     if (text.length > 0) return body
   }
   return bodies.last()
