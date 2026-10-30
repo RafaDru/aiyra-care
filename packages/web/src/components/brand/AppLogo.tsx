@@ -42,7 +42,7 @@ const DEFAULT_HEIGHT: Record<AppLogoVariant, number> = {
   wordmark: 36,
 }
 
-export function AppLogo({ variant, height, className, style, alt = 'Aiyra Care' }: Props) {
+export function AppLogo({ variant, height, className, style, alt = 'Ananeri' }: Props) {
   const { darkMode } = useTheme()
   const src = ASSETS[variant][darkMode ? 'dark' : 'light']
 

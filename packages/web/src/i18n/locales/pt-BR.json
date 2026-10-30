@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "AiyraCare",
+    "title": "Ananeri",
     "subtitle": "Cuidado infantil com inteligência"
   },
   "environment": {
@@ -172,7 +172,7 @@
   "onboarding": {
     "title": "Complete seu cadastro",
     "subtitle": "Precisamos de alguns dados para criar seu perfil. O cadastro é permitido apenas para maiores de 18 anos.",
-    "layoutTagline": "Organize o cuidado da sua família em um só lugar — convênios, exames e apoio da Ava.",
+    "layoutTagline": "Organize o cuidado da sua família em um só lugar — convênios, exames e apoio da Ananeri.",
     "stepProgress": "Passo {{current}} de {{total}}",
     "welcomeTitle": "Vamos começar pelo seu perfil",
     "welcomeSubtitle": "Você é o titular da conta (cuidador). Precisamos de alguns dados para criar seu perfil de saúde. Apenas maiores de 18 anos.",
@@ -185,7 +185,7 @@
       "familiesHint": "Nome e perfis",
       "connectors": "Conexões",
       "connectorsHint": "Opcional",
-      "summary": "Contexto para Ava",
+      "summary": "Contexto para Ananeri",
       "summaryHint": "Opcional",
       "complete": "Concluir",
       "completeHint": "Ir ao painel"
@@ -261,8 +261,8 @@
       "uncle_aunt": "Tio ou tia",
       "other": "Outro"
     },
-    "avaSummaryTitle": "Conte um pouco para a Ava",
-    "avaSummarySubtitle": "Em uma ou duas frases, o que mais importa no cuidado da sua família agora? A Ava usa isso só para personalizar o apoio — você pode mudar depois no perfil.",
+    "avaSummaryTitle": "Conte um pouco para a Ananeri",
+    "avaSummarySubtitle": "Em uma ou duas frases, o que mais importa no cuidado da sua família agora? A Ananeri usa isso só para personalizar o apoio — você pode mudar depois no perfil.",
     "avaSummaryLabel": "Resumo (opcional)",
     "avaSummaryHint": "Ex.: «Minha filha tem asma leve; acompanho consultas e vacinas.»",
     "avaSummaryTooLong": "Use até 500 caracteres",
@@ -314,7 +314,7 @@
   },
   "supportCenter": {
     "title": "Central de atendimento",
-    "subtitle": "Estamos aqui para ajudar você a entrar na conta, entender o cadastro com CPF e tirar outras dúvidas sobre o cuidado da sua família no AiyraCare.",
+    "subtitle": "Estamos aqui para ajudar você a entrar na conta, entender o cadastro com CPF e tirar outras dúvidas sobre o cuidado da sua família no Ananeri.",
     "cpfRegisteredHint": "Se o CPF já aparece como cadastrado, é bem provável que já exista uma conta — muitas vezes é só entrar com o e-mail certo ou recuperar o acesso.",
     "authProblemsHint": "Senha, confirmação de e-mail ou outro jeito de login não funcionou? Você não está sozinho(a): abaixo explicamos como pedir ajuda sem expor dados da sua família.",
     "channelsTitle": "Como pedir ajuda",
@@ -331,7 +331,7 @@
     "back": "Voltar",
     "next": "Próximo",
     "complete": "Concluir",
-    "noPatientsHint": "Comece adicionando quem você cuida — depois fica mais fácil usar o registro rápido e a Ava.",
+    "noPatientsHint": "Comece adicionando quem você cuida — depois fica mais fácil usar o registro rápido e a Ananeri.",
     "avaSeedMessage": "Olá! Me ajude a entender como posso apoiar o cuidado da minha família.",
     "steps": {
       "family": {
@@ -347,22 +347,22 @@
         "description": "Registre medidas, medicações ou notas do dia — sem precisar abrir o histórico completo."
       },
       "ava": {
-        "title": "Ava, sua companheira",
-        "description": "A Ava está sempre à mão para organizar contexto e ajudar a preparar a conversa com o médico."
+        "title": "Ananeri, sua companheira",
+        "description": "A Ananeri está sempre à mão para organizar contexto e ajudar a preparar a conversa com o médico."
       }
     },
     "actions": {
       "family": "Ver sua família",
       "addPerson": "Adicionar pessoa",
       "today": "Abrir registro rápido",
-      "ava": "Conhecer a Ava"
+      "ava": "Conhecer a Ananeri"
     }
   },
   "settings": {
     "subtitle": "Preferências do aplicativo",
     "appearance": "Aparência",
     "darkMode": "Modo escuro",
-    "brandColors": "Identidade AiyraCare",
+    "brandColors": "Identidade Ananeri",
     "language": "Idioma",
     "languageLabel": "Idioma da interface",
     "palette": {
@@ -733,14 +733,14 @@
     "integrations": "Integrações",
     "timeline": "Linha do tempo",
     "agenda": "Agenda",
-    "ava": "Ava"
+    "ava": "Ananeri"
   },
   "ava": {
-    "title": "Ava — Agente Virtual Aiyra",
-    "subtitle": "Agente Virtual Aiyra",
-    "name": "Ava",
+    "title": "Ananeri — Agente de IA Ananeri",
+    "subtitle": "Agente de IA Ananeri",
+    "name": "Ananeri",
     "you": "Você",
-    "intro": "Descreva o que está ocorrendo. Ava organiza o histórico de saúde e ajuda a preparar a conversa com o pediatra — sem substituir o médico.",
+    "intro": "Descreva o que está ocorrendo. Ananeri organiza o histórico de saúde e ajuda a preparar a conversa com o pediatra — sem substituir o médico.",
     "introPersonal": "{{name}}, descreva o que está ocorrendo. Organizo o histórico de saúde e ajudo a preparar a conversa com o pediatra — sem substituir o médico.",
     "placeholder": "Ex.: Ele está com febre desde ontem e não quer comer…",
     "quotaHint": "Saldo IA: ~{{credits}} créditos ({{tokens}} tokens estimados)",
@@ -754,17 +754,17 @@
     "quotaBypassed": "Franquia de IA desativada para testes (sem limite nesta conta).",
     "upgradePlan": "Ver plano",
     "revised": "revisada",
-    "defaultDisclaimer": "Ava é apoio à comunicação — não substitui avaliação médica.",
-    "openChat": "Abrir conversa com Ava",
+    "defaultDisclaimer": "Ananeri é apoio à comunicação — não substitui avaliação médica.",
+    "openChat": "Abrir conversa com Ananeri",
     "dockHint": "Apoio para conversar com o pediatra",
-    "dockGreeting": "Oi, eu sou a Ava!",
-    "dockGreetingPersonal": "Oi, {{name}}, eu sou a Ava!",
+    "dockGreeting": "Oi, eu sou a Ananeri!",
+    "dockGreetingPersonal": "Oi, {{name}}, eu sou a Ananeri!",
     "dockOffer": "Se precisar de mim, estou aqui para ajudá-lo",
     "dockOfferPersonal": "{{name}}, se precisar de mim, estou aqui para ajudar",
-    "dockCta": "Falar com a Ava",
+    "dockCta": "Falar com a Ananeri",
     "chatDisclaimerShort": "Apoio à família — não substitui consulta médica. Emergência: 192 (SAMU).",
     "thinking": "Organizando o contexto…",
-    "thinkingStatusHint": "Status do processamento (não é resposta da Ava)",
+    "thinkingStatusHint": "Status do processamento (não é resposta da Ananeri)",
     "thinkingPhrases": {
       "pensando": "Pensando…",
       "analisando": "Analisando o histórico…",
@@ -787,7 +787,7 @@
     "imageAttachWarningDontShow": "Não mostrar novamente",
     "imageAttachUploading": "Enviando documento…",
     "imageAttachFailed": "Não foi possível enviar o documento",
-    "contextPinsLabel": "No contexto da Ava",
+    "contextPinsLabel": "No contexto da Ananeri",
     "contextPinType": {
       "exam": "Exame",
       "exam_order": "Pedido",
@@ -805,7 +805,7 @@
     "patientSwitchKeep": "Manter no contexto",
     "patientSwitchRemove": "Remover pins antigos",
     "inactivityHint": "Passou um tempo desde a última mensagem — os registros pinados ainda estão no contexto. Remova os chips se a conversa mudou de assunto.",
-    "accelerator": "Pergunte à Ava",
+    "accelerator": "Pergunte à Ananeri",
     "acceleratorExam": "O que significa este exame no contexto do histórico de saúde?",
     "acceleratorOrder": "O que este pedido de exame indica e como interpretar os resultados?",
     "acceleratorMarker": "O que significa este marcador e como interpretar a evolução?",
@@ -822,11 +822,11 @@
     "openIntegrations": "Ver integrações",
     "platformDocumentsMessage": "Quer ajuda para usar um documento nesta aba na conversa com o pediatra?",
     "platformExportMessage": "Antes de imprimir ou compartilhar, quer que eu destaque o que mais importa no histórico?",
-    "liteModeBanner": "Ava em modo simplificado — respostas sem revisão automática. Confirme informações importantes com o pediatra.",
+    "liteModeBanner": "Ananeri em modo simplificado — respostas sem revisão automática. Confirme informações importantes com o pediatra.",
     "thinkingStatusAriaLabel": "Status do processamento",
     "reportPrint": {
-      "generatedAt": "Relatório gerado pelo AiyraCare · {{date}}",
-      "footer": "Ava é apoio à comunicação familiar — não substitui avaliação médica. Emergência: SAMU 192.",
+      "generatedAt": "Relatório gerado pelo Ananeri · {{date}}",
+      "footer": "Ananeri é apoio à comunicação familiar — não substitui avaliação médica. Emergência: SAMU 192.",
       "printPdf": "Imprimir / Salvar PDF",
       "empty": "Nada para exibir ainda."
     },
@@ -880,7 +880,7 @@
   },
   "landing": {
     "seo": {
-      "title": "AiyraCare — saúde da família em um só lugar",
+      "title": "Ananeri — saúde da família em um só lugar",
       "description": "Organize exames, consultas e histórico familiar com integrações e apoio de IA. Cadastro gratuito para começar."
     },
     "footerNavLabel": "Links institucionais",
@@ -895,7 +895,7 @@
     "ctaLogin": "Entrar",
     "ctaSignup": "Criar conta grátis",
     "heroTitle": "Saúde da família em um só lugar",
-    "heroSubtitle": "Histórico atualizado, linha do tempo que acompanha a vida da família e apoio imediato nas consultas. Centraliza exames, consultas, lembretes e agenda — conectada ao Google Calendar e Outlook. Ava, nossa agente de inteligência artificial, ajuda a organizar tudo mais rápido.",
+    "heroSubtitle": "Histórico atualizado, linha do tempo que acompanha a vida da família e apoio imediato nas consultas. Centraliza exames, consultas, lembretes e agenda — conectada ao Google Calendar e Outlook. Ananeri, nossa agente de inteligência artificial, ajuda a organizar tudo mais rápido.",
     "heroNote": "Funcionalidades em uso por famílias reais. Textos e preços ainda em revisão.",
     "pains": {
       "title": "Você não está sozinho nessa",
@@ -932,7 +932,7 @@
         "body": "Export clínico com vacinas, exames recentes, medicações e linha do tempo — dados reais do prontuário para você chegar preparado ao profissional de saúde."
       },
       "ava": {
-        "title": "Ava — sua companheira de bolso na consulta",
+        "title": "Ananeri — sua companheira de bolso na consulta",
         "body": "Nossa agente de inteligência artificial apoia as famílias nas principais dúvidas do cotidiano, organiza o contexto com base nas informações reais do prontuário e ajuda a preparar a conversa com mais rapidez."
       },
       "timeline": {
@@ -942,7 +942,7 @@
     },
     "gallery": {
       "title": "Por dentro da plataforma",
-      "subtitle": "Telas reais do AiyraCare — histórico, agenda, exames e conversa com a Ava.",
+      "subtitle": "Telas reais do Ananeri — histórico, agenda, exames e conversa com a Ananeri.",
       "items": [
         {
           "key": "dashboard",
@@ -956,7 +956,7 @@
         },
         {
           "key": "avaChat",
-          "title": "Conversa com a Ava",
+          "title": "Conversa com a Ananeri",
           "altKey": "landing.screenshots.avaChat"
         }
       ]
@@ -967,9 +967,9 @@
       "timeline": "Linha do tempo clínica",
       "agenda": "Agenda e calendário",
       "exams": "Exames e marcadores",
-      "avaChat": "Ava — conversa com contexto do histórico"
+      "avaChat": "Ananeri — conversa com contexto do histórico"
     },
-    "avaDisclaimer": "Ava orienta com base no seu prontuário e nas dúvidas do dia a dia. Ela não realiza exames, não emite diagnósticos e não substitui avaliação médica ou emergência (SAMU 192).",
+    "avaDisclaimer": "Ananeri orienta com base no seu prontuário e nas dúvidas do dia a dia. Ela não realiza exames, não emite diagnósticos e não substitui avaliação médica ou emergência (SAMU 192).",
     "useCases": {
       "title": "Como famílias usam hoje",
       "stepLabel": "Passo {{n}}",
@@ -980,7 +980,7 @@
         },
         {
           "title": "Chegue preparado",
-          "body": "Revise o que mudou, exporte o resumo e use a Ava para listar dúvidas antes da consulta."
+          "body": "Revise o que mudou, exporte o resumo e use a Ananeri para listar dúvidas antes da consulta."
         },
         {
           "title": "Cresça com a família",
@@ -1001,7 +1001,7 @@
           "body": "Resumo clínico determinístico, PDF e link temporário para compartilhar com médicos e outros profissionais."
         },
         {
-          "title": "Ava — agente de IA",
+          "title": "Ananeri — agente de IA",
           "body": "Companheira de bolso na consulta: tira dúvidas, organiza contexto e acelera o que você precisa revisar antes da visita."
         },
         {
@@ -1023,7 +1023,7 @@
       "items": [
         "Agentes clínicos com base em evidências (após pareceres regulatórios)",
         "Medidas e marcos expandidos",
-        "Guardrails da Ava — foco em saúde e segurança",
+        "Guardrails da Ananeri — foco em saúde e segurança",
         "Preços dinâmicos na página e go-live público"
       ]
     },
@@ -1054,7 +1054,7 @@
       "title": "Organize o cuidado da família hoje",
       "body": "Cadastro rápido. Você controla integrações e pode excluir a conta quando quiser."
     },
-    "footerNote": "AiyraCare — tecnologia para famílias que querem histórico de saúde organizado.",
+    "footerNote": "Ananeri — tecnologia para famílias que querem histórico de saúde organizado.",
     "photoCredit": "Fotos ilustrativas via Unsplash. Capturas de tela do produto real; dados de demonstração quando aplicável.",
     "loginDiscover": "Conheça a plataforma",
     "media": {
@@ -1063,7 +1063,7 @@
       "organizedCare": "Organização de informações de saúde"
     },
     "mocks": {
-      "dashboardTitle": "AiyraCare — sua família",
+      "dashboardTitle": "Ananeri — sua família",
       "syncOk": "Atualizado",
       "patients": [
         {
@@ -1075,7 +1075,7 @@
           "age": "8 anos"
         }
       ],
-      "avaTitle": "Ava",
+      "avaTitle": "Ananeri",
       "avaLines": [
         "O que devo levar na consulta de Ana na semana que vem?",
         "Vacinas em dia, hemograma de março e medicação atual. Quer que eu monte um resumo para exportar?",
@@ -1674,7 +1674,7 @@
     "reportSubmit": "Enviar pedido de ajuda",
     "reportSuccess": "Chamado registrado (#{{id}}). Obrigado por confiar em nós.",
     "reportError": "Não conseguimos enviar agora. Tente de novo em instantes.",
-    "reportPrivacyHint": "Por padrão não enviamos exames nem conversas da Ava — só o que você autorizar para investigar.",
+    "reportPrivacyHint": "Por padrão não enviamos exames nem conversas da Ananeri — só o que você autorizar para investigar.",
     "resolutionPromptQuestion": "Isso resolveu sua dúvida ou problema?",
     "resolutionPromptYes": "Sim, resolveu",
     "resolutionPromptNo": "Ainda não",
@@ -1714,7 +1714,7 @@
   },
   "compliance": {
     "acceptTitle": "Aceite dos termos",
-    "acceptSubtitle": "Para usar o AiyraCare, aceite a versão vigente dos documentos abaixo.",
+    "acceptSubtitle": "Para usar o Ananeri, aceite a versão vigente dos documentos abaixo.",
     "acceptCheckbox": "Li e aceito os documentos listados na versão publicada.",
     "signupCheckbox": "Li e aceito os",
     "oauthHint": "Login com Google ou Microsoft: após o primeiro acesso você confirmará os termos na próxima página.",
@@ -1769,7 +1769,7 @@
   },
   "clinicalExport": {
     "title": "Resumo para consulta médica",
-    "subtitle": "AiyraCare — histórico consolidado do paciente",
+    "subtitle": "Ananeri — histórico consolidado do paciente",
     "printButton": "Imprimir / salvar PDF",
     "closeButton": "Fechar",
     "previewTitle": "Pré-visualização do resumo",
@@ -1808,7 +1808,7 @@
     "consultVisitEmailSend": "Enviar e-mail",
     "consultVisitEmailSent": "E-mail enviado ao médico",
     "consultVisitEmailQueued": "Link preparado — e-mail será enviado em breve",
-    "consultVisitReferralHint": "O link inclui seu código de indicação AiyraCare — ajuda a reconhecer quem compartilhou.",
+    "consultVisitReferralHint": "O link inclui seu código de indicação Ananeri — ajuda a reconhecer quem compartilhou.",
     "consultVisitReferralCode": "Seu código:",
     "exportFullTitle": "Prontuário completo para consulta",
     "sectionAllergies": "Alergias",
@@ -1824,9 +1824,9 @@
     "clinicianPortalDisclaimer": "Documento gerado automaticamente a partir dos registros do cuidador. Não substitui prontuário oficial. Revise com o paciente ou responsável.",
     "clinicianPortalModeSummary": "Resumo para consulta",
     "clinicianPortalModeFull": "Prontuário completo",
-    "clinicianPortalCtaTitle": "AiyraCare para consultórios",
+    "clinicianPortalCtaTitle": "Ananeri para consultórios",
     "clinicianPortalCtaBody": "Receba resumos estruturados dos seus pacientes — sem instalar app no consultório.",
-    "clinicianPortalCtaButton": "Conhecer o AiyraCare",
+    "clinicianPortalCtaButton": "Conhecer o Ananeri",
     "clinicianFeedbackPrompt": "Este resumo foi útil para a consulta?",
     "clinicianFeedbackYes": "Sim, ajudou",
     "clinicianFeedbackNo": "Pouco útil",

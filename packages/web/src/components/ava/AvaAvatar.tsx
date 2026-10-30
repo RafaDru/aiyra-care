@@ -182,7 +182,7 @@ export function AvaAvatar({
                   <img
                     className="ava-avatar__photo"
                     src={layer.src}
-                    alt={isTop ? 'Ava' : ''}
+                    alt={isTop ? 'Ananeri' : ''}
                     width={size}
                     height={size}
                   />

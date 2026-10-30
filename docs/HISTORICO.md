@@ -1,5 +1,14 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-10-30] - Rebrand Phase 1 slice 1–2 — Ananeri (UI)
+
+### Decisão
+- Marca e agente user-facing passam a **Ananeri** (Phase 0 locked); pedido **INPI** adiado até gate de faturamento.
+- Sem rename de npm scope/repo; `LEGAL_*` placeholders mantidos.
+
+### Realizado (eng)
+- `docs/product/REBRAND_STATUS.md`; landing, footer, `index.html`, i18n tier-1 web (`AiyraCare` / `Ava` → Ananeri).
+
 ## [2026-10-30] - Merge wave beta + Anel B (#189, #190)
 
 ### Realizado
