@@ -46,7 +46,7 @@ export function MobileOAuthReturnPage() {
     <main style={{ padding: 24, fontFamily: 'system-ui, sans-serif' }}>
       {phase === 'opening' ? (
         <>
-          <p style={{ fontSize: 18, fontWeight: 600 }}>Abrindo o AiyraCare…</p>
+          <p style={{ fontSize: 18, fontWeight: 600 }}>Abrindo o Ananeri…</p>
           <p style={{ color: '#666', fontSize: 14 }}>Aguarde — você deve voltar ao app automaticamente.</p>
         </>
       ) : (

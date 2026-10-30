@@ -1,8 +1,8 @@
 # Beta prep — Sessão B (sem lock de marca)
 
-> **2026-10-29** — Trilha MVP negócio/dev. Rebrand/domínio final ficam na **Sessão A** (Project store: `docs/session-split-rebrand-vs-produto.md`).
+> **2026-10-30** — Trilha MVP negócio/dev. Marca UI **Ananeri** locked (Phase 0); **INPI/domínio produção** ainda no gate financeiro — ver [`REBRAND_STATUS.md`](./REBRAND_STATUS.md) e Project store `ananeri-phase0-lock.md`.
 
-Objetivo: fechar **pilares 1–2 e 5 (eng)** do [`MVP_GO_LIVE_CHECKLIST.md`](./MVP_GO_LIVE_CHECKLIST.md) **sem** domínio `.com.br`, CNPJ definitivo ou wordmark final.
+Objetivo: fechar **pilares 1–2 e 5 (eng)** do [`MVP_GO_LIVE_CHECKLIST.md`](./MVP_GO_LIVE_CHECKLIST.md) **sem** domínio `.com.br` definitivo, CNPJ definitivo ou pedido INPI pago.
 
 ## O que pode avançar agora
 
@@ -84,9 +84,10 @@ VITE_PUBLIC_SITE_URL=https://…preview…
 VITE_LEGAL_ENTITY_NAME=AiyraCare (beta)
 ```
 
-## Evitar até Sessão A (rebrand)
+## Rebrand (Phase 1 em progresso)
 
-- Rename massivo user-facing, `TRANSACTIONAL_EMAIL_FROM` no domínio final, OAuth callbacks no domínio `.com.br`.
+- **UI pública:** **Ananeri** (landing, layout, agente) — slice 1–2 no repo; status em [`REBRAND_STATUS.md`](./REBRAND_STATUS.md).
+- **Ainda evitar até gate INPI/go-live:** `TRANSACTIONAL_EMAIL_FROM` no domínio final, OAuth callbacks no domínio `.com.br`, merchant Stripe com razão definitiva.
 
 ## Referências
 
