@@ -9,6 +9,8 @@ description: Run real E2E QA on My Machines (NotebookRafael)—git pull, migrati
 
 Cloud Agent **pre-flight** `npm run qa:run` does **not** satisfy tier ≥1 Definition of Done ([`docs/CURSOR_WORK_MODEL.md`](../../docs/CURSOR_WORK_MODEL.md), [`FOCO_ATUAL.md`](../../docs/FOCO_ATUAL.md)).
 
+**Project coordinator (Cloud):** spawning `Task` with `selfHostedWorkerId` is **ignored** in current builds — child runs on Cloud VM (`usePrivateWorker: false`). Use [`docs/ops/NOTEBOOK_QA_DISPATCH.md`](../../docs/ops/NOTEBOOK_QA_DISPATCH.md) (REST `env: { type: machine, name: NotebookRafael }`, future `CreateAgent` + `worker_id`, or manual My Machines chat).
+
 Use **`computerUse`** / local terminal only on My Machines—never claim notebook PASS from Cloud VM without PG + Supabase local stack.
 
 ## Definition of Done (E2E real)

@@ -42,6 +42,8 @@ npm run qa:run-all -- --lane regression
 
 Cloud Agent: build + `test:e2e:ci` quando PG/Supabase disponíveis; **DoD** permanece notebook com `QA_TEST_*`.
 
+**Dispatch do coordenador Cloud:** `Task`/`selfHostedWorkerId` **não** roteia para My Machines — ver [`../ops/NOTEBOOK_QA_DISPATCH.md`](../ops/NOTEBOOK_QA_DISPATCH.md) (REST `env.machine`, CreateAgent `worker_id`, ou chat My Machines).
+
 ---
 
 ## Estado (pós-merge main)
