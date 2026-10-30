@@ -1,6 +1,6 @@
 # Foco atual — tracking vivo
 
-> **Última atualização:** 2026-10-28  
+> **Última atualização:** 2026-10-30  
 > Complementa `roadmap.json` e `HISTORICO.md`. Duas frentes ativas — **não** abrir terceira lane sem pausar uma (`docs/PARALLEL_WORK.md`).
 
 ---
@@ -28,12 +28,14 @@
 | [#178](https://github.com/RafaDru/aiyra-care/pull/178) | Gate scrape **Fase 2** (prod tier) |
 | [#179](https://github.com/RafaDru/aiyra-care/pull/179) | `DELETE /auth/account` — FK `care_circles` (LGPD) |
 | [#180](https://github.com/RafaDru/aiyra-care/pull/180) | **Anel B slice 1** — CTAs pós-onboarding (integrações) |
+| [#189](https://github.com/RafaDru/aiyra-care/pull/189) | **Anel B slice 3** — CTA integrações no card Início (dependente) |
+| [#190](https://github.com/RafaDru/aiyra-care/pull/190) | Ritual **beta Sessão B** + E2E footer legal + `beta:bootstrap-legal` |
 
 ### Próximo trabalho produto
 
-1. **Checklist go-live** — pilares 1–5 em [`MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md); ritual **beta sem marca** em [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](./product/BETA_PREP_WITHOUT_BRAND_LOCK.md).
-2. **Anel B** — progressive profiling (integrações, co-responsável, billing) sem reabrir gate; card [`anel-b-progressive-profiling.md`](./features/anel-b-progressive-profiling.md).
-3. **Notebook (J1)** — após `pull` ≥ `2111042`, migration **089**, `scripts/up.ps1`; suites J1 + `patient-wallet` com E2E real (`QA_TEST_*` ou CI `e2e-regression`).
+1. **Checklist go-live** — pilares 1–5 em [`MVP_GO_LIVE_CHECKLIST.md`](./product/MVP_GO_LIVE_CHECKLIST.md); ritual **beta sem marca** em [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](./product/BETA_PREP_WITHOUT_BRAND_LOCK.md). **Preview:** `promotion:gates` notebook + GCP runbook.
+2. **Anel B** — co-responsável / billing CTAs (slice 4+); card [`anel-b-progressive-profiling.md`](./features/anel-b-progressive-profiling.md).
+3. **Notebook (J1)** — suites J1 + `patient-wallet` com E2E real; marcar checklist 1.10/2.5 notebook PASS.
 
 **Definition of Done (tier ≥1):** suite QA da feature card com E2E real — CI verde **ou** notebook com PASS reportado. Cloud `qa:run` pré-voo **não** substitui DoD.
 

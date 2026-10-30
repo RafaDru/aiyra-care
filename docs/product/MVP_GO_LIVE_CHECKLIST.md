@@ -22,9 +22,9 @@ Lista de pilares para abrir **beta público** (domínio + famílias externas), s
 | 1.5 | Feature card [`landing-marketing`](../features/landing-marketing.md) revisada para tier de conteúdo | [ ] |
 | 1.6 | `LEGAL_ENTITY_NAME`, `LEGAL_CNPJ`, `LEGAL_PRIVACY_EMAIL` na API (footer e documentos legais) | [ ] prep — ver [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](./BETA_PREP_WITHOUT_BRAND_LOCK.md) |
 | 1.7 | Opcional build web: `VITE_LEGAL_ENTITY_NAME`, `VITE_LEGAL_CNPJ`, `VITE_PUBLIC_SITE_URL` (SEO canonical/OG) | [ ] preview URL ok; prod domínio pausado |
-| 1.8 | Termos, privacidade e cookies publicados (`seed-legal-documents`) | [ ] eng seed — `npm run beta:bootstrap-legal` no ambiente |
+| 1.8 | Termos, privacidade e cookies publicados (`seed-legal-documents`) | [x] eng CI/preview seed — notebook: `npm run beta:bootstrap-legal` |
 | 1.9 | Preços na landing sem valores vinculantes até billing público | [ ] |
-| 1.10 | Suite QA [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) | [ ] notebook/CI — incl. footer legal (E2E) |
+| 1.10 | Suite QA [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) | [x] CI `e2e-regression` (main pós #190); [ ] notebook PASS reportado |
 
 **Referência técnica:** [`auth-entry-onboarding`](../features/auth-entry-onboarding.md) (funil landing → login).
 
