@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ananeri">
+  <defs>
+    <linearGradient id="fav-purple-lift" x1="8%" y1="92%" x2="92%" y2="8%">
+      <stop offset="0%" stop-color="#7E22CE"/>
+      <stop offset="100%" stop-color="#9333EA"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path
+      fill="url(#fav-purple-lift)"
+      opacity="0.96"
+      d="M 258.50 232.02
+         A 112 112 0 1 0 258.50 363.98
+         C 228 342 208 302 224 268
+         C 236 248 246 238 258.50 232.02 Z"
+    />
+    <path
+      fill="#EC4899"
+      opacity="0.96"
+      d="M 258.50 232.02
+         A 108 108 0 1 1 258.50 363.98
+         C 286 342 306 302 290 268
+         C 278 248 268 238 258.50 232.02 Z"
+    />
+    <path
+      fill="#9333EA"
+      opacity="0.94"
+      d="M 258.50 232.02
+         C 272 246 284 268 258.50 298.00
+         C 232 268 244 246 258.50 232.02 Z"
+    />
+    <path
+      fill="#FACC15"
+      opacity="0.96"
+      d="M 215.27 136.35
+         A 46 46 0 1 1 296.73 136.35
+         C 282 182 272 208 258.50 232.02
+         C 244 208 234 182 215.27 136.35 Z"
+    />
+    <path
+      fill="#9333EA"
+      opacity="0.90"
+      d="M 238 192
+         C 248 204 264 212 258.50 232.02
+         C 252 212 268 204 278 192
+         C 268 200 248 200 238 192 Z"
+    />
+  </g>
+</svg>

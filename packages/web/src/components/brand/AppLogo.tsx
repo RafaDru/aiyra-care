@@ -3,27 +3,15 @@ import { useTheme } from '../../theme/ThemeProvider.js'
 
 export type AppLogoVariant = 'horizontal' | 'square' | 'icon' | 'sidebar' | 'wordmark'
 
+const LOCKUP = '/brand/ananeri-lockup.svg'
+const SYMBOL = '/brand/ananeri-symbol.svg'
+
 const ASSETS: Record<AppLogoVariant, { light: string; dark: string }> = {
-  horizontal: {
-    light: '/brand/logo-horizontal.svg',
-    dark: '/brand/logo-horizontal-dark.svg',
-  },
-  square: {
-    light: '/brand/logo-square.svg',
-    dark: '/brand/logo-square-dark.svg',
-  },
-  icon: {
-    light: '/brand/logo-icon.svg',
-    dark: '/brand/logo-icon-dark.svg',
-  },
-  sidebar: {
-    light: '/brand/logo-sidebar.svg',
-    dark: '/brand/logo-sidebar-dark.svg',
-  },
-  wordmark: {
-    light: '/brand/logo-wordmark.svg',
-    dark: '/brand/logo-wordmark-dark.svg',
-  },
+  horizontal: { light: LOCKUP, dark: LOCKUP },
+  square: { light: SYMBOL, dark: SYMBOL },
+  icon: { light: SYMBOL, dark: SYMBOL },
+  sidebar: { light: LOCKUP, dark: LOCKUP },
+  wordmark: { light: LOCKUP, dark: LOCKUP },
 }
 
 interface Props {
@@ -42,7 +30,7 @@ const DEFAULT_HEIGHT: Record<AppLogoVariant, number> = {
   wordmark: 36,
 }
 
-export function AppLogo({ variant, height, className, style, alt = 'Aiyra Care' }: Props) {
+export function AppLogo({ variant, height, className, style, alt = 'Ananeri' }: Props) {
   const { darkMode } = useTheme()
   const src = ASSETS[variant][darkMode ? 'dark' : 'light']
 

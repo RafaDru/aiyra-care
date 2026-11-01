@@ -34,12 +34,13 @@ export function printAvaReport(title: string, messages: AvaReportMessage[]): voi
   const win = window.open('', '_blank', 'width=820,height=920')
   if (!win) return
   const youLabel = i18n.t('ava.you')
+  const agentName = i18n.t('ava.name')
   const revisedLabel = i18n.t('ava.revised')
   const body = messages
     .map((m) =>
       m.role === 'user'
         ? `<div class="msg msg-user"><div class="who">${escapeHtml(youLabel)}</div><div class="bubble bubble-user">${escapeHtml(m.text)}</div></div>`
-        : `<div class="msg"><div class="who">Ava${m.revised ? ` · ${escapeHtml(revisedLabel)}` : ''}</div><div class="bubble bubble-ava">${escapeHtml(m.text)}</div></div>`,
+        : `<div class="msg"><div class="who">${escapeHtml(agentName)}${m.revised ? ` · ${escapeHtml(revisedLabel)}` : ''}</div><div class="bubble bubble-ava">${escapeHtml(m.text)}</div></div>`,
     )
     .join('\n')
   win.document.write(`<!doctype html>

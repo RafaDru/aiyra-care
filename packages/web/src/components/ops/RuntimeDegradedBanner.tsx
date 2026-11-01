@@ -22,7 +22,7 @@ export function RuntimeDegradedBanner() {
     )
   }
   if (runtime.avaLite) {
-    messages.push('Ava está em modo simplificado — respostas sem revisão automática.')
+    messages.push('A Neri está em modo simplificado — respostas sem revisão automática.')
   }
   if (runtime.syncDegradedPortals.length) {
     messages.push(

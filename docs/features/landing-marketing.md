@@ -27,6 +27,7 @@ Página pública `/home` com hero, dores da família, showcases de produto, bloc
 ## QA
 
 - Suite [`auth-entry-flow`](../testing/suites/auth-entry-flow.md) — landing → login/signup mode + dashboard «Sua família»; footer → termos/privacidade (documentos seed)
+- Rebrand Phase 1: copy **Ananeri** / **Neri**, logo G2g — [`REBRAND_STATUS.md`](../product/REBRAND_STATUS.md)
 - Ritual beta Sessão B: [`BETA_PREP_WITHOUT_BRAND_LOCK.md`](../product/BETA_PREP_WITHOUT_BRAND_LOCK.md)
 - Smoke: `regression-smoke` — `/home` render
 

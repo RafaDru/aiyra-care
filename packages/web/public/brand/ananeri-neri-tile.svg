@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="g2g-neri-title g2g-neri-desc">
+  <title id="g2g-neri-title">Neri tile metaball family (Vivid v2)</title>
+  <desc id="g2g-neri-desc">Warm vivid fused orbs for agent dock; pink and gold forward</desc>
+  <rect width="64" height="64" rx="16" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1"/>
+  <g transform="translate(32 30) scale(0.105) translate(-256 -268)">
+    <path
+      fill="#7E22CE"
+      opacity="0.94"
+      d="M 258.50 232.02 A 112 112 0 1 0 258.50 363.98 C 228 342 208 302 224 268 C 236 248 246 238 258.50 232.02 Z"
+    />
+    <path
+      fill="#EC4899"
+      opacity="0.96"
+      d="M 258.50 232.02 A 108 108 0 1 1 258.50 363.98 C 286 342 306 302 290 268 C 278 248 268 238 258.50 232.02 Z"
+    />
+    <path fill="#9333EA" opacity="0.92" d="M 258.50 232.02 C 272 246 284 268 258.50 298.00 C 232 268 244 246 258.50 232.02 Z"/>
+    <path
+      fill="#FACC15"
+      opacity="0.96"
+      d="M 215.27 136.35 A 46 46 0 1 1 296.73 136.35 C 282 182 272 208 258.50 232.02 C 244 208 234 182 215.27 136.35 Z"
+    />
+  </g>
+  <text
+    x="32"
+    y="58"
+    text-anchor="middle"
+    font-family="'DM Sans', system-ui, sans-serif"
+    font-size="11"
+    font-weight="600"
+    fill="#1E293B"
+  >Neri</text>
+</svg>
