@@ -1,10 +1,10 @@
 /** Shared AiyraCare design tokens — consumed by web, mobile, and future clients. */
 export const AIYRACARE_TOKENS = {
-  colorPrimary: '#9333EA',
-  colorPrimaryHover: '#A855F7',
-  colorPrimaryActive: '#7E22CE',
-  colorInfo: '#FF3DA8',
-  colorLink: '#FF3DA8',
+  colorPrimary: '#7E22CE',
+  colorPrimaryHover: '#9333EA',
+  colorPrimaryActive: '#6B21A8',
+  colorInfo: '#EC4899',
+  colorLink: '#EC4899',
   colorWarning: '#FFE566',
   colorSuccess: '#10B981',
   colorError: '#EF4444',
@@ -18,14 +18,18 @@ export const AIYRACARE_TOKENS = {
   colorTextBase: '#1E293B',
   colorTextSecondary: '#64748B',
   colorBorder: '#E2E8F0',
+  /** Vivid v2 — logo / spark UI (not yet in all clients) */
+  brandGold: '#FACC15',
+  colorPrimaryBg: '#EDE9FE',
+  colorPrimaryBorder: '#C4B5FD',
 } as const
 
 export const AIYRACARE_DARK = {
-  colorPrimary: '#A855F7',
-  colorPrimaryHover: '#C084FC',
-  colorPrimaryActive: '#9333EA',
-  colorInfo: '#FF5BC4',
-  colorLink: '#FF5BC4',
+  colorPrimary: '#9333EA',
+  colorPrimaryHover: '#A855F7',
+  colorPrimaryActive: '#7E22CE',
+  colorInfo: '#F472B6',
+  colorLink: '#EC4899',
   colorBgLayout: '#0f0f0f',
   colorBgContainer: '#1a1a1a',
   colorTextBase: '#f1f5f9',

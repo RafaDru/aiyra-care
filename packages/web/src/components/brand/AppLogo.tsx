@@ -3,15 +3,15 @@ import { useTheme } from '../../theme/ThemeProvider.js'
 
 export type AppLogoVariant = 'horizontal' | 'square' | 'icon' | 'sidebar' | 'wordmark'
 
-const WORDMARK = '/brand/ananeri-wordmark.svg'
-const MARK = '/brand/ananeri-mark.svg'
+const LOCKUP = '/brand/ananeri-lockup.svg'
+const SYMBOL = '/brand/ananeri-symbol.svg'
 
 const ASSETS: Record<AppLogoVariant, { light: string; dark: string }> = {
-  horizontal: { light: WORDMARK, dark: WORDMARK },
-  square: { light: MARK, dark: MARK },
-  icon: { light: MARK, dark: MARK },
-  sidebar: { light: WORDMARK, dark: WORDMARK },
-  wordmark: { light: WORDMARK, dark: WORDMARK },
+  horizontal: { light: LOCKUP, dark: LOCKUP },
+  square: { light: SYMBOL, dark: SYMBOL },
+  icon: { light: SYMBOL, dark: SYMBOL },
+  sidebar: { light: LOCKUP, dark: LOCKUP },
+  wordmark: { light: LOCKUP, dark: LOCKUP },
 }
 
 interface Props {

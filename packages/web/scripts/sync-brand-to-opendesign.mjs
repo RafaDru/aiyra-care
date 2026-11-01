@@ -12,13 +12,13 @@ const odRoot = join(
 )
 
 const PALETTE_LIGHT = {
-  primary: '#9333EA',
-  primaryHover: '#A855F7',
-  primaryActive: '#7E22CE',
-  primaryBg: '#F3E8FF',
-  primaryBorder: '#E9D5FF',
-  accent: '#FF3DA8',
-  accentHover: '#FF5BC4',
+  primary: '#7E22CE',
+  primaryHover: '#9333EA',
+  primaryActive: '#6B21A8',
+  primaryBg: '#EDE9FE',
+  primaryBorder: '#C4B5FD',
+  accent: '#EC4899',
+  accentHover: '#F472B6',
   accentBg: '#FCE7F3',
   insight: '#FFE566',
   bg: '#F8FAFC',
@@ -29,9 +29,9 @@ const PALETTE_LIGHT = {
 }
 
 const PALETTE_DARK = {
-  primary: '#A855F7',
-  primaryHover: '#C084FC',
-  primaryActive: '#9333EA',
+  primary: '#9333EA',
+  primaryHover: '#A855F7',
+  primaryActive: '#7E22CE',
   primaryBg: '#2E1065',
   primaryBorder: '#581C87',
   accent: '#FF5BC4',

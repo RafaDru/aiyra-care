@@ -66,7 +66,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--sidebar-shadow', palette.sidebarShadow)
     root.style.setProperty(
       '--sidebar-menu-selected',
-      darkMode ? 'rgba(168, 85, 247, 0.2)' : 'rgba(147, 51, 234, 0.12)',
+      darkMode ? 'rgba(147, 51, 234, 0.2)' : 'rgba(126, 34, 206, 0.12)',
     )
     root.style.setProperty('--status-attention-bg', a11y.colorWarningBg ?? '#FFFBEB')
     root.style.setProperty('--status-attention-fg', a11y.colorWarning ?? '#B45309')

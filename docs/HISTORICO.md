@@ -1,13 +1,24 @@
 # Histórico do Projeto AiyraCare
 
+## [2026-11-01] - Rebrand Phase 1 G3 — Vivid v2 + logo G2g
+
+### Decisão (Rafael)
+- Paleta **Vivid v2 trilha B** locked; logo placeholder **G2g metaball C** (wordmark tipográfico ainda provisório).
+- Plataforma **Ananeri**; agente de chat **Neri** (não rename de pacotes `@aiyra-care/*`).
+- INPI permanece adiado.
+
+### Realizado (eng)
+- Tokens `@aiyra-care/design-tokens` + `packages/web/src/theme/*` alinhados à spec v2.
+- Assets G2g em `packages/web/public/brand/`; `AppLogo` + favicon; slices 1–2 (#193).
+
 ## [2026-10-30] - Rebrand Phase 1 slice 1–2 — Ananeri (UI)
 
 ### Decisão
-- Marca e agente user-facing passam a **Ananeri** (Phase 0 locked); pedido **INPI** adiado até gate de faturamento.
+- Marca plataforma **Ananeri** e agente **Neri** user-facing (Phase 0 locked); pedido **INPI** adiado até gate de faturamento.
 - Sem rename de npm scope/repo; `LEGAL_*` placeholders mantidos.
 
 ### Realizado (eng)
-- `docs/product/REBRAND_STATUS.md`; landing, footer, `index.html`, i18n tier-1 web (`AiyraCare` / `Ava` → Ananeri).
+- `docs/product/REBRAND_STATUS.md`; landing, footer, `index.html`, i18n tier-1 web (`AiyraCare` / `Ava` → Ananeri / Neri).
 
 ## [2026-10-30] - Merge wave beta + Anel B (#189, #190)
 
