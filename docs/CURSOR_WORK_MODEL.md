@@ -1,4 +1,4 @@
-# Modelo de trabalho Cursor — resumo (AiyraCare)
+# Modelo de trabalho Cursor — resumo (Ananeri)
 
 > **Versão resumida** · spec completa no **Project Context** (aba Context do Project) ou store: `cursor-work-model-improvements-spec.md`  
 > Charter inalterado: [`OPS_SOLO_OPERATOR_CHARTER.md`](./OPS_SOLO_OPERATOR_CHARTER.md)

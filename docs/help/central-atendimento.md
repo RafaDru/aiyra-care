@@ -9,7 +9,7 @@ O que fazer se meu CPF já está cadastrado ou não consigo entrar na conta?
 
 ## Resposta
 
-O AiyraCare mantém uma página pública **Central de atendimento** (`/central-atendimento`) com orientações em tom de família/cuidador — sem e-mail ou telefone públicos nesta fase.
+O Ananeri mantém uma página pública **Central de atendimento** (`/central-atendimento`) com orientações em tom de família/cuidador — sem e-mail ou telefone públicos nesta fase.
 
 1. Tente **entrar** com o e-mail que você usa no dia a dia ou recupere o acesso pelo provedor de login.
 2. Se ainda precisar de ajuda, **entre na conta** e use **Reportar problema** no menu. Escolha a categoria **Conta, login e CPF** para dúvidas de cadastro ou acesso.

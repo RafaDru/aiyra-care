@@ -1,4 +1,4 @@
-# Framework de revisão paralela — AiyraCare
+# Framework de revisão paralela — Ananeri
 
 > **Última atualização:** 2026-08-24  
 > Complementa [`LEGAL_COMPLIANCE.md`](./LEGAL_COMPLIANCE.md) e skills em `.cursor/skills/aiyracare-review-*`.

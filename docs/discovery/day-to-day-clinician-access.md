@@ -9,7 +9,7 @@
 
 Tornar **registro do cotidiano** (sintoma, medida, medicação, evento) **tranquilo, simples e rápido**, e facilitar **entregar contexto ao médico** antes/durante a consulta — com extrato **completo o suficiente** para impressionar o profissional e abrir caminho para conversão B2B.
 
-**Hipótese de negócio:** quanto mais útil e “pronto para consulta” o material for para o médico, maior a chance de o médico adotar (ou recomendar) o AiyraCare — reforçada por um **programa de indicação bilateral** (paciente ↔ médico). Ver debate em [`referral-growth-loop.md`](./referral-growth-loop.md).
+**Hipótese de negócio:** quanto mais útil e “pronto para consulta” o material for para o médico, maior a chance de o médico adotar (ou recomendar) o Ananeri — reforçada por um **programa de indicação bilateral** (paciente ↔ médico). Ver debate em [`referral-growth-loop.md`](./referral-growth-loop.md).
 
 ---
 
@@ -19,7 +19,7 @@ Tornar **registro do cotidiano** (sintoma, medida, medicação, evento) **tranqu
 |---------|---------|-----|
 | **Cuidador familiar** | Dia a dia + véspera de consulta | Esquece de registrar; não sabe o que anotar; medo de perder informação |
 | **Médico** | 5–10 min antes/durante consulta | PDF desorganizado, WhatsApp sem estrutura, falta sequência consulta→exame |
-| **AiyraCare (negócio)** | Aquisição B2B2C | Médico precisa *ver valor em 30s* sem criar conta obrigatória no primeiro contato |
+| **Ananeri (negócio)** | Aquisição B2B2C | Médico precisa *ver valor em 30s* sem criar conta obrigatória no primeiro contato |
 
 ---
 
@@ -115,7 +115,7 @@ Três abordagens (podem coexistir em fases):
 
 **Hipótese:** médico impressionado = **Consulta** bem formatado + sequência visual (não necessariamente `full` no primeiro contato).
 
-**Requisito:** resumo **determinístico** (já é) + marca AiyraCare + «gerado pelo cuidador em DD/MM».
+**Requisito:** resumo **determinístico** (já é) + marca Ananeri + «gerado pelo cuidador em DD/MM».
 
 ---
 

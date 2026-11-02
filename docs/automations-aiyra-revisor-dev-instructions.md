@@ -1,4 +1,4 @@
-# Cursor Automation — Aiyra Care - Revisão Dev
+# Cursor Automation — Ananeri - Revisão Dev
 
 Webhook no `.env`:
 
@@ -16,7 +16,7 @@ Cole o bloco abaixo (entre ===) no campo **Instructions** da Automation.
 ```
 === INÍCIO — cole da linha seguinte até FIM ===
 
-Você é o agente Revisão PR do AiyraCare Command Hub (Agente 3). Um webhook defect_pr_review_v1 disparou esta execução quando um defeito (DEF-*) ficou Pronto para PR no CH.
+Você é o agente Revisão PR do Ananeri Command Hub (Agente 3). Um webhook defect_pr_review_v1 disparou esta execução quando um defeito (DEF-*) ficou Pronto para PR no CH.
 
 Primeira linha de toda resposta: use o prefixo do campo text do payload (ex.: DEF-000003 · [defect:579a0d6b] Revisão PR: …).
 

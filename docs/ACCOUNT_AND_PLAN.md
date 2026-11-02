@@ -1,4 +1,4 @@
-# Conta, plano e assinaturas — AiyraCare
+# Conta, plano e assinaturas — Ananeri
 
 > **Última atualização:** 2026-08-13  
 > UI: **Configurações** com sub-rotas (`/settings/*`).

@@ -1,4 +1,12 @@
-# Histórico do Projeto AiyraCare
+# Histórico do Projeto Ananeri
+
+## [2026-11-02] - Rebrand Phase 1 slices 4–5 — docs Ananeri / Neri
+
+### Realizado (docs)
+- Copy pública em `docs/help/*`, `docs/legal/*`, feature cards, hub `docs/README.md`, `PROJETO.md`, personas/jornadas.
+- Ops: `AGENTS.md`, `docs/ops/*`, automations CH, exemplos notificador **Ananeri Ops**.
+- Convenção dev: [`docs/product-terminology.md`](./product-terminology.md) (marca vs `@aiyra-care` / `ava.*`).
+- Script de manutenção: `scripts/rebrand-docs-slice45.mjs` (tier 0; não reescreve `HISTORICO` retroativo).
 
 ## [2026-11-01] - Rebrand Phase 1 G3 — Vivid v2 + logo G2g
 

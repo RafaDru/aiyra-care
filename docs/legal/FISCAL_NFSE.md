@@ -14,7 +14,7 @@ Emitir **nota fiscal de serviço (NFS-e)** para cada cobrança recorrente ou pac
 3. **NFS-e** — emitir nota por receita de software/SaaS conforme orientação do contador (municipio BH ou domicílio fiscal).
 4. Conciliar: valor bruto, taxa Stripe, valor líquido na conta PJ.
 
-## Dados no AiyraCare
+## Dados no Ananeri
 
 | Fonte | Onde |
 |-------|------|
@@ -25,7 +25,7 @@ Emitir **nota fiscal de serviço (NFS-e)** para cada cobrança recorrente ou pac
 ## Campos úteis para a nota
 
 - Tomador: e-mail da `app_accounts` + nome do `account_profiles.full_name` se houver
-- Descrição: "Assinatura AiyraCare plano família" ou "Pacote N interpretações manuscrito"
+- Descrição: "Assinatura Ananeri plano família" ou "Pacote N interpretações manuscrito"
 - Valor: `amount_cents` / 100 (BRL)
 - Referência Stripe: `stripe_session_id` ou `stripe_payment_intent_id`
 

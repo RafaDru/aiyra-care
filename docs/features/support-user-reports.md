@@ -45,7 +45,7 @@ Botão global **Reportar problema** permite ao cuidador abrir um chamado interno
 - Último `sync_jobs` failed do paciente em contexto (se `patientId` na rota)
 - Contexto cliente allowlisted: locale, viewport, theme
 
-**Não inclui:** mensagens Ava, OCR, valores de exame, credenciais.
+**Não inclui:** mensagens Neri, OCR, valores de exame, credenciais.
 
 ## Retenção
 

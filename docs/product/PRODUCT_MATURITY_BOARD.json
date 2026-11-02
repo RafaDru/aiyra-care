@@ -1,6 +1,6 @@
 {
   "updatedAt": "2026-10-07T20:00:00Z",
-  "summary": "Visão estratégica da maturidade do AiyraCare por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo. Web: onboarding B2C refresh 2026-10 (wizard + banner pós-cadastro); first-visit-guided-ux (drawer tour) segue como épico separado.",
+  "summary": "Visão estratégica da maturidade do Ananeri por superfície e domínio de produto. Fonte viva no repositório — atualizar quando um épico mudar de estágio (piloto → operacional). Não reflete métricas por ambiente; use Negócio e Operação para sinais ao vivo. Web: onboarding B2C refresh 2026-10 (wizard + banner pós-cadastro); first-visit-guided-ux (drawer tour) segue como épico separado.",
   "surfaces": [
     {
       "id": "web",

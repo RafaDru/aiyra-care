@@ -1,4 +1,4 @@
-# Documentos legais — AiyraCare
+# Documentos legais — Ananeri
 
 Repositório canônico de **termos, políticas e consentimentos** com versionamento explícito.
 

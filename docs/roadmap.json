@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "updatedAt": "2026-10-01",
-  "title": "Roadmap AiyraCare",
-  "intro": "O AiyraCare existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Fase atual (pré-CNPJ):** estruturar ambientes dev/staging/prod, massas e esteiras enquanto a regularização fiscal permite cobrança live; paralelo: discovery B2B (médicos, planos, labs, farmácias). **Go-live B2C:** código pronto no essencial; pendências com badge 🧑‍⚖️ dependem de revisão humana (advogado, contador, consultor, médico).",
+  "title": "Roadmap Ananeri",
+  "intro": "O Ananeri existe para centralizar o histórico dos meninos com o mínimo de trabalho manual para a família. Entregamos sync, sequência clínica, export, agenda, billing de manuscrito e OCR. **Fase atual (pré-CNPJ):** estruturar ambientes dev/staging/prod, massas e esteiras enquanto a regularização fiscal permite cobrança live; paralelo: discovery B2B (médicos, planos, labs, farmácias). **Go-live B2C:** código pronto no essencial; pendências com badge 🧑‍⚖️ dependem de revisão humana (advogado, contador, consultor, médico).",
   "reviewBadges": [
     {
       "id": "legal",
@@ -785,7 +785,7 @@
         },
         {
           "id": "agent-ava-chat-mvp",
-          "title": "Chat Ava — Agente Virtual Aiyra (LLM + contexto clínico)",
+          "title": "Chat Ava — Agente Neri (LLM + contexto clínico)",
           "status": "done",
           "detail": "Drawer 45vw, Gemini Pro cascade, contexto expandido (prontuário + acompanhamento), glow neural quando LLM ativa."
         },
@@ -865,9 +865,9 @@
         },
         {
           "id": "ava-accelerators",
-          "title": "Aceleradores 'Pergunte à Ava' nas entidades",
+          "title": "Aceleradores 'Pergunte à Neri' nas entidades",
           "status": "done",
-          "detail": "Botões/hints contextuais (exames, marcadores, laudos, autorizações): 'Não sabe interpretar? Pergunte à Ava' — abre dock com pergunta pré-montada sobre o registro (pin implícito da entidade). Ava recebe o contexto do registro específico no prompt."
+          "detail": "Botões/hints contextuais (exames, marcadores, laudos, autorizações): 'Não sabe interpretar? Pergunte à Neri' — abre dock com pergunta pré-montada sobre o registro (pin implícito da entidade). Ava recebe o contexto do registro específico no prompt."
         },
         {
           "id": "ava-charts-in-chat",
@@ -2168,7 +2168,7 @@
           "id": "run-ops-local-notifier",
           "title": "Notificador local (toast + browser)",
           "status": "done",
-          "detail": "Tray Windows (logo AiyraCare) + toast; ops-local-notifier.mjs headless."
+          "detail": "Tray Windows (logo Ananeri) + toast; ops-local-notifier.mjs headless."
         },
         {
           "id": "run-ops-dashboard-web",
@@ -2649,7 +2649,7 @@
       "category": "negocio",
       "priority": "P2",
       "title": "Site institucional / landing page",
-      "summary": "Página pública de apresentação do AiyraCare: dores da família, showcases com fotos Unsplash + mockups de produto, funcionalidades disponíveis vs roadmap, planos placeholder e telemetria de funil.",
+      "summary": "Página pública de apresentação do Ananeri: dores da família, showcases com fotos Unsplash + mockups de produto, funcionalidades disponíveis vs roadmap, planos placeholder e telemetria de funil.",
       "status": "in_progress",
       "statusLabel": "V2 marketing + mocks",
       "reviewBadge": ["content", "legal"],

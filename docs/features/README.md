@@ -1,4 +1,4 @@
-# Feature cards — AiyraCare
+# Feature cards — Ananeri
 
 Uma **feature card** descreve **uma capacidade de produto** (não um arquivo de código).
 

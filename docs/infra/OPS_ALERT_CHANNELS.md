@@ -19,7 +19,7 @@ connect-worker / cron / ops:alerts-check
 
 ```json
 {
-  "text": "AiyraCare ops — 2 alerta(s)\n• [critical] sync: ...",
+  "text": "Ananeri ops — 2 alerta(s)\n• [critical] sync: ...",
   "alerts": [ { "id": "...", "severity": "critical", "category": "sync", "message": "..." } ],
   "checkedAt": "2026-09-01T12:00:00.000Z",
   "dashboardUrl": "http://127.0.0.1:3013"

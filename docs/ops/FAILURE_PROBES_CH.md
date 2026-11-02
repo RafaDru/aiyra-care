@@ -21,7 +21,7 @@
 
 ## 1. Visão
 
-**Failure Probes** é uma camada de captura centrada no **Command Hub (CH)** — quase um produto à parte, reutilizável fora do AiyraCare no longo prazo. Objetivo: declarar e correlacionar **falhas com impacto no usuário** antes de qualquer mensagem genérica («algo deu errado»), enviar contexto mínimo ao backend e acionar a cadeia automática **INC → triagem → DEF** já existente.
+**Failure Probes** é uma camada de captura centrada no **Command Hub (CH)** — quase um produto à parte, reutilizável fora do Ananeri no longo prazo. Objetivo: declarar e correlacionar **falhas com impacto no usuário** antes de qualquer mensagem genérica («algo deu errado»), enviar contexto mínimo ao backend e acionar a cadeia automática **INC → triagem → DEF** já existente.
 
 | Inclui (MVP web + mobile) | Não inclui (MVP) |
 |-------------|-----------------|

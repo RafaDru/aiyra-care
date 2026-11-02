@@ -6,7 +6,7 @@
 
 ## O que é (e o que não é)
 
-O AiyraCare oferece **agentes de apoio** para pais, mães e responsáveis — no espírito de uma **doula** no parto: presença, organização e linguagem clara, **sem substituir** o pediatra.
+O Ananeri oferece **agentes de apoio** para pais, mães e responsáveis — no espírito de uma **doula** no parto: presença, organização e linguagem clara, **sem substituir** o pediatra.
 
 | Sim | Não |
 |-----|-----|
@@ -18,13 +18,13 @@ O AiyraCare oferece **agentes de apoio** para pais, mães e responsáveis — no
 
 ## Nome do produto (em aberto)
 
-**Decisão (2026-08-14):** **Ava** — Agente Virtual Aiyra. Uma persona no chat; capacidades clínicas como **skills** internas (não agentes separados na UI).
+**Decisão (2026-08-14):** **Ava** — Agente Neri. Uma persona no chat; capacidades clínicas como **skills** internas (não agentes separados na UI).
 
 Código interno: `ava` / `family-support`; bounded context `application/ava/`.
 
 | Nome | Prós |
 |------|------|
-| **Ava (Agente Virtual Aiyra)** | Marca + abreviação humana; espaço de chat natural |
+| **Ava (Agente Neri)** | Marca + abreviação humana; espaço de chat natural |
 | ~~Apoio Aiyra~~ | Substituído por Ava na UI; APIs podem manter `family-support` |
 
 ## Skill vs Agente — alinhamento
@@ -203,7 +203,7 @@ Proposta de tabela (migration futura):
 
 ### Pipeline de retrieval (cada turno)
 
-1. **Query pack** — mensagem do usuário + `focus_thread_id` + últimas 3 mensagens Ava.
+1. **Query pack** — mensagem do usuário + `focus_thread_id` + últimas 3 mensagens Neri.
 2. **Mandatory pack** — allergies + meds + identity (JSON compacto).
 3. **Scoped SQL** — se foco: entries, measurements, administrations do thread.
 4. **Recency SQL** — timeline PatientContext window (ex. 14d).

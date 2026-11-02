@@ -10,7 +10,7 @@
 
 ---
 
-## O que já existe no AiyraCare
+## O que já existe no Ananeri
 
 | Conceito | Implementação atual | Limite |
 |----------|---------------------|--------|

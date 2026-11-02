@@ -1,4 +1,4 @@
-# Roadmap AiyraCare
+# Roadmap Ananeri
 
 > **Fonte estruturada (UI + API):** [`roadmap.json`](./roadmap.json)  
 > **Última revisão de prioridades:** 2026-09-02

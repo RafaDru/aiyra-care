@@ -1,4 +1,4 @@
-# Runbook — alertas ops AiyraCare
+# Runbook — alertas ops Ananeri
 
 > Um bloco por família de alerta. Sem PHI em notificações.  
 > Console: `http://127.0.0.1:3013` (prod: URL em `OPS_ALERT_DASHBOARD_URL`).  

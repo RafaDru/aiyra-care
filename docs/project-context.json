@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "generatedAt": "2026-10-30",
   "application": {
-    "name": "AiyraCare",
+    "name": "Ananeri",
     "repository": "https://github.com/RafaDru/aiyra-care",
     "workspacePath": "C:\\Users\\rafae\\workspace\\aiyra-care",
     "workspaceNote": "Pasta canônica única; ver docs/CURSOR_WORKSPACE.md",
@@ -15,12 +15,12 @@
     },
     "patientsFocus": ["Luís Drummond Freitas Reis (2020)", "Bruno Drummond Freitas Reis (2022)", "Rafael (adulto — check-up)"]
   },
-  "textSummary": "AiyraCare centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Wave MVP out/2026: landing #176, Anel A gate #177 (convênio/SUS fora do 1º onboarding), scrape prod gate #178, delete account #179, Anel B slice 1 #180; docs go-live #175. Foco vivo: MVP beta checklist + Ops CH. Connect Fase 1; billing Stripe; compliance LGPD.",
+  "textSummary": "Ananeri centraliza histórico médico familiar. Postgres = entidades; Neo4j = associações. Wave MVP out/2026: landing #176, Anel A gate #177 (convênio/SUS fora do 1º onboarding), scrape prod gate #178, delete account #179, Anel B slice 1 #180; docs go-live #175. Foco vivo: MVP beta checklist + Ops CH. Connect Fase 1; billing Stripe; compliance LGPD.",
   "architecture": {
     "pattern": "Hexagonal em packages/api: domain → application → infrastructure",
-    "postgresRole": "Fonte da verdade — entidades clínicas, conversas Ava (planejado), billing, legal, telemetria llm_usage + product_events (planejado)",
+    "postgresRole": "Fonte da verdade — entidades clínicas, conversas Neri (tabelas ava_*), billing, legal, telemetria llm_usage + product_events (planejado)",
     "neo4jRole": "Associações entre entidades PG — caminhos clínicos, pins de sessão, candidatos dedup, analytics Topic (opt-in); não duplica atributos",
-    "principle": "PatientContext determinístico sem LLM; Ava com pins transparentes; grafo opcional para expansão"
+    "principle": "PatientContext determinístico sem LLM; Neri (domínio ava) com pins transparentes; grafo opcional para expansão"
   },
   "layers": [
     { "id": "A", "name": "Dados estruturados", "description": "Postgres: consultas, exames, vacinas, meds, alergias, autorizações, plano, agenda, billing", "usesLlm": false, "status": "operational" },
@@ -31,7 +31,7 @@
     { "id": "F", "name": "Agenda + calendários", "description": "scheduled_events, ICS, Google/Microsoft OAuth sync", "usesLlm": false, "status": "done" },
     { "id": "G", "name": "Billing SaaS", "description": "Stripe checkout, webhook, assinatura, entitlements", "usesLlm": false, "status": "done" },
     { "id": "H", "name": "Legal / LGPD", "description": "Compliance gate, aceite versionado, exclusão conta", "usesLlm": false, "status": "operational" },
-    { "id": "I", "name": "Agentes de apoio (Ava)", "description": "Ava chat + reflexão + ferramentas read-only (ava-tools) + SSE activityTrace; conversas persistidas planejadas", "usesLlm": true, "status": "operational" },
+    { "id": "I", "name": "Agente Neri (apoio)", "description": "Chat Neri + reflexão + ferramentas read-only (ava-tools) + SSE activityTrace; rotas /ava/*", "usesLlm": true, "status": "operational" },
     { "id": "J", "name": "Observabilidade", "description": "llm_usage_events, sync_jobs; product_events planejado", "usesLlm": false, "status": "planned" },
     { "id": "K", "name": "Higienização (dedup)", "description": "Detectores exams/vacinas; hygiene_candidates (042); bloqueio na inserção", "usesLlm": false, "status": "operational" },
     { "id": "L", "name": "Classificação de rótulos", "description": "Motor 3-tier (vetor + LLM + catálogo 044); roteia Amil → consulta/exame", "usesLlm": true, "status": "operational" },
@@ -203,7 +203,7 @@
     { "path": "docs/FOCO_ATUAL.md", "role": "Frentes MVP beta + Ops (tracking vivo)" },
     { "path": "docs/product/MVP_GO_LIVE_CHECKLIST.md", "role": "Pilares go-live beta B2C" },
     { "path": "docs/product/ONBOARDING_MVP_GATE.md", "role": "Spec Anel A gate onboarding" },
-    { "path": "docs/help/", "role": "FAQ usuário + base Ava" },
+    { "path": "docs/help/", "role": "FAQ usuário + base Neri" },
     { "path": "docs/FAMILY_ACCESS_MODEL.md", "role": "Discovery conta × família × perfil" },
     { "path": "AGENTS.md", "role": "Instruções agentes Cursor" }
   ]

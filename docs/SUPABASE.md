@@ -1,4 +1,4 @@
-# Supabase — AiyraCare
+# Supabase — Ananeri
 
 Projeto cloud existente: **lyljosprzmtapkocmxxa**
 
@@ -66,7 +66,7 @@ Variáveis `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` no `.env` ser
 
 ## Microsoft (Azure) OAuth
 
-1. **Azure Portal** → Microsoft Entra ID → App registrations → app **Aiyra Care**
+1. **Azure Portal** → Microsoft Entra ID → App registrations → app **Ananeri**
    - Redirect URI (Web): `https://lyljosprzmtapkocmxxa.supabase.co/auth/v1/callback`
 2. **Supabase Dashboard** → [Authentication → Providers → Azure](https://supabase.com/dashboard/project/lyljosprzmtapkocmxxa/auth/providers)
    - Ativar **Azure**, Client ID + Secret da Azure

@@ -74,7 +74,7 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 
 ## Dual entry (Ava + Registro rápido)
 
-- **Spec canônica:** [`mobile-dual-entry-ux.md`](./mobile-dual-entry-ux.md) — dual FAB (registro inferior esquerdo, Ava inferior direito), paridade web (`QuickCaptureGlobal` no header + orb Ava).
+- **Spec canônica:** [`mobile-dual-entry-ux.md`](./mobile-dual-entry-ux.md) — dual FAB (registro inferior esquerdo, Ava inferior direito), paridade web (`QuickCaptureGlobal` no header + orb Neri).
 - **Fundação:** `QuickCaptureGlobal` + `QuickCaptureSheet` — **nota**, **sintoma** e **medição**; medicação/agenda/documento com UI e save «Em breve» (paridade kinds com web).
 - **Bus:** `packages/mobile/src/lib/quick-capture-bus.ts`
 

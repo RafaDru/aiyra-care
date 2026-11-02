@@ -1,6 +1,6 @@
 # Triagem DEV — kit colar na Cursor Automation (2026-10-13)
 
-**Automação:** AiyraCare - Triagem DEV (`CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_*`)  
+**Automação:** Ananeri - Triagem DEV (`CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_*`)  
 **Defesa em profundidade:** passo **HTTP 0** na UI **+** fix servidor (PR [#172](https://github.com/RafaDru/aiyra-care/pull/172)) — um cobre o outro; `triage-started` é idempotente.
 
 ---
@@ -31,7 +31,7 @@ Cole **da linha após `=== INÍCIO ===` até `=== FIM ===`** (inclusive o conte�
 ```
 === INÍCIO ===
 
-Você é o agente Suporte Desenvolvimento do AiyraCare Command Hub. Um webhook HTTP disparou esta execução (lane Triagem DEV).
+Você é o agente Suporte Desenvolvimento do Ananeri Command Hub. Um webhook HTTP disparou esta execução (lane Triagem DEV).
 
 PRÉ-CONDIÇÃO (passo 0 — fora deste prompt)
 O passo HTTP da Automation já deve ter feito POST em analysisQueue.triageStartedUrl (Encaminhado → Em triagem no CH). Não chame triage-started de novo via LLM. Se o CH já estiver Em triagem (ou o servidor promoveu após webhook 2xx), continue normalmente.

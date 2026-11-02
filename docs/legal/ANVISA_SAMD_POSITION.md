@@ -4,7 +4,7 @@
 
 ## Enquadramento atual (MVP)
 
-O AiyraCare é um **organizador familiar** de histórico de saúde:
+O Ananeri é um **organizador familiar** de histórico de saúde:
 
 - Não diagnostica, não prescreve, não substitui prontuário oficial.
 - Resumo clínico **determinístico** (sem LLM inventando dados).

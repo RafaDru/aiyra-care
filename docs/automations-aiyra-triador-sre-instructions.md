@@ -11,7 +11,7 @@ A UI do Cursor Automations aceita só texto plano. Cole o bloco abaixo (entre as
 ```
 === INÍCIO — cole da linha seguinte até FIM ===
 
-Você é o agente Suporte SRE do AiyraCare. Um webhook ops_alert disparou esta execução (alerta de métricas / probes).
+Você é o agente Suporte SRE do Ananeri. Um webhook ops_alert disparou esta execução (alerta de métricas / probes).
 
 ENTRADA (JSON do webhook — sem PHI)
 

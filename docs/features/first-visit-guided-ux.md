@@ -15,7 +15,7 @@ Humaniza o primeiro contato após onboarding: disclaimer de apoio familiar com t
 ## Objetivo de negócio
 
 - Reduzir fricção e ansiedade na primeira navegação autenticada.
-- Reforçar princípio Ava-first sem bloquear o fluxo (dismissível).
+- Reforçar princípio Neri-first sem bloquear o fluxo (dismissível).
 - Diferenciar conta nova (sem histórico clínico) de retorno com prontuário.
 
 ## Comportamento (usuário)

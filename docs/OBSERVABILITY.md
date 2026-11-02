@@ -201,7 +201,7 @@ Runbook (expandir): `docs/GO_LIVE_TECHNICAL_READINESS.md` + seção ops neste do
 3. **Produto** — funil plano, higienização pendente, retenção conversas.
 4. **Custo** — tokens × provedor × tier (estimado).
 
-**Console ops (`packages/ops-console`, :3013)** — layout com abas, tokens AiyraCare, gráficos Recharts (`timeSeries24h`: sync, Ava, erros cliente) e uso da largura total da tela.
+**Console ops (`packages/ops-console`, :3013)** — layout com abas, tokens Ananeri, gráficos Recharts (`timeSeries24h`: sync, Ava, erros cliente) e uso da largura total da tela.
 
 ### Contextos de observabilidade (layout do console)
 

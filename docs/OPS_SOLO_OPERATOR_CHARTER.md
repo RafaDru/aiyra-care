@@ -1,4 +1,4 @@
-# Carta do operador solo — AiyraCare
+# Carta do operador solo — Ananeri
 
 **Status:** canônico · **Vigência:** 2026-10-06 (Rafael Drummond)  
 **Audiência:** humanos, agentes Cursor, automations, reviewers internos

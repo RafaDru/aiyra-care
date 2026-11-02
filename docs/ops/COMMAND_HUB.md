@@ -1,7 +1,7 @@
 # Command Hub (CH)
 
 > **Última atualização:** 2026-09-24  
-> Nome oficial da **plataforma interna** AiyraCare: observabilidade, alertas, suporte, métricas de produto/negócio e console `:3013`.
+> Nome oficial da **plataforma interna** Ananeri: observabilidade, alertas, suporte, métricas de produto/negócio e console `:3013`.
 
 **Acrônimo:** **CH** (uso em chat, issues, Project: «frente CH», «aba CH Suporte»).
 

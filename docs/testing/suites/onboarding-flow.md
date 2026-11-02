@@ -32,7 +32,7 @@ Conta dedicada `qa.onboarding@aiyracare.local`, estado resetado no PG.
 | 4 | Preencher nome, nascimento ≥18, sexo, CPF → **Continuar** | Sub-step endereço (CEP ViaCEP) + celular obrigatório | |
 | 5 | **Continuar** (complete-profile) → nome da família | `data-testid="onboarding-step-family-name"` | |
 | 6 | **Continuar** → membros | `data-testid="onboarding-step-family-members"` | |
-| 7 | **Pular pessoas por agora** → resumo Ava (opcional) | `data-testid="onboarding-step-ava-summary"`; **Pular e ir ao início** ou salvar texto | |
+| 7 | **Pular pessoas por agora** → resumo Neri (opcional) | `data-testid="onboarding-step-ava-summary"`; **Pular e ir ao início** ou salvar texto | |
 | 8 | Concluir resumo | Dashboard `/` com heading «Quem você cuida»; grupo com nome da família; gate só libera com ≥1 `care_circle` + paciente | |
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (cenário A)
@@ -55,7 +55,7 @@ Conta recém-onboarded; `localStorage` sem `aiyracare.first_visit_tour_completed
 |---|------|-------------------|-------|
 | 1 | Concluir cenário A (dashboard `/`) | Banner pós-onboarding (`post-onboarding-welcome`) visível; drawer **não** sobrepõe o banner | |
 | 2 | **Entendi** no banner (ou fechar) | Banner some; drawer «Primeiros passos» abre em ~1s | |
-| 3 | Percorrer 4 etapas (família → pessoa → registro → Ava) | Textos i18n; etapa Ava desabilitada se zero pacientes | |
+| 3 | Percorrer 4 etapas (família → pessoa → registro → Ava) | Textos i18n; etapa Neri desabilitada se zero pacientes | |
 | 4 | **Concluir** ou **Fechar guia** | Drawer fecha; flag localStorage; evento `first_visit_tour_completed` | |
 | 5 | Recarregar dashboard | Drawer não reaparece | |
 | 6 | Repetir onboarding com `localStorage` `first_visit_tour_completed=1` (sessão anterior) | **Ver primeiros passos** no banner abre o drawer | |

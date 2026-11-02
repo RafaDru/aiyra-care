@@ -1,4 +1,4 @@
-# Sistema de documentação e tracking — AiyraCare
+# Sistema de documentação e tracking — Ananeri
 
 > **Última atualização:** 2026-09-08  
 > **Objetivo:** qualquer pessoa (ou LLM/Ava) entender **para quê** existe cada parte do produto **sem ler código**, com rastreio de negócio e entrega alinhados.

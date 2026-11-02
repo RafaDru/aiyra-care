@@ -1,4 +1,4 @@
-# Plano de resposta a incidentes — AiyraCare
+# Plano de resposta a incidentes — Ananeri
 
 > **Última atualização:** 2026-08-13  
 > Runbook operacional — validar prazos e obrigações com advogado (LGPD art. 48).

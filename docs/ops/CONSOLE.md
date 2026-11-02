@@ -3,7 +3,7 @@
 > UI: `packages/ops-console` · `:3013` (integração) / `:3023` (preview).  
 > Lê **Postgres direto** + sonda API monitorada — não passa pelo JWT do app.
 
-## Layout — Command Hub Care (shell v2)
+## Layout — Command Hub Ananeri (shell v2)
 
 Spec: Project store `docs/ch-header-spec-2026-09-24.md` · `layoutVersion: ch-shell-v2` em `GET /health`.
 
@@ -11,7 +11,7 @@ Spec: Project store `docs/ch-header-spec-2026-09-24.md` · `layoutVersion: ch-sh
 
 | Bloco | Conteúdo |
 |-------|----------|
-| **Marca** | **Command Hub Care** + ícone gradiente Aiyra (`ChHubCareLogo`) |
+| **Marca** | **Command Hub Ananeri** + ícone gradiente Aiyra (`ChHubCareLogo`) |
 | **Ambiente** | Chip: **Desenvolvimento** \| **Preview** \| **Produção** (`DEPLOYMENT_TIER` + porta `:3013` / `:3023`) |
 | **Status geral** | Pills **Web** e **Backend** — `UP` / `Degraded` / `Down` (`GET /api/services/status`, refresh ~60s) |
 | **Ações** | **Atualizar** · **Verificar e acionar** |

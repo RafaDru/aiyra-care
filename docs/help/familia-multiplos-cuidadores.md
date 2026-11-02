@@ -5,7 +5,7 @@
 
 ## Pergunta
 
-Pai e mãe podem usar o AiyraCare juntos?
+Pai e mãe podem usar o Ananeri juntos?
 
 ## Resposta
 

@@ -61,7 +61,7 @@ Wizard **Levar na consulta** no perfil do paciente gera um link temporário (48h
 
 - Cabeçalho «Portal do médico» + cartão do paciente + disclaimer
 - Feedback «foi útil?» (telemetria pública, sem login)
-- CTA «Conhecer o AiyraCare» → landing
+- CTA «Conhecer o Ananeri» → landing
 
 ## Fora de escopo
 

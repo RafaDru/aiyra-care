@@ -1,4 +1,4 @@
-# Personas oficiais — AiyraCare
+# Personas oficiais — Ananeri
 
 > **Última atualização:** 2026-10-26  
 > **Status:** canon do repositório para produto, QA e roadmap.  
@@ -90,7 +90,7 @@ Não bloqueiam MVP família; informam export, share e roadmap `b2b-partner-platf
 | | |
 |--|--|
 | **Goals** | Receber export/share com contexto; confiar em fonte; pouco tempo de treinamento. |
-| **Relação** | **Não** é login AiyraCare no MVP; consumidor do **link/export** gerado pela família. |
+| **Relação** | **Não** é login Ananeri no MVP; consumidor do **link/export** gerado pela família. |
 | **Produto hoje** | Export clínico + share token — suite `patient-clinical-export` ✅. |
 
 ### `persona-small-clinic` — Consultório pequeno (P2)

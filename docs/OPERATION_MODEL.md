@@ -125,7 +125,7 @@ Nome técnico do padrão que você descreveu: **cache com invalidação por vers
 
 Isso é equivalente a **ETag por domínio de dados**, comum em APIs REST e BFFs.
 
-### 7.2 Níveis de cache (proposta AiyraCare)
+### 7.2 Níveis de cache (proposta Ananeri)
 
 | Nível | Onde | O que guarda | Invalidação |
 |-------|------|--------------|-------------|
