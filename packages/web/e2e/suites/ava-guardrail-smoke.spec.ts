@@ -25,6 +25,6 @@ test.describe('ava-guardrail-smoke', () => {
     await waitForAvaAssistantReply(page, /companheira de cuidado|saúde na família/i)
 
     await submitAvaMessage(page, 'Quais vacinas constam no perfil?')
-    await waitForAvaAssistantReply(page, /Resposta de teste Ava|vacina|não há/i)
+    await waitForAvaAssistantReply(page, /Resposta de teste (Ava|Neri)|vacina|não há/i)
   })
 })
