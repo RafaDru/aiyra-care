@@ -1,6 +1,6 @@
 # OCR em laudos de exame → medidas
 
-Prática adotada no AiyraCare: **todo laudo textual de exame passa por OCR** na importação (sync de portal ou upload manual), e o texto extraído alimenta o histórico de **medidas** (`measurement_observations`).
+Prática adotada no Ananeri: **todo laudo textual de exame passa por OCR** na importação (sync de portal ou upload manual), e o texto extraído alimenta o histórico de **medidas** (`measurement_observations`).
 
 ## Fluxo
 

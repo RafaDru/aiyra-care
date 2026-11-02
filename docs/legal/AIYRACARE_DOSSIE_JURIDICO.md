@@ -1,4 +1,4 @@
-# AiyraCare — Dossiê para Análise Jurídica
+# Ananeri — Dossiê para Análise Jurídica
 
 **Documento:** Dossiê descritivo de produto, dados e conformidade  
 **Versão:** 1.0  
@@ -9,7 +9,7 @@
 ---
 
 > **Aviso importante**  
-> Este documento descreve o **estado técnico e funcional** da plataforma AiyraCare com base na documentação interna do repositório `aiyra-care` e nos modelos legais em `docs/legal/`. **Não constitui parecer jurídico.** Os textos de Termos de Uso, Política de Privacidade e demais políticas versionadas em `docs/legal/*/v1.0.md` são **modelos operacionais** pendentes de revisão formal antes de go-live público e cobrança ampla.
+> Este documento descreve o **estado técnico e funcional** da plataforma **Ananeri** com base na documentação interna do repositório `aiyra-care` e nos modelos legais em `docs/legal/`. **Não constitui parecer jurídico.** Os textos de Termos de Uso, Política de Privacidade e demais políticas versionadas em `docs/legal/*/v1.0.md` são **modelos operacionais** pendentes de revisão formal antes de go-live público e cobrança ampla.
 
 ---
 
@@ -24,7 +24,7 @@
 7. [Menores de idade e consentimento](#7-menores-de-idade-e-consentimento)
 8. [Integrações com portais de saúde (scraping e APIs)](#8-integrações-com-portais-de-saúde)
 9. [Compartilhamento clínico e acesso do médico](#9-compartilhamento-clínico-e-acesso-do-médico)
-10. [Inteligência artificial, OCR e assistente Ava](#10-inteligência-artificial-ocr-e-assistente-ava)
+10. [Inteligência artificial, OCR e agente Neri](#10-inteligência-artificial-ocr-e-assistente-ava)
 11. [Cobrança, assinaturas e pagamentos](#11-cobrança-assinaturas-e-pagamentos)
 12. [Acesso familiar e controle de permissões](#12-acesso-familiar-e-controle-de-permissões)
 13. [Suporte ao usuário e observabilidade](#13-suporte-ao-usuário-e-observabilidade)
@@ -44,7 +44,7 @@
 
 ### 1.1 Nome e natureza
 
-**AiyraCare** é uma plataforma digital **B2C (família/cuidador)** para **organizar, centralizar e compartilhar** informações de saúde de membros da família — com foco inicial em cuidado pediátrico, mas suportando adultos na mesma conta.
+**Ananeri** é uma plataforma digital **B2C (família/cuidador)** para **organizar, centralizar e compartilhar** informações de saúde de membros da família — com foco inicial em cuidado pediátrico, mas suportando adultos na mesma conta.
 
 ### 1.2 Missão declarada
 
@@ -397,7 +397,7 @@ Eventos de produto (`product_events`) usam **allowlist** de propriedades — pro
 
 ---
 
-## 10. Inteligência artificial, OCR e assistente Ava
+## 10. Inteligência artificial, OCR e agente Neri
 
 ### 10.1 Usos de LLM
 
@@ -636,6 +636,6 @@ Runbook em `docs/legal/INCIDENT_RESPONSE.md`:
 
 ---
 
-**Elaborado a partir do repositório AiyraCare** — para dúvidas técnicas de implementação, solicitar acesso ao código ou à documentação viva em `docs/`.
+**Elaborado a partir do repositório Ananeri** — para dúvidas técnicas de implementação, solicitar acesso ao código ou à documentação viva em `docs/`.
 
 *Fim do dossiê.*

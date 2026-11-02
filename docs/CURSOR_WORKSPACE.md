@@ -1,4 +1,4 @@
-# Cursor — workspace AiyraCare
+# Cursor — workspace Ananeri
 
 > **Última atualização:** 2026-09-18  
 > **Status:** pasta canônica única em `workspace\aiyra-care`.
@@ -65,7 +65,7 @@ powershell -File scripts/cursor-worker-start.ps1
 ```
 
 Log do autostart: `%LOCALAPPDATA%\cursor-agent\worker-autostart.log`  
-Tarefa agendada: `AiyraCare-CursorMyMachinesWorker` (remover: `scripts/cursor-worker-uninstall-autostart.ps1`).
+Tarefa agendada: `Ananeri-CursorMyMachinesWorker` (remover: `scripts/cursor-worker-uninstall-autostart.ps1`).
 
 4. No Cursor: **Projects** ou [cursor.com/agents](https://cursor.com/agents) → ambiente **My Machines** → **`NotebookRafael`**.
 5. Opcional no chat/Slack/GitHub: `worker=NotebookRafael` para forçar esta máquina.

@@ -142,7 +142,7 @@ Documentar na feature card se ainda forem web-only após o bloco:
 | Tema | Escopo |
 |------|--------|
 | Tipografia | Inter carregada globalmente; hierarquia títulos/corpo |
-| Navegação | Macro-seções, tabs, FAB Ava, safe areas, gestos |
+| Navegação | Macro-seções, tabs, FAB Neri, safe areas, gestos |
 | Listas alinhadas | Regra `GroupedAlignedTables` adaptada a RN |
 | Empty / error states | Playbooks + ilustração leve |
 | Tema claro/escuro | Refinar tokens + componentes compartilhados |

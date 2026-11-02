@@ -1,4 +1,4 @@
-# Modelo operacional agêntico (AiyraCare)
+# Modelo operacional agêntico (Ananeri)
 
 **Canônico:** [`OPS_SOLO_OPERATOR_CHARTER.md`](./OPS_SOLO_OPERATOR_CHARTER.md)
 

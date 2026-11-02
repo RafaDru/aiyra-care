@@ -11,7 +11,7 @@
 
 | Sigla | Nome | O que é |
 |-------|------|---------|
-| **CH** | **Command Hub** | Plataforma interna AiyraCare — console `:3013`, rotas ops, pipeline INC/DEF. Marca «CH»; paths técnicos legados `docs/ops/`, `OPS_*`. |
+| **CH** | **Command Hub** | Plataforma interna Ananeri — console `:3013`, rotas ops, pipeline INC/DEF. Marca «CH»; paths técnicos legados `docs/ops/`, `OPS_*`. |
 | **INC** | **Incidente** | Linha na fila `ops_analysis_queue` com ref humana **`INC-*`** (reporte, alerta, bridge `client_errors`, etc.). Estados na coluna `incident_pipeline_status`. |
 | **DEF** | **Defeito** | Registro `platform_defects` com ref **`DEF-*`**, criado ou vinculado após triagem bem-sucedida; dedup por fingerprint; N INC podem apontar ao mesmo DEF. |
 

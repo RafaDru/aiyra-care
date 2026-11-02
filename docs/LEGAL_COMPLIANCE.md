@@ -1,4 +1,4 @@
-# Legal, LGPD e conformidade — AiyraCare
+# Legal, LGPD e conformidade — Ananeri
 
 > **Última atualização:** 2026-08-13  
 > **Status:** Estrutura inicial implementada — revisão jurídica pendente antes de go-live público.
@@ -9,7 +9,7 @@ Documento vivo: arquitetura, momento atual, histórico e referência ao backlog 
 
 ## 1. Objetivo
 
-Preparar o AiyraCare para **oferta a famílias externas** (B2C), com:
+Preparar o Ananeri para **oferta a famílias externas** (B2C), com:
 
 - Documentos legais **versionados** e auditáveis.
 - **Aceite explícito** vinculado à `app_accounts`.
@@ -225,7 +225,7 @@ Termos de Uso e Política de Privacidade em SaaS consumer usam **click-wrap**:
 
 Isso satisfaz a LGPD (consentimento **demonstrável**, art. 8) e prática de mercado (Stripe, Notion, etc.). **Não exige** assinatura manuscrita nem **certificado digital ICP-Brasil** para esse tipo de contrato.
 
-Implementação AiyraCare: `legal_document_acceptances` + `content_sha256` + `legal_documents.version`.
+Implementação Ananeri: `legal_document_acceptances` + `content_sha256` + `legal_documents.version`.
 
 ### Quando DocuSign (ou similar) **pode** entrar
 

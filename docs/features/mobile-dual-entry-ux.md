@@ -10,7 +10,7 @@
 
 ## Resumo
 
-Dois pontos de entrada globais no shell Expo autenticado: **Registro rápido** (FAB inferior esquerdo) e **Ava** (FAB inferior direito). Espelha a hierarquia do web — botão «Registro rápido» no header + orb Ava — adaptada à thumb zone mobile e à ausência de header persistente.
+Dois pontos de entrada globais no shell Expo autenticado: **Registro rápido** (FAB inferior esquerdo) e **Ava** (FAB inferior direito). Espelha a hierarquia do web — botão «Registro rápido» no header + orb Neri — adaptada à thumb zone mobile e à ausência de header persistente.
 
 ## Objetivo de negócio
 
@@ -87,7 +87,7 @@ A11y: `accessibilityRole="button"`; labels `quickCapture.triggerA11y` / `ava.ope
 ## Fora de escopo
 
 - Tour «Primeiros passos» mobile (`FirstVisitTourDrawer`).
-- Long-press no FAB Ava como atalho de registro (falha WCAG sem alternativa visível).
+- Long-press no FAB Neri como atalho de registro (falha WCAG sem alternativa visível).
 - Redesign Ant Design Mobile dedicado; Metro E2E device na cloud.
 
 ## QA (obrigatório ao entregar)

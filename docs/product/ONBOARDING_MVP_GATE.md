@@ -28,7 +28,7 @@ flowchart LR
   subgraph anelB [Anel B — opcional]
     Conv[Convênio / operadora]
     SUS[ConecteSUS]
-    AvaResumo[Resumo Ava]
+    AvaResumo[resumo Neri]
     Pay[Pagamento / plano]
   end
   Auth --> Conta --> Fam --> Pessoa --> Self --> Inicio[Dashboard Início]
@@ -42,7 +42,7 @@ flowchart LR
 
 ## Anel A — obrigatório (critérios de negócio)
 
-O usuário **não** acessa o dashboard principal de forma estável até concluir todos os itens abaixo (exceto resumo Ava, marcado opcional).
+O usuário **não** acessa o dashboard principal de forma estável até concluir todos os itens abaixo (exceto resumo Neri, marcado opcional).
 
 ### 1. Conta (titular)
 
@@ -81,7 +81,7 @@ O usuário **não** acessa o dashboard principal de forma estável até concluir
 - Para cada pessoa adicionada no gate: papel explícito (ex.: guardião ↔ dependente) alinhado a [`FAMILY_ACCESS_MODEL.md`](../FAMILY_ACCESS_MODEL.md) (`patient_memberships`, vínculo ao círculo).
 - Copy deve deixar claro **quem** cuida de **quem** (evita perfil órfão no Início).
 
-### 6. Resumo Ava (opcional no Anel A)
+### 6. resumo Neri (opcional no Anel A)
 
 - Oferta de resumo inicial («o que posso fazer por você») **pode** aparecer após o gate; **não** bloqueia `Ir para o início`.
 - Qualidade de LLM: fora de escopo de regressão ([`AVA_QA_SCOPE.md`](../testing/AVA_QA_SCOPE.md)).
@@ -127,7 +127,7 @@ Considerar o **gate MVP atendido** quando **todos** os itens abaixo são verdade
 5. **Relação:** memberships coerentes (guardião no menor); Início mostra a pessoa em «Quem você cuida».
 6. **Sem convênio/SUS no gate:** fluxo Anel A **não** exige passo de conector nem CTA «não tenho convênio/SUS».
 7. **Destino:** usuário chega a `/` com agrupamento por círculo; sem loop infinito no wizard.
-8. **Opcional:** resumo Ava dispensável sem impedir (6).
+8. **Opcional:** resumo Neri dispensável sem impedir (6).
 
 ### Gap implementação vs gate
 

@@ -1,4 +1,4 @@
-# Mapa de tratamento de dados (LGPD) — AiyraCare
+# Mapa de tratamento de dados (LGPD) — Ananeri
 
 > **Última atualização:** 2026-09-16  
 > Documento operacional interno — complementa a Política de Privacidade v1.0. Revisar com DPO/advogado antes do go-live.

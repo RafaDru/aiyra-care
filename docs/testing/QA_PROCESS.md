@@ -1,4 +1,4 @@
-# Processo QA — AiyraCare
+# Processo QA — Ananeri
 
 > **Última atualização:** 2026-09-08  
 > **Princípio:** feature **não está entregue** sem plano de teste executável; push em `main` exige **regressão** do núcleo (manual hoje → automatizado em CI).

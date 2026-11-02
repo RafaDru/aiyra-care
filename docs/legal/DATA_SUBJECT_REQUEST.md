@@ -14,7 +14,7 @@ E-mail: valor de `LEGAL_PRIVACY_EMAIL` (ex.: `privacidade@empresa.com`)
 2. Identificação suficiente (e-mail da conta + confirmação de acesso ao login quando possível).
 3. Descrição do pedido: acesso, correção, exclusão, portabilidade, revogação de consentimento, etc.
 
-## O que o operador faz no AiyraCare
+## O que o operador faz no Ananeri
 
 | Pedido | Ação no sistema |
 |--------|-----------------|

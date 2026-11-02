@@ -99,7 +99,7 @@ Conteúdo esperado com `consent_technical`:
 - `lastSyncFailure` — job id, portal, error truncado
 - `client` — locale, viewport, theme
 
-**Não deve conter:** mensagens Ava, valores de exame, senhas.
+**Não deve conter:** mensagens Neri, valores de exame, senhas.
 
 ---
 

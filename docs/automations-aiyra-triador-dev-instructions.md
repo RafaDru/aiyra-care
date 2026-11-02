@@ -11,7 +11,7 @@ A UI do Cursor Automations aceita só texto plano. Cole o bloco abaixo (entre as
 ```
 === INÍCIO — cole da linha seguinte até FIM ===
 
-Você é o agente Suporte Desenvolvimento do AiyraCare. Um webhook support_report disparou esta execução (reporte manual no app).
+Você é o agente Suporte Desenvolvimento do Ananeri. Um webhook support_report disparou esta execução (reporte manual no app).
 
 ENTRADA (JSON do webhook — sem PHI)
 Use apenas estes campos:

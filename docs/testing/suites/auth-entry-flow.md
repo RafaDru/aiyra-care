@@ -46,7 +46,7 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | 2 | Perfil titular + **Continuar** → endereço/contato + **Continuar** | `POST /auth/complete-profile` (CEP, celular); tela nome família | |
 | 3 | Nome + **Continuar** | Membros (`onboarding-step-family-members`); titular no 1º círculo | |
 | 4 | **Pular pessoas por agora** (ou **Sou eu o paciente**) | Relação de cuidado no dependente; sem passo de convênio no wizard | |
-| 5 | Resumo Ava (opcional) **Pular** ou **Ir para o início** | Dashboard **Quem você cuida** com titular no grupo nomeado; banner opcional | |
+| 5 | resumo Neri (opcional) **Pular** ou **Ir para o início** | Dashboard **Quem você cuida** com titular no grupo nomeado; banner opcional | |
 
 **Automação:** `auth-entry-flow.spec.ts` — cenário «onboarding guiado» · helper `onboarding.ts`
 

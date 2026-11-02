@@ -11,7 +11,7 @@ Ava tão ou mais **operacional** que o usuário: não só responder sobre o pron
 
 | Fase | Entrega | Status |
 |------|---------|--------|
-| **G1 — Aceleradores + pins** | Botões “Pergunte à Ava” em entidades; dock abre com lente + pergunta + bloco de pin no prompt | **done** |
+| **G1 — Aceleradores + pins** | Botões “Pergunte à Neri” em entidades; dock abre com lente + pergunta + bloco de pin no prompt | **done** |
 | **G2 — Ações read-only** | Navegar abas, abrir laudo/PDF, listar sync status via chat (links + respostas estruturadas) | **done (V0)** |
 | **G3 — Ações com confirmação** | Sync portal, export clínico, consulta, hygiene — POST só após `Modal.confirm` | **done (MVP)** |
 | **G4 — Tool calling** | Runtime de ferramentas (`ava-tools.ts`) + SSE de atividade na UI | **parcial (read-only + reflexão)** |
@@ -35,7 +35,7 @@ Próximo: ferramentas mutáveis (G3) com confirmação UI + `product_events`.
 
 ### UX
 
-- Botão/link **“Pergunte à Ava”** em exame, pedido de exame, marcador laboratorial.
+- Botão/link **“Pergunte à Neri”** em exame, pedido de exame, marcador laboratorial.
 - Abre drawer global, define **lente** = paciente da entidade, pré-preenche pergunta.
 - API recebe `entityPin` → bloco **REGISTRO EM FOCO** no prompt (dados determinísticos).
 

@@ -1,4 +1,4 @@
-# Documentação AiyraCare
+# Documentação Ananeri
 
 > Hub de navegação — ver [`DOCUMENTATION_SYSTEM.md`](./DOCUMENTATION_SYSTEM.md) para o modelo completo.
 
@@ -36,9 +36,9 @@
 - [`EXAM_ARTIFACT_PIPELINE.md`](./EXAM_ARTIFACT_PIPELINE.md) — laudos → marcadores
 - [`SYNC_DELTA.md`](./SYNC_DELTA.md) — sync incremental por portal
 
-### Ava e IA
+### Neri e IA
 
-- [`AVA_VISION.md`](./AVA_VISION.md) — companion global
+- [`AVA_VISION.md`](./AVA_VISION.md) — companion global (display **Neri**)
 - [`AVA_OPERATIONAL.md`](./AVA_OPERATIONAL.md) — fases G1–G4
 - [`AVA_PATIENT_LENS.md`](./AVA_PATIENT_LENS.md) — lente de paciente
 - [`LLM_USAGE.md`](./LLM_USAGE.md) — metering e orçamento interno

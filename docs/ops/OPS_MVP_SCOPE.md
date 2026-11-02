@@ -12,7 +12,7 @@ Decisão registrada em [`HISTORICO.md`](../HISTORICO.md) (2026-09-23). Ambiente 
 
 ## Objetivo
 
-Operar o AiyraCare com **observabilidade suficiente** para detectar falhas de infra e produto, triar suporte e preparar go-live — **sem** manter duas pilhas ops (integração + preview) nem expandir automations até o MVP de produto estar verde em regression.
+Operar o Ananeri com **observabilidade suficiente** para detectar falhas de infra e produto, triar suporte e preparar go-live — **sem** manter duas pilhas ops (integração + preview) nem expandir automations até o MVP de produto estar verde em regression.
 
 ---
 

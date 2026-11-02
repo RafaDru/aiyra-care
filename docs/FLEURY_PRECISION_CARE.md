@@ -10,7 +10,7 @@ O **Instituto Hermes Pardini** foi combinado ao **Grupo Fleury** (anúncio 2022;
 
 Para o paciente, o grupo promove o **Precision Care**: uma conta e um portal para **todas as marcas** (Fleury, Pardini, a+, Labs a+, etc.). Referência pública: [precisioncare.med.br/paciente](https://precisioncare.med.br/paciente).
 
-**Implicação para AiyraCare:** não existe backend “só Hermes” separado do Fleury no portal de resultados. A integração atual já usa infraestrutura Fleury; o trabalho pendente é **autenticação unificada (OTP)** e **multi-marca** nos headers de API.
+**Implicação para Ananeri:** não existe backend “só Hermes” separado do Fleury no portal de resultados. A integração atual já usa infraestrutura Fleury; o trabalho pendente é **autenticação unificada (OTP)** e **multi-marca** nos headers de API.
 
 ---
 
@@ -55,7 +55,7 @@ O sync de produção usa perfil `pardini` (`HERMES_PARDINI_PACIENTE_API_DEFAULT_
 
 ## Autenticação
 
-| Fluxo | Suporte AiyraCare | Notas |
+| Fluxo | Suporte Ananeri | Notas |
 |-------|-------------------|-------|
 | ROPC CPF + senha protocolo | Diagnóstico only (`loginHermesPardiniApi`) | Token frequentemente **não** autoriza `GET /pedidos` |
 | Browser PKCE + senha protocolo | Sync manual (`HERMES_PARDINI_ALLOW_BROWSER=1`) | Fallback se OTP falhar (`?origin=pardini`) |
@@ -120,7 +120,7 @@ npm run probe:fleury-marca
 
 ---
 
-## Integração AiyraCare hoje
+## Integração Ananeri hoje
 
 | Item | Estado |
 |------|--------|

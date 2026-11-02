@@ -18,7 +18,7 @@
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
-| 1 | Abrir `/login` | Página renderiza; texto Entrar/Login/Aiyra visível | |
+| 1 | Abrir `/login` | Página renderiza; texto Entrar/Login/Ananeri visível | |
 | 2 | Abrir `/home` | Landing visível; sem erro 5xx no console | |
 | 3 | Abrir `/roadmap` (logado) | Redirect para `/` (roadmap interno oculto no app família) | |
 

@@ -44,7 +44,7 @@ O modo **Projects** coordena na nuvem; para rodar tool calls no checkout desta m
 |----------|--------|
 | `docs/CURSOR_WORKSPACE.md` | Runbook completo (setup, verificação, limitações) |
 | `scripts/cursor-worker-start.ps1` | Sobe worker `NotebookRafael` |
-| `scripts/cursor-worker-install-autostart.ps1` | Tarefa Windows `AiyraCare-CursorMyMachinesWorker` no logon |
+| `scripts/cursor-worker-install-autostart.ps1` | Tarefa Windows `Ananeri-CursorMyMachinesWorker` no logon |
 | `scripts/cursor-worker-repair.ps1` | Fix `better-sqlite3` após `agent update` (Windows) |
 
 Verificação: `agent worker debug` → `Visibility: 1 worker`. No picker de ambiente: **My Machines** → `NotebookRafael`.

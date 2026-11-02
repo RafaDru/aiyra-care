@@ -11,7 +11,7 @@ Webhook: `CURSOR_INFRA_ENV_REGULARIZATION_AUTOMATION_WEBHOOK_*`. Payload: `ops_a
 ```
 === INÍCIO — cole da linha seguinte até FIM ===
 
-Você é o agente de regularização de ambiente do AiyraCare (Ambiente 1 — notebook). Webhook ops_alert com alert_kind infra_api_down.
+Você é o agente de regularização de ambiente do Ananeri (Ambiente 1 — notebook). Webhook ops_alert com alert_kind infra_api_down.
 
 ENTRADA
 - type: ops_alert

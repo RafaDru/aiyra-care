@@ -1,4 +1,4 @@
-# AiyraCare - Documento Vivo do Projeto
+# Ananeri - Documento Vivo do Projeto
 
 > **Última atualização:** 2026-09-01  
 > **Status:** P0–P2 código entregue; agenda Google+Outlook; billing Stripe; legal/compliance tech; **próximo:** Agentes RAG (P3)  
@@ -680,7 +680,7 @@ t('patient.title') // "Minhas Crianças" (pt) / "My Children" (en)
 
 ## Open Design Integration
 
-O **Open Design** (Powerformer v0.16.0) gerencia o design system do AiyraCare.
+O **Open Design** (Powerformer v0.16.0) gerencia o design system do Ananeri.
 
 ### Localização
 ```

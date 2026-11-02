@@ -9,7 +9,7 @@ Por que aparecem dois exames parecidos? O que fazer?
 
 ## Resposta
 
-Às vezes o mesmo exame chega de portais diferentes ou em importações repetidas. O AiyraCare detecta **candidatos a duplicata** e pode avisar no login ou na higienização.
+Às vezes o mesmo exame chega de portais diferentes ou em importações repetidas. O Ananeri detecta **candidatos a duplicata** e pode avisar no login ou na higienização.
 
 ## O que você pode fazer
 

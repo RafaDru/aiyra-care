@@ -28,7 +28,7 @@ Canais **independentes**: o notificador local e a Automation recebem o mesmo pay
 
 | Campo | Valor |
 |-------|--------|
-| **Nome** | AiyraCare — Suporte Desenvolvimento (Tier 0) |
+| **Nome** | Ananeri — Suporte Desenvolvimento (Tier 0) |
 | **Trigger** | HTTP webhook |
 | **Repo** | `RafaDru/aiyra-care` · branch `main` |
 | **Modelo** | Composer 2.5 (ou equivalente com reasoning) |

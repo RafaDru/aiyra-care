@@ -1,4 +1,4 @@
-# RTK no AiyraCare — compressão de saída sem perder qualidade
+# RTK no Ananeri — compressão de saída sem perder qualidade
 
 > **Última atualização:** 2026-10-02  
 > [RTK](https://github.com/rtk-ai/rtk) reescreve comandos de shell (`git status` → `rtk git status`) para reduzir tokens na saída. No monorepo usamos um modelo **conservador**: RTK ligado por padrão, com **bypass** onde a saída integral é parte do Definition of Done ou do debug.

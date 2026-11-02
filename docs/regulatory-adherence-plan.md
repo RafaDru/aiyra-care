@@ -1,4 +1,4 @@
-# Plano de aderência regulatória e interoperabilidade — AiyraCare
+# Plano de aderência regulatória e interoperabilidade — Ananeri
 
 > **Autor:** thread «Análise Jev e POCs» · **2026-09-30**  
 > **Contexto:** pesquisa interoperabilidade (Project store) · [connect-showcase-not-production.md](principles/connect-showcase-not-production.md)  
@@ -67,7 +67,7 @@ flowchart LR
 
 ### CNAEs — referência para discussão com contador
 
-| CNAE | Uso provável AiyraCare | Principal / secundária |
+| CNAE | Uso provável Ananeri | Principal / secundária |
 |------|------------------------|-------------------------|
 | **6203-1/00** | Desenvolvimento e licenciamento de programas **não customizáveis** (SaaS B2C, assinatura) | **Principal** candidata |
 | **6311-9/00** | Tratamento de dados, provedor de aplicação, hospedagem na internet (nuvem, SaaS) | **Secundária** recomendada |

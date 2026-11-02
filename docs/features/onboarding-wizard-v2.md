@@ -11,7 +11,7 @@ Wizard em `/onboarding` com passos:
 
 1. **Perfil titular** (identidade + endereço/contato) → `POST /auth/complete-profile` → `needsProfile: false`
 2. **Família(s)** — loop nome + membros (`care_circles`)
-3. **Resumo Ava** — 1–3 frases opcionais (`account_profiles.bio`)
+3. **resumo Neri** — 1–3 frases opcionais (`account_profiles.bio`)
 
 **Anel A (MVP):** gate `needsOnboardingSetup` — titular completo + ≥1 `care_circle` + ≥1 paciente antes do dashboard feliz. Conectores/convênio **fora** do wizard inicial (Integrações pós-início). Passo família: **Sou eu o paciente**, relação de cuidado no dependente (`patient_circle_links.care_relation`).
 

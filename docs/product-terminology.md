@@ -1,7 +1,17 @@
 # Terminologia de produto (B2C — cuidador familiar)
 
-> **Última atualização:** 2026-09-17  
-> Relacionado: [`FAMILY_ACCESS_MODEL.md`](./FAMILY_ACCESS_MODEL.md), [`AVA_PATIENT_LENS.md`](./AVA_PATIENT_LENS.md)
+> **Última atualização:** 2026-11-02  
+> Relacionado: [`FAMILY_ACCESS_MODEL.md`](./FAMILY_ACCESS_MODEL.md), [`AVA_PATIENT_LENS.md`](./AVA_PATIENT_LENS.md), [`product/REBRAND_STATUS.md`](./product/REBRAND_STATUS.md)
+
+## Marca (Phase 1)
+
+| Camada | Nome | Não confundir com |
+|--------|------|-------------------|
+| Plataforma (UI, legal user-facing, help) | **Ananeri** | Razão social / `LEGAL_*` env (beta placeholder) |
+| Agente (chat, dock, FAB) | **Neri** | Pasta/código `ava/*`, chaves i18n `ava.*`, rotas `/ava/*`, feature id `ava_companion` |
+| Monorepo / npm | `aiyra-care`, `@aiyra-care/*` | Marca exibida — defer Phase 3A |
+
+Documentação de engenharia pode manter prefixo **`AVA_`** nos nomes de arquivo (`AVA_OPERATIONAL.md`) enquanto a copy descreve **Neri**.
 
 ## Princípio
 
@@ -28,7 +38,7 @@ No app **B2C**, o usuário é um **cuidador familiar**, não um profissional de 
 ## Quando usar linguagem clínica
 
 - **Exportação clínica / «Levar na consulta»:** pode citar prontuário, histórico consolidado, responsável — o destinatário é o profissional.
-- **Ava (aceleradores):** priorizar «histórico de saúde», «registros», «consulta»; evitar «prontuário» em frases curtas da UI.
+- **Neri (aceleradores):** priorizar «histórico de saúde», «registros», «consulta»; evitar «prontuário» em frases curtas da UI.
 - **Higienização / duplicatas:** «registros» e «histórico»; botão de navegação → «Abrir perfil».
 - **Ops / observabilidade:** terminologia técnica inalterada.
 

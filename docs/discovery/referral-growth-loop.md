@@ -12,7 +12,7 @@ Registrado a pedido do Rafael para debate de plano e precificação.
 
 Criar um **loop de crescimento** em que:
 
-1. **Paciente (cuidador)** compartilha extrato/link com o médico e, se o médico aderir a um plano pago AiyraCare (lado profissional), o **paciente ganha desconto** no plano familiar.
+1. **Paciente (cuidador)** compartilha extrato/link com o médico e, se o médico aderir a um plano pago Ananeri (lado profissional), o **paciente ganha desconto** no plano familiar.
 2. **Médico** que assina pode **indicar pacientes**; por cada paciente que converte para plano pago, o **médico ganha desconto** (ou crédito) no próprio plano.
 
 **Hipótese:** o extrato “impressionante” na consulta + incentivo econômico aumenta conversão dos dois lados.

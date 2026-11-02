@@ -1,4 +1,4 @@
-# Ecossistema AiyraCare — personas, valor e plano de negócio
+# Ecossistema Ananeri — personas, valor e plano de negócio
 
 > **Última atualização:** 2026-10-26  
 > **Nota:** prioridades P0–P4 no roadmap **organizam temas** — não são uma fila rígida de execução.  
@@ -7,7 +7,7 @@
 
 ## Visão em uma frase
 
-**AiyraCare** é a camada familiar que **organiza** histórico clínico disperso (planos, labs, SUS, documentos) com **mínimo esforço manual** — e, no horizonte, conecta **parceiros** que participam do cuidado (médicos, labs, operadoras, farmácias) sem substituir o prontuário oficial.
+**Ananeri** é a camada familiar que **organiza** histórico clínico disperso (planos, labs, SUS, documentos) com **mínimo esforço manual** — e, no horizonte, conecta **parceiros** que participam do cuidado (médicos, labs, operadoras, farmácias) sem substituir o prontuário oficial.
 
 ---
 
@@ -37,7 +37,7 @@ flowchart TB
   PLAN -->|"sync autorização/eligibility"| FAM
   PHARM -->|"adesão, compra, lembrete"| FAM
 
-  AIYRA["AiyraCare<br/>Postgres + Connect + Ava"]
+  AIYRA["Ananeri<br/>Postgres + Connect + Ava"]
   FAM & PAT & MED & LAB & PLAN & PHARM -.-> AIYRA
 ```
 
@@ -125,7 +125,7 @@ quadrantChart
 ```mermaid
 sequenceDiagram
   participant R as Responsável
-  participant A as AiyraCare
+  participant A as Ananeri
   participant P as Portal convênio
   participant M as Médico
 
@@ -145,7 +145,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant R as Responsável
-  participant A as AiyraCare
+  participant A as Ananeri
   participant F as Farmácia parceira
 
   Note over A: Medicação já no prontuário

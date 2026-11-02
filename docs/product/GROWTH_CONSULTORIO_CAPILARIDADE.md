@@ -17,7 +17,7 @@
 ```mermaid
 flowchart LR
   subgraph familia["Família (B2C)"]
-    C[Cuidador usa AiyraCare]
+    C[Cuidador usa Ananeri]
     S[Share consultório\nlink · QR · PDF · WhatsApp]
   end
   subgraph medico["Médico (gancho)"]

@@ -8,7 +8,7 @@
 | **Agente (chat/dock/FAB)** | **Neri** |
 | **Paleta** | **Vivid v2 trilha B** (`#7E22CE`, `#EC4899`, `#FACC15`) |
 | **Logo (UI)** | Placeholder **G2g metaball C** — lockup tipográfico não final |
-| **Phase** | **1 — slices 1–3** (G3 em PR [#193](https://github.com/RafaDru/aiyra-care/pull/193)) |
+| **Phase** | **1 — slices 1–5** (G3 web/API [#193](https://github.com/RafaDru/aiyra-care/pull/193), [#195](https://github.com/RafaDru/aiyra-care/pull/195); docs slice 4–5 neste PR) |
 | **INPI / ®** | **Adiado** — gate financeiro (ver Project store `ananeri-phase0-lock.md`) |
 | **npm scope / repo** | Sem rename — `@aiyra-care/*` e `aiyra-care` (Phase 3A defer) |
 | **`LEGAL_*` env** | Placeholders beta inalterados até razão social/CNPJ definitivos |
@@ -20,8 +20,8 @@
 | 1 | `REBRAND_STATUS`, landing `/home`, footer, `index.html` SEO, tokens v2, logo G2g | **Concluído (G3)** |
 | 2 | Agente UI (i18n `ava.*` → Neri, dock, layout) | **Concluído (G3)** |
 | 3 | API mensagens user-facing + compliance seed display name | **Concluído** — `platform-display.ts`, auth/billing/e-mails/Neri LLM, seed legal titles, mobile shell copy; `@aiyra-care/*` intacto |
-| 4 | Docs produto / help face pública | Pendente |
-| 5 | Ops / CH strings | Pendente |
+| 4 | Docs produto / help face pública | **Concluído** — help, legal v1.0, features, hub `docs/README`, `PROJETO`, personas/jornadas; `@aiyra-care` / ids `ava_*` documentados |
+| 5 | Ops / CH strings (docs) | **Concluído** — `AGENTS.md`, `docs/ops/*`, automations paste kits, notifier examples **Ananeri Ops** |
 
 ### Slice 3 — critério de done
 
@@ -31,6 +31,18 @@
 - [x] Mobile: `app.json` display name, i18n lock/onboarding, telas compliance/convite
 - [x] Grep audit: sem `AiyraCare` / copy `Ava` user-facing em `packages/api/src` (exceto comentários técnicos / ids internos)
 - [x] `npm run test:critical` + `compliance-gate` / `legal-publisher` no critical
+
+### Slice 4 — critério de done
+
+- [x] `docs/help/*`, `docs/legal/*/v1.0.md` e índices legais — marca **Ananeri**, agente **Neri** na copy
+- [x] Feature cards + `docs/README.md`, `PROJETO.md`, personas/jornadas/produto alinhados
+- [x] [`product-terminology.md`](../product-terminology.md) — convenção dev (`ava.*` / paths `AVA_*` vs display Neri)
+
+### Slice 5 — critério de done
+
+- [x] [`AGENTS.md`](../../AGENTS.md) — marca vs monorepo `@aiyra-care`
+- [x] `docs/ops/*` (CH, notificador, runbooks) — prefixo **Ananeri Ops** onde aplicável
+- [x] Instruções automations CH — referência **Ananeri** (identificadores `aiyra-*` de webhook inalterados)
 
 ## Assets (web)
 

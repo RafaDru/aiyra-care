@@ -22,7 +22,7 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 3. **Onboarding passo 1:** perfil titular (identidade → endereço ViaCEP + celular obrigatório; nome social opcional) → `POST /auth/complete-profile`
 4. **Onboarding passo 2 (loop):** para cada família — nome (`POST /care-circles`; 1º círculo vincula titular) → membros (`POST /patients` + `POST /care-circles/:id/patients`) → **Adicionar outra família** ou **Ir para o início**; gestão contínua em `/family`
 
-**Anel A (MVP):** após `POST /auth/complete-profile` (`needsProfile: false`), `RequireCompliance` mantém `/onboarding` enquanto `needsOnboardingSetup` (sem círculo ou sem paciente). Wizard: família obrigatória (nome + membros ou **Sou eu o paciente**) → resumo Ava opcional — **sem** passo de convênio/SUS no primeiro fluxo.
+**Anel A (MVP):** após `POST /auth/complete-profile` (`needsProfile: false`), `RequireCompliance` mantém `/onboarding` enquanto `needsOnboardingSetup` (sem círculo ou sem paciente). Wizard: família obrigatória (nome + membros ou **Sou eu o paciente**) → resumo Neri opcional — **sem** passo de convênio/SUS no primeiro fluxo.
 
 **Higiene de sessão (wizard v2):** estado em `sessionStorage` via `onboarding-wizard-storage.ts` (`aiyracare.onboarding_wizard_step`, `aiyracare.onboarding_family_wizard`, `aiyracare.onboarding_just_completed`, `aiyracare.onboarding_wizard_owner_sub`). Limpeza no logout e quando o Supabase `user.id` do sync não coincide com o owner gravado; ver [`onboarding-wizard-v2.md`](./onboarding-wizard-v2.md) e [`onboarding-session-hygiene-spec.md`](./onboarding-session-hygiene-spec.md). Recarga reconcilia família com `GET /care-circles`.
 

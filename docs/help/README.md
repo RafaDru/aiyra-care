@@ -1,6 +1,6 @@
-# Ajuda e FAQ — AiyraCare
+# Ajuda e FAQ — Ananeri
 
-> Textos curtos para **usuários**, **suporte** e futura **base de conhecimento da Ava**.  
+> Textos curtos para **usuários**, **suporte** e futura **base de conhecimento da Neri**.  
 > Convenção: um arquivo por tópico; `id` = nome do arquivo sem `.md`.
 
 ## Tópicos
@@ -29,7 +29,7 @@
 ## Futuro (roadmap)
 
 - `GET /help/topics` — lista para UI de ajuda
-- RAG Ava com citação de `docs/help/*`
+- RAG Neri com citação de `docs/help/*`
 - i18n `en` espelhando `pt`
 
 ## Ver também
