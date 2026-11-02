@@ -1,4 +1,5 @@
 import { ApiResponseError } from './api-response-error.js'
+import { isPublicCompliancePath } from './public-compliance-path.js'
 
 /** Em dev o Vite faz proxy à API (porta 3010). Não usar localhost:3000 — conflita com outros apps. */
 const BASE_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'http://127.0.0.1:3010')
@@ -71,7 +72,7 @@ async function request<T>(
   const headers: Record<string, string> = options?.body && !isFormData ? { 'Content-Type': 'application/json' } : {}
   const { ensureAccessToken, supabaseConfigured } = await import('./supabase.js')
   const token = await ensureAccessToken()
-  if (supabaseConfigured && !token) {
+  if (supabaseConfigured && !token && !isPublicCompliancePath(path)) {
     throw new Error('Sessão não disponível — aguarde ou faça login novamente')
   }
   if (token) headers.Authorization = `Bearer ${token}`
