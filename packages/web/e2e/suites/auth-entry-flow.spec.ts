@@ -32,12 +32,12 @@ test.describe('auth-entry-flow', () => {
     await page.goto('/home')
     await page.getByTestId('landing-footer-link-terms').click()
     await expect(page).toHaveURL(/\/termos/)
-    await expect(page.getByRole('heading', { level: 2 })).toContainText(/Termos de Uso/i, { timeout: 20_000 })
+    await expect(page.getByTestId('legal-document-title')).toContainText(/Termos de Uso/i, { timeout: 20_000 })
 
     await page.goto('/home')
     await page.getByTestId('landing-footer-link-privacy').click()
     await expect(page).toHaveURL(/\/privacidade/)
-    await expect(page.getByRole('heading', { level: 2 })).toContainText(/Privacidade/i, { timeout: 20_000 })
+    await expect(page.getByTestId('legal-document-title')).toContainText(/Privacidade/i, { timeout: 20_000 })
   })
 
   test('onboarding guiado — login QA onboarding → wizard → dashboard', async ({ page }) => {

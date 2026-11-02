@@ -62,7 +62,7 @@ export function LegalDocumentBody({ kind, showCrossLinks = true }: Props) {
 
   return (
     <>
-      <Title level={2} style={{ marginTop: 0 }}>{doc.title}</Title>
+      <Title level={2} data-testid="legal-document-title" style={{ marginTop: 0 }}>{doc.title}</Title>
       <Text type="secondary">
         {t('legal.version', {
           version: doc.version,
