@@ -8,7 +8,7 @@
 | **Agente (chat/dock/FAB)** | **Neri** |
 | **Paleta** | **Vivid v2 trilha B** (`#7E22CE`, `#EC4899`, `#FACC15`) |
 | **Logo (UI)** | Placeholder **G2g metaball C** — lockup tipográfico não final |
-| **Phase** | **1 — slices 1–5** (G3 web/API [#193](https://github.com/RafaDru/aiyra-care/pull/193), [#195](https://github.com/RafaDru/aiyra-care/pull/195); docs slice 4–5 neste PR) |
+| **Phase** | **1 — slices 1–5** (G3 web/API [#193](https://github.com/RafaDru/aiyra-care/pull/193), [#195](https://github.com/RafaDru/aiyra-care/pull/195); docs [#196](https://github.com/RafaDru/aiyra-care/pull/196)) |
 | **INPI / ®** | **Adiado** — gate financeiro (ver Project store `ananeri-phase0-lock.md`) |
 | **npm scope / repo** | Sem rename — `@aiyra-care/*` e `aiyra-care` (Phase 3A defer) |
 | **`LEGAL_*` env** | Placeholders beta inalterados até razão social/CNPJ definitivos |
