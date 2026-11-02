@@ -125,9 +125,10 @@ export async function waitForAvaAssistantReply(
       const body = bodies.nth(i)
       const text = (await body.innerText()).replace(/^Neri\s*/i, '').trim()
       if (text.length === 0) continue
-      await expect(body).toContainText(pattern)
-      matched = true
-      break
+      if (pattern.test(text)) {
+        matched = true
+        break
+      }
     }
     expect(matched).toBe(true)
   }).toPass({ timeout })
@@ -169,7 +170,7 @@ export async function submitAvaMessage(page: Page, text: string) {
 export async function sendAvaMessage(page: Page, text: string) {
   await submitAvaMessage(page, text)
   const replyPattern = process.env.CI
-    ? /Resposta de teste Ava|companheira de cuidado|saúde na família|exames|vacina|não há/i
+    ? /Resposta de teste (Ava|Neri)|companheira de cuidado|saúde na família|exames|vacina|não há/i
     : /.{8,}/
   await waitForAvaAssistantReply(page, replyPattern, 90_000)
   await waitAvaComposerReady(page)

@@ -17,6 +17,6 @@ test.describe('ava-companion-smoke', () => {
     await openAvaDock(page)
     await startFreshAvaConversation(page)
     await sendAvaMessage(page, 'Quais exames recentes do paciente?')
-    await waitForAvaAssistantReply(page, /Resposta de teste Ava|exames|não há/i)
+    await waitForAvaAssistantReply(page, /Resposta de teste (Ava|Neri)|exames|não há/i)
   })
 })
