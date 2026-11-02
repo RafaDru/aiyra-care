@@ -23,7 +23,7 @@ describe('ops alert dispatch payload', () => {
       '2026-01-01T00:00:00.000Z',
     )
     expect(payload.dashboardUrl).toBe('http://127.0.0.1:3013')
-    expect(payload.text).toContain('AiyraCare Ops')
+    expect(payload.text).toContain('Ananeri Ops')
     expect(payload.toast?.title).toContain('CRITICO')
     expect(payload.toast?.icon).toBe('error')
   })

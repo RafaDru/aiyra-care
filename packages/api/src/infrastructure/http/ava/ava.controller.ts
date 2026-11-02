@@ -8,6 +8,7 @@ import { resolveHandwritingScopeId } from '../handwriting/handwriting-scope.js'
 import { chunkReplyForSse } from '../../../domain/llm/ava-reply-stream.js'
 import { writeSseResponseHead } from '../sse-response.helper.js'
 import { avaChatBodySchema, avaChatParamsSchema } from './ava.schema.js'
+import { AGENT_DISPLAY_NAME } from '../../../domain/brand/platform-display.js'
 
 function writeSse(res: import('node:http').ServerResponse, event: string, data: unknown) {
   res.write(`event: ${event}\n`)
@@ -84,7 +85,7 @@ export class AvaController {
         if (message === 'LLM_QUOTA_EXCEEDED') {
           writeSse(res, 'error', { code: 'LLM_QUOTA_EXCEEDED', message: 'Franquia de IA esgotada.' })
         } else if (message === 'AVA_LLM_DISABLED') {
-          writeSse(res, 'error', { code: 'AVA_LLM_DISABLED', message: 'Ava com LLM desabilitada.' })
+          writeSse(res, 'error', { code: 'AVA_LLM_DISABLED', message: `${AGENT_DISPLAY_NAME} com LLM desabilitada.` })
         } else {
           writeSse(res, 'error', { code: 'AVA_CHAT_FAILED', message })
         }
@@ -122,7 +123,7 @@ export class AvaController {
       }
       if (message === 'AVA_LLM_DISABLED') {
         return reply.status(503).send({
-          message: 'Ava com LLM desabilitada (configure OPENCODE_ZEN/GO, GEMINI_API_KEY ou GROQ_API_KEY)',
+          message: `${AGENT_DISPLAY_NAME} com LLM desabilitada (configure OPENCODE_ZEN/GO, GEMINI_API_KEY ou GROQ_API_KEY)`,
           code: 'AVA_LLM_DISABLED',
         })
       }

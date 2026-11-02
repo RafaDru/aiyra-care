@@ -12,6 +12,10 @@ import {
   type OpsAlertToast,
 } from '../../domain/ops/ops-alert-toast.js'
 import type { OpsAlertAnalysisService } from './ops-alert-analysis.service.js'
+import {
+  AGENT_DISPLAY_NAME,
+  PLATFORM_OPS_DISPLAY_PREFIX,
+} from '../../domain/brand/platform-display.js'
 
 const DEFAULT_COOLDOWN_MS = 30 * 60 * 1000
 
@@ -27,7 +31,7 @@ function categoryLabel(category: OpsAlert['category']): string {
   switch (category) {
     case 'infra': return 'Infra'
     case 'sync': return 'Sync'
-    case 'llm': return 'Ava'
+    case 'llm': return AGENT_DISPLAY_NAME
     case 'product': return 'Produto'
     default: return category
   }
@@ -38,7 +42,7 @@ function formatAlertText(alerts: OpsAlert[]): string {
     const msg = sanitizeOpsToastText(a.message)
     return `- [${a.severity}] ${categoryLabel(a.category)}: ${msg}`
   })
-  return `AiyraCare Ops - ${alerts.length} alerta(s)\n${lines.join('\n')}`
+  return `${PLATFORM_OPS_DISPLAY_PREFIX} - ${alerts.length} alerta(s)\n${lines.join('\n')}`
 }
 
 export function resolveOpsAlertDashboardUrl(): string | undefined {

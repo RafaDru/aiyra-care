@@ -51,7 +51,7 @@ describe('ops notifier scenarios — triagem e payload', () => {
         new Date().toISOString(),
         triage,
       )
-      expect(payload.text).toContain('AiyraCare Ops')
+      expect(payload.text).toContain('Ananeri Ops')
       expect(payload.dashboardUrl).toMatch(/3013/)
       if (toDispatch.length) {
         expect(payload.alerts.length).toBe(toDispatch.length)

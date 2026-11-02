@@ -1,3 +1,5 @@
+import { PLATFORM_DISPLAY_NAME } from '../brand/platform-display.js'
+
 /** Falhas mínimas em 24h para abrir incidente (mesmo integration_link). */
 export const SYNC_ESCALATION_MIN_FAILURES_24H = Number(
   process.env.SYNC_ESCALATION_MIN_FAILURES ?? '3',
@@ -25,6 +27,6 @@ export function shouldNotifyEscalation(
 }
 
 export const SYNC_ESCALATION_MESSAGES = {
-  open: 'A sincronização de um convênio apresentou falhas repetidas. Abra o AiyraCare em Integrações para verificar.',
+  open: `A sincronização de um convênio apresentou falhas repetidas. Abra o ${PLATFORM_DISPLAY_NAME} em Integrações para verificar.`,
   resolved: 'A sincronização do convênio voltou ao normal.',
 } as const

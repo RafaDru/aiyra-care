@@ -63,7 +63,7 @@ export class AuthController {
       if (isPostgresUniqueViolation(err, 'patients_cpf_key')) {
         return reply.status(409).send({
           message:
-            'Este CPF já está cadastrado no AiyraCare. Entre com a conta que criou o perfil ou use outro CPF.',
+            'Este CPF já está cadastrado no Ananeri. Entre com a conta que criou o perfil ou use outro CPF.',
           code: 'CPF_ALREADY_LINKED',
         })
       }

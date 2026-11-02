@@ -1,3 +1,5 @@
+import { AGENT_DISPLAY_NAME } from '../brand/platform-display.js'
+
 export type AvaTopicClassification = 'health' | 'off_topic'
 
 const OFF_TOPIC_PATTERNS: RegExp[] = [
@@ -15,7 +17,7 @@ const HEALTH_HINT_PATTERNS: RegExp[] = [
 ]
 
 export const AVA_OFF_TOPIC_REPLY_PT =
-  'Sou a Ava, sua companheira de cuidado de saúde na família. Posso ajudar com exames, vacinas, medicamentos, consultas e organização do cuidado — não consigo ajudar com programação, finanças ou outros assuntos fora desse contexto. Como posso apoiar o cuidado de saúde hoje?'
+  `Sou ${AGENT_DISPLAY_NAME}, sua companheira de cuidado de saúde na família. Posso ajudar com exames, vacinas, medicamentos, consultas e organização do cuidado — não consigo ajudar com programação, finanças ou outros assuntos fora desse contexto. Como posso apoiar o cuidado de saúde hoje?`
 
 export function classifyAvaUserMessage(message: string): AvaTopicClassification {
   const text = message.trim()

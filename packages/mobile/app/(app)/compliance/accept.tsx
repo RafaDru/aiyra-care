@@ -82,7 +82,7 @@ export default function ComplianceAcceptScreen() {
       <View style={[styles.card, { backgroundColor: tokens.colorBgContainer, borderColor: tokens.colorBorder }]}>
         <Text style={[styles.title, { color: tokens.colorTextBase }]}>Termos e privacidade</Text>
         <Text style={{ color: tokens.colorTextSecondary, marginBottom: 16 }}>
-          Para continuar, aceite os documentos legais vigentes do AiyraCare.
+          Para continuar, aceite os documentos legais vigentes do Ananeri.
         </Text>
 
         {error ? (

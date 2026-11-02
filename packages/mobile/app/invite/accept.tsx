@@ -63,7 +63,7 @@ export default function InviteAcceptScreen() {
         <View style={[styles.card, { backgroundColor: tokens.colorBgContainer, borderColor: tokens.colorBorder }]}>
           <Text style={{ color: tokens.colorTextSecondary }}>De</Text>
           <Text style={[styles.rowValue, { color: tokens.colorTextBase }]}>
-            {preview.inviterDisplayName ?? 'Cuidador AiyraCare'}
+            {preview.inviterDisplayName ?? 'Cuidador Ananeri'}
           </Text>
           {preview.circleName ? (
             <>

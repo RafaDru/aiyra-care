@@ -1,5 +1,6 @@
 import type { Pool } from 'pg'
 import type { BillingExportRow } from './billing-export.js'
+import { PLATFORM_DISPLAY_NAME } from '../../domain/brand/platform-display.js'
 
 export type PlanTier = 'free' | 'family'
 
@@ -329,7 +330,7 @@ export class BillingService {
       accountEmail: (r.account_email as string) ?? '',
       accountFullName: (r.account_full_name as string | null) ?? null,
       amountBrl: refAmount,
-      description: 'Assinatura AiyraCare plano família (valor referência — conferir Stripe)',
+      description: `Assinatura ${PLATFORM_DISPLAY_NAME} plano família (valor referência — conferir Stripe)`,
       packageCredits: null,
       currency: 'brl',
       stripeSessionId: null,

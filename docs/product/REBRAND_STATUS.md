@@ -1,6 +1,6 @@
 # Rebrand status — Ananeri
 
-> **Atualizado:** 2026-11-01
+> **Atualizado:** 2026-11-02
 
 | Campo | Valor |
 |-------|--------|
@@ -8,7 +8,7 @@
 | **Agente (chat/dock/FAB)** | **Neri** |
 | **Paleta** | **Vivid v2 trilha B** (`#7E22CE`, `#EC4899`, `#FACC15`) |
 | **Logo (UI)** | Placeholder **G2g metaball C** — lockup tipográfico não final |
-| **Phase** | **1 — slices 1–2** (G3 em PR [#193](https://github.com/RafaDru/aiyra-care/pull/193)) |
+| **Phase** | **1 — slices 1–3** (G3 em PR [#193](https://github.com/RafaDru/aiyra-care/pull/193)) |
 | **INPI / ®** | **Adiado** — gate financeiro (ver Project store `ananeri-phase0-lock.md`) |
 | **npm scope / repo** | Sem rename — `@aiyra-care/*` e `aiyra-care` (Phase 3A defer) |
 | **`LEGAL_*` env** | Placeholders beta inalterados até razão social/CNPJ definitivos |
@@ -19,9 +19,18 @@
 |-------|--------|--------|
 | 1 | `REBRAND_STATUS`, landing `/home`, footer, `index.html` SEO, tokens v2, logo G2g | **Concluído (G3)** |
 | 2 | Agente UI (i18n `ava.*` → Neri, dock, layout) | **Concluído (G3)** |
-| 3 | API mensagens user-facing + compliance seed display name | Pendente |
+| 3 | API mensagens user-facing + compliance seed display name | **Concluído** — `platform-display.ts`, auth/billing/e-mails/Neri LLM, seed legal titles, mobile shell copy; `@aiyra-care/*` intacto |
 | 4 | Docs produto / help face pública | Pendente |
 | 5 | Ops / CH strings | Pendente |
+
+### Slice 3 — critério de done
+
+- [x] Constantes `PLATFORM_DISPLAY_NAME` / `AGENT_DISPLAY_NAME` na API
+- [x] Erros auth, Stripe/checkout, escalonamento sync, e-mails transacionais, guardrail/off-topic Neri
+- [x] `seed-legal-documents.mjs` títulos **Ananeri** (conteúdo markdown legal = slice 4)
+- [x] Mobile: `app.json` display name, i18n lock/onboarding, telas compliance/convite
+- [x] Grep audit: sem `AiyraCare` / copy `Ava` user-facing em `packages/api/src` (exceto comentários técnicos / ids internos)
+- [x] `npm run test:critical` + `compliance-gate` / `legal-publisher` no critical
 
 ## Assets (web)
 

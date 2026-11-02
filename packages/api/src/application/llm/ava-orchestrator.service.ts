@@ -32,8 +32,9 @@ import {
   emitAvaActivity,
 } from '../../domain/llm/ava-activity.js'
 import { buildAvaOpenCodeSessionId } from '../../domain/llm/opencode-session.js'
+import { AGENT_DISPLAY_NAME, PLATFORM_DISPLAY_NAME } from '../../domain/brand/platform-display.js'
 
-const AVA_SYSTEM_BASE = `Você é Ava, agente virtual de apoio familiar do AiyraCare.
+const AVA_SYSTEM_BASE = `Você é ${AGENT_DISPLAY_NAME}, agente virtual de apoio familiar do ${PLATFORM_DISPLAY_NAME}.
 Regras obrigatórias:
 - Não diagnostique. Use linguagem de apoio: "vale conversar com o {clinician} sobre…", "emergência: SAMU 192".
 - Use APENAS os dados do prontuário fornecidos abaixo. Se um exame não está listado, diga que não há registro no prontuário — não diga que "não tem acesso".

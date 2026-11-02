@@ -1,4 +1,5 @@
 import type { TransactionalEmailPort } from '../../domain/notifications/transactional-email.types.js'
+import { PLATFORM_DISPLAY_NAME } from '../../domain/brand/platform-display.js'
 import { createTransactionalEmailAdapter } from '../../infrastructure/notifications/resend-transactional-email.adapter.js'
 
 export interface ClinicalExportDoctorEmailInput {
@@ -34,10 +35,10 @@ export function buildClinicalExportDoctorEmail(input: ClinicalExportDoctorEmailI
     `Abra o link seguro (válido até ${expires}):`,
     input.shareUrl,
     ``,
-    `O documento foi gerado pelo cuidador no AiyraCare e não substitui o prontuário oficial.`,
+    `O documento foi gerado pelo cuidador no ${PLATFORM_DISPLAY_NAME} e não substitui o prontuário oficial.`,
     `Se você não esperava este e-mail, ignore-o.`,
     ``,
-    `— AiyraCare`,
+    `— ${PLATFORM_DISPLAY_NAME}`,
   ].join('\n')
   const html = `<p>Olá, ${escapeHtml(doctor)},</p>
 <p><strong>${escapeHtml(caregiver)}</strong> preparou um resumo de saúde de <strong>${escapeHtml(input.patientName)}</strong> para apoiar a consulta.</p>

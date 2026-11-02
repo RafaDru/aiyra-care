@@ -84,7 +84,7 @@ export function buildGoLiveStatus(args: {
   return {
     complianceGateEnabled: gateEnabled,
     publisher,
-    privacyEmail: privacyEmail || 'privacidade@aiyracare.com',
+    privacyEmail: privacyEmail || 'privacidade@exemplo.com',
     stripeConfigured,
     stripeLiveMode,
     dpoSlaDays,
