@@ -130,7 +130,7 @@ export class LegalComplianceService implements ComplianceGatePort {
     const webBase = process.env.WEB_PUBLIC_URL?.trim() || 'http://localhost:5173'
     const dpoSlaDays = Number(process.env.LEGAL_DPO_SLA_DAYS ?? 15)
     return {
-      privacyEmail: process.env.LEGAL_PRIVACY_EMAIL?.trim() || 'privacidade@aiyracare.com',
+      privacyEmail: process.env.LEGAL_PRIVACY_EMAIL?.trim() || 'privacidade@exemplo.com',
       supportEmail: process.env.LEGAL_SUPPORT_EMAIL?.trim() || null,
       dpoSlaDays: Number.isFinite(dpoSlaDays) && dpoSlaDays > 0 ? Math.floor(dpoSlaDays) : 15,
       dataSubjectRequestPath: 'docs/legal/DATA_SUBJECT_REQUEST.md',

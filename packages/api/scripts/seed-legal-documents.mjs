@@ -12,7 +12,7 @@ const REGISTRY = [
   {
     kind: 'terms_of_use',
     version: '1.0',
-    title: 'Termos de Uso — AiyraCare',
+    title: 'Termos de Uso — Ananeri',
     summary: 'Condições de uso da plataforma familiar; não substitui prontuário oficial.',
     contentPath: 'docs/legal/terms-of-use/v1.0.md',
     effectiveAt: '2026-08-13T00:00:00.000Z',
@@ -21,7 +21,7 @@ const REGISTRY = [
   {
     kind: 'privacy_policy',
     version: '1.0',
-    title: 'Política de Privacidade — AiyraCare',
+    title: 'Política de Privacidade — Ananeri',
     summary: 'LGPD, dados sensíveis de saúde, suboperadores e direitos do titular.',
     contentPath: 'docs/legal/privacy-policy/v1.0.md',
     effectiveAt: '2026-08-13T00:00:00.000Z',
@@ -30,7 +30,7 @@ const REGISTRY = [
   {
     kind: 'cookie_policy',
     version: '1.0',
-    title: 'Política de Cookies — AiyraCare',
+    title: 'Política de Cookies — Ananeri',
     summary: 'Cookies essenciais, preferências e transparência (sem analytics de terceiros no MVP).',
     contentPath: 'docs/legal/cookie-policy/v1.0.md',
     effectiveAt: '2026-08-13T00:00:00.000Z',

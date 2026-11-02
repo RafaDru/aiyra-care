@@ -108,7 +108,7 @@ describe('ops pipeline — alertas → triagem → fallback → payload', () => 
       triage,
     )
 
-    expect(payload.text).toContain('AiyraCare Ops')
+    expect(payload.text).toContain('Ananeri Ops')
     expect(payload.dashboardUrl).toMatch(/3013/)
     expect(payload.triage?.length).toBe(alerts.length)
     expect(payload.humanRequiredCount).toBeGreaterThan(0)

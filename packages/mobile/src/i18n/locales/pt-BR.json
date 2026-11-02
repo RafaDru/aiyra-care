@@ -51,10 +51,10 @@
     }
   },
   "appLock": {
-    "title": "Desbloquear AiyraCare",
+    "title": "Desbloquear Ananeri",
     "subtitle": "Use a biometria do dispositivo para continuar.",
     "subtitleWithEmail": "Conta {{email}}",
-    "prompt": "Desbloquear o AiyraCare",
+    "prompt": "Desbloquear o Ananeri",
     "unlockWith": "Usar {{method}}",
     "usePassword": "Entrar com senha",
     "cancelled": "Biometria cancelada.",
@@ -70,7 +70,7 @@
     "socialDisabled": "Login social não está habilitado neste ambiente."
   },
   "onboarding": {
-    "welcomeTitle": "Bem-vindo ao AiyraCare",
+    "welcomeTitle": "Bem-vindo ao Ananeri",
     "welcomeSubtitle": "Crie seu perfil de titular para começar. Cadastro permitido apenas para maiores de 18 anos.",
     "steps": {
       "profile": "Seu perfil",

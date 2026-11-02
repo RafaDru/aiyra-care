@@ -51,10 +51,10 @@
     }
   },
   "appLock": {
-    "title": "Unlock AiyraCare",
+    "title": "Unlock Ananeri",
     "subtitle": "Use your device biometrics to continue.",
     "subtitleWithEmail": "Account {{email}}",
-    "prompt": "Unlock AiyraCare",
+    "prompt": "Unlock Ananeri",
     "unlockWith": "Use {{method}}",
     "usePassword": "Sign in with password",
     "cancelled": "Biometric unlock cancelled.",
@@ -70,7 +70,7 @@
     "socialDisabled": "Social sign-in is not enabled in this environment."
   },
   "onboarding": {
-    "welcomeTitle": "Welcome to AiyraCare",
+    "welcomeTitle": "Welcome to Ananeri",
     "welcomeSubtitle": "Create your account holder profile to get started. Only ages 18+.",
     "steps": {
       "profile": "Your profile",

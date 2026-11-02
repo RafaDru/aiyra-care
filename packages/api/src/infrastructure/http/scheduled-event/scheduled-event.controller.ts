@@ -11,6 +11,7 @@ import { NotFoundError } from '../../../domain/errors.js'
 import type { AuthenticatedRequest } from '../auth/auth.middleware.js'
 import { assertPatientAccess, filterByPatientAccess } from '../auth/patient-access.guard.js'
 import { guardPatientEntity } from '../auth/patient-entity.guard.js'
+import { PLATFORM_DISPLAY_NAME } from '../../../domain/brand/platform-display.js'
 
 export class ScheduledEventController {
   constructor(private readonly service: ScheduledEventService) {}
@@ -101,7 +102,7 @@ export class ScheduledEventController {
     const lines = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//AiyraCare//Agenda//PT',
+      `PRODID:-//${PLATFORM_DISPLAY_NAME}//Agenda//PT`,
       'CALSCALE:GREGORIAN',
     ]
     for (const e of events) {

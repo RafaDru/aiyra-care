@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import Stripe from 'stripe'
+import { PLATFORM_DISPLAY_NAME } from '../../../domain/brand/platform-display.js'
 import {
   BillingService,
   billingPackageOffers,
@@ -179,7 +180,7 @@ export async function billingRoutes(app: FastifyInstance) {
             price_data: {
               currency: pack.currency,
               unit_amount: pack.amountCents,
-              product_data: { name: `AiyraCare — ${pack.label}` },
+              product_data: { name: `${PLATFORM_DISPLAY_NAME} — ${pack.label}` },
             },
             quantity: 1,
           }],

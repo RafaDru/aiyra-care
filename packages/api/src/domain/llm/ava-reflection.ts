@@ -1,5 +1,6 @@
 import type { FamilySupportInsight } from '../../domain/family-support/family-support.types.js'
 import type { LlmMessage, LlmTokenUsage } from './llm.types.js'
+import { AGENT_DISPLAY_NAME } from '../brand/platform-display.js'
 
 export type AvaReflectionSeverity = 'ok' | 'minor' | 'critical'
 
@@ -176,7 +177,7 @@ export function parseAvaCritiqueJson(raw: string): AvaCritiqueResult | null {
   }
 }
 
-export const AVA_CRITIQUE_SYSTEM = `Você é o verificador de qualidade da Ava (apoio familiar pediátrico).
+export const AVA_CRITIQUE_SYSTEM = `Você é o verificador de qualidade da ${AGENT_DISPLAY_NAME} (apoio familiar pediátrico).
 NÃO converse com o responsável — apenas avalie a RESPOSTA PROPOSTA.
 Regras que a resposta DEVE cumprir:
 - Sem diagnóstico afirmativo ("é pneumonia", "tem diabetes").
@@ -200,7 +201,7 @@ ${userMessage}
 Contexto determinístico do prontuário:
 ${clipContext(contextBlock)}
 
-Resposta proposta da Ava:
+Resposta proposta da ${AGENT_DISPLAY_NAME}:
 ${proposedReply}
 
 Problemas já detectados por regras (${deterministicIssues.length}):

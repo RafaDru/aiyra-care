@@ -68,7 +68,7 @@ Aprovação Rafael em `promotion-report-last.md` antes de promover preview GCP (
 API (`.env`) — valores de **prep**, não go-live público:
 
 ```env
-LEGAL_ENTITY_NAME=AiyraCare (beta — razão social a confirmar)
+LEGAL_ENTITY_NAME=Ananeri (beta — razão social a confirmar)
 # LEGAL_CNPJ=              # 14 dígitos — só após contador/advogado
 LEGAL_PRIVACY_EMAIL=privacidade@exemplo.com
 LEGAL_SUPPORT_EMAIL=suporte@exemplo.com
@@ -81,7 +81,7 @@ Web (opcional fallback footer/SEO):
 
 ```env
 VITE_PUBLIC_SITE_URL=https://…preview…
-VITE_LEGAL_ENTITY_NAME=AiyraCare (beta)
+VITE_LEGAL_ENTITY_NAME=Ananeri (beta)
 ```
 
 ## Rebrand (Phase 1 em progresso)

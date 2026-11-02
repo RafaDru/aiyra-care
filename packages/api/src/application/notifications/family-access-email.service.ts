@@ -1,4 +1,5 @@
 import type { TransactionalEmailPort } from '../../domain/notifications/transactional-email.types.js'
+import { PLATFORM_DISPLAY_NAME } from '../../domain/brand/platform-display.js'
 import { createTransactionalEmailAdapter } from '../../infrastructure/notifications/resend-transactional-email.adapter.js'
 
 export interface CaregiverInviteEmailInput {
@@ -25,7 +26,7 @@ function escapeHtml(value: string) {
 }
 
 export function buildCaregiverInviteEmail(input: CaregiverInviteEmailInput) {
-  const inviter = input.inviterDisplayName?.trim() || 'Um cuidador no AiyraCare'
+  const inviter = input.inviterDisplayName?.trim() || `Um cuidador no ${PLATFORM_DISPLAY_NAME}`
   const profiles = input.patientNames.join(', ')
   const family = input.circleName ? ` na família «${input.circleName}»` : ''
   const subject = `${inviter} convidou você para cuidar de perfis de saúde`
@@ -39,7 +40,7 @@ export function buildCaregiverInviteEmail(input: CaregiverInviteEmailInput) {
     ``,
     `Se você não esperava este convite, ignore este e-mail.`,
     ``,
-    `— AiyraCare`,
+    `— ${PLATFORM_DISPLAY_NAME}`,
   ].join('\n')
   const html = `<p>Olá,</p>
 <p><strong>${escapeHtml(inviter)}</strong> convidou você para acessar perfis de saúde${family ? ` na família <strong>${escapeHtml(input.circleName!)}</strong>` : ''}: <strong>${escapeHtml(profiles)}</strong>.</p>
@@ -55,14 +56,14 @@ export function buildProfileShareInviteEmail(input: ProfileShareInviteEmailInput
   const text = [
     `Olá,`,
     ``,
-    `${owner} convidou você a vincular o perfil de saúde «${input.patientName}» a uma família na sua conta AiyraCare.`,
+    `${owner} convidou você a vincular o perfil de saúde «${input.patientName}» a uma família na sua conta ${PLATFORM_DISPLAY_NAME}.`,
     ``,
     `Entre em Configurações → Família e cuidadores para aceitar:`,
     input.settingsUrl,
     ``,
     `Depois do vínculo, conceda acesso apenas aos cuidadores necessários.`,
     ``,
-    `— AiyraCare`,
+    `— ${PLATFORM_DISPLAY_NAME}`,
   ].join('\n')
   const html = `<p>Olá,</p>
 <p><strong>${escapeHtml(owner)}</strong> convidou você a vincular o perfil <strong>${escapeHtml(input.patientName)}</strong> a uma família na sua conta.</p>

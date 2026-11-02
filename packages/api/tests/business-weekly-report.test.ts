@@ -61,7 +61,7 @@ const sample: OpsBusinessAnalytics = {
 describe('business-weekly-report', () => {
   it('renders markdown sections without PHI', () => {
     const md = buildBusinessWeeklyReportMarkdown(sample, '2026-09-11T18:00:00.000Z')
-    expect(md).toContain('# AiyraCare — relatório semanal de negócio')
+    expect(md).toContain('# Ananeri — relatório semanal de negócio')
     expect(md).toContain('WAU: **20**')
     expect(md).toContain('unimed_bh')
     expect(md).toContain('R$ 150,00')

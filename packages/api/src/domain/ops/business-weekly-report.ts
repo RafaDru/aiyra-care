@@ -1,4 +1,5 @@
 import type { OpsBusinessAnalytics } from './ops-metrics.types.js'
+import { AGENT_DISPLAY_NAME, PLATFORM_DISPLAY_NAME } from '../brand/platform-display.js'
 
 function pct(part: number, total: number): string {
   if (total <= 0) return '—'
@@ -15,7 +16,7 @@ export function buildBusinessWeeklyReportMarkdown(
 ): string {
   const { totals, activation, engagement, support, billing, integrationHealth7d, ava } = business
   const lines: string[] = [
-    '# AiyraCare — relatório semanal de negócio',
+    `# ${PLATFORM_DISPLAY_NAME} — relatório semanal de negócio`,
     '',
     `> Gerado em ${generatedAt} · agregados sem PHI`,
     '',
@@ -41,7 +42,7 @@ export function buildBusinessWeeklyReportMarkdown(
     `- WAU: **${engagement.wau}** · MAU: **${engagement.mau}** · WAU/MAU: **${engagement.wauOverMauPct ?? '—'}%**`,
     `- Contas inativas 30d: **${engagement.dormantAccounts30d}**`,
     '',
-    '## Ava (30d)',
+    `## ${AGENT_DISPLAY_NAME} (30d)`,
     '',
     `- Turnos iniciados: **${ava.started30d}** · concluídos: **${ava.completed30d}** · taxa sucesso: **${ava.successRatePct ?? '—'}%**`,
     `- Falhas: **${ava.failed30d}** · quota bloqueada: **${ava.quotaBlocked30d}**`,
