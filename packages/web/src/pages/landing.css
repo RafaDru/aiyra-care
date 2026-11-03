@@ -28,6 +28,92 @@
   padding-bottom: 56px;
 }
 
+.landing-hero-v2 {
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.landing-hero-v2-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.landing-hero-lockup {
+  margin: 0 auto 24px;
+}
+
+.landing-hero-ctas {
+  justify-content: center;
+  width: 100%;
+}
+
+.landing-proof-card {
+  border-top: 3px solid var(--brand-primary, #7e22ce);
+}
+
+.landing-proof-visual {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 12px;
+}
+
+.landing-proof-brand {
+  height: 32px;
+  width: auto;
+  max-width: 96px;
+  object-fit: contain;
+}
+
+.landing-proof-icon {
+  font-size: 32px;
+  color: var(--brand-primary, #7e22ce);
+}
+
+.landing-proof-disclaimer {
+  margin-top: 20px;
+}
+
+.landing-neri {
+  background: var(--brand-primary-bg, #ede9fe);
+  border-radius: 16px;
+  max-width: calc(1080px - 48px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-neri-visual-col {
+  display: flex;
+  justify-content: center;
+}
+
+.landing-neri-tile {
+  width: min(220px, 70vw);
+  height: auto;
+  display: block;
+}
+
+.landing-step-card {
+  border-left: 3px solid var(--brand-accent, #ec4899);
+}
+
+.landing-step-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-primary, #7e22ce);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.landing-privacy-icon {
+  font-size: 28px;
+  color: var(--brand-primary, #7e22ce);
+}
+
 .landing-hero-title {
   margin-bottom: 16px !important;
   line-height: 1.15;
@@ -387,6 +473,23 @@
 
   .landing-section {
     padding: 32px 16px;
+  }
+
+  .landing-neri {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .landing-hero-v2-inner {
+    text-align: left;
+  }
+
+  .landing-hero-lockup {
+    margin-left: 0;
+  }
+
+  .landing-hero-ctas {
+    justify-content: flex-start;
   }
 
   .landing-pricing {

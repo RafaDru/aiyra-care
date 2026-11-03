@@ -881,8 +881,8 @@
   },
   "landing": {
     "seo": {
-      "title": "Ananeri — saúde da família em um só lugar",
-      "description": "Organize exames, consultas e histórico familiar com integrações e apoio de IA. Cadastro gratuito para começar."
+      "title": "Ananeri — saúde integrada da família",
+      "description": "Carteira de saúde da família com convênio, SUS e histórico integrados. A Neri, parceira inteligente da Ananeri, ajuda no próximo passo — sem substituir seu médico."
     },
     "footerNavLabel": "Links institucionais",
     "footerPublisherPending": "Razão social e CNPJ do responsável pelo tratamento constam nos documentos legais abaixo.",
@@ -894,10 +894,64 @@
       "trustBody": "Políticas públicas, aceite de termos no cadastro e cookies opcionais. Você pode solicitar informações sobre seus dados pelo canal indicado na política de privacidade."
     },
     "ctaLogin": "Entrar",
-    "ctaSignup": "Criar conta grátis",
-    "heroTitle": "Saúde da família em um só lugar",
-    "heroSubtitle": "Histórico atualizado, linha do tempo que acompanha a vida da família e apoio imediato nas consultas. Centraliza exames, consultas, lembretes e agenda — conectada ao Google Calendar e Outlook. A Neri, assistente inteligente da Ananeri, ajuda a organizar tudo mais rápido.",
-    "heroNote": "Funcionalidades em uso por famílias reais. Textos e preços ainda em revisão.",
+    "ctaSignup": "Criar conta",
+    "heroTitle": "A carteira de saúde da família, atualizada",
+    "heroSubtitle": "Para quem cuida de filhos, pais ou de si: convênio, SUS, exames e consultas num só lugar — com integrações automáticas quando o portal permite.",
+    "heroNote": "A Neri é sua parceira no dia a dia: organiza contexto e próximos passos. Ela não é médica e não substitui avaliação clínica ou emergência (SAMU 192).",
+    "proofConcept": {
+      "title": "Tudo que importa, conectado",
+      "subtitle": "Menos portais espalhados, mais clareza na hora da consulta ou quando outro cuidador precisa de contexto.",
+      "items": [
+        {
+          "key": "convenio",
+          "title": "Convênio e laboratórios",
+          "body": "Sincronize carteirinha, autorizações e resultados quando a operadora ou laboratório disponibiliza — menos login manual."
+        },
+        {
+          "key": "sus",
+          "title": "Rede pública e SUS",
+          "body": "Organize vacinas, atendimentos e documentos do SUS junto do restante do histórico familiar."
+        },
+        {
+          "key": "familia",
+          "title": "Família no centro",
+          "body": "Perfis separados, controle de quem acessa e linha do tempo contínua para adultos e crianças."
+        }
+      ]
+    },
+    "neriSection": {
+      "title": "Conheça a Neri",
+      "tileAlt": "Neri — parceira inteligente da Ananeri",
+      "lead": "Linguagem humana para o próximo passo: o que revisar antes da consulta, o que mudou no histórico e como se preparar.",
+      "body": "A Neri usa as informações do seu prontuário na Ananeri para organizar dúvidas do cotidiano — sempre com transparência sobre limites.",
+      "disclaimer": "A Neri não realiza exames, não emite diagnósticos e não substitui médico, enfermeiro ou emergência (SAMU 192)."
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "Três passos para sair da planilha — Anel A do beta: conta, família e integrações essenciais.",
+      "stepLabel": "Passo {{n}}",
+      "steps": [
+        {
+          "title": "Crie sua conta",
+          "body": "Cadastro rápido, termos claros e você no controle de integrações desde o início."
+        },
+        {
+          "title": "Adicione quem você cuida",
+          "body": "Perfis da família, permissões de acesso e histórico separado por pessoa."
+        },
+        {
+          "title": "Integre convênio e SUS",
+          "body": "Conecte as fontes que já usa; os dados começam a chegar quando o portal permite."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacidade e LGPD",
+      "body": "Dados de saúde tratados com cuidado: infraestrutura pensada para operação no Brasil, criptografia e controle de acesso por perfil familiar.",
+      "lgpd": "Políticas públicas, aceite no cadastro e canal para titulares. Leia nossos documentos:",
+      "trustTitle": "Seus dados, suas regras",
+      "trustBody": "Você gerencia integrações, cookies opcionais e pode solicitar informações ou exclusão conforme a política de privacidade."
+    },
     "pains": {
       "title": "Você não está sozinho nessa",
       "subtitle": "Cuidar da saúde da família já exige atenção. Quando o histórico está espalhado, a carga aumenta — na consulta, na emergência ou quando outro cuidador precisa de contexto.",
