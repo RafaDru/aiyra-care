@@ -881,8 +881,8 @@
   },
   "landing": {
     "seo": {
-      "title": "Ananeri — family health in one place",
-      "description": "Organize exams, visits and family health history with integrations and AI support. Free signup to get started."
+      "title": "Ananeri — integrated family health",
+      "description": "Family health wallet with insurance, public health (SUS) and history in one place. Neri, Ananeri's intelligent partner, helps with the next step — she does not replace your doctor."
     },
     "footerNavLabel": "Institutional links",
     "footerPublisherPending": "Controller identification is published in the legal documents below.",
@@ -894,10 +894,64 @@
       "trustBody": "Public policies, terms acceptance at signup and optional cookies. You can request information about your data through the channel in our privacy policy."
     },
     "ctaLogin": "Sign in",
-    "ctaSignup": "Create free account",
-    "heroTitle": "Family health in one place",
-    "heroSubtitle": "An updated health history, a timeline that follows family life, and immediate support at medical visits. Centralizes exams, appointments, reminders and calendar — connected to Google Calendar and Outlook. Neri, Ananeri's intelligent assistant, helps families organize faster.",
-    "heroNote": "Features in use by real families. Copy and pricing still under review.",
+    "ctaSignup": "Create account",
+    "heroTitle": "Your family's health wallet, kept up to date",
+    "heroSubtitle": "For caregivers of children, parents or yourself: insurance, public health, exams and visits in one place — with automatic sync when portals allow.",
+    "heroNote": "Neri is your day-to-day partner: she organizes context and next steps. She is not a clinician and does not replace medical evaluation or emergencies (call local emergency services).",
+    "proofConcept": {
+      "title": "What matters, connected",
+      "subtitle": "Fewer scattered portals, more clarity at visits or when another caregiver needs context.",
+      "items": [
+        {
+          "key": "convenio",
+          "title": "Insurance and labs",
+          "body": "Sync cards, authorizations and results when carriers or labs make them available — less manual login."
+        },
+        {
+          "key": "sus",
+          "title": "Public health (SUS)",
+          "body": "Keep vaccines, visits and public-health documents alongside the rest of the family record."
+        },
+        {
+          "key": "familia",
+          "title": "Family-first",
+          "body": "Separate profiles, access control and a continuous timeline for adults and children."
+        }
+      ]
+    },
+    "neriSection": {
+      "title": "Meet Neri",
+      "tileAlt": "Neri — Ananeri's intelligent partner",
+      "lead": "Human language for the next step: what to review before a visit, what changed in the record and how to prepare.",
+      "body": "Neri uses your Ananeri record to organize everyday questions — always transparent about limits.",
+      "disclaimer": "Neri does not perform exams, does not diagnose and does not replace a doctor, nurse or emergency care."
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Three steps off the spreadsheet — beta Ring A: account, family and core integrations.",
+      "stepLabel": "Step {{n}}",
+      "steps": [
+        {
+          "title": "Create your account",
+          "body": "Quick signup, clear terms and you control integrations from day one."
+        },
+        {
+          "title": "Add who you care for",
+          "body": "Family profiles, access permissions and history per person."
+        },
+        {
+          "title": "Connect insurance and SUS",
+          "body": "Link the sources you already use; data flows in when portals allow."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy and LGPD",
+      "body": "Health data handled with care: infrastructure designed for Brazil, encryption and family-scoped access control.",
+      "lgpd": "Public policies, signup consent and a channel for data subjects. Read our documents:",
+      "trustTitle": "Your data, your rules",
+      "trustBody": "You manage integrations, optional cookies and can request information or deletion per our privacy policy."
+    },
     "pains": {
       "title": "You're not alone in this",
       "subtitle": "Family health already demands attention. When records are scattered, the load grows — at visits, in emergencies, or when another caregiver needs context.",
