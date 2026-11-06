@@ -1,4 +1,5 @@
 # Restaura workspace aiyra-care após junction quebrada.
+# Legacy path name: npm raiz `ananeri`; usuário pode symlink `workspace\aiyra-care` → `workspace\ananeri`.
 # FECHE O CURSOR antes de rodar.
 # Uso: npm run fix:workspace
 $ErrorActionPreference = 'Stop'

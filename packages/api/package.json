@@ -1,11 +1,11 @@
 {
-  "name": "@aiyra-care/api",
+  "name": "@ananeri/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "npm run build --workspace=@aiyra-care/connect && tsc",
+    "build": "npm run build --workspace=@ananeri/connect && tsc",
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:unit": "vitest run",
@@ -52,7 +52,7 @@
     "@google-cloud/storage": "^7.21.0",
     "@google-cloud/vision": "^5.3.7",
     "@nlptools/distance": "^0.0.8",
-    "@aiyra-care/connect": "*",
+    "@ananeri/connect": "*",
     "@supabase/supabase-js": "^2.111.0",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",

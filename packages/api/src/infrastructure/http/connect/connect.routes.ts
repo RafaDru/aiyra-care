@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { listConnectors } from '@aiyra-care/connect'
+import { listConnectors } from '@ananeri/connect'
 
 export async function connectRoutes(app: FastifyInstance) {
   app.get('/connect/connectors', async () => {

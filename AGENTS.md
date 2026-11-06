@@ -2,7 +2,7 @@
 
 ## What is this project
 
-**Ananeri** (marca UI) · agente **Neri** — monorepo técnico `aiyra-care` (`@aiyra-care/*`; rename Phase 3A defer). Workspace: `%USERPROFILE%\workspace\aiyra-care` — ver [`docs/CURSOR_WORKSPACE.md`](docs/CURSOR_WORKSPACE.md). Status rebrand: [`docs/product/REBRAND_STATUS.md`](docs/product/REBRAND_STATUS.md). Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: [`docs/PROJETO.md`](docs/PROJETO.md); decision log: [`docs/HISTORICO.md`](docs/HISTORICO.md).
+**Ananeri** (marca UI) · agente **Neri** — monorepo técnico **ananeri** no npm (`@ananeri/*`). Repositório GitHub ainda pode chamar-se `aiyra-care` até rename manual pós-merge. Workspace: `%USERPROFILE%\workspace\aiyra-care` (pasta local pode renomear para `ananeri`; ver [`docs/CURSOR_WORKSPACE.md`](docs/CURSOR_WORKSPACE.md)). Status rebrand: [`docs/product/REBRAND_STATUS.md`](docs/product/REBRAND_STATUS.md). Stack: Fastify API + React/Vite web + PostgreSQL. Living docs: [`docs/PROJETO.md`](docs/PROJETO.md); decision log: [`docs/HISTORICO.md`](docs/HISTORICO.md).
 
 **Work model (lanes, DoD, Cloud vs notebook):** [`docs/CURSOR_WORK_MODEL.md`](docs/CURSOR_WORK_MODEL.md).
 

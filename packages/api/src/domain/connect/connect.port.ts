@@ -1,6 +1,6 @@
 /**
  * Portas do Core para o motor Connect.
- * Tipos canônicos vivem em @aiyra-care/connect.
+ * Tipos canônicos vivem em @ananeri/connect.
  */
 export type {
   ConnectPort,
@@ -10,4 +10,4 @@ export type {
   ConnectorDefinition,
   CreateConnectionInput,
   ConnectionSummary,
-} from '@aiyra-care/connect'
+} from '@ananeri/connect'

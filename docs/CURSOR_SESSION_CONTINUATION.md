@@ -7,7 +7,7 @@
 
 | Item | Status |
 |------|--------|
-| Monorepo npm | `aiyra-care` (`@aiyra-care/*`) |
+| Monorepo npm | Raiz **`ananeri`**, workspaces **`@ananeri/*`** (pasta/repo podem ainda se chamar `aiyra-care`) |
 | GitHub | `RafaDru/aiyra-care` |
 | Workspace Cursor | `C:\Users\rafae\Documents\aiyra-care` |
 | PG integração | `aiyracare` (`DATABASE_URL` no `.env`) |

@@ -23,5 +23,5 @@ Aba **Produto → Maturidade** no Command Hub: ribbon, KPIs por nível e cards p
 ## QA
 
 - **Gap:** suite Playwright dedicada ainda não catalogada — validação manual: abrir `?group=produto&tab=maturidade`, conferir KPIs e link de doc (ex. failure-probes).
-- Build gate: `npm run build --workspace=@aiyra-care/ops-console`
+- Build gate: `npm run build --workspace=@ananeri/ops-console`
 - Regressão CH layout: `packages/ops-console/e2e/` (quando suite `ops-ch-maturity` existir)

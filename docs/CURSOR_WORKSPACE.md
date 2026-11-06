@@ -1,16 +1,22 @@
 # Cursor — workspace Ananeri
 
-> **Última atualização:** 2026-09-18  
-> **Status:** pasta canônica única em `workspace\aiyra-care`.
+> **Última atualização:** 2026-11-06  
+> **Status:** pasta canônica em `workspace\aiyra-care` (compatível). Npm: raiz **`ananeri`** e `@ananeri/*` (Phase 3A).
 
 ## Caminho canônico
 
 | Item | Valor |
 |------|--------|
-| **Abrir no Cursor** | `C:\Users\rafae\workspace\aiyra-care` |
-| **GitHub** | `RafaDru/aiyra-care` |
-| **npm** | `aiyra-care` (`@aiyra-care/*`) |
+| **Abrir no Cursor** | `C:\Users\rafae\workspace\aiyra-care` (ou `...\workspace\ananeri` após renomear a pasta local) |
+| **GitHub** | `RafaDru/aiyra-care` (URL permanece até rename do repositório no GitHub) |
+| **npm** | `ananeri` (`@ananeri/*`) |
 | **Continuar sessão** | `docs/CURSOR_SESSION_CONTINUATION.md` |
+
+### Migração de pasta (opcional, pós-merge Phase 3A)
+
+1. Renomeie a pasta local `workspace\aiyra-care` → `workspace\ananeri` **ou** crie um symlink/junction com o mesmo conteúdo.
+2. No Cursor: **File → Open Folder** para o novo caminho; em **Projects / My Machines** atualize o label `repo` se referir ao path antigo.
+3. `git remote set-url origin https://github.com/RafaDru/<novo-nome>.git` após rename do repositório no GitHub (se aplicável).
 
 ### Worktree CH (`aiyra-care-ch-shell`)
 
@@ -73,7 +79,8 @@ Tarefa agendada: `Ananeri-CursorMyMachinesWorker` (remover: `scripts/cursor-work
 ### Verificação
 
 ```powershell
-cd C:\Users\rafae\workspace\aiyra-care
+cd C:\Users\rafae\workspace\ananeri
+# legacy path (ainda válido): C:\Users\rafae\workspace\aiyra-care
 agent worker debug
 ```
 
@@ -96,7 +103,7 @@ agent worker debug   # deve listar Non-privacy: 1 worker
 Get-Content $env:LOCALAPPDATA\cursor-agent\worker-autostart.log -Tail 15
 ```
 
-Alternativa estável (se o bug voltar): worker dentro de **WSL Ubuntu** com repo em `~/workspace/aiyra-care` (não em `/mnt/c`).
+Alternativa estável (se o bug voltar): worker dentro de **WSL Ubuntu** com repo em `~/workspace/ananeri` ou `~/workspace/aiyra-care` (não em `/mnt/c`).
 
 ### Limitações conhecidas
 

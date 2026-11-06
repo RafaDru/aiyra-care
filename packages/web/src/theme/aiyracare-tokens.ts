@@ -1,8 +1,8 @@
-/** Web theme barrel — shared palette from @aiyra-care/design-tokens; web-only surfaces below. */
-export { AIYRACARE_DARK, AIYRACARE_TOKENS } from '@aiyra-care/design-tokens'
-export type { AiyraThemeTokens } from '@aiyra-care/design-tokens'
+/** Web theme barrel — shared palette from @ananeri/design-tokens; web-only surfaces below. */
+export { AIYRACARE_DARK, AIYRACARE_TOKENS } from '@ananeri/design-tokens'
+export type { AiyraThemeTokens } from '@ananeri/design-tokens'
 
-import { AIYRACARE_TOKENS } from '@aiyra-care/design-tokens'
+import { AIYRACARE_TOKENS } from '@ananeri/design-tokens'
 
 /** Gradientes e bordas do menu lateral — neutro claro (Vivid v2). */
 export const SIDEBAR_SURFACE = {

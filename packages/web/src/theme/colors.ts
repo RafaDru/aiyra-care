@@ -1,4 +1,4 @@
-/** Paleta Ananeri Vivid v2 — sincronizada com @aiyra-care/design-tokens. */
+/** Paleta Ananeri Vivid v2 — sincronizada com @ananeri/design-tokens. */
 export const palettes = {
   aiyra: {
     primary: '#7E22CE',

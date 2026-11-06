@@ -1,18 +1,28 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-06] - Phase 3A — escopo npm e nome raiz `ananeri`
+
+### Decisão (Rafael)
+- Renomear o monorepo no npm: raiz **`ananeri`**, workspaces **`@ananeri/*`** (importações e `package.json` alinhados).
+- **Não** renomear nesta leva identificadores de infra legados: serviços GCP (`aiyracare-preview-*`), nomes de banco Postgres (`aiyracare`, etc.) — ver [`docs/product/REBRAND_STATUS.md`](./product/REBRAND_STATUS.md).
+
+### Realizado (eng)
+- `package.json` raiz + workspaces; `package-lock.json` regenerado; Dockerfiles e scripts npm `-w` atualizados.
+- Documentação: `AGENTS.md`, `docs/CURSOR_WORKSPACE.md`, `docs/product-terminology.md`, `REBRAND_STATUS`.
+
 ## [2026-11-02] - Rebrand Phase 1 slices 4–5 — docs Ananeri / Neri
 
 ### Realizado (docs)
 - Copy pública em `docs/help/*`, `docs/legal/*`, feature cards, hub `docs/README.md`, `PROJETO.md`, personas/jornadas.
 - Ops: `AGENTS.md`, `docs/ops/*`, automations CH, exemplos notificador **Ananeri Ops**.
-- Convenção dev: [`docs/product-terminology.md`](./product-terminology.md) (marca vs `@aiyra-care` / `ava.*`).
+- Convenção dev: [`docs/product-terminology.md`](./product-terminology.md) (marca vs escopo npm `@ananeri` / `ava.*`).
 - Script de manutenção: `scripts/rebrand-docs-slice45.mjs` (tier 0; não reescreve `HISTORICO` retroativo).
 
 ## [2026-11-01] - Rebrand Phase 1 G3 — Vivid v2 + logo G2g
 
 ### Decisão (Rafael)
 - Paleta **Vivid v2 trilha B** locked; logo placeholder **G2g metaball C** (wordmark tipográfico ainda provisório).
-- Plataforma **Ananeri**; agente de chat **Neri** (não rename de pacotes `@aiyra-care/*`).
+- Plataforma **Ananeri**; agente de chat **Neri** (escopo npm ainda `@aiyra-care/*` nesta data — rename Phase 3A em 2026-11-06).
 - INPI permanece adiado.
 
 ### Realizado (eng)

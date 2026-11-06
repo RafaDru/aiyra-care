@@ -1,6 +1,6 @@
 import type { Pool } from 'pg'
-import type { CanonicalSyncBatch, CanonicalRecord } from '@aiyra-care/connect'
-import { canonicalSyncBatchSchema } from '@aiyra-care/connect'
+import type { CanonicalSyncBatch, CanonicalRecord } from '@ananeri/connect'
+import { canonicalSyncBatchSchema } from '@ananeri/connect'
 import { Authorization } from '../../domain/authorization/authorization.entity.js'
 import { AuthorizationItem } from '../../domain/authorization/authorization-item.entity.js'
 import { Exam } from '../../domain/exam/exam.entity.js'

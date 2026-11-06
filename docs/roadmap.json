@@ -283,7 +283,7 @@
       "items": [
         {
           "id": "connect-contract",
-          "title": "Pacote @aiyra-care/connect (registry + payload canônico)",
+          "title": "Pacote @ananeri/connect (registry + payload canônico)",
           "status": "done",
           "detail": "Fase 1: tipos, CONNECTOR_REGISTRY, CanonicalSyncBatch; scrapers ainda em packages/api."
         },

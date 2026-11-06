@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { CanonicalSyncBatch, CanonicalRecord } from '@aiyra-care/connect'
+import type { CanonicalSyncBatch, CanonicalRecord } from '@ananeri/connect'
 import type { AmilSyncResult } from '../../../infrastructure/scraper/amil-sync.scraper.js'
 import { AmilLabelClassifier } from '../../classification/amil-label-classifier.js'
 import { FuzzyExamCatalogLookup } from '../../../infrastructure/classification/fuzzy-exam-catalog-lookup.js'

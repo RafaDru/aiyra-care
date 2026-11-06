@@ -1,4 +1,4 @@
-import { AIYRACARE_TOKENS } from '@aiyra-care/design-tokens'
+import { AIYRACARE_TOKENS } from '@ananeri/design-tokens'
 
 /** Offset vertical compartilhado pelos FABs globais (acima da tab bar). */
 export const DUAL_ENTRY_FAB_BOTTOM_OFFSET = 56

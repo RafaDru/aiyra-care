@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Phase 1 rebrand slices 4–5 — docs only.
- * Platform: Ananeri · Agent UI: Neri · Keep @aiyra-care / aiyra-care repo ids.
+ * Platform: Ananeri · Agent UI: Neri · Npm `@ananeri/*`; GitHub/pasta local podem ainda ser `aiyra-care`.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -93,7 +93,7 @@ function walk(dir, out = []) {
 /** @param {string} line */
 function lineKeepsAiyraCare(line) {
   return (
-    /@aiyra-care/i.test(line) ||
+    /@ananeri/i.test(line) ||
     /aiyra-care/i.test(line) ||
     /AIYRACARE_DOSSIE/i.test(line) ||
     /npm scope/i.test(line) ||

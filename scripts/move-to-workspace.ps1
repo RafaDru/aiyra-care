@@ -1,5 +1,6 @@
 # Legado: migração Documents\Filhos → workspace\aiyra-care (concluída 2026-09-03).
 # Mantido para referência; o destino canônico já é %USERPROFILE%\workspace\aiyra-care.
+# Legacy path name: repo npm raiz `ananeri` — pasta local pode renomear para workspace\ananeri com symlink.
 param(
   [switch]$CopyOnly,
   [string]$Source = "$env:USERPROFILE\workspace\_archive\Filhos-2026-09-03",

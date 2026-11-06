@@ -5,7 +5,7 @@
     "name": "Ananeri",
     "repository": "https://github.com/RafaDru/aiyra-care",
     "workspacePath": "C:\\Users\\rafae\\workspace\\aiyra-care",
-    "workspaceNote": "Pasta canônica única; ver docs/CURSOR_WORKSPACE.md",
+    "workspaceNote": "Pasta local típica (legacy path); futuro `workspace\\ananeri` ou symlink — ver docs/CURSOR_WORKSPACE.md. Npm: raiz ananeri, @ananeri/*.",
     "stack": ["Fastify API", "React/Vite", "PostgreSQL", "Neo4j (projeção)", "Supabase Auth", "Stripe"],
     "localUrls": {
       "api": "http://127.0.0.1:3010",

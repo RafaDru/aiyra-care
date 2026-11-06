@@ -45,7 +45,7 @@ function transform(text) {
   protect(/aiyracare-\*\.json/g, 'gitignore')
 
   // Specific before generic
-  s = s.replace(/@aiyra-care\//g, '@aiyra-care/')
+  s = s.replace(/@ananeri\//g, '@ananeri/')
   s = s.replace(/aiyracare_preview/g, 'aiyracare_preview')
   s = s.replace(/aiyra-care-platform-for-users-and-patients/g, 'aiyra-care-platform-for-users-and-patients')
   s = s.replace(/aiyra-care-remember-me/g, 'aiyra-care-remember-me')
