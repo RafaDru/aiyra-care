@@ -1,6 +1,6 @@
 # Runbook — Preview no GCP (Ambiente 2)
 
-> **Última atualização:** 2026-09-03  
+> **Última atualização:** 2026-11-06  
 > **Pré-requisito:** staging local validado (`npm run preview:validate` verde + aprovação em `promotion-report-last.md`).  
 > **Projeto GCP:** `openhealth-503119` · Billing alerts: [`GCP_BILLING_ALERTS.md`](./GCP_BILLING_ALERTS.md)
 
@@ -32,7 +32,7 @@ flowchart LR
 | Web | Cloud Run ou static + CDN | `VITE_API_URL` + `VITE_OPS_CONSOLE_URL` do host preview |
 | Ops console | Cloud Run `:443` separado | PG direto; chave `OPS_METRICS_KEY` preview-only |
 | Worker | Cloud Run Job ou GCE | `OPS_ALERTS_INTERVAL_MS`, probe, scheduled sync |
-| Alertas | ntfy `aiyracare-preview` ou webhook Slack | Distinto de integração e prod |
+| Alertas | ntfy `ananeri-preview` ou webhook Slack | Distinto de integração e prod |
 
 ## Checklist — provisionar (uma vez)
 
@@ -61,7 +61,7 @@ Ver [`GITHUB_ENVIRONMENTS_SECRETS.md`](./GITHUB_ENVIRONMENTS_SECRETS.md). Mínim
 | `DATABASE_URL` | `postgresql://...@/aiyracare_preview` |
 | `CRYPTO_KEY` | 64 hex **único preview** |
 | `OPS_METRICS_KEY` | distinto de `.env` local |
-| `OPS_ALERT_WEBHOOK_URL` | `https://ntfy.sh/aiyracare-preview` |
+| `OPS_ALERT_WEBHOOK_URL` | `https://ntfy.sh/ananeri-preview` |
 | `OPS_ALERT_DASHBOARD_URL` | `https://ops.preview.<domínio>` |
 | `API_PUBLIC_URL` | `https://api.preview.<domínio>` |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE` | projeto staging Supabase |
@@ -93,8 +93,10 @@ Dois jobs no GCP Preview (substituem o loop local):
 
 | Job | Modo | Schedule default |
 |-----|------|------------------|
-| `aiyracare-preview-worker-sync` | `CONNECT_WORKER_JOB_MODE=sync` | `*/30 * * * *` |
-| `aiyracare-preview-worker-ops` | probe + alerts | `*/15 * * * *` |
+| `ananeri-preview-worker-sync` | `CONNECT_WORKER_JOB_MODE=sync` | `*/30 * * * *` |
+| `ananeri-preview-worker-ops` | probe + alerts | `*/15 * * * *` |
+
+**Migração a partir de `aiyracare-preview-*`:** nomes antigos permanecem no GCP até redeploy ou rename manual; após criar serviços/repo `ananeri-preview*`, atualize secrets `GCP_ARTIFACT_REGISTRY`, URLs públicas (`API_PUBLIC_URL`, etc.) e dispache um novo promote.
 
 ```powershell
 npm run deploy:preview:worker -- --dry-run --tag=test

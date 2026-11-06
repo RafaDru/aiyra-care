@@ -4,11 +4,12 @@
 
 ### Decisão (Rafael)
 - Renomear o monorepo no npm: raiz **`ananeri`**, workspaces **`@ananeri/*`** (importações e `package.json` alinhados).
-- **Não** renomear nesta leva identificadores de infra legados: serviços GCP (`aiyracare-preview-*`), nomes de banco Postgres (`aiyracare`, etc.) — ver [`docs/product/REBRAND_STATUS.md`](./product/REBRAND_STATUS.md).
+- **Post-3A (mesmo dia):** alinhar **nomes de recursos preview no GCP** a `ananeri-preview-*` (Artifact Registry, Cloud Run, jobs, scheduler); **Postgres** (`aiyracare_preview`, etc.) permanece legado até migração de BD dedicada — ver [`docs/product/REBRAND_STATUS.md`](./product/REBRAND_STATUS.md).
 
 ### Realizado (eng)
 - `package.json` raiz + workspaces; `package-lock.json` regenerado; Dockerfiles e scripts npm `-w` atualizados.
 - Documentação: `AGENTS.md`, `docs/CURSOR_WORKSPACE.md`, `docs/product-terminology.md`, `REBRAND_STATUS`.
+- **Naming preview GCP + notebook:** `infra/gcp/preview.defaults.json`, `scripts/gcp-preview-worker.mjs`, `scripts/setup-ops-preview.ps1`, runbooks (`GCP_PREVIEW_RUNBOOK`, secrets matrix, `OPS_TWO_ENV_SETUP`), tarefa agendada Windows **Ananeri-CursorMyMachinesWorker** (remove `AiyraCare-*`), `scripts/up.ps1` detecta worktree `ananeri-ch-shell` ou legado `aiyra-care-ch-shell`; checklist [`docs/product/NPM_ORG_AND_LEGAL_ENV.md`](./product/NPM_ORG_AND_LEGAL_ENV.md).
 
 ## [2026-11-02] - Rebrand Phase 1 slices 4–5 — docs Ananeri / Neri
 

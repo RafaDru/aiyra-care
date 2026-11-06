@@ -3,7 +3,8 @@
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$TaskName = "AiyraCare-CursorMyMachinesWorker"
+$TaskName = "Ananeri-CursorMyMachinesWorker"
+$LegacyTaskName = "AiyraCare-CursorMyMachinesWorker"
 $StartScript = Join-Path $PSScriptRoot "cursor-worker-start.ps1"
 $Pwsh = "C:\Program Files\PowerShell\7\pwsh.exe"
 if (-not (Test-Path $Pwsh)) {
@@ -28,9 +29,11 @@ $settings = New-ScheduledTaskSettingsSet `
 
 $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
 
-$existing = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
-if ($existing) {
-  Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+foreach ($name in @($TaskName, $LegacyTaskName)) {
+  $existing = Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue
+  if ($existing) {
+    Unregister-ScheduledTask -TaskName $name -Confirm:$false
+  }
 }
 
 Register-ScheduledTask `
@@ -39,7 +42,7 @@ Register-ScheduledTask `
   -Trigger $trigger `
   -Settings $settings `
   -Principal $principal `
-  -Description "Cursor Projects / My Machines worker (local execution for aiyra-care)." | Out-Null
+  -Description "Cursor Projects / My Machines worker (Ananeri monorepo — local execution)." | Out-Null
 
 Write-Host "Scheduled task registered: $TaskName"
 Write-Host "Trigger: 45s after user logon ($env:USERNAME)"

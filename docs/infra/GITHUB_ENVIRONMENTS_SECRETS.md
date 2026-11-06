@@ -1,6 +1,6 @@
 # GitHub Environments — secrets e variáveis
 
-> **Última atualização:** 2026-09-03  
+> **Última atualização:** 2026-11-06  
 > Matriz para configurar **Settings → Environments** quando houver hosts cloud.  
 > Local hoje: `.env` (integração) + `.env.preview` (preview paralelo) — ver `npm run setup:ops-preview`.
 
@@ -27,7 +27,7 @@
 | `STRIPE_WEBHOOK_SECRET` | test endpoint | test | live |
 | `API_PUBLIC_URL` | `https://preview...` ou `http://127.0.0.1:3020` | `http://127.0.0.1:3010` | `https://api...` |
 | `OPS_METRICS_KEY` | preview-only | integration-only | prod-only |
-| `OPS_ALERT_WEBHOOK_URL` | ntfy `aiyracare-preview` | local `:3012` ou off | ntfy prod |
+| `OPS_ALERT_WEBHOOK_URL` | ntfy `ananeri-preview` | local `:3012` ou off | ntfy prod |
 | `OPS_ALERT_DASHBOARD_URL` | console preview | `:3013` | ops prod URL |
 
 ### GCP Preview (Environment `preview`)
@@ -37,7 +37,7 @@
 | `GCP_SA_KEY` | JSON service account — Cloud Run + Artifact Registry deploy |
 | `GCP_PROJECT_ID` | Variable — ex. `openhealth-503119` |
 | `GCP_REGION` | Variable — ex. `us-central1` |
-| `GCP_ARTIFACT_REGISTRY` | Variable — ex. `aiyracare-preview` |
+| `GCP_ARTIFACT_REGISTRY` | Variable — ex. `ananeri-preview` |
 | `VITE_SUPABASE_ANON_KEY` | Build imagem web no deploy GCP |
 
 | `GCP_SCHEDULER_SA_EMAIL` | Variable — SA para Cloud Scheduler invocar Run Jobs |

@@ -14,9 +14,9 @@ O processo `:3013` deve ser o **ops-console** com navegação CH v2 (grupos late
 
 App web (Configurações → Ops): abre `:3013` via `openOpsConsole()` — favorito o link de **Defeitos** acima.
 
-## Worktree opcional `aiyra-care-ch-shell`
+## Worktree opcional `ananeri-ch-shell` (legado: `aiyra-care-ch-shell`)
 
-Par irmão do repo principal (ou `AIYRA_CH_SHELL_ROOT`). O `scripts/up.ps1` **prefere** subir o ops-console a partir do ch-shell **somente** quando o HEAD do worktree está **alinhado** com o checkout principal:
+Par irmão do repo principal (ou `AIYRA_CH_SHELL_ROOT`). O `scripts/up.ps1` resolve por defeito `..\ananeri-ch-shell`, caindo para `..\aiyra-care-ch-shell` se existir. O `scripts/up.ps1` **prefere** subir o ops-console a partir do ch-shell **somente** quando o HEAD do worktree está **alinhado** com o checkout principal:
 
 | Situação | Comportamento do `up.ps1` |
 |----------|---------------------------|
@@ -32,12 +32,13 @@ Isso evita servir CH antigo em `:3013` quando o worktree ficou parado sem merge/
 1. **Um SHA** — alinhe os dois checkouts ao mesmo commit (recomendado: `main` atual):
 
    ```powershell
-   cd C:\Users\rafae\Workspace\aiyra-care
+   cd C:\Users\rafae\Workspace\ananeri
    git fetch origin main
    git checkout main
    git pull origin main
 
-   cd ..\aiyra-care-ch-shell
+   cd ..\ananeri-ch-shell
+   # ou: cd ..\aiyra-care-ch-shell   (nome legado da pasta)
    git fetch origin main
    git checkout main
    git reset --hard origin/main   # ou merge/rebase se estiver em branch de feature
