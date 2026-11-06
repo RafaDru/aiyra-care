@@ -155,10 +155,15 @@ if (-not $apiHealthOk) {
 Write-Host "Starting Ops console..." -NoNewline
 if ($Preview -and -not $env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT = $defaultOpsConsole }
 $opsConsolePort = if ($env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT } else { $defaultOpsConsole }
-$chShellRoot = if ($env:AIYRA_CH_SHELL_ROOT) {
-  $env:AIYRA_CH_SHELL_ROOT.Trim()
+$chParent = Split-Path $root -Parent
+if ($env:AIYRA_CH_SHELL_ROOT -and $env:AIYRA_CH_SHELL_ROOT.Trim()) {
+  $chShellRoot = $env:AIYRA_CH_SHELL_ROOT.Trim()
 } else {
-  Join-Path (Split-Path $root -Parent) "aiyra-care-ch-shell"
+  $chAnaneri = Join-Path $chParent "ananeri-ch-shell"
+  $chLegacy = Join-Path $chParent "aiyra-care-ch-shell"
+  if (Test-Path $chAnaneri) { $chShellRoot = $chAnaneri }
+  elseif (Test-Path $chLegacy) { $chShellRoot = $chLegacy }
+  else { $chShellRoot = $chAnaneri }
 }
 $rootOpsUp = Join-Path $PSScriptRoot 'ops-console-up.ps1'
 if (-not $Preview) {

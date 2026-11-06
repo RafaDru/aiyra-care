@@ -1,15 +1,15 @@
 {
   "projectId": "openhealth-503119",
   "region": "us-central1",
-  "artifactRegistry": "aiyracare-preview",
+  "artifactRegistry": "ananeri-preview",
   "services": {
-    "api": "aiyracare-preview-api",
-    "web": "aiyracare-preview-web",
-    "ops": "aiyracare-preview-ops"
+    "api": "ananeri-preview-api",
+    "web": "ananeri-preview-web",
+    "ops": "ananeri-preview-ops"
   },
   "jobs": {
-    "workerSync": "aiyracare-preview-worker-sync",
-    "workerOps": "aiyracare-preview-worker-ops"
+    "workerSync": "ananeri-preview-worker-sync",
+    "workerOps": "ananeri-preview-worker-ops"
   },
   "schedules": {
     "workerSync": "*/30 * * * *",

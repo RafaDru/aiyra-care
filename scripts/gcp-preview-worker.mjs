@@ -145,8 +145,8 @@ deployJob(jobs.workerSync, 'sync')
 deployJob(jobs.workerOps, 'ops')
 
 if (!jobsOnly) {
-  deployScheduler(jobs.workerSync, schedules.workerSync, 'aiyracare-preview-scheduler-sync')
-  deployScheduler(jobs.workerOps, schedules.workerOps, 'aiyracare-preview-scheduler-ops')
+  deployScheduler(jobs.workerSync, schedules.workerSync, 'ananeri-preview-scheduler-sync')
+  deployScheduler(jobs.workerOps, schedules.workerOps, 'ananeri-preview-scheduler-ops')
 }
 
 console.log('\ngcp-preview-worker OK')

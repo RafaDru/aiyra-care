@@ -7,7 +7,7 @@
 
 | Item | Valor |
 |------|--------|
-| **Abrir no Cursor** | `C:\Users\rafae\workspace\aiyra-care` (ou `...\workspace\ananeri` após renomear a pasta local) |
+| **Abrir no Cursor** | `C:\Users\rafae\workspace\ananeri` (canonical). Path legado `...\workspace\aiyra-care` ainda funciona até renomear. |
 | **GitHub** | `RafaDru/aiyra-care` (URL permanece até rename do repositório no GitHub) |
 | **npm** | `ananeri` (`@ananeri/*`) |
 | **Continuar sessão** | `docs/CURSOR_SESSION_CONTINUATION.md` |
@@ -18,13 +18,13 @@
 2. No Cursor: **File → Open Folder** para o novo caminho; em **Projects / My Machines** atualize o label `repo` se referir ao path antigo.
 3. `git remote set-url origin https://github.com/RafaDru/<novo-nome>.git` após rename do repositório no GitHub (se aplicável).
 
-### Worktree CH (`aiyra-care-ch-shell`)
+### Worktree CH (`ananeri-ch-shell`, legado `aiyra-care-ch-shell`)
 
 Branch típica: `cursor/ch-incidentes-board-193e` (Command Hub / pipeline incidentes). O checkout **não herda** `.env` do repo principal.
 
 | Passo | Ação |
 |-------|------|
-| 1 | Na raiz do worktree, symlink `.env` → `..\aiyra-care\.env` (ou cópia) com `DATABASE_URL`, `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_*`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_*`, `OPS_METRICS_KEY`, opcional `OPS_INVESTIGATOR_CALLBACK_KEY` |
+| 1 | Na raiz do worktree, symlink `.env` → `..\ananeri\.env` (ou `..\aiyra-care\.env` se a pasta principal ainda tiver nome legado) com `DATABASE_URL`, `CURSOR_DEVELOPMENT_SUPPORT_AUTOMATION_WEBHOOK_*`, `CURSOR_SRE_SUPPORT_AUTOMATION_WEBHOOK_*`, `OPS_METRICS_KEY`, opcional `OPS_INVESTIGATOR_CALLBACK_KEY` |
 | 2 | **Reiniciar API `:3010` e ops-console `:3013`** após criar/alterar o symlink (processos antigos não leem env novo) |
 | 3 | Webhook URL/key: copiar do **painel Cursor** (Automations) — mismatch → HTTP 400/401 no dispatch; ver `docs/ops/AUTOMATIONS_LANES.md` |
 | 4 | Ops-console `:3013` usa o mesmo `.env` para worker embutido de outbox (`CH_INCIDENT_DISPATCH_WORKER`, default ligado) |
@@ -44,7 +44,7 @@ Ver [`docs/ops/CH_INCIDENT_DEFECT_PIPELINE.md`](ops/CH_INCIDENT_DEFECT_PIPELINE.
 
 | Pasta interna | Workspace |
 |---------------|-----------|
-| `c-Users-rafae-workspace-aiyra-care` | **usar** |
+| `c-Users-rafae-workspace-ananeri` | **usar** (legado: `c-Users-rafae-workspace-aiyra-care`) |
 
 ## Projects (coordenação nuvem) + agentes locais
 

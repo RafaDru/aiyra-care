@@ -61,7 +61,9 @@
 
 ## Identificadores legados (infra)
 
-Não confundir com o escopo npm `@ananeri/*`: nomes **GCP Cloud Run** (`aiyracare-preview-*`), **Postgres** (`aiyracare`, `aiyracare_preview`), storage keys e paths históricos em scripts permanecem como estão até migração de infra dedicada.
+- **GCP preview (código / defaults):** serviços, Artifact Registry e jobs usam prefixo **`ananeri-preview-*`** (`infra/gcp/preview.defaults.json`). Recursos ainda chamados `aiyracare-preview-*` no console são legados até redeploy ou rename manual.
+- **Postgres:** instâncias e databases (`aiyracare`, `aiyracare_preview`) **não** mudam só por causa do rename npm — migração de BD é passo separado.
+- **Checklists:** org npm `@ananeri` e variáveis `LEGAL_*` — [`NPM_ORG_AND_LEGAL_ENV.md`](./NPM_ORG_AND_LEGAL_ENV.md).
 
 ## Referências
 
