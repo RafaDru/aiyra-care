@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     resolve: {
       alias: {
-        '@aiyra-care/design-tokens': resolve(monorepoRoot, 'packages/design-tokens/src/index.ts'),
+        '@ananeri/design-tokens': resolve(monorepoRoot, 'packages/design-tokens/src/index.ts'),
       },
     },
     root: resolve(__dirname, 'src/client'),

@@ -9,7 +9,7 @@ COPY packages/api/package.json packages/api/
 COPY packages/connect/package.json packages/connect/
 COPY packages/connect-worker/package.json packages/connect-worker/
 
-RUN npm ci --workspace=@aiyra-care/connect-worker --workspace=@aiyra-care/api --workspace=@aiyra-care/connect
+RUN npm ci --workspace=@ananeri/connect-worker --workspace=@ananeri/api --workspace=@ananeri/connect
 
 COPY packages/connect packages/connect
 COPY packages/api packages/api

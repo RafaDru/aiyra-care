@@ -3,9 +3,9 @@ import {
   connectorForLegacyPortal,
   getConnector,
   listConnectors,
-} from '@aiyra-care/connect'
+} from '@ananeri/connect'
 
-describe('@aiyra-care/connect registry', () => {
+describe('@ananeri/connect registry', () => {
   it('maps hermes_pardini portal to grupo Fleury connector', () => {
     const c = connectorForLegacyPortal('hermes_pardini')
     expect(c?.id).toBe('grupo_fleury_precision_care')

@@ -1,4 +1,5 @@
 # Migra ambiente local à estrutura aiyra-care (PG + .env + Open Design).
+# Legacy path: estes scripts ainda referem pasta/repo `aiyra-care` — pode usar junction/symlink para `ananeri`.
 # Uso: npm run migrate:session
 param([switch]$SkipOpenDesign)
 

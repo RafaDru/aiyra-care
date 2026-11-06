@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AIYRACARE_TOKENS } from '@aiyra-care/design-tokens'
+import { AIYRACARE_TOKENS } from '@ananeri/design-tokens'
 import {
   DUAL_ENTRY_EDGE_INSET,
   DUAL_ENTRY_FAB_BOTTOM_OFFSET,

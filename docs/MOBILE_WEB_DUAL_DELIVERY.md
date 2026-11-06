@@ -25,7 +25,7 @@ Cada exceção precisa de linha na tabela **Web-only** em `docs/features/mobile-
 
 1. **Bootstrap:** `docs/features/<id>.md` + `packages/web/src/lib/patient-navigation.ts` (se paciente) + `packages/mobile/src/lib/patient-navigation.ts` (manter paridade de chaves).
 2. **API:** contrato único em `packages/api` — mobile não duplica BFF.
-3. **Tokens:** `@aiyra-care/design-tokens` — não copiar cores soltas.
+3. **Tokens:** `@ananeri/design-tokens` — não copiar cores soltas.
 4. **UI mobile:** componente em `packages/mobile/src/components/<domínio>/`; rota Expo espelhando path web quando fizer sentido.
 5. **QA:** `npm run mobile:check` + suite `mobile-shell-smoke` se tocou auth, paciente ou tab já coberta.
 6. **Ops:** aba **Produto → Mobile** no Command Hub (`docs/ops/CONSOLE.md`).

@@ -1,6 +1,6 @@
 # Rebrand status — Ananeri
 
-> **Atualizado:** 2026-11-02
+> **Atualizado:** 2026-11-06
 
 | Campo | Valor |
 |-------|--------|
@@ -10,7 +10,7 @@
 | **Logo (UI)** | Placeholder **G2g metaball C** — lockup tipográfico não final |
 | **Phase** | **1 — slices 1–5** (G3 web/API [#193](https://github.com/RafaDru/aiyra-care/pull/193), [#195](https://github.com/RafaDru/aiyra-care/pull/195); docs [#196](https://github.com/RafaDru/aiyra-care/pull/196)) |
 | **INPI / ®** | **Adiado** — gate financeiro (ver Project store `ananeri-phase0-lock.md`) |
-| **npm scope / repo** | Sem rename — `@aiyra-care/*` e `aiyra-care` (Phase 3A defer) |
+| **npm scope / repo** | **Phase 3A (code):** raiz npm `ananeri`, pacotes `@ananeri/*`. Nome do repositório GitHub / pasta local podem permanecer `aiyra-care` até passos manuais pós-merge. |
 | **`LEGAL_*` env** | Placeholders beta inalterados até razão social/CNPJ definitivos |
 
 ## Slices (Phase 1)
@@ -19,8 +19,8 @@
 |-------|--------|--------|
 | 1 | `REBRAND_STATUS`, landing `/home`, footer, `index.html` SEO, tokens v2, logo G2g | **Concluído (G3)** |
 | 2 | Agente UI (i18n `ava.*` → Neri, dock, layout) | **Concluído (G3)** |
-| 3 | API mensagens user-facing + compliance seed display name | **Concluído** — `platform-display.ts`, auth/billing/e-mails/Neri LLM, seed legal titles, mobile shell copy; `@aiyra-care/*` intacto |
-| 4 | Docs produto / help face pública | **Concluído** — help, legal v1.0, features, hub `docs/README`, `PROJETO`, personas/jornadas; `@aiyra-care` / ids `ava_*` documentados |
+| 3 | API mensagens user-facing + compliance seed display name | **Concluído** — `platform-display.ts`, auth/billing/e-mails/Neri LLM, seed legal titles, mobile shell copy; escopo npm migrado em Phase 3A |
+| 4 | Docs produto / help face pública | **Concluído** — help, legal v1.0, features, hub `docs/README`, `PROJETO`, personas/jornadas; `@ananeri/*` / ids `ava_*` documentados |
 | 5 | Ops / CH strings (docs) | **Concluído** — `AGENTS.md`, `docs/ops/*`, automations paste kits, notifier examples **Ananeri Ops** |
 
 ### Slice 3 — critério de done
@@ -40,7 +40,7 @@
 
 ### Slice 5 — critério de done
 
-- [x] [`AGENTS.md`](../../AGENTS.md) — marca vs monorepo `@aiyra-care`
+- [x] [`AGENTS.md`](../../AGENTS.md) — marca vs monorepo `@ananeri`
 - [x] `docs/ops/*` (CH, notificador, runbooks) — prefixo **Ananeri Ops** onde aplicável
 - [x] Instruções automations CH — referência **Ananeri** (identificadores `aiyra-*` de webhook inalterados)
 
@@ -58,6 +58,10 @@
 - Cloud: `packages/web` build + `npm run test:critical`
 - Notebook (footer/landing): suite [`auth-entry-flow`](../testing/suites/auth-entry-flow.md)
 - Agente: suites lane `ava` se alteração de strings
+
+## Identificadores legados (infra)
+
+Não confundir com o escopo npm `@ananeri/*`: nomes **GCP Cloud Run** (`aiyracare-preview-*`), **Postgres** (`aiyracare`, `aiyracare_preview`), storage keys e paths históricos em scripts permanecem como estão até migração de infra dedicada.
 
 ## Referências
 

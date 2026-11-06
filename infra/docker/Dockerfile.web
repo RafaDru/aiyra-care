@@ -15,11 +15,11 @@ ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 COPY package.json package-lock.json ./
 COPY packages/web/package.json packages/web/
 
-RUN npm ci --workspace=@aiyra-care/web
+RUN npm ci --workspace=@ananeri/web
 
 COPY packages/web packages/web
 
-RUN npm run build -w @aiyra-care/web
+RUN npm run build -w @ananeri/web
 
 FROM nginx:1.27-alpine AS runtime
 COPY infra/docker/nginx-web.conf /etc/nginx/conf.d/default.conf

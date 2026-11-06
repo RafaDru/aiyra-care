@@ -1,4 +1,5 @@
 # Migra sessoes Cursor para workspace\aiyra-care (rename aiyra-cara -> aiyra-care).
+# Legacy paths: pós Phase 3A o checkout pode viver em workspace\ananeri — ajuste manual ou symlink se necessário.
 param([switch]$DryRun)
 
 $ErrorActionPreference = 'Stop'

@@ -1,4 +1,4 @@
-# @aiyra-care/connect
+# @ananeri/connect
 
 Contrato e registry do **Aiyra Connect** — motor de integração (connectores, sync, credenciais).
 

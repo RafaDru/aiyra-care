@@ -1,5 +1,5 @@
 {
-  "name": "@aiyra-care/connect",
+  "name": "@ananeri/connect",
   "version": "0.1.0",
   "private": true,
   "description": "Contrato canônico e registry de connectors — motor de integração Aiyra Connect",

@@ -1,6 +1,6 @@
 # Terminologia de produto (B2C — cuidador familiar)
 
-> **Última atualização:** 2026-11-02  
+> **Última atualização:** 2026-11-06  
 > Relacionado: [`FAMILY_ACCESS_MODEL.md`](./FAMILY_ACCESS_MODEL.md), [`AVA_PATIENT_LENS.md`](./AVA_PATIENT_LENS.md), [`product/REBRAND_STATUS.md`](./product/REBRAND_STATUS.md)
 
 ## Marca (Phase 1)
@@ -9,7 +9,7 @@
 |--------|------|-------------------|
 | Plataforma (UI, legal user-facing, help) | **Ananeri** | Razão social / `LEGAL_*` env (beta placeholder) |
 | Agente (chat, dock, FAB) | **Neri** | Pasta/código `ava/*`, chaves i18n `ava.*`, rotas `/ava/*`, feature id `ava_companion` |
-| Monorepo / npm | `aiyra-care`, `@aiyra-care/*` | Marca exibida — defer Phase 3A |
+| Monorepo / npm | Raiz **`ananeri`**, workspaces `@ananeri/*` | Distinto da marca **Ananeri** na UI; repositório/pasta local podem ainda ser `aiyra-care` |
 
 Documentação de engenharia pode manter prefixo **`AVA_`** nos nomes de arquivo (`AVA_OPERATIONAL.md`) enquanto a copy descreve **Neri**.
 

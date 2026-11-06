@@ -32,7 +32,7 @@ Connect extrai, normaliza e entrega **payload canônico**. O Core importa no dom
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Pacote `@aiyra-care/connect` (Fase 1)
+## Pacote `@ananeri/connect` (Fase 1)
 
 | Módulo | Conteúdo |
 |--------|----------|

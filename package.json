@@ -1,8 +1,8 @@
 {
-  "name": "aiyra-care",
+  "name": "ananeri",
   "version": "0.1.0",
   "private": true,
-  "description": "AiyraCare - Gerenciamento centralizado de histórico médico infantil",
+  "description": "Ananeri — gerenciamento centralizado de histórico médico familiar (monorepo)",
   "scripts": {
     "api:dev": "cd packages/api && npm run dev",
     "web:dev": "cd packages/web && npm run dev",

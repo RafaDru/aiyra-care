@@ -1,4 +1,5 @@
 # Remove pastas legadas apos reabrir Cursor em workspace\aiyra-care.
+# Legacy: mesmo fluxo se a pasta se chamar workspace\ananeri (symlink/junction ao path antigo).
 $ErrorActionPreference = 'Stop'
 $legacy = @(
   'C:\Users\rafae\workspace\aiyra-cara',

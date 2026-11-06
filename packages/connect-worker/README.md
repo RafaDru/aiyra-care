@@ -1,4 +1,4 @@
-# @aiyra-care/connect-worker
+# @ananeri/connect-worker
 
 Processo apartado para **sync agendado** (`trigger=scheduled`) dos `integration_links`.
 

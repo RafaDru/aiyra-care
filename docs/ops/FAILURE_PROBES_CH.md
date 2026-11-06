@@ -10,7 +10,7 @@
 
 | **MVP — implementar** | **Pós-MVP — só documentar** |
 |------------------------|-------------------------------|
-| React **web** SDK (evoluir `client-errors`) | Backend probe / filter Fastify (`@aiyra-care/failure-probe-fastify`) |
+| React **web** SDK (evoluir `client-errors`) | Backend probe / filter Fastify (`@ananeri/failure-probe-fastify`) |
 | React **Native** mobile SDK | Pacote **Angular** (CH / outros consumidores) |
 | Bridge blocklist `CLIENT_ERROR_INCIDENT_FEATURES_DISABLED` (M2 parcial; **3A** `ava_companion`) | SDK **Android / iOS** nativos |
 | Suite QA `failure-probes-ch` (após M2) | |
@@ -45,7 +45,7 @@
 2. Contrato estável **probe → ingest → fingerprint → dedupe → INC** compartilhado entre **web e mobile** (MVP); backend probe documentado para pós-MVP.
 3. Respeitar **LGPD**: sem PHI em Postgres; stacks só em log servidor quando aplicável.
 4. **Manutenção planejada** suprime auto-INC (comportamento atual do bridge — manter).
-5. Pacotes SDK nomeados para extração futura (`@aiyra-care/failure-probe` ou namespace CH probe).
+5. Pacotes SDK nomeados para extração futura (`@ananeri/failure-probe` ou namespace CH probe).
 
 ### Não-objetivos (MVP)
 
@@ -170,12 +170,12 @@ Doc operacional legado: [`CLIENT_ERROR_INCIDENT_BRIDGE.md`](./CLIENT_ERROR_INCID
 
 | Pacote | MVP | Repo path (atual / alvo) | Responsabilidade |
 |--------|-----|---------------------------|------------------|
-| `@aiyra-care/failure-probe-core` | sim (M3) | `packages/failure-probe` (novo) | Tipos Zod, fingerprint, normalização, default-on/opt-out |
-| `@aiyra-care/failure-probe-react` | **sim** | `packages/web/src/lib/client-errors.ts` | Boundary, `reportClientError`, React 19 |
-| `@aiyra-care/failure-probe-react-native` | **sim** | `packages/mobile/src/lib/client-errors.ts` | Paridade web |
+| `@ananeri/failure-probe-core` | sim (M3) | `packages/failure-probe` (novo) | Tipos Zod, fingerprint, normalização, default-on/opt-out |
+| `@ananeri/failure-probe-react` | **sim** | `packages/web/src/lib/client-errors.ts` | Boundary, `reportClientError`, React 19 |
+| `@ananeri/failure-probe-react-native` | **sim** | `packages/mobile/src/lib/client-errors.ts` | Paridade web |
 | Ingest API | sim (existente) | `packages/api` telemetry routes | Auth, validação, insert, bridge |
-| `@aiyra-care/failure-probe-angular` | pós-MVP | doc / sketch | ErrorHandler + HTTP interceptor espelhado |
-| `@aiyra-care/failure-probe-fastify` | pós-MVP | `packages/api` (futuro) | Não substitui hook prefixo 5xx no MVP |
+| `@ananeri/failure-probe-angular` | pós-MVP | doc / sketch | ErrorHandler + HTTP interceptor espelhado |
+| `@ananeri/failure-probe-fastify` | pós-MVP | `packages/api` (futuro) | Não substitui hook prefixo 5xx no MVP |
 
 Namespace alternativo longo prazo: pacotes publicados sob org **CH probe** se Aiyra e CH divergirem — contrato JSON permanece igual.
 

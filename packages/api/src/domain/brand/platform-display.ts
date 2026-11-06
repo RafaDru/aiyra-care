@@ -1,4 +1,4 @@
-/** Marca exibida ao usuário (Phase 1 rebrand — npm scope permanece @aiyra-care). */
+/** Marca exibida ao usuário (Phase 1 rebrand; escopo npm `@ananeri/*` — Phase 3A). */
 export const PLATFORM_DISPLAY_NAME = 'Ananeri'
 
 /** Agente de chat / apoio familiar (UI e mensagens user-facing). */

@@ -14,7 +14,7 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 |---------|-------|-----------|
 | App funciona local, CI quebra no build | `dev` ≠ `build` | Rodar `cd packages/api && npm run build` antes de push em `main` |
 | E2E regression para em "Build API" | Mesmo gate do job `api` | Corrigir build primeiro; Playwright só roda depois |
-| E2E regression para em "Wait for API" | `node dist/index.js` importa `@aiyra-care/connect` como `.ts` | `connect` deve gerar `dist/` antes do `tsc` da API (`api` build já encadeia) |
+| E2E regression para em "Wait for API" | `node dist/index.js` importa `@ananeri/connect` como `.ts` | `connect` deve gerar `dist/` antes do `tsc` da API (`api` build já encadeia) |
 | `api.log` só `{"level":50,...}` sem mensagem | `logMethod` sanitizava `Error` → `{}`; `app.log.error(err)` perdia stack | Preservar `Error` no hook; `console.error` no catch de startup |
 | API morre no CI sem `GROQ_API_KEY` | `groq-llm.adapter.ts` fazia `new Groq()` no import (via Ava → scraper agent) | Inicialização lazy como em `llm-chat.providers.ts`; Groq só ao chamar LLM |
 | Fase 3 business-full no CI | Mesma stack da Fase 2; 13+ specs ~15 min com build Vite | `ci-e2e-business-full.yml` **sexta 06:00 BRT**; não gate PR até 7 semanas verdes |
@@ -34,7 +34,7 @@ Localmente o backend sobe com `npm run dev` (tsx, sem checagem completa de tipos
 | Spec onboarding tour | `data-testid` vs `role=dialog` | Drawer expõe `first-visit-tour-drawer`; helpers também aceitam «Primeiros passos» / modal |
 | Nightly `createUser: {}` | Supabase intermitente / corrida | `ensure-qa-auth-user.mjs` com retry |
 | `patient-documents` sem «Documento processado» | GCS indisponível no runner + OCR lento | `resolveFileStorage()` local + `OCR_CI_STUB=1` no CI |
-| Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@aiyra-care/connect` ou repositórios: build obrigatório |
+| Erros em mappers Connect / Ava / suporte | Tipos desatualizados vs domínio | PR que mexe em `@ananeri/connect` ou repositórios: build obrigatório |
 | Imports duplicados (`PatientPgRepository`, `VaccinePgRepository`) | merge/copy-paste | `tsc` pega imediatamente |
 
 ## Checklist rápido antes de push

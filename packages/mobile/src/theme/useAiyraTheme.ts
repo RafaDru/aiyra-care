@@ -1,4 +1,4 @@
-import { AIYRACARE_DARK, AIYRACARE_TOKENS } from '@aiyra-care/design-tokens'
+import { AIYRACARE_DARK, AIYRACARE_TOKENS } from '@ananeri/design-tokens'
 import { useColorScheme } from 'react-native'
 import { useAppearancePreference } from '@/theme/AppearancePreferenceContext'
 
