@@ -188,7 +188,6 @@ const opsDashboard = requireEnv('OPS_ALERT_DASHBOARD_URL')
 
 const apiEnv = [
   ['DEPLOYMENT_TIER', 'preview'],
-  ['PORT', '8080'],
   ['DATABASE_URL', databaseUrl],
   ['CRYPTO_KEY', cryptoKey],
   ['SUPABASE_URL', supabaseUrl],
@@ -206,7 +205,6 @@ const apiEnv = [
 
 const opsEnv = [
   ['DEPLOYMENT_TIER', 'preview'],
-  ['PORT', '8080'],
   ['OPS_CONSOLE_PORT', '8080'],
   ['OPS_CONSOLE_HOST', '0.0.0.0'],
   ['DATABASE_URL', databaseUrl],
