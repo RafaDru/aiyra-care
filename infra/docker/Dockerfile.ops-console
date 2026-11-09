@@ -8,12 +8,14 @@ ENV OPS_CONSOLE_HOST=0.0.0.0
 COPY package.json package-lock.json ./
 COPY packages/api/package.json packages/api/
 COPY packages/connect/package.json packages/connect/
+COPY packages/design-tokens/package.json packages/design-tokens/
 COPY packages/ops-console/package.json packages/ops-console/
 
-RUN npm ci --workspace=@ananeri/ops-console --workspace=@ananeri/api --workspace=@ananeri/connect
+RUN npm ci --workspace=@ananeri/ops-console --workspace=@ananeri/api --workspace=@ananeri/connect --workspace=@ananeri/design-tokens
 
 COPY packages/connect packages/connect
 COPY packages/api packages/api
+COPY packages/design-tokens packages/design-tokens
 COPY packages/ops-console packages/ops-console
 
 WORKDIR /app/packages/ops-console

@@ -14,10 +14,12 @@ ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 
 COPY package.json package-lock.json ./
 COPY packages/web/package.json packages/web/
+COPY packages/design-tokens/package.json packages/design-tokens/
 
-RUN npm ci --workspace=@ananeri/web
+RUN npm ci --workspace=@ananeri/web --workspace=@ananeri/design-tokens
 
 COPY packages/web packages/web
+COPY packages/design-tokens packages/design-tokens
 
 RUN npm run build -w @ananeri/web
 
