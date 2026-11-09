@@ -16,6 +16,7 @@ COPY packages/connect packages/connect
 COPY packages/api packages/api
 COPY packages/design-tokens packages/design-tokens
 COPY packages/ops-console packages/ops-console
+COPY tsconfig.base.json ./
 
 WORKDIR /app/packages/ops-console
 RUN npm run build
