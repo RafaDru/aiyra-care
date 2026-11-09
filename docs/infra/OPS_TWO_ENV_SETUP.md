@@ -10,7 +10,7 @@
 | Camada | Script setup | Worker monitor | Webhook típico | Console |
 |--------|--------------|----------------|----------------|---------|
 | **Ambiente 1 — Integração** | `npm run setup:ops-alerts` | **Não** (`OPS_WORKER_MONITOR=0`) | Local `:3012` ou off | `localhost:3013` → PG local |
-| **Ambiente 2 — Preview** | `npm run setup:ops-preview` | **Sim** (`OPS_WORKER_MONITOR=1`) | ntfy topic `aiyracare-preview` | URL preview `:3013` |
+| **Ambiente 2 — Preview** | `npm run setup:ops-preview` | **Sim** (`OPS_WORKER_MONITOR=1`) | ntfy topic `ananeri-preview` | URL preview `:3013` |
 | **Produção** | `npm run setup:ops-prod` | **Sim** | ntfy / e-mail prod | URL ops restrita |
 
 ## Ambiente 1 — Integração (dev + agentes)

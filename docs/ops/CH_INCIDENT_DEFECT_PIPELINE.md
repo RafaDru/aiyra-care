@@ -244,13 +244,13 @@ Rotas ops-console: `/api/platform-defects`, `/api/defect-pr-batches/*`, `GET /ap
 
 Tabela completa lanes + troubleshooting key: [`AUTOMATIONS_LANES.md`](./AUTOMATIONS_LANES.md). Runbook suporte Dev: [`SUPPORT_INVESTIGATOR_AUTOMATION.md`](./SUPPORT_INVESTIGATOR_AUTOMATION.md).
 
-### 6.3 Notebook — worktree `aiyra-care-ch-shell`
+### 6.3 Notebook — worktree `ananeri-ch-shell` (legado: `aiyra-care-ch-shell`)
 
 O checkout do branch CH **não herda** `.env` do repo principal.
 
 | Passo | Ação |
 |-------|------|
-| 1 | Na raiz do worktree, **symlink** `.env` → `..\aiyra-care\.env` (Windows) ou cópia com `DATABASE_URL`, `CURSOR_*`, `OPS_METRICS_KEY` |
+| 1 | Na raiz do worktree, **symlink** `.env` → `..\ananeri\.env` (ou `..\aiyra-care\.env` se o principal ainda tiver nome legado) — Windows — ou cópia com `DATABASE_URL`, `CURSOR_*`, `OPS_METRICS_KEY` |
 | 2 | Reiniciar **API `:3010`** e **ops-console `:3013`** após criar/alterar o symlink |
 | 3 | `curl -s http://127.0.0.1:3013/api/incident-dispatch/health` — confirmar `webhooks` `ready` |
 | 4 | Outbox `dead` / incidentes **Falha**: corrigir URL/key → `npm run ch-incident-dispatch-backfill -- --reset-dead` → `npm run ch-incident-dispatch-worker:once` |

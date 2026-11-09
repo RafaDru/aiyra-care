@@ -1,7 +1,7 @@
 param(
   [string]$WebhookUrl = '',
   [string]$DashboardUrl = '',
-  [string]$NtfyTopic = 'aiyracare-preview'
+  [string]$NtfyTopic = 'ananeri-preview'
 )
 
 $ErrorActionPreference = 'Stop'
