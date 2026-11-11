@@ -11,6 +11,10 @@
  *   API_PUBLIC_URL, OPS_ALERT_DASHBOARD_URL (URLs públicas preview)
  *   OPS_METRICS_KEY, OPS_ALERT_WEBHOOK_URL
  *
+ * Env opcional (Cloud SQL socket no Cloud Run — API/ops):
+ *   GCP_CLOUDSQL_INSTANCE ou CLOUDSQL_CONNECTION_NAME (project:region:instance)
+ *   DATABASE_URL deve usar host unix: ...@/dbname?host=/cloudsql/PROJECT:REGION:INSTANCE
+ *
  * Env build web:
  *   VITE_API_URL (= API_PUBLIC_URL)
  *   VITE_OPS_CONSOLE_URL (= OPS_ALERT_DASHBOARD_URL)
@@ -70,6 +74,21 @@ function requireEnv(name) {
     process.exit(1)
   }
   return v
+}
+
+/** project:region:instance — attaches Cloud SQL Unix socket to API/ops Run services. */
+function cloudSqlConnectionName() {
+  return (
+    process.env.GCP_CLOUDSQL_INSTANCE?.trim()
+    || process.env.CLOUDSQL_CONNECTION_NAME?.trim()
+    || ''
+  )
+}
+
+function cloudSqlDeployArgs() {
+  const connection = cloudSqlConnectionName()
+  if (!connection) return []
+  return [`--add-cloudsql-instances=${connection}`]
 }
 
 function writeEnvYaml(pairs) {
@@ -136,8 +155,14 @@ function deployCloudRun(name, image, envPairs, extraArgs = []) {
   }
 }
 
+const cloudSqlArgs = cloudSqlDeployArgs()
+const cloudSqlConn = cloudSqlConnectionName()
+
 console.log('gcp-preview-deploy')
 console.log(`  project=${projectId} region=${region} tag=${imageTag}`)
+if (cloudSqlConn) {
+  console.log(`  cloudsql=${cloudSqlConn} (API + ops)`)
+}
 
 ensureGcloud()
 
@@ -213,8 +238,8 @@ const opsEnv = [
   ['OPS_ALERT_DASHBOARD_URL', opsDashboard],
 ]
 
-deployCloudRun(services.api, images.api, apiEnv, ['--memory', '1Gi', '--cpu', '1', '--min-instances', '0', '--max-instances', '2'])
-deployCloudRun(services.ops, images.ops, opsEnv, ['--memory', '512Mi', '--cpu', '1', '--min-instances', '0', '--max-instances', '1'])
+deployCloudRun(services.api, images.api, apiEnv, ['--memory', '1Gi', '--cpu', '1', '--min-instances', '0', '--max-instances', '2', ...cloudSqlArgs])
+deployCloudRun(services.ops, images.ops, opsEnv, ['--memory', '512Mi', '--cpu', '1', '--min-instances', '0', '--max-instances', '1', ...cloudSqlArgs])
 deployCloudRun(services.web, images.web, [], ['--memory', '256Mi', '--cpu', '1', '--min-instances', '0', '--max-instances', '2'])
 
 console.log('\ngcp-preview-deploy OK')
