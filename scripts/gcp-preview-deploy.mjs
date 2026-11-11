@@ -134,24 +134,34 @@ function configureDockerAuth() {
   if (r.status !== 0) process.exit(r.status ?? 1)
 }
 
+function hasNonEmptyEnvPairs(pairs) {
+  return pairs.some(([, v]) => v != null && String(v).length > 0)
+}
+
 function deployCloudRun(name, image, envPairs, extraArgs = []) {
-  const envFile = writeEnvYaml(envPairs)
+  let envFile
+  const cmdArgs = [
+    'run', 'deploy', name,
+    '--image', image,
+    '--region', region,
+    '--project', projectId,
+    '--platform', 'managed',
+    '--allow-unauthenticated',
+    '--port', '8080',
+    '--quiet',
+    ...extraArgs,
+  ]
+  if (hasNonEmptyEnvPairs(envPairs)) {
+    envFile = writeEnvYaml(envPairs)
+    cmdArgs.splice(cmdArgs.indexOf('--quiet'), 0, '--env-vars-file', envFile)
+  }
   try {
-    const r = run('gcloud', [
-      'run', 'deploy', name,
-      '--image', image,
-      '--region', region,
-      '--project', projectId,
-      '--platform', 'managed',
-      '--allow-unauthenticated',
-      '--port', '8080',
-      '--env-vars-file', envFile,
-      '--quiet',
-      ...extraArgs,
-    ])
+    const r = run('gcloud', cmdArgs)
     if (r.status !== 0) process.exit(r.status ?? 1)
   } finally {
-    try { unlinkSync(envFile) } catch { /* ignore */ }
+    if (envFile) {
+      try { unlinkSync(envFile) } catch { /* ignore */ }
+    }
   }
 }
 
