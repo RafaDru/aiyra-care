@@ -130,22 +130,16 @@ jobs:
           OPS_ALERT_DASHBOARD_URL: ${{ secrets.OPS_ALERT_DASHBOARD_URL }}
           GCP_SCHEDULER_SA_EMAIL: ${{ vars.GCP_SCHEDULER_SA_EMAIL }}
 
-  post-deploy:
-    if: ${{ inputs.run_post_deploy }}
-    needs: promote
-    runs-on: ubuntu-latest
-    environment: preview
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
       - uses: actions/setup-node@v4
+        if: ${{ inputs.run_post_deploy || github.event.inputs.run_post_deploy == 'true' }}
         with:
           node-version: 22
-      - name: Install API
+      - name: Install API (post-deploy)
+        if: ${{ inputs.run_post_deploy || github.event.inputs.run_post_deploy == 'true' }}
         working-directory: packages/api
         run: npm ci
       - name: Preview post-deploy checks
+        if: ${{ inputs.run_post_deploy || github.event.inputs.run_post_deploy == 'true' }}
         run: node scripts/preview-post-deploy.mjs
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
