@@ -97,6 +97,8 @@ jobs:
           GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           GCP_REGION: ${{ vars.GCP_REGION }}
           GCP_ARTIFACT_REGISTRY: ${{ vars.GCP_ARTIFACT_REGISTRY }}
+          GCP_CLOUDSQL_INSTANCE: ${{ vars.GCP_CLOUDSQL_INSTANCE }}
+          CLOUDSQL_CONNECTION_NAME: ${{ vars.GCP_CLOUDSQL_INSTANCE }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CRYPTO_KEY: ${{ secrets.CRYPTO_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
