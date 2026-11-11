@@ -41,6 +41,8 @@
 | `VITE_SUPABASE_ANON_KEY` | Build imagem web no deploy GCP |
 
 | `GCP_SCHEDULER_SA_EMAIL` | Variable — SA para Cloud Scheduler invocar Run Jobs |
+| `GCP_CLOUDSQL_INSTANCE` | Variable (opcional) no Environment `preview` — `project:region:instance`; alias `CLOUDSQL_CONNECTION_NAME`. Passa `--add-cloudsql-instances` no deploy GCP da API e do ops (não na web). |
+| `DATABASE_URL` (socket) | Secret — com Cloud SQL: usar host unix no formato documentado em `scripts/gcp-preview-deploy.mjs` (`host=/cloudsql/...` com o mesmo connection name). |
 
 Workflow `promote-preview.yml` — `deploy_gcp=true` (API/web/ops) · `deploy_worker=true` (jobs).
 
