@@ -106,6 +106,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           API_PUBLIC_URL: ${{ secrets.API_PUBLIC_URL }}
+          WEB_PUBLIC_URL: ${{ secrets.WEB_PUBLIC_URL }}
           VITE_API_URL: ${{ secrets.API_PUBLIC_URL }}
           OPS_METRICS_KEY: ${{ secrets.OPS_METRICS_KEY }}
           OPS_ALERT_WEBHOOK_URL: ${{ secrets.OPS_ALERT_WEBHOOK_URL }}
