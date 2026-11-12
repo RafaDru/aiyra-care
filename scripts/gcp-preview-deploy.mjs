@@ -8,7 +8,7 @@
  * Env obrigatório (deploy):
  *   GCP_PROJECT_ID, GCP_REGION (ou defaults em infra/gcp/preview.defaults.json)
  *   DATABASE_URL, CRYPTO_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE
- *   API_PUBLIC_URL, OPS_ALERT_DASHBOARD_URL (URLs públicas preview)
+ *   API_PUBLIC_URL, WEB_PUBLIC_URL, OPS_ALERT_DASHBOARD_URL (URLs públicas preview)
  *   OPS_METRICS_KEY, OPS_ALERT_WEBHOOK_URL
  *
  * Env opcional (Cloud SQL socket no Cloud Run — API/ops):
@@ -217,6 +217,7 @@ const cryptoKey = requireEnv('CRYPTO_KEY')
 const supabaseUrl = requireEnv('SUPABASE_URL')
 const supabaseServiceRole = requireEnv('SUPABASE_SERVICE_ROLE')
 const apiPublicUrl = requireEnv('API_PUBLIC_URL')
+const webPublicUrl = requireEnv('WEB_PUBLIC_URL')
 const opsMetricsKey = requireEnv('OPS_METRICS_KEY')
 const opsWebhook = requireEnv('OPS_ALERT_WEBHOOK_URL')
 const opsDashboard = requireEnv('OPS_ALERT_DASHBOARD_URL')
@@ -243,6 +244,10 @@ const opsEnv = [
   ['OPS_CONSOLE_PORT', '8080'],
   ['OPS_CONSOLE_HOST', '0.0.0.0'],
   ['DATABASE_URL', databaseUrl],
+  ['API_PUBLIC_URL', apiPublicUrl],
+  ['WEB_PUBLIC_URL', webPublicUrl],
+  ['NEO4J_SYNC_ENABLED', '0'],
+  ['OPS_STACK_CONTROL_ENABLED', '0'],
   ['OPS_METRICS_KEY', opsMetricsKey],
   ['OPS_ALERT_WEBHOOK_URL', opsWebhook],
   ['OPS_ALERT_DASHBOARD_URL', opsDashboard],

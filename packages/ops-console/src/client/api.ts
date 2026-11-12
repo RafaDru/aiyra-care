@@ -21,6 +21,8 @@ export type OpsConsoleHealth = {
   readOnly?: boolean
   chG3RequireReviewApprove?: boolean
   chG3AgenticAutoApprove?: boolean
+  stackControl?: boolean
+  platform?: string
 }
 
 export type ChServicesStatusResponse = {

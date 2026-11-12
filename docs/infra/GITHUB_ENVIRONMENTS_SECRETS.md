@@ -1,6 +1,6 @@
 # GitHub Environments — secrets e variáveis
 
-> **Última atualização:** 2026-11-06  
+> **Última atualização:** 2026-11-12  
 > Matriz para configurar **Settings → Environments** quando houver hosts cloud.  
 > Local hoje: `.env` (integração) + `.env.preview` (preview paralelo) — ver `npm run setup:ops-preview`.
 
@@ -26,6 +26,7 @@
 | `STRIPE_SECRET_KEY` | test | test | live |
 | `STRIPE_WEBHOOK_SECRET` | test endpoint | test | live |
 | `API_PUBLIC_URL` | `https://preview...` ou `http://127.0.0.1:3020` | `http://127.0.0.1:3010` | `https://api...` |
+| `WEB_PUBLIC_URL` | URL Cloud Run web preview (ex. `https://…-web-….run.app`) — **obrigatório** para `deploy_gcp` (ops console sonda web + header CH) | `http://127.0.0.1:5173` | `https://…` |
 | `OPS_METRICS_KEY` | preview-only | integration-only | prod-only |
 | `OPS_ALERT_WEBHOOK_URL` | ntfy `ananeri-preview` | local `:3012` ou off | ntfy prod |
 | `OPS_ALERT_DASHBOARD_URL` | console preview | `:3013` | ops prod URL |
@@ -45,6 +46,8 @@
 | `DATABASE_URL` (socket) | Secret — com Cloud SQL: usar host unix no formato documentado em `scripts/gcp-preview-deploy.mjs` (`host=/cloudsql/...` com o mesmo connection name). |
 
 Workflow `promote-preview.yml` — `deploy_gcp=true` (API/web/ops) · `deploy_worker=true` (jobs).
+
+**GCP ops console:** `scripts/gcp-preview-deploy.mjs` injeta no serviço ops `API_PUBLIC_URL`, `WEB_PUBLIC_URL`, `NEO4J_SYNC_ENABLED=0` e `OPS_STACK_CONTROL_ENABLED=0` (probes e alertas infra sem localhost). Após criar o serviço web, grave `WEB_PUBLIC_URL` no Environment `preview` (NotebookRafael: `gh secret set WEB_PUBLIC_URL --env preview`); não commitar URLs no repositório.
 
 ```powershell
 npm run provision:preview:gcp -- --dry-run

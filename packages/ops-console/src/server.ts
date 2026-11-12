@@ -332,6 +332,8 @@ async function main() {
       readOnly: maintenance.plannedMaintenance,
       chG3RequireReviewApprove: isChG3RequireReviewApproveEnabled(),
       chG3AgenticAutoApprove: isChG3AgenticAutoApproveEnabled(),
+      stackControl: isStackControlEnabled(),
+      platform: process.platform,
     }
   })
 

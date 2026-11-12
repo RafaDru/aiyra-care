@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Spin, Tooltip } from 'antd'
+import { Alert, Button, Spin, Tooltip, Typography } from 'antd'
 import { ReloadOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { OpsMetricsResponse } from './ops.types.js'
 import { OpsMetricsDashboard } from './OpsMetricsDashboard.js'
@@ -22,6 +22,7 @@ function AppConsole() {
   const [dispatching, setDispatching] = useState(false)
   const [deploymentTier, setDeploymentTier] = useState<OpsDeploymentTier>('integration')
   const [readOnly, setReadOnly] = useState(false)
+  const [stackControl, setStackControl] = useState(true)
 
   const load = useCallback(async () => {
     setError(null)
@@ -31,6 +32,7 @@ function AppConsole() {
         opsApi.metrics(),
       ])
       setDeploymentTier(normalizeOpsDeploymentTier(health.deploymentTier, health.port))
+      setStackControl(health.stackControl !== false)
       setReadOnly(Boolean(health.readOnly ?? health.plannedMaintenance ?? result.readOnly))
       setData(result)
     } catch (err) {
@@ -151,16 +153,33 @@ function AppConsole() {
             <OpsPanel
               title="Stack Aiyra"
               description={
-                deploymentTier === 'preview'
-                  ? 'API :3020 e web :5174 — app monitorado (staging local).'
-                  : 'API :3010 e web :5173 — app monitorado (dev local).'
+                deploymentTier === 'preview' && !stackControl
+                  ? 'Preview GCP — monitoramento remoto (API e web públicos).'
+                  : deploymentTier === 'preview'
+                    ? 'API :3020 e web :5174 — app monitorado (staging local).'
+                    : 'API :3010 e web :5173 — app monitorado (dev local).'
               }
             >
-              <StackControlCard
-                deploymentTier={deploymentTier}
-                onStackChange={refresh}
-                readOnly={readOnly}
-              />
+              {deploymentTier === 'preview' && !stackControl ? (
+                <Alert
+                  type="info"
+                  showIcon
+                  message="Preview GCP — sem controle de stack local"
+                  description={
+                    <Typography.Paragraph style={{ marginBottom: 0 }}>
+                      Start, stop e restart da stack só estão disponíveis no Windows (dev/preview
+                      local). No Cloud Run, use o pipeline{' '}
+                      <Typography.Text code>promote-preview.yml</Typography.Text> para redeploy.
+                    </Typography.Paragraph>
+                  }
+                />
+              ) : (
+                <StackControlCard
+                  deploymentTier={deploymentTier}
+                  onStackChange={refresh}
+                  readOnly={readOnly}
+                />
+              )}
             </OpsPanel>
           }
         />
