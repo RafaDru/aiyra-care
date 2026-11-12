@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Badge, Button, Drawer, Typography } from 'antd'
+import { Badge, Drawer } from 'antd'
 import { MessageFilled } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { AvaAvatar } from './AvaAvatar.js'
 import { AvaChatPanel } from './AvaChatPanel.js'
 import { AvaDockFlyingBubble } from './AvaDockFlyingBubble.js'
-import { AvaPatientLensChips } from './AvaPatientLensChips.js'
 import { useAvaPatientSwitchHook } from './useAvaPatientSwitchHook.js'
 import { useAvaDockIntro } from './useAvaDockIntro.js'
 import { useAvaExpression } from './useAvaExpression.js'
@@ -158,42 +157,24 @@ export function AvaDockWidget({
         destroyOnClose={false}
       >
         <div className="ava-chat-shell">
-          <div className="ava-chat-shell__head">
-            <div className="ava-chat-shell__head-main">
-              <Typography.Text type="secondary" className="ava-chat-shell__head-label">
-                {t('ava.patientLensLabel')}
-              </Typography.Text>
-              <AvaPatientLensChips
-                patients={patients}
-                value={patientId}
-                onChange={(id) => void requestPatientChange(id)}
-              />
-              {lensOverridesRoute && (
-                <Typography.Text type="warning" className="ava-chat-shell__head-hint">
-                  {t('ava.patientLensOverrideHint')}
-                </Typography.Text>
-              )}
-            </div>
-            <Button type="link" size="small" onClick={() => setOpen(false)}>
-              {t('common.close')}
-            </Button>
-          </div>
-          <div className="ava-chat-shell__body">
-            <AvaChatPanel
-              key={`${patientId}-${chatEpoch}`}
-              patientId={patientId}
-              lensPatient={lensPatient}
-              healthThreadId={healthThreadId}
-              variant="embedded"
-              showTitle={false}
-              initialMessage={openRequest?.initialMessage}
-              entityPin={openRequest?.entityPin}
-              autoSend={openRequest?.autoSend}
-              conversationId={conversationId}
-              onConversationIdChange={setConversationId}
-              onAcceleratorConsumed={onOpenRequestConsumed}
-            />
-          </div>
+          <AvaChatPanel
+            key={`${patientId}-${chatEpoch}`}
+            patientId={patientId}
+            lensPatient={lensPatient}
+            patients={patients}
+            onPatientLensChange={(id) => void requestPatientChange(id)}
+            lensOverridesRoute={lensOverridesRoute}
+            onCloseDrawer={() => setOpen(false)}
+            healthThreadId={healthThreadId}
+            variant="embedded"
+            showTitle={false}
+            initialMessage={openRequest?.initialMessage}
+            entityPin={openRequest?.entityPin}
+            autoSend={openRequest?.autoSend}
+            conversationId={conversationId}
+            onConversationIdChange={setConversationId}
+            onAcceleratorConsumed={onOpenRequestConsumed}
+          />
         </div>
       </Drawer>
       {patientSwitchModal}

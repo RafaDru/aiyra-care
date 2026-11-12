@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Avatar, Button, Checkbox, Input, Modal, Select, Typography, App } from 'antd'
+import { Avatar, Button, Checkbox, Input, Modal, Typography, App } from 'antd'
 import { FileTextOutlined, PictureOutlined, SendOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -45,6 +45,8 @@ import { AvaReportModal } from './AvaReportModal.js'
 import { AvaContextChips } from './AvaContextChips.js'
 import { AvaContextAccelerators } from './AvaContextAccelerators.js'
 import { AvaProposedActions } from './AvaProposedActions.js'
+import { AvaConversationSidebar } from './AvaConversationSidebar.js'
+import { AvaPatientLensChips } from './AvaPatientLensChips.js'
 import './ava-chat.css'
 import './ava-report.css'
 
@@ -60,6 +62,11 @@ interface Props {
   patientId: string
   /** Paciente da lente ativa — copy do empty state (pediatra vs médico). */
   lensPatient?: Pick<Patient, 'isSelf' | 'ageCategory'> | null
+  /** Drawer embedded: lista para chips compactos. */
+  patients?: Patient[]
+  onPatientLensChange?: (patientId: string) => void
+  lensOverridesRoute?: boolean
+  onCloseDrawer?: () => void
   healthThreadId?: string
   variant?: 'card' | 'embedded'
   showTitle?: boolean
@@ -91,6 +98,10 @@ function initialsOf(name: string | null | undefined): string {
 export function AvaChatPanel({
   lensPatient,
   patientId,
+  patients,
+  onPatientLensChange,
+  lensOverridesRoute,
+  onCloseDrawer,
   healthThreadId,
   variant = 'card',
   showTitle = true,
@@ -495,8 +506,8 @@ export function AvaChatPanel({
     </span>
   )
 
-  return (
-    <div className={panelClass}>
+  const chatColumn = (
+    <>
       {showTitle && (
         <div style={{ marginBottom: 8 }}>
           <AvaChatHeading />
@@ -545,40 +556,6 @@ export function AvaChatPanel({
           style={{ margin: '0 18px 8px' }}
           message={t('ava.inactivityHint')}
         />
-      )}
-
-      {variant === 'embedded' && (
-        <div className="ava-chat-panel__conversation-bar">
-          <Typography.Text type="secondary" className="ava-chat-panel__conversation-label">
-            {t('ava.conversationLabel')}
-          </Typography.Text>
-          <Select
-            size="small"
-            className="ava-chat-panel__conversation-select"
-            placeholder={t('ava.newConversation')}
-            value={conversationId ?? undefined}
-            allowClear
-            onClear={() => startNewConversation()}
-            onChange={(id) => id && handleConversationSelect(id)}
-            options={conversationOptions.map((c) => ({
-              value: c.id,
-              label: c.title ?? t('ava.resumeConversation'),
-            }))}
-          />
-          <Button size="small" type="link" onClick={startNewConversation}>
-            {t('ava.newConversation')}
-          </Button>
-          {conversationId && (
-            <>
-              <Button size="small" type="link" onClick={() => void archiveCurrentConversation()}>
-                {t('ava.archiveConversation')}
-              </Button>
-              <Button size="small" type="link" danger onClick={() => void deleteCurrentConversation()}>
-                {t('ava.deleteConversation')}
-              </Button>
-            </>
-          )}
-        </div>
       )}
 
       {conversationId && contextPins.length > 0 && (
@@ -752,6 +729,50 @@ export function AvaChatPanel({
         title={`${t('ava.name')} — ${t('ava.report')}`}
         messages={messages}
       />
+    </>
+  )
+
+  return (
+    <div className={panelClass}>
+      {variant === 'embedded' ? (
+        <div className="ava-chat-panel__layout">
+          <AvaConversationSidebar
+            conversations={conversationOptions}
+            activeConversationId={conversationId}
+            onSelect={handleConversationSelect}
+            onNew={startNewConversation}
+            onArchive={conversationId ? () => void archiveCurrentConversation() : undefined}
+            onDelete={conversationId ? () => void deleteCurrentConversation() : undefined}
+          />
+          <div className="ava-chat-panel__main">
+            <div className="ava-chat-panel__main-head">
+              <div className="ava-chat-panel__main-head-lens">
+                {patients && onPatientLensChange && patients.length > 0 && (
+                  <AvaPatientLensChips
+                    compact
+                    patients={patients}
+                    value={patientId}
+                    onChange={onPatientLensChange}
+                  />
+                )}
+                {lensOverridesRoute && (
+                  <Typography.Text type="warning" className="ava-chat-panel__lens-hint">
+                    {t('ava.patientLensOverrideHint')}
+                  </Typography.Text>
+                )}
+              </div>
+              {onCloseDrawer && (
+                <Button type="text" size="small" className="ava-chat-panel__close" onClick={onCloseDrawer}>
+                  {t('common.close')}
+                </Button>
+              )}
+            </div>
+            {chatColumn}
+          </div>
+        </div>
+      ) : (
+        chatColumn
+      )}
     </div>
   )
 }
