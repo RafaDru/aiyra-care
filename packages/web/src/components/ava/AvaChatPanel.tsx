@@ -4,7 +4,15 @@ import { FileTextOutlined, PictureOutlined, SendOutlined } from '@ant-design/ico
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
-import type { AvaActivityEvent, AvaChatResponse, AvaConversation, AvaProposedAction, AvaSessionPin, LlmUsageQuota } from '../../lib/api.types.js'
+import type {
+  AvaActivityEvent,
+  AvaChatResponse,
+  AvaConversation,
+  AvaProposedAction,
+  AvaSessionPin,
+  LlmUsageQuota,
+  Patient,
+} from '../../lib/api.types.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { DismissibleHint } from '../ui/DismissibleHint.js'
@@ -14,6 +22,7 @@ import { AvaChatHeading } from './AvaChatHeading.js'
 import { useAvaThinkingPhrase } from './useAvaThinkingPhrase.js'
 import { useAvaExpression } from './useAvaExpression.js'
 import { caregiverFirstName } from '../../lib/ava-personalization.js'
+import { avaIntroUsesPediatricCopy } from '../../lib/clinician-label.js'
 import { AvaThinkingAura } from './AvaThinkingAura.js'
 import {
   AVA_CHAT_STAGE_AVATAR_SIZE,
@@ -49,6 +58,8 @@ interface ChatMessage {
 
 interface Props {
   patientId: string
+  /** Paciente da lente ativa — copy do empty state (pediatra vs médico). */
+  lensPatient?: Pick<Patient, 'isSelf' | 'ageCategory'> | null
   healthThreadId?: string
   variant?: 'card' | 'embedded'
   showTitle?: boolean
@@ -78,6 +89,7 @@ function initialsOf(name: string | null | undefined): string {
 }
 
 export function AvaChatPanel({
+  lensPatient,
   patientId,
   healthThreadId,
   variant = 'card',
@@ -128,6 +140,13 @@ export function AvaChatPanel({
   const avaExpression = useAvaExpression(loading, statusLabel, { context: 'chat' })
   const freshness = useAccountFreshnessSnapshot()
   const caregiverName = caregiverFirstName(account?.displayName, account?.email)
+  const emptyIntroText = useMemo(() => {
+    const pediatric = avaIntroUsesPediatricCopy(lensPatient)
+    if (caregiverName) {
+      return t(pediatric ? 'ava.introPersonal' : 'ava.introPersonalAdult', { name: caregiverName })
+    }
+    return t(pediatric ? 'ava.intro' : 'ava.introAdult')
+  }, [caregiverName, lensPatient, t])
   const quotaBlocked = isLlmQuotaExhausted(quota)
 
   useEffect(() => {
@@ -602,9 +621,7 @@ export function AvaChatPanel({
             {messages.length === 0 && !loading && (
               <>
                 <Typography.Paragraph className="ava-chat-panel__intro">
-                  {caregiverName
-                    ? t('ava.introPersonal', { name: caregiverName })
-                    : t('ava.intro')}
+                  {emptyIntroText}
                 </Typography.Paragraph>
                 <AvaContextAccelerators
                   patientId={patientId}

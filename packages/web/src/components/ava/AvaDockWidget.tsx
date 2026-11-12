@@ -60,6 +60,8 @@ export function AvaDockWidget({
   })
   const [chatEpoch, setChatEpoch] = useState(0)
 
+  const lensPatient = patients.find((p) => p.id === patientId) ?? null
+
   const avaSize = Math.round(patientAvatarSize * AVA_SIZE_RATIO)
   const chatBadgeSize = Math.max(28, Math.round(avaSize * 0.32))
   const chatIconSize = Math.max(15, Math.round(chatBadgeSize * 0.52))
@@ -180,6 +182,7 @@ export function AvaDockWidget({
             <AvaChatPanel
               key={`${patientId}-${chatEpoch}`}
               patientId={patientId}
+              lensPatient={lensPatient}
               healthThreadId={healthThreadId}
               variant="embedded"
               showTitle={false}
