@@ -1,0 +1,266 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1180" fill="none" role="img" aria-label="Brand System Completo Ananeri v14: Dark Mode com Coração Original e neri em Branco Puro">
+  <defs>
+    <!-- Gradientes Oficiais (Intactos tanto no Light quanto no Dark) -->
+    <linearGradient id="ana-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" />
+      <stop offset="55%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+    <linearGradient id="neri-purple" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#7E22CE" />
+      <stop offset="52%" stop-color="#6B21A8" />
+      <stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+
+    <linearGradient id="blend-1" x1="80%" y1="10%" x2="10%" y2="90%">
+      <stop offset="0%" stop-color="#F472B6" /><stop offset="50%" stop-color="#EC4899" /><stop offset="100%" stop-color="#9333EA" />
+    </linearGradient>
+    <linearGradient id="blend-2" x1="50%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" /><stop offset="55%" stop-color="#9333EA" /><stop offset="100%" stop-color="#7E22CE" />
+    </linearGradient>
+    <linearGradient id="blend-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" /><stop offset="45%" stop-color="#7E22CE" /><stop offset="78%" stop-color="#6B21A8" /><stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+    <linearGradient id="solid-purple" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7" /><stop offset="50%" stop-color="#7E22CE" /><stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+    <linearGradient id="solid-pink" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" /><stop offset="50%" stop-color="#EC4899" /><stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+    <linearGradient id="solid-gold" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FFE566" /><stop offset="55%" stop-color="#FACC15" /><stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+    <linearGradient id="a-drop-pink" x1="25%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" /><stop offset="55%" stop-color="#EC4899" /><stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+
+    <linearGradient id="brand-royal-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7E22CE" />
+      <stop offset="55%" stop-color="#581C87" />
+      <stop offset="100%" stop-color="#3B0764" />
+    </linearGradient>
+
+    <!-- Símbolo Coração Oficial (único e intacto para Light e Dark) -->
+    <g id="heart-color">
+      <path d="M 88.6 71.4 C 68.5 52.5, 52 59, 51.2 81 C 50.5 109, 72.5 127.5, 89.2 137.6 C 91.8 139.6, 92.4 136.8, 91 134.6 C 82 127, 76 114, 76 99 C 75 85, 78 71, 88 78 C 91.4 78.8, 92 74.8, 88.6 71.4 Z" fill="url(#a-drop-pink)" />
+      <path d="M 95.2 51.4 A 4.0 4.0 0 1 1 89.2 56.8 C 74 44, 50 52, 37 86 C 45 45, 75 35, 95.2 51.4 Z" fill="url(#solid-gold)" />
+      <path d="M 65.5 30.8 A 4.8 4.8 0 1 1 63.2 40.2 C 42 43, 29.5 55, 29 75 C 28.5 96, 35 112, 45 126 C 30 112, 20.5 96, 20.5 75 C 20.5 48, 39 33, 65.5 30.8 Z" fill="url(#solid-pink)" />
+      <path d="M 10.5 96.8 A 4.2 4.2 0 1 1 18.8 94.8 C 24 126, 56 152, 99 171 C 50 157, 16 131, 10.5 96.8 Z" fill="url(#solid-purple)" />
+      <path d="M 102 54 C 131 21, 181 30, 186.5 75 C 192 129, 135 159, 102 169 C 131 154, 178 124, 178.5 75 C 178 41, 130 31, 102 54 Z" fill="url(#blend-3)" />
+      <path d="M 106 64 C 131 36, 166.5 44.5, 167.5 78 C 168.5 119, 132.5 144, 105 154 C 129 139, 159.5 115, 160.5 78 C 161.2 52, 129 44, 106 64 Z" fill="url(#blend-2)" />
+      <path d="M 110 75 C 131 53, 148 59, 148.8 81 C 149.5 109, 127.5 127.5, 108 139 C 124.5 125.5, 141.8 108, 142 82 C 142.2 66, 127 60, 110 75 Z" fill="url(#blend-1)" />
+    </g>
+
+    <!-- Símbolos Monocromáticos (Aprovados) -->
+    <g id="heart-mono-purple" fill="#581C87">
+      <path d="M 88.6 71.4 C 68.5 52.5, 52 59, 51.2 81 C 50.5 109, 72.5 127.5, 89.2 137.6 C 91.8 139.6, 92.4 136.8, 91 134.6 C 82 127, 76 114, 76 99 C 75 85, 78 71, 88 78 C 91.4 78.8, 92 74.8, 88.6 71.4 Z" opacity="0.72" />
+      <path d="M 95.2 51.4 A 4.0 4.0 0 1 1 89.2 56.8 C 74 44, 50 52, 37 86 C 45 45, 75 35, 95.2 51.4 Z" />
+      <path d="M 65.5 30.8 A 4.8 4.8 0 1 1 63.2 40.2 C 42 43, 29.5 55, 29 75 C 28.5 96, 35 112, 45 126 C 30 112, 20.5 96, 20.5 75 C 20.5 48, 39 33, 65.5 30.8 Z" />
+      <path d="M 10.5 96.8 A 4.2 4.2 0 1 1 18.8 94.8 C 24 126, 56 152, 99 171 C 50 157, 16 131, 10.5 96.8 Z" />
+      <path d="M 102 54 C 131 21, 181 30, 186.5 75 C 192 129, 135 159, 102 169 C 131 154, 178 124, 178.5 75 C 178 41, 130 31, 102 54 Z" />
+      <path d="M 106 64 C 131 36, 166.5 44.5, 167.5 78 C 168.5 119, 132.5 144, 105 154 C 129 139, 159.5 115, 160.5 78 C 161.2 52, 129 44, 106 64 Z" opacity="0.82" />
+      <path d="M 110 75 C 131 53, 148 59, 148.8 81 C 149.5 109, 127.5 127.5, 108 139 C 124.5 125.5, 141.8 108, 142 82 C 142.2 66, 127 60, 110 75 Z" opacity="0.65" />
+    </g>
+
+    <g id="heart-mono-white" fill="#FFFFFF">
+      <path d="M 88.6 71.4 C 68.5 52.5, 52 59, 51.2 81 C 50.5 109, 72.5 127.5, 89.2 137.6 C 91.8 139.6, 92.4 136.8, 91 134.6 C 82 127, 76 114, 76 99 C 75 85, 78 71, 88 78 C 91.4 78.8, 92 74.8, 88.6 71.4 Z" opacity="0.75" />
+      <path d="M 95.2 51.4 A 4.0 4.0 0 1 1 89.2 56.8 C 74 44, 50 52, 37 86 C 45 45, 75 35, 95.2 51.4 Z" />
+      <path d="M 65.5 30.8 A 4.8 4.8 0 1 1 63.2 40.2 C 42 43, 29.5 55, 29 75 C 28.5 96, 35 112, 45 126 C 30 112, 20.5 96, 20.5 75 C 20.5 48, 39 33, 65.5 30.8 Z" />
+      <path d="M 10.5 96.8 A 4.2 4.2 0 1 1 18.8 94.8 C 24 126, 56 152, 99 171 C 50 157, 16 131, 10.5 96.8 Z" />
+      <path d="M 102 54 C 131 21, 181 30, 186.5 75 C 192 129, 135 159, 102 169 C 131 154, 178 124, 178.5 75 C 178 41, 130 31, 102 54 Z" />
+      <path d="M 106 64 C 131 36, 166.5 44.5, 167.5 78 C 168.5 119, 132.5 144, 105 154 C 129 139, 159.5 115, 160.5 78 C 161.2 52, 129 44, 106 64 Z" opacity="0.85" />
+      <path d="M 110 75 C 131 53, 148 59, 148.8 81 C 149.5 109, 127.5 127.5, 108 139 C 124.5 125.5, 141.8 108, 142 82 C 142.2 66, 127 60, 110 75 Z" opacity="0.70" />
+    </g>
+  </defs>
+
+  <rect width="1440" height="1180" rx="22" fill="#F8FAFC" />
+
+  <!-- Cabeçalho -->
+  <rect x="24" y="16" width="1392" height="46" rx="12" fill="#FFFFFF" stroke="#E2E8F0" />
+  <circle cx="48" cy="39" r="7" fill="#EC4899" /><circle cx="66" cy="39" r="7" fill="#7E22CE" /><circle cx="84" cy="39" r="7" fill="#FACC15" />
+  <text x="106" y="44" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="700" fill="#1E293B">
+    ANANERI · SISTEMA OFICIAL DE IDENTIDADE VISUAL (v14 · DARK MODE COM CORAÇÃO ORIGINAL E "neri" EM BRANCO PURO)
+  </text>
+
+  <!-- ==================== LINHA 1: ASSINATURA PRINCIPAL HORIZONTAL (LIGHT & DARK) ==================== -->
+  <!-- 1A: Light Mode -->
+  <rect x="24" y="76" width="684" height="232" rx="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+  <text x="48" y="106" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#7E22CE">
+    1A · ASSINATURA PRINCIPAL HORIZONTAL · LIGHT MODE
+  </text>
+  <g transform="translate(58.00,158.71) scale(1.0200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(137.56,158.71) scale(1.0200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(222.22,158.71) scale(1.0200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(289.64, 146.18) scale(0.6071)"><use href="#heart-color" /></g>
+      <g transform="translate(403.17,158.71) scale(1.0200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(487.83,158.71) scale(1.0200)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="url(#neri-purple)" fill-rule="evenodd" /></g>
+      <g transform="translate(565.35,158.71) scale(1.0200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(626.55,158.71) scale(1.0200)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+
+  <!-- 1B: Dark Mode (Fundo Slate #0F172A + Coração Original + ana Rosa + neri Branco Puro) -->
+  <rect x="732" y="76" width="684" height="232" rx="18" fill="#0F172A" stroke="#1E293B" stroke-width="1.5" />
+  <text x="756" y="106" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#94A3B8">
+    1B · ASSINATURA PRINCIPAL HORIZONTAL · DARK MODE (CORAÇÃO ORIGINAL + "neri" BRANCO)
+  </text>
+  <g transform="translate(758.00,158.71) scale(1.0200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(837.56,158.71) scale(1.0200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(922.22,158.71) scale(1.0200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(989.64, 146.18) scale(0.6071)"><use href="#heart-color" /></g>
+      <g transform="translate(1103.17,158.71) scale(1.0200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(1187.83,158.71) scale(1.0200)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="#FFFFFF" fill-rule="evenodd" /></g>
+      <g transform="translate(1265.35,158.71) scale(1.0200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(1326.55,158.71) scale(1.0200)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+
+  <!-- ==================== LINHA 2: ASSINATURA COMPACTA EMPILHADA (LIGHT & DARK) ==================== -->
+  <!-- 2A: Empilhada Light -->
+  <rect x="24" y="324" width="684" height="248" rx="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+  <text x="48" y="354" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748B">
+    2A · ASSINATURA COMPACTA EMPILHADA · LIGHT MODE
+  </text>
+  <g transform="translate(155.00, 365.00) scale(1.0800)"><use href="#heart-color" /></g>
+      <g transform="translate(375.64,374.90) scale(0.9000)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(446.02,374.90) scale(0.9000)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(520.90,374.90) scale(0.9000)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(374.74,469.13) scale(0.9000)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(449.62,469.13) scale(0.9000)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="url(#neri-purple)" fill-rule="evenodd" /></g>
+      <g transform="translate(518.20,469.13) scale(0.9000)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(572.38,469.13) scale(0.9000)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+
+  <!-- 2B: Empilhada Dark -->
+  <rect x="732" y="324" width="684" height="248" rx="18" fill="#0F172A" stroke="#1E293B" stroke-width="1.5" />
+  <text x="756" y="354" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#94A3B8">
+    2B · ASSINATURA COMPACTA EMPILHADA · DARK MODE (CORAÇÃO ORIGINAL + "neri" BRANCO)
+  </text>
+  <g transform="translate(855.00, 365.00) scale(1.0800)"><use href="#heart-color" /></g>
+      <g transform="translate(1075.64,374.90) scale(0.9000)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(1146.02,374.90) scale(0.9000)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(1220.90,374.90) scale(0.9000)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(1074.74,469.13) scale(0.9000)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(1149.62,469.13) scale(0.9000)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="#FFFFFF" fill-rule="evenodd" /></g>
+      <g transform="translate(1218.20,469.13) scale(0.9000)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(1272.38,469.13) scale(0.9000)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+
+  <!-- ==================== LINHA 3: SÍMBOLO, APP ICONS, AVATAR NERI E ESCALA FAVICON ==================== -->
+  <rect x="24" y="588" width="1392" height="190" rx="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+  <text x="48" y="618" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#1E293B">
+    3 · SÍMBOLO ISOLADO, ÍCONES DE APP (iOS / ANDROID), AVATAR DA AGENTE "NERI" E ESCALA DE REDUÇÃO (FAVICON)
+  </text>
+
+  <!-- 3.1 App Icon Light -->
+  <rect x="56" y="636" width="116" height="116" rx="26" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5" />
+  <g transform="translate(65, 644) scale(0.50)">
+    <use href="#heart-color" />
+  </g>
+  <text x="114" y="768" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#64748B">App Icon Light</text>
+
+  <!-- 3.2 App Icon Dark (com Coração Original sobre Slate #0F172A) -->
+  <rect x="216" y="636" width="116" height="116" rx="26" fill="#0F172A" stroke="#1E293B" stroke-width="1.5" />
+  <g transform="translate(225, 644) scale(0.50)">
+    <use href="#heart-color" />
+  </g>
+  <text x="274" y="768" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#64748B">App Icon Dark</text>
+
+  <!-- 3.3 App Icon Roxo Institucional -->
+  <rect x="376" y="636" width="116" height="116" rx="26" fill="url(#brand-royal-bg)" />
+  <g transform="translate(385, 644) scale(0.50)">
+    <use href="#heart-mono-white" />
+  </g>
+  <text x="434" y="768" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#64748B">App Icon Roxo</text>
+
+  <!-- 3.4 Avatar Circular da Agente Neri -->
+  <circle cx="596" cy="694" r="58" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="2" />
+  <g transform="translate(547, 644) scale(0.50)">
+    <use href="#heart-color" />
+  </g>
+  <circle cx="638" cy="734" r="11" fill="#10B981" stroke="#FFFFFF" stroke-width="3" />
+  <text x="596" y="768" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#64748B">Avatar Agente Neri</text>
+
+  <!-- 3.5 Teste de Redução: 64px, 32px, 16px -->
+  <rect x="720" y="662" width="64" height="64" rx="14" fill="#FFFFFF" stroke="#E2E8F0" />
+  <g transform="translate(725, 666) scale(0.275)"><use href="#heart-color" /></g>
+  <text x="752" y="748" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">64px</text>
+
+  <rect x="828" y="678" width="32" height="32" rx="7" fill="#FFFFFF" stroke="#E2E8F0" />
+  <g transform="translate(830.5, 680) scale(0.138)"><use href="#heart-color" /></g>
+  <text x="844" y="748" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">32px</text>
+
+  <rect x="904" y="686" width="16" height="16" rx="4" fill="#FFFFFF" stroke="#E2E8F0" />
+  <g transform="translate(905.2, 687) scale(0.068)"><use href="#heart-color" /></g>
+  <text x="912" y="748" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">16px</text>
+
+  <!-- Paleta Oficial -->
+  <g transform="translate(990, 642)">
+    <rect x="0" y="0" width="76" height="92" rx="10" fill="#EC4899" />
+    <text x="38" y="108" text-anchor="middle" font-family="Consolas, monospace" font-size="9.5" fill="#475569">#EC4899</text>
+    <rect x="92" y="0" width="76" height="92" rx="10" fill="#BE185D" />
+    <text x="130" y="108" text-anchor="middle" font-family="Consolas, monospace" font-size="9.5" fill="#475569">#BE185D</text>
+    <rect x="184" y="0" width="76" height="92" rx="10" fill="#7E22CE" />
+    <text x="222" y="108" text-anchor="middle" font-family="Consolas, monospace" font-size="9.5" fill="#475569">#7E22CE</text>
+    <rect x="276" y="0" width="76" height="92" rx="10" fill="#581C87" />
+    <text x="314" y="108" text-anchor="middle" font-family="Consolas, monospace" font-size="9.5" fill="#475569">#581C87</text>
+  </g>
+
+  <!-- ==================== LINHA 4: VERSÕES MONOCROMÁTICAS (POSITIVA E NEGATIVA) ==================== -->
+  <rect x="24" y="794" width="684" height="176" rx="18" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+  <text x="48" y="822" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#581C87">
+    4A · MONOCROMÁTICA POSITIVA (IMPRESSÃO / CARIMBO / RECEITUÁRIO #581C87)
+  </text>
+  <g transform="translate(88.00,852.19) scale(0.7800)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="#581C87" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="#581C87" fill-rule="nonzero" /></g>
+      <g transform="translate(148.84,852.19) scale(0.7800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#581C87" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#581C87" fill-rule="nonzero" /></g>
+      <g transform="translate(213.58,852.19) scale(0.7800)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="#581C87" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="#581C87" fill-rule="nonzero" /></g>
+      <g transform="translate(265.13, 842.61) scale(0.4643)"><use href="#heart-mono-purple" /></g>
+      <g transform="translate(351.96,852.19) scale(0.7800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#581C87" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#581C87" fill-rule="nonzero" /></g>
+      <g transform="translate(416.70,852.19) scale(0.7800)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="#581C87" fill-rule="evenodd" /></g>
+      <g transform="translate(475.98,852.19) scale(0.7800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#581C87" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#581C87" fill-rule="nonzero" /></g>
+      <g transform="translate(522.78,852.19) scale(0.7800)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="#581C87" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="#581C87" /></g>
+
+  <rect x="732" y="794" width="684" height="176" rx="18" fill="url(#brand-royal-bg)" />
+  <text x="756" y="822" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#E9D5FF">
+    4B · MONOCROMÁTICA NEGATIVA (BRANCA SOBRE FUNDO INSTITUCIONAL)
+  </text>
+  <g transform="translate(788.00,852.19) scale(0.7800)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(848.84,852.19) scale(0.7800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(913.58,852.19) scale(0.7800)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(965.13, 842.61) scale(0.4643)"><use href="#heart-mono-white" /></g>
+      <g transform="translate(1051.96,852.19) scale(0.7800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(1116.70,852.19) scale(0.7800)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="#FFFFFF" fill-rule="evenodd" /></g>
+      <g transform="translate(1175.98,852.19) scale(0.7800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(1222.78,852.19) scale(0.7800)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="#FFFFFF" /></g>
+
+  <!-- ==================== LINHA 5: APLICAÇÃO EM NAVBAR DE PRODUTO (LIGHT & DARK) ==================== -->
+  <rect x="24" y="986" width="684" height="170" rx="18" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5" />
+  <text x="48" y="1014" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#475569">
+    5A · APLICAÇÃO EM BARRA DE TOPO DO SISTEMA (WEB NAVBAR LIGHT)
+  </text>
+  <rect x="48" y="1032" width="636" height="76" rx="14" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" />
+  <g transform="translate(76.00,1048.41) scale(0.4200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(108.76,1048.41) scale(0.4200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(143.62,1048.41) scale(0.4200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(171.38, 1043.25) scale(0.2500)"><use href="#heart-color" /></g>
+      <g transform="translate(218.13,1048.41) scale(0.4200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(252.99,1048.41) scale(0.4200)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="url(#neri-purple)" fill-rule="evenodd" /></g>
+      <g transform="translate(284.91,1048.41) scale(0.4200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(310.11,1048.41) scale(0.4200)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+  <rect x="440" y="1056" width="76" height="28" rx="8" fill="#F8FAFC" />
+  <text x="478" y="1074" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#475569">Carteira</text>
+  <rect x="526" y="1056" width="136" height="28" rx="14" fill="#FDF2F8" stroke="#FBCFE8" />
+  <text x="594" y="1074" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#BE185D">Perguntar à Neri</text>
+
+  <rect x="732" y="986" width="684" height="170" rx="18" fill="#090D16" stroke="#1E293B" stroke-width="1.5" />
+  <text x="756" y="1014" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#94A3B8">
+    5B · APLICAÇÃO EM BARRA DE TOPO DO SISTEMA (WEB NAVBAR DARK)
+  </text>
+  <rect x="756" y="1032" width="636" height="76" rx="14" fill="#0F172A" stroke="#1E293B" stroke-width="1.5" />
+  <g transform="translate(776.00,1048.41) scale(0.4200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(808.76,1048.41) scale(0.4200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(843.62,1048.41) scale(0.4200)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(871.38, 1043.25) scale(0.2500)"><use href="#heart-color" /></g>
+      <g transform="translate(918.13,1048.41) scale(0.4200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(952.99,1048.41) scale(0.4200)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="#FFFFFF" fill-rule="evenodd" /></g>
+      <g transform="translate(984.91,1048.41) scale(0.4200)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="#FFFFFF" fill-rule="nonzero" /></g>
+      <g transform="translate(1010.11,1048.41) scale(0.4200)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="#FFFFFF" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+  <rect x="1148" y="1056" width="76" height="28" rx="8" fill="#1E293B" />
+  <text x="1186" y="1074" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#E2E8F0">Carteira</text>
+  <rect x="1234" y="1056" width="136" height="28" rx="14" fill="#1E293B" stroke="#334155" />
+  <text x="1302" y="1074" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#F472B6">Perguntar à Neri</text>
+</svg>
