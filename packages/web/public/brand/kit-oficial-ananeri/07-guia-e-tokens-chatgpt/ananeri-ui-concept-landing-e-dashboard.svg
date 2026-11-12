@@ -1,0 +1,579 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1040" fill="none" role="img" aria-label="Proposta UI v3 Light Fluida: Modo claro natural com pinceladas em marca-d'água e marcador da asa interna">
+  <defs>
+    <!-- Gradientes Oficiais da Marca -->
+    <linearGradient id="ana-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" />
+      <stop offset="55%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+    <linearGradient id="neri-purple" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#7E22CE" />
+      <stop offset="52%" stop-color="#6B21A8" />
+      <stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+    <linearGradient id="blend-1" x1="80%" y1="10%" x2="10%" y2="90%">
+      <stop offset="0%" stop-color="#F472B6" /><stop offset="50%" stop-color="#EC4899" /><stop offset="100%" stop-color="#9333EA" />
+    </linearGradient>
+    <linearGradient id="blend-2" x1="50%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" /><stop offset="55%" stop-color="#9333EA" /><stop offset="100%" stop-color="#7E22CE" />
+    </linearGradient>
+    <linearGradient id="blend-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" /><stop offset="45%" stop-color="#7E22CE" /><stop offset="78%" stop-color="#6B21A8" /><stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+    <linearGradient id="solid-purple" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7" /><stop offset="50%" stop-color="#7E22CE" /><stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+    <linearGradient id="solid-pink" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" /><stop offset="50%" stop-color="#EC4899" /><stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+    <linearGradient id="solid-gold" x1="20%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE566" /><stop offset="55%" stop-color="#FACC15" /><stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+    <linearGradient id="a-drop-pink" x1="25%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" /><stop offset="55%" stop-color="#EC4899" /><stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+
+    <!-- Gradientes LUMINOSOS (Light Mode Natural com Contraste de Superfície) -->
+    <!-- Header e Sidebar em Lavanda-Pérola / Rosa-Seda com contraste suave contra o branco -->
+    <linearGradient id="light-header-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5EEFF" />
+      <stop offset="50%" stop-color="#FDF2F8" />
+      <stop offset="100%" stop-color="#EDE9FE" />
+    </linearGradient>
+    <linearGradient id="light-sidebar-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5EEFF" />
+      <stop offset="48%" stop-color="#FAF5FF" />
+      <stop offset="100%" stop-color="#FDF2F8" />
+    </linearGradient>
+    <linearGradient id="hero-silk-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF7FB" />
+      <stop offset="50%" stop-color="#F8F2FF" />
+      <stop offset="100%" stop-color="#EDE9FE" />
+    </linearGradient>
+    <linearGradient id="plum-soft-banner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3E8FF" />
+      <stop offset="52%" stop-color="#FCE7F3" />
+      <stop offset="100%" stop-color="#EDE9FE" />
+    </linearGradient>
+    <linearGradient id="vivid-card-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9333EA" />
+      <stop offset="52%" stop-color="#7E22CE" />
+      <stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+    <linearGradient id="cta-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" />
+      <stop offset="50%" stop-color="#9333EA" />
+      <stop offset="100%" stop-color="#7E22CE" />
+    </linearGradient>
+
+    <!-- RECURSO GRÁFICO PROPRIETÁRIO 1: O "Marcador da Asa Central Esquerda" (v24-echo) -->
+    <g id="wing-marker">
+      <path d="M 38.6 21.4 C 18.5 2.5, 2 9, 1.2 31 C 0.5 59, 22.5 77.5, 39.2 87.6 C 41.8 89.6, 42.4 86.8, 41 84.6 C 32 77, 26 64, 26 49 C 25 35, 28 21, 38 28 C 41.4 28.8, 42 24.8, 38.6 21.4 Z" fill="url(#a-drop-pink)" />
+    </g>
+    <g id="wing-marker-purple">
+      <path d="M 38.6 21.4 C 18.5 2.5, 2 9, 1.2 31 C 0.5 59, 22.5 77.5, 39.2 87.6 C 41.8 89.6, 42.4 86.8, 41 84.6 C 32 77, 26 64, 26 49 C 25 35, 28 21, 38 28 C 41.4 28.8, 42 24.8, 38.6 21.4 Z" fill="url(#blend-2)" />
+    </g>
+    <g id="wing-marker-gold">
+      <path d="M 38.6 21.4 C 18.5 2.5, 2 9, 1.2 31 C 0.5 59, 22.5 77.5, 39.2 87.6 C 41.8 89.6, 42.4 86.8, 41 84.6 C 32 77, 26 64, 26 49 C 25 35, 28 21, 38 28 C 41.4 28.8, 42 24.8, 38.6 21.4 Z" fill="url(#solid-gold)" />
+    </g>
+
+    <!-- RECURSO GRÁFICO PROPRIETÁRIO 2: Pinceladas / Fitas em Marca-d'água -->
+    <g id="brush-watermark-ribbons">
+      <path d="M 102 54 C 131 21, 181 30, 186.5 75 C 192 129, 135 159, 102 169 C 131 154, 178 124, 178.5 75 C 178 41, 130 31, 102 54 Z" fill="url(#blend-3)" />
+      <path d="M 106 64 C 131 36, 166.5 44.5, 167.5 78 C 168.5 119, 132.5 144, 105 154 C 129 139, 159.5 115, 160.5 78 C 161.2 52, 129 44, 106 64 Z" fill="url(#blend-2)" />
+      <path d="M 110 75 C 131 53, 148 59, 148.8 81 C 149.5 109, 127.5 127.5, 108 139 C 124.5 125.5, 141.8 108, 142 82 C 142.2 66, 127 60, 110 75 Z" fill="url(#blend-1)" />
+    </g>
+
+    <!-- Símbolo Coração Oficial -->
+    <g id="heart-color">
+      <path d="M 88.6 71.4 C 68.5 52.5, 52 59, 51.2 81 C 50.5 109, 72.5 127.5, 89.2 137.6 C 91.8 139.6, 92.4 136.8, 91 134.6 C 82 127, 76 114, 76 99 C 75 85, 78 71, 88 78 C 91.4 78.8, 92 74.8, 88.6 71.4 Z" fill="url(#a-drop-pink)" />
+      <path d="M 95.2 51.4 A 4.0 4.0 0 1 1 89.2 56.8 C 74 44, 50 52, 37 86 C 45 45, 75 35, 95.2 51.4 Z" fill="url(#solid-gold)" />
+      <path d="M 65.5 30.8 A 4.8 4.8 0 1 1 63.2 40.2 C 42 43, 29.5 55, 29 75 C 28.5 96, 35 112, 45 126 C 30 112, 20.5 96, 20.5 75 C 20.5 48, 39 33, 65.5 30.8 Z" fill="url(#solid-pink)" />
+      <path d="M 10.5 96.8 A 4.2 4.2 0 1 1 18.8 94.8 C 24 126, 56 152, 99 171 C 50 157, 16 131, 10.5 96.8 Z" fill="url(#solid-purple)" />
+      <path d="M 102 54 C 131 21, 181 30, 186.5 75 C 192 129, 135 159, 102 169 C 131 154, 178 124, 178.5 75 C 178 41, 130 31, 102 54 Z" fill="url(#blend-3)" />
+      <path d="M 106 64 C 131 36, 166.5 44.5, 167.5 78 C 168.5 119, 132.5 144, 105 154 C 129 139, 159.5 115, 160.5 78 C 161.2 52, 129 44, 106 64 Z" fill="url(#blend-2)" />
+      <path d="M 110 75 C 131 53, 148 59, 148.8 81 C 149.5 109, 127.5 127.5, 108 139 C 124.5 125.5, 141.8 108, 142 82 C 142.2 66, 127 60, 110 75 Z" fill="url(#blend-1)" />
+    </g>
+
+    <clipPath id="clip-landing-header">
+      <rect x="38" y="88" width="724" height="66" rx="18" />
+    </clipPath>
+    <clipPath id="clip-landing-hero">
+      <rect x="38" y="166" width="724" height="404" rx="26" />
+    </clipPath>
+    <clipPath id="clip-app-sidebar">
+      <rect x="800" y="76" width="202" height="940" rx="22" />
+    </clipPath>
+    <clipPath id="clip-app-top-banner">
+      <rect x="1018" y="88" width="544" height="148" rx="22" />
+    </clipPath>
+  </defs>
+
+  <!-- Fundo Geral da Prancha -->
+  <rect width="1600" height="1040" rx="24" fill="#F4F1FA" />
+
+  <!-- Top Bar da Prancha -->
+  <rect x="24" y="16" width="1552" height="46" rx="12" fill="#FFFFFF" stroke="#DDD6FE" stroke-width="1.5" />
+  <g transform="translate(42, 23) scale(0.32)"><use href="#wing-marker" /></g>
+  <text x="68" y="44" font-family="Inter, system-ui, sans-serif" font-size="12.5" font-weight="800" fill="#581C87">
+    PROPOSTA UI v3 (LIGHT NATURAL FLUIDA) · SUPERFÍCIES CLARAS EM CAMADAS + PINCELADAS EM MARCA-D'ÁGUA + MARCADOR DA ASA INTERNA
+  </text>
+
+  <!-- ========================================================================================= -->
+  <!-- TELA 1 (ESQUERDA): LANDING PAGE EM LIGHT MODE NATURAL (x=24..776)                         -->
+  <!-- ========================================================================================= -->
+  <g id="screen-landing">
+    <rect x="24" y="76" width="752" height="940" rx="24" fill="#FFFFFF" stroke="#DDD6FE" stroke-width="1.5" />
+
+    <!-- 1. HEADER LUMINOSO COM CONTRASTE DE CAMADA (LAVANDA-SEDA #F5EEFF -> #FDF2F8) E PINCELADAS -->
+    <g clip-path="url(#clip-landing-header)">
+      <rect x="38" y="88" width="724" height="66" rx="18" fill="url(#light-header-grad)" stroke="#E9D5FF" stroke-width="1.5" />
+      <!-- Pinceladas do coração como marca-d'água suave atravessando o header claro -->
+      <g transform="translate(230, -45) scale(1.65) rotate(18)" opacity="0.16">
+        <use href="#brush-watermark-ribbons" />
+      </g>
+      <g transform="translate(530, 8) scale(1.25) rotate(-22)" opacity="0.18">
+        <use href="#wing-marker" />
+      </g>
+    </g>
+    <!-- Logo Oficial nas suas cores naturais (ana rosa + coração + neri roxo) -->
+    <g transform="translate(68.00,101.99) scale(0.3800)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(97.64,101.99) scale(0.3800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(129.18,101.99) scale(0.3800)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(154.30, 97.32) scale(0.2262)"><use href="#heart-color" /></g>
+      <g transform="translate(196.59,101.99) scale(0.3800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(228.13,101.99) scale(0.3800)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="url(#neri-purple)" fill-rule="evenodd" /></g>
+      <g transform="translate(257.01,101.99) scale(0.3800)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(279.81,101.99) scale(0.3800)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+    <text x="318" y="126" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#581C87">Ecossistema</text>
+    <text x="406" y="126" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#581C87">Hospitais &amp; SUS</text>
+    <text x="514" y="126" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#581C87">Segurança</text>
+    <text x="602" y="126" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#BE185D">Entrar</text>
+    <rect x="652" y="104" width="96" height="34" rx="17" fill="url(#cta-primary)" />
+    <text x="700" y="125" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#FFFFFF">Criar conta</text>
+
+    <!-- 2. HERO ASSIMÉTRICO CLARO COM ONDAS DE PINCELADA EM MARCA-D'ÁGUA -->
+    <g clip-path="url(#clip-landing-hero)">
+      <rect x="38" y="166" width="724" height="404" rx="26" fill="url(#hero-silk-bg)" stroke="#F3E8FF" stroke-width="1.5" />
+      <!-- Grande pincelada fluida em marca-d'água no lado direito do Hero -->
+      <g transform="translate(350, 35) scale(3.4) rotate(8)" opacity="0.15">
+        <use href="#brush-watermark-ribbons" />
+      </g>
+      <!-- Asa central esquerda gigante suavizada na base esquerda -->
+      <g transform="translate(-25, 310) scale(3.2) rotate(-18)" opacity="0.13">
+        <use href="#wing-marker" />
+      </g>
+      <!-- Semente dourada em marca-d'água -->
+      <path d="M 95.2 51.4 A 4.0 4.0 0 1 1 89.2 56.8 C 74 44, 50 52, 37 86 C 45 45, 75 35, 95.2 51.4 Z"
+            transform="translate(460, 120) scale(3.2)" fill="url(#solid-gold)" opacity="0.22" />
+    </g>
+
+    <!-- Badge com o Marcador da Asa Central Esquerda -->
+    <rect x="68" y="188" width="290" height="28" rx="14" fill="#FFFFFF" stroke="#FBCFE8" stroke-width="1.2" />
+    <g transform="translate(76, 189) scale(0.28)"><use href="#wing-marker" /></g>
+    <text x="96" y="206" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#9D174D">
+      INTELIGÊNCIA FLUIDA DE CUIDADO FAMILIAR
+    </text>
+
+    <g transform="translate(92.00,225.88) scale(0.5600)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(135.68,225.88) scale(0.5600)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(182.16,225.88) scale(0.5600)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(219.17, 219.00) scale(0.3333)"><use href="#heart-color" /></g>
+      <g transform="translate(281.51,225.88) scale(0.5600)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(327.99,225.88) scale(0.5600)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="url(#neri-purple)" fill-rule="evenodd" /></g>
+      <g transform="translate(370.55,225.88) scale(0.5600)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(404.15,225.88) scale(0.5600)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+
+    <text x="68" y="318" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="800" fill="#2E1065">
+      A memória clínica viva
+    </text>
+    <text x="68" y="346" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="800" fill="#7E22CE">
+      de quem você mais ama.
+    </text>
+    <text x="68" y="374" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#581C87">
+      Exames, vacinas e histórico sincronizados dos portais
+    </text>
+    <text x="68" y="390" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#581C87">
+      de saúde, traduzidos com carinho pela agente Neri.
+    </text>
+
+    <!-- Botões Hero -->
+    <rect x="68" y="410" width="176" height="42" rx="21" fill="url(#cta-primary)" />
+    <text x="156" y="435" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF">
+      Começar gratuitamente
+    </text>
+    <rect x="256" y="410" width="134" height="42" rx="21" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="1.5" />
+    <text x="323" y="435" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#581C87">
+      Ouvir a Neri
+    </text>
+
+    <!-- Card Flutuante Escultural à Direita do Hero -->
+    <rect x="436" y="194" width="304" height="264" rx="22" fill="#FFFFFF" stroke="#E9D5FF" stroke-width="2" />
+    <g transform="translate(630, 200) scale(1.25)" opacity="0.14"><use href="#wing-marker" /></g>
+    <g transform="translate(454, 210) scale(0.28)"><use href="#heart-color" /></g>
+    <text x="514" y="230" font-family="Inter, system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#581C87">
+      Síntese Viva · Agente Neri
+    </text>
+    <text x="514" y="246" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#EC4899">
+      Sincronizado com Rede Mater Dei e SUS
+    </text>
+
+    <rect x="454" y="266" width="268" height="54" rx="14" fill="#FDF2F8" />
+    <g transform="translate(464, 276) scale(0.36)"><use href="#wing-marker" /></g>
+    <text x="488" y="289" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#831843">
+      Ferritina da Helena subiu para 34 ng/mL
+    </text>
+    <text x="488" y="305" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#9D174D">
+      Resposta excelente após suplementação
+    </text>
+
+    <rect x="454" y="330" width="268" height="54" rx="14" fill="#FAF5FF" />
+    <g transform="translate(464, 340) scale(0.36)"><use href="#wing-marker-purple" /></g>
+    <text x="488" y="353" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#4C1D95">
+      Caderneta ConecteSUS 100% em dia
+    </text>
+    <text x="488" y="369" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">
+      Dose anual Influenza registrada automaticamente
+    </text>
+
+    <rect x="454" y="394" width="268" height="48" rx="14" fill="#FFFBEB" />
+    <g transform="translate(464, 402) scale(0.36)"><use href="#wing-marker-gold" /></g>
+    <text x="488" y="416" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#78350F">
+      Roteiro pronto para a consulta de quinta
+    </text>
+    <text x="488" y="431" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#92400E">
+      3 perguntas sugeridas para a Dra. Camila
+    </text>
+
+    <!-- Faixa Clara Acetinada de Portais Conectados (sem barra preta!) -->
+    <rect x="64" y="482" width="672" height="68" rx="18" fill="#FFFFFF" stroke="#E9D5FF" stroke-width="1.5" />
+    <g transform="translate(78, 496) scale(0.42)"><use href="#wing-marker" /></g>
+    <text x="104" y="514" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#7E22CE">
+      CONECTADA AOS SEUS PORTAIS:
+    </text>
+    <text x="104" y="530" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">
+      Importação contínua sem digitar nada
+    </text>
+    <rect x="304" y="502" width="76" height="28" rx="14" fill="#F0FDF4" stroke="#BBF7D0" />
+    <text x="342" y="520" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#15803D">Unimed</text>
+    <rect x="390" y="502" width="68" height="28" rx="14" fill="#EFF6FF" stroke="#BFDBFE" />
+    <text x="424" y="520" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#1D4ED8">Amil</text>
+    <rect x="468" y="502" width="92" height="28" rx="14" fill="#FEF2F2" stroke="#FECACA" />
+    <text x="514" y="520" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#B91C1C">Mater Dei</text>
+    <rect x="570" y="502" width="74" height="28" rx="14" fill="#FAF5FF" stroke="#E9D5FF" />
+    <text x="607" y="520" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#7E22CE">Fleury</text>
+    <rect x="654" y="502" width="66" height="28" rx="14" fill="#FDF2F8" stroke="#FBCFE8" />
+    <text x="687" y="520" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#BE185D">SUS</text>
+
+    <!-- 3. SEÇÃO DE EXPERIÊNCIA ORGÂNICA EM TONS CLAROS -->
+    <g transform="translate(46, 584) scale(0.38)"><use href="#wing-marker" /></g>
+    <text x="72" y="608" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="800" fill="#2E1065">
+      Uma experiência desenhada como gesto de cuidado
+    </text>
+
+    <!-- Card Orgânico 1 (Rosa-Pérola suave com marca-d'água da asa) -->
+    <rect x="38" y="626" width="352" height="184" rx="22" fill="#FFF7FB" stroke="#FBCFE8" stroke-width="1.5" />
+    <g transform="translate(275, 635) scale(1.65) rotate(12)" opacity="0.14"><use href="#wing-marker" /></g>
+    <g transform="translate(58, 646) scale(0.45)"><use href="#wing-marker" /></g>
+    <text x="86" y="672" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#831843">
+      Círculo de Cuidado da Família
+    </text>
+    <text x="58" y="700" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">
+      Acompanhe filhos, pais e avós no mesmo lugar.
+    </text>
+    <text x="58" y="718" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">
+      Compartilhe apenas o necessário com pediatras,
+    </text>
+    <text x="58" y="736" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">
+      escola ou cuidadores com controle total LGPD.
+    </text>
+    <rect x="58" y="758" width="164" height="30" rx="15" fill="#FFFFFF" stroke="#FBCFE8" />
+    <text x="140" y="777" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#BE185D">
+      Perfis por geração →
+    </text>
+
+    <!-- Card Orgânico 2 (Lavanda-Seda claro com fitas do coração em marca-d'água) -->
+    <rect x="410" y="626" width="352" height="184" rx="22" fill="#F8F2FF" stroke="#DDD6FE" stroke-width="1.5" />
+    <g transform="translate(560, 610) scale(1.35) rotate(-10)" opacity="0.16"><use href="#brush-watermark-ribbons" /></g>
+    <g transform="translate(430, 646) scale(0.45)"><use href="#wing-marker-purple" /></g>
+    <text x="458" y="672" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#581C87">
+      Linha Viva de Exames &amp; Laudos
+    </text>
+    <text x="430" y="700" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#4C1D95">
+      Chega de PDFs espalhados em dezenas de portais.
+    </text>
+    <text x="430" y="718" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#4C1D95">
+      A Ananeri busca novos resultados automaticamente
+    </text>
+    <text x="430" y="736" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#4C1D95">
+      e desenha a evolução de cada marcador no tempo.
+    </text>
+    <rect x="430" y="758" width="176" height="30" rx="15" fill="#FFFFFF" stroke="#DDD6FE" />
+    <text x="518" y="777" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#7E22CE">
+      Histórico clínico contínuo →
+    </text>
+
+    <!-- Rodapé Editorial Luminoso da Landing -->
+    <rect x="38" y="828" width="724" height="168" rx="22" fill="url(#plum-soft-banner)" stroke="#E9D5FF" stroke-width="1.5" />
+    <g transform="translate(560, 815) scale(1.8) rotate(12)" opacity="0.15"><use href="#brush-watermark-ribbons" /></g>
+    <g transform="translate(64, 852) scale(0.62)"><use href="#heart-color" /></g>
+    <text x="200" y="882" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="800" fill="#2E1065">
+      Pronto para reunir a saúde da sua família?
+    </text>
+    <text x="200" y="906" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#581C87">
+      Crie seu círculo familiar em 2 minutos e deixe a Neri organizar seus exames.
+    </text>
+    <rect x="200" y="924" width="196" height="40" rx="20" fill="url(#cta-primary)" />
+    <text x="298" y="949" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF">
+      Criar minha conta agora
+    </text>
+  </g>
+
+  <!-- ========================================================================================= -->
+  <!-- TELA 2 (DIREITA): TELA PRINCIPAL DO APP EM MODO CLARO FLUIDO (x=800..1576)                -->
+  <!-- ========================================================================================= -->
+  <g id="screen-dashboard">
+    <rect x="800" y="76" width="776" height="940" rx="24" fill="#FAF8FF" stroke="#DDD6FE" stroke-width="1.5" />
+
+    <!-- 1. SIDEBAR ESQUERDA EM LAVANDA-SEDA LUMINOSO COM PINCELADAS EM MARCA-D'ÁGUA -->
+    <g clip-path="url(#clip-app-sidebar)">
+      <rect x="800" y="76" width="202" height="940" rx="22" fill="url(#light-sidebar-grad)" stroke="#E9D5FF" stroke-width="1.5" />
+      <!-- Pinceladas do coração em marca-d'água no topo e na base da sidebar clara -->
+      <g transform="translate(765, -25) scale(1.55) rotate(14)" opacity="0.15">
+        <use href="#brush-watermark-ribbons" />
+      </g>
+      <g transform="translate(815, 720) scale(2.4) rotate(-20)" opacity="0.12">
+        <use href="#wing-marker" />
+      </g>
+    </g>
+
+    <!-- Logo Oficial na Sidebar Clara -->
+    <g transform="translate(826.00,102.67) scale(0.3500)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(853.30,102.67) scale(0.3500)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(882.35,102.67) scale(0.3500)"><path d="M 56 35 C 49 22, 34 19, 21 27 C 7 36, 4 58, 14 75 C 23 89, 42 91, 54 78 C 57 74, 57 69, 54 71 C 44 81, 29 80, 22 68 C 15 55, 17 37, 29 29 C 39 23, 50 26, 55 38 C 56 40, 57 38, 56 35 Z" fill="url(#ana-pink)" fill-rule="nonzero" /><path d="M 53 25 A 4.8 4.8 0 1 1 62.6 25 C 61.5 42, 60.5 62, 64 76 C 66 83, 71 85, 69 88.5 C 66.5 91, 58 89.5, 55 83 C 52.5 77, 52.5 63, 53 46 C 53 35, 53 29, 53 25 Z" fill="url(#ana-pink)" fill-rule="nonzero" /></g>
+      <g transform="translate(905.48, 98.38) scale(0.2083)"><use href="#heart-color" /></g>
+      <g transform="translate(944.44,102.67) scale(0.3500)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 25 26, 39 19, 52 21 C 66 23, 72 35, 71 53 C 70 67, 70 76, 72 82 C 74 88, 64 91, 61 85 C 58.5 79, 59.5 67, 60.5 53 C 61.5 37, 56 28, 46 27 C 35 26, 24 34, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(973.49,102.67) scale(0.3500)"><path d="M 18 53 C 35 54, 52 49, 60 40 C 66 33, 64 23, 52 20 C 37 17, 19 25, 11 42 C 3 59, 8 80, 25 87 C 40 93, 57 88, 66 76 C 68.5 72.5, 65 69.5, 61.5 73 C 53 81, 39 84, 29 79 C 18 73, 15 61, 18 53 Z M 19 47 C 23 33, 36 25, 48 26.5 C 56 27.5, 57 34, 51 39.5 C 44 45.5, 31 48, 19 47 Z" fill="url(#neri-purple)" fill-rule="evenodd" /></g>
+      <g transform="translate(1000.09,102.67) scale(0.3500)"><path d="M 10 25 A 4.8 4.8 0 1 1 19.6 25 C 19 42, 18.5 62, 20.5 79 C 21.5 87, 13.5 91, 10.5 85 C 8.5 80, 9.5 64, 10 47 C 10 35, 10 29, 10 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 42 C 24 26, 36 19, 47 21 C 54 22.5, 56 30, 50 33.5 C 45.5 36, 41.5 31.5, 36.5 30.5 C 29 29, 23 36, 18.5 47 C 17 46, 17 44, 18 42 Z" fill="url(#neri-purple)" fill-rule="nonzero" /></g>
+      <g transform="translate(1021.09,102.67) scale(0.3500)"><path d="M 12 25 A 4.8 4.8 0 1 1 21.6 25 C 21 42, 20.5 62, 22.5 79 C 23.5 87, 15.5 91, 12.5 85 C 10.5 80, 11.5 64, 12 47 C 12 35, 12 29, 12 25 Z" fill="url(#neri-purple)" fill-rule="nonzero" /><path d="M 18 4 C 23 2, 27 6.5, 24.5 11.5 C 22 16, 14.5 16.5, 12 13 C 9.5 9.5, 13 5.5, 18 4 Z" fill="url(#ana-pink)" /></g>
+
+    <!-- Seletor do Círculo Familiar -->
+    <rect x="818" y="162" width="166" height="48" rx="14" fill="#FFFFFF" stroke="#E9D5FF" stroke-width="1.5" />
+    <g transform="translate(828, 172) scale(0.32)"><use href="#wing-marker" /></g>
+    <text x="848" y="181" font-family="Inter, system-ui, sans-serif" font-size="8.5" font-weight="700" fill="#BE185D">CÍRCULO DA FAMÍLIA</text>
+    <text x="848" y="198" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#2E1065">Família Rafael (4)</text>
+
+    <!-- Menu Lateral com o Marcador da Asa -->
+    <rect x="818" y="228" width="166" height="40" rx="12" fill="url(#cta-primary)" />
+    <g transform="translate(828, 234) scale(0.30)"><use href="#wing-marker-gold" /></g>
+    <text x="850" y="253" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">Visão Geral</text>
+
+    <g transform="translate(828, 282) scale(0.26)"><use href="#wing-marker" /></g>
+    <text x="850" y="298" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#4C1D95">Carteira &amp; Convênios</text>
+
+    <g transform="translate(828, 322) scale(0.26)"><use href="#wing-marker-purple" /></g>
+    <text x="850" y="338" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#4C1D95">Exames &amp; Laudos</text>
+
+    <g transform="translate(828, 362) scale(0.26)"><use href="#wing-marker" /></g>
+    <text x="850" y="378" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#4C1D95">Linha Viva</text>
+
+    <g transform="translate(828, 402) scale(0.26)"><use href="#wing-marker-purple" /></g>
+    <text x="850" y="418" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#4C1D95">Vacinas &amp; Curvas</text>
+
+    <g transform="translate(828, 442) scale(0.26)"><use href="#wing-marker" /></g>
+    <text x="850" y="458" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#4C1D95">Portais Conectados</text>
+
+    <!-- Atalho de Emergência na Sidebar -->
+    <rect x="818" y="918" width="166" height="78" rx="16" fill="#FFFFFF" stroke="#FBCFE8" stroke-width="1.5" />
+    <g transform="translate(828, 930) scale(0.32)"><use href="#wing-marker" /></g>
+    <text x="848" y="946" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#9D174D">Modo Emergência</text>
+    <text x="830" y="964" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">Alergias, tipo sanguíneo e</text>
+    <text x="830" y="978" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">carteirinhas em 1 clique</text>
+
+    <!-- 2. HEADER BANNER DO DASHBOARD EM LAVANDA/ROSA LUMINOSO COM PINCELADAS EM MARCA-D'ÁGUA -->
+    <g clip-path="url(#clip-app-top-banner)">
+      <rect x="1018" y="88" width="544" height="148" rx="22" fill="url(#plum-soft-banner)" stroke="#E9D5FF" stroke-width="1.5" />
+      <g transform="translate(1275, -25) scale(2.1) rotate(12)" opacity="0.18">
+        <use href="#brush-watermark-ribbons" />
+      </g>
+      <g transform="translate(1005, 85) scale(1.9) rotate(-18)" opacity="0.14">
+        <use href="#wing-marker" />
+      </g>
+    </g>
+
+    <g transform="translate(1038, 104) scale(0.38)"><use href="#wing-marker" /></g>
+    <text x="1064" y="126" font-family="Inter, system-ui, sans-serif" font-size="17" font-weight="800" fill="#2E1065">
+      Bom dia, Rafael
+    </text>
+    <text x="1064" y="146" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#7E22CE">
+      A Neri analisou 3 novos resultados da Rede Mater Dei e Unimed hoje.
+    </text>
+
+    <!-- Pílulas brancas translúcidas dentro do Header Hero -->
+    <rect x="1038" y="166" width="236" height="52" rx="14" fill="#FFFFFF" stroke="#FBCFE8" />
+    <g transform="translate(1048, 176) scale(0.34)"><use href="#wing-marker" /></g>
+    <text x="1072" y="188" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="800" fill="#831843">
+      Helena · Hemograma &amp; Ferritina
+    </text>
+    <text x="1072" y="204" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">
+      Ferritina subiu para 34 ng/mL (Ótimo)
+    </text>
+
+    <rect x="1286" y="166" width="256" height="52" rx="14" fill="#FFFFFF" stroke="#E9D5FF" />
+    <g transform="translate(1296, 176) scale(0.34)"><use href="#wing-marker-purple" /></g>
+    <text x="1320" y="188" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="800" fill="#581C87">
+      Quinta, 14h30 · Pediatria
+    </text>
+    <text x="1320" y="204" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">
+      Guia Unimed autorizada · Dra. Camila
+    </text>
+
+    <!-- 3. ÁREA CENTRAL DE PACIENTES & CARTEIRA -->
+    <g transform="translate(1020, 250) scale(0.34)"><use href="#wing-marker" /></g>
+    <text x="1042" y="272" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#581C87">
+      PESSOAS DO SEU CÍRCULO
+    </text>
+
+    <!-- Card Paciente 1: Helena -->
+    <rect x="1018" y="284" width="322" height="172" rx="20" fill="#FFFFFF" stroke="#FBCFE8" stroke-width="1.5" />
+    <g transform="translate(1255, 290) scale(1.4) rotate(10)" opacity="0.11"><use href="#wing-marker" /></g>
+    <circle cx="1050" cy="322" r="22" fill="#FDF2F8" stroke="#F472B6" stroke-width="1.5" />
+    <text x="1050" y="327" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#BE185D">H</text>
+    <text x="1082" y="316" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#2E1065">Helena · 6 anos</text>
+    <text x="1082" y="334" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6B21A8">Filha · Sangue O+ · Sem alergias</text>
+
+    <rect x="1034" y="354" width="92" height="50" rx="12" fill="#FDF2F8" />
+    <text x="1046" y="373" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="600" fill="#9D174D">Exames</text>
+    <text x="1046" y="391" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#831843">42 laudos</text>
+
+    <rect x="1134" y="354" width="92" height="50" rx="12" fill="#FAF5FF" />
+    <text x="1146" y="373" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="600" fill="#6B21A8">Vacinas SUS</text>
+    <text x="1146" y="391" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#581C87">Em dia</text>
+
+    <rect x="1234" y="354" width="90" height="50" rx="12" fill="#FFFBEB" />
+    <text x="1246" y="373" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="600" fill="#92400E">Curva OMS</text>
+    <text x="1246" y="391" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#78350F">P75 ideal</text>
+
+    <g transform="translate(1034, 418) scale(0.26)"><use href="#wing-marker" /></g>
+    <text x="1052" y="435" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#BE185D">
+      Abrir linha viva, curva pediátrica e carteirinhas →
+    </text>
+
+    <!-- Card Paciente 2: Rafael -->
+    <rect x="1018" y="470" width="322" height="142" rx="20" fill="#FFFFFF" stroke="#E9D5FF" stroke-width="1.5" />
+    <g transform="translate(1255, 476) scale(1.3) rotate(10)" opacity="0.11"><use href="#wing-marker-purple" /></g>
+    <circle cx="1050" cy="508" r="22" fill="#FAF5FF" stroke="#A855F7" stroke-width="1.5" />
+    <text x="1050" y="513" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#581C87">R</text>
+    <text x="1082" y="502" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#2E1065">Rafael · Titular</text>
+    <text x="1082" y="520" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#6B21A8">Unimed Especial · Check-up 2026 em dia</text>
+
+    <rect x="1034" y="540" width="140" height="46" rx="12" fill="#FAF5FF" />
+    <text x="1046" y="558" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="600" fill="#6B21A8">Biomarcadores</text>
+    <text x="1046" y="575" font-family="Inter, system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#581C87">18 dentro da meta</text>
+
+    <rect x="1184" y="540" width="140" height="46" rx="12" fill="#FDF2F8" />
+    <text x="1196" y="558" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="600" fill="#9D174D">Portais Ativos</text>
+    <text x="1196" y="575" font-family="Inter, system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#BE185D">Unimed · Fleury</text>
+
+    <!-- Carteira Digital com Gradiente Vivo da Marca -->
+    <g transform="translate(1020, 626) scale(0.34)"><use href="#wing-marker-purple" /></g>
+    <text x="1042" y="648" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#581C87">
+      CARTEIRA DIGITAL &amp; LINHA DO TEMPO
+    </text>
+
+    <rect x="1018" y="660" width="322" height="110" rx="20" fill="url(#cta-primary)" />
+    <g transform="translate(1210, 640) scale(1.2) rotate(18)" opacity="0.24"><use href="#brush-watermark-ribbons" /></g>
+    <g transform="translate(1034, 676) scale(0.36)"><use href="#wing-marker-gold" /></g>
+    <text x="1058" y="694" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#FFE566">
+      CARTEIRINHA DIGITAL UNIFICADA · PRONTO ATENDIMENTO
+    </text>
+    <text x="1034" y="718" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#FFFFFF">
+      Helena · Unimed + CNS ConecteSUS
+    </text>
+    <text x="1034" y="740" font-family="Consolas, monospace" font-size="11" fill="#FCE7F3">
+      0064.8920.1149.00-8  ·  CNS 704 8012 9934
+    </text>
+
+    <!-- Linha do Tempo com bullets usando o Marcador da Asa Esquerda -->
+    <rect x="1018" y="784" width="322" height="212" rx="20" fill="#FFFFFF" stroke="#E9D5FF" stroke-width="1.5" />
+    <text x="1036" y="812" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#581C87">
+      ÚLTIMOS EVENTOS SINCRONIZADOS
+    </text>
+
+    <g transform="translate(1032, 826) scale(0.32)"><use href="#wing-marker" /></g>
+    <text x="1054" y="842" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#2E1065">Hemograma + Ferritina (Helena)</text>
+    <text x="1054" y="857" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">Rede Mater Dei · Interpretado pela Neri há 2h</text>
+
+    <g transform="translate(1032, 878) scale(0.32)"><use href="#wing-marker-purple" /></g>
+    <text x="1054" y="894" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#2E1065">Consulta Pediátrica Agendada</text>
+    <text x="1054" y="909" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">Dra. Camila Rocha · Quinta-feira às 14h30</text>
+
+    <g transform="translate(1032, 930) scale(0.32)"><use href="#wing-marker-gold" /></g>
+    <text x="1054" y="946" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#2E1065">Vacina Influenza Tetravalente</text>
+    <text x="1054" y="961" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">Sincronizada automaticamente via ConecteSUS</text>
+
+    <!-- 4. COLUNA DIREITA: AGENTE NERI -->
+    <rect x="1354" y="250" width="208" height="746" rx="22" fill="#FFFFFF" stroke="#FBCFE8" stroke-width="1.5" />
+    <g transform="translate(1445, 255) scale(1.4) rotate(12)" opacity="0.12"><use href="#wing-marker" /></g>
+
+    <g transform="translate(1368, 266) scale(0.24)"><use href="#heart-color" /></g>
+    <text x="1420" y="288" font-family="Inter, system-ui, sans-serif" font-size="12.5" font-weight="800" fill="#581C87">Agente Neri</text>
+    <text x="1420" y="304" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#EC4899">● Copiloto da Família</text>
+
+    <rect x="1368" y="324" width="180" height="148" rx="16" fill="url(#hero-silk-bg)" stroke="#FBCFE8" />
+    <g transform="translate(1378, 336) scale(0.32)"><use href="#wing-marker" /></g>
+    <text x="1400" y="352" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="800" fill="#831843">
+      Leitura do Exame
+    </text>
+    <text x="1380" y="374" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#4C1D95">
+      A ferritina da Helena dobrou
+    </text>
+    <text x="1380" y="390" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#4C1D95">
+      desde agosto (18 → 34 ng/mL)
+    </text>
+    <text x="1380" y="406" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#4C1D95">
+      e a hemoglobina está ótima
+    </text>
+    <text x="1380" y="422" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#581C87">
+      em 13,1 g/dL.
+    </text>
+    <text x="1380" y="450" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#BE185D">
+      Ver evolução completa →
+    </text>
+
+    <rect x="1368" y="486" width="180" height="126" rx="16" fill="#FAF5FF" stroke="#E9D5FF" />
+    <g transform="translate(1378, 498) scale(0.32)"><use href="#wing-marker-purple" /></g>
+    <text x="1400" y="514" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="800" fill="#581C87">
+      Para levar à consulta
+    </text>
+    <text x="1380" y="536" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#4C1D95">
+      Preparei um resumo com os
+    </text>
+    <text x="1380" y="552" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#4C1D95">
+      laudos da Mater Dei para a
+    </text>
+    <text x="1380" y="568" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#4C1D95">
+      Dra. Camila nesta quinta.
+    </text>
+    <rect x="1380" y="578" width="156" height="24" rx="12" fill="url(#cta-primary)" />
+    <text x="1458" y="594" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#FFFFFF">
+      Compartilhar com médica
+    </text>
+
+    <text x="1372" y="640" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#6B21A8">
+      PERGUNTE À NERI:
+    </text>
+    <rect x="1368" y="652" width="180" height="36" rx="12" fill="#FDF2F8" />
+    <g transform="translate(1376, 660) scale(0.24)"><use href="#wing-marker" /></g>
+    <text x="1394" y="674" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#831843">Traduzir laudo em PDF</text>
+
+    <rect x="1368" y="696" width="180" height="36" rx="12" fill="#FAF5FF" />
+    <g transform="translate(1376, 704) scale(0.24)"><use href="#wing-marker-purple" /></g>
+    <text x="1394" y="718" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#581C87">Checar receita e dosagem</text>
+
+    <rect x="1368" y="932" width="180" height="48" rx="16" fill="#FAF5FF" stroke="#C4B5FD" stroke-width="1.5" />
+    <text x="1382" y="960" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#6B21A8">Conversar com a Neri...</text>
+    <circle cx="1528" cy="956" r="13" fill="url(#cta-primary)" />
+    <text x="1528" y="960" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="800" fill="#FFFFFF">↑</text>
+  </g>
+</svg>
