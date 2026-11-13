@@ -1,0 +1,322 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1020" fill="none" role="img" aria-label="Estudo Estratégico: Plataformas de Gestão de Clínicas e Consultórios vs. Ecossistema Ananeri">
+  <defs>
+    <linearGradient id="ana-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" />
+      <stop offset="55%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+    <linearGradient id="neri-purple" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#7E22CE" />
+      <stop offset="52%" stop-color="#6B21A8" />
+      <stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+    <linearGradient id="cta-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" />
+      <stop offset="50%" stop-color="#9333EA" />
+      <stop offset="100%" stop-color="#7E22CE" />
+    </linearGradient>
+    <linearGradient id="silk-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF7FB" />
+      <stop offset="50%" stop-color="#F8F2FF" />
+      <stop offset="100%" stop-color="#EDE9FE" />
+    </linearGradient>
+    <linearGradient id="solid-gold" x1="20%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE566" /><stop offset="55%" stop-color="#FACC15" /><stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+
+    <g id="wing-marker">
+      <path d="M 38.6 21.4 C 18.5 2.5, 2 9, 1.2 31 C 0.5 59, 22.5 77.5, 39.2 87.6 C 41.8 89.6, 42.4 86.8, 41 84.6 C 32 77, 26 64, 26 49 C 25 35, 28 21, 38 28 C 41.4 28.8, 42 24.8, 38.6 21.4 Z" fill="url(#ana-pink)" />
+    </g>
+    <g id="wing-marker-purple">
+      <path d="M 38.6 21.4 C 18.5 2.5, 2 9, 1.2 31 C 0.5 59, 22.5 77.5, 39.2 87.6 C 41.8 89.6, 42.4 86.8, 41 84.6 C 32 77, 26 64, 26 49 C 25 35, 28 21, 38 28 C 41.4 28.8, 42 24.8, 38.6 21.4 Z" fill="url(#neri-purple)" />
+    </g>
+    <g id="wing-marker-gold">
+      <path d="M 38.6 21.4 C 18.5 2.5, 2 9, 1.2 31 C 0.5 59, 22.5 77.5, 39.2 87.6 C 41.8 89.6, 42.4 86.8, 41 84.6 C 32 77, 26 64, 26 49 C 25 35, 28 21, 38 28 C 41.4 28.8, 42 24.8, 38.6 21.4 Z" fill="url(#solid-gold)" />
+    </g>
+  </defs>
+
+  <rect width="1600" height="1020" rx="24" fill="#F4F1FA" />
+
+  <!-- Top Header -->
+  <rect x="24" y="16" width="1552" height="58" rx="16" fill="url(#silk-header)" stroke="#DDD6FE" stroke-width="1.5" />
+  <g transform="translate(46, 28) scale(0.38)"><use href="#wing-marker" /></g>
+  <text x="76" y="44" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#2E1065">
+    ESTUDO ESTRATÉGICO B2B2C · PLATAFORMAS DE GESTÃO DE CLÍNICAS E CONSULTÓRIOS (2026) &amp; ROADMAP ANANERI
+  </text>
+  <text x="76" y="62" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#7E22CE">
+    Benchmark: Afya iClinic · Feegow · Amplimed · Conclínica · Aura · GestãoDS · Athenahealth · Jane App
+  </text>
+
+  <!-- ========================================================================================= -->
+  <!-- SEÇÃO 1 (TOPO): O PROBLEMA DOS ERPs DE CLÍNICA vs. O FLYWHEEL CONTÍNUO DA ANANERI         -->
+  <!-- ========================================================================================= -->
+  <!-- Card Esquerdo: O Ponto Cego do Mercado Atual -->
+  <rect x="24" y="88" width="520" height="236" rx="20" fill="#FFFFFF" stroke="#FECACA" stroke-width="1.5" />
+  <rect x="44" y="106" width="248" height="24" rx="12" fill="#FEF2F2" />
+  <text x="168" y="122" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#B91C1C">
+    O PONTO CEGO DOS SISTEMAS TRADICIONAIS
+  </text>
+  <text x="44" y="152" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="800" fill="#1E293B">
+    iClinic, Feegow e Amplimed são "Ilhas Cegas"
+  </text>
+  <text x="44" y="176" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">
+    · Só enxergam o que acontece dentro das 4 paredes do consultório;
+  </text>
+  <text x="44" y="196" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">
+    · O médico perde 10–15 min da consulta abrindo PDFs soltos no WhatsApp;
+  </text>
+  <text x="44" y="216" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">
+    · Não recebem exames externos (Fleury, Mater Dei, Unimed, ConecteSUS);
+  </text>
+  <text x="44" y="236" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">
+    · Quando o paciente sai da sala, a receita vira um PDF estático sem acompanhamento;
+  </text>
+  <rect x="44" y="256" width="480" height="48" rx="12" fill="#FFF1F2" />
+  <text x="60" y="276" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#9F1239">
+    Consequência: Sobrecarga de digitação para o médico e fragmentação para a família.
+  </text>
+  <text x="60" y="292" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#BE123C">
+    85% da jornada de saúde da criança/família acontece FORA do consultório!
+  </text>
+
+  <!-- Card Direito: O Flywheel B2B2C Exclusivo da Ananeri -->
+  <rect x="564" y="88" width="1012" height="236" rx="20" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="2" />
+  <rect x="584" y="106" width="290" height="24" rx="12" fill="#FAF5FF" stroke="#E9D5FF" />
+  <g transform="translate(594, 108) scale(0.22)"><use href="#wing-marker" /></g>
+  <text x="740" y="122" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#6B21A8">
+    A VANTAGEM INJUSTA ANANERI · CICLO CONTÍNUO
+  </text>
+  <text x="584" y="152" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="800" fill="#2E1065">
+    O Primeiro Consultório Conectado à Linha Viva da Família (B2C ⇄ B2B)
+  </text>
+
+  <!-- 4 Estágios do Flywheel Conectados -->
+  <!-- Passo 1 -->
+  <rect x="584" y="170" width="224" height="134" rx="16" fill="#FFF7FB" stroke="#FBCFE8" stroke-width="1.5" />
+  <g transform="translate(598, 182) scale(0.30)"><use href="#wing-marker" /></g>
+  <text x="620" y="200" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#831843">1. Pré-Consulta em Casa</text>
+  <text x="598" y="220" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">Sync automático de laboratórios,</text>
+  <text x="598" y="235" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">hospitais e SUS + diário rápido</text>
+  <text x="598" y="250" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">de sintomas e dúvidas da mãe.</text>
+  <text x="598" y="284" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#BE185D">Gera Briefing + QR Code →</text>
+
+  <!-- Passo 2 -->
+  <rect x="826" y="170" width="232" height="134" rx="16" fill="#FAF5FF" stroke="#DDD6FE" stroke-width="1.5" />
+  <g transform="translate(840, 182) scale(0.30)"><use href="#wing-marker-purple" /></g>
+  <text x="862" y="200" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#581C87">2. Durante a Consulta</text>
+  <text x="840" y="220" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">Médico vê histórico unificado,</text>
+  <text x="840" y="235" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">curvas OMS e usa a Neri Scribe</text>
+  <text x="840" y="250" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">(transcrição SOAP + CID/TUSS).</text>
+  <text x="840" y="284" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#7E22CE">Zero digitação mecânica →</text>
+
+  <!-- Passo 3 -->
+  <rect x="1076" y="170" width="232" height="134" rx="16" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5" />
+  <g transform="translate(1090, 182) scale(0.30)"><use href="#wing-marker-gold" /></g>
+  <text x="1112" y="200" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#78350F">3. Prescrição &amp; Pedidos</text>
+  <text x="1090" y="220" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">Receita ICP-Brasil e pedidos de</text>
+  <text x="1090" y="235" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">exames caem estruturados direto</text>
+  <text x="1090" y="250" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">nas abas do app da família!</text>
+  <text x="1090" y="284" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#B45309">Adesão automática →</text>
+
+  <!-- Passo 4 -->
+  <rect x="1326" y="170" width="230" height="134" rx="16" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5" />
+  <circle cx="1346" cy="195" r="7" fill="#10B981" />
+  <text x="1362" y="200" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#14532D">4. Pós-Consulta &amp; Recall</text>
+  <text x="1340" y="220" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">Exames solicitados cruzam com</text>
+  <text x="1340" y="235" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">o novo sync; Neri lembra o</text>
+  <text x="1340" y="250" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">retorno (puericultura/check-up).</text>
+  <text x="1340" y="284" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#15803D">Retenção para a clínica ↺</text>
+
+  <!-- ========================================================================================= -->
+  <!-- SEÇÃO 2 (MEIO): OS 3 HORIZONTES DE FEATURES PARA INCORPORAR À ANANERI                     -->
+  <!-- ========================================================================================= -->
+  <!-- HORIZONTE 1 (H1) -->
+  <rect x="24" y="342" width="504" height="444" rx="22" fill="#FFFFFF" stroke="#F472B6" stroke-width="2" />
+  <rect x="24" y="342" width="504" height="54" rx="22" fill="#FDF2F8" />
+  <g transform="translate(44, 353) scale(0.36)"><use href="#wing-marker" /></g>
+  <text x="72" y="368" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="800" fill="#831843">
+    HORIZONTE 1 · PONTE CLÍNICA &amp; CO-PILOT (CURTO PRAZO)
+  </text>
+  <text x="72" y="385" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#BE185D">
+    Alto impacto na consulta · Zero burocracia contábil inicial
+  </text>
+
+  <rect x="44" y="412" width="464" height="106" rx="14" fill="#FFF7FB" stroke="#FBCFE8" />
+  <text x="60" y="436" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#831843">
+    1.1 · Pré-Check-in Digital &amp; Briefing de 1 Página ("Levar na Consulta" 2.0)
+  </text>
+  <text x="60" y="456" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Família preenche queixa principal e sintomas em 30s antes da consulta;
+  </text>
+  <text x="60" y="474" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Médico abre via QR Code/Link o resumo determinístico + exames recém-importados
+  </text>
+  <text x="60" y="492" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+      (Mater Dei, Fleury, Unimed, SUS) + curvas OMS sem precisar criar conta prévia.
+  </text>
+
+  <rect x="44" y="532" width="464" height="112" rx="14" fill="#FFF7FB" stroke="#FBCFE8" />
+  <text x="60" y="556" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#831843">
+    1.2 · Neri Clinical Scribe &amp; SOAP Co-Pilot (Resolução CFM 2.454/2026)
+  </text>
+  <text x="60" y="576" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Escuta ambiente ou ditado médico estruturando anamnese SOAP automaticamente;
+  </text>
+  <text x="60" y="594" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Sugestão automática de códigos CID-10 e TUSS + alerta de alergias/interações;
+  </text>
+  <text x="60" y="612" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Gera em 1 clique o "Plano Pós-Consulta" em linguagem acolhedora para a família.
+  </text>
+
+  <rect x="44" y="658" width="464" height="108" rx="14" fill="#FFF7FB" stroke="#FBCFE8" />
+  <text x="60" y="682" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#831843">
+    1.3 · Console do Médico / Clínica Leve (Sobre schema `organizations`)
+  </text>
+  <text x="60" y="702" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Painel com pacientes compartilhados, comparador longitudinal de biomarcadores
+  </text>
+  <text x="60" y="720" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+      entre laboratórios distintos e templates por especialidade (Pediatria, Clínica, etc.).
+  </text>
+  <text x="60" y="742" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#BE185D">
+    Aproveita 100% da Migration 055 (`organizations` + `organization_members`) já pronta!
+  </text>
+
+  <!-- HORIZONTE 2 (H2) -->
+  <rect x="548" y="342" width="504" height="444" rx="22" fill="#FFFFFF" stroke="#9333EA" stroke-width="2" />
+  <rect x="548" y="342" width="504" height="54" rx="22" fill="#FAF5FF" />
+  <g transform="translate(568, 353) scale(0.36)"><use href="#wing-marker-purple" /></g>
+  <text x="596" y="368" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="800" fill="#581C87">
+    HORIZONTE 2 · CONSULTÓRIO DIGITAL &amp; ADESÃO (MÉDIO PRAZO)
+  </text>
+  <text x="596" y="385" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#7E22CE">
+    Prescrição conectada, agenda anti-falta e retorno inteligente
+  </text>
+
+  <rect x="568" y="412" width="464" height="112" rx="14" fill="#FAF5FF" stroke="#E9D5FF" />
+  <text x="584" y="436" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#581C87">
+    2.1 · Prescrição Digital ICP-Brasil / Memed com Loop de Adesão
+  </text>
+  <text x="584" y="456" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Emissão de receitas, atestados e pedidos de exames com validade jurídica;
+  </text>
+  <text x="584" y="474" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · DIFERENCIAL ANANERI: os remédios prescritos entram automaticamente na aba
+  </text>
+  <text x="584" y="492" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+      "Medicamentos" da família e os pedidos de exame vinculam-se ao futuro laudo!
+  </text>
+
+  <rect x="568" y="538" width="464" height="112" rx="14" fill="#FAF5FF" stroke="#E9D5FF" />
+  <text x="584" y="562" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#581C87">
+    2.2 · Agenda Inteligente + Confirmação WhatsApp/App + Recall Clínico
+  </text>
+  <text x="584" y="582" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Confirmação automática em 1 toque (reduz até 40% das faltas / no-show);
+  </text>
+  <text x="584" y="600" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Motor de Recall Baseado em Protocolos: avisa a família e a clínica quando chega
+  </text>
+  <text x="584" y="618" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+      a janela da próxima consulta de puericultura (SBP), reforço vacinal ou check-up.
+  </text>
+
+  <rect x="568" y="664" width="464" height="102" rx="14" fill="#FAF5FF" stroke="#E9D5FF" />
+  <text x="584" y="688" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#581C87">
+    2.3 · Teleconsulta Contextual Integrada à Linha Viva
+  </text>
+  <text x="584" y="708" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Vídeo integrado ao prontuário com compartilhamento visual de curvas e exames,
+  </text>
+  <text x="584" y="726" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+      registro automático de horário/termo de consentimento (CFM) e Neri Scribe ativo.
+  </text>
+
+  <!-- HORIZONTE 3 (H3) -->
+  <rect x="1072" y="342" width="504" height="444" rx="22" fill="#FFFFFF" stroke="#FACC15" stroke-width="2" />
+  <rect x="1072" y="342" width="504" height="54" rx="22" fill="#FFFBEB" />
+  <g transform="translate(1092, 353) scale(0.36)"><use href="#wing-marker-gold" /></g>
+  <text x="1120" y="368" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="800" fill="#78350F">
+    HORIZONTE 3 · OPERAÇÃO, TISS &amp; FINANCEIRO (LONGO PRAZO)
+  </text>
+  <text x="1120" y="385" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#B45309">
+    Alavancando os conectores de operadoras para substituir o ERP legado
+  </text>
+
+  <rect x="1092" y="412" width="464" height="112" rx="14" fill="#FFFBEB" stroke="#FDE68A" />
+  <text x="1108" y="436" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#78350F">
+    3.1 · Elegibilidade de Convênio em Tempo Real (Motor `@ananeri/connect`)
+  </text>
+  <text x="1108" y="456" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Como a Ananeri já tem a carteira digital do paciente (Unimed, Amil, Bradesco),
+  </text>
+  <text x="1108" y="474" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+      valida a elegibilidade e o status de autorizações/guias antes do paciente chegar.
+  </text>
+
+  <rect x="1092" y="538" width="464" height="112" rx="14" fill="#FFFBEB" stroke="#FDE68A" />
+  <text x="1108" y="562" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#78350F">
+    3.2 · Faturamento TISS/TUSS Automatizado &amp; Auditoria Anti-Glosa por IA
+  </text>
+  <text x="1108" y="582" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Geração automática de Guias de Consulta e SP/SADT direto do atendimento;
+  </text>
+  <text x="1108" y="600" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Fechamento de lotes XML TISS e conciliação de demonstrativos de retorno.
+  </text>
+
+  <rect x="1092" y="664" width="464" height="102" rx="14" fill="#FFFBEB" stroke="#FDE68A" />
+  <text x="1108" y="688" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#78350F">
+    3.3 · Financeiro Clínico, Split/Repasse Médico e Emissão de NFS-e
+  </text>
+  <text x="1108" y="708" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+    · Cobrança online (Pix/Cartão), controle de repasse por médico/sala e emissão
+  </text>
+  <text x="1108" y="726" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#475569">
+      automática de nota fiscal de serviço (integrado à esteira fiscal da plataforma).
+  </text>
+
+  <!-- ========================================================================================= -->
+  <!-- SEÇÃO 3 (BASE): MATRIZ DE BENCHMARK & POSICIONAMENTO DE PREÇO/MODELO NO BRASIL (2026)     -->
+  <!-- ========================================================================================= -->
+  <rect x="24" y="804" width="1552" height="192" rx="20" fill="#FFFFFF" stroke="#DDD6FE" stroke-width="1.5" />
+  <g transform="translate(44, 820) scale(0.34)"><use href="#wing-marker-purple" /></g>
+  <text x="68" y="842" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="800" fill="#2E1065">
+    BENCHMARK RÁPIDO (BRASIL 2026) vs. POSICIONAMENTO ANANERI
+  </text>
+
+  <!-- Colunas de Benchmark -->
+  <rect x="44" y="858" width="290" height="118" rx="14" fill="#F8FAFC" stroke="#E2E8F0" />
+  <text x="60" y="880" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#334155">Afya iClinic (R$ 99 – R$ 299/médico)</text>
+  <text x="60" y="898" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">✓ Forte em UX médica + IA Scribe (iClinic Assist)</text>
+  <text x="60" y="914" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">✓ Curvas de crescimento e prescrição Memed</text>
+  <text x="60" y="932" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#B91C1C">✗ Sem sync de labs/hospitais/SUS nem app família</text>
+
+  <rect x="348" y="858" width="290" height="118" rx="14" fill="#F8FAFC" stroke="#E2E8F0" />
+  <text x="364" y="880" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#334155">Feegow / ProDoctor (R$ 129 – R$ 249)</text>
+  <text x="364" y="898" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">✓ Fortes em faturamento TISS pesado e repasses</text>
+  <text x="364" y="914" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">✓ Controle de salas, filas e certificação SBIS</text>
+  <text x="364" y="932" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#B91C1C">✗ UX complexa; paciente não participa do prontuário</text>
+
+  <rect x="652" y="858" width="290" height="118" rx="14" fill="#F8FAFC" stroke="#E2E8F0" />
+  <text x="668" y="880" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#334155">Aura / Amplimed (R$ 0 – R$ 139)</text>
+  <text x="668" y="898" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">✓ Entrada via AI Scribe (voz→SOAP) e WhatsApp bot</text>
+  <text x="668" y="914" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#64748B">✓ Baixa barreira de adoção para médico individual</text>
+  <text x="668" y="932" font-family="Inter, system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#B91C1C">✗ Sem histórico longitudinal real pré-consulta</text>
+
+  <rect x="956" y="858" width="600" height="118" rx="14" fill="url(#silk-header)" stroke="#C4B5FD" stroke-width="1.5" />
+  <g transform="translate(972, 868) scale(0.30)"><use href="#wing-marker" /></g>
+  <text x="996" y="882" font-family="Inter, system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#581C87">
+    ESTRATÉGIA RECOMENDADA PARA A ANANERI ("CUNHA B2B2C"):
+  </text>
+  <text x="974" y="902" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#2E1065">
+    1. Entrar como **"Co-Piloto Longitudinal &amp; Pré-Consulta"** (convive com o ERP atual do médico sem exigir troca no Dia 1);
+  </text>
+  <text x="974" y="920" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#2E1065">
+    2. Conquistar o médico pelo **Briefing Pré-Consulta + Neri Scribe SOAP + Plano Pós-Consulta no App da Família**;
+  </text>
+  <text x="974" y="938" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#BE185D">
+    3. Expandir para Prescrição ICP, Agenda com Recall Pediátrico/Check-up e TISS à medida que a base de clínicas cresce.
+  </text>
+</svg>
