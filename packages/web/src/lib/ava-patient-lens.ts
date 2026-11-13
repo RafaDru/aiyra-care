@@ -40,6 +40,10 @@ export function resolveAvaPatientLens(
   if (opts?.preferSelfOnHome && self) return self.id
   const last = readAvaLastPatientId()
   if (last && patients.some((p) => p.id === last)) return last
+  if (!opts?.preferSelfOnHome) {
+    const dependent = patients.find((p) => !p.isSelf)
+    if (dependent) return dependent.id
+  }
   if (self) return self.id
   return patients[0]?.id ?? null
 }

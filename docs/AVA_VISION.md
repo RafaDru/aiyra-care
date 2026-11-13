@@ -23,7 +23,7 @@ Horizonte: export rico para médico, portabilidade para operadora (com consentim
 
 | Hoje | Direção |
 |------|---------|
-| **Orb global fixo (FAB)** em todas as telas via `AppLayout` — seletor de paciente no drawer; lente: rota → último → `self` → fallback | **Global na conta** (`account_id`) com conversas persistidas |
+| **Orb global fixo (FAB)** em todas as telas via `AppLayout` — drawer com **barra lateral de sessões** (colapsável) + lente compacta (primeiro nome) na coluna do chat; lente: rota → último → dependente → `self` (ver `AVA_PATIENT_LENS.md`) | **Global na conta** (`account_id`) com conversas persistidas |
 | Histórico só no browser | **Persistido no servidor** |
 | Contexto = prontuário inteiro do paciente da URL | **Pins** + slices por entidade |
 

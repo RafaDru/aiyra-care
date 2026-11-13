@@ -18,8 +18,11 @@
 | 1 | Rota `/patients/:id` ou `?patientId=` | Navegação no perfil |
 | 2 | Override no drawer (seletor) | Usuário escolhe outro paciente |
 | 3 | `localStorage` `ava:lastPatientId` | Última lente usada |
-| 4 | Paciente `isSelf` (`role=self`) | Titular da conta |
-| 5 | Primeiro da lista API | Fallback |
+| 4 | Primeiro dependente (`!isSelf`) | Drawer global / consumidores sem `preferSelfOnHome` |
+| 5 | Paciente `isSelf` (`role=self`) | Titular da conta |
+| 6 | Primeiro da lista API | Fallback |
+
+**Dashboard «Hoje»** (`DashboardDayToDaySection`): `useAvaPatientLens({ preferSelfOnHome: true })` — em `/` ou `/dashboard` sem rota, o titular vê o próprio «Hoje» antes do último/dependente. **Ava global** (`AvaGlobalDock`) usa o default (caregiver-first).
 
 **Regras:**
 

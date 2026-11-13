@@ -52,4 +52,14 @@ describe('resolveAvaPatientLens', () => {
     writeAvaLastPatientId(child.id)
     expect(resolveAvaPatientLens([self, child], null)).toBe(child.id)
   })
+
+  it('prefers first dependent before self when no last and no home self preference', async () => {
+    const { resolveAvaPatientLens } = await import('../src/lib/ava-patient-lens.js')
+    expect(resolveAvaPatientLens([self, child], null)).toBe(child.id)
+  })
+
+  it('falls back to self when only titular exists', async () => {
+    const { resolveAvaPatientLens } = await import('../src/lib/ava-patient-lens.js')
+    expect(resolveAvaPatientLens([self], null)).toBe(self.id)
+  })
 })
