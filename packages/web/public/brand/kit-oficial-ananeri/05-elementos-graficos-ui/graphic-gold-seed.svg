@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 54" fill="none" role="img" aria-label="Ananeri - Traço Semente Dourada">
+  <defs>
+    <linearGradient id="solid-gold" x1="20%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE566" /><stop offset="55%" stop-color="#FACC15" /><stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(-33, -38)">
+    <path d="M 95.2 51.4 A 4.0 4.0 0 1 1 89.2 56.8 C 74 44, 50 52, 37 86 C 45 45, 75 35, 95.2 51.4 Z" fill="url(#solid-gold)" />
+  </g>
+</svg>

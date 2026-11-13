@@ -1,0 +1,80 @@
+{
+  "brandName": "Ananeri",
+  "aiAgentName": "Neri",
+  "concept": "Pincelada Fluida de Alto-Contraste (Gesto de Cuidado Vivo)",
+  "colors": {
+    "anaPink": {
+      "lightStart": "#F472B6",
+      "midCore": "#EC4899",
+      "deepEnd": "#BE185D",
+      "softBg": "#FDF2F8",
+      "softBorder": "#FBCFE8"
+    },
+    "neriPurple": {
+      "lightStart": "#7E22CE",
+      "midCore": "#6B21A8",
+      "deepEnd": "#581C87",
+      "vividAccent": "#9333EA",
+      "softBg": "#FAF5FF",
+      "softBorder": "#E9D5FF"
+    },
+    "sparkGold": {
+      "lightStart": "#FFE566",
+      "midCore": "#FACC15",
+      "deepEnd": "#CA8A04",
+      "softBg": "#FFFBEB"
+    },
+    "surfacesLightMode": {
+      "pageCanvas": "#FFFFFF",
+      "silkHeaderGradient": "linear-gradient(135deg, #F5EEFF 0%, #FDF2F8 50%, #EDE9FE 100%)",
+      "silkHeroGradient": "linear-gradient(135deg, #FFF7FB 0%, #F8F2FF 50%, #EDE9FE 100%)",
+      "textHeading": "#2E1065",
+      "textBody": "#4C1D95",
+      "textMuted": "#6B21A8"
+    },
+    "surfacesDarkMode": {
+      "pageCanvas": "#0F172A",
+      "surfaceCard": "#1E293B",
+      "neriWordmarkInDark": "#FFFFFF",
+      "anaWordmarkInDark": "linear-gradient(135deg, #F472B6 0%, #EC4899 55%, #BE185D 100%)"
+    }
+  },
+  "artifacts": {
+    "01-lockups-principais": [
+      "ananeri-lockup-horizontal-light.svg",
+      "ananeri-lockup-horizontal-dark.svg",
+      "ananeri-lockup-stacked-light.svg",
+      "ananeri-lockup-stacked-dark.svg"
+    ],
+    "02-simbolo-e-wordmark": [
+      "ananeri-symbol-heart.svg",
+      "ananeri-wordmark-light.svg",
+      "ananeri-wordmark-dark.svg"
+    ],
+    "03-monocromaticas": [
+      "ananeri-mono-purple.svg",
+      "ananeri-mono-white.svg",
+      "ananeri-symbol-mono-purple.svg",
+      "ananeri-symbol-mono-white.svg"
+    ],
+    "04-app-icons-e-favicons": [
+      "app-icon-ios-android-light.svg",
+      "app-icon-ios-android-dark.svg",
+      "app-icon-ios-android-royal.svg",
+      "favicon.svg",
+      "neri-agent-avatar-circle.svg",
+      "neri-agent-tile-rounded.svg"
+    ],
+    "05-elementos-graficos-ui": [
+      "graphic-wing-marker-pink.svg",
+      "graphic-wing-marker-purple.svg",
+      "graphic-wing-marker-gold.svg",
+      "graphic-brush-watermark-ribbons.svg",
+      "graphic-gold-seed.svg"
+    ],
+    "06-social-e-splash": [
+      "og-share-banner-1200x630.svg",
+      "mobile-splash-screen-1080x1920.svg"
+    ]
+  }
+}
