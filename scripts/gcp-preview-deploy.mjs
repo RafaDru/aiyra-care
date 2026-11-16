@@ -8,8 +8,12 @@
  * Env obrigatório (deploy):
  *   GCP_PROJECT_ID, GCP_REGION (ou defaults em infra/gcp/preview.defaults.json)
  *   DATABASE_URL, CRYPTO_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE
- *   API_PUBLIC_URL, OPS_ALERT_DASHBOARD_URL (URLs públicas preview)
+ *   API_PUBLIC_URL, WEB_PUBLIC_URL, OPS_ALERT_DASHBOARD_URL (URLs públicas preview)
  *   OPS_METRICS_KEY, OPS_ALERT_WEBHOOK_URL
+ *
+ * Env opcional (Cloud SQL socket no Cloud Run — API/ops):
+ *   GCP_CLOUDSQL_INSTANCE ou CLOUDSQL_CONNECTION_NAME (project:region:instance)
+ *   DATABASE_URL deve usar host unix: ...@/dbname?host=/cloudsql/PROJECT:REGION:INSTANCE
  *
  * Env build web:
  *   VITE_API_URL (= API_PUBLIC_URL)
@@ -72,6 +76,21 @@ function requireEnv(name) {
   return v
 }
 
+/** project:region:instance — attaches Cloud SQL Unix socket to API/ops Run services. */
+function cloudSqlConnectionName() {
+  return (
+    process.env.GCP_CLOUDSQL_INSTANCE?.trim()
+    || process.env.CLOUDSQL_CONNECTION_NAME?.trim()
+    || ''
+  )
+}
+
+function cloudSqlDeployArgs() {
+  const connection = cloudSqlConnectionName()
+  if (!connection) return []
+  return [`--add-cloudsql-instances=${connection}`]
+}
+
 function writeEnvYaml(pairs) {
   const path = resolve(root, `.gcp-preview-env-${Date.now()}.yaml`)
   const lines = pairs
@@ -115,29 +134,45 @@ function configureDockerAuth() {
   if (r.status !== 0) process.exit(r.status ?? 1)
 }
 
+function hasNonEmptyEnvPairs(pairs) {
+  return pairs.some(([, v]) => v != null && String(v).length > 0)
+}
+
 function deployCloudRun(name, image, envPairs, extraArgs = []) {
-  const envFile = writeEnvYaml(envPairs)
+  let envFile
+  const cmdArgs = [
+    'run', 'deploy', name,
+    '--image', image,
+    '--region', region,
+    '--project', projectId,
+    '--platform', 'managed',
+    '--allow-unauthenticated',
+    '--port', '8080',
+    '--quiet',
+    ...extraArgs,
+  ]
+  if (hasNonEmptyEnvPairs(envPairs)) {
+    envFile = writeEnvYaml(envPairs)
+    cmdArgs.splice(cmdArgs.indexOf('--quiet'), 0, '--env-vars-file', envFile)
+  }
   try {
-    const r = run('gcloud', [
-      'run', 'deploy', name,
-      '--image', image,
-      '--region', region,
-      '--project', projectId,
-      '--platform', 'managed',
-      '--allow-unauthenticated',
-      '--port', '8080',
-      '--env-vars-file', envFile,
-      '--quiet',
-      ...extraArgs,
-    ])
+    const r = run('gcloud', cmdArgs)
     if (r.status !== 0) process.exit(r.status ?? 1)
   } finally {
-    try { unlinkSync(envFile) } catch { /* ignore */ }
+    if (envFile) {
+      try { unlinkSync(envFile) } catch { /* ignore */ }
+    }
   }
 }
 
+const cloudSqlArgs = cloudSqlDeployArgs()
+const cloudSqlConn = cloudSqlConnectionName()
+
 console.log('gcp-preview-deploy')
 console.log(`  project=${projectId} region=${region} tag=${imageTag}`)
+if (cloudSqlConn) {
+  console.log(`  cloudsql=${cloudSqlConn} (API + ops)`)
+}
 
 ensureGcloud()
 
@@ -182,6 +217,7 @@ const cryptoKey = requireEnv('CRYPTO_KEY')
 const supabaseUrl = requireEnv('SUPABASE_URL')
 const supabaseServiceRole = requireEnv('SUPABASE_SERVICE_ROLE')
 const apiPublicUrl = requireEnv('API_PUBLIC_URL')
+const webPublicUrl = requireEnv('WEB_PUBLIC_URL')
 const opsMetricsKey = requireEnv('OPS_METRICS_KEY')
 const opsWebhook = requireEnv('OPS_ALERT_WEBHOOK_URL')
 const opsDashboard = requireEnv('OPS_ALERT_DASHBOARD_URL')
@@ -208,13 +244,17 @@ const opsEnv = [
   ['OPS_CONSOLE_PORT', '8080'],
   ['OPS_CONSOLE_HOST', '0.0.0.0'],
   ['DATABASE_URL', databaseUrl],
+  ['API_PUBLIC_URL', apiPublicUrl],
+  ['WEB_PUBLIC_URL', webPublicUrl],
+  ['NEO4J_SYNC_ENABLED', '0'],
+  ['OPS_STACK_CONTROL_ENABLED', '0'],
   ['OPS_METRICS_KEY', opsMetricsKey],
   ['OPS_ALERT_WEBHOOK_URL', opsWebhook],
   ['OPS_ALERT_DASHBOARD_URL', opsDashboard],
 ]
 
-deployCloudRun(services.api, images.api, apiEnv, ['--memory', '1Gi', '--cpu', '1', '--min-instances', '0', '--max-instances', '2'])
-deployCloudRun(services.ops, images.ops, opsEnv, ['--memory', '512Mi', '--cpu', '1', '--min-instances', '0', '--max-instances', '1'])
+deployCloudRun(services.api, images.api, apiEnv, ['--memory', '1Gi', '--cpu', '1', '--min-instances', '0', '--max-instances', '2', ...cloudSqlArgs])
+deployCloudRun(services.ops, images.ops, opsEnv, ['--memory', '512Mi', '--cpu', '1', '--min-instances', '0', '--max-instances', '1', ...cloudSqlArgs])
 deployCloudRun(services.web, images.web, [], ['--memory', '256Mi', '--cpu', '1', '--min-instances', '0', '--max-instances', '2'])
 
 console.log('\ngcp-preview-deploy OK')

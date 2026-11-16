@@ -18,6 +18,8 @@ COPY packages/design-tokens packages/design-tokens
 COPY packages/ops-console packages/ops-console
 COPY tsconfig.base.json ./
 
+RUN npm run build --workspace=@ananeri/connect
+
 WORKDIR /app/packages/ops-console
 RUN npm run build
 ENV NODE_ENV=production

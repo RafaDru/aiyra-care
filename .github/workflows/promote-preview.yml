@@ -97,6 +97,8 @@ jobs:
           GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           GCP_REGION: ${{ vars.GCP_REGION }}
           GCP_ARTIFACT_REGISTRY: ${{ vars.GCP_ARTIFACT_REGISTRY }}
+          GCP_CLOUDSQL_INSTANCE: ${{ vars.GCP_CLOUDSQL_INSTANCE }}
+          CLOUDSQL_CONNECTION_NAME: ${{ vars.GCP_CLOUDSQL_INSTANCE }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CRYPTO_KEY: ${{ secrets.CRYPTO_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -104,6 +106,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           API_PUBLIC_URL: ${{ secrets.API_PUBLIC_URL }}
+          WEB_PUBLIC_URL: ${{ secrets.WEB_PUBLIC_URL }}
           VITE_API_URL: ${{ secrets.API_PUBLIC_URL }}
           OPS_METRICS_KEY: ${{ secrets.OPS_METRICS_KEY }}
           OPS_ALERT_WEBHOOK_URL: ${{ secrets.OPS_ALERT_WEBHOOK_URL }}
@@ -128,22 +131,16 @@ jobs:
           OPS_ALERT_DASHBOARD_URL: ${{ secrets.OPS_ALERT_DASHBOARD_URL }}
           GCP_SCHEDULER_SA_EMAIL: ${{ vars.GCP_SCHEDULER_SA_EMAIL }}
 
-  post-deploy:
-    if: ${{ inputs.run_post_deploy }}
-    needs: promote
-    runs-on: ubuntu-latest
-    environment: preview
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
       - uses: actions/setup-node@v4
+        if: ${{ inputs.run_post_deploy || github.event.inputs.run_post_deploy == 'true' }}
         with:
           node-version: 22
-      - name: Install API
+      - name: Install API (post-deploy)
+        if: ${{ inputs.run_post_deploy || github.event.inputs.run_post_deploy == 'true' }}
         working-directory: packages/api
         run: npm ci
       - name: Preview post-deploy checks
+        if: ${{ inputs.run_post_deploy || github.event.inputs.run_post_deploy == 'true' }}
         run: node scripts/preview-post-deploy.mjs
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

@@ -142,5 +142,8 @@ export async function runStackAction(
 }
 
 export function isStackControlEnabled(): boolean {
+  const flag = process.env.OPS_STACK_CONTROL_ENABLED?.trim().toLowerCase()
+  if (flag === '0' || flag === 'false' || flag === 'off') return false
+  if (flag === '1' || flag === 'true' || flag === 'on') return true
   return process.platform === 'win32'
 }
