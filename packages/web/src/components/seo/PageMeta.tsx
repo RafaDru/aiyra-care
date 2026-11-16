@@ -33,7 +33,7 @@ export function PageMeta({
   title,
   description,
   canonicalPath = '/home',
-  imagePath = '/brand/logo-square.png',
+  imagePath = '/brand/kit-oficial-ananeri/06-social-e-splash/og-share-banner-1200x630.svg',
   robots = 'index, follow',
 }: PageMetaProps) {
   useEffect(() => {

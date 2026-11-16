@@ -105,7 +105,7 @@ export function AppLayout() {
           }}
         >
           {collapsed ? (
-            <AppLogo variant="icon" height={28} style={{ maxWidth: 48 }} />
+            <AppLogo variant="stacked" height={44} style={{ maxWidth: 56 }} />
           ) : (
             <AppLogo variant="sidebar" style={{ maxWidth: '100%' }} />
           )}

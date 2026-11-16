@@ -13,7 +13,8 @@ import './landing.css'
 
 const { Title, Paragraph, Text } = Typography
 
-const NERI_TILE = '/brand/ananeri-neri-tile.svg'
+const NERI_TILE =
+  '/brand/kit-oficial-ananeri/04-app-icons-e-favicons/neri-agent-tile-rounded.svg'
 
 const PROOF_BRAND_LOGOS: Record<string, string[]> = {
   convenio: ['/brands/unimed-logo.png', '/brands/amil-square.png'],

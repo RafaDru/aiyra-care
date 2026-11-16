@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-07",
+  "updatedAt": "2026-11-16",
   "description": "Índice de capacidades de produto — ver docs/DOCUMENTATION_SYSTEM.md",
   "features": [
     {
@@ -366,6 +366,20 @@
       "api": ["POST /auth/complete-profile", "POST /patients"],
       "helpTopics": ["central-atendimento"],
       "tags": ["onboarding", "suporte", "acesso"]
+    },
+    {
+      "id": "official-brand-kit-web-wave1",
+      "epicId": "ananeri-brand",
+      "title": "Kit oficial Ananeri — wiring web (wave 1)",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P1",
+      "doc": "docs/features/official-brand-kit-web-wave1.md",
+      "domainDoc": "docs/brand/kit-oficial-ananeri/BRAND_GUIDELINES_FOR_AI.md",
+      "routes": ["/home", "/", "/login", "/onboarding"],
+      "api": [],
+      "helpTopics": [],
+      "tags": ["brand", "rebrand", "ui"]
     },
     {
       "id": "documentation-knowledge-base",
