@@ -242,6 +242,20 @@
       "tags": ["ops", "analytics", "negócio", "sem-phi"]
     },
     {
+      "id": "ch-operator-auth",
+      "epicId": "prod-run-intelligence",
+      "title": "CH — autenticação de operador",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P1",
+      "doc": "docs/features/ch-operator-auth.md",
+      "domainDoc": "docs/ops/CH_OPERATOR_AUTH.md",
+      "routes": [],
+      "api": ["GET /api/auth/status", "GET /api/auth/session"],
+      "helpTopics": [],
+      "tags": ["ops", "ch", "auth", "supabase", "security"]
+    },
+    {
       "id": "ops-strategy-advisory",
       "epicId": "business-analytics",
       "title": "Estratégia advisory (console ops)",
