@@ -14,6 +14,14 @@ Shell alinhado ao web: Supabase auth (e-mail/senha + **Google OAuth**), API `:30
 4. **API local:** subir stack com API em **http://127.0.0.1:3010** (`npm run env:status` na raiz)
 5. **Expo web:** `npm run web` (ou na raiz `npm run mobile:web`)
 
+## Beta staging (Play Store — lista fechada)
+
+**Expo Go não escala** para convidados. Fluxo canônico: **EAS Build** + **Google Play teste interno/fechado** apontando para API preview GCP.
+
+→ [`docs/product/MOBILE_STAGING_DISTRIBUTION.md`](../../docs/product/MOBILE_STAGING_DISTRIBUTION.md) · `eas.json` perfis `preview` / `preview-aab` · `applicationId` `br.com.ananeri.preview`
+
+Semana 1 em casa: Expo Go abaixo **ou** web preview; semana 2+: só build loja.
+
 ## Expo Go (dispositivo)
 
 1. Instale **Expo Go** (iOS/Android) — versão **SDK 57** (padrão nas lojas em 2026).
