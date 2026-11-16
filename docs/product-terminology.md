@@ -10,8 +10,11 @@
 | Plataforma (UI, legal user-facing, help) | **Ananeri** | Razão social / `LEGAL_*` env (beta placeholder) |
 | Agente (chat, dock, FAB) | **Neri** | Pasta/código `ava/*`, chaves i18n `ava.*`, rotas `/ava/*`, feature id `ava_companion` |
 | Monorepo / npm | Raiz **`ananeri`**, workspaces `@ananeri/*` | Distinto da marca **Ananeri** na UI; repositório/pasta local podem ainda ser `aiyra-care` |
+| Storage cliente (idioma, remember-me) | Prefixo **`ananeri-*`** | Legado `aiyra-care-*` só leitura migratória — ver `ananeri-storage-keys` web/mobile |
 
 Documentação de engenharia pode manter prefixo **`AVA_`** nos nomes de arquivo (`AVA_OPERATIONAL.md`) enquanto a copy descreve **Neri**.
+
+**Nomenclatura:** na UI e documentação voltados ao cuidador, não usar **AiyraCare** / **Aiyra Care** — só **Ananeri** (plataforma) e **Neri** (agente). Checklist operacional: [`PATIENT_BRAND_VISUAL_CHECKLIST.md`](./PATIENT_BRAND_VISUAL_CHECKLIST.md).
 
 ## Princípio
 

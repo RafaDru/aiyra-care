@@ -30,11 +30,12 @@ if (!existsSync(INTER_SEMIBOLD)) {
   process.exit(1)
 }
 
+/** Ananeri Phase 1 — raster a partir dos SVG ativos no web (`AppLogo`). */
 const PAIRS = [
-  ['logo-horizontal.svg', 'logo-horizontal.png'],
-  ['logo-horizontal-dark.svg', 'logo-horizontal-dark.png'],
-  ['logo-square.svg', 'logo-square.png'],
-  ['logo-square-dark.svg', 'logo-square-dark.png'],
+  ['ananeri-lockup.svg', 'logo-horizontal.png'],
+  ['ananeri-lockup.svg', 'logo-horizontal-dark.png'],
+  ['ananeri-symbol.svg', 'logo-square.png'],
+  ['ananeri-symbol.svg', 'logo-square-dark.png'],
 ]
 
 /** PNG estático do web — copiado sem raster (já otimizado). */
