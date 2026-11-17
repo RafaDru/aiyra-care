@@ -60,6 +60,39 @@ function Test-GitIsAncestor {
   return $LASTEXITCODE -eq 0
 }
 
+function Escape-CmdEnvSegment {
+  param([string]$Value)
+  if ($null -eq $Value) { return '' }
+  return ($Value -replace '%', '%%' -replace '&', '^&')
+}
+
+# Ops console script can block up.ps1 (CH worktree / tsx cold start). Boot async + cap wait so Web still starts.
+function Start-OpsConsoleUpWithTimeout {
+  param(
+    [string]$ScriptPath,
+    [int]$Port,
+    [int]$TimeoutSec
+  )
+  if (-not (Test-Path $ScriptPath)) {
+    Write-Host " skip (missing script)" -ForegroundColor Yellow
+    return $false
+  }
+  $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptPath`""
+  Start-Process -FilePath "powershell.exe" -ArgumentList $argList -WindowStyle Hidden | Out-Null
+  for ($i = 0; $i -lt $TimeoutSec; $i++) {
+    Start-Sleep 1
+    try {
+      $h = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/health" -ErrorAction Stop
+      if ($h.service -eq 'aiyracare-ops-console') {
+        Write-Host " OK" -ForegroundColor Green
+        return $true
+      }
+    } catch { }
+  }
+  Write-Host " skip (timeout ${TimeoutSec}s; stack continua)" -ForegroundColor Yellow
+  return $false
+}
+
 # ch-shell só quando alinhado com main (mesmo SHA ou à frente). Atrás/divergente → checkout principal.
 function Resolve-ChShellOpsConsoleUp {
   param(
@@ -122,7 +155,21 @@ if (-not $Cloud) {
 $llmQuotaUnlimited = $env:LLM_QUOTA_UNLIMITED
 $deploymentTier = if ($Preview) { 'preview' } else { 'integration' }
 $env:DEPLOYMENT_TIER = $deploymentTier
-$cmdApi = "set PORT=$apiPort&&set DEPLOYMENT_TIER=$deploymentTier&&set DATABASE_URL=$env:DATABASE_URL&&set LLM_QUOTA_UNLIMITED=$llmQuotaUnlimited&&set OPENCODE_GO_API_KEY=$env:OPENCODE_GO_API_KEY&&set OPENCODE_ZEN_API_KEY=$env:OPENCODE_ZEN_API_KEY&&set GEMINI_API_KEY=$env:GEMINI_API_KEY&&set GROQ_API_KEY=$env:GROQ_API_KEY&&cd /d $apiDir&&npx tsx watch src/index.ts >`"$logApi`" 2>&1"
+$dbUrlCmd = Escape-CmdEnvSegment $env:DATABASE_URL
+$llmQuotaCmd = Escape-CmdEnvSegment $llmQuotaUnlimited
+$cmdApi = (
+  'set PORT={0}&&set DEPLOYMENT_TIER={1}&&set DATABASE_URL={2}&&set LLM_QUOTA_UNLIMITED={3}&&set OPENCODE_GO_API_KEY={4}&&set OPENCODE_ZEN_API_KEY={5}&&set GEMINI_API_KEY={6}&&set GROQ_API_KEY={7}&&cd /d {8}&&npx tsx watch src/index.ts >"{9}" 2>&1' -f `
+    $apiPort, `
+    $deploymentTier, `
+    $dbUrlCmd, `
+    $llmQuotaCmd, `
+    (Escape-CmdEnvSegment $env:OPENCODE_GO_API_KEY), `
+    (Escape-CmdEnvSegment $env:OPENCODE_ZEN_API_KEY), `
+    (Escape-CmdEnvSegment $env:GEMINI_API_KEY), `
+    (Escape-CmdEnvSegment $env:GROQ_API_KEY), `
+    $apiDir, `
+    $logApi
+)
 cmd /c "start /B cmd /c `"$cmdApi`""
 
 $apiHealthWaitSec = 45
@@ -155,38 +202,43 @@ if (-not $apiHealthOk) {
 Write-Host "Starting Ops console..." -NoNewline
 if ($Preview -and -not $env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT = $defaultOpsConsole }
 $opsConsolePort = if ($env:OPS_CONSOLE_PORT) { $env:OPS_CONSOLE_PORT } else { $defaultOpsConsole }
-$chParent = Split-Path $root -Parent
-if ($env:AIYRA_CH_SHELL_ROOT -and $env:AIYRA_CH_SHELL_ROOT.Trim()) {
-  $chShellRoot = $env:AIYRA_CH_SHELL_ROOT.Trim()
-} else {
-  $chAnaneri = Join-Path $chParent "ananeri-ch-shell"
-  $chLegacy = Join-Path $chParent "aiyra-care-ch-shell"
-  if (Test-Path $chAnaneri) { $chShellRoot = $chAnaneri }
-  elseif (Test-Path $chLegacy) { $chShellRoot = $chLegacy }
-  else { $chShellRoot = $chAnaneri }
-}
-$rootOpsUp = Join-Path $PSScriptRoot 'ops-console-up.ps1'
-if (-not $Preview) {
-  $chResolve = Resolve-ChShellOpsConsoleUp -MainRoot $root -ChShellRoot $chShellRoot -RootOpsUp $rootOpsUp
-  if ($chResolve.UseChShell) {
-    Write-Host " (CH via ch-shell @ $($chResolve.ShellSha.Substring(0, 12)))" -ForegroundColor DarkCyan
-    & $chResolve.Script | Out-Null
-  } else {
-    if ($chResolve.Reason -eq 'AIYRA_OPS_CONSOLE_FROM_MAIN=1') {
-      Write-Host " (ops-console checkout principal — AIYRA_OPS_CONSOLE_FROM_MAIN)" -ForegroundColor DarkCyan
-    } elseif ($chResolve.Reason -and $chResolve.Reason -ne 'missing') {
-      Write-Host " (ops-console checkout principal)" -ForegroundColor DarkCyan
-    }
-    & $chResolve.Script | Out-Null
+$opsConsoleTimeoutSec = 15
+if ($env:AIYRA_OPS_CONSOLE_BOOT_TIMEOUT_SEC) {
+  $parsedOpsWait = 0
+  if ([int]::TryParse($env:AIYRA_OPS_CONSOLE_BOOT_TIMEOUT_SEC, [ref]$parsedOpsWait) -and $parsedOpsWait -gt 0) {
+    $opsConsoleTimeoutSec = $parsedOpsWait
   }
-} else {
-  & $rootOpsUp | Out-Null
 }
-try {
-  $h = Invoke-RestMethod -Uri "http://127.0.0.1:$opsConsolePort/health" -ErrorAction Stop
-  if ($h.service -eq 'aiyracare-ops-console') { Write-Host " OK" -ForegroundColor Green }
-  else { Write-Host " skip" -ForegroundColor Yellow }
-} catch { Write-Host " FAIL" -ForegroundColor Red }
+if ($env:AIYRA_SKIP_OPS_CONSOLE -eq '1') {
+  Write-Host " skip (AIYRA_SKIP_OPS_CONSOLE=1)" -ForegroundColor Yellow
+} else {
+  $chParent = Split-Path $root -Parent
+  if ($env:AIYRA_CH_SHELL_ROOT -and $env:AIYRA_CH_SHELL_ROOT.Trim()) {
+    $chShellRoot = $env:AIYRA_CH_SHELL_ROOT.Trim()
+  } else {
+    $chAnaneri = Join-Path $chParent "ananeri-ch-shell"
+    $chLegacy = Join-Path $chParent "aiyra-care-ch-shell"
+    if (Test-Path $chAnaneri) { $chShellRoot = $chAnaneri }
+    elseif (Test-Path $chLegacy) { $chShellRoot = $chLegacy }
+    else { $chShellRoot = $chAnaneri }
+  }
+  $rootOpsUp = Join-Path $PSScriptRoot 'ops-console-up.ps1'
+  $opsScript = $rootOpsUp
+  if (-not $Preview) {
+    $chResolve = Resolve-ChShellOpsConsoleUp -MainRoot $root -ChShellRoot $chShellRoot -RootOpsUp $rootOpsUp
+  } else {
+    $chResolve = @{ Script = $rootOpsUp; UseChShell = $false; Reason = 'preview' }
+  }
+  if ($chResolve.UseChShell) {
+    Write-Host " (CH via ch-shell @ $($chResolve.ShellSha.Substring(0, 12)))" -ForegroundColor DarkCyan -NoNewline
+  } elseif ($chResolve.Reason -eq 'AIYRA_OPS_CONSOLE_FROM_MAIN=1') {
+    Write-Host " (checkout principal — AIYRA_OPS_CONSOLE_FROM_MAIN)" -ForegroundColor DarkCyan -NoNewline
+  } elseif ($chResolve.Reason -and $chResolve.Reason -ne 'missing' -and $chResolve.Reason -ne 'preview') {
+    Write-Host " (checkout principal)" -ForegroundColor DarkCyan -NoNewline
+  }
+  $opsScript = $chResolve.Script
+  [void](Start-OpsConsoleUpWithTimeout -ScriptPath $opsScript -Port $opsConsolePort -TimeoutSec $opsConsoleTimeoutSec)
+}
 
 Write-Host "Starting Ops notifier..." -NoNewline
 if ($Preview -and -not $env:OPS_LOCAL_NOTIFIER_PORT) { $env:OPS_LOCAL_NOTIFIER_PORT = $defaultNotifier }
