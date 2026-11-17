@@ -1,4 +1,4 @@
-/** Shared AiyraCare design tokens — consumed by web, mobile, and future clients. */
+/** Shared Ananeri design tokens — synced from kit ananeri-design-tokens.json */
 export const AIYRACARE_TOKENS = {
   colorPrimary: '#7E22CE',
   colorPrimaryHover: '#9333EA',
@@ -13,15 +13,14 @@ export const AIYRACARE_TOKENS = {
   padding: 16,
   paddingLG: 24,
   paddingXL: 32,
-  colorBgLayout: '#F8FAFC',
+  colorBgLayout: '#FFFFFF',
   colorBgContainer: '#FFFFFF',
-  colorTextBase: '#1E293B',
-  colorTextSecondary: '#64748B',
-  colorBorder: '#E2E8F0',
-  /** Vivid v2 — logo / spark UI (not yet in all clients) */
+  colorTextBase: '#4C1D95',
+  colorTextSecondary: '#6B21A8',
+  colorBorder: '#FBCFE8',
   brandGold: '#FACC15',
-  colorPrimaryBg: '#EDE9FE',
-  colorPrimaryBorder: '#C4B5FD',
+  colorPrimaryBg: '#FAF5FF',
+  colorPrimaryBorder: '#E9D5FF',
 } as const
 
 export const AIYRACARE_DARK = {
@@ -30,8 +29,8 @@ export const AIYRACARE_DARK = {
   colorPrimaryActive: '#7E22CE',
   colorInfo: '#F472B6',
   colorLink: '#EC4899',
-  colorBgLayout: '#0f0f0f',
-  colorBgContainer: '#1a1a1a',
+  colorBgLayout: '#0F172A',
+  colorBgContainer: '#1E293B',
   colorTextBase: '#f1f5f9',
   colorTextSecondary: '#94a3b8',
   colorBorder: '#334155',

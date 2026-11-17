@@ -8,9 +8,15 @@
   "display": "standalone",
   "orientation": "portrait",
   "lang": "pt-BR",
-  "background_color": "#F8FAFC",
+  "background_color": "#FAF5FF",
   "theme_color": "#7E22CE",
   "icons": [
+    {
+      "src": "/brand/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/brand/apple-touch-icon.png",
       "sizes": "180x180",
@@ -18,16 +24,22 @@
       "purpose": "any"
     },
     {
-      "src": "/brand/logo-square.png",
+      "src": "/brand/pwa-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/brand/ananeri-symbol.svg",
-      "sizes": "any",
+      "src": "/brand/pwa-icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/brand/kit-oficial-ananeri/04-app-icons-e-favicons/favicon.svg",
+      "sizes": "64x64",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

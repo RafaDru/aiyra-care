@@ -7,7 +7,7 @@
 | Campo | Valor |
 |-------|--------|
 | **ID** | `official-brand-kit-web-wave1` |
-| **Tier** | 0 — assets + wiring UI (sem migração de theme tokens) |
+| **Tier** | 0 — assets + wiring UI + sync `@ananeri/design-tokens` do JSON |
 | **Status** | `done` |
 | **Depende** | PR #214 (kit no `public/`) |
 
@@ -33,7 +33,7 @@ Apontar superfícies web user-facing para o **kit oficial** (lockups light/dark,
 
 ## Fora de escopo (wave 2)
 
-- `ananeri-design-tokens.json` → CSS vars / Ant Design `ThemeProvider`
+- Gradients silk / CSS vars avançados do JSON no `ThemeProvider`
 - Watermarks / fitas (`05-elementos-graficos-ui`)
 - Export mobile (`packages/mobile/assets/brand/`)
 - Rasterizar OG 1200×630 para PNG se redes exigirem bitmap
@@ -49,6 +49,10 @@ Apontar superfícies web user-facing para o **kit oficial** (lockups light/dark,
 | `packages/web/src/pages/landing.tsx` | `NERI_TILE` kit |
 | `packages/web/index.html` | Favicon + OG estáticos |
 | `packages/web/src/components/seo/PageMeta.tsx` | Default `imagePath` OG banner |
+| `packages/web/public/manifest.webmanifest` | Ícones PWA oficiais (PNG 192/512 do kit) |
+| `scripts/sync-ananeri-design-tokens.mjs` | `packages/design-tokens/src/index.ts` ← JSON |
+| `packages/web/scripts/rasterize-brand-pwa-icons.mjs` | `pwa-icon-*.png`, `favicon-32`, `apple-touch-icon` |
+| `packages/mobile/scripts/sync-brand-png.mjs` | PNG mobile a partir do kit |
 
 **Inalterado (decisão Rafael):** `ava-expressions.ts`, PNGs Ava no dock/chat.
 
