@@ -35,7 +35,6 @@ Apontar superfícies web user-facing para o **kit oficial** (lockups light/dark,
 
 - Gradients silk / CSS vars avançados do JSON no `ThemeProvider`
 - Watermarks / fitas (`05-elementos-graficos-ui`)
-- Export mobile (`packages/mobile/assets/brand/`)
 - Rasterizar OG 1200×630 para PNG se redes exigirem bitmap
 - Substituir `ava-expressions/*.png` por `neri-agent-avatar-circle.svg`
 - Remover arquivos legados `logo-*` / `ananeri-*.svg` na raiz de `public/brand/` (permanecem no disco; UI não referencia)
