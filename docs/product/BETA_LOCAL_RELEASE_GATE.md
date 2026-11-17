@@ -12,8 +12,9 @@ Project store (detalhe): `beta-release-local-first-2026-11-17.md`
 1. `scripts/up.ps1` — API `3010`, web `5173`, PG `aiyracare`
 2. `npm run beta:bootstrap-legal`
 3. PWA: `manifest.webmanifest` + web em **IP LAN** (`http://<LAN>:5173`) — instalar no celular
-4. QA: `promotion:gates` + `auth-entry-flow`, `onboarding-flow`, `core-patient-crud`, `family-quick-capture`
-5. Walkthrough runbook familiar §2 na URL LAN — **PASS** antes de cloud
+4. **Supabase LAN (PWA celular):** com PAT no notebook — `SUPABASE_ACCESS_TOKEN=sbp_… AIYRA_LAN_IP=<ip-wifi> npm run supabase:patch-lan` (merge allow list + `site_url` LAN; script já default `192.168.18.77` do último gate)
+5. QA: `promotion:gates` + `auth-entry-flow`, `onboarding-flow`, `core-patient-crud`, `family-quick-capture`
+6. Walkthrough runbook familiar §2 na URL LAN — **PASS** antes de cloud
 
 Opcional: `npm run up:preview` (`5174` / `3020`) como ensaio do Ambiente 2 local.
 

@@ -4,7 +4,8 @@
  * Requires personal access token: https://supabase.com/dashboard/account/tokens
  *
  *   set SUPABASE_ACCESS_TOKEN=sbp_...
- *   node scripts/patch-supabase-auth-redirect-urls.mjs
+ *   npm run supabase:patch-lan
+ *   AIYRA_LAN_IP=192.168.x.x npm run supabase:patch-lan
  */
 const PROJECT_REF = process.env.SUPABASE_PROJECT_REF ?? 'lyljosprzmtapkocmxxa'
 const token = process.env.SUPABASE_ACCESS_TOKEN?.trim()
@@ -13,7 +14,10 @@ if (!token) {
   process.exit(1)
 }
 
-const LAN_IP = process.env.AIYRA_LAN_IP ?? '192.168.18.77'
+const LAN_IP =
+  process.env.ANANERI_LAN_IP?.trim() ||
+  process.env.AIYRA_LAN_IP?.trim() ||
+  '192.168.18.77'
 
 const ADD = [
   'exp://**',

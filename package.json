@@ -65,6 +65,7 @@
     "qa:reset-onboarding-user": "cd packages/api && node scripts/reset-qa-onboarding-user.mjs",
     "qa:seed-e2e-account": "cd packages/api && node scripts/seed-qa-e2e-account.mjs",
     "beta:bootstrap-legal": "node packages/api/scripts/seed-legal-documents.mjs",
+    "supabase:patch-lan": "node scripts/patch-supabase-auth-redirect-urls.mjs",
     "qa:seed-hygiene-candidate": "cd packages/api && node scripts/seed-qa-hygiene-candidate.mjs",
     "link:demo-patients": "cd packages/api && npm run link:demo-patients",
     "promotion:gates": "node scripts/run-promotion-gates.mjs",
