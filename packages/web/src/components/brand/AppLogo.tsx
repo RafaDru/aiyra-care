@@ -1,17 +1,43 @@
 import type { CSSProperties } from 'react'
 import { useTheme } from '../../theme/ThemeProvider.js'
 
-export type AppLogoVariant = 'horizontal' | 'square' | 'icon' | 'sidebar' | 'wordmark'
+export type AppLogoVariant =
+  | 'horizontal'
+  | 'stacked'
+  | 'square'
+  | 'icon'
+  | 'sidebar'
+  | 'wordmark'
 
-const LOCKUP = '/brand/ananeri-lockup.svg'
-const SYMBOL = '/brand/ananeri-symbol.svg'
+const KIT = '/brand/kit-oficial-ananeri'
+const LOCKUPS = `${KIT}/01-lockups-principais`
+const SYMBOL_WORDMARK = `${KIT}/02-simbolo-e-wordmark`
 
 const ASSETS: Record<AppLogoVariant, { light: string; dark: string }> = {
-  horizontal: { light: LOCKUP, dark: LOCKUP },
-  square: { light: SYMBOL, dark: SYMBOL },
-  icon: { light: SYMBOL, dark: SYMBOL },
-  sidebar: { light: LOCKUP, dark: LOCKUP },
-  wordmark: { light: LOCKUP, dark: LOCKUP },
+  horizontal: {
+    light: `${LOCKUPS}/ananeri-lockup-horizontal-light.svg`,
+    dark: `${LOCKUPS}/ananeri-lockup-horizontal-dark.svg`,
+  },
+  sidebar: {
+    light: `${LOCKUPS}/ananeri-lockup-horizontal-light.svg`,
+    dark: `${LOCKUPS}/ananeri-lockup-horizontal-dark.svg`,
+  },
+  stacked: {
+    light: `${LOCKUPS}/ananeri-lockup-stacked-light.svg`,
+    dark: `${LOCKUPS}/ananeri-lockup-stacked-dark.svg`,
+  },
+  square: {
+    light: `${SYMBOL_WORDMARK}/ananeri-symbol-heart.svg`,
+    dark: `${SYMBOL_WORDMARK}/ananeri-symbol-heart.svg`,
+  },
+  icon: {
+    light: `${SYMBOL_WORDMARK}/ananeri-symbol-heart.svg`,
+    dark: `${SYMBOL_WORDMARK}/ananeri-symbol-heart.svg`,
+  },
+  wordmark: {
+    light: `${SYMBOL_WORDMARK}/ananeri-wordmark-light.svg`,
+    dark: `${SYMBOL_WORDMARK}/ananeri-wordmark-dark.svg`,
+  },
 }
 
 interface Props {
@@ -24,6 +50,7 @@ interface Props {
 
 const DEFAULT_HEIGHT: Record<AppLogoVariant, number> = {
   horizontal: 40,
+  stacked: 44,
   square: 120,
   icon: 36,
   sidebar: 48,

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 92" fill="none" role="img" aria-label="Marcador Gráfico Asa Interna (Dourado)">
+  <defs>
+    <linearGradient id="wing-gold" x1="25%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#FFE566" /><stop offset="55%" stop-color="#FACC15" /><stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+  </defs>
+  <path d="M 40.6 18.4 C 20.5 -0.5, 4 6, 3.2 28 C 2.5 56, 24.5 74.5, 41.2 84.6 C 43.8 86.6, 44.4 83.8, 43 81.6 C 34 74, 28 61, 28 46 C 27 32, 30 18, 40 25 C 43.4 25.8, 44 21.8, 40.6 18.4 Z" fill="url(#wing-gold)" />
+</svg>
