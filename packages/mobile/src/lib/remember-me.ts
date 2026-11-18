@@ -1,9 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-/** Mesma chave do web (`packages/web/src/lib/supabase.ts`). */
-export const REMEMBER_ME_KEY = 'aiyra-care-remember-me'
+import {
+  LAST_EMAIL_KEY,
+  REMEMBER_ME_KEY,
+  readLastEmail,
+  readRememberMeRaw,
+  removeLastEmail,
+  writeLastEmail,
+  writeRememberMeRaw,
+} from './ananeri-storage-keys'
 
-export const LAST_EMAIL_KEY = 'aiyracare.mobile.last-email'
+export { LAST_EMAIL_KEY, REMEMBER_ME_KEY }
 
 const memoryAuth = new Map<string, string>()
 
@@ -20,12 +27,12 @@ const volatileAuthStorage = {
 }
 
 export async function isRememberMeEnabled(): Promise<boolean> {
-  const raw = await AsyncStorage.getItem(REMEMBER_ME_KEY)
+  const raw = await readRememberMeRaw()
   return raw !== '0'
 }
 
 export async function setRememberMePreference(remember: boolean): Promise<void> {
-  await AsyncStorage.setItem(REMEMBER_ME_KEY, remember ? '1' : '0')
+  await writeRememberMeRaw(remember ? '1' : '0')
 }
 
 /** AsyncStorage quando “manter conectado”; só memória quando desligado (perde ao fechar o app). */
@@ -58,14 +65,14 @@ export const hybridAuthStorage = {
 export async function loadLastEmail(): Promise<string | null> {
   const remember = await isRememberMeEnabled()
   if (!remember) return null
-  return AsyncStorage.getItem(LAST_EMAIL_KEY)
+  return readLastEmail()
 }
 
 export async function saveLastEmail(email: string): Promise<void> {
   const remember = await isRememberMeEnabled()
   if (!remember) {
-    await AsyncStorage.removeItem(LAST_EMAIL_KEY)
+    await removeLastEmail()
     return
   }
-  await AsyncStorage.setItem(LAST_EMAIL_KEY, email.trim())
+  await writeLastEmail(email.trim())
 }

@@ -1,4 +1,4 @@
-/** Chave estável de pedido no AiyraCare (dedup por paciente + portal). */
+/** Chave estável de pedido no Ananeri (dedup por paciente + portal). */
 export function buildExamOrderExternalKey(source: string, portalOrderId: string): string {
   const src = source.trim().toLowerCase()
   const id = portalOrderId.trim()

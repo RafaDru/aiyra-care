@@ -1,9 +1,16 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
+import {
+  REMEMBER_ME_STORAGE_KEY,
+  readRememberMePreference,
+  writeRememberMePreference,
+} from './ananeri-storage-keys.js'
+
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
-export const REMEMBER_ME_KEY = 'aiyra-care-remember-me'
+/** Chave persistida (legado exportado para testes que importam o nome). */
+export const REMEMBER_ME_KEY = REMEMBER_ME_STORAGE_KEY
 
 if (!url || !anonKey) {
   console.warn('[auth] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY não configurados — login desativado')
@@ -12,11 +19,11 @@ if (!url || !anonKey) {
 export const supabaseConfigured = Boolean(url && anonKey)
 
 export function isRememberMeEnabled(): boolean {
-  return localStorage.getItem(REMEMBER_ME_KEY) !== '0'
+  return readRememberMePreference() !== '0'
 }
 
 export function setRememberMePreference(remember: boolean): void {
-  localStorage.setItem(REMEMBER_ME_KEY, remember ? '1' : '0')
+  writeRememberMePreference(remember ? '1' : '0')
 }
 
 /** sessionStorage = só nesta sessão do browser; localStorage = manter conectado. */

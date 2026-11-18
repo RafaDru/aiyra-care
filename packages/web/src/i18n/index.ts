@@ -5,8 +5,9 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import ptBR from './locales/pt-BR.json' with { type: 'json' }
 import en from './locales/en.json' with { type: 'json' }
 import { syncDayjsLocale } from '../lib/dayjs-locale.js'
+import { readLanguagePreference, writeLanguagePreference } from '../lib/ananeri-storage-keys.js'
 
-const saved = localStorage.getItem('aiyra-care-lang')
+const saved = readLanguagePreference()
 const initialLang = saved || 'pt-BR'
 syncDayjsLocale(initialLang)
 
@@ -25,7 +26,7 @@ i18n.on('languageChanged', (lang) => {
 })
 
 export function setLanguage(lang: string) {
-  localStorage.setItem('aiyra-care-lang', lang)
+  writeLanguagePreference(lang)
   syncDayjsLocale(lang)
   void i18n.changeLanguage(lang)
 }

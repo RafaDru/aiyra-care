@@ -56,7 +56,7 @@ Fluxo alinhado ao web (`signInWithOAuth({ provider: 'google' })`) via `expo-auth
 
 - **Um toque** em «Continuar com Google» → Custom Tab → conta Google → **volta ao app já logado**.
 - Sem mensagem «Login cancelado» quando o Google concluiu.
-- A bridge web (`/mobile-oauth-return`) só repassa tokens ao app via deep link `exp://…/auth/callback` — o usuário **não** precisa «fechar o browser» manualmente na versão final (hoje pode ver «Abrindo o AiyraCare…» por 1–2s).
+- A bridge web (`/mobile-oauth-return`) só repassa tokens ao app via deep link `exp://…/auth/callback` — o usuário **não** precisa «fechar o browser» manualmente na versão final (hoje pode ver «Abrindo o Ananeri…» por 1–2s).
 
 Bridge: `packages/web/src/pages/auth/mobile-oauth-return.tsx` · deep link: `packages/web/src/lib/mobile-oauth-deep-link.ts`.
 

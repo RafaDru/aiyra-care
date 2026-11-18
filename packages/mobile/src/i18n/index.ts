@@ -1,12 +1,16 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Localization from 'expo-localization'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
 import ptBR from './locales/pt-BR.json'
 import en from './locales/en.json'
+import {
+  LANGUAGE_STORAGE_KEY,
+  readStoredLanguage,
+  writeStoredLanguage,
+} from '@/lib/ananeri-storage-keys'
 
-export const LANGUAGE_STORAGE_KEY = 'aiyra-care-lang'
+export { LANGUAGE_STORAGE_KEY }
 
 export type AppLanguage = 'pt-BR' | 'en'
 
@@ -27,7 +31,7 @@ let initPromise: Promise<void> | null = null
 export function initI18n(): Promise<void> {
   if (initPromise) return initPromise
   initPromise = (async () => {
-    const saved = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY)
+    const saved = await readStoredLanguage()
     const lng: AppLanguage =
       saved === 'en' || saved === 'pt-BR' ? saved : deviceDefaultLanguage()
 
@@ -47,7 +51,7 @@ export function initI18n(): Promise<void> {
 }
 
 export async function setAppLanguage(lang: AppLanguage): Promise<void> {
-  await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, lang)
+  await writeStoredLanguage(lang)
   await i18n.changeLanguage(lang)
 }
 

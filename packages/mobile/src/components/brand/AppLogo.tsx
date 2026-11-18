@@ -35,7 +35,7 @@ export function AppLogo({ variant = 'horizontal', height }: Props) {
   return (
     <Image
       source={source}
-      accessibilityLabel="Aiyra Care"
+      accessibilityLabel="Ananeri"
       style={{ height: h, width: h * meta.aspect, maxWidth: '100%' }}
       resizeMode="contain"
     />
@@ -46,7 +46,7 @@ export function AppLogo({ variant = 'horizontal', height }: Props) {
 export function AppLogoFallback({ height = 40 }: { height?: number }) {
   const { tokens } = useAiyraTheme()
   return (
-    <View style={styles.row} accessibilityLabel="Aiyra Care">
+    <View style={styles.row} accessibilityLabel="Ananeri">
       <View
         style={[
           styles.icon,
@@ -54,7 +54,7 @@ export function AppLogoFallback({ height = 40 }: { height?: number }) {
         ]}
       />
       <Text style={[styles.wordmark, { color: tokens.colorTextBase, fontSize: height * 0.55 }]}>
-        Aiyra Care
+        Ananeri
       </Text>
     </View>
   )

@@ -7,7 +7,7 @@ type AiInsightCardProps = CardProps & {
 }
 
 /**
- * Card para conteúdo processado por IA — borda amarela e sombra suave (AiyraCare).
+ * Card para conteúdo processado por IA — borda amarela e sombra suave (Ananeri).
  */
 export function AiInsightCard({ children, style, styles, ...rest }: AiInsightCardProps) {
   return (
