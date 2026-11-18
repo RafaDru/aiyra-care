@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 150" fill="none" role="img" aria-label="Ananeri - Fitas de Pincelada para Marca-d'água">
+  <defs>
+    <linearGradient id="blend-1" x1="80%" y1="10%" x2="10%" y2="90%">
+      <stop offset="0%" stop-color="#F472B6" /><stop offset="50%" stop-color="#EC4899" /><stop offset="100%" stop-color="#9333EA" />
+    </linearGradient>
+    <linearGradient id="blend-2" x1="50%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" /><stop offset="55%" stop-color="#9333EA" /><stop offset="100%" stop-color="#7E22CE" />
+    </linearGradient>
+    <linearGradient id="blend-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" /><stop offset="45%" stop-color="#7E22CE" /><stop offset="78%" stop-color="#6B21A8" /><stop offset="100%" stop-color="#581C87" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(-92, -26)">
+    <path d="M 102 54 C 131 21, 181 30, 186.5 75 C 192 129, 135 159, 102 169 C 131 154, 178 124, 178.5 75 C 178 41, 130 31, 102 54 Z" fill="url(#blend-3)" />
+    <path d="M 106 64 C 131 36, 166.5 44.5, 167.5 78 C 168.5 119, 132.5 144, 105 154 C 129 139, 159.5 115, 160.5 78 C 161.2 52, 129 44, 106 64 Z" fill="url(#blend-2)" />
+    <path d="M 110 75 C 131 53, 148 59, 148.8 81 C 149.5 109, 127.5 127.5, 108 139 C 124.5 125.5, 141.8 108, 142 82 C 142.2 66, 127 60, 110 75 Z" fill="url(#blend-1)" />
+  </g>
+</svg>

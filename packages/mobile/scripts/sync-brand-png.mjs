@@ -30,12 +30,15 @@ if (!existsSync(INTER_SEMIBOLD)) {
   process.exit(1)
 }
 
-/** Ananeri Phase 1 — raster a partir dos SVG ativos no web (`AppLogo`). */
+const kit = join(webBrand, 'kit-oficial-ananeri')
+const lockups = join(kit, '01-lockups-principais')
+const symbolDir = join(kit, '02-simbolo-e-wordmark')
+
 const PAIRS = [
-  ['ananeri-lockup.svg', 'logo-horizontal.png'],
-  ['ananeri-lockup.svg', 'logo-horizontal-dark.png'],
-  ['ananeri-symbol.svg', 'logo-square.png'],
-  ['ananeri-symbol.svg', 'logo-square-dark.png'],
+  [join(lockups, 'ananeri-lockup-horizontal-light.svg'), 'logo-horizontal.png'],
+  [join(lockups, 'ananeri-lockup-horizontal-dark.svg'), 'logo-horizontal-dark.png'],
+  [join(symbolDir, 'ananeri-symbol-heart.svg'), 'logo-square.png'],
+  [join(symbolDir, 'ananeri-symbol-heart.svg'), 'logo-square-dark.png'],
 ]
 
 /** PNG estático do web — copiado sem raster (já otimizado). */
@@ -43,8 +46,7 @@ const PNG_COPY = ['ava-avatar.png']
 
 const SCALE = 3
 
-for (const [svgName, pngName] of PAIRS) {
-  const svgPath = join(webBrand, svgName)
+for (const [svgPath, pngName] of PAIRS) {
   const svg = readFileSync(svgPath)
   const resvg = new Resvg(svg, {
     fitTo: { mode: 'zoom', value: SCALE },

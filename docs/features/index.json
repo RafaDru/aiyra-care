@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-07",
+  "updatedAt": "2026-11-16",
   "description": "Índice de capacidades de produto — ver docs/DOCUMENTATION_SYSTEM.md",
   "features": [
     {
@@ -242,6 +242,20 @@
       "tags": ["ops", "analytics", "negócio", "sem-phi"]
     },
     {
+      "id": "ch-operator-auth",
+      "epicId": "prod-run-intelligence",
+      "title": "CH — autenticação de operador",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P1",
+      "doc": "docs/features/ch-operator-auth.md",
+      "domainDoc": "docs/ops/CH_OPERATOR_AUTH.md",
+      "routes": [],
+      "api": ["GET /api/auth/status", "GET /api/auth/session"],
+      "helpTopics": [],
+      "tags": ["ops", "ch", "auth", "supabase", "security"]
+    },
+    {
       "id": "ops-strategy-advisory",
       "epicId": "business-analytics",
       "title": "Estratégia advisory (console ops)",
@@ -366,6 +380,20 @@
       "api": ["POST /auth/complete-profile", "POST /patients"],
       "helpTopics": ["central-atendimento"],
       "tags": ["onboarding", "suporte", "acesso"]
+    },
+    {
+      "id": "official-brand-kit-web-wave1",
+      "epicId": "ananeri-brand",
+      "title": "Kit oficial Ananeri — wiring web (wave 1)",
+      "status": "done",
+      "category": "tecnico",
+      "priority": "P1",
+      "doc": "docs/features/official-brand-kit-web-wave1.md",
+      "domainDoc": "docs/brand/kit-oficial-ananeri/BRAND_GUIDELINES_FOR_AI.md",
+      "routes": ["/home", "/", "/login", "/onboarding"],
+      "api": [],
+      "helpTopics": [],
+      "tags": ["brand", "rebrand", "ui"]
     },
     {
       "id": "documentation-knowledge-base",

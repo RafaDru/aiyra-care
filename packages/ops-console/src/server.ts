@@ -98,6 +98,13 @@ import { subscribeIncidentBoard } from '../../api/src/infrastructure/ops/inciden
 import { subscribeDefectBoard } from '../../api/src/infrastructure/ops/platform-defect-board.bus.js'
 import { notifyIncidentBoardById } from '../../api/src/application/ops/incident-board-notify.js'
 import { isOpsConsoleReadOnly, resolvePlannedMaintenance } from './planned-maintenance.js'
+import { registerOpsConsoleAuthHook } from './operator-auth.hook.js'
+import {
+  type OpsConsoleAuthenticatedRequest,
+  isLoopbackHost,
+  isSupabaseConfiguredForOpsConsole,
+  parseOperatorEmailAllowlist,
+} from './operator-auth.js'
 
 const CH_BOARD_SSE_HEARTBEAT_MS = 25_000
 
@@ -295,6 +302,47 @@ async function main() {
     },
   )
 
+  const operatorAuth = registerOpsConsoleAuthHook(fastify, { host, deploymentTier })
+  const authDisabledEnv =
+    process.env.OPS_CONSOLE_AUTH_ENABLED?.trim() === '0' ||
+    process.env.OPS_CONSOLE_AUTH_ENABLED?.trim().toLowerCase() === 'false'
+  if (authDisabledEnv && !isLoopbackHost(host) && operatorAuth.enabled) {
+    console.warn(
+      '[ops-console] OPS_CONSOLE_AUTH_ENABLED=0 ignorado — bind não é loopback; auth de operador ativo.',
+    )
+  }
+  if (operatorAuth.enabled) {
+    if (!isSupabaseConfiguredForOpsConsole()) {
+      console.warn(
+        '[ops-console] Auth de operador ativo, mas SUPABASE_URL/SUPABASE_SERVICE_ROLE ausentes — APIs retornam 503.',
+      )
+    } else if (parseOperatorEmailAllowlist().size === 0) {
+      console.warn(
+        '[ops-console] Auth de operador ativo, mas OPS_CONSOLE_OPERATOR_EMAILS vazio — APIs retornam 503.',
+      )
+    }
+  }
+
+  fastify.get('/api/auth/status', async () => ({
+    enabled: operatorAuth.enabled,
+    supabaseConfigured: isSupabaseConfiguredForOpsConsole(),
+    allowlistConfigured: parseOperatorEmailAllowlist().size > 0,
+  }))
+
+  fastify.get('/api/auth/session', async (req, reply) => {
+    if (!operatorAuth.enabled) {
+      return { ok: true, authEnabled: false }
+    }
+    const email = (req as OpsConsoleAuthenticatedRequest).opsConsoleOperatorEmail
+    if (!email) {
+      return reply.status(401).send({
+        error: 'unauthorized',
+        code: 'OPS_CONSOLE_AUTH_REQUIRED',
+      })
+    }
+    return { ok: true, authEnabled: true, email }
+  })
+
   fastify.setErrorHandler((err, _req, reply) => {
     if (isPgSchemaOutdatedError(err)) {
       const detail = err instanceof Error ? err.message : String(err)
@@ -325,6 +373,7 @@ async function main() {
       status: 'ok',
       port,
       deploymentTier,
+      operatorAuthEnabled: operatorAuth.enabled,
       layoutVersion: 'ch-shell-v2',
       commandHub: true,
       plannedMaintenance: maintenance.plannedMaintenance,
