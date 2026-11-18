@@ -31,8 +31,21 @@ export async function installChCycleCloseApiMocks(page: Page) {
         port: 4313,
         deploymentTier: 'integration',
         layoutVersion: 'ch-shell-v2',
+        operatorAuthEnabled: false,
         chG3RequireReviewApprove: false,
       })
+    }
+
+    if (path === '/api/auth/status') {
+      return json(route, {
+        enabled: false,
+        supabaseConfigured: false,
+        allowlistConfigured: false,
+      })
+    }
+
+    if (path === '/api/auth/session') {
+      return json(route, { ok: true, authEnabled: false })
     }
 
     if (path === '/api/metrics') {

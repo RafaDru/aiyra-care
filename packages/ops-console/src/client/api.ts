@@ -33,6 +33,14 @@ export type ChServicesStatusResponse = {
   webPort: number
 }
 
+import { getChAccessToken } from './lib/supabase.js'
+
+async function authHeaders(): Promise<Record<string, string>> {
+  const token = await getChAccessToken()
+  if (!token) return {}
+  return { Authorization: `Bearer ${token}` }
+}
+
 function stackHeaders(): Record<string, string> {
   const key =
     (typeof localStorage !== 'undefined' ? localStorage.getItem('opsStackKey') : null) ??
@@ -44,7 +52,7 @@ function stackHeaders(): Record<string, string> {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
-    headers: { ...stackHeaders(), ...init?.headers },
+    headers: { ...(await authHeaders()), ...stackHeaders(), ...init?.headers },
   })
   if (!res.ok) {
     const text = await res.text().catch(() => '')

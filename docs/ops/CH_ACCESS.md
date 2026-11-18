@@ -1,5 +1,7 @@
 # Command Hub — URL canônica (dev)
 
+**Auth operador (antes de túnel público):** [`CH_OPERATOR_AUTH.md`](./CH_OPERATOR_AUTH.md)
+
 **Não use** `http://localhost:5173/ops` (legado) nem só `http://127.0.0.1:3013` sem query (abre última aba salva — muitas vezes UI antiga).
 
 | Destino | URL |

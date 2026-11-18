@@ -142,6 +142,7 @@ E2E correção: [`CORRECAO_DEV_E2E_CHECKLIST.md`](./CORRECAO_DEV_E2E_CHECKLIST.m
 
 ## 9. Segurança (mínimo)
 
+- **Operador humano:** auth Supabase JWT + allowlist — [`CH_OPERATOR_AUTH.md`](./CH_OPERATOR_AUTH.md) (obrigatório antes de túnel público).
 - Rotacionar `OPS_INVESTIGATOR_CALLBACK_KEY` se vazamento; nunca commitar.
 - Túnel quick: tratar URL como secreto operacional.
 - Webhooks: validar `X-Hub-Signature-256` (implementado em ops-console).
