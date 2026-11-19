@@ -20,17 +20,3 @@
   margin-bottom: 0 !important;
 }
 
-/* Família típica: chips em vez de Select (dropdown Ant Design quebrava no mobile/PWA). */
-.wallet-today-panel__lens-chips .ava-patient-lens-chips {
-  width: 100%;
-}
-
-.wallet-today-panel__lens-chips .ava-patient-lens-chip {
-  flex: 1 1 calc(50% - 6px);
-  min-width: 0;
-  justify-content: center;
-}
-
-.wallet-today-panel__lens-chips .ava-patient-lens-chip__name {
-  max-width: 100%;
-}

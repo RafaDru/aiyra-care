@@ -26,7 +26,7 @@ import type { HealthThread, Patient } from '../../lib/api.types.js'
 import { api } from '../../lib/api.js'
 import { uploadDocumentWithProgress } from '../../lib/document-upload.js'
 import { trackProductEvent } from '../../lib/product-events.js'
-import { AvaPatientLensSelect } from '../ava/AvaPatientLensSelect.js'
+import { AvaPatientLensControl } from '../ava/AvaPatientLensControl.js'
 import type { QuickCaptureKind } from '../../lib/quick-capture-bus.js'
 import './quick-capture-sheet.css'
 
@@ -352,7 +352,7 @@ export function QuickCaptureSheet({
             {t('quickCapture.patientLabel')}
           </Text>
           {patients.length > 0 && patientId ? (
-            <AvaPatientLensSelect
+            <AvaPatientLensControl
               block
               patients={patients}
               value={patientId}
