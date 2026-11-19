@@ -136,11 +136,15 @@ function Start-AiyraApi {
 function Start-AiyraWeb {
   Stop-ListenerOnPort $webPort
   $logWeb = Join-Path $root "web$logSuffix.log"
-  $viteApiUrl = "http://127.0.0.1:$apiPort"
   $opsConsolePort = if ($previewStack) { 3023 } else { 3013 }
   $viteOpsConsoleUrl = "http://127.0.0.1:$opsConsolePort"
   $viteDeploymentTier = if ($previewStack) { 'preview' } else { 'integration' }
-  $cmdWeb = "set VITE_API_URL=$viteApiUrl&&set VITE_OPS_CONSOLE_URL=$viteOpsConsoleUrl&&set VITE_DEPLOYMENT_TIER=$viteDeploymentTier&&cd /d $webDir&&npx vite --host 0.0.0.0 --port $webPort >`"$logWeb`" 2>&1"
+  $viteApiSegment = ''
+  if ($env:AIYRA_VITE_DIRECT_API -eq '1' -or $env:VITE_API_URL) {
+    $apiUrl = if ($env:VITE_API_URL) { $env:VITE_API_URL } else { "http://127.0.0.1:$apiPort" }
+    $viteApiSegment = "set VITE_API_URL=$apiUrl&&"
+  }
+  $cmdWeb = "${viteApiSegment}set VITE_OPS_CONSOLE_URL=$viteOpsConsoleUrl&&set VITE_DEPLOYMENT_TIER=$viteDeploymentTier&&cd /d $webDir&&npx vite --host 0.0.0.0 --port $webPort >`"$logWeb`" 2>&1"
   cmd /c "start /B cmd /c `"$cmdWeb`""
 }
 

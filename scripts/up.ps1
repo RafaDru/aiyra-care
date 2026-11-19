@@ -66,6 +66,22 @@ function Escape-CmdEnvSegment {
   return ($Value -replace '%', '%%' -replace '&', '^&')
 }
 
+function Get-ViteWebCmdEnvPrefix {
+  param(
+    [int]$ApiPort,
+    [string]$OpsConsoleUrl
+  )
+  # Celular na LAN: VITE_API_URL=127.0.0.1 faz o browser chamar o localhost do aparelho.
+  # Dev padrão: proxy Vite (BASE_URL vazio). Opt-in notebook-only: AIYRA_VITE_DIRECT_API=1 ou VITE_API_URL no ambiente.
+  $viteApiSegment = ''
+  if ($env:AIYRA_VITE_DIRECT_API -eq '1' -or $env:VITE_API_URL) {
+    $apiUrl = if ($env:VITE_API_URL) { $env:VITE_API_URL } else { "http://127.0.0.1:$ApiPort" }
+    $viteApiSegment = "set VITE_API_URL=$(Escape-CmdEnvSegment $apiUrl)&&"
+  }
+  $opsUrl = Escape-CmdEnvSegment $OpsConsoleUrl
+  return "${viteApiSegment}set VITE_OPS_CONSOLE_URL=$opsUrl&&"
+}
+
 # Ops console script can block up.ps1 (CH worktree / tsx cold start). Boot async + cap wait so Web still starts.
 function Start-OpsConsoleUpWithTimeout {
   param(
@@ -256,12 +272,12 @@ try {
 Write-Host "Starting Web..." -NoNewline
 $logWeb = Join-Path $root "web$logSuffix.log"
 Stop-ListenerOnPort $webPort
-$viteApiUrl = "http://127.0.0.1:$apiPort"
 $viteOpsConsoleUrl = "http://127.0.0.1:$opsConsolePort"
 $webOpenUrl = "http://localhost:$webPort"
 $apiDisplayUrl = "http://127.0.0.1:$apiPort"
 $opsDisplayUrl = "http://127.0.0.1:$opsConsolePort"
-$cmdWeb = "set VITE_API_URL=$viteApiUrl&&set VITE_OPS_CONSOLE_URL=$viteOpsConsoleUrl&&cd /d $webDir&&npx vite --host 0.0.0.0 --port $webPort >`"$logWeb`" 2>&1"
+$viteEnvPrefix = Get-ViteWebCmdEnvPrefix -ApiPort $apiPort -OpsConsoleUrl $viteOpsConsoleUrl
+$cmdWeb = "${viteEnvPrefix}cd /d $webDir&&npx vite --host 0.0.0.0 --port $webPort >`"$logWeb`" 2>&1"
 cmd /c "start /B cmd /c `"$cmdWeb`""
 
 for ($i = 0; $i -lt 12; $i++) {
