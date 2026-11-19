@@ -7,6 +7,7 @@ import {
   openPatientByName,
   editPatientName,
   deleteCurrentPatient,
+  patientCardByName,
 } from '../helpers/patient'
 
 test.describe('core-patient-crud', () => {
@@ -49,11 +50,13 @@ test.describe('core-patient-crud', () => {
 
     await openPatientByName(page, minorName)
     await deleteCurrentPatient(page)
-    await expect(page.getByText(minorName)).toHaveCount(0)
+    await expect(patientCardByName(page, minorName)).toHaveCount(0)
 
     await openPatientByName(page, adultEdited)
     await deleteCurrentPatient(page)
-    await expect(page.getByText(adultEdited)).toHaveCount(0)
-    await expect(page.getByText(/^QA-/)).toHaveCount(0)
+    await expect(patientCardByName(page, adultEdited)).toHaveCount(0)
+    await expect(
+      page.locator('.ant-card.ant-card-hoverable').filter({ hasText: /^QA-/ }),
+    ).toHaveCount(0)
   })
 })

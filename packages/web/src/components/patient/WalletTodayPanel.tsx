@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { CareReminderRow, MonitoringTimelineRow, Patient, ScheduledEvent } from '../../lib/api.types.js'
 import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
-import { AvaPatientLensSelect } from '../ava/AvaPatientLensSelect.js'
+import { AvaPatientLensChips } from '../ava/AvaPatientLensChips.js'
+import '../ava/ava-chat.css'
 import './wallet-today-panel.css'
 
 const { Text, Title } = Typography
@@ -187,13 +188,13 @@ export function WalletTodayPanel({
           <Text type="secondary" style={{ display: 'block', marginBottom: 6, fontSize: 12 }}>
             {viewingSelf ? t('walletToday.lensLabelSelf') : t('walletToday.lensLabel')}
           </Text>
-          <AvaPatientLensSelect
-            block
-            patients={lensPatients}
-            value={patientId}
-            onChange={onPatientChange!}
-            routePatientId={routePatientId}
-          />
+          <div className="wallet-today-panel__lens-chips">
+            <AvaPatientLensChips
+              patients={lensPatients}
+              value={patientId}
+              onChange={onPatientChange!}
+            />
+          </div>
         </div>
       )}
 

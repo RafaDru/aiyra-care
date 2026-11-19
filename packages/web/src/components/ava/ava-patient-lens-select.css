@@ -70,6 +70,16 @@
   min-height: 32px;
 }
 
+/* Ant Design 6 ainda monta holder de lista virtual — força altura natural quando virtual={false}. */
+.ava-patient-lens-select__popup .rc-virtual-list-holder {
+  max-height: none !important;
+}
+
+.ava-patient-lens-select__popup .rc-virtual-list-holder-inner {
+  position: relative !important;
+  transform: none !important;
+}
+
 .ava-patient-lens-select__option {
   display: inline-flex;
   align-items: center;
