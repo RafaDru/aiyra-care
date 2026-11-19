@@ -21,6 +21,13 @@ async function fillMaskedDate(page: Page, label: string, value: string) {
 const newPatientDialog = (page: Page) =>
   page.getByRole('dialog', { name: 'Adicionar pessoa' })
 
+export function patientCardByName(page: Page, name: string) {
+  return page
+    .locator('.ant-card.ant-card-hoverable')
+    .filter({ has: page.getByRole('heading', { name, exact: true, level: 5 }) })
+    .first()
+}
+
 export async function openNewPatientModal(page: Page) {
   await dismissFirstVisitTour(page)
   await hideAvaDock(page)
@@ -45,11 +52,11 @@ export async function createPatientFromDashboard(page: Page, input: CreatePatien
   }
   await dialog.getByRole('button', { name: 'Salvar' }).click()
   await dialog.waitFor({ state: 'hidden', timeout: 15_000 })
-  await page.getByText(input.name).first().waitFor({ state: 'visible', timeout: 15_000 })
+  await patientCardByName(page, input.name).waitFor({ state: 'visible', timeout: 15_000 })
 }
 
 export async function openPatientByName(page: Page, name: string) {
-  await page.getByText(name, { exact: true }).first().click()
+  await patientCardByName(page, name).click()
   await page.waitForURL(/\/patients\//, { timeout: 15_000 })
   await page.getByRole('heading', { name, exact: true }).waitFor({ state: 'visible' })
 }
