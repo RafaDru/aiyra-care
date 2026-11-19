@@ -1,0 +1,17 @@
+.ava-patient-lens-control--block {
+  width: 100%;
+}
+
+.ava-patient-lens-control--block .ava-patient-lens-chips {
+  width: 100%;
+}
+
+.ava-patient-lens-control--block .ava-patient-lens-chip {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 0;
+  justify-content: center;
+}
+
+.ava-patient-lens-control--block .ava-patient-lens-chip__name {
+  max-width: 100%;
+}
