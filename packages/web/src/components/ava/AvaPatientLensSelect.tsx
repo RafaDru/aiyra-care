@@ -69,11 +69,13 @@ export function AvaPatientLensSelect({
   return (
     <Select
       className={clsx('ava-patient-lens-select', block && 'ava-patient-lens-select--block')}
+      popupClassName="ava-patient-lens-select__popup"
       size="small"
       value={value}
       disabled={disabled || patients.length <= 1}
       onChange={onChange}
       popupMatchSelectWidth={block}
+      virtual={false}
       labelRender={labelRender}
       style={
         block
