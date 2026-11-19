@@ -59,8 +59,15 @@
   align-self: center;
 }
 
-.ava-patient-lens-select .ant-select-item-option-content {
-  display: block;
+/* Dropdown (popupClassName): lista curta, sem virtual scroll — evita “buraco” entre opções no mobile. */
+.ava-patient-lens-select__popup .ant-select-item-option-content {
+  display: flex;
+  align-items: center;
+  min-height: 0;
+}
+
+.ava-patient-lens-select__popup .ant-select-item {
+  min-height: 32px;
 }
 
 .ava-patient-lens-select__option {
