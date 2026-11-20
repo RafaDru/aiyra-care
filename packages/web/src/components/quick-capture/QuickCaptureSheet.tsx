@@ -28,6 +28,7 @@ import { uploadDocumentWithProgress } from '../../lib/document-upload.js'
 import { trackProductEvent } from '../../lib/product-events.js'
 import { AvaPatientLensControl } from '../ava/AvaPatientLensControl.js'
 import type { QuickCaptureKind } from '../../lib/quick-capture-bus.js'
+import { notifyQuickCaptureSaved } from '../../lib/quick-capture-saved-bus.js'
 import './quick-capture-sheet.css'
 
 const { Text } = Typography
@@ -50,6 +51,7 @@ interface Props {
   routePatientId: string | null
   onPatientChange: (id: string) => void
   initialKind?: QuickCaptureKind
+  initialHealthThreadId?: string
 }
 
 export function QuickCaptureSheet({
@@ -60,6 +62,7 @@ export function QuickCaptureSheet({
   routePatientId,
   onPatientChange,
   initialKind,
+  initialHealthThreadId,
 }: Props) {
   const { t } = useTranslation()
   const { message } = App.useApp()
@@ -96,6 +99,7 @@ export function QuickCaptureSheet({
       administeredAt: dayjs(),
       scheduledAt: dayjs().add(1, 'hour').minute(0),
       kind: 'reminder',
+      healthThreadId: initialHealthThreadId,
     })
     if (patientId) void loadThreads(patientId)
     trackProductEvent(
@@ -103,7 +107,7 @@ export function QuickCaptureSheet({
       { capture_kind: initialKind ?? 'note' },
       { patientId: patientId ?? undefined },
     )
-  }, [open, initialKind, patientId, form, loadThreads])
+  }, [open, initialKind, initialHealthThreadId, patientId, form, loadThreads])
 
   useEffect(() => {
     if (!open || !patientId) return
@@ -131,8 +135,11 @@ export function QuickCaptureSheet({
     onClose()
   }
 
-  const afterSave = (captureKind: QuickCaptureKind) => {
+  const afterSave = (captureKind: QuickCaptureKind, healthThreadId?: string | null) => {
     trackProductEvent('quick_capture_saved', { capture_kind: captureKind }, { patientId: patientId ?? undefined })
+    if (patientId) {
+      notifyQuickCaptureSaved({ patientId, healthThreadId: healthThreadId ?? null })
+    }
     message.success(t('quickCapture.saved'))
     onClose()
   }
@@ -142,7 +149,7 @@ export function QuickCaptureSheet({
     if (!body) throw new Error('empty')
     const threadId = await resolveThreadId(values.healthThreadId as string | undefined)
     await api.healthThreads.addEntry(threadId, body)
-    afterSave('note')
+    afterSave('note', threadId)
   }
 
   const saveMeasurement = async (values: Record<string, unknown>) => {
@@ -153,25 +160,28 @@ export function QuickCaptureSheet({
       { typeCode: 'spo2', valueNumeric: values.spo2 as number | undefined },
     ].filter((i) => i.valueNumeric != null)
     if (!items.length) throw new Error('empty')
+    const threadId = (values.healthThreadId as string) ?? undefined
+    const notes = (values.notes as string | undefined)?.trim() || undefined
     await api.measurements.createBatch({
       patientId: patientId!,
       observedAt,
-      healthThreadId: (values.healthThreadId as string) ?? undefined,
-      items,
+      healthThreadId: threadId,
+      items: items.map((i) => ({ ...i, notes })),
     })
-    afterSave('measurement')
+    afterSave('measurement', threadId)
   }
 
   const saveMedication = async (values: Record<string, unknown>) => {
+    const threadId = (values.healthThreadId as string) ?? undefined
     await api.medicationAdministrations.create({
       patientId: patientId!,
       medicationName: values.medicationName as string,
       administeredAt: (values.administeredAt as Dayjs).toISOString(),
       doseGiven: values.doseGiven as string | undefined,
-      healthThreadId: (values.healthThreadId as string) ?? undefined,
+      healthThreadId: threadId,
       notes: values.notes as string | undefined,
     })
-    afterSave('medication')
+    afterSave('medication', threadId)
   }
 
   const saveAgenda = async (values: Record<string, unknown>) => {
@@ -184,7 +194,7 @@ export function QuickCaptureSheet({
       kind: values.kind as string,
       status: 'planned',
     })
-    afterSave('agenda')
+    afterSave('agenda', values.healthThreadId as string | undefined)
   }
 
   const saveDocument = async (file: File) => {
@@ -256,6 +266,9 @@ export function QuickCaptureSheet({
           </Form.Item>
           <Form.Item name="spo2" label={t('measurement.type.spo2')}>
             <InputNumber min={50} max={100} style={{ width: '100%' }} addonAfter="%" />
+          </Form.Item>
+          <Form.Item name="notes" label={t('growth.notes')}>
+            <Input.TextArea rows={2} placeholder={t('quickCapture.measurementNotesPlaceholder')} />
           </Form.Item>
         </>
       )

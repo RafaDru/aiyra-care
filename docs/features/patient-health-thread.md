@@ -24,6 +24,8 @@ Painel **Em acompanhamento** no perfil do paciente (aba básica) permite criar *
 3. Wizard «Nova investigação»: título, contexto, hipótese, plano
 4. Ao concluir: toast «Investigação aberta» + drawer do workflow
 5. Item aparece na lista com tag de tipo e status
+6. No drawer: **Registrar medida** / **Registrar dose** abrem registro rápido já vinculado ao acompanhamento
+7. Medidas e doses com `health_thread_id` aparecem na **linha do tempo** do drawer (além de Medidas / bloco Hoje)
 
 ## Superfície técnica
 

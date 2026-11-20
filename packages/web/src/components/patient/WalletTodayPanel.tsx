@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
 import type { CareReminderRow, MonitoringTimelineRow, Patient, ScheduledEvent } from '../../lib/api.types.js'
 import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
+import { subscribeQuickCaptureSaved } from '../../lib/quick-capture-saved-bus.js'
 import { AvaPatientLensControl } from '../ava/AvaPatientLensControl.js'
 import './wallet-today-panel.css'
 
@@ -136,6 +137,12 @@ export function WalletTodayPanel({
   useEffect(() => {
     void load()
   }, [load, refreshKey])
+
+  useEffect(() => {
+    return subscribeQuickCaptureSaved((detail) => {
+      if (detail.patientId === patientId) void load()
+    })
+  }, [patientId, load])
 
   const markAgendaDone = async (eventId: string) => {
     setActingId(eventId)

@@ -31,6 +31,8 @@ import { ClinicalLinkModal } from './ClinicalLinkModal.js'
 import type { ClinicalFlow } from '../../lib/api.types.js'
 import { CLINICAL_SEQUENCE_COPY } from './clinical-sequence-copy.js'
 import { ClinicalSequenceSectionHeader } from './ClinicalSequenceSectionHeader.js'
+import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
+import { subscribeQuickCaptureSaved } from '../../lib/quick-capture-saved-bus.js'
 
 const { Text, Paragraph } = Typography
 
@@ -51,11 +53,41 @@ function formatEventDate(iso: string): string {
 }
 
 function timelineForDisplay(items: HealthThreadTimelineItem[]): HealthThreadTimelineItem[] {
-  return items.filter((item) => item.kind === 'link' || item.entryType !== 'system')
+  return items.filter(
+    (item) => item.kind === 'link' || item.kind === 'monitoring' || item.entryType !== 'system',
+  )
 }
 
 function TimelineEventContent({ item }: { item: HealthThreadTimelineItem }) {
   const { t } = useTranslation()
+  if (item.kind === 'monitoring') {
+    const tagKey =
+      item.monitoringKind === 'medication_administration'
+        ? 'clinicalSequence.timelineMedicationTag'
+        : 'clinicalSequence.timelineMeasurementTag'
+    return (
+      <div>
+        <Text style={{ fontSize: 12 }} type="secondary">
+          {formatEventDate(item.occurredAt)}
+        </Text>
+        <div style={{ marginTop: 4 }}>
+          <Tag color={item.monitoringKind === 'medication_administration' ? 'purple' : 'blue'}>
+            {t(tagKey)}
+          </Tag>
+          <Text strong style={{ display: 'block' }}>
+            {item.monitoringTitle}
+          </Text>
+          {item.monitoringSubtitle && (
+            <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+              {item.monitoringSubtitle}
+            </Text>
+          )}
+          {item.body && <Text style={{ display: 'block', marginTop: 4 }}>{item.body}</Text>}
+        </div>
+      </div>
+    )
+  }
+
   if (item.kind === 'entry') {
     return (
       <div>
@@ -148,6 +180,16 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
     if (!open) setDetail(null)
   }, [open, threadId, load])
 
+  useEffect(() => {
+    if (!open || !threadId) return undefined
+    return subscribeQuickCaptureSaved((detail) => {
+      if (detail.healthThreadId && detail.healthThreadId !== threadId) return
+      if (detail.patientId !== patientId) return
+      load()
+      onUpdated?.()
+    })
+  }, [open, threadId, patientId, load, onUpdated])
+
   const addNote = async () => {
     if (!threadId || !note.trim()) return
     setNoteLoading(true)
@@ -230,6 +272,35 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
               onReload={load}
             />
 
+            <Space wrap style={{ marginBottom: 16 }}>
+              <Button
+                size="small"
+                data-testid="health-thread-register-measurement"
+                onClick={() =>
+                  requestQuickCaptureOpen({
+                    patientId,
+                    kind: 'measurement',
+                    healthThreadId: threadId ?? undefined,
+                  })
+                }
+              >
+                {t('clinicalSequence.registerMeasurement')}
+              </Button>
+              <Button
+                size="small"
+                data-testid="health-thread-register-medication"
+                onClick={() =>
+                  requestQuickCaptureOpen({
+                    patientId,
+                    kind: 'medication',
+                    healthThreadId: threadId ?? undefined,
+                  })
+                }
+              >
+                {t('clinicalSequence.registerMedicationDose')}
+              </Button>
+            </Space>
+
             {threadEvents.length > 0 && (
               <div style={{ marginBottom: 16 }}>
                 <ClinicalSequenceSectionHeader title={t('modals.linkedAgenda')} />
@@ -301,7 +372,12 @@ export function HealthThreadDrawer({ threadId, patientId, open, onClose, onUpdat
                 <Timeline
                   style={{ marginTop: 4 }}
                   items={displayTimeline.map((item) => ({
-                    color: item.kind === 'link' ? AIYRACARE_TOKENS.colorPrimary : 'gray',
+                    color:
+                      item.kind === 'link'
+                        ? AIYRACARE_TOKENS.colorPrimary
+                        : item.kind === 'monitoring'
+                          ? 'blue'
+                          : 'gray',
                     children: <TimelineEventContent item={item} />,
                   }))}
                 />
