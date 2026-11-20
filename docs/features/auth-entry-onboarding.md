@@ -21,6 +21,7 @@ Fluxo B2C de entrada: landing → login/signup com modo na URL → wizard de onb
 2. **Signup** (`?mode=signup`): título «Crie sua conta»; copy de confirmação por e-mail (informativo); após signup → `/onboarding`
 3. **Onboarding passo 1:** perfil titular (identidade → endereço ViaCEP + celular obrigatório; nome social opcional) → `POST /auth/complete-profile`
 4. **Onboarding passo 2 (loop):** para cada família — nome (`POST /care-circles`; 1º círculo vincula titular) → membros (`POST /patients` + `POST /care-circles/:id/patients`) → **Adicionar outra família** ou **Ir para o início**; gestão contínua em `/family`
+5. **Conta errada:** rodapé no wizard — e-mail conectado, **Sair e entrar com outro e-mail** (`signOut` → `/login`), link **Voltar ao site** (`/home`)
 
 **Anel A (MVP):** após `POST /auth/complete-profile` (`needsProfile: false`), `RequireCompliance` mantém `/onboarding` enquanto `needsOnboardingSetup` (sem círculo ou sem paciente). Wizard: família obrigatória (nome + membros ou **Sou eu o paciente**) → resumo Neri opcional — **sem** passo de convênio/SUS no primeiro fluxo.
 
