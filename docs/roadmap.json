@@ -2645,6 +2645,60 @@
       ]
     },
     {
+      "id": "ch-usage-live-telemetry",
+      "category": "tecnico",
+      "priority": "P1",
+      "title": "CH — Uso ao vivo (contas ativas, timeline, heatmap)",
+      "summary": "Primeiras telas do Command Hub com visão de uso de momento: contas ativas (proxy 15 min), séries dia/semana/mês, mapa de calor por feature/área. Fonte product_events + client_errors; sem PHI. Spec: docs/ops/CH_USAGE_LIVE_TELEMETRY_SPEC.md.",
+      "status": "planned",
+      "statusLabel": "U0 spec — U1–U5 implementação",
+      "reviewBadge": ["design", "legal"],
+      "items": [
+        {
+          "id": "ch-usage-spec",
+          "title": "U0 — Estudo + spec telas CH",
+          "status": "done",
+          "detail": "CH_USAGE_LIVE_TELEMETRY_SPEC.md; CONSOLE + README ops; link business-analytics-ops."
+        },
+        {
+          "id": "ch-usage-live-kpis",
+          "title": "U1 — KPIs «agora» (Visão geral)",
+          "status": "planned",
+          "detail": "OpsUsageLiveSnapshot; índices PG; hero Operação :3013."
+        },
+        {
+          "id": "ch-usage-timeline",
+          "title": "U2 — Aba Uso ao vivo + timeline presets",
+          "status": "planned",
+          "detail": "tab=usage; Hoje/7d/30d/custom; GET /api/usage series."
+        },
+        {
+          "id": "ch-usage-heatmap",
+          "title": "U3 — Heatmap feature × tempo",
+          "status": "planned",
+          "detail": "Join client_errors; drill-down; reuse ops-feature-catalog."
+        },
+        {
+          "id": "ch-usage-mobile-telemetry",
+          "title": "U4 — app_screen_viewed mobile + surface",
+          "status": "planned",
+          "detail": "Paridade RN com web; breakdown web/mobile no CH."
+        },
+        {
+          "id": "ch-usage-heartbeat",
+          "title": "U5 — Heartbeat + auth_session_started",
+          "status": "planned",
+          "detail": "Allowlist product_events; review legal."
+        },
+        {
+          "id": "ch-usage-qa",
+          "title": "QA suite ops-ch-usage-live",
+          "status": "planned",
+          "detail": "Seed product_events; assert KPIs e série."
+        }
+      ]
+    },
+    {
       "id": "institutional-landing",
       "category": "negocio",
       "priority": "P2",

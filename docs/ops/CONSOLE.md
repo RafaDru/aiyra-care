@@ -34,6 +34,8 @@ Spec: Project store `docs/ch-header-spec-2026-09-24.md` · `layoutVersion: ch-sh
 | Negócio | `business`, `strategy` |
 | **AI** | `ava`, `cost` |
 
+**Planejado (spec):** aba **Uso ao vivo** (`tab=usage`, grupo Produto) — KPIs «agora», timeline dia/semana/mês, heatmap por feature/área. Ver [`CH_USAGE_LIVE_TELEMETRY_SPEC.md`](./CH_USAGE_LIVE_TELEMETRY_SPEC.md). Hero de uso também na **Visão geral** (Operação).
+
 **Validação (NotebookRafael):**
 
 ```powershell

@@ -42,6 +42,10 @@ KPIs agregados sem PHI no console ops (aba **Negócio**) e relatório semanal em
 - API: `packages/api/tests/ops-business-analytics.test.ts`, `business-weekly-report.test.ts`
 - UI ops: validação manual na aba Negócio (`:3013`)
 
+## Próxima evolução (spec)
+
+- **Uso ao vivo no CH:** KPIs «contas ativas (15 min)», timeline com presets dia/semana/mês, heatmap funcionalidade×tempo — [`docs/ops/CH_USAGE_LIVE_TELEMETRY_SPEC.md`](../ops/CH_USAGE_LIVE_TELEMETRY_SPEC.md) · épico roadmap `ch-usage-live-telemetry`.
+
 ## Relacionado
 
 - Aba **Estratégia** (advisory markdown): [`ops-strategy-advisory.md`](./ops-strategy-advisory.md)
