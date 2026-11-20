@@ -10,6 +10,7 @@ import type { DiagnosisRepository } from '../../domain/diagnosis/diagnosis.repos
 import type { MedicationRepository } from '../../domain/medication/medication.repository.js'
 import type { VaccineRepository } from '../../domain/vaccine/vaccine.repository.js'
 import type { DocumentRepository } from '../../domain/document/document.repository.js'
+import type { MeasurementRepository } from '../../domain/measurement/measurement.repository.js'
 import { HealthThread } from '../../domain/health-thread/health-thread.entity.js'
 import { HealthThreadEntry } from '../../domain/health-thread/health-thread-entry.entity.js'
 import { HealthThreadLink } from '../../domain/health-thread/health-thread-link.entity.js'
@@ -58,7 +59,7 @@ export interface HealthThreadArtifactSummary {
 }
 
 export interface HealthThreadTimelineItem {
-  kind: 'entry' | 'link'
+  kind: 'entry' | 'link' | 'monitoring'
   id: string
   occurredAt: string
   linkedAt?: string
@@ -68,6 +69,9 @@ export interface HealthThreadTimelineItem {
   entityType?: string
   entityId?: string
   artifact?: HealthThreadArtifactSummary
+  monitoringKind?: 'measurement' | 'medication_administration'
+  monitoringTitle?: string
+  monitoringSubtitle?: string
 }
 
 export interface HealthThreadDetail {
@@ -91,8 +95,23 @@ export class HealthThreadWorkflowService {
     private readonly medications: MedicationRepository,
     private readonly vaccines: VaccineRepository,
     private readonly documents: DocumentRepository,
+    private readonly measurements: MeasurementRepository,
     private readonly graphSync?: HealthThreadGraphSync,
   ) {}
+
+  private formatMeasurementTitle(typeCode: string, value: number | null, unit: string | null): string {
+    const labels: Record<string, string> = {
+      temperature: 'Temperatura',
+      heart_rate: 'Frequência cardíaca',
+      spo2: 'SpO₂',
+      weight: 'Peso',
+      height: 'Altura',
+    }
+    const name = labels[typeCode] ?? typeCode
+    if (value == null) return name
+    const suffix = unit ? ` ${unit}` : ''
+    return `${name}: ${value}${suffix}`
+  }
 
   async startInvestigation(input: InvestigationWizardInput) {
     const metadata = {
@@ -545,6 +564,37 @@ export class HealthThreadWorkflowService {
         entityType: l.entityType,
         entityId: l.entityId,
         artifact,
+      })
+    }
+
+    const [observations, administrations] = await Promise.all([
+      this.measurements.findObservations({ healthThreadId: threadId }),
+      this.measurements.findAdministrations({ healthThreadId: threadId }),
+    ])
+
+    for (const obs of observations) {
+      const json = obs.toJSON()
+      timeline.push({
+        kind: 'monitoring',
+        id: json.id,
+        occurredAt: new Date(json.observedAt).toISOString(),
+        monitoringKind: 'measurement',
+        monitoringTitle: this.formatMeasurementTitle(json.typeCode, json.valueNumeric, json.unit),
+        body: json.notes ?? undefined,
+      })
+    }
+
+    for (const admin of administrations) {
+      const json = admin.toJSON()
+      const subtitle = json.doseGiven?.trim() || undefined
+      timeline.push({
+        kind: 'monitoring',
+        id: json.id,
+        occurredAt: new Date(json.administeredAt).toISOString(),
+        monitoringKind: 'medication_administration',
+        monitoringTitle: json.medicationName,
+        monitoringSubtitle: subtitle,
+        body: json.notes ?? undefined,
       })
     }
 

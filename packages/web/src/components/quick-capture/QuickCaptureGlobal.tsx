@@ -24,11 +24,13 @@ export function QuickCaptureGlobal() {
 
   const [open, setOpen] = useState(false)
   const [initialKind, setInitialKind] = useState<QuickCaptureKind | undefined>()
+  const [initialHealthThreadId, setInitialHealthThreadId] = useState<string | undefined>()
 
   useEffect(() => {
     return subscribeQuickCaptureOpen((req) => {
       if (req.patientId) setPatientId(req.patientId)
       setInitialKind(req.kind)
+      setInitialHealthThreadId(req.healthThreadId)
       setOpen(true)
     })
   }, [setPatientId])
@@ -42,6 +44,7 @@ export function QuickCaptureGlobal() {
         icon={<PlusOutlined />}
         onClick={() => {
           setInitialKind(undefined)
+          setInitialHealthThreadId(undefined)
           setOpen(true)
         }}
       >
@@ -55,6 +58,7 @@ export function QuickCaptureGlobal() {
         routePatientId={routePatientId}
         onPatientChange={setPatientId}
         initialKind={initialKind}
+        initialHealthThreadId={initialHealthThreadId}
       />
     </>
   )

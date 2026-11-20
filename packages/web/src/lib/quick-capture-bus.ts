@@ -3,6 +3,7 @@ export type QuickCaptureKind = 'note' | 'measurement' | 'medication' | 'agenda' 
 export interface QuickCaptureOpenRequest {
   patientId?: string
   kind?: QuickCaptureKind
+  healthThreadId?: string
 }
 
 const EVENT = 'aiyracare:quick-capture-open'

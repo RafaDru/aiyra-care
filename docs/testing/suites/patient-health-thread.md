@@ -23,3 +23,5 @@
 | 3 | Preencher título e avançar etapas | Wizard completa 4 passos | |
 | 4 | Clicar **Abrir investigação** | Toast «Investigação aberta»; `POST .../wizard/investigation` 201 | |
 | 5 | Verificar lista ou drawer | Título da investigação visível | |
+| 6 | **Registrar medida** no drawer → salvar temperatura | Linha «Medida» na timeline; bloco **Hoje** atualiza sem recarregar página | |
+| 7 | **Registrar dose** no drawer | Linha «Dose» na timeline com medicamento | |

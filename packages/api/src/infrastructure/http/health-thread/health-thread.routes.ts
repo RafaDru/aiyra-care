@@ -13,6 +13,7 @@ import { DiagnosisPgRepository } from '../../persistence/diagnosis.pg.repository
 import { MedicationPgRepository } from '../../persistence/medication.pg.repository.js'
 import { VaccinePgRepository } from '../../persistence/vaccine.pg.repository.js'
 import { DocumentPgRepository } from '../../persistence/document.pg.repository.js'
+import { MeasurementPgRepository } from '../../persistence/measurement.pg.repository.js'
 import { pgPool } from '../../../db/postgres.js'
 import { neo4jDriver } from '../../../db/neo4j.js'
 import { HealthThreadGraphProjector } from '../../graph/health-thread-graph.projector.js'
@@ -34,6 +35,7 @@ export async function healthThreadRoutes(app: FastifyInstance) {
     new MedicationPgRepository(pgPool),
     new VaccinePgRepository(pgPool),
     new DocumentPgRepository(pgPool),
+    new MeasurementPgRepository(pgPool),
     graphProjector,
   )
   const controller = new HealthThreadController(threadService, workflow)

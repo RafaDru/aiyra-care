@@ -174,7 +174,7 @@ export interface HealthThread {
 }
 
 export interface HealthThreadTimelineItem {
-  kind: 'entry' | 'link'
+  kind: 'entry' | 'link' | 'monitoring'
   id: string
   occurredAt: string
   linkedAt?: string
@@ -190,6 +190,9 @@ export interface HealthThreadTimelineItem {
     subtitle?: string
     date?: string
   }
+  monitoringKind?: 'measurement' | 'medication_administration'
+  monitoringTitle?: string
+  monitoringSubtitle?: string
 }
 
 export interface HealthThreadDetail {

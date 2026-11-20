@@ -62,6 +62,14 @@ Conta recém-onboarded; `localStorage` sem `aiyracare.first_visit_tour_completed
 
 **Automação:** `packages/web/e2e/onboarding.spec.ts` (drawer após **Entendi**; cenário 6 = CTA com flag antiga)
 
+### E — Conta errada no onboarding
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Login com conta sem perfil → `/onboarding` | Rodapé `data-testid="onboarding-session-escape"` visível | |
+| 2 | **Sair e entrar com outro e-mail** | Redireciona para `/login`; sessão encerrada | |
+| 3 | **Voltar ao site** | Abre `/home` (institucional) sem sair da sessão | |
+
 ### C — Bloqueio menor de 18 (manual rápido)
 
 | # | Ação | Resultado esperado | ✅/❌ |
