@@ -39,6 +39,7 @@ export type ChTabKey =
   | 'produto'
   | 'maturidade'
   | 'capilaridade'
+  | 'usage'
   | 'product'
   | 'support'
   | 'business'
@@ -125,6 +126,12 @@ export const CH_NAV_GROUPS: ChNavGroup[] = [
         label: 'Capilarização',
         description: 'GTM família → médico → consultório — fases, canais e decisões.',
         icon: icon(BranchesOutlined),
+      },
+      {
+        tab: 'usage',
+        label: 'Uso ao vivo',
+        description: 'Contas ativas, linha do tempo e mapa de calor por área.',
+        icon: icon(BarChartOutlined),
       },
       {
         tab: 'product',

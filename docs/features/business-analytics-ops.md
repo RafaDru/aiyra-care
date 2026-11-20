@@ -39,8 +39,8 @@ KPIs agregados sem PHI no console ops (aba **Negócio**) e relatório semanal em
 
 ## QA
 
-- API: `packages/api/tests/ops-business-analytics.test.ts`, `business-weekly-report.test.ts`
-- UI ops: validação manual na aba Negócio (`:3013`)
+- API: `packages/api/tests/ops-business-analytics.test.ts`, `business-weekly-report.test.ts`, `ops-usage.test.ts`
+- UI ops: aba Negócio + **Uso ao vivo** (`:3013`) — suite [`ops-ch-usage-live`](../testing/suites/ops-ch-usage-live.md)
 
 ## Próxima evolução (spec)
 

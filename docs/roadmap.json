@@ -2650,8 +2650,8 @@
       "priority": "P1",
       "title": "CH — Uso ao vivo (contas ativas, timeline, heatmap)",
       "summary": "Primeiras telas do Command Hub com visão de uso de momento: contas ativas (proxy 15 min), séries dia/semana/mês, mapa de calor por feature/área. Fonte product_events + client_errors; sem PHI. Spec: docs/ops/CH_USAGE_LIVE_TELEMETRY_SPEC.md.",
-      "status": "planned",
-      "statusLabel": "U0 spec — U1–U5 implementação",
+      "status": "in_progress",
+      "statusLabel": "U1–U3 no CH — U4 mobile · U5 heartbeat",
       "reviewBadge": ["design", "legal"],
       "items": [
         {
@@ -2663,19 +2663,19 @@
         {
           "id": "ch-usage-live-kpis",
           "title": "U1 — KPIs «agora» (Visão geral)",
-          "status": "planned",
+          "status": "done",
           "detail": "OpsUsageLiveSnapshot; índices PG; hero Operação :3013."
         },
         {
           "id": "ch-usage-timeline",
           "title": "U2 — Aba Uso ao vivo + timeline presets",
-          "status": "planned",
+          "status": "done",
           "detail": "tab=usage; Hoje/7d/30d/custom; GET /api/usage series."
         },
         {
           "id": "ch-usage-heatmap",
           "title": "U3 — Heatmap feature × tempo",
-          "status": "planned",
+          "status": "done",
           "detail": "Join client_errors; drill-down; reuse ops-feature-catalog."
         },
         {

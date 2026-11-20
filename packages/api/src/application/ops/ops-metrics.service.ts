@@ -9,6 +9,7 @@ import { buildTimeSeries24h } from '../../domain/ops/ops-time-series.js'
 import type { OpsAlert, OpsMetricsSnapshot } from '../../domain/ops/ops-metrics.types.js'
 import type { OpsMetricsPgRepository } from '../../infrastructure/persistence/ops-metrics.pg.repository.js'
 import { readOpsProbeArtifact, writeOpsMetricsArtifact } from './ops-probe-artifact.js'
+import { OpsUsageService } from './ops-usage.service.js'
 
 export interface OpsMetricsResponse {
   metrics: OpsMetricsSnapshot
@@ -16,10 +17,14 @@ export interface OpsMetricsResponse {
 }
 
 export class OpsMetricsService {
+  private readonly usage: OpsUsageService
+
   constructor(
     private readonly repo: OpsMetricsPgRepository,
     private readonly internalCost?: LlmInternalCostService,
-  ) {}
+  ) {
+    this.usage = new OpsUsageService(repo)
+  }
 
   async getMetrics(): Promise<OpsMetricsResponse> {
     const [
@@ -45,6 +50,7 @@ export class OpsMetricsService {
       supportOpenCount,
       supportSubmitted24h,
       business,
+      usageLive,
     ] = await Promise.all([
       this.repo.avaTokenPercentiles(24),
       this.repo.avaTokenPercentiles(24 * 7),
@@ -68,6 +74,7 @@ export class OpsMetricsService {
       this.repo.supportReportsOpenCount(),
       this.repo.supportReportsSubmitted24h(),
       this.repo.businessAnalytics(),
+      this.usage.getLiveSnapshot(),
     ])
 
     const featureHealth24h = buildFeatureHealthMatrix(
@@ -138,6 +145,7 @@ export class OpsMetricsService {
         submitted24h: supportSubmitted24h,
       },
       business,
+      usageLive,
     }
 
     return { metrics, alerts: evaluateOpsAlerts(metrics) }

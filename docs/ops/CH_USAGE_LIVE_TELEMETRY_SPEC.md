@@ -1,7 +1,7 @@
 # CH — Uso ao vivo e telemetria de produto (spec telas)
 
 > **Data:** 2026-11-20  
-> **Status:** especificação (pré-implementação)  
+> **Status:** U1–U3 implementados (2026-11-20) — U4 mobile / U5 heartbeat pendentes  
 > **Autor:** estudo agêntico a pedido Rafael — frente Command Hub  
 > **Relacionado:** [`TELEMETRY.md`](./TELEMETRY.md) · [`CONSOLE.md`](./CONSOLE.md) · [`OBSERVABILITY.md`](../OBSERVABILITY.md) · épico `business-analytics` · `ch-usage-live-telemetry` (roadmap)
 
