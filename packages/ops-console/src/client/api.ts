@@ -73,6 +73,10 @@ export const opsApi = {
   health: () => request<OpsConsoleHealth>('/health'),
   servicesStatus: () => request<ChServicesStatusResponse>('/api/services/status'),
   metrics: () => request<OpsMetricsResponse>('/api/metrics'),
+  usage: (preset = 'today') =>
+    request<import('./ops.types.js').OpsUsageResponse>(
+      `/api/usage?preset=${encodeURIComponent(preset)}`,
+    ),
   incidentDefectCycleMetrics: (windowDays = 7) =>
     request<import('./ops.types.js').IncidentDefectCycleMetrics>(
       `/api/ops/incident-defect-cycle-metrics?windowDays=${encodeURIComponent(String(windowDays))}`,

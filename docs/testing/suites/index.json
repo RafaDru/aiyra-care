@@ -651,6 +651,22 @@
       "estimatedMinutes": 20
     },
     {
+      "id": "ops-ch-usage-live",
+      "domain": "ops",
+      "title": "CH — uso ao vivo (KPIs, timeline, heatmap)",
+      "lane": "ops",
+      "parallelSafe": true,
+      "fixtureId": "ops-local",
+      "doc": "docs/testing/suites/ops-ch-usage-live.md",
+      "coverage": "partial",
+      "businessActions": ["ops.ch_usage_live"],
+      "automation": {
+        "status": "partial",
+        "spec": "packages/api/tests/ops-usage.test.ts"
+      },
+      "estimatedMinutes": 15
+    },
+    {
       "id": "ops-ch-cycle-close",
       "domain": "ops",
       "title": "CH — fechamento de ciclo (suporte → merge → resolved)",

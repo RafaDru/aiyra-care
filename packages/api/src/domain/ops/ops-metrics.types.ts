@@ -1,3 +1,5 @@
+import type { OpsUsageLiveSnapshot } from './ops-usage.types.js'
+
 export interface AvaTokenPercentiles {
   windowHours: number
   turns: number
@@ -339,6 +341,7 @@ export interface OpsMetricsSnapshot {
     submitted24h: number
   }
   business?: OpsBusinessAnalytics
+  usageLive?: OpsUsageLiveSnapshot
 }
 
 export type OpsAlertSeverity = 'warning' | 'critical'

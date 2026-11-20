@@ -790,3 +790,51 @@
 .ch-capilaridade-channel-meta {
   font-size: 12px;
 }
+
+.ch-usage-heatmap {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.ch-usage-heatmap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ch-usage-heatmap-row-label {
+  width: 120px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ch-usage-heatmap-cells {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 3px;
+  min-width: min-content;
+}
+
+.ch-usage-heatmap-cells--labels {
+  gap: 3px;
+}
+
+.ch-usage-heatmap-cell {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.ch-usage-heatmap-time-label {
+  width: 18px;
+  font-size: 9px;
+  text-align: center;
+  color: #64748b;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  height: 48px;
+}
