@@ -28,6 +28,20 @@ test.describe('auth-entry-flow', () => {
     await expect(page.getByRole('button', { name: 'Criar conta' })).toBeVisible()
   })
 
+  test('central de atendimento logada — sem CTA cego para login', async ({ page }) => {
+    requireOnboardingCredentials()
+    const { email, password } = requireOnboardingCredentials()
+    await page.goto('/login')
+    await loginViaPassword(page, email, password)
+    await page.waitForURL(/\/(onboarding|compliance)/, { timeout: 30_000 })
+
+    await page.goto('/central-atendimento?context=onboarding-cpf')
+    await expect(page.getByText(/outra conta já tenha seu perfil|another account likely/i)).toBeVisible()
+    await expect(page.getByRole('button', { name: /Voltar ao app|Back to the app/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Voltar ao app|Back to the app/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Entrar na minha conta|Sign in to my account/i })).toHaveCount(0)
+  })
+
   test('landing footer — documentos legais publicados', async ({ page }) => {
     await page.goto('/home')
     await page.getByTestId('landing-footer-link-terms').click()

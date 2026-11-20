@@ -37,6 +37,11 @@ describe('AuthService.syncAccountFromToken', () => {
   const accounts = {
     findByAuthSubject: vi.fn(),
     findById: vi.fn(),
+    listByEmail: vi.fn(async () => [] as AppAccount[]),
+    relinkAuthSubject: vi.fn(async (id: string, _p: string, sub: string) =>
+      AppAccount.create({ authSubject: sub, email: 'jenifer@example.com', displayName: 'Jenifer' }, id),
+    ),
+    retireAuthSubject: vi.fn(async () => undefined),
     save: vi.fn(),
     update: vi.fn(async (a: AppAccount) => a),
   }
@@ -106,6 +111,43 @@ describe('AuthService.syncAccountFromToken', () => {
     expect(result?.needsOnboardingSetup).toBe(false)
   })
 
+  it('relinks OAuth subject to existing account with same email', async () => {
+    const legacy = AppAccount.create(
+      { authSubject: 'old-sub', email: 'jenifer@example.com', displayName: 'Jenifer' },
+      'account-legacy',
+    )
+    accounts.findByAuthSubject.mockResolvedValue(null)
+    accounts.listByEmail.mockResolvedValue([legacy])
+    accounts.relinkAuthSubject.mockImplementation(async (id: string, _p: string, sub: string) =>
+      AppAccount.restore({ ...legacy.toJSON(), id, authSubject: sub, updatedAt: new Date() }),
+    )
+    authProvider.verifyAccessToken.mockResolvedValue({
+      id: 'google-sub-new',
+      email: 'jenifer@example.com',
+      displayName: 'Jenifer Google',
+      avatarUrl: null,
+    })
+    patients.findById.mockResolvedValue(
+      Patient.create({
+        name: 'Jenifer',
+        birthDate: new Date('1990-01-01'),
+        cpf: '12345678901',
+      }, 'patient-self-1'),
+    )
+
+    const result = await service.syncAccountFromToken('token')
+
+    expect(accounts.save).not.toHaveBeenCalled()
+    expect(accounts.relinkAuthSubject).toHaveBeenCalledWith(
+      'account-legacy',
+      'supabase',
+      'google-sub-new',
+    )
+    expect(result?.account.id).toBe('account-legacy')
+    expect(result?.needsProfile).toBe(false)
+    expect(result?.isNew).toBe(false)
+  })
+
   it('needsOnboardingSetup when profile ok but no care circle', async () => {
     const existing = AppAccount.create(
       { authSubject: 'sub-1', email: 'bruno@example.com', displayName: 'Bruno' },
@@ -153,6 +195,9 @@ describe('AuthService.completeProfile', () => {
     findById: vi.fn(async () =>
       AppAccount.create({ authSubject: 'sub-1', email: 'a@b.com', displayName: 'a@b.com' }, 'account-1'),
     ),
+    listByEmail: vi.fn(async () => [] as AppAccount[]),
+    relinkAuthSubject: vi.fn(),
+    retireAuthSubject: vi.fn(),
     save: vi.fn(),
     update: vi.fn(async (a: AppAccount) => a),
   }

@@ -82,29 +82,90 @@ export class AuthService {
     return { needsProfile, needsOnboardingSetup }
   }
 
+  /** Escolhe a conta canônica quando o e-mail aparece em mais de um auth_subject (ex.: Google após cadastro por convite). */
+  private async pickCanonicalAccountId(candidates: readonly { id: string }[]): Promise<string> {
+    let bestId = candidates[0]!.id
+    let bestScore = -1
+    for (const candidate of candidates) {
+      const selfId = await this.memberships.findSelfPatientId(candidate.id)
+      let score = 0
+      if (selfId) {
+        const patient = await this.patients.findById(selfId)
+        score = isValidSelfProfileCpf(patient.cpf) ? 2 : 1
+      }
+      if (score > bestScore) {
+        bestScore = score
+        bestId = candidate.id
+      }
+    }
+    return bestId
+  }
+
+  private async mergeProviderMetadata(
+    account: AppAccount,
+    user: AuthUser,
+  ): Promise<AppAccount> {
+    const updated = AppAccount.restore({
+      ...account.toJSON(),
+      email: user.email ?? account.email,
+      displayName: mergeAccountDisplayName(
+        account.displayName,
+        user.displayName,
+        user.email ?? account.email,
+      ),
+      avatarUrl: user.avatarUrl ?? account.avatarUrl,
+      updatedAt: new Date(),
+    })
+    return this.accounts.update(updated)
+  }
+
   async syncAccountFromToken(accessToken: string): Promise<SyncAccountResult | null> {
     const user = await this.verifyToken(accessToken)
     if (!user) return null
 
+    const emailNorm = user.email?.trim().toLowerCase() ?? null
+
     const existing = await this.accounts.findByAuthSubject(this.providerName, user.id)
     if (existing) {
-      const updated = AppAccount.restore({
-        ...existing.toJSON(),
-        email: user.email ?? existing.email,
-        displayName: mergeAccountDisplayName(
-          existing.displayName,
-          user.displayName,
-          user.email ?? existing.email,
-        ),
-        avatarUrl: user.avatarUrl ?? existing.avatarUrl,
-        updatedAt: new Date(),
-      })
-      const saved = await this.accounts.update(updated)
+      if (emailNorm) {
+        const sameEmail = await this.accounts.listByEmail(this.providerName, emailNorm)
+        const others = sameEmail.filter((a) => a.id !== existing.id)
+        if (others.length > 0) {
+          const canonicalId = await this.pickCanonicalAccountId([existing, ...others])
+          if (canonicalId !== existing.id) {
+            await this.accounts.retireAuthSubject(existing.id)
+            const relinked = await this.accounts.relinkAuthSubject(
+              canonicalId,
+              this.providerName,
+              user.id,
+            )
+            const saved = await this.mergeProviderMetadata(relinked, user)
+            const flags = await this.syncFlags(saved.id)
+            return { account: saved, isNew: false, ...flags }
+          }
+        }
+      }
+      const saved = await this.mergeProviderMetadata(existing, user)
       const flags = await this.syncFlags(saved.id)
       return {
         account: saved,
         isNew: false,
         ...flags,
+      }
+    }
+
+    if (emailNorm) {
+      const sameEmail = await this.accounts.listByEmail(this.providerName, emailNorm)
+      if (sameEmail.length > 0) {
+        const canonicalId = await this.pickCanonicalAccountId(sameEmail)
+        const relinked = await this.accounts.relinkAuthSubject(
+          canonicalId,
+          this.providerName,
+          user.id,
+        )
+        const saved = await this.mergeProviderMetadata(relinked, user)
+        const flags = await this.syncFlags(saved.id)
+        return { account: saved, isNew: false, ...flags }
       }
     }
 

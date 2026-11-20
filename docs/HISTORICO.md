@@ -1,5 +1,12 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-20] - Beta Jenifer — relink conta por e-mail + central de atendimento
+
+### Realizado (eng)
+- `AuthService.syncAccountFromToken`: ao logar com novo `auth_subject` (ex. Google), relinka na `app_accounts` canônica do mesmo e-mail em vez de recriar titular.
+- UX `/central-atendimento`: sem loop login→onboarding; CTAs para sessão logada.
+- Script notebook: `packages/api/scripts/repair-jenifer-onboarding-beta.mjs`.
+
 ## [2026-11-06] - Phase 3A — escopo npm e nome raiz `ananeri`
 
 ### Decisão (Rafael)

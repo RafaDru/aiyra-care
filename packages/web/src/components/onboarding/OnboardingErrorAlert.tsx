@@ -21,7 +21,7 @@ export function OnboardingErrorAlert({ message, cpfAlreadyLinked }: Props) {
           <Trans
             i18nKey="onboarding.cpfAlreadyLinked"
             components={{
-              supportLink: <Link to={SUPPORT_CENTER_PATH} />,
+              supportLink: <Link to={`${SUPPORT_CENTER_PATH}?context=onboarding-cpf`} />,
             }}
           />
         }
