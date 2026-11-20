@@ -28,10 +28,12 @@ function shellPadding(): CSSProperties {
 type AuthWizardShellProps = {
   variant: AuthWizardShellVariant
   children: ReactNode
+  /** Rendered below the onboarding card (e.g. sign out / back to marketing). */
+  onboardingFooter?: ReactNode
 }
 
 /** Shared outer shell for login, compliance, and onboarding — aligned horizontal padding and safe-area. */
-export function AuthWizardShell({ variant, children }: AuthWizardShellProps) {
+export function AuthWizardShell({ variant, children, onboardingFooter }: AuthWizardShellProps) {
   const { t } = useTranslation()
   const isOnboarding = variant === 'onboarding'
   const maxWidth = isOnboarding ? ONBOARDING_WIZARD_CONTENT_MAX_WIDTH : AUTH_WIZARD_CONTENT_MAX_WIDTH
@@ -84,17 +86,20 @@ export function AuthWizardShell({ variant, children }: AuthWizardShellProps) {
           </div>
         )}
         {isOnboarding ? (
-          <div
-            style={{
-              background: 'var(--brand-surface, #fff)',
-              borderRadius: AIYRACARE_TOKENS.borderRadius,
-              border: '1px solid var(--brand-border-subtle, rgba(147, 51, 234, 0.12))',
-              boxShadow: '0 8px 32px rgba(79, 70, 229, 0.06)',
-              overflow: 'hidden',
-            }}
-          >
-            {children}
-          </div>
+          <>
+            <div
+              style={{
+                background: 'var(--brand-surface, #fff)',
+                borderRadius: AIYRACARE_TOKENS.borderRadius,
+                border: '1px solid var(--brand-border-subtle, rgba(147, 51, 234, 0.12))',
+                boxShadow: '0 8px 32px rgba(79, 70, 229, 0.06)',
+                overflow: 'hidden',
+              }}
+            >
+              {children}
+            </div>
+            {onboardingFooter}
+          </>
         ) : (
           children
         )}
