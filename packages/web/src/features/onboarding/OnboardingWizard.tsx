@@ -233,16 +233,16 @@ export function OnboardingWizard() {
           message: e instanceof Error ? e.message : undefined,
         })
       }
-      clearOnboardingWizardStep()
-      setCurrentStep(0)
-      setProfileSubStep('identity')
-      setFamilyReady(false)
       if (isApiResponseError(e) && e.code === 'CPF_ALREADY_LINKED') {
         setCpfAlreadyLinked(true)
         setError(null)
       } else {
         setCpfAlreadyLinked(false)
         setError(e instanceof Error ? e.message : t('onboarding.error'))
+        clearOnboardingWizardStep()
+        setCurrentStep(0)
+        setProfileSubStep('identity')
+        setFamilyReady(false)
       }
     } finally {
       setSubmitting(false)

@@ -322,6 +322,9 @@
     "channelsHowTo": "Sign in and use «Report a problem» in the app menu. Choose «Account, login and CPF» for access or registration issues — our team (with agent support) follows your request.",
     "noPublicEmailNote": "We do not have a public email or phone in this phase yet — so we avoid channels we cannot serve with the care your family deserves.",
     "ctaLogin": "Sign in to my account",
+    "ctaBackToApp": "Back to the app",
+    "ctaSignOutOtherEmail": "Sign out and try another email",
+    "onboardingCpfLoopHint": "If you just saw that your CPF is already on file, another account likely already has your profile. Sign out of the current session and sign in with the email you used when you first registered — or use «Report a problem» in the menu once you are in the app.",
     "backToLogin": "Back to login",
     "legalLinks": "<terms>Terms of use</terms> · <privacy>Privacy</privacy>"
   },

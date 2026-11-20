@@ -35,6 +35,16 @@ export class AppAccountPgRepository implements AppAccountRepository {
     return rows.length ? rowToEntity(rows[0]) : null
   }
 
+  async listByEmail(authProvider: string, email: string) {
+    const { rows } = await this.pool.query(
+      `SELECT ${COLUMNS} FROM app_accounts
+       WHERE auth_provider = $1 AND email IS NOT NULL AND lower(email) = lower($2)
+       ORDER BY created_at ASC`,
+      [authProvider, email.trim()],
+    )
+    return rows.map((row) => rowToEntity(row))
+  }
+
   async save(account: AppAccount) {
     const data = account.toJSON()
     const { rows } = await this.pool.query(
@@ -54,6 +64,40 @@ export class AppAccountPgRepository implements AppAccountRepository {
     )
     if (!rows.length) throw new Error(`AppAccount ${data.id} not found`)
     return rowToEntity(rows[0])
+  }
+
+  async relinkAuthSubject(accountId: string, authProvider: string, authSubject: string) {
+    const client = await this.pool.connect()
+    try {
+      await client.query('BEGIN')
+      await client.query(
+        `UPDATE app_accounts
+         SET auth_subject = 'replaced-' || id::text, updated_at = NOW()
+         WHERE auth_provider = $1 AND auth_subject = $2 AND id != $3`,
+        [authProvider, authSubject, accountId],
+      )
+      const { rows } = await client.query(
+        `UPDATE app_accounts SET auth_subject = $3, updated_at = NOW()
+         WHERE id = $1 AND auth_provider = $2
+         RETURNING ${COLUMNS}`,
+        [accountId, authProvider, authSubject],
+      )
+      if (!rows.length) throw new Error(`AppAccount ${accountId} not found`)
+      await client.query('COMMIT')
+      return rowToEntity(rows[0])
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    } finally {
+      client.release()
+    }
+  }
+
+  async retireAuthSubject(accountId: string) {
+    await this.pool.query(
+      `UPDATE app_accounts SET auth_subject = 'replaced-' || id::text, updated_at = NOW() WHERE id = $1`,
+      [accountId],
+    )
   }
 }
 

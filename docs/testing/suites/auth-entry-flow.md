@@ -57,7 +57,16 @@ Fluxos de **entrada na conta** a partir da landing pública: cliente existente (
 | 1 | Após 1º círculo | **Adicionar outra família** | |
 | 2 | 2º nome + dependente (sem «Incluir você») | Dashboard com 2 grupos; `GET /care-circles` ≥ 2 | |
 
-### E — Footer legal (público, sem auth)
+### E — Central de atendimento (CPF duplicado / sessão logada)
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Login QA onboarding (perfil incompleto) → `/central-atendimento?context=onboarding-cpf` | Texto extra «outra conta já tem seu perfil»; **Voltar ao app** (não «login» cego) | |
+| 2 | Voltar pelo header | `/onboarding` ou `/` conforme sessão — **não** loop login→onboarding infinito | |
+
+**Automação:** opcional na CI — validar em notebook pós-merge.
+
+### F — Footer legal (público, sem auth)
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|

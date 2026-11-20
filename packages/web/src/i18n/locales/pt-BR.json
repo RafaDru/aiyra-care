@@ -322,6 +322,9 @@
     "channelsHowTo": "Entre na sua conta e use «Reportar problema» no menu do app. Escolha «Conta, login e CPF» quando a dúvida for sobre acesso ou cadastro — nossa equipe (com apoio de agentes) acompanha o chamado por você.",
     "noPublicEmailNote": "Ainda não temos e-mail público nem telefone nesta fase — assim evitamos canais que não conseguimos atender com o cuidado que sua família merece.",
     "ctaLogin": "Entrar na minha conta",
+    "ctaBackToApp": "Voltar ao app",
+    "ctaSignOutOtherEmail": "Sair e tentar outro e-mail",
+    "onboardingCpfLoopHint": "Se você acabou de ver que o CPF já está cadastrado, é provável que outra conta já tenha seu perfil. Saia da sessão atual e entre com o e-mail que você usou no primeiro cadastro — ou use «Reportar problema» no menu quando estiver no app.",
     "backToLogin": "Voltar ao login",
     "legalLinks": "<terms>Termos de uso</terms> · <privacy>Privacidade</privacy>"
   },
