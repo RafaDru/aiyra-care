@@ -5,7 +5,9 @@ import './dashboard-day-to-day-section.css'
 
 /** Bloco «Dia a dia» + «Hoje» no dashboard — mesma lente Ava do registro rápido. */
 export function DashboardDayToDaySection() {
-  const { patients, patientId, routePatientId, loading, setPatientId } = useAvaPatientLens()
+  const { patients, patientId, routePatientId, loading, setPatientId } = useAvaPatientLens({
+    preferSelfOnHome: true,
+  })
 
   if (loading || !patientId || patients.length === 0) return null
 

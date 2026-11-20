@@ -17,11 +17,16 @@ function routePatientIdFromLocation(
   return q ?? null
 }
 
+export type UseAvaPatientLensOptions = {
+  /** Dashboard «Hoje»: em `/` ou `/dashboard` sem rota, titular vê o próprio painel primeiro. */
+  preferSelfOnHome?: boolean
+}
+
 /**
- * Lente de paciente da Ava global: rota → último usado → self → primeiro.
+ * Lente de paciente da Ava: rota → (opcional self em home) → último → dependente → self.
  * Override manual persiste em localStorage e sobrescreve até mudar de rota.
  */
-export function useAvaPatientLens() {
+export function useAvaPatientLens(options?: UseAvaPatientLensOptions) {
   const location = useLocation()
   const params = useParams()
   const routePatientId = routePatientIdFromLocation(
@@ -57,6 +62,7 @@ export function useAvaPatientLens() {
   }, [routePatientId])
 
   const preferSelfOnHome =
+    Boolean(options?.preferSelfOnHome) &&
     !routePatientId &&
     (location.pathname === '/' || location.pathname === '/dashboard')
 

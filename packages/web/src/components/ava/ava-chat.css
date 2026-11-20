@@ -6,42 +6,14 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  overflow: hidden;
   --ava-thread-surface: var(--ant-color-bg-container, #fff);
 }
 
-.ava-chat-shell__head {
-  flex-shrink: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px 12px;
-  border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
-}
-
-.ava-chat-shell__head-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ava-chat-shell__head-label {
-  font-size: 11px;
-  line-height: 1.2;
-}
-
-.ava-chat-shell__head-hint {
-  font-size: 11px;
-  line-height: 1.3;
-  display: block;
-}
-
-.ava-chat-shell__body {
+/* Shell: corpo único — lente + sessões vivem no painel embedded */
+.ava-chat-shell > .ava-chat-panel--embedded {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
 }
 
 .ava-chat-panel {
@@ -54,6 +26,233 @@
 .ava-chat-panel--embedded {
   height: 100%;
   max-height: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ava-chat-panel__layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  position: relative;
+}
+
+.ava-chat-panel__main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--ava-thread-surface, var(--ant-color-bg-container, #fff));
+}
+
+.ava-chat-panel__main-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 5px 8px 5px 10px;
+  border-bottom: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+}
+
+.ava-chat-panel__main-head-lens {
+  flex: 1;
+  min-width: 0;
+}
+
+.ava-chat-panel__lens-hint {
+  font-size: 10px;
+  line-height: 1.25;
+  display: block;
+  margin-top: 2px;
+}
+
+.ava-chat-panel__close {
+  flex-shrink: 0;
+  margin-top: 0;
+  padding-inline: 6px !important;
+}
+
+/* Barra lateral — sessões */
+.ava-conversation-sidebar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  background: var(--ant-color-fill-quaternary, #fafafa);
+  transition: width 0.18s ease;
+}
+
+.ava-conversation-sidebar--collapsed {
+  width: 44px;
+  align-items: center;
+}
+
+.ava-conversation-sidebar--expanded {
+  width: min(200px, 38%);
+  min-width: 168px;
+  max-width: 220px;
+}
+
+.ava-conversation-sidebar--overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
+}
+
+.ava-conversation-sidebar__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.ava-conversation-sidebar__top {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+}
+
+.ava-conversation-sidebar__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 8px 10px;
+  overflow: hidden;
+}
+
+.ava-conversation-sidebar__section {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  padding: 0 2px;
+}
+
+.ava-conversation-sidebar__new {
+  font-size: 12px;
+}
+
+.ava-conversation-sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ava-conversation-sidebar__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--ant-color-text);
+}
+
+.ava-conversation-sidebar__item:hover {
+  background: rgba(79, 70, 229, 0.06);
+}
+
+.ava-conversation-sidebar__item--active {
+  background: rgba(147, 51, 234, 0.12);
+  font-weight: 600;
+}
+
+.ava-conversation-sidebar__item-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ant-color-text-secondary);
+}
+
+.ava-conversation-sidebar__item-label {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.ava-conversation-sidebar__actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+}
+
+.ava-conversation-sidebar__rail-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--ant-color-text-secondary);
+  padding: 4px 0;
+}
+
+.ava-conversation-sidebar__rail-count {
+  font-weight: 600;
+}
+
+.ava-conversation-sidebar__toggle,
+.ava-conversation-sidebar__rail-new {
+  width: 36px !important;
+  height: 32px !important;
+}
+
+.ava-patient-lens-chips--compact {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 4px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ava-patient-lens-chip--compact {
+  padding: 2px 8px 2px 8px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.ava-patient-lens-chips--compact .ava-patient-lens-chip__name {
+  max-width: 76px;
+}
+
+.ava-patient-lens-chips__solo--compact {
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ava-chat-panel__meta {
@@ -524,18 +723,7 @@
   font-size: 13px;
 }
 
-.ava-chat-panel__conversation-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 18px 0;
-  flex-wrap: wrap;
-}
-
-.ava-chat-panel__conversation-select {
-  min-width: 160px;
-  flex: 1;
-}
+/* conversation-bar removida — sessões na barra lateral (AC-102) */
 
 .ava-context-chips {
   display: flex;
@@ -554,9 +742,6 @@
   margin: 0;
 }
 
-.ava-chat-panel__conversation-label {
-  font-size: 12px;
-}
 
 .ava-chat-panel__composer {
   flex-shrink: 0;
