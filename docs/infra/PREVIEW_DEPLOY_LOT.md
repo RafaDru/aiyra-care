@@ -24,7 +24,7 @@ Ver [`preview-deploy-status.json`](./preview-deploy-status.json) — `lastPromot
 ## Hooks
 
 - `after-file-edit-delivery-lot` marca sessão com produto tocado.
-- `stop` pode lembrar o triângulo se preview ≠ `main` — **sem** executar promote.
+- `stop` lembra o triângulo **só se a sessão editou produto** (não a cada stop só por preview atrás de `main`) — **sem** executar promote.
 
 ## Gatilhos de promote
 

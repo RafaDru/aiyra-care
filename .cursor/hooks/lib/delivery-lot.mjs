@@ -60,7 +60,9 @@ export function deliveryLotFollowupMessage() {
   const previewSha = status?.lastPromoteMainSha ?? null
   const stale = Boolean(mainSha && previewSha && mainSha !== previewSha)
 
-  if (!pending && !stale) return null
+  // Só lembrar no `stop` se esta sessão editou produto — gap preview≠main
+  // fica em preview-deploy-status.json (evita spam a cada encerramento).
+  if (!pending) return null
 
   const parts = [
     'Triângulo entrega (lote beta, sem promote por PR):',
