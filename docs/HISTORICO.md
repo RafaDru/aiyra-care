@@ -1,5 +1,13 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-23] - Registro rápido — título do acompanhamento + sequência nota → vitais
+
+### Decisão (Rafael)
+- Nota rápida com **título** que cria/vincula health thread; medidas no **mesmo** acompanhamento sem parecer “solto”.
+
+### Realizado (eng)
+- `QuickCaptureSheet`: título, «Salvar e registrar sinais vitais», thread fixada entre tipos; suite `family-quick-capture` atualizada.
+
 ## [2026-11-23] - PWA beta Jenifer (AC-126) — ícone light + shell mobile
 
 ### Decisão (Rafael)

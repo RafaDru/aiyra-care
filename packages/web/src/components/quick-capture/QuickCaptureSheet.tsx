@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
+  Alert,
   App,
   AutoComplete,
   Button,
@@ -10,6 +11,7 @@ import {
   InputNumber,
   Select,
   Space,
+  Tag,
   Typography,
   Upload,
 } from 'antd'
@@ -71,6 +73,7 @@ export function QuickCaptureSheet({
   const [threadsLoading, setThreadsLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [pinnedThread, setPinnedThread] = useState<{ id: string; title: string } | null>(null)
   const [form] = Form.useForm()
 
   const threadOptions = useMemo(
@@ -102,6 +105,7 @@ export function QuickCaptureSheet({
       healthThreadId: initialHealthThreadId,
     })
     if (patientId) void loadThreads(patientId)
+    if (!initialHealthThreadId) setPinnedThread(null)
     trackProductEvent(
       'quick_capture_opened',
       { capture_kind: initialKind ?? 'note' },
@@ -114,9 +118,26 @@ export function QuickCaptureSheet({
     void loadThreads(patientId)
   }, [open, patientId, loadThreads])
 
-  const resolveThreadId = async (selectedId?: string): Promise<string> => {
+  useEffect(() => {
+    if (!open || !initialHealthThreadId) return
+    const th = threads.find((item) => item.id === initialHealthThreadId)
+    if (th) setPinnedThread({ id: th.id, title: th.title })
+  }, [open, initialHealthThreadId, threads])
+
+  const resolveThreadId = async (selectedId?: string, newTitle?: string): Promise<string> => {
     if (!patientId) throw new Error('no_patient')
     if (selectedId) return selectedId
+    const title = newTitle?.trim()
+    if (title) {
+      const thread = await api.healthThreads.create({
+        patientId,
+        kind: 'acompanhamento',
+        title,
+      })
+      setThreads((prev) => [...prev, thread])
+      return thread.id
+    }
+    if (pinnedThread) return pinnedThread.id
     if (threads.length === 1) return threads[0].id
     if (threads.length === 0) {
       const thread = await api.healthThreads.create({
@@ -128,6 +149,14 @@ export function QuickCaptureSheet({
       return thread.id
     }
     throw new Error('thread_required')
+  }
+
+  const resolveThreadTitle = (threadId: string, fallbackTitle?: string): string => {
+    const found = threads.find((th) => th.id === threadId)?.title
+    if (found) return found
+    if (fallbackTitle?.trim()) return fallbackTitle.trim()
+    if (pinnedThread?.id === threadId) return pinnedThread.title
+    return t('quickCapture.defaultThreadTitle')
   }
 
   const handleClose = () => {
@@ -144,11 +173,34 @@ export function QuickCaptureSheet({
     onClose()
   }
 
-  const saveNote = async (values: Record<string, unknown>) => {
+  const saveNote = async (
+    values: Record<string, unknown>,
+    options?: { continueWithMeasurement?: boolean },
+  ) => {
     const body = String(values.body ?? '').trim()
     if (!body) throw new Error('empty')
-    const threadId = await resolveThreadId(values.healthThreadId as string | undefined)
+    const threadTitle = values.threadTitle as string | undefined
+    const threadId = await resolveThreadId(
+      values.healthThreadId as string | undefined,
+      threadTitle,
+    )
     await api.healthThreads.addEntry(threadId, body)
+    const title = resolveThreadTitle(threadId, threadTitle)
+    setPinnedThread({ id: threadId, title })
+
+    if (options?.continueWithMeasurement) {
+      trackProductEvent('quick_capture_saved', { capture_kind: 'note' }, { patientId: patientId ?? undefined })
+      if (patientId) notifyQuickCaptureSaved({ patientId, healthThreadId: threadId })
+      message.success(t('quickCapture.savedContinueVitals'))
+      setKind('measurement')
+      form.setFieldsValue({
+        healthThreadId: threadId,
+        observedAt: dayjs(),
+        body: undefined,
+        threadTitle: undefined,
+      })
+      return
+    }
     afterSave('note', threadId)
   }
 
@@ -160,7 +212,8 @@ export function QuickCaptureSheet({
       { typeCode: 'spo2', valueNumeric: values.spo2 as number | undefined },
     ].filter((i) => i.valueNumeric != null)
     if (!items.length) throw new Error('empty')
-    const threadId = (values.healthThreadId as string) ?? undefined
+    const threadId =
+      (values.healthThreadId as string | undefined) ?? pinnedThread?.id ?? undefined
     const notes = (values.notes as string | undefined)?.trim() || undefined
     await api.measurements.createBatch({
       patientId: patientId!,
@@ -208,7 +261,7 @@ export function QuickCaptureSheet({
     }
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (options?: { continueWithMeasurement?: boolean }) => {
     if (!patientId) {
       message.warning(t('quickCapture.pickPatient'))
       return
@@ -217,7 +270,7 @@ export function QuickCaptureSheet({
     setSaving(true)
     try {
       const values = await form.validateFields()
-      if (kind === 'note') await saveNote(values)
+      if (kind === 'note') await saveNote(values, options)
       else if (kind === 'measurement') await saveMeasurement(values)
       else if (kind === 'medication') await saveMedication(values)
       else if (kind === 'agenda') await saveAgenda(values)
@@ -240,11 +293,18 @@ export function QuickCaptureSheet({
     if (kind === 'note') {
       return (
         <>
+          <Form.Item
+            name="threadTitle"
+            label={t('quickCapture.threadTitleLabel')}
+            extra={t('quickCapture.threadTitleHint')}
+          >
+            <Input placeholder={t('quickCapture.threadTitlePlaceholder')} maxLength={120} />
+          </Form.Item>
           <Form.Item name="body" label={t('quickCapture.noteLabel')} rules={[{ required: true, message: t('quickCapture.noteRequired') }]}>
             <Input.TextArea rows={4} placeholder={t('quickCapture.notePlaceholder')} />
           </Form.Item>
-          <Form.Item name="healthThreadId" label={t('measurement.acompanhamento')}>
-            <Select allowClear loading={threadsLoading} options={threadOptions} placeholder={t('measurement.optionalThread')} />
+          <Form.Item name="healthThreadId" label={t('quickCapture.linkExistingThread')}>
+            <Select allowClear loading={threadsLoading} options={threadOptions} placeholder={t('quickCapture.linkExistingThreadPlaceholder')} />
           </Form.Item>
         </>
       )
@@ -256,7 +316,13 @@ export function QuickCaptureSheet({
             <DatePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="healthThreadId" label={t('measurement.acompanhamento')}>
-            <Select allowClear loading={threadsLoading} options={threadOptions} placeholder={t('measurement.optionalThread')} />
+            <Select
+              allowClear={!pinnedThread}
+              disabled={Boolean(pinnedThread)}
+              loading={threadsLoading}
+              options={threadOptions}
+              placeholder={t('measurement.optionalThread')}
+            />
           </Form.Item>
           <Form.Item name="temperature" label={t('measurement.type.temperature')}>
             <InputNumber min={30} max={45} step={0.1} style={{ width: '100%' }} addonAfter="°C" />
@@ -350,8 +416,13 @@ export function QuickCaptureSheet({
       destroyOnClose
       footer={
         kind === 'document' ? null : (
-          <Space style={{ justifyContent: 'flex-end', width: '100%' }}>
+          <Space style={{ justifyContent: 'flex-end', width: '100%' }} wrap>
             <Button onClick={handleClose}>{t('common.cancel')}</Button>
+            {kind === 'note' && (
+              <Button loading={saving} onClick={() => void handleSubmit({ continueWithMeasurement: true })}>
+                {t('quickCapture.saveAndVitals')}
+              </Button>
+            )}
             <Button type="primary" loading={saving} onClick={() => void handleSubmit()}>
               {t('common.save')}
             </Button>
@@ -394,6 +465,19 @@ export function QuickCaptureSheet({
             ))}
           </Space>
         </div>
+
+        {pinnedThread && kind !== 'note' && (
+          <Alert
+            type="info"
+            showIcon
+            message={t('quickCapture.pinnedThreadBanner')}
+            description={
+              <Tag color="purple" style={{ marginTop: 4 }}>
+                {pinnedThread.title}
+              </Tag>
+            }
+          />
+        )}
 
         <Form form={form} layout="vertical" requiredMark="optional">
           {renderForm()}
