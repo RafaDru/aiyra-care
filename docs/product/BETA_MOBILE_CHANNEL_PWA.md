@@ -27,7 +27,7 @@ Auth e API já apontam para o mesmo ambiente via build preview — testers **nã
 - **PNGs:** `node packages/web/scripts/rasterize-brand-pwa-icons.mjs`
 - **Chrome «Instalar app»:** `manifest.webmanifest` + `theme-color` `#FFF7FB`.
 
-Feature: [`docs/features/beta-pwa-mobile-shell.md`](../features/beta-pwa-mobile-shell.md).
+Feature: [`docs/features/beta-pwa-mobile-shell.md`](../features/beta-pwa-mobile-shell.md). Shell polish (Neri center): [`PWA_MOBILE_SHELL_POLISH.md`](./PWA_MOBILE_SHELL_POLISH.md).
 
 ## Instalação (instrução para testadores)
 
