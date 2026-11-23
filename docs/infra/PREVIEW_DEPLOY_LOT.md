@@ -19,7 +19,7 @@ Muitos pedidos por dia → várias PRs/merges. CI em PR é barato; promote Cloud
 
 Ver [`preview-deploy-status.json`](./preview-deploy-status.json) — `lastPromoteMainSha` é o SHA **já** no Cloud Run; `originMainSha` / `git rev-parse origin/main` mostram se preview está atrás. `promotePending: true` = lote aberto, sem Promote.
 
-**2026-11-23 (lote aberto):** Preview `828eb3b` (AC-126) ≠ `main` `63fb1b3` (#232 AC-136). Promote **pendente** — só no fechamento de lote ou pedido Rafael.
+**2026-11-23:** Lote fechado — promote [`45250015448`](https://github.com/RafaDru/aiyra-care/actions/runs/45250015448) @ `f8659fa` (success ~19:36 UTC).
 
 ## Hooks
 
@@ -38,9 +38,8 @@ Ver [`preview-deploy-status.json`](./preview-deploy-status.json) — `lastPromot
 
 | Data (UTC) | `main` SHA (curto) | Lote | Workflow run |
 |------------|-------------------|------|--------------|
-| 2026-11-23 | `828eb3b` | AC-126 ícone + shell v1 | [#21](https://github.com/RafaDru/aiyra-care/actions/runs/45229326123) |
-
-Lote aberto (sem Promote): `main` `63fb1b3` (#232 AC-136) já passou o preview `828eb3b`. Candidatos a incluir no fechamento: #235 (registro rápido) + #234 (spec) + #236 (esta política), se mergeados.
+| 2026-11-23 | `828eb3b` | AC-126 ícone + shell v1 | [45229326123](https://github.com/RafaDru/aiyra-care/actions/runs/45229326123) |
+| 2026-11-23 | `f8659fa` | #232–#236 Neri + quick capture + lote | [45250015448](https://github.com/RafaDru/aiyra-care/actions/runs/45250015448) |
 
 ## Ver também
 
