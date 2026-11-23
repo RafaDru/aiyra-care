@@ -20,6 +20,7 @@
     "settings": "Configurações",
     "services": "Serviços",
     "neriCapture": "Neri",
+    "neriChat": "Neri",
     "collapseSidebar": "Recolher menu",
     "expandSidebar": "Expandir menu",
     "openMenu": "Abrir menu",
@@ -1702,6 +1703,9 @@
       "beneficiary": "Beneficiário",
       "card": "Carteirinha"
     }
+  },
+  "mobileFab": {
+    "expand": "Mais ações"
   },
   "headerOrderRequests": {
     "trigger": "Fazer um pedido",

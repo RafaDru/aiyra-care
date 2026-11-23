@@ -20,6 +20,7 @@
     "settings": "Settings",
     "services": "More",
     "neriCapture": "Neri",
+    "neriChat": "Neri",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
     "openMenu": "Open menu",
@@ -1702,6 +1703,9 @@
       "beneficiary": "Beneficiary",
       "card": "Member ID"
     }
+  },
+  "mobileFab": {
+    "expand": "More actions"
   },
   "headerOrderRequests": {
     "trigger": "Make a request",
