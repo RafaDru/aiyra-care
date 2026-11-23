@@ -21,7 +21,8 @@
     "collapseSidebar": "Recolher menu",
     "expandSidebar": "Expandir menu",
     "openMenu": "Abrir menu",
-    "main": "Navegação principal"
+    "main": "Navegação principal",
+    "services": "Serviços"
   },
   "integrationsHub": {
     "subtitle": "Conecte portais de saúde ao perfil de quem você cuida",
@@ -1706,6 +1707,7 @@
     "prepareConsultSummary": "Preparar resumo para consulta"
   },
   "quickCapture": {
+    "neriTabA11y": "Registro rápido com a Neri",
     "trigger": "Registro rápido",
     "title": "Registro rápido",
     "patientLabel": "Quem ver hoje",

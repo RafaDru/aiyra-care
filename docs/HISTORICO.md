@@ -9,6 +9,7 @@
 ### Realizado (eng)
 - PNGs PWA rasterizados de `app-icon-ios-android-light.svg`; manifest + `index.html`.
 - `useCompactAppShell`, `AppLayout` compact, suite `pwa-mobile-shell`.
+- Polish: Neri central na tab bar → registro rápido; aba Serviços; sem hamburger/FAB Ava no compact (`docs/product/PWA_MOBILE_SHELL_POLISH.md`).
 
 ## [2026-11-20] - Beta Jenifer — relink conta por e-mail + central de atendimento
 

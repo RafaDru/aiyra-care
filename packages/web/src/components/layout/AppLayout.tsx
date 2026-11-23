@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Button, Dropdown, Drawer } from 'antd'
+import { Layout, Menu, Button, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   LogoutOutlined,
@@ -9,7 +9,6 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   QuestionCircleOutlined,
-  MenuOutlined,
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
@@ -33,13 +32,15 @@ import { CareCircleGlobalSelector } from '../family/CareCircleGlobalSelector.js'
 import { useFamilyPendingCount } from '../../hooks/useFamilyPendingCount.js'
 import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { buildMainNavItems, type MainNavKey } from './app-main-nav-items.js'
-import { AppMobileBottomNav } from './AppMobileBottomNav.js'
+import { AppMobileBottomNav, type CompactBottomNavKey } from './AppMobileBottomNav.js'
+import { AppMobileServicesSheet } from './AppMobileServicesSheet.js'
+import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
 
 const { Sider, Content, Header } = Layout
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  const [servicesSheetOpen, setServicesSheetOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
   const compactShell = useCompactAppShell()
   const navigate = useNavigate()
@@ -83,10 +84,8 @@ export function AppLayout() {
     showFamilyPendingBadge: !collapsed || compactShell,
   })
 
-  const navigateMain = (key: string) => {
-    navigate(key)
-    setMobileDrawerOpen(false)
-  }
+  const compactBottomSelected: CompactBottomNavKey | '' =
+    mainSelectedKey === '/settings' ? 'services' : mainSelectedKey
 
   const layout = (
     <Layout
@@ -164,16 +163,16 @@ export function AppLayout() {
       )}
       <Layout style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Header
-          className="app-header"
+          className={compactShell ? 'app-header app-header--compact' : 'app-header'}
           style={{
-            background: 'var(--card-bg)',
-            padding: '0 24px',
-            borderBottom: '1px solid var(--border)',
+            background: compactShell ? undefined : 'var(--card-bg)',
+            padding: compactShell ? '0 12px' : '0 24px',
+            borderBottom: compactShell ? 'none' : '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
             height: 64,
-            gap: 16,
+            gap: compactShell ? 8 : 16,
             flexShrink: 0,
             position: 'sticky',
             top: 0,
@@ -181,49 +180,38 @@ export function AppLayout() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap', minWidth: 0 }}>
-            {compactShell && (
-              <Button
-                type="text"
-                className="app-header__menu-trigger"
-                icon={<MenuOutlined />}
-                aria-label={t('nav.openMenu')}
-                onClick={() => setMobileDrawerOpen(true)}
-              />
-            )}
             {compactShell ? (
-              <AppLogo variant="wordmark" height={32} style={{ maxWidth: 120 }} />
+              <AppLogo variant="wordmark" height={34} style={{ maxWidth: 128 }} />
             ) : (
               collapsed && <AppLogo variant="wordmark" height={38} />
             )}
             {configured && user && <CareCircleGlobalSelector />}
             {!compactShell && <DeploymentEnvironmentBadge />}
           </div>
-          <div
-            className={compactShell ? 'app-header-actions app-header-actions--compact-hide-label' : 'app-header-actions'}
-            style={{ display: 'flex', alignItems: 'center', gap: compactShell ? 4 : 16 }}
-          >
-            {configured && user && <HeaderOrderRequestsMenu />}
-            {configured && user && <QuickCaptureGlobal />}
-            {configured && user && (
-              <Button
-                type="text"
-                icon={<CustomerServiceOutlined />}
-                aria-label={t('support.reportButton')}
-                onClick={() => setSupportOpen(true)}
-              >
-                {!compactShell && t('support.reportButton')}
-              </Button>
-            )}
-            {configured && user && (
-              <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-                <Button type="text" icon={<UserOutlined />} aria-label={user.email ?? t('auth.account')}>
-                  {!compactShell && (user.email ?? t('auth.account'))}
+          {!compactShell && (
+            <div className="app-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              {configured && user && <HeaderOrderRequestsMenu />}
+              {configured && user && <QuickCaptureGlobal />}
+              {configured && user && (
+                <Button
+                  type="text"
+                  icon={<CustomerServiceOutlined />}
+                  onClick={() => setSupportOpen(true)}
+                >
+                  {t('support.reportButton')}
                 </Button>
-              </Dropdown>
-            )}
-            {!compactShell && <ThemeSwitcher />}
-            {!compactShell && <LanguageSwitcher />}
-          </div>
+              )}
+              {configured && user && (
+                <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
+                  <Button type="text" icon={<UserOutlined />}>
+                    {user.email ?? t('auth.account')}
+                  </Button>
+                </Dropdown>
+              )}
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
+          )}
         </Header>
         <Content
           className="app-main-content"
@@ -234,53 +222,26 @@ export function AppLayout() {
           <Outlet />
         </Content>
       </Layout>
-      {compactShell && mainSelectedKey && (
+      {compactShell && configured && user && (
         <AppMobileBottomNav
-          selectedKey={mainSelectedKey}
+          selectedKey={compactBottomSelected}
           onNavigate={(path) => navigate(path)}
+          onNeriPress={() => requestQuickCaptureOpen()}
+          onServicesPress={() => setServicesSheetOpen(true)}
         />
       )}
-      <Drawer
-        className="app-mobile-nav-drawer"
-        title={null}
-        placement="left"
-        width={280}
-        open={compactShell && mobileDrawerOpen}
-        onClose={() => setMobileDrawerOpen(false)}
-        styles={{ body: { padding: 0 } }}
-      >
-        <div className="app-sider-brand">
-          <AppLogo variant="sidebar" style={{ maxWidth: '100%' }} />
-        </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[mainSelectedKey]}
-          items={mainNavItems}
-          onClick={({ key }) => navigateMain(key)}
-          style={{ borderInlineEnd: 0 }}
-        />
-        <div style={{ padding: '8px 16px 24px' }}>
-          {configured && user && (
-            <Button
-              type="text"
-              danger
-              block
-              icon={<LogoutOutlined />}
-              onClick={() => {
-                setMobileDrawerOpen(false)
-                signOut()
-              }}
-            >
-              {t('auth.signOut')}
-            </Button>
-          )}
-          <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'center' }}>
-            <ThemeSwitcher />
-            <LanguageSwitcher />
-          </div>
-        </div>
-      </Drawer>
-      <AvaGlobalDock />
+      {compactShell && configured && user && (
+        <>
+          <QuickCaptureGlobal hideTrigger />
+          <AppMobileServicesSheet
+            open={servicesSheetOpen}
+            onClose={() => setServicesSheetOpen(false)}
+            userEmail={user.email}
+            onSignOut={() => signOut()}
+          />
+        </>
+      )}
+      {!compactShell && <AvaGlobalDock />}
       {configured && user && <FirstVisitTourDrawer />}
       {configured && user && <PatientConsultVisitHost />}
       <SupportReportModal open={supportOpen} onClose={() => setSupportOpen(false)} />

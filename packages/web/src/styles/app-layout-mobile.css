@@ -1,23 +1,35 @@
+.app-layout--compact {
+  background: var(--app-compact-canvas, #faf5ff);
+}
+
 .app-layout--compact .app-sider {
   display: none !important;
 }
 
-.app-layout--compact .app-header {
-  padding: 0 12px !important;
-  gap: 8px !important;
+.app-layout--compact .app-header--compact {
+  background: linear-gradient(90deg, #fdf2f8 0%, #f5f3ff 55%, #ede9fe 100%) !important;
+  border-bottom: 1px solid rgba(126, 34, 206, 0.12) !important;
+  position: relative;
+  overflow: hidden;
 }
 
-.app-layout--compact .app-header__menu-trigger {
-  margin-right: 4px;
+.app-layout--compact .app-header--compact::before {
+  content: '';
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  width: 120px;
+  height: 120px;
+  transform: translateY(-50%);
+  opacity: 0.14;
+  background: center / contain no-repeat url('/brand/kit-oficial-ananeri/02-simbolo-e-wordmark/ananeri-symbol-heart.svg');
+  pointer-events: none;
 }
 
 .app-layout--compact .app-main-content {
   margin: 12px !important;
-  margin-bottom: calc(12px + 56px + env(safe-area-inset-bottom, 0px)) !important;
-}
-
-.app-layout--compact .app-header-actions--compact-hide-label .ant-btn > span:not(.ant-btn-icon) {
-  display: none;
+  margin-bottom: calc(16px + 56px + env(safe-area-inset-bottom, 0px)) !important;
+  background: transparent;
 }
 
 .app-mobile-bottom-nav {
@@ -27,12 +39,13 @@
   bottom: 0;
   z-index: 500;
   display: flex;
-  align-items: stretch;
+  align-items: flex-end;
   justify-content: space-around;
   height: calc(56px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--card-bg);
   border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(88, 28, 135, 0.08);
 }
 
 .app-mobile-bottom-nav__item {
@@ -40,20 +53,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 2px;
+  min-height: 56px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, rgba(0, 0, 0, 0.65));
-  font-size: 11px;
-  line-height: 1.2;
-  padding: 6px 4px;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.55));
+  font-size: 10px;
+  line-height: 1.15;
+  padding: 6px 2px 8px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.app-mobile-bottom-nav__item .anticon {
+.app-mobile-bottom-nav__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 26px;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+
+.app-mobile-bottom-nav__icon-wrap .anticon {
   font-size: 20px;
+}
+
+.app-mobile-bottom-nav__icon-wrap--active {
+  background: rgba(126, 34, 206, 0.12);
 }
 
 .app-mobile-bottom-nav__item--active {
@@ -65,17 +93,73 @@
   color: var(--emergency-nav, #cf1322);
 }
 
+.app-mobile-bottom-nav__item--emergency .app-mobile-bottom-nav__icon-wrap--active {
+  background: rgba(207, 19, 34, 0.1);
+}
+
 .app-mobile-bottom-nav__item--emergency.app-mobile-bottom-nav__item--active {
   color: var(--emergency-nav, #cf1322);
 }
 
-.app-mobile-nav-drawer .app-sider-brand {
-  padding: 8px 12px 16px;
+.app-mobile-bottom-nav__center {
+  flex: 1;
+  position: relative;
   display: flex;
   justify-content: center;
+  align-items: flex-end;
+  min-height: 56px;
+  pointer-events: none;
+}
+
+.app-mobile-bottom-nav__neri {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 3px solid var(--card-bg);
+  border-radius: 50%;
+  background: #fff7fb;
+  box-shadow: 0 4px 16px rgba(126, 34, 206, 0.22);
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.app-mobile-bottom-nav__neri img {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.app-mobile-services-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-mobile-services-sheet__email {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  font-size: 13px;
+}
+
+.app-mobile-services-sheet__prefs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 8px 0;
 }
 
 .app-layout--compact .ava-global-dock {
-  bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 12px);
-  right: 16px;
+  display: none !important;
 }

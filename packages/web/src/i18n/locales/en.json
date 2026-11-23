@@ -21,7 +21,8 @@
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
     "openMenu": "Open menu",
-    "main": "Main navigation"
+    "main": "Main navigation",
+    "services": "Services"
   },
   "integrationsHub": {
     "subtitle": "Connect health portals to a family member's health profile",
@@ -1706,6 +1707,7 @@
     "prepareConsultSummary": "Prepare summary for appointment"
   },
   "quickCapture": {
+    "neriTabA11y": "Quick log with Neri",
     "trigger": "Quick log",
     "title": "Quick log",
     "patientLabel": "Who to view today",

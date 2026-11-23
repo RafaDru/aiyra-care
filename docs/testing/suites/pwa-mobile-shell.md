@@ -27,10 +27,11 @@ PWA instalável (ícone light) e navegação compacta pós-login.
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
-| 1 | Login → dashboard em viewport 390px | Sem sider esquerda; barra inferior com 4 abas | |
-| 2 | Toque **Sua família** na bottom nav | Rota `/family` | |
-| 3 | Hamburger (☰) | Drawer com menu + sair + tema/idioma | |
-| 4 | Largura ≥992px | Sider desktop visível; sem bottom nav | |
+| 1 | Login → dashboard em viewport 390px | Sem sider; barra com 5 itens; **Neri** central elevada | |
+| 2 | Toque **Neri** (centro) | Abre sheet **Registro rápido** | |
+| 3 | Toque **Serviços** | Folha inferior: Config, Ajuda, tema, sair | |
+| 4 | Orb Ava no canto | **Ausente** no compact | |
+| 5 | Largura ≥992px | Sider desktop; sem bottom nav; Ava orb visível | |
 
 **Automação:** parcial — ver `auth-entry-flow` para login; checks B são manuais ou DevTools até spec dedicado.
 

@@ -17,7 +17,7 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 |------|----------------|
 | Ícones PWA | PNGs rasterizados de `app-icon-ios-android-light.svg` (192/512/apple-touch) |
 | Manifest + HTML | `theme_color` / `background_color` `#FFF7FB` (silk light) |
-| Shell compacto | `≤768px` ou `display-mode: standalone` → sem sider; drawer (hamburger); bottom nav Início / Família / Emergência / Config |
+| Shell compacto | `≤768px` ou `display-mode: standalone` → bottom nav 5 pontos (Início · Família · **Neri** · Emergência · Serviços); ver [`PWA_MOBILE_SHELL_POLISH.md`](../product/PWA_MOBILE_SHELL_POLISH.md) |
 | Desktop | Sider + header inalterados |
 
 ## Implementação

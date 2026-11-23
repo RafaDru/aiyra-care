@@ -10,8 +10,13 @@ import {
 } from '../../lib/quick-capture-bus.js'
 import { QuickCaptureSheet } from './QuickCaptureSheet.js'
 
+type Props = {
+  /** PWA compact: sheet via Neri na tab bar; sem botão no header. */
+  hideTrigger?: boolean
+}
+
 /** Botão global + sheet de captura rápida (D2). */
-export function QuickCaptureGlobal() {
+export function QuickCaptureGlobal({ hideTrigger = false }: Props) {
   const { t } = useTranslation()
   const { configured, user } = useAuth()
   const {
@@ -39,17 +44,19 @@ export function QuickCaptureGlobal() {
 
   return (
     <>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => {
-          setInitialKind(undefined)
-          setInitialHealthThreadId(undefined)
-          setOpen(true)
-        }}
-      >
-        {t('quickCapture.trigger')}
-      </Button>
+      {!hideTrigger && (
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setInitialKind(undefined)
+            setInitialHealthThreadId(undefined)
+            setOpen(true)
+          }}
+        >
+          {t('quickCapture.trigger')}
+        </Button>
+      )}
       <QuickCaptureSheet
         open={open}
         onClose={() => setOpen(false)}
