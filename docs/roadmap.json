@@ -3127,6 +3127,51 @@
           "detail": "Medicação × diagnóstico/idade/efeito; base para aplicações analíticas e de apoio (Ava)."
         }
       ]
+    },
+    {
+      "id": "mobile-patient-ux-backlog",
+      "category": "negocio",
+      "priority": "P1",
+      "title": "Mobile / PWA — UX paciente e cadastro",
+      "summary": "Feedback Rafael 2026-11-23 (preview PWA): bugs de shell compact + backlog cadastro/cards.",
+      "status": "in_progress",
+      "statusLabel": "X1–X4 + B5 entregues; B1–B4 planejados",
+      "items": [
+        {
+          "id": "mobile-patient-ux-wave1",
+          "title": "Wave 1 — dia a dia, loading, sub-abas, onboarding copy",
+          "status": "done",
+          "detail": "patient-list-bus; CenteredLoading; PatientCompactSubTabs (chips); B5 só home vazia. Spec store mobile-patient-ux-backlog-2026-11-23."
+        },
+        {
+          "id": "mobile-patient-wizard-b1",
+          "title": "B1 — Wizard cadastro de pessoa",
+          "status": "planned",
+          "detail": "Menos formulário único; etapas; tipografia maior; mobile-first.",
+          "featureId": "mobile-patient-wizard"
+        },
+        {
+          "id": "mobile-patient-upload-ocr-b2",
+          "title": "B2 — Upload no fluxo + OCR auto-preenchimento",
+          "status": "planned",
+          "detail": "Tier 2+ (OCR). Feature mobile-patient-upload-ocr.",
+          "reviewBadge": ["medical", "legal"]
+        },
+        {
+          "id": "mobile-patient-cards-grid-b3",
+          "title": "B3 — Cards pessoas em grid ≥2 colunas + lista",
+          "status": "planned",
+          "detail": "Modo compacto no dashboard; toggle lista/grid.",
+          "featureId": "mobile-patient-cards-grid"
+        },
+        {
+          "id": "mobile-vitals-recorded-at-b4",
+          "title": "B4 — Data/hora opcional do registro (vitais)",
+          "status": "planned",
+          "detail": "Default agora; override para medidas retrospectivas.",
+          "featureId": "mobile-vitals-recorded-at"
+        }
+      ]
     }
   ]
 }

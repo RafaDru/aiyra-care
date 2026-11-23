@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Empty, List, Space, Spin, Tag, Typography } from 'antd'
+import { Button, Card, Empty, List, Space, Tag, Typography } from 'antd'
+import { CenteredBlockLoading } from '../ui/CenteredLoading.js'
 import {
   BellOutlined,
   CalendarOutlined,
@@ -205,7 +206,7 @@ export function WalletTodayPanel({
       )}
 
       {loading ? (
-        <Spin size="small" style={{ display: 'block', margin: '16px auto' }} />
+        <CenteredBlockLoading size="small" />
       ) : items.length === 0 ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}

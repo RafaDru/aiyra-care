@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { Spin } from 'antd'
+
+import { CenteredPageLoading } from '../ui/CenteredLoading.js'
 import { useEffect, useState, useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { api } from '../../lib/api.js'
@@ -55,13 +56,7 @@ export function RequireCompliance() {
 
   if (!configured) return <Outlet />
 
-  if (authLoading || checking) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
-        <Spin size="large" />
-      </div>
-    )
-  }
+  if (authLoading || checking) return <CenteredPageLoading />
 
   if (!compliant && location.pathname !== COMPLIANCE_ACCEPT_PATH) {
     return <Navigate to={COMPLIANCE_ACCEPT_PATH} replace state={{ from: location.pathname }} />

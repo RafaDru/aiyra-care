@@ -6,6 +6,7 @@ import {
   resolveAvaPatientLens,
   writeAvaLastPatientId,
 } from '../../lib/ava-patient-lens.js'
+import { subscribePatientsListChanged } from '../../lib/patient-list-bus.js'
 
 function routePatientIdFromLocation(
   params: Record<string, string | undefined>,
@@ -33,24 +34,20 @@ export function useAvaPatientLens() {
   const [overrideId, setOverrideId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    let cancelled = false
+  const refreshPatients = useCallback(() => {
     setLoading(true)
-    api.patients
+    return api.patients
       .list()
-      .then((list) => {
-        if (!cancelled) setPatients(list)
-      })
-      .catch(() => {
-        if (!cancelled) setPatients([])
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
+      .then((list) => setPatients(list))
+      .catch(() => setPatients([]))
+      .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    void refreshPatients()
+  }, [refreshPatients])
+
+  useEffect(() => subscribePatientsListChanged(refreshPatients), [refreshPatients])
 
   useEffect(() => {
     setOverrideId(null)

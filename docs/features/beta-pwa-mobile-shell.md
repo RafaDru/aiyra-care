@@ -4,7 +4,7 @@
 |-------|--------|
 | **ID** | `beta-pwa-mobile-shell` |
 | **Tier** | 1 — UX beta Jenifer (AC-126) |
-| **Status** | `done` |
+| **Status** | `in_progress` |
 | **Ver também** | [`docs/product/BETA_MOBILE_CHANNEL_PWA.md`](../product/BETA_MOBILE_CHANNEL_PWA.md), [`docs/MOBILE_WEB_DUAL_DELIVERY.md`](../MOBILE_WEB_DUAL_DELIVERY.md) |
 
 ## Objetivo
@@ -18,6 +18,9 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 | Ícones PWA | PNGs rasterizados de `app-icon-ios-android-light.svg` (192/512/apple-touch) |
 | Manifest + HTML | `theme_color` / `background_color` `#FFF7FB` (silk light) |
 | Shell compacto | `standalone` ou `≤768px` + coarse pointer → bottom nav; **Neri** centro → chat Ava; FAB **+** direita (Registro / Pedido); header lockup + gradiente; orb Ava oculto |
+| Paciente compact (wave 2026-11-23) | Sub-abas em grade de **chips** (`PatientCompactSubTabs`); copy onboarding só na home sem perfis |
+| Dia a dia | `patient-list-bus` + refresh da lente Ava após CRUD |
+| Loading | `CenteredPageLoading` / `CenteredBlockLoading` |
 | Desktop | Sider + header inalterados |
 
 ## Implementação
@@ -32,10 +35,17 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 | `packages/web/src/components/layout/AppMobileCaptureFabStack.tsx` | FAB Registro + Pedido |
 | `packages/web/src/components/layout/AppMobileServicesSheet.tsx` | Folha Serviços (compact) |
 | `packages/web/src/styles/app-layout-mobile.css` | Contraste, header, bottom nav, oculta Ava |
+| `packages/web/src/lib/patient-list-bus.ts` | Sincroniza lista após cadastro |
+| `packages/web/src/components/patient/PatientCompactSubTabs.tsx` | Sub-abas mobile (alternativa ao carrossel Ant Tabs) |
+| `packages/web/src/components/ui/CenteredLoading.tsx` | Spinner centralizado |
 
 ## QA
 
-Suite: [`docs/testing/suites/pwa-mobile-shell.md`](../testing/suites/pwa-mobile-shell.md) · regressão login: `auth-entry-flow`.
+| Suíte | Comando |
+|-------|---------|
+| Shell | [`pwa-mobile-shell`](../testing/suites/pwa-mobile-shell.md) |
+| UX paciente (2026-11-23) | [`pwa-mobile-patient-ux`](../testing/suites/pwa-mobile-patient-ux.md) · `npm run qa:run -- --suite pwa-mobile-patient-ux` |
+| Login | `auth-entry-flow` |
 
 ## Web-only (paridade mobile RN)
 
