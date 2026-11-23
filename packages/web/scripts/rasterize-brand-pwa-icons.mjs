@@ -1,5 +1,5 @@
 /**
- * Rasteriza ícones PWA a partir do kit oficial (app-icon royal + favicon).
+ * Rasteriza ícones PWA a partir do kit oficial (app-icon light + favicon).
  * Uso: node packages/web/scripts/rasterize-brand-pwa-icons.mjs
  */
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
@@ -44,8 +44,10 @@ function rasterize(svgRel, outName, px) {
   console.log(`wrote ${outName} (${px}px, ${png.length} bytes)`)
 }
 
-rasterize('app-icon-ios-android-royal.svg', 'pwa-icon-192.png', 192)
-rasterize('app-icon-ios-android-royal.svg', 'pwa-icon-512.png', 512)
-rasterize('app-icon-ios-android-royal.svg', 'pwa-icon-512-maskable.png', 512)
+const APP_ICON_LIGHT = 'app-icon-ios-android-light.svg'
+
+rasterize(APP_ICON_LIGHT, 'pwa-icon-192.png', 192)
+rasterize(APP_ICON_LIGHT, 'pwa-icon-512.png', 512)
+rasterize(APP_ICON_LIGHT, 'pwa-icon-512-maskable.png', 512)
 rasterize('favicon.svg', 'favicon-32.png', 32)
-rasterize('app-icon-ios-android-royal.svg', 'apple-touch-icon.png', 180)
+rasterize(APP_ICON_LIGHT, 'apple-touch-icon.png', 180)

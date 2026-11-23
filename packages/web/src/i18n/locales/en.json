@@ -19,7 +19,9 @@
     "session": "Sessions",
     "settings": "Settings",
     "collapseSidebar": "Collapse sidebar",
-    "expandSidebar": "Expand sidebar"
+    "expandSidebar": "Expand sidebar",
+    "openMenu": "Open menu",
+    "main": "Main navigation"
   },
   "integrationsHub": {
     "subtitle": "Connect health portals to a family member's health profile",

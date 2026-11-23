@@ -1,5 +1,15 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-23] - PWA beta Jenifer (AC-126) — ícone light + shell mobile
+
+### Decisão (Rafael)
+- Ícone instalável: variante **light** do kit (não royal); `theme-color` silk `#FFF7FB`.
+- Pós-login mobile/PWA: drawer + bottom nav; desktop inalterado.
+
+### Realizado (eng)
+- PNGs PWA rasterizados de `app-icon-ios-android-light.svg`; manifest + `index.html`.
+- `useCompactAppShell`, `AppLayout` compact, suite `pwa-mobile-shell`.
+
 ## [2026-11-20] - Beta Jenifer — relink conta por e-mail + central de atendimento
 
 ### Realizado (eng)
