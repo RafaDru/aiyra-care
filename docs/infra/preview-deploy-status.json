@@ -1,19 +1,14 @@
 {
   "previewWebUrl": "https://ananeri-preview-web-kzp5ynymva-uc.a.run.app",
   "previewApiUrl": "https://ananeri-preview-api-kzp5ynymva-uc.a.run.app",
-  "lastPromoteMainSha": "828eb3bdc8bdfc203b84ec62c94097db404adf39",
-  "lastPromoteAt": "2026-11-23T17:40:02Z",
-  "lastPromoteWorkflowRun": 21,
-  "lotLabel": "AC-126 PWA light",
-  "promotePending": true,
-  "originMainSha": "63fb1b3aa0cbc4702f820673124da64736f39e4b",
-  "statusCheckedAt": "2026-11-23T19:30:00Z",
-  "betaNowTests": "Preview ainda é AC-126: ícone PWA light + shell mobile v1. Testers não veem a aba Neri central (#232 / AC-136) até o próximo Promote.",
-  "nextLotCandidates": [
-    "63fb1b3 #232 AC-136 Neri tab (já em main, não promovido)",
-    "#235 quick capture sequence (PR aberta)",
-    "#234 PWA shell spec (PR aberta)",
-    "#236 docs lote preview (esta PR)"
-  ],
-  "notes": "Promote por lote — não a cada merge. Não disparar workflow_dispatch. Atualizar lastPromote* só após Promote to Preview (deploy_gcp=true) bem-sucedido."
+  "lastPromoteMainSha": "f8659faf784c862da65565762ca5dfd5a6d521fc",
+  "lastPromoteAt": "2026-11-23T19:37:36Z",
+  "lastPromoteWorkflowRun": 45250015448,
+  "lotLabel": "Lote #234–#236: AC-136 Neri tab + quick capture + preview policy",
+  "promotePending": false,
+  "originMainSha": "f8659faf784c862da65565762ca5dfd5a6d521fc",
+  "statusCheckedAt": "2026-11-23T19:37:36Z",
+  "betaNowTests": "PWA compact (aba Neri central), registro rápido com título de acompanhamento + fluxo nota→sinais vitais, ícones PWA light. Reinstalar PWA após promote.",
+  "nextLotCandidates": [],
+  "notes": "Promote por lote — não a cada merge. Atualizado após Promote to Preview run 45250015448 (NotebookRafael)."
 }
