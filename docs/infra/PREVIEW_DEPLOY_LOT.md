@@ -13,11 +13,13 @@ Muitos pedidos por dia → várias PRs/merges. CI em PR é barato; promote Cloud
 
 1. **Merge(s)** em `main` com CI verde (quantos forem no lote).
 2. **Promote** — GitHub Actions → `Promote to Preview (Ambiente 2)` · `ref=main` · `deploy_gcp=true` (humano ou CH; agentes **não** disparam workflow automaticamente).
-3. **Registro** — atualizar este arquivo + [`preview-deploy-status.json`](./preview-deploy-status.json) + nota curta no Project store `internal/beta/` (SHA, URL, o que a beta testa).
+3. **Registro** — atualizar este arquivo + [`preview-deploy-status.json`](./preview-deploy-status.json) + nota curta em [`../internal/beta/CURRENT.md`](../internal/beta/CURRENT.md) (espelho repo de `internal/beta/`: SHA, URL, o que a beta testa). **Não** disparar `workflow_dispatch`.
 
 ## Status vivo (máquina)
 
-Ver [`preview-deploy-status.json`](./preview-deploy-status.json) — `lastPromoteMainSha` deve coincidir com o SHA promovido; compare com `git rev-parse origin/main` para saber se preview está atrás.
+Ver [`preview-deploy-status.json`](./preview-deploy-status.json) — `lastPromoteMainSha` é o SHA **já** no Cloud Run; `originMainSha` / `git rev-parse origin/main` mostram se preview está atrás. `promotePending: true` = lote aberto, sem Promote.
+
+**2026-11-23 (lote aberto):** Preview `828eb3b` (AC-126) ≠ `main` `63fb1b3` (#232 AC-136). Promote **pendente** — só no fechamento de lote ou pedido Rafael.
 
 ## Hooks
 
@@ -38,7 +40,7 @@ Ver [`preview-deploy-status.json`](./preview-deploy-status.json) — `lastPromot
 |------------|-------------------|------|--------------|
 | 2026-11-23 | `828eb3b` | AC-126 ícone + shell v1 | [#21](https://github.com/RafaDru/aiyra-care/actions/runs/45229326123) |
 
-Próximo lote sugerido: #232 (AC-136) + #235 (registro rápido) + #234 (doc) após merges.
+Lote aberto (sem Promote): `main` `63fb1b3` (#232 AC-136) já passou o preview `828eb3b`. Candidatos a incluir no fechamento: #235 (registro rápido) + #234 (spec) + #236 (esta política), se mergeados.
 
 ## Ver também
 

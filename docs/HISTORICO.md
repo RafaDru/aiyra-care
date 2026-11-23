@@ -7,6 +7,7 @@
 
 ### Realizado (eng)
 - `docs/infra/PREVIEW_DEPLOY_LOT.md`, `preview-deploy-status.json`, hooks `delivery-lot` no `stop`.
+- Registro vivo: preview `828eb3b` ≠ `main` `63fb1b3` — promote pendente; espelho em `docs/internal/beta/CURRENT.md`.
 
 ## [2026-11-23] - Registro rápido — título do acompanhamento + sequência nota → vitais
 
