@@ -5,20 +5,19 @@ Espelho no repo do Project store `internal/beta/` (SHA, URL, o que testar). Atua
 | Campo | Valor |
 |-------|--------|
 | **Checagem** | 2026-11-23 |
-| **Preview SHA** | `f8659fa` (`f8659faf784c862da65565762ca5dfd5a6d521fc`) |
-| **`main` SHA** | `f8659fa` (alinhado) |
-| **Promote** | **OK** — lote #234–#236 |
-| **Último Promote** | 2026-11-23T19:37:36Z · [Actions run 45250015448](https://github.com/RafaDru/aiyra-care/actions/runs/45250015448) |
+| **Preview SHA** | `64c914e` (`64c914edb9163ec0ddb49a6b1feb6f3dbc3c0c03`) |
+| **`main` SHA** | `64c914e` (alinhado) |
+| **Promote** | **OK** — #238 Neri FAB |
+| **Último Promote** | 2026-11-23T21:32:52Z · [Actions run 45269987814](https://github.com/RafaDru/aiyra-care/actions/runs/45269987814) |
 | **Web** | https://ananeri-preview-web-kzp5ynymva-uc.a.run.app |
 | **API** | https://ananeri-preview-api-kzp5ynymva-uc.a.run.app |
 
 ## O que a beta testa agora (preview)
 
-- AC-136: shell PWA compacta com **aba Neri central** + polish mobile.
-- **Registro rápido**: título de acompanhamento, nota → continua em sinais vitais (lote #235).
-- Ícones PWA light (AC-126 / lote).
-- **Jenifer:** remover e reinstalar o atalho PWA no celular após este promote.
+- **#238:** Neri no centro → **chat** (Ava); FAB mobile para registro/pedido (`app-mobile-fab-stack`).
+- Shell PWA compact + registro rápido (lotes anteriores).
+- **Reinstalar PWA** após promote.
 
 ## Próximo lote
 
-Novos merges em `main` acumulam até Rafael pedir ou fechamento de wave — ver [`../infra/PREVIEW_DEPLOY_LOT.md`](../infra/PREVIEW_DEPLOY_LOT.md).
+Ver [`../infra/PREVIEW_DEPLOY_LOT.md`](../infra/PREVIEW_DEPLOY_LOT.md).
