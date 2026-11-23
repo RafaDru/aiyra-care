@@ -1,0 +1,10 @@
+{
+  "previewWebUrl": "https://ananeri-preview-web-kzp5ynymva-uc.a.run.app",
+  "previewApiUrl": "https://ananeri-preview-api-kzp5ynymva-uc.a.run.app",
+  "lastPromoteMainSha": "828eb3bdc8bdfc203b84ec62c94097db404adf39",
+  "lastPromoteAt": "2026-11-23T17:40:02Z",
+  "lastPromoteWorkflowRun": 21,
+  "lotLabel": "AC-126 PWA light",
+  "nextLotCandidates": ["63fb1b3 AC-136 Neri tab", "#235 quick capture sequence"],
+  "notes": "Promote por lote — não a cada merge. Atualizar este JSON após cada Promote to Preview bem-sucedido."
+}

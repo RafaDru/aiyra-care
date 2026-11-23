@@ -28,7 +28,7 @@ flowchart LR
 | Gates agregados | `npm run promotion:gates` | Ambiente 1 → Preview |
 | Classificação | Skill `aiyracare-feature-release` (tier 0–3) | Tier ≥ 2 |
 | CI | `.github/workflows/ci.yml` | Automático em PR/main |
-| Promoção Preview | `.github/workflows/promote-preview.yml` | Manual, após aprovação Rafael |
+| Promoção Preview | `.github/workflows/promote-preview.yml` | **Por lote** ou pedido Rafael — ver [`infra/PREVIEW_DEPLOY_LOT.md`](./infra/PREVIEW_DEPLOY_LOT.md) |
 
 ## Ciclo mínimo (Build)
 
