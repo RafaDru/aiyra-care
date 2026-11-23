@@ -35,6 +35,9 @@ import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { buildMainNavItems, type MainNavKey } from './app-main-nav-items.js'
 import { AppMobileBottomNav, type MobileBottomNavKey } from './AppMobileBottomNav.js'
 import { AppMobileServicesSheet } from './AppMobileServicesSheet.js'
+import { AppMobileCaptureFabStack } from './AppMobileCaptureFabStack.js'
+import { useAvaPatientLens } from '../ava/useAvaPatientLens.js'
+import { requestAvaOpen } from '../../lib/ava-dock-bus.js'
 
 const { Sider, Content, Header } = Layout
 
@@ -43,6 +46,7 @@ export function AppLayout() {
   const [servicesSheetOpen, setServicesSheetOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
   const compactShell = useCompactAppShell()
+  const { patientId: avaPatientId } = useAvaPatientLens()
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation()
@@ -94,7 +98,7 @@ export function AppLayout() {
     <Layout
       className={
         compactShell
-          ? 'app-layout app-layout--compact app-layout--neri-tab-shipped'
+          ? 'app-layout app-layout--compact app-layout--neri-fab-refinement'
           : 'app-layout'
       }
       style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}
@@ -191,7 +195,7 @@ export function AppLayout() {
             style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap', minWidth: 0 }}
           >
             {compactShell ? (
-              <AppLogo variant="wordmark" height={32} style={{ maxWidth: 120 }} />
+              <AppLogo variant="horizontal" height={36} style={{ maxWidth: 168 }} />
             ) : (
               collapsed && <AppLogo variant="wordmark" height={38} />
             )}
@@ -238,9 +242,12 @@ export function AppLayout() {
           servicesActive={servicesNavActive}
           onNavigate={(path) => navigate(path)}
           onOpenServices={() => setServicesSheetOpen(true)}
-          onOpenQuickCapture={() => requestQuickCaptureOpen()}
+          onOpenNeriChat={() => {
+            if (avaPatientId) requestAvaOpen({ patientId: avaPatientId })
+          }}
         />
       )}
+      {compactShell && configured && user && <AppMobileCaptureFabStack />}
       {configured && user && <QuickCaptureGlobal showTrigger={!compactShell} />}
       {compactShell && configured && user && (
         <AppMobileServicesSheet

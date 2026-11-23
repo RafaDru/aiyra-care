@@ -5,10 +5,10 @@ import {
   DashboardOutlined,
   PhoneFilled,
   PhoneOutlined,
-  PlusOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { AvaAvatar } from '../ava/AvaAvatar.js'
 import type { MainNavKey } from './app-main-nav-items.js'
 
 export type MobileBottomNavKey = MainNavKey | 'services'
@@ -27,7 +27,7 @@ type Props = {
   selectedKey: MobileBottomNavKey | ''
   onNavigate: (path: MainNavKey) => void
   onOpenServices: () => void
-  onOpenQuickCapture: () => void
+  onOpenNeriChat: () => void
   servicesActive: boolean
 }
 
@@ -35,7 +35,7 @@ export function AppMobileBottomNav({
   selectedKey,
   onNavigate,
   onOpenServices,
-  onOpenQuickCapture,
+  onOpenNeriChat,
   servicesActive,
 }: Props) {
   const { t } = useTranslation()
@@ -73,23 +73,25 @@ export function AppMobileBottomNav({
     <nav className="app-mobile-bottom-nav" aria-label={t('nav.main')}>
       {renderRouteItem(ROUTE_ITEMS[0])}
       {renderRouteItem(ROUTE_ITEMS[1])}
-      <button
-        type="button"
-        className="app-mobile-bottom-nav__neri"
-        aria-label={t('quickCapture.trigger')}
-        onClick={onOpenQuickCapture}
-      >
-        <span className="app-mobile-bottom-nav__neri-inner">
-          <img
-            className="app-mobile-bottom-nav__neri-symbol"
-            src="/brand/kit-oficial-ananeri/02-simbolo-e-wordmark/ananeri-symbol-heart.svg"
-            alt=""
-            aria-hidden
-          />
-          <PlusOutlined className="app-mobile-bottom-nav__neri-plus" />
-        </span>
-        <span className="app-mobile-bottom-nav__neri-caption">{t('nav.neriCapture')}</span>
-      </button>
+      <div className="app-mobile-bottom-nav__neri-slot" aria-hidden={false}>
+        <button
+          type="button"
+          className="app-mobile-bottom-nav__neri"
+          aria-label={t('ava.openChat')}
+          onClick={onOpenNeriChat}
+        >
+          <span className="app-mobile-bottom-nav__neri-inner">
+            <AvaAvatar
+              size={48}
+              className="app-mobile-bottom-nav__neri-avatar"
+              expression="present"
+              softCrossfade
+              crossfadeVariant="lite"
+            />
+          </span>
+          <span className="app-mobile-bottom-nav__neri-caption">{t('nav.neriChat')}</span>
+        </button>
+      </div>
       {renderRouteItem(ROUTE_ITEMS[2])}
       <button
         type="button"

@@ -14,8 +14,9 @@ Layout compacto inicial: **4 abas iguais** + orb Ava flutuante no canto e hambur
 
 | Tema | Comportamento |
 |------|----------------|
-| **Neri no centro** | Entre Família e Emergência; borda superior da barra no **centro do círculo**; toque abre **Registro rápido** (`QuickCaptureSheet`) |
-| **Sem FAB Ava** | `AvaGlobalDock` oculto no compact |
+| **Neri no centro** | Rosto Ava/Neri; toque abre **chat** (`requestAvaOpen`); faixa central da barra transparente |
+| **FAB direita** | `+` → **Registro rápido** (roxo) e **Fazer um pedido** |
+| **Sem FAB Ava** | Trigger do dock oculto no compact; drawer do chat permanece |
 | **Sem + no header** | `QuickCaptureGlobal` só com sheet (`hideTrigger`) |
 | **Serviços** | Quinta aba; folha inferior com Config, Ajuda, conta, tema, idioma, sair |
 | **Sem hamburger** | Menu lateral removido no compact |

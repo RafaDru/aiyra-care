@@ -2,29 +2,34 @@ import { useEffect, useState } from 'react'
 
 const NARROW_VIEWPORT_MQ = '(max-width: 768px)'
 const STANDALONE_DISPLAY_MQ = '(display-mode: standalone)'
+const COARSE_POINTER_MQ = '(pointer: coarse)'
 
 function matchesCompactShell(): boolean {
   if (typeof window === 'undefined') return false
-  return (
-    window.matchMedia(NARROW_VIEWPORT_MQ).matches ||
-    window.matchMedia(STANDALONE_DISPLAY_MQ).matches
-  )
+  if (window.matchMedia(STANDALONE_DISPLAY_MQ).matches) return true
+  const narrow = window.matchMedia(NARROW_VIEWPORT_MQ).matches
+  const coarse = window.matchMedia(COARSE_POINTER_MQ).matches
+  return narrow && coarse
 }
 
-/** Layout mobile/PWA: viewport estreito ou app instalado (`display-mode: standalone`). */
+/** PWA compact: `standalone` ou viewport estreito **com** pointer coarse (não quebra web estreita no desktop). */
 export function useCompactAppShell(): boolean {
   const [compact, setCompact] = useState(matchesCompactShell)
 
   useEffect(() => {
     const narrow = window.matchMedia(NARROW_VIEWPORT_MQ)
     const standalone = window.matchMedia(STANDALONE_DISPLAY_MQ)
-    const update = () => setCompact(narrow.matches || standalone.matches)
+    const coarse = window.matchMedia(COARSE_POINTER_MQ)
+    const update = () =>
+      setCompact(standalone.matches || (narrow.matches && coarse.matches))
     narrow.addEventListener('change', update)
     standalone.addEventListener('change', update)
+    coarse.addEventListener('change', update)
     update()
     return () => {
       narrow.removeEventListener('change', update)
       standalone.removeEventListener('change', update)
+      coarse.removeEventListener('change', update)
     }
   }, [])
 

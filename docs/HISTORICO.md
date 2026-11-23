@@ -1,5 +1,13 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-23] - PWA shell — Neri chat centro + FAB Registro/Pedido
+
+### Produto (Rafael)
+- Centro: rosto Neri → chat; FAB direita: Registro + Pedido; header lockup + gradiente; compact-only; gate coarse pointer.
+
+### Eng
+- `AppMobileCaptureFabStack`, `useCompactAppShell` coarse+standalone.
+
 ## [2026-11-23] - Preview promote por lote + hook triângulo entrega
 
 ### Decisão (Rafael)

@@ -17,7 +17,7 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 |------|----------------|
 | Ícones PWA | PNGs rasterizados de `app-icon-ios-android-light.svg` (192/512/apple-touch) |
 | Manifest + HTML | `theme_color` / `background_color` `#FFF7FB` (silk light) |
-| Shell compacto | `≤768px` ou `standalone` → sem sider; bottom nav com **Neri** central (registro rápido); folha **Serviços**; header gradiente; Ava FAB oculto |
+| Shell compacto | `standalone` ou `≤768px` + coarse pointer → bottom nav; **Neri** centro → chat Ava; FAB **+** direita (Registro / Pedido); header lockup + gradiente; orb Ava oculto |
 | Desktop | Sider + header inalterados |
 
 ## Implementação
@@ -28,7 +28,8 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 | `packages/web/public/manifest.webmanifest` | Cores + ícones |
 | `packages/web/src/hooks/useCompactAppShell.ts` | Detecção viewport / standalone |
 | `packages/web/src/components/layout/AppLayout.tsx` | Branch desktop vs compact |
-| `packages/web/src/components/layout/AppMobileBottomNav.tsx` | 5 abas + Neri (bissecta borda superior) |
+| `packages/web/src/components/layout/AppMobileBottomNav.tsx` | 5 abas + Neri (rosto → chat) |
+| `packages/web/src/components/layout/AppMobileCaptureFabStack.tsx` | FAB Registro + Pedido |
 | `packages/web/src/components/layout/AppMobileServicesSheet.tsx` | Folha Serviços (compact) |
 | `packages/web/src/styles/app-layout-mobile.css` | Contraste, header, bottom nav, oculta Ava |
 
