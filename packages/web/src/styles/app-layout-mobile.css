@@ -1,24 +1,67 @@
+/* ── Compact PWA shell (≤768px / standalone) ───────────────────────────── */
+
+.app-layout--compact {
+  background: var(--background, #f8fafc);
+}
+
 .app-layout--compact .app-sider {
   display: none !important;
 }
 
-.app-layout--compact .app-header {
-  padding: 0 12px !important;
+.app-layout--compact .ant-layout {
+  background: var(--background, #f8fafc);
+}
+
+.app-layout--compact .app-header--compact-brand {
+  padding: 0 14px !important;
   gap: 8px !important;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(
+    105deg,
+    rgba(251, 207, 232, 0.55) 0%,
+    rgba(233, 213, 255, 0.42) 38%,
+    var(--card-bg, #ffffff) 72%
+  ) !important;
+  box-shadow: 0 1px 0 rgba(126, 34, 206, 0.06);
 }
 
-.app-layout--compact .app-header__menu-trigger {
-  margin-right: 4px;
+.app-layout--compact .app-header__brand--compact {
+  position: relative;
+  isolation: isolate;
 }
 
+.app-layout--compact .app-header__brand--compact::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 88px;
+  height: 88px;
+  transform: translateY(-50%);
+  opacity: 0.09;
+  pointer-events: none;
+  z-index: 0;
+  background: url('/brand/kit-oficial-ananeri/02-simbolo-e-wordmark/ananeri-symbol-heart.svg')
+    center / contain no-repeat;
+}
+
+.app-layout--compact .app-header__brand--compact > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Metade superior do círculo Neri (~26px) projeta acima da barra */
 .app-layout--compact .app-main-content {
   margin: 12px !important;
-  margin-bottom: calc(12px + 56px + env(safe-area-inset-bottom, 0px)) !important;
+  margin-bottom: calc(12px + 56px + 26px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-.app-layout--compact .app-header-actions--compact-hide-label .ant-btn > span:not(.ant-btn-icon) {
-  display: none;
+/* Cards stand out from page wash on compact */
+.app-layout--compact .app-main-content .ant-card {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
+
+/* ── Bottom navigation ─────────────────────────────────────────────────── */
 
 .app-mobile-bottom-nav {
   position: fixed;
@@ -33,6 +76,8 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--card-bg);
   border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
+  overflow: visible;
 }
 
 .app-mobile-bottom-nav__item {
@@ -50,6 +95,17 @@
   padding: 6px 4px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  font-weight: 500;
+}
+
+.app-mobile-bottom-nav__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 28px;
+  border-radius: 14px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .app-mobile-bottom-nav__item .anticon {
@@ -61,6 +117,24 @@
   font-weight: 600;
 }
 
+.app-mobile-bottom-nav__item--active .app-mobile-bottom-nav__icon-wrap {
+  background: color-mix(in srgb, var(--primary, #7e22ce) 14%, transparent);
+}
+
+.app-mobile-bottom-nav__item--active .app-mobile-bottom-nav__label {
+  position: relative;
+}
+
+.app-mobile-bottom-nav__item--active .app-mobile-bottom-nav__label::after {
+  content: '';
+  display: block;
+  width: 16px;
+  height: 2px;
+  margin: 2px auto 0;
+  border-radius: 2px;
+  background: var(--primary, #7e22ce);
+}
+
 .app-mobile-bottom-nav__item--emergency {
   color: var(--emergency-nav, #cf1322);
 }
@@ -69,13 +143,101 @@
   color: var(--emergency-nav, #cf1322);
 }
 
-.app-mobile-nav-drawer .app-sider-brand {
-  padding: 8px 12px 16px;
-  display: flex;
-  justify-content: center;
+.app-mobile-bottom-nav__item--emergency.app-mobile-bottom-nav__item--active .app-mobile-bottom-nav__icon-wrap {
+  background: color-mix(in srgb, var(--emergency-nav, #cf1322) 12%, transparent);
 }
 
-.app-layout--compact .ava-global-dock {
-  bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 12px);
-  right: 16px;
+.app-mobile-bottom-nav__item--emergency.app-mobile-bottom-nav__item--active .app-mobile-bottom-nav__label::after {
+  background: var(--emergency-nav, #cf1322);
+}
+
+/* ── Services sheet (Outros / Serviços) ────────────────────────────────── */
+
+.app-mobile-services-sheet .ant-drawer-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.app-mobile-services-sheet__list .ant-list-item {
+  padding: 0;
+  border-block-end: none;
+}
+
+.app-mobile-services-sheet__prefs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 8px 0 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.app-mobile-services-sheet__logout {
+  margin-top: 4px;
+}
+
+/* ── Center Neri tab (quick capture) ───────────────────────────────────── */
+
+.app-mobile-bottom-nav__neri {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  overflow: visible;
+}
+
+/* Centro geométrico do círculo na linha do border-top da barra */
+.app-mobile-bottom-nav__neri-inner {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #c026d3 0%, #7e22ce 55%, #6d28d9 100%);
+  border: 3px solid var(--card-bg);
+  box-shadow:
+    0 4px 14px rgba(126, 34, 206, 0.35),
+    0 0 0 1px rgba(126, 34, 206, 0.12);
+  z-index: 2;
+}
+
+.app-mobile-bottom-nav__neri-symbol {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.app-mobile-bottom-nav__neri-plus {
+  font-size: 22px;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.app-mobile-bottom-nav__neri-caption {
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--primary, #7e22ce);
+  margin-top: auto;
+}
+
+/* ── Ava dock — oculto no compact com aba Neri ─────────────────────────── */
+
+.app-layout--compact.app-layout--neri-tab-shipped .ava-global-dock {
+  display: none !important;
 }
