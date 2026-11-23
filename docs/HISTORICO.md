@@ -9,6 +9,7 @@
 ### Realizado (eng)
 - PNGs PWA rasterizados de `app-icon-ios-android-light.svg`; manifest + `index.html`.
 - `useCompactAppShell`, `AppLayout` compact, suite `pwa-mobile-shell`.
+- AC-136 (PR #232): Neri center tab + Serviços — spec [`docs/product/PWA_MOBILE_SHELL_POLISH.md`](./product/PWA_MOBILE_SHELL_POLISH.md).
 
 ## [2026-11-20] - Beta Jenifer — relink conta por e-mail + central de atendimento
 
