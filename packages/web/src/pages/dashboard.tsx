@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from 'react'
 import { subscribePatientCreateOpen } from '../lib/patient-create-bus.js'
+import { notifyPatientsListChanged } from '../lib/patient-list-bus.js'
+import { CenteredPageLoading } from '../components/ui/CenteredLoading.js'
 import {
   Row,
   Col,
   Typography,
-  Spin,
   Empty,
   Button,
   Tag,
@@ -149,7 +150,8 @@ export function Dashboard() {
       message.success(t('patient.createSuccess'))
       setModalOpen(false)
       form.resetFields()
-      load()
+      await load()
+      notifyPatientsListChanged()
     } catch (err) {
       if (err && typeof err === 'object' && 'errorFields' in err) return
       message.error(t('patient.createError'))
@@ -258,7 +260,7 @@ export function Dashboard() {
     )
   }
 
-  if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
+  if (loading) return <CenteredPageLoading />
 
   return (
     <div>

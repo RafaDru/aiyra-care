@@ -63,6 +63,7 @@ export function FamilySupportPanel({ patientId, medicationName, healthThreadId, 
   const showDisclaimer = !isHintDismissed(familySupportHintId(patientId, 'disclaimer'))
   const showNoInsights = !compact
     && visibleInsights.length === 0
+    && bundle?.hasClinicalHistory
     && !isHintDismissed(familySupportHintId(patientId, 'no-insights'))
 
   const showEmergencyLink = visibleInsights.some(
@@ -138,9 +139,7 @@ export function FamilySupportPanel({ patientId, medicationName, healthThreadId, 
           type="info"
           acknowledge={false}
           onClose={onDismissed}
-          message={bundle.hasClinicalHistory
-            ? t('familySupport.noInsights')
-            : t('familySupport.noInsightsWelcome')}
+          message={t('familySupport.noInsights')}
           style={{ marginTop: visibleInsights.length > 0 ? 8 : 0 }}
         />
       )}

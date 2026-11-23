@@ -1,5 +1,14 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-23] - PWA paciente — feedback Rafael (X1–X4, B5)
+
+### Produto (Rafael)
+- Dia a dia deve atualizar após cadastro; loading centralizado; sub-abas sem truncar; chips no lugar do carrossel; copy «Que bom ter você aqui» só na home vazia.
+
+### Realizado (eng)
+- `patient-list-bus`, `PatientCompactSubTabs`, `CenteredLoading`, gate B5 em `FamilySupportPanel` + `DayToDayDiscoveryHub`.
+- Roadmap `mobile-patient-ux-backlog` (B1–B4 stubs); suite `pwa-mobile-patient-ux`; decisão X4 no store `mobile-patient-ux-backlog-2026-11-23`.
+
 ## [2026-11-23] - PWA shell — Neri chat centro + FAB Registro/Pedido
 
 ### Produto (Rafael)

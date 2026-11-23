@@ -305,6 +305,20 @@
       "estimatedMinutes": 4
     },
     {
+      "id": "pwa-mobile-patient-ux",
+      "domain": "conta",
+      "title": "PWA — UX paciente compact (2026-11-23)",
+      "featureId": "beta-pwa-mobile-shell",
+      "lane": "regression",
+      "parallelSafe": false,
+      "fixtureId": "core-demo",
+      "doc": "docs/testing/suites/pwa-mobile-patient-ux.md",
+      "coverage": "partial",
+      "businessActions": ["mobile.patient_shell_ux"],
+      "automation": { "status": "partial", "spec": "packages/web/e2e/suites/pwa-mobile-patient-ux.spec.ts" },
+      "estimatedMinutes": 8
+    },
+    {
       "id": "family-day-timeline",
       "domain": "clinico",
       "title": "Carteira — bloco Hoje",

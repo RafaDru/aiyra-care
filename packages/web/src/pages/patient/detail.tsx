@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Tabs, Card, Avatar, Spin, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload, Badge } from 'antd'
+import { Tabs, Card, Avatar, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload, Badge } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
 import { patientBirthDateFormRules } from '../../lib/patient-birth-date-form-rules.js'
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
@@ -48,6 +48,10 @@ import {
 import '../../components/patient/patient-basic-summary.css'
 import '../../components/patient/patient-detail-nav.css'
 import '../../components/ava/ava-dock.css'
+import { PatientCompactSubTabs } from '../../components/patient/PatientCompactSubTabs.js'
+import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
+import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
+import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
 
 const { Title, Text } = Typography
 
@@ -99,6 +103,7 @@ export function PatientDetail() {
     healthThreadId?: string | null
   } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
+  const compactShell = useCompactAppShell()
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
@@ -315,10 +320,31 @@ export function PatientDetail() {
     }
   }
 
-  if (loading) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
+  if (loading) return <CenteredPageLoading />
   if (!patient) return <Text type="danger">{t('patient.notFound')}</Text>
 
   const age = calcAge(patient.birthDate, t)
+
+  const tabTextLabel = (key: PatientTabKey): string => {
+    switch (key) {
+      case 'basic': return t('tabs.basic')
+      case 'agenda': return t('tabs.agenda')
+      case 'personal-documents': return t('tabs.personalDocuments')
+      case 'wallet': return t('tabs.wallet')
+      case 'coverage': return t('tabs.coverage')
+      case 'integrations': return t('tabs.integrations')
+      case 'growth': return t('tabs.growth')
+      case 'vaccines': return t('tabs.vaccines')
+      case 'medications': return t('tabs.medications')
+      case 'allergies': return t('tabs.allergies')
+      case 'exams': return t('tabs.exams')
+      case 'records': return t('tabs.records')
+      case 'authorizations': return t('tabs.authorizations')
+      case 'diagnoses': return t('tabs.diagnoses')
+      case 'documents': return t('tabs.documents')
+      default: return key
+    }
+  }
 
   const tabLabel = (key: PatientTabKey): ReactNode => {
     switch (key) {
@@ -513,7 +539,7 @@ export function PatientDetail() {
               <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
               <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
               {patient.isOwner !== false && (
-              <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); message.success(t('common.ok')); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : t('toast.deletePatientError')) } }}>
+              <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); notifyPatientsListChanged(); message.success(t('common.ok')); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : t('toast.deletePatientError')) } }}>
                 <Button size="small" danger icon={<DeleteOutlined />} />
               </Popconfirm>
               )}
@@ -586,7 +612,15 @@ export function PatientDetail() {
                     options={sectionOptions}
                   />
                 </div>
-                <DefaultTabBar {...props} />
+                {compactShell ? (
+                  <PatientCompactSubTabs
+                    activeKey={activeTab}
+                    items={sectionTabKeys.map((key) => ({ key, label: tabTextLabel(key) }))}
+                    onChange={setActiveTab}
+                  />
+                ) : (
+                  <DefaultTabBar {...props} />
+                )}
               </div>
             )}
           />

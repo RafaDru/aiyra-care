@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import { api } from '../../lib/api.js'
 import { isMinorBirthDate } from '../../lib/patient-age.js'
 import { MinorGuardianConsentFormItem } from '../legal/MinorGuardianConsentField.js'
+import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
 
 export interface UnmatchedBeneficiary {
   name: string
@@ -77,6 +78,7 @@ export function RegisterAmilDependentModal({
         cns: values.cns?.replace(/\D/g, '') || undefined,
         parentIds: values.parentIds || [],
       })
+      notifyPatientsListChanged()
       message.success(t('patient.amilDependentSuccess'))
       onRegistered()
       onClose()

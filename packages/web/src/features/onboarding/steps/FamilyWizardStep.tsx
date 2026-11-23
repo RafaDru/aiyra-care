@@ -21,6 +21,7 @@ import {
   ONBOARDING_CARE_RELATION_OPTIONS,
   type OnboardingCareRelation,
 } from '../onboarding-care-relations.js'
+import { notifyPatientsListChanged } from '../../../lib/patient-list-bus.js'
 
 const { Title, Text } = Typography
 
@@ -192,6 +193,7 @@ export function FamilyWizardStep({
         cpf: values.cpf?.replace(/\D/g, '') || undefined,
       })
       await api.careCircles.linkPatient(activeCircleId, created.id, values.careRelation ?? 'guardian')
+      notifyPatientsListChanged()
       setMembers((prev) => [...prev, { id: created.id, name: created.name }])
       memberForm.resetFields()
       trackProductEvent('onboarding_step', { step: 'family_member_added', circle_index: circleIndex })
