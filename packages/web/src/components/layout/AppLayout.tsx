@@ -1,18 +1,15 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Button, Dropdown, Typography, Badge } from 'antd'
+import { Layout, Menu, Button, Dropdown, Drawer } from 'antd'
 import type { MenuProps } from 'antd'
 import {
-  SettingOutlined,
   LogoutOutlined,
   UserOutlined,
-  DashboardOutlined,
-  PhoneOutlined,
   CustomerServiceOutlined,
-  TeamOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   QuestionCircleOutlined,
+  MenuOutlined,
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext.js'
@@ -34,13 +31,17 @@ import { DeploymentEnvironmentBadge } from './DeploymentEnvironmentBadge.js'
 import { ActiveCareCircleProvider } from '../../contexts/ActiveCareCircleContext.js'
 import { CareCircleGlobalSelector } from '../family/CareCircleGlobalSelector.js'
 import { useFamilyPendingCount } from '../../hooks/useFamilyPendingCount.js'
+import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
+import { buildMainNavItems, type MainNavKey } from './app-main-nav-items.js'
+import { AppMobileBottomNav } from './AppMobileBottomNav.js'
 
 const { Sider, Content, Header } = Layout
-const { Text } = Typography
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
+  const compactShell = useCompactAppShell()
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation()
@@ -65,7 +66,7 @@ export function AppLayout() {
     },
   ]
 
-  const mainSelectedKey =
+  const mainSelectedKey: MainNavKey | '' =
     location.pathname === '/' || location.pathname.startsWith('/patients')
       ? '/'
       : location.pathname.startsWith('/family')
@@ -76,8 +77,23 @@ export function AppLayout() {
             ? '/settings'
             : ''
 
+  const mainNavItems = buildMainNavItems({
+    t,
+    familyPendingCount,
+    showFamilyPendingBadge: !collapsed || compactShell,
+  })
+
+  const navigateMain = (key: string) => {
+    navigate(key)
+    setMobileDrawerOpen(false)
+  }
+
   const layout = (
-    <Layout style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
+    <Layout
+      className={compactShell ? 'app-layout app-layout--compact' : 'app-layout'}
+      style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}
+    >
+      {!compactShell && (
       <Sider
         className="app-sider"
         collapsible
@@ -114,34 +130,7 @@ export function AppLayout() {
           <Menu
             mode="inline"
             selectedKeys={[mainSelectedKey]}
-            items={[
-              { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
-              {
-                key: '/family',
-                icon: <TeamOutlined />,
-                label: collapsed ? (
-                  t('nav.yourFamily')
-                ) : (
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, width: '100%' }}>
-                    <span>{t('nav.yourFamily')}</span>
-                    {familyPendingCount > 0 && (
-                      <Badge
-                        count={familyPendingCount}
-                        size="small"
-                        title={t('family.sidebar.pending', { count: familyPendingCount })}
-                      />
-                    )}
-                  </span>
-                ),
-              },
-              {
-                key: '/emergency',
-                icon: <PhoneOutlined />,
-                label: t('nav.emergency'),
-                style: { color: 'var(--emergency-nav, #cf1322)', fontWeight: 600 },
-              },
-              { key: '/settings', icon: <SettingOutlined />, label: t('nav.settings') },
-            ]}
+            items={mainNavItems}
             onClick={({ key }) => navigate(key)}
             style={{ borderRight: 0, background: 'transparent' }}
           />
@@ -172,6 +161,7 @@ export function AppLayout() {
           </div>
         </div>
       </Sider>
+      )}
       <Layout style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Header
           className="app-header"
@@ -190,40 +180,106 @@ export function AppLayout() {
             zIndex: 100,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap' }}>
-            {collapsed && <AppLogo variant="wordmark" height={38} />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap', minWidth: 0 }}>
+            {compactShell && (
+              <Button
+                type="text"
+                className="app-header__menu-trigger"
+                icon={<MenuOutlined />}
+                aria-label={t('nav.openMenu')}
+                onClick={() => setMobileDrawerOpen(true)}
+              />
+            )}
+            {compactShell ? (
+              <AppLogo variant="wordmark" height={32} style={{ maxWidth: 120 }} />
+            ) : (
+              collapsed && <AppLogo variant="wordmark" height={38} />
+            )}
             {configured && user && <CareCircleGlobalSelector />}
-            <DeploymentEnvironmentBadge />
+            {!compactShell && <DeploymentEnvironmentBadge />}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div
+            className={compactShell ? 'app-header-actions app-header-actions--compact-hide-label' : 'app-header-actions'}
+            style={{ display: 'flex', alignItems: 'center', gap: compactShell ? 4 : 16 }}
+          >
             {configured && user && <HeaderOrderRequestsMenu />}
             {configured && user && <QuickCaptureGlobal />}
             {configured && user && (
               <Button
                 type="text"
                 icon={<CustomerServiceOutlined />}
+                aria-label={t('support.reportButton')}
                 onClick={() => setSupportOpen(true)}
               >
-                {t('support.reportButton')}
+                {!compactShell && t('support.reportButton')}
               </Button>
             )}
             {configured && user && (
               <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-                <Button type="text" icon={<UserOutlined />}>
-                  {user.email ?? t('auth.account')}
+                <Button type="text" icon={<UserOutlined />} aria-label={user.email ?? t('auth.account')}>
+                  {!compactShell && (user.email ?? t('auth.account'))}
                 </Button>
               </Dropdown>
             )}
-            <ThemeSwitcher />
-            <LanguageSwitcher />
+            {!compactShell && <ThemeSwitcher />}
+            {!compactShell && <LanguageSwitcher />}
           </div>
         </Header>
-        <Content style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }}>
+        <Content
+          className="app-main-content"
+          style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }}
+        >
           {configured && user && <RuntimeDegradedBanner />}
           {configured && user && <HygieneLoginPrompt />}
           <Outlet />
         </Content>
       </Layout>
+      {compactShell && mainSelectedKey && (
+        <AppMobileBottomNav
+          selectedKey={mainSelectedKey}
+          onNavigate={(path) => navigate(path)}
+        />
+      )}
+      <Drawer
+        className="app-mobile-nav-drawer"
+        title={null}
+        placement="left"
+        width={280}
+        open={compactShell && mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        styles={{ body: { padding: 0 } }}
+      >
+        <div className="app-sider-brand">
+          <AppLogo variant="sidebar" style={{ maxWidth: '100%' }} />
+        </div>
+        <Menu
+          mode="inline"
+          selectedKeys={[mainSelectedKey]}
+          items={mainNavItems}
+          onClick={({ key }) => navigateMain(key)}
+          style={{ borderInlineEnd: 0 }}
+        />
+        <div style={{ padding: '8px 16px 24px' }}>
+          {configured && user && (
+            <Button
+              type="text"
+              danger
+              block
+              icon={<LogoutOutlined />}
+              onClick={() => {
+                setMobileDrawerOpen(false)
+                signOut()
+              }}
+            >
+              {t('auth.signOut')}
+            </Button>
+          )}
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'center' }}>
+            <ThemeSwitcher />
+            <LanguageSwitcher />
+          </div>
+        </div>
+      </Drawer>
       <AvaGlobalDock />
       {configured && user && <FirstVisitTourDrawer />}
       {configured && user && <PatientConsultVisitHost />}

@@ -9,6 +9,7 @@ import { ThemeProvider } from './theme/ThemeProvider.js'
 import './i18n/index.js'
 import './styles/globals.css'
 import './styles/app-sider.css'
+import './styles/app-layout-mobile.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

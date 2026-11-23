@@ -21,6 +21,14 @@ Usar a URL **web** do runbook familiar (Cloud Run preview). Exemplo documentado 
 
 Auth e API já apontam para o mesmo ambiente via build preview — testers **não** usam IP local.
 
+## Ícone instalável (AC-126)
+
+- **Variante:** `04-app-icons-e-favicons/app-icon-ios-android-light.svg` (fundo silk claro).
+- **PNGs:** `node packages/web/scripts/rasterize-brand-pwa-icons.mjs`
+- **Chrome «Instalar app»:** `manifest.webmanifest` + `theme-color` `#FFF7FB`.
+
+Feature: [`docs/features/beta-pwa-mobile-shell.md`](../features/beta-pwa-mobile-shell.md).
+
 ## Instalação (instrução para testadores)
 
 **Android (Chrome):** abrir o link → menu (⋮) → **Instalar app** ou **Adicionar à tela inicial**.

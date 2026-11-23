@@ -396,6 +396,20 @@
       "tags": ["brand", "rebrand", "ui"]
     },
     {
+      "id": "beta-pwa-mobile-shell",
+      "epicId": "plat-mobile",
+      "title": "PWA beta — ícone light + shell mobile",
+      "status": "done",
+      "category": "produto",
+      "priority": "P1",
+      "doc": "docs/features/beta-pwa-mobile-shell.md",
+      "domainDoc": "docs/product/BETA_MOBILE_CHANNEL_PWA.md",
+      "routes": ["/", "/family", "/emergency", "/settings"],
+      "api": [],
+      "helpTopics": [],
+      "tags": ["pwa", "mobile", "beta"]
+    },
+    {
       "id": "documentation-knowledge-base",
       "epicId": "documentation-knowledge-base",
       "title": "Base de conhecimento — features, ajuda e tracking",

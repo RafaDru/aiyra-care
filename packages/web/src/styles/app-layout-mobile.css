@@ -1,0 +1,81 @@
+.app-layout--compact .app-sider {
+  display: none !important;
+}
+
+.app-layout--compact .app-header {
+  padding: 0 12px !important;
+  gap: 8px !important;
+}
+
+.app-layout--compact .app-header__menu-trigger {
+  margin-right: 4px;
+}
+
+.app-layout--compact .app-main-content {
+  margin: 12px !important;
+  margin-bottom: calc(12px + 56px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.app-layout--compact .app-header-actions--compact-hide-label .ant-btn > span:not(.ant-btn-icon) {
+  display: none;
+}
+
+.app-mobile-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 500;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+}
+
+.app-mobile-bottom-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.65));
+  font-size: 11px;
+  line-height: 1.2;
+  padding: 6px 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-mobile-bottom-nav__item .anticon {
+  font-size: 20px;
+}
+
+.app-mobile-bottom-nav__item--active {
+  color: var(--primary, #7e22ce);
+  font-weight: 600;
+}
+
+.app-mobile-bottom-nav__item--emergency {
+  color: var(--emergency-nav, #cf1322);
+}
+
+.app-mobile-bottom-nav__item--emergency.app-mobile-bottom-nav__item--active {
+  color: var(--emergency-nav, #cf1322);
+}
+
+.app-mobile-nav-drawer .app-sider-brand {
+  padding: 8px 12px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.app-layout--compact .ava-global-dock {
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 12px);
+  right: 16px;
+}
