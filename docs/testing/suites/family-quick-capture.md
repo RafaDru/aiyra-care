@@ -20,6 +20,8 @@
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
 | 1 | Após login, clicar **Registro rápido** no header | Drawer abre com seletor de paciente e tipos | |
-| 2 | Tipo **Nota** (default), preencher sintoma/nota | Campo obrigatório aceita texto | |
-| 3 | Salvar | Toast «Registro salvo»; drawer fecha | |
-| 4 | (API) `POST /health-threads/.../entries` ou criação de thread | 2xx | |
+| 2 | Tipo **Nota**: título «Teste febre» + texto da nota | Título opcional; cria/vincula acompanhamento | |
+| 3 | **Salvar e registrar sinais vitais** | Permanece no drawer; tipo Medida; mesma thread selecionada | |
+| 4 | Preencher temperatura e salvar | Toast; drawer fecha; medida com `health_thread_id` | |
+| 5 | Salvar nota simples (sem continuar) | Toast «Registro salvo»; drawer fecha | |
+| 6 | (API) `POST /health-threads/.../entries` ou criação de thread | 2xx | |
