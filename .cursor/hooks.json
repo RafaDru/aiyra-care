@@ -30,6 +30,9 @@
       },
       {
         "command": "node .cursor/hooks/after-file-edit-qa-ritual.mjs"
+      },
+      {
+        "command": "node .cursor/hooks/after-file-edit-delivery-lot.mjs"
       }
     ],
     "preToolUse": [

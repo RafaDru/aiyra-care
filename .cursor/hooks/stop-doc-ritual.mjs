@@ -6,6 +6,10 @@ import {
   qaRitualFollowupMessage,
   readQaRitualPending,
 } from './lib/qa-ritual.mjs'
+import {
+  clearDeliveryLotPending,
+  deliveryLotFollowupMessage,
+} from './lib/delivery-lot.mjs'
 
 const input = readStdinJson()
 const loopCount = input.loop_count ?? input.loopCount ?? 0
@@ -19,7 +23,9 @@ const docPending = readDocRitualPending()
 const qaBlocking = isQaRitualBlocking()
 const qaPending = readQaRitualPending()
 
-if (!docPending && !qaBlocking) {
+const deliveryLotMsg = deliveryLotFollowupMessage()
+
+if (!docPending && !qaBlocking && !deliveryLotMsg) {
   process.stdout.write('{}')
   process.exit(0)
 }
@@ -41,6 +47,12 @@ if (qaBlocking && qaPending) {
   auditWrite('qa-ritual', { event: 'stop_followup', pending: qaPending })
   parts.push(qaRitualFollowupMessage(qaPending))
   clearQaRitualPending()
+}
+
+if (deliveryLotMsg) {
+  auditWrite('delivery-lot', { event: 'stop_followup' })
+  parts.push(deliveryLotMsg)
+  clearDeliveryLotPending()
 }
 
 const followup = parts.join(' ')
