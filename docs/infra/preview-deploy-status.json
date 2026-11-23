@@ -1,14 +1,14 @@
 {
   "previewWebUrl": "https://ananeri-preview-web-kzp5ynymva-uc.a.run.app",
   "previewApiUrl": "https://ananeri-preview-api-kzp5ynymva-uc.a.run.app",
-  "lastPromoteMainSha": "64c914edb9163ec0ddb49a6b1feb6f3dbc3c0c03",
-  "lastPromoteAt": "2026-11-23T21:32:52Z",
-  "lastPromoteWorkflowRun": 45269987814,
-  "lotLabel": "#238 PWA Neri chat centro + FAB stack",
+  "lastPromoteMainSha": "6f9ac3aa1e3dfda619019ed6606cc9206cf72bc2",
+  "lastPromoteAt": "2026-11-23T21:52:26Z",
+  "lastPromoteWorkflowRun": 45273356419,
+  "lotLabel": "#239 mobile patient UX (compact sub-tabs + patient-list-bus)",
   "promotePending": false,
-  "originMainSha": "64c914edb9163ec0ddb49a6b1feb6f3dbc3c0c03",
-  "statusCheckedAt": "2026-11-23T21:32:52Z",
-  "betaNowTests": "Neri centro abre chat (não registro rápido no tap), FAB stack captura mobile (registro/pedido), shell PWA compact. Reinstalar PWA.",
+  "originMainSha": "6f9ac3aa1e3dfda619019ed6606cc9206cf72bc2",
+  "statusCheckedAt": "2026-11-23T21:52:26Z",
+  "betaNowTests": "Inclui #238 Neri FAB + #239 UX paciente mobile (PatientCompactSubTabs, refresh lista via patient-list-bus). Reinstalar PWA se shell antigo.",
   "nextLotCandidates": [],
-  "notes": "Promote NotebookRafael pós-merge #238 (run 45269987814)."
+  "notes": "Promote NotebookRafael pós-merge #239 (run 45273356419)."
 }
