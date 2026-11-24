@@ -1,14 +1,14 @@
 {
   "previewWebUrl": "https://ananeri-preview-web-kzp5ynymva-uc.a.run.app",
   "previewApiUrl": "https://ananeri-preview-api-kzp5ynymva-uc.a.run.app",
-  "lastPromoteMainSha": "6f9ac3aa1e3dfda619019ed6606cc9206cf72bc2",
-  "lastPromoteAt": "2026-11-23T21:52:26Z",
-  "lastPromoteWorkflowRun": 45273356419,
-  "lotLabel": "#239 mobile patient UX (compact sub-tabs + patient-list-bus)",
+  "lastPromoteMainSha": "1e2824b314481a86f710433edf990bb26e6b1f43",
+  "lastPromoteAt": "2026-11-24T03:15:00Z",
+  "lastPromoteWorkflowRun": 45317749510,
+  "lotLabel": "#240 PWA shell polish round 2 (Neri clip + dark nav + note DatePicker)",
   "promotePending": false,
-  "originMainSha": "6f9ac3aa1e3dfda619019ed6606cc9206cf72bc2",
-  "statusCheckedAt": "2026-11-23T21:52:26Z",
-  "betaNowTests": "Inclui #238 Neri FAB + #239 UX paciente mobile (PatientCompactSubTabs, refresh lista via patient-list-bus). Reinstalar PWA se shell antigo.",
+  "originMainSha": "1e2824b314481a86f710433edf990bb26e6b1f43",
+  "statusCheckedAt": "2026-11-24T03:15:00Z",
+  "betaNowTests": "Shell round 2: Neri centro sem clip, header/nav dark polish, registro rápido com Quando aconteceu. Reinstalar PWA.",
   "nextLotCandidates": [],
-  "notes": "Promote NotebookRafael pós-merge #239 (run 45273356419)."
+  "notes": "Promote NotebookRafael para teste manhã Rafael (run 45317749510)."
 }
