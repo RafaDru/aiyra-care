@@ -93,6 +93,7 @@ export class HealthThreadController {
         params.data.id,
         body.data.body,
         req.accountId ?? undefined,
+        body.data.occurredAt,
       )
       return reply.status(201).send(entry.toJSON())
     } catch (err) {

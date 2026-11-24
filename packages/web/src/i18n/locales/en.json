@@ -1733,6 +1733,8 @@
     "noteLabel": "Symptom or note",
     "noteRequired": "Describe what happened",
     "notePlaceholder": "e.g. fever 38.5°C, vomiting after lunch…",
+    "occurredAtLabel": "When it happened",
+    "occurredAtHint": "Optional — defaults to now",
     "measurementNotesPlaceholder": "Optional — e.g. after bath, at bedtime…",
     "documentHint": "Photo or PDF — exam, prescription, medical certificate…",
     "uploadDocument": "Upload file",

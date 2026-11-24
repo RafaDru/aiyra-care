@@ -10,6 +10,8 @@ describe('QuickCaptureSheet patient lens', () => {
     const tsx = readFileSync(resolve(root, 'src/components/quick-capture/QuickCaptureSheet.tsx'), 'utf8')
     expect(tsx).toMatch(/<AvaPatientLensControl[\s\S]*?\bblock\b/)
     expect(tsx).toContain('quick-capture-sheet__patient')
+    expect(tsx).toContain('occurredAt')
+    expect(tsx).toMatch(/kind === 'note'[\s\S]*DatePicker/)
 
     const css = readFileSync(resolve(root, 'src/components/quick-capture/quick-capture-sheet.css'), 'utf8')
     expect(css).toContain('align-self: flex-start')

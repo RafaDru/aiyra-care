@@ -98,6 +98,7 @@ export function QuickCaptureSheet({
     setKind(initialKind ?? 'note')
     form.resetFields()
     form.setFieldsValue({
+      occurredAt: dayjs(),
       observedAt: dayjs(),
       administeredAt: dayjs(),
       scheduledAt: dayjs().add(1, 'hour').minute(0),
@@ -184,7 +185,8 @@ export function QuickCaptureSheet({
       values.healthThreadId as string | undefined,
       threadTitle,
     )
-    await api.healthThreads.addEntry(threadId, body)
+    const occurredAt = (values.occurredAt as Dayjs | undefined)?.toISOString()
+    await api.healthThreads.addEntry(threadId, body, occurredAt)
     const title = resolveThreadTitle(threadId, threadTitle)
     setPinnedThread({ id: threadId, title })
 
@@ -195,6 +197,7 @@ export function QuickCaptureSheet({
       setKind('measurement')
       form.setFieldsValue({
         healthThreadId: threadId,
+        occurredAt: dayjs(),
         observedAt: dayjs(),
         body: undefined,
         threadTitle: undefined,
@@ -299,6 +302,14 @@ export function QuickCaptureSheet({
             extra={t('quickCapture.threadTitleHint')}
           >
             <Input placeholder={t('quickCapture.threadTitlePlaceholder')} maxLength={120} />
+          </Form.Item>
+          <Form.Item
+            name="occurredAt"
+            label={t('quickCapture.occurredAtLabel')}
+            extra={t('quickCapture.occurredAtHint')}
+            initialValue={dayjs()}
+          >
+            <DatePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="body" label={t('quickCapture.noteLabel')} rules={[{ required: true, message: t('quickCapture.noteRequired') }]}>
             <Input.TextArea rows={4} placeholder={t('quickCapture.notePlaceholder')} />

@@ -23,7 +23,7 @@ Botão **Registro rápido** no header da aplicação abre um sheet com cinco tip
 1. Em qualquer tela autenticada, clica **Registro rápido** no header
 2. Confirma ou troca o paciente (lente Ava)
 3. Escolhe o tipo: **Nota** · **Medida** · **Medicação** · **Agenda** · **Documento**
-4. Em **Nota**: pode informar **título do acompanhamento** (cria thread) ou vincular existente; corpo da nota
+4. Em **Nota**: pode informar **título do acompanhamento** (cria thread) ou vincular existente; **data/hora** opcional (`occurredAt`, padrão agora); corpo da nota
 5. **Salvar e registrar sinais vitais** mantém o sheet aberto, mesma thread, tipo Medida
 6. Toast de confirmação; sheet fecha (salvar simples)
 
