@@ -798,10 +798,10 @@ export const api = {
       }),
     detail: (id: string) =>
       request<import('./api.types.js').HealthThreadDetail>(`/health-threads/${id}/detail`),
-    addEntry: (id: string, body: string) =>
+    addEntry: (id: string, body: string, occurredAt?: string) =>
       request(`/health-threads/${id}/entries`, {
         method: 'POST',
-        body: JSON.stringify({ body }),
+        body: JSON.stringify({ body, ...(occurredAt ? { occurredAt } : {}) }),
       }),
     createExam: (id: string, data: object) =>
       request<{ exam: import('./api.types.js').Exam; link: unknown }>(

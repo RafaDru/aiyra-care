@@ -21,6 +21,7 @@
 |---|------|-------------------|-------|
 | 1 | Após login, clicar **Registro rápido** no header | Drawer abre com seletor de paciente e tipos | |
 | 2 | Tipo **Nota**: título «Teste febre» + texto da nota | Título opcional; cria/vincula acompanhamento | |
+| 2b | Campo **Quando aconteceu** (data/hora) em Nota | Visível; default agora; opcional ajustar antes de salvar | |
 | 3 | **Salvar e registrar sinais vitais** | Permanece no drawer; tipo Medida; mesma thread selecionada | |
 | 4 | Preencher temperatura e salvar | Toast; drawer fecha; medida com `health_thread_id` | |
 | 5 | Salvar nota simples (sem continuar) | Toast «Registro salvo»; drawer fecha | |

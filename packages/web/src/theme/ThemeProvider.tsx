@@ -45,6 +45,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem(DARK_MODE_KEY, darkMode ? '1' : '0')
     const root = document.documentElement
+    root.setAttribute('data-theme', darkMode ? 'dark' : 'light')
     root.setAttribute('data-a11y-mode', accessibilityMode)
     const tokens = darkMode ? { ...AIYRACARE_TOKENS, ...AIYRACARE_DARK } : AIYRACARE_TOKENS
     const a11y = accessibilityTokenOverrides(accessibilityMode, darkMode)

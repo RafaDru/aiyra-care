@@ -201,7 +201,7 @@ export class HealthThreadWorkflowService {
     return thread
   }
 
-  async addNote(threadId: string, body: string, createdBy?: string) {
+  async addNote(threadId: string, body: string, createdBy?: string, occurredAt?: Date) {
     await this.threads.findById(threadId)
     return this.entries.save(
       HealthThreadEntry.create({
@@ -209,6 +209,7 @@ export class HealthThreadWorkflowService {
         entryType: 'note',
         body,
         createdBy,
+        occurredAt,
       }),
     )
   }

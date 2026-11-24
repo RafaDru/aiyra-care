@@ -61,6 +61,7 @@ export const taskWizardSchema = z.object({
 
 export const addThreadEntrySchema = z.object({
   body: z.string().min(1).max(5000),
+  occurredAt: z.coerce.date().optional(),
 })
 
 const linkRoleSchema = z.enum(['ordered', 'scheduled', 'result', 'related', 'blocked_by'])

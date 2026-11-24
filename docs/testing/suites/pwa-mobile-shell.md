@@ -33,8 +33,10 @@ PWA instalável (ícone light) e navegação compacta pós-login.
 | 4 | FAB **+** inferior direito → **Registro rápido** (roxo) | `QuickCaptureSheet` | |
 | 5 | FAB **+** → **Fazer um pedido** | Fluxo resumo consulta (`PatientConsultVisitHost`) | |
 | 6 | Toque **Serviços** | Folha: Config, Ajuda, tema, idioma, sair | |
-| 7 | Header compact | Lockup horizontal (coração + wordmark); gradiente branco→rosa | |
-| 8 | Largura ≥992px (desktop, fine pointer) | Sider; sem bottom nav; sem FAB stack; Ava dock + Registro no header | |
+| 7 | Header compact | Lockup horizontal à esquerda; watermark coração parcial (~2× crop); gradiente branco→rosa (dark: tokens, sem “chapado”) | |
+| 8 | Bottom nav — centro Neri | Faixa lateral opaca só nas pontas; **eixo Neri transparente** (círculo não cortado pela barra) | |
+| 9 | Modo escuro: aba ativa bottom nav | Ícone/label roxo subtle; **sem** caixa roxa pesada no ícone (paridade com light) | |
+| 10 | Largura ≥992px (desktop, fine pointer) | Sider; sem bottom nav; sem FAB stack; Ava dock + Registro no header | |
 
 **Automação:** parcial — ver `auth-entry-flow` para login; checks B manuais ou DevTools.
 
