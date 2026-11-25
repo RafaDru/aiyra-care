@@ -46,6 +46,10 @@ test.describe('pwa-mobile-patient-ux', () => {
     await expect(compact).toBeVisible({ timeout: 15_000 })
     await expect(compact.getByRole('tab', { name: 'Vacinas' })).toBeVisible()
     await expect(compact.getByRole('tab', { name: 'Medicações' })).toBeVisible()
+    await page.getByTestId('patient-sub-tabs-menu').click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await expect(page.getByText('Consultas', { exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
   })
 
   test('drawer Neri ocupa largura total no compact (P0-6)', async ({ page }) => {

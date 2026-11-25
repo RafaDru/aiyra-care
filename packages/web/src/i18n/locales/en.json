@@ -692,6 +692,9 @@
     "linkPortalError": "Could not link portal",
     "susReimportError": "Could not re-import SUS data",
     "susImported": "SUS: imported {{parts}}",
+    "compactSubNavMenu": "All sections",
+    "compactSubNavSheetTitle": "{{section}} — sections",
+    "compactSubNavSheetTitleGeneric": "Sections",
     "category": {
       "children": "Child",
       "adolescents": "Teen",
