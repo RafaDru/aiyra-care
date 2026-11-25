@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |-------|--------|
-| **Preview SHA** | `1e2824b` |
-| **Promote** | **OK** — #240 shell round 2 |
-| **Run** | [45317749510](https://github.com/RafaDru/aiyra-care/actions/runs/45317749510) |
+| **Preview SHA** | `f964c2f` |
+| **Promote** | **OK** — #241 macro 2×2 + #242 drawer Neri 100vw |
+| **Run** | [45642161292](https://github.com/RafaDru/aiyra-care/actions/runs/45642161292) |
 | **Web** | https://ananeri-preview-web-kzp5ynymva-uc.a.run.app |
 
-PWA: Neri sem clip, dark nav/header, quick capture com data/hora da nota. **Reinstalar PWA** para manhã Rafael.
+Paciente: blocos macro compactos 2×2. Neri: drawer em largura total no mobile. **Reinstalar PWA** se o shell estiver desatualizado.
 
 [`preview-deploy-status.json`](../infra/preview-deploy-status.json)

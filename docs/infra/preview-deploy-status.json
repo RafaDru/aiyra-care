@@ -1,14 +1,14 @@
 {
   "previewWebUrl": "https://ananeri-preview-web-kzp5ynymva-uc.a.run.app",
   "previewApiUrl": "https://ananeri-preview-api-kzp5ynymva-uc.a.run.app",
-  "lastPromoteMainSha": "1e2824b314481a86f710433edf990bb26e6b1f43",
-  "lastPromoteAt": "2026-11-24T03:15:00Z",
-  "lastPromoteWorkflowRun": 45317749510,
-  "lotLabel": "#240 PWA shell polish round 2 (Neri clip + dark nav + note DatePicker)",
+  "lastPromoteMainSha": "f964c2f1437e0896e45714d9d2554a6cbd7f00aa",
+  "lastPromoteAt": "2026-11-25T15:10:00Z",
+  "lastPromoteWorkflowRun": 45642161292,
+  "lotLabel": "#241 macro 2×2 + #242 drawer Neri 100vw",
   "promotePending": false,
-  "originMainSha": "1e2824b314481a86f710433edf990bb26e6b1f43",
-  "statusCheckedAt": "2026-11-24T03:15:00Z",
-  "betaNowTests": "Shell round 2: Neri centro sem clip, header/nav dark polish, registro rápido com Quando aconteceu. Reinstalar PWA.",
+  "originMainSha": "f964c2f1437e0896e45714d9d2554a6cbd7f00aa",
+  "statusCheckedAt": "2026-11-25T15:10:00Z",
+  "betaNowTests": "Paciente: macro 2×2 compact. Ava: drawer chat 100vw no compact shell. Reinstalar PWA.",
   "nextLotCandidates": [],
-  "notes": "Promote NotebookRafael para teste manhã Rafael (run 45317749510)."
+  "notes": "Promote NotebookRafael; cancelou run incompleto 45641595198 (só #241/493033b). Run 45642161292."
 }
