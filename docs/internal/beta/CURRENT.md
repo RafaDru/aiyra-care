@@ -2,12 +2,13 @@
 
 | Campo | Valor |
 |-------|--------|
-| **Preview SHA (código)** | `3b955d0` (+ docs `7872322` na imagem) — **desatualizado** |
-| **`main` (lote pendente)** | `bc4902bd` — merge #245 PAT-2b |
-| **Promote** | **Pendente** — após #241–#244 run 45645028088 |
-| **Run (vivo)** | [45645028088](https://github.com/RafaDru/aiyra-care/actions/runs/45645028088) |
+| **Preview SHA (GHA)** | `fe39650` (imagem web) |
+| **Código PAT-2b** | `bc4902bd` — merge #245 |
+| **Promote** | **OK** 2026-11-25 |
+| **Run** | [45688849964](https://github.com/RafaDru/aiyra-care/actions/runs/45688849964) |
+| **Web revisão** | `ananeri-preview-web-00014-6c6` |
 | **Web** | https://ananeri-preview-web-kzp5ynymva-uc.a.run.app |
 
-Promote opcional nesta wave (`bc-75f90062`). Após deploy: PAT-2b ☰ + carrossel peek; regressão macro/drawer. **Reinstalar PWA** se o shell estiver antigo.
+Beta: PAT-2b ☰ + carrossel peek em Histórico clínico; regressão macro 2×2 + drawer Neri. **Reinstalar PWA** se o shell estiver antigo.
 
 [`preview-deploy-status.json`](../infra/preview-deploy-status.json)
