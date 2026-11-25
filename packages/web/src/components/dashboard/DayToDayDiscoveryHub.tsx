@@ -68,8 +68,8 @@ export function DayToDayDiscoveryHub({ patientId, hasPatients }: Props) {
   return (
     <Card
       size="small"
+      className="day-to-day-discovery-hub"
       data-testid="day-to-day-discovery-hub"
-      style={{ marginBottom: 16, borderColor: '#d1fae5', background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 55%)' }}
       title={
         <Space direction="vertical" size={0}>
           <Title level={5} style={{ margin: 0 }}>{t('dayToDayDiscovery.title')}</Title>

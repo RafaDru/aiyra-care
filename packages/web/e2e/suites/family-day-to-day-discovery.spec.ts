@@ -44,4 +44,26 @@ test.describe('family-day-to-day-discovery', () => {
     await page.reload()
     await expect(hub).toBeHidden()
   })
+
+  test('hub legivel em dark mode (P0-8)', async ({ page }) => {
+    await ensureQaE2eSession(page)
+    await page.addInitScript(() => {
+      localStorage.setItem('aiyracare-dark-mode', '1')
+      const key = 'aiyracare.dismissedHints'
+      const raw = localStorage.getItem(key)
+      try {
+        const list = raw ? (JSON.parse(raw) as string[]) : []
+        const next = list.filter((id) => id !== 'day-to-day-discovery-hub')
+        localStorage.setItem(key, JSON.stringify(next))
+      } catch {
+        /* ignore */
+      }
+    })
+    await page.goto('/')
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    const hub = page.getByTestId('day-to-day-discovery-hub')
+    await expect(hub.getByText('Dia a dia da família')).toBeVisible({ timeout: 20_000 })
+    const bg = await hub.evaluate((el) => getComputedStyle(el).backgroundColor)
+    expect(bg).not.toContain('255, 255, 255')
+  })
 })

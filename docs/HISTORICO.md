@@ -1,5 +1,12 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-25] - PWA compact — P0-7/P0-6 em `main`; P0-8 dark home
+
+### Realizado (eng)
+- **P0-7** merge: macro 2×2 + nav soft (PR #241).
+- **P0-6** PR #242: drawer Neri 100vw no compact.
+- **P0-8** (PR pendente): `DayToDayDiscoveryHub` sem gradiente light fixo; CSS tema `data-theme`.
+
 ## [2026-11-23] - PWA paciente — feedback Rafael (X1–X4, B5)
 
 ### Produto (Rafael)
