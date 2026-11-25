@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |-------|--------|
-| **Preview SHA** | `f964c2f` |
-| **Promote** | **OK** — #241 macro 2×2 + #242 drawer Neri 100vw |
-| **Run** | [45642161292](https://github.com/RafaDru/aiyra-care/actions/runs/45642161292) |
+| **Preview SHA (código)** | `3b955d0` (+ docs `7872322` na imagem) |
+| **Promote** | **OK** — #241–#244 P0-7..P0-9 |
+| **Run** | [45645028088](https://github.com/RafaDru/aiyra-care/actions/runs/45645028088) |
 | **Web** | https://ananeri-preview-web-kzp5ynymva-uc.a.run.app |
 
-Paciente: blocos macro compactos 2×2. Neri: drawer em largura total no mobile. **Reinstalar PWA** se o shell estiver desatualizado.
+Macro compact, Ava 100vw, hub Dia a dia no dark, alert Arquivos no compact. **Reinstalar PWA** se o shell estiver antigo.
 
 [`preview-deploy-status.json`](../infra/preview-deploy-status.json)

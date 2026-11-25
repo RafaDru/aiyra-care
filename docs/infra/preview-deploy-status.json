@@ -1,14 +1,15 @@
 {
   "previewWebUrl": "https://ananeri-preview-web-kzp5ynymva-uc.a.run.app",
   "previewApiUrl": "https://ananeri-preview-api-kzp5ynymva-uc.a.run.app",
-  "lastPromoteMainSha": "f964c2f1437e0896e45714d9d2554a6cbd7f00aa",
-  "lastPromoteAt": "2026-11-25T15:10:00Z",
-  "lastPromoteWorkflowRun": 45642161292,
-  "lotLabel": "#241 macro 2×2 + #242 drawer Neri 100vw",
+  "lastPromoteMainSha": "787232217e37dce4621a4d141ae71dd0a8631c0f",
+  "lastPromoteCodeSha": "3b955d0fe90db7391583e4b91d6bf68947be5d5f",
+  "lastPromoteAt": "2026-11-25T15:35:00Z",
+  "lastPromoteWorkflowRun": 45645028088,
+  "lotLabel": "#241–#244 P0-7..P0-9 (macro, Ava 100vw, Dia a dia dark, Arquivos alert)",
   "promotePending": false,
-  "originMainSha": "f964c2f1437e0896e45714d9d2554a6cbd7f00aa",
-  "statusCheckedAt": "2026-11-25T15:10:00Z",
-  "betaNowTests": "Paciente: macro 2×2 compact. Ava: drawer chat 100vw no compact shell. Reinstalar PWA.",
+  "originMainSha": "787232217e37dce4621a4d141ae71dd0a8631c0f",
+  "statusCheckedAt": "2026-11-25T15:35:00Z",
+  "betaNowTests": "PWA compact: macro 2×2, drawer Neri 100vw, card Dia a dia legível no dark, alert Arquivos em coluna. Reinstalar PWA.",
   "nextLotCandidates": [],
-  "notes": "Promote NotebookRafael; cancelou run incompleto 45641595198 (só #241/493033b). Run 45642161292."
+  "notes": "Cancelou 45644296820 (c73ac3e). Notebook run 45645028088."
 }
