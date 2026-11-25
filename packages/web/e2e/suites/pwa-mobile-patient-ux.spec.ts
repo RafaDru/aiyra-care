@@ -38,7 +38,7 @@ test.describe('pwa-mobile-patient-ux', () => {
     })
     await openPatientByName(page, unique)
 
-    await page.locator('.patient-section-nav').getByText('Histórico clínico', { exact: true }).click()
+    await page.getByTestId('patient-macro-sections-compact').getByRole('tab', { name: 'Histórico clínico' }).click()
     const compact = page.getByTestId('patient-sub-tabs-compact')
     await expect(compact).toBeVisible({ timeout: 15_000 })
     await expect(compact.getByRole('tab', { name: 'Vacinas' })).toBeVisible()

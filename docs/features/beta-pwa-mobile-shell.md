@@ -18,7 +18,7 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 | Ícones PWA | PNGs rasterizados de `app-icon-ios-android-light.svg` (192/512/apple-touch) |
 | Manifest + HTML | `theme_color` / `background_color` `#FFF7FB` (silk light) |
 | Shell compacto | `standalone` ou `≤768px` + coarse pointer → bottom nav (laterais opacas, eixo Neri transparente); **Neri** centro → chat Ava; FAB **+** direita; header lockup à esquerda + watermark coração crop ~2×; gradiente light/dark; orb Ava oculto |
-| Paciente compact (wave 2026-11-23) | Sub-abas em grade de **chips** (`PatientCompactSubTabs`); copy onboarding só na home sem perfis |
+| Paciente compact (wave 2026-11-23) | Sub-abas em grade de **chips** (`PatientCompactSubTabs`); macro **2×2** (`PatientCompactMacroSections`, P0-7); seleção nav **soft** (não roxo CTA); copy onboarding só na home sem perfis |
 | Dia a dia | `patient-list-bus` + refresh da lente Ava após CRUD |
 | Loading | `CenteredPageLoading` / `CenteredBlockLoading` |
 | Desktop | Sider + header inalterados |
@@ -37,6 +37,7 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 | `packages/web/src/styles/app-layout-mobile.css` | Contraste, header, bottom nav, oculta Ava |
 | `packages/web/src/lib/patient-list-bus.ts` | Sincroniza lista após cadastro |
 | `packages/web/src/components/patient/PatientCompactSubTabs.tsx` | Sub-abas mobile (alternativa ao carrossel Ant Tabs) |
+| `packages/web/src/components/patient/PatientCompactMacroSections.tsx` | Macro 2×2 no compact (PAT-1 / P0-7) |
 | `packages/web/src/components/ui/CenteredLoading.tsx` | Spinner centralizado |
 
 ## QA
