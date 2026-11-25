@@ -117,8 +117,13 @@ Toda capacidade de produto tier ≥ 1 deve considerar **web + mobile** na mesma 
 - `AppErrorBoundary` + toast em falhas 5xx/rede (`service-failure-notify.ts`)
 - Erros de auth pós-login visíveis em telemetria produto (`client_errors`) — painel CH quando catalogado
 
+## Beta staging (distribuição)
+
+Android-first: EAS + Google Play teste interno/fechado → [`MOBILE_STAGING_DISTRIBUTION.md`](../product/MOBILE_STAGING_DISTRIBUTION.md). `eas.json` em `packages/mobile`; `applicationId` `br.com.ananeri.preview`.
+
 ## Pendente
 
+- `eas init` + secrets EAS + primeira submissão Play (ver doc distribuição)
 - Telemetria ops em falhas de auth **sem JWT** (cadastro aguardando e-mail)
 - Onboarding mobile — titular + dependentes; **CRUD perfil** em Dados básicos + Início (Adicionar perfil)
 - **Agenda** — CRUD eventos (consulta/lembrete/tarefa) em `PatientAgendaTab`; calendário/ICS/sync no web

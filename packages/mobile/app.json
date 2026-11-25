@@ -6,8 +6,20 @@
     "orientation": "portrait",
     "scheme": "aiyracare",
     "userInterfaceStyle": "light",
+    "icon": "./assets/brand/logo-square.png",
+    "splash": {
+      "image": "./assets/brand/logo-square.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7E22CE"
+    },
     "android": {
-      "softwareKeyboardLayoutMode": "resize"
+      "package": "br.com.ananeri.preview",
+      "versionCode": 1,
+      "softwareKeyboardLayoutMode": "resize",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand/logo-square.png",
+        "backgroundColor": "#7E22CE"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -17,6 +29,7 @@
       "tsconfigPaths": true
     },
     "ios": {
+      "bundleIdentifier": "br.com.ananeri.preview",
       "infoPlist": {
         "NSFaceIDUsageDescription": "O Ananeri usa Face ID para desbloquear o app com segurança."
       }
