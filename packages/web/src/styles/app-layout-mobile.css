@@ -373,7 +373,8 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
   cursor: not-allowed;
 }
 
-.app-layout--compact .ava-chat-drawer .ant-drawer-content-wrapper {
+.app-layout--compact .ava-chat-drawer .ant-drawer-content-wrapper,
+.ava-chat-drawer--compact .ant-drawer-content-wrapper {
   width: 100vw !important;
   min-width: 0 !important;
   max-width: 100vw !important;

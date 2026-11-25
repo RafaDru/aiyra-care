@@ -41,7 +41,14 @@ Melhorias Rafael 2026-11-23: dia a dia pós-cadastro, loading centralizado, sub-
 | 3 | Perfil → **Clínico** | Chips `patient-sub-tabs-compact`, rótulos completos | |
 | 4 | Trocar chip | Conteúdo da aba muda; sem carrossel horizontal de tabs Ant | |
 
-### D — Loading centralizado (X2)
+### D — Drawer Neri 100vw (P0-6)
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Abrir chat Neri no compact | Drawer sem corte lateral; chips/avatar visíveis | |
+| 2 | Classe | `ava-chat-drawer--compact` no portal | |
+
+### E — Loading centralizado (X2)
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|

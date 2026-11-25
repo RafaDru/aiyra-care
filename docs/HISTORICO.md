@@ -1,5 +1,14 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-25] - PWA compact — macro 2×2 (P0-7) + drawer Neri 100vw (P0-6)
+
+### Realizado (eng)
+- **P0-7** merge `main`: `PatientCompactMacroSections`, tokens nav soft, suite `pwa-mobile-patient-ux` (PR #241).
+- **P0-6** (branch): `AvaDockWidget` aplica `styles.wrapper` 100vw + `ava-chat-drawer--compact` no portal Ant (não depende de `.app-layout--compact` ancestral).
+
+### Design
+- Figma Paciente fidel v2 (`23-86`) alinhado à implementação PAT-1.
+
 ## [2026-11-23] - PWA paciente — feedback Rafael (X1–X4, B5)
 
 ### Produto (Rafael)
