@@ -678,6 +678,8 @@
     "importForProfile": "Import to this profile",
     "openHealthProfile": "Open health profile",
     "personFallback": "this person",
+    "compactContextAria": "Current person: {{name}}. Switch person",
+    "compactContextSheetTitle": "Family members",
     "importHint": "Data will be imported into this profile. For recurring sync, link the portal under Integrations.",
     "amilDependentSuccess": "Profile added. Sync again to import guides and member card.",
     "age": "years old",

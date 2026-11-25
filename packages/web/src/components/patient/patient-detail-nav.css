@@ -305,6 +305,95 @@
   padding: 16px !important;
 }
 
+/* PAT-CTX-1 — contexto de pessoa ao rolar (compact) */
+.patient-compact-person-ctx {
+  position: sticky;
+  top: 0;
+  z-index: 24;
+  display: none;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.patient-compact-person-ctx--visible {
+  display: flex;
+}
+
+.patient-detail-root--ctx-pinned .patient-detail-sticky-nav {
+  top: 44px;
+}
+
+.patient-compact-person-ctx__trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.patient-compact-person-ctx__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+.patient-compact-person-ctx__chev {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.patient-compact-person-ctx__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.patient-compact-person-ctx__list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 4px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.patient-compact-person-ctx__list-item--active {
+  background: var(--nav-selected-bg, #faf5ff);
+  color: var(--nav-selected-text, #6b21a8);
+  font-weight: 600;
+}
+
+.patient-compact-person-ctx__hint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .patient-section-nav {
     padding: 12px 16px 8px;
