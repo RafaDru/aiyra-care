@@ -640,6 +640,7 @@ export function PatientDetail() {
                     activeKey={activeTab}
                     items={sectionTabKeys.map((key) => ({ key, label: tabTextLabel(key) }))}
                     onChange={setActiveTab}
+                    sectionLabel={t(`sections.${activeSection}`)}
                   />
                 ) : (
                   <DefaultTabBar {...props} />

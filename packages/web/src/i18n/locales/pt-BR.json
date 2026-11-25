@@ -692,6 +692,9 @@
     "linkPortalError": "Erro ao vincular",
     "susReimportError": "Erro ao reimportar SUS",
     "susImported": "SUS: importados {{parts}}",
+    "compactSubNavMenu": "Ver todas as seções",
+    "compactSubNavSheetTitle": "{{section}} — seções",
+    "compactSubNavSheetTitleGeneric": "Seções",
     "category": {
       "children": "Criança",
       "adolescents": "Adolescente",
