@@ -904,4 +904,182 @@ export class OpsMetricsPgRepository {
       })),
     }
   }
+
+  private usageBucketExpr(granularity: '15m' | '1h' | '1d'): string {
+    if (granularity === '15m') {
+      return `to_timestamp(floor(extract(epoch FROM created_at) / 900) * 900)`
+    }
+    if (granularity === '1h') {
+      return `date_trunc('hour', created_at)`
+    }
+    return `date_trunc('day', created_at AT TIME ZONE 'America/Sao_Paulo')`
+  }
+
+  async usageActiveCounts(windowMinutes: number): Promise<{
+    activeAccounts: number
+    activeSessions: number
+    anonymousSessions: number
+  }> {
+    const { rows } = await this.pool.query(
+      `SELECT
+         COUNT(DISTINCT account_id) FILTER (WHERE account_id IS NOT NULL)::int AS active_accounts,
+         COUNT(DISTINCT session_id)::int AS active_sessions,
+         COUNT(DISTINCT session_id) FILTER (WHERE account_id IS NULL)::int AS anon_sessions
+       FROM product_events
+       WHERE created_at >= NOW() - make_interval(mins => $1::int)`,
+      [windowMinutes],
+    )
+    const row = rows[0] as Record<string, unknown>
+    return {
+      activeAccounts: Number(row.active_accounts ?? 0),
+      activeSessions: Number(row.active_sessions ?? 0),
+      anonymousSessions: Number(row.anon_sessions ?? 0),
+    }
+  }
+
+  async usageBySurface(windowMinutes: number): Promise<
+    import('../../domain/ops/ops-usage.types.js').OpsUsageSurfaceRow[]
+  > {
+    const { rows } = await this.pool.query(
+      `SELECT
+         CASE
+           WHEN account_id IS NULL THEN 'anon'
+           WHEN COALESCE(properties->>'surface', 'web') = 'mobile' THEN 'mobile'
+           ELSE 'web'
+         END AS surface,
+         COUNT(DISTINCT session_id)::int AS sessions,
+         COUNT(DISTINCT account_id) FILTER (WHERE account_id IS NOT NULL)::int AS accounts
+       FROM product_events
+       WHERE created_at >= NOW() - make_interval(mins => $1::int)
+       GROUP BY 1
+       ORDER BY sessions DESC`,
+      [windowMinutes],
+    )
+    return rows.map((row) => ({
+      surface: row.surface as string,
+      sessions: Number(row.sessions),
+      accounts: Number(row.accounts),
+    }))
+  }
+
+  async usageEventsPerMinuteLastHour(): Promise<
+    import('../../domain/ops/ops-usage.types.js').OpsUsageMinuteBucket[]
+  > {
+    const { rows } = await this.pool.query(
+      `SELECT
+         date_trunc('minute', created_at) AS minute,
+         COUNT(*)::int AS count
+       FROM product_events
+       WHERE created_at >= NOW() - INTERVAL '1 hour'
+         AND event_name NOT IN ('ops_worker_tick', 'stripe_webhook_rejected')
+       GROUP BY 1
+       ORDER BY 1`,
+    )
+    return rows.map((row) => ({
+      minute: new Date(row.minute as string).toISOString(),
+      count: Number(row.count),
+    }))
+  }
+
+  async usageTimeSeries(
+    from: Date,
+    to: Date,
+    granularity: '15m' | '1h' | '1d',
+  ): Promise<import('../../domain/ops/ops-usage.types.js').OpsUsageSeriesBucket[]> {
+    const bucket = this.usageBucketExpr(granularity)
+    const params = [from.toISOString(), to.toISOString()]
+    const [peRes, ceRes] = await Promise.all([
+      this.pool.query(
+        `SELECT
+           ${bucket} AS bucket_start,
+           COUNT(DISTINCT account_id) FILTER (WHERE account_id IS NOT NULL)::int AS active_accounts,
+           COUNT(DISTINCT session_id)::int AS active_sessions,
+           COUNT(*) FILTER (WHERE event_name = 'app_screen_viewed')::int AS screen_views,
+           COUNT(*)::int AS total_events
+         FROM product_events
+         WHERE created_at >= $1 AND created_at < $2
+           AND event_name NOT IN ('ops_worker_tick', 'stripe_webhook_rejected')
+         GROUP BY 1
+         ORDER BY 1`,
+        params,
+      ),
+      this.pool.query(
+        `SELECT
+           ${bucket} AS bucket_start,
+           COUNT(*)::int AS client_errors
+         FROM client_errors
+         WHERE created_at >= $1 AND created_at < $2
+         GROUP BY 1`,
+        params,
+      ),
+    ])
+    const errByBucket = new Map<string, number>()
+    for (const row of ceRes.rows) {
+      const key = new Date(row.bucket_start as string).toISOString()
+      errByBucket.set(key, Number(row.client_errors))
+    }
+    return peRes.rows.map((row) => {
+      const bucketStart = new Date(row.bucket_start as string).toISOString()
+      return {
+        bucketStart,
+        activeAccounts: Number(row.active_accounts),
+        activeSessions: Number(row.active_sessions),
+        screenViews: Number(row.screen_views),
+        totalEvents: Number(row.total_events),
+        clientErrors: errByBucket.get(bucketStart) ?? 0,
+      }
+    })
+  }
+
+  async usageHeatmapFeatureBuckets(
+    from: Date,
+    to: Date,
+    granularity: '15m' | '1h' | '1d',
+  ): Promise<import('../../domain/ops/ops-usage-heatmap.js').UsageHeatmapFeatureBucketRow[]> {
+    const bucket = this.usageBucketExpr(granularity)
+    const { rows } = await this.pool.query(
+      `SELECT
+         COALESCE(properties->>'feature_key', 'unknown') AS feature_key,
+         ${bucket} AS bucket_start,
+         COUNT(DISTINCT session_id)::int AS session_count,
+         COUNT(DISTINCT account_id) FILTER (WHERE account_id IS NOT NULL)::int AS account_count,
+         COUNT(*)::int AS event_count
+       FROM product_events
+       WHERE event_name = 'app_screen_viewed'
+         AND created_at >= $1 AND created_at < $2
+       GROUP BY 1, 2
+       ORDER BY 2, session_count DESC`,
+      [from.toISOString(), to.toISOString()],
+    )
+    return rows.map((row) => ({
+      featureKey: row.feature_key as string,
+      bucketStart: new Date(row.bucket_start as string),
+      sessionCount: Number(row.session_count),
+      accountCount: Number(row.account_count),
+      eventCount: Number(row.event_count),
+    }))
+  }
+
+  async usageHeatmapErrorBuckets(
+    from: Date,
+    to: Date,
+    granularity: '15m' | '1h' | '1d',
+  ): Promise<import('../../domain/ops/ops-usage-heatmap.js').UsageHeatmapErrorBucketRow[]> {
+    const bucket = this.usageBucketExpr(granularity)
+    const { rows } = await this.pool.query(
+      `SELECT
+         feature,
+         ${bucket} AS bucket_start,
+         COUNT(*)::int AS error_count
+       FROM client_errors
+       WHERE created_at >= $1 AND created_at < $2
+       GROUP BY 1, 2`,
+      [from.toISOString(), to.toISOString()],
+    )
+    return rows.map((row) => ({
+      feature: row.feature as string,
+      bucketStart: new Date(row.bucket_start as string),
+      errorCount: Number(row.error_count),
+    }))
+  }
 }

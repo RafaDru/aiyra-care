@@ -12,6 +12,7 @@ import fastifyStatic from '@fastify/static'
 import { createServer as createViteServer, type ViteDevServer } from 'vite'
 import pg from 'pg'
 import { OpsMetricsService } from '../../api/src/application/ops/ops-metrics.service.js'
+import { OpsUsageService } from '../../api/src/application/ops/ops-usage.service.js'
 import { OpsAlertDispatchService } from '../../api/src/application/ops/ops-alert-dispatch.service.js'
 import { OpsMetricsPgRepository } from '../../api/src/infrastructure/persistence/ops-metrics.pg.repository.js'
 import { LlmInternalCostService } from '../../api/src/application/llm/llm-internal-cost.service.js'
@@ -134,8 +135,10 @@ const pool = new pg.Pool({
     process.env.DATABASE_URL ?? 'postgresql://postgres:postgres123@127.0.0.1:5432/aiyracare',
 })
 
+const opsMetricsRepo = new OpsMetricsPgRepository(pool)
+const usageService = new OpsUsageService(opsMetricsRepo)
 const metricsService = new OpsMetricsService(
-  new OpsMetricsPgRepository(pool),
+  opsMetricsRepo,
   new LlmInternalCostService(
     new LlmUsagePgRepository(pool),
     new LlmInternalBudgetPgRepository(pool),
@@ -427,6 +430,22 @@ async function main() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'strategy_load_failed'
       return reply.status(500).send({ error: message })
+    }
+  })
+
+  fastify.get<{
+    Querystring: { preset?: string; from?: string; to?: string; series?: string; heatmap?: string }
+  }>('/api/usage', async (req, reply) => {
+    try {
+      const includeSeries = req.query.series !== '0'
+      const includeHeatmap = req.query.heatmap !== '0'
+      return await usageService.getUsage(req.query.preset, req.query.from, req.query.to, {
+        includeSeries,
+        includeHeatmap,
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'usage_failed'
+      return reply.status(400).send({ error: message })
     }
   })
 

@@ -513,6 +513,63 @@ export interface OpsMetricsSnapshot {
     submitted24h: number
   }
   business?: OpsBusinessAnalytics
+  usageLive?: OpsUsageLiveSnapshot
+}
+
+export type OpsUsagePreset = 'today' | '7d' | '30d' | 'custom'
+
+export interface OpsUsageLiveSnapshot {
+  generatedAt: string
+  windowMinutes: number
+  activeAccounts: number
+  activeSessions: number
+  anonymousSessions: number
+  bySurface: Array<{ surface: string; sessions: number; accounts: number }>
+  eventsPerMinuteLastHour: Array<{ minute: string; count: number }>
+}
+
+export interface OpsUsageSeriesBucket {
+  bucketStart: string
+  activeAccounts: number
+  activeSessions: number
+  screenViews: number
+  totalEvents: number
+  clientErrors: number
+}
+
+export interface OpsUsageTimeSeries {
+  from: string
+  to: string
+  granularity: '15m' | '1h' | '1d'
+  preset: OpsUsagePreset
+  series: OpsUsageSeriesBucket[]
+}
+
+export interface OpsUsageHeatmapCell {
+  bucketStart: string
+  sessionCount: number
+  accountCount: number
+  eventCount: number
+  failRatePct: number | null
+}
+
+export interface OpsUsageHeatmapRow {
+  area: string
+  cells: OpsUsageHeatmapCell[]
+}
+
+export interface OpsUsageHeatmap {
+  from: string
+  to: string
+  granularity: '15m' | '1h' | '1d'
+  preset: OpsUsagePreset
+  rows: OpsUsageHeatmapRow[]
+}
+
+export interface OpsUsageResponse {
+  live: OpsUsageLiveSnapshot
+  series?: OpsUsageTimeSeries
+  heatmap?: OpsUsageHeatmap
 }
 
 export interface SupportReportOpsRow {

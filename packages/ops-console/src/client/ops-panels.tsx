@@ -34,6 +34,7 @@ import {
 } from './components/OpsCharts.js'
 import { OpsKpiCard, OpsKpiGrid } from './components/OpsKpiCard.js'
 import { ChCycleMetricsCard } from './components/ChCycleMetricsCard.js'
+import { UsageLiveStrip } from './UsageLiveStrip.js'
 import { resolveClientFeatureArea, resolveClientFeatureLabel } from './ops-feature-catalog.js'
 import { formatBrl, formatUsdCents } from './ops-format.js'
 import { useOpsDrillDown } from './ops-drill-down.js'
@@ -133,6 +134,7 @@ export function OverviewPanel({
   return (
     <div className="ops-panel-stack">
       <ChCycleMetricsCard />
+      <UsageLiveStrip live={metrics.usageLive} />
       <OpsKpiGrid>
         <OpsKpiCard
           label="Alertas critical"
