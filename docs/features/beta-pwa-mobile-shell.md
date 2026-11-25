@@ -18,7 +18,7 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 | Ícones PWA | PNGs rasterizados de `app-icon-ios-android-light.svg` (192/512/apple-touch) |
 | Manifest + HTML | `theme_color` / `background_color` `#FFF7FB` (silk light) |
 | Shell compacto | `standalone` ou `≤768px` + coarse pointer → bottom nav (laterais opacas, eixo Neri transparente); **Neri** centro → chat Ava (**drawer 100vw**, P0-6); FAB **+** direita; header lockup à esquerda + watermark coração crop ~2×; gradiente light/dark; orb Ava oculto |
-| Paciente compact (wave 2026-11-23+) | Sub-abas **PAT-2b**: menu ☰ (lista completa) + carrossel peek (`PatientCompactSubTabs`); macro **2×2** (`PatientCompactMacroSections`, P0-7); seleção **fidel** + underline; copy onboarding só na home sem perfis |
+| Paciente compact (wave 2026-11-23+) | Sub-abas **PAT-2b**: menu ☰ + carrossel peek; macro **2×2 PAT-2a** (ícone em cima, label centrada, 72px); seleção **fidel** + underline; copy onboarding só na home sem perfis |
 | Dia a dia | `patient-list-bus` + refresh da lente Ava após CRUD; card discovery **dark legível** (P0-8, `day-to-day-discovery-hub.css`) |
 | Loading | `CenteredPageLoading` / `CenteredBlockLoading` |
 | Desktop | Sider + header inalterados |
