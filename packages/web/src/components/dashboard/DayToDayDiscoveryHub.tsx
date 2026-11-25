@@ -12,6 +12,7 @@ import { dismissHint, isHintDismissed } from '../../lib/dismissed-hints.js'
 import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
 import { requestConsultVisitOpen } from '../../lib/clinical-export-bus.js'
 import { requestPatientCreateOpen } from '../../lib/patient-create-bus.js'
+import './day-to-day-discovery-hub.css'
 
 const HINT_ID = 'day-to-day-discovery-hub'
 
