@@ -1,0 +1,27 @@
+.day-to-day-discovery-hub.ant-card {
+  margin-bottom: 16px;
+  border-color: color-mix(in srgb, var(--status-success-fg) 35%, var(--border));
+  background: linear-gradient(
+    135deg,
+    var(--status-success-bg) 0%,
+    var(--card-bg) 55%
+  );
+}
+
+html[data-theme='dark'] .day-to-day-discovery-hub.ant-card {
+  border-color: color-mix(in srgb, var(--status-success-fg) 45%, var(--border));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--status-success-fg) 18%, var(--card-bg)) 0%,
+    var(--card-bg) 60%
+  );
+}
+
+html[data-theme='dark'] .day-to-day-discovery-hub .ant-card-head-title,
+html[data-theme='dark'] .day-to-day-discovery-hub .ant-typography {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+html[data-theme='dark'] .day-to-day-discovery-hub .ant-typography.ant-typography-secondary {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+}

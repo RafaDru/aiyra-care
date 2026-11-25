@@ -24,3 +24,4 @@
 | 3 | Fechar drawer; clicar **Preparar consulta** | Modal «Levar na consulta» abre | |
 | 4 | Fechar modal; dismiss (×) no card | Card some | |
 | 5 | Recarregar página | Card não reaparece | |
+| 6 | Dark mode (`aiyracare-dark-mode=1`) | Título legível; fundo não branco puro (P0-8, E2E) | |
