@@ -1,5 +1,14 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-25] - PWA compact — PAT-2b sub-nav B+ em `main`
+
+### Realizado (eng)
+- **PAT-2b** merge `main` (PR #245, `bc4902bd`): `PatientCompactSubTabs` — menu ☰ (lista completa), carrossel peek, chips 44px, drawer; i18n + suite `pwa-mobile-patient-ux`.
+- **AC-159** concluído (tracker) — alinhado à decisão submenu B+ / Figma `30-2`.
+
+### Preview lote
+- SHA registro pós-merge: `bc4902bd3eb33f99c1e208d2329d121ff95f38da`; promote **não** disparado nesta wave (notebook / `bc-75f90062` se refresh).
+
 ## [2026-11-25] - PWA compact — P0-7/P0-6 em `main`; P0-8 dark home
 
 ### Realizado (eng)
