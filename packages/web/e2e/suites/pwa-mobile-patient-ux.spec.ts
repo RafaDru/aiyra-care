@@ -52,6 +52,37 @@ test.describe('pwa-mobile-patient-ux', () => {
     await page.keyboard.press('Escape')
   })
 
+  test('PAT-2a macro icone-top + PAT-CTX-1 barra pessoa ao rolar', async ({ page }) => {
+    await ensureQaE2eSession(page)
+    await page.goto('/')
+
+    const unique = `QA MacroCtx ${Date.now()}`
+    await createPatientFromDashboard(page, {
+      name: unique,
+      birthDate: '20/03/2018',
+      genderLabel: 'Feminino',
+    })
+    await openPatientByName(page, unique)
+
+    const firstTile = page.getByTestId('patient-macro-sections-compact').getByRole('tab').first()
+    const iconBox = await firstTile.locator('.patient-macro-tile__icon').boundingBox()
+    const labelBox = await firstTile.locator('.patient-macro-tile__label').boundingBox()
+    expect(iconBox).not.toBeNull()
+    expect(labelBox).not.toBeNull()
+    expect(iconBox!.y).toBeLessThan(labelBox!.y)
+
+    const ctxBar = page.getByTestId('patient-compact-person-ctx')
+    await expect(ctxBar).toBeHidden()
+    await page.locator('.app-main-content').evaluate((el) => {
+      el.scrollTop = 420
+    })
+    await expect(ctxBar).toHaveClass(/patient-compact-person-ctx--visible/, { timeout: 10_000 })
+    await ctxBar.getByRole('button').first().click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await expect(page.getByText(unique, { exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+  })
+
   test('drawer Neri ocupa largura total no compact (P0-6)', async ({ page }) => {
     await ensureQaE2eSession(page)
     await page.goto('/')

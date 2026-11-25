@@ -41,6 +41,14 @@ Melhorias Rafael 2026-11-23: dia a dia pós-cadastro, loading centralizado, sub-
 | 3 | Perfil → **Clínico** | **PAT-2b:** ☰ + carrossel peek; menu abre lista completa; chips 44px alinhados | |
 | 4 | Trocar chip / item da lista | Conteúdo da aba muda; rail centraliza item ativo | |
 
+### F — Contexto pessoa ao rolar (PAT-CTX-1, lote 25/11)
+
+| # | Ação | Resultado esperado | ✅/❌ |
+|---|------|-------------------|-------|
+| 1 | Topo do perfil compact | Barra `patient-compact-person-ctx` **oculta** (hero visível) | |
+| 2 | Scroll até macro sticky | Barra visível: avatar 24px + nome + chevron; `patient-detail-sticky-nav` com offset ~44px | |
+| 3 | Toque na barra | Sheet lista pessoas; troca navega para outro `/patients/:id` | |
+
 ### D — Drawer Neri 100vw (P0-6)
 
 | # | Ação | Resultado esperado | ✅/❌ |

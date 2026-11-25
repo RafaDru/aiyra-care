@@ -50,6 +50,7 @@ import '../../components/patient/patient-detail-nav.css'
 import '../../components/ava/ava-dock.css'
 import { PatientCompactSubTabs } from '../../components/patient/PatientCompactSubTabs.js'
 import { PatientCompactMacroSections } from '../../components/patient/PatientCompactMacroSections.js'
+import { PatientCompactPersonContextBar } from '../../components/patient/PatientCompactPersonContextBar.js'
 import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
@@ -104,6 +105,8 @@ export function PatientDetail() {
     healthThreadId?: string | null
   } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
+  const heroSentinelRef = useRef<HTMLDivElement>(null)
+  const [personCtxPinned, setPersonCtxPinned] = useState(false)
   const compactShell = useCompactAppShell()
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
@@ -545,12 +548,13 @@ export function PatientDetail() {
   }))
 
   return (
-    <div>
+    <div className={compactShell && personCtxPinned ? 'patient-detail-root--ctx-pinned' : undefined}>
       <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} style={{ marginBottom: 16 }}>
         {t('common.back')}
       </Button>
 
-      <Card style={{ borderRadius: 16, marginBottom: 20, overflow: 'clip' }}>
+      <div ref={heroSentinelRef} style={{ marginBottom: 20 }}>
+      <Card style={{ borderRadius: 16, overflow: 'clip' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
           <Avatar size={96} src={patient.photoUrl} style={{ backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5', fontSize: 40 }}>
             {patient.name.charAt(0).toUpperCase()}
@@ -587,6 +591,16 @@ export function PatientDetail() {
           </div>
         </div>
       </Card>
+      </div>
+
+      {compactShell ? (
+        <PatientCompactPersonContextBar
+          patient={patient}
+          patients={allPatients}
+          heroSentinelRef={heroSentinelRef}
+          onPinnedChange={setPersonCtxPinned}
+        />
+      ) : null}
 
       <CareReminderBanner
         patientId={patient.id}

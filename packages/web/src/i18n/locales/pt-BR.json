@@ -678,6 +678,8 @@
     "importForProfile": "Importar para este perfil",
     "openHealthProfile": "Abrir perfil de saúde",
     "personFallback": "esta pessoa",
+    "compactContextAria": "Pessoa atual: {{name}}. Trocar pessoa",
+    "compactContextSheetTitle": "Pessoas da família",
     "importHint": "Os dados serão importados neste perfil. Para sync recorrente, vincule o portal em Integrações.",
     "amilDependentSuccess": "Perfil adicionado. Sincronize novamente para importar guias e carteirinha.",
     "age": "anos",

@@ -1,5 +1,10 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-25] - PWA shell lote Rafael (HDR-2, NAV, PAT-CTX-1)
+
+### Em PR (cloud)
+- **Shell wave** (`cursor/pwa-shell-wave-25nov-27b0`, stacked em PR #247 PAT-2a): watermark direita, scroll padding FAB/barra, Neri sem disco branco, barra pessoa sticky; macro **não** duplicado — #247.
+
 ## [2026-11-25] - PWA compact — PAT-2b sub-nav B+ em `main`
 
 ### Realizado (eng)
