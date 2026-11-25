@@ -5,7 +5,8 @@
 ### Realizado (eng)
 - **P0-7** merge `main`: `PatientCompactMacroSections`, tokens nav soft, suite `pwa-mobile-patient-ux` (PR #241).
 - **P0-6** merge `main`: `AvaDockWidget` 100vw + `ava-chat-drawer--compact` (PR #242).
-- **P0-8** (PR #243): `DayToDayDiscoveryHub` — CSS tema, sem gradiente light fixo.
+- **P0-8** merge (PR #243, `c73ac3e`): `DayToDayDiscoveryHub` — CSS tema dark.
+- **P0-9** (PR #244): alert Arquivos — link «Exames» em coluna no compact.
 
 ### Design
 - Figma Paciente fidel v2 (`23-86`) alinhado à implementação PAT-1.

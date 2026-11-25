@@ -24,6 +24,7 @@ import { buildDocumentLinkIndex, groupPortalDocuments } from '../../../lib/docum
 import { SourceTag } from '../../../components/ui/SourceTag.js'
 import { DismissibleHint } from '../../../components/ui/DismissibleHint.js'
 import { AvaPlatformHint } from '../../../components/ava/AvaPlatformHint.js'
+import './documents-tab.css'
 
 interface Props {
   patientId: string
@@ -401,7 +402,7 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
   const identityMode = reviewDoc ? isIdentityType(reviewDoc.documentType) : isIdentityType(documentType)
 
   return (
-    <>
+    <div className="patient-documents-tab">
       <OcrStatsPanel />
       <AvaPlatformHint patientId={patientId} context="documents" />
       <DismissibleHint
@@ -411,20 +412,24 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
         style={{ marginBottom: 16 }}
         message="Arquivos importados dos portais"
         description={
-          <span>
-            {t('document.portalImportsHint')}
-            {hiddenSliceCount > 0 && !showSlices && (
-              <> · <Text type="secondary">{hiddenSliceCount} cortes ocultos</Text></>
-            )}
-            {onOpenExamsTab && (
-              <>
-                {' '}
-                <Button type="link" size="small" style={{ padding: 0 }} onClick={onOpenExamsTab}>
-                  Abrir aba Exames
-                </Button>
-              </>
-            )}
-          </span>
+          <div className="documents-portal-import-hint">
+            <span>
+              {t('document.portalImportsHint')}
+              {hiddenSliceCount > 0 && !showSlices && (
+                <> · <Text type="secondary">{hiddenSliceCount} cortes ocultos</Text></>
+              )}
+            </span>
+            {onOpenExamsTab ? (
+              <Button
+                type="link"
+                size="small"
+                className="documents-portal-import-hint__link"
+                onClick={onOpenExamsTab}
+              >
+                Abrir aba Exames
+              </Button>
+            ) : null}
+          </div>
         }
       />
       <DismissibleHint
@@ -652,6 +657,6 @@ export function DocumentsTab({ patientId, onPatientUpdated, onOpenExamsTab }: Pr
           api.handwritingCredits.quota().then(setQuota).catch(() => {})
         }}
       />
-    </>
+    </div>
   )
 }
