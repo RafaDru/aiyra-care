@@ -40,6 +40,7 @@ Ver [`preview-deploy-status.json`](./preview-deploy-status.json) — `lastPromot
 |------------|-------------------|------|--------------|
 | 2026-11-23 | `828eb3b` | AC-126 ícone + shell v1 | [45229326123](https://github.com/RafaDru/aiyra-care/actions/runs/45229326123) |
 | 2026-11-23 | `f8659fa` | Lote #234–#236 (AC-136 + quick capture + policy) | [45250015448](https://github.com/RafaDru/aiyra-care/actions/runs/45250015448) |
+| 2026-11-25 | `bc4902bd` | #245 PAT-2b sub-nav ☰ + carrossel | [45688849964](https://github.com/RafaDru/aiyra-care/actions/runs/45688849964) |
 
 Lote aberto (sem Promote): `main` `63fb1b3` (#232 AC-136) já passou o preview `828eb3b`. Candidatos a incluir no fechamento: #235 (registro rápido) + #234 (spec) + #236 (esta política), se mergeados.
 
