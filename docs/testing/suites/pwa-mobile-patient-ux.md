@@ -36,7 +36,7 @@ Melhorias Rafael 2026-11-23: dia a dia pós-cadastro, loading centralizado, sub-
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
-| 1 | Perfil compact | Macro em grade 2×2 (`patient-macro-sections-compact`); rótulos completos (não «Histór…») | |
+| 1 | Perfil compact | Macro 2×2 (`patient-macro-sections-compact`); **ícone em cima + label centrada** (PAT-2a); rótulos completos | |
 | 2 | Macro ativo | Tom **soft** (lavanda), não roxo sólido de CTA | |
 | 3 | Perfil → **Clínico** | **PAT-2b:** ☰ + carrossel peek; menu abre lista completa; chips 44px alinhados | |
 | 4 | Trocar chip / item da lista | Conteúdo da aba muda; rail centraliza item ativo | |
