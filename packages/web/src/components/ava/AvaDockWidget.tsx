@@ -16,6 +16,7 @@ import { isLlmQuotaExhausted } from '../../lib/llm-quota.js'
 import { useAuth } from '../../contexts/AuthContext.js'
 import { useLlmActivity } from '../../contexts/LlmActivityContext.js'
 import type { AvaOpenRequest } from '../../lib/ava-dock-bus.js'
+import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 
 /** Ava no header: círculo grande, balão à esquerda, CTA após intro. */
 const AVA_SIZE_RATIO = 1
@@ -47,6 +48,7 @@ export function AvaDockWidget({
   onOpenRequestConsumed,
 }: Props) {
   const { t } = useTranslation()
+  const compactShell = useCompactAppShell()
   const [open, setOpen] = useState(false)
   const { active: llmAnalyzing } = useLlmActivity()
   const { account } = useAuth()
@@ -140,13 +142,17 @@ export function AvaDockWidget({
       </button>
 
       <Drawer
-        rootClassName="ava-chat-drawer"
+        rootClassName={
+          compactShell ? 'ava-chat-drawer ava-chat-drawer--compact' : 'ava-chat-drawer'
+        }
         styles={{
-          wrapper: {
-            width: '50vw',
-            minWidth: 420,
-            maxWidth: '50vw',
-          },
+          wrapper: compactShell
+            ? { width: '100vw', minWidth: 0, maxWidth: '100vw' }
+            : {
+                width: '50vw',
+                minWidth: 420,
+                maxWidth: '50vw',
+              },
           header: { display: 'none' },
           body: { padding: 0 },
         }}

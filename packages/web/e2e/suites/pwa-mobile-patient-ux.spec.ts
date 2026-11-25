@@ -2,12 +2,15 @@ import { test, expect } from '@playwright/test'
 import { requireQaTestCredentials } from '../helpers/env'
 import { ensureQaE2eSession } from '../helpers/session'
 import { createPatientFromDashboard, openPatientByName } from '../helpers/patient'
+import { emulateCompactAppShell } from '../helpers/compact-shell'
+import { openAvaDock } from '../helpers/ava'
 
 test.describe('pwa-mobile-patient-ux', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
-  test.beforeEach(() => {
+  test.beforeEach(async ({ page }) => {
     requireQaTestCredentials()
+    await emulateCompactAppShell(page)
   })
 
   test('dia a dia aparece apos cadastro sem reload (X1)', async ({ page }) => {
@@ -43,5 +46,18 @@ test.describe('pwa-mobile-patient-ux', () => {
     await expect(compact).toBeVisible({ timeout: 15_000 })
     await expect(compact.getByRole('tab', { name: 'Vacinas' })).toBeVisible()
     await expect(compact.getByRole('tab', { name: 'Medicações' })).toBeVisible()
+  })
+
+  test('drawer Neri ocupa largura total no compact (P0-6)', async ({ page }) => {
+    await ensureQaE2eSession(page)
+    await page.goto('/')
+    await openAvaDock(page)
+    const drawer = page.locator('.ava-chat-drawer--compact .ant-drawer-content-wrapper')
+    await expect(drawer).toBeVisible({ timeout: 15_000 })
+    const box = await drawer.boundingBox()
+    expect(box).not.toBeNull()
+    const viewport = page.viewportSize()
+    expect(viewport).not.toBeNull()
+    expect(box!.width).toBeGreaterThanOrEqual((viewport!.width ?? 390) * 0.98)
   })
 })
