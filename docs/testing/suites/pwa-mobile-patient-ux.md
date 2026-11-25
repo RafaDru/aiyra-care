@@ -38,8 +38,8 @@ Melhorias Rafael 2026-11-23: dia a dia pós-cadastro, loading centralizado, sub-
 |---|------|-------------------|-------|
 | 1 | Perfil compact | Macro em grade 2×2 (`patient-macro-sections-compact`); rótulos completos (não «Histór…») | |
 | 2 | Macro ativo | Tom **soft** (lavanda), não roxo sólido de CTA | |
-| 3 | Perfil → **Clínico** | Chips `patient-sub-tabs-compact`, rótulos completos | |
-| 4 | Trocar chip | Conteúdo da aba muda; sem carrossel horizontal de tabs Ant | |
+| 3 | Perfil → **Clínico** | **PAT-2b:** ☰ + carrossel peek; menu abre lista completa; chips 44px alinhados | |
+| 4 | Trocar chip / item da lista | Conteúdo da aba muda; rail centraliza item ativo | |
 
 ### D — Drawer Neri 100vw (P0-6)
 
