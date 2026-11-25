@@ -32,12 +32,14 @@ Melhorias Rafael 2026-11-23: dia a dia pós-cadastro, loading centralizado, sub-
 | 1 | Home com zero pessoas | Texto «Que bom ter você aqui…» no card Dia a dia | |
 | 2 | Abrir perfil → visão geral sem histórico clínico | **Sem** o mesmo parágrafo de boas-vindas no painel família | |
 
-### C — Sub-abas compact (X3 + X4)
+### C — Macro 2×2 + sub-abas compact (P0-7, X3 + X4)
 
 | # | Ação | Resultado esperado | ✅/❌ |
 |---|------|-------------------|-------|
-| 1 | Perfil → seção **Clínico** | Grade de chips (`patient-sub-tabs-compact`), rótulos completos (ex.: Histórico, Arquivos) | |
-| 2 | Trocar chip | Conteúdo da aba muda; sem carrossel horizontal de tabs Ant | |
+| 1 | Perfil compact | Macro em grade 2×2 (`patient-macro-sections-compact`); rótulos completos (não «Histór…») | |
+| 2 | Macro ativo | Tom **soft** (lavanda), não roxo sólido de CTA | |
+| 3 | Perfil → **Clínico** | Chips `patient-sub-tabs-compact`, rótulos completos | |
+| 4 | Trocar chip | Conteúdo da aba muda; sem carrossel horizontal de tabs Ant | |
 
 ### D — Loading centralizado (X2)
 

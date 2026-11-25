@@ -49,6 +49,7 @@ import '../../components/patient/patient-basic-summary.css'
 import '../../components/patient/patient-detail-nav.css'
 import '../../components/ava/ava-dock.css'
 import { PatientCompactSubTabs } from '../../components/patient/PatientCompactSubTabs.js'
+import { PatientCompactMacroSections } from '../../components/patient/PatientCompactMacroSections.js'
 import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
@@ -497,11 +498,7 @@ export function PatientDetail() {
     }
   }
 
-  const subTabItems = sectionTabKeys.map((key) => ({
-    key,
-    label: tabLabel(key),
-    children: <div style={{ padding: 24 }}>{renderTabContent(key)}</div>,
-  }))
+  const tabBodyPadding = compactShell ? 16 : 24
 
   const sectionOptions = PATIENT_SECTIONS.map((section) => ({
     value: section,
@@ -510,6 +507,40 @@ export function PatientDetail() {
         {SECTION_ICONS[section]}
         {t(`sections.${section}`)}
       </span>
+    ),
+  }))
+
+  const macroCompactItems = PATIENT_SECTIONS.map((section) => ({
+    section,
+    label: t(`sections.${section}`),
+    icon: SECTION_ICONS[section],
+  }))
+
+  const macroSectionNav = compactShell ? (
+    <PatientCompactMacroSections
+      activeSection={activeSection}
+      items={macroCompactItems}
+      onChange={setActiveSection}
+    />
+  ) : (
+    <div className="patient-section-nav">
+      <Segmented
+        block
+        size="large"
+        value={activeSection}
+        onChange={(value) => setActiveSection(value as PatientSection)}
+        options={sectionOptions}
+      />
+    </div>
+  )
+
+  const subTabItems = sectionTabKeys.map((key) => ({
+    key,
+    label: tabLabel(key),
+    children: (
+      <div className={compactShell ? 'patient-tab-body--compact' : undefined} style={{ padding: tabBodyPadding }}>
+        {renderTabContent(key)}
+      </div>
     ),
   }))
 
@@ -603,15 +634,7 @@ export function PatientDetail() {
             items={subTabItems}
             renderTabBar={(props, DefaultTabBar) => (
               <div className="patient-detail-sticky-nav">
-                <div className="patient-section-nav">
-                  <Segmented
-                    block
-                    size="large"
-                    value={activeSection}
-                    onChange={(value) => setActiveSection(value as PatientSection)}
-                    options={sectionOptions}
-                  />
-                </div>
+                {macroSectionNav}
                 {compactShell ? (
                   <PatientCompactSubTabs
                     activeKey={activeTab}
@@ -626,18 +649,13 @@ export function PatientDetail() {
           />
         ) : (
           <>
-            <div className="patient-detail-sticky-nav">
-              <div className="patient-section-nav">
-                <Segmented
-                  block
-                  size="large"
-                  value={activeSection}
-                  onChange={(value) => setActiveSection(value as PatientSection)}
-                  options={sectionOptions}
-                />
-              </div>
+            <div className="patient-detail-sticky-nav">{macroSectionNav}</div>
+            <div
+              className={compactShell ? 'patient-tab-body--compact' : undefined}
+              style={{ padding: tabBodyPadding }}
+            >
+              {renderTabContent(activeTab)}
             </div>
-            <div style={{ padding: 24 }}>{renderTabContent(activeTab)}</div>
           </>
         )}
       </Card>
