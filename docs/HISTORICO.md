@@ -1,5 +1,13 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-26] - PWA — splash lockup, nav 50px, PAT-CTX-2 parallax
+
+### Produto (Rafael)
+- Abertura sem tile duplicado do app icon; barra inferior menor; rolagem no perfil com header coração + pessoa e densificação de macro/nav.
+
+### Realizado (eng)
+- PR **#250** (`cursor/pwa-scroll-compact-chrome-53db`): `pwa-startup-lockup-light`, `CompactPatientChromeContext`, portal chip no header, nav 50px.
+
 ## [2026-11-25] - PWA shell lote Rafael (HDR-2, NAV, PAT-CTX-1) em `main`
 
 ### Realizado (eng)
