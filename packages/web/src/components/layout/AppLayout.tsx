@@ -242,7 +242,14 @@ function AppLayoutFrame() {
         >
           <div
             className={compactShell ? 'app-header__brand app-header__brand--compact' : undefined}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap', minWidth: 0 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              marginRight: 'auto',
+              flexWrap: compactShell ? 'nowrap' : 'wrap',
+              minWidth: 0,
+            }}
           >
             {compactShell ? (
               <>

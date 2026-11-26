@@ -53,11 +53,20 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   isolation: isolate;
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 8px;
   min-width: 0;
   flex: 1 1 auto;
   padding-left: calc(4px + var(--patient-chrome-p, 0) * 52px);
   transition: padding-left 0.2s ease;
+}
+
+/* PAT-CTX-2 — chip de pessoa à direita do orb 56px, mesma faixa do header (não embaixo) */
+.app-layout--compact.app-layout--patient-chrome .app-header__brand--compact {
+  padding-left: max(
+    calc(4px + var(--patient-chrome-p, 0) * 52px),
+    calc(10px + 56px + 8px)
+  );
 }
 
 .app-layout--compact .app-header__lockup-wrap {
@@ -85,11 +94,11 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   min-height: 44px;
 }
 
-/* Coração no header — diâmetro igual ao FAB; sobrepõe levemente a nav */
+/* Coração no header — 10px esq/topo; sobrepõe o silk como Neri na bottom nav */
 .app-layout--compact .app-header__heart-orb {
   position: absolute;
   left: 10px;
-  bottom: calc(-10px - (1 - var(--patient-chrome-p, 0)) * 18px);
+  top: 10px;
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -99,12 +108,12 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
     0 0 0 1px color-mix(in srgb, var(--border) 55%, transparent);
   opacity: var(--patient-chrome-p, 0);
   transform: scale(calc(0.75 + var(--patient-chrome-p, 0) * 0.25));
+  transform-origin: top left;
   z-index: 520;
   pointer-events: none;
   transition:
     opacity 0.22s ease,
-    transform 0.22s ease,
-    bottom 0.22s ease;
+    transform 0.22s ease;
 }
 
 .app-layout--compact .app-header__heart-orb::before {
@@ -120,6 +129,10 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   position: relative;
   overflow: clip;
   overflow-clip-margin: 0 0 0 0;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement.app-layout--patient-chrome .app-header--compact-brand {
+  overflow-clip-margin: 0 0 14px 0;
 }
 
 .app-layout--compact.app-layout--neri-fab-refinement .app-header--compact-brand::after {
