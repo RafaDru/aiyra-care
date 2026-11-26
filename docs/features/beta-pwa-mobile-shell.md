@@ -41,6 +41,10 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 | `packages/web/src/components/patient/PatientCompactPersonContextBar.tsx` | Barra contexto pessoa ao rolar (PAT-CTX-1) |
 | `packages/web/src/components/ui/CenteredLoading.tsx` | Spinner centralizado |
 
+## Validação visual (pré-código)
+
+[`docs/design/PWA_VISUAL_VALIDATION.md`](../design/PWA_VISUAL_VALIDATION.md) — Canvas componentizado; Figma não é canal operacional.
+
 ## QA
 
 | Suíte | Comando |

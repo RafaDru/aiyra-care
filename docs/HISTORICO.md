@@ -1,5 +1,14 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-26] - Validação visual PWA — Canvas (sem Figma operacional)
+
+### Produto (Rafael)
+- Não edita Figma na plataforma; precisa de local para validar componentes/telas antes do código.
+
+### Realizado (política + doc)
+- Canal oficial: Canvas **Ananeri PWA — design system playground** + `docs/design/PWA_VISUAL_VALIDATION.md`.
+- Figma Paciente permanece arquivo histórico; desconexão de conta/MCP é opcional.
+
 ## [2026-11-26] - PWA — splash lockup, nav 50px, PAT-CTX-2 parallax
 
 ### Produto (Rafael)
