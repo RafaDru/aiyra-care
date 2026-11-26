@@ -1,11 +1,14 @@
 /* ── Compact PWA shell (≤768px / standalone) ───────────────────────────── */
 
 .app-layout--compact {
+  --patient-chrome-p: 0;
   --compact-header-h: 64px;
-  --compact-nav-overhang: 26px;
-  --compact-fab-clearance: 64px;
+  --compact-nav-h: 50px;
+  --compact-nav-overhang: 22px;
+  --compact-fab-clearance: 58px;
   --compact-bottom-scroll-pad: calc(
-    56px + var(--compact-nav-overhang) + var(--compact-fab-clearance) + env(safe-area-inset-bottom, 0px)
+    var(--compact-nav-h) + var(--compact-nav-overhang) + var(--compact-fab-clearance) +
+      env(safe-area-inset-bottom, 0px)
   );
   background: var(--background, #f8fafc);
 }
@@ -46,8 +49,68 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 .app-layout--compact .app-header__brand--compact {
   position: relative;
   isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
   flex: 1 1 auto;
+  padding-left: calc(4px + var(--patient-chrome-p, 0) * 52px);
+  transition: padding-left 0.2s ease;
+}
+
+.app-layout--compact .app-header__lockup-wrap {
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
+  opacity: calc(1 - var(--patient-chrome-p, 0));
+  transform: translateY(calc(var(--patient-chrome-p, 0) * -6px));
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: calc((1 - var(--patient-chrome-p, 0)) * 1); /* no-op in old browsers */
+}
+
+@supports (pointer-events: none) {
+  .app-layout--compact.app-layout--patient-chrome .app-header__lockup-wrap {
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+.app-layout--compact .app-header__patient-ctx-slot {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+}
+
+/* Coração no header — diâmetro igual ao FAB; sobrepõe levemente a nav */
+.app-layout--compact .app-header__heart-orb {
+  position: absolute;
+  left: 10px;
+  bottom: calc(-10px - (1 - var(--patient-chrome-p, 0)) * 18px);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  box-shadow:
+    0 3px 12px rgba(126, 34, 206, 0.18),
+    0 0 0 1px color-mix(in srgb, var(--border) 55%, transparent);
+  opacity: var(--patient-chrome-p, 0);
+  transform: scale(calc(0.75 + var(--patient-chrome-p, 0) * 0.25));
+  z-index: 520;
+  pointer-events: none;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    bottom 0.22s ease;
+}
+
+.app-layout--compact .app-header__heart-orb::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  background: url('/brand/kit-oficial-ananeri/02-simbolo-e-wordmark/ananeri-symbol-heart.svg') center / contain
+    no-repeat;
 }
 
 /* HDR-2 — marca d’água à direita no header (não no brand com overflow clip) */
@@ -107,7 +170,7 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement .ap
   display: flex;
   align-items: stretch;
   justify-content: space-around;
-  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  height: calc(var(--compact-nav-h, 50px) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: transparent;
   border-top: none;
@@ -160,10 +223,11 @@ html[data-theme='dark'] .app-mobile-bottom-nav::after {
   color: var(--text-secondary, rgba(0, 0, 0, 0.65));
   font-size: 11px;
   line-height: 1.2;
-  padding: 6px 4px;
+  padding: 4px 4px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   font-weight: 500;
+  transition: gap 0.2s ease, padding 0.2s ease;
 }
 
 .app-mobile-bottom-nav__icon-wrap {
@@ -321,10 +385,31 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
 
 /* ── FAB stack (Registro / Pedido) ─────────────────────────────────────── */
 
+.app-layout--bottom-nav-dense .app-mobile-bottom-nav__icon-wrap,
+.app-layout--bottom-nav-dense .app-mobile-bottom-nav__neri-inner {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  transform: scale(0.85);
+  transition: opacity 0.2s ease, max-height 0.2s ease, transform 0.2s ease;
+}
+
+.app-layout--bottom-nav-dense .app-mobile-bottom-nav__item {
+  gap: 0;
+  padding-top: 6px;
+  padding-bottom: 2px;
+}
+
+.app-layout--bottom-nav-dense .app-mobile-bottom-nav__neri-caption {
+  margin-top: 0;
+}
+
 .app-mobile-fab-stack {
   position: fixed;
   right: 16px;
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--compact-nav-h, 50px) + 8px + env(safe-area-inset-bottom, 0px));
   z-index: 520;
   display: flex;
   flex-direction: column;

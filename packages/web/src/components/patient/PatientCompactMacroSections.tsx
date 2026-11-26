@@ -11,15 +11,17 @@ interface Props {
   activeSection: PatientSection
   items: PatientCompactMacroItem[]
   onChange: (section: PatientSection) => void
+  /** Quando true, oculta ícones (chrome denso ao rolar). */
+  labelsOnly?: boolean
 }
 
 /**
  * Macro-seções do perfil no shell compacto (PAT-1): grade 2×2, rótulos completos.
  */
-export function PatientCompactMacroSections({ activeSection, items, onChange }: Props) {
+export function PatientCompactMacroSections({ activeSection, items, onChange, labelsOnly }: Props) {
   return (
     <div
-      className="patient-section-nav patient-section-nav--compact-grid"
+      className={`patient-section-nav patient-section-nav--compact-grid${labelsOnly ? ' patient-section-nav--labels-only' : ''}`}
       role="tablist"
       data-testid="patient-macro-sections-compact"
     >
@@ -34,7 +36,7 @@ export function PatientCompactMacroSections({ activeSection, items, onChange }: 
             className={`patient-macro-tile${selected ? ' patient-macro-tile--active' : ''}`}
             onClick={() => onChange(item.section)}
           >
-            {item.icon ? <span className="patient-macro-tile__icon">{item.icon}</span> : null}
+            {item.icon && !labelsOnly ? <span className="patient-macro-tile__icon">{item.icon}</span> : null}
             <span className="patient-macro-tile__label">{item.label}</span>
           </button>
         )

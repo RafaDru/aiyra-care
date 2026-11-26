@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
@@ -38,14 +38,32 @@ import { AppMobileServicesSheet } from './AppMobileServicesSheet.js'
 import { AppMobileCaptureFabStack } from './AppMobileCaptureFabStack.js'
 import { useAvaPatientLens } from '../ava/useAvaPatientLens.js'
 import { requestAvaOpen } from '../../lib/ava-dock-bus.js'
+import {
+  CompactPatientChromeProvider,
+  useCompactPatientChrome,
+} from '../../contexts/CompactPatientChromeContext.js'
 
 const { Sider, Content, Header } = Layout
 
+const PATIENT_FOCUS_PATH = /^\/patients\/[^/]+/
+
 export function AppLayout() {
+  return (
+    <ActiveCareCircleProvider>
+      <CompactPatientChromeProvider>
+        <AppLayoutFrame />
+      </CompactPatientChromeProvider>
+    </ActiveCareCircleProvider>
+  )
+}
+
+function AppLayoutFrame() {
   const [collapsed, setCollapsed] = useState(false)
   const [servicesSheetOpen, setServicesSheetOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
   const compactShell = useCompactAppShell()
+  const { progress: chromeProgress, patientFocus, setChrome, resetChrome } = useCompactPatientChrome()
   const { patientId: avaPatientId } = useAvaPatientLens()
   const navigate = useNavigate()
   const location = useLocation()
@@ -94,14 +112,46 @@ export function AppLayout() {
 
   const servicesNavActive = servicesSheetOpen || location.pathname.startsWith('/settings')
 
+  const patientFocusRoute = PATIENT_FOCUS_PATH.test(location.pathname)
+
+  useEffect(() => {
+    if (!compactShell || !patientFocusRoute) {
+      resetChrome()
+    }
+  }, [compactShell, patientFocusRoute, location.pathname, resetChrome])
+
+  useEffect(() => {
+    const el = contentRef.current
+    if (!el || !compactShell || !patientFocusRoute) return
+
+    const onScroll = () => {
+      const raw = Math.min(1, Math.max(0, el.scrollTop / 152))
+      const eased = raw * raw * (3 - 2 * raw)
+      setChrome({ progress: eased, patientFocus: true })
+      el.style.setProperty('--patient-chrome-p', String(eased))
+    }
+
+    onScroll()
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [compactShell, patientFocusRoute, location.pathname, setChrome])
+
+  const chromeLevel =
+    compactShell && patientFocus && chromeProgress > 0.12 ? 'app-layout--patient-chrome' : ''
+  const navDense = chromeProgress > 0.58 ? 'app-layout--bottom-nav-dense' : ''
+
   const layout = (
     <Layout
       className={
         compactShell
-          ? 'app-layout app-layout--compact app-layout--neri-fab-refinement'
+          ? `app-layout app-layout--compact app-layout--neri-fab-refinement ${chromeLevel} ${navDense}`.trim()
           : 'app-layout'
       }
-      style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}
+      style={
+        compactShell
+          ? ({ '--patient-chrome-p': chromeProgress, minHeight: '100vh', height: '100vh', overflow: 'hidden' } as CSSProperties)
+          : { minHeight: '100vh', height: '100vh', overflow: 'hidden' }
+      }
     >
       {!compactShell && (
       <Sider
@@ -195,11 +245,26 @@ export function AppLayout() {
             style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 'auto', flexWrap: 'wrap', minWidth: 0 }}
           >
             {compactShell ? (
-              <AppLogo variant="horizontal" height={36} style={{ maxWidth: 168 }} />
+              <>
+                <span className="app-header__heart-orb" aria-hidden />
+                <span className="app-header__lockup-wrap">
+                  <AppLogo
+                    variant="horizontal"
+                    height={36}
+                    className="app-header__lockup-full"
+                    style={{ maxWidth: 168 }}
+                  />
+                </span>
+                <div
+                  id="app-header-patient-ctx-slot"
+                  className="app-header__patient-ctx-slot"
+                  data-testid="app-header-patient-ctx-slot"
+                />
+              </>
             ) : (
               collapsed && <AppLogo variant="wordmark" height={38} />
             )}
-            {configured && user && <CareCircleGlobalSelector />}
+            {configured && user && !patientFocusRoute && <CareCircleGlobalSelector />}
             {!compactShell && <DeploymentEnvironmentBadge />}
           </div>
           {!compactShell && (
@@ -228,6 +293,7 @@ export function AppLayout() {
           )}
         </Header>
         <Content
+          ref={contentRef}
           className="app-main-content"
           style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }}
         >
@@ -263,7 +329,5 @@ export function AppLayout() {
     </Layout>
   )
 
-  // Provider sempre montado: Dashboard e rotas autenticadas usam useActiveCareCircle mesmo
-  // quando o seletor global só aparece com sessão (configured && user).
-  return <ActiveCareCircleProvider>{layout}</ActiveCareCircleProvider>
+  return layout
 }

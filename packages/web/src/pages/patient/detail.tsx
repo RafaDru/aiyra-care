@@ -54,6 +54,7 @@ import { PatientCompactPersonContextBar } from '../../components/patient/Patient
 import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
+import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
 
 const { Title, Text } = Typography
 
@@ -106,8 +107,9 @@ export function PatientDetail() {
   } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
   const heroSentinelRef = useRef<HTMLDivElement>(null)
-  const [personCtxPinned, setPersonCtxPinned] = useState(false)
   const compactShell = useCompactAppShell()
+  const { progress: chromeProgress } = useCompactPatientChrome()
+  const macroLabelsOnly = compactShell && chromeProgress > 0.62
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
@@ -524,6 +526,7 @@ export function PatientDetail() {
       activeSection={activeSection}
       items={macroCompactItems}
       onChange={setActiveSection}
+      labelsOnly={macroLabelsOnly}
     />
   ) : (
     <div className="patient-section-nav">
@@ -548,7 +551,7 @@ export function PatientDetail() {
   }))
 
   return (
-    <div className={compactShell && personCtxPinned ? 'patient-detail-root--ctx-pinned' : undefined}>
+    <div>
       <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} style={{ marginBottom: 16 }}>
         {t('common.back')}
       </Button>
@@ -598,7 +601,6 @@ export function PatientDetail() {
           patient={patient}
           patients={allPatients}
           heroSentinelRef={heroSentinelRef}
-          onPinnedChange={setPersonCtxPinned}
         />
       ) : null}
 

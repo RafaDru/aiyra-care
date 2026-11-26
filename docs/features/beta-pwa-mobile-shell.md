@@ -15,10 +15,10 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 
 | Área | Comportamento |
 |------|----------------|
-| Ícones PWA | PNGs rasterizados de `app-icon-ios-android-light.svg` (192/512/apple-touch) |
+| Ícones PWA | Tile light 192/512/maskable; **splash/apple-touch** = lockup stacked em silk (`pwa-startup-lockup-light.svg`) |
 | Manifest + HTML | `theme_color` / `background_color` `#FFF7FB` (silk light) |
-| Shell compacto | `standalone` ou `≤768px` + coarse pointer → bottom nav (laterais opacas, eixo Neri transparente); **Neri** centro → chat Ava (**drawer 100vw**, P0-6); FAB **+** direita; header lockup à esquerda + watermark coração **à direita** (HDR-2); scroll padding p/ FAB+barra (NAV-CONTENT); Neri **sem disco branco** (NAV-NERI-BG); gradiente light/dark; orb Ava oculto |
-| Paciente compact (wave 2026-11-23+) | Sub-abas **PAT-2b**: menu ☰ + carrossel peek; macro **2×2 PAT-2a** (ícone em cima, label centrada, 72px); **PAT-CTX-1** barra pessoa sticky ao rolar; seleção **fidel** + underline; copy onboarding só na home sem perfis |
+| Shell compacto | Bottom nav **50px** + overhang 22px; **Neri** → chat 100vw; FAB direita; HDR-2; NAV-CONTENT; **PAT-CTX-2** parallax (coração 56px + chip no header no perfil; nav ícones off ao rolar fundo) |
+| Paciente compact | PAT-2b sub-abas; macro PAT-2a; PAT-CTX-2 chrome; seleção fidel; copy onboarding home vazia |
 | Dia a dia | `patient-list-bus` + refresh da lente Ava após CRUD; card discovery **dark legível** (P0-8, `day-to-day-discovery-hub.css`) |
 | Loading | `CenteredPageLoading` / `CenteredBlockLoading` |
 | Desktop | Sider + header inalterados |

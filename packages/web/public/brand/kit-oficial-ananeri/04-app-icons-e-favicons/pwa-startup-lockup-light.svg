@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ananeri — splash lockup">
+  <defs>
+    <linearGradient id="silk" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF7FB" />
+      <stop offset="50%" stop-color="#F8F2FF" />
+      <stop offset="100%" stop-color="#EDE9FE" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#silk)" />
+  <image
+    href="../01-lockups-principais/ananeri-lockup-stacked-light.svg"
+    x="88"
+    y="112"
+    width="336"
+    height="288"
+    preserveAspectRatio="xMidYMid meet"
+  />
+</svg>

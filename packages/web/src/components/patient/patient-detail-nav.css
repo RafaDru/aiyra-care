@@ -301,32 +301,20 @@
   color: var(--nav-selected-text, #6b21a8);
 }
 
+.patient-section-nav--labels-only .patient-macro-tile {
+  min-height: 40px;
+  padding: 8px 6px;
+}
+
+.patient-section-nav--labels-only .patient-macro-tile__label {
+  font-size: 11px;
+}
+
 .patient-tab-body--compact {
   padding: 16px !important;
 }
 
-/* PAT-CTX-1 — contexto de pessoa ao rolar (compact) */
-.patient-compact-person-ctx {
-  position: sticky;
-  top: 0;
-  z-index: 24;
-  display: none;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 12px;
-  background: var(--card-bg);
-  border-bottom: 1px solid var(--border, #e2e8f0);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
-}
-
-.patient-compact-person-ctx--visible {
-  display: flex;
-}
-
-.patient-detail-root--ctx-pinned .patient-detail-sticky-nav {
-  top: 44px;
-}
-
+/* PAT-CTX-1 — chip de pessoa no header (portal) */
 .patient-compact-person-ctx__trigger {
   display: flex;
   align-items: center;
@@ -334,7 +322,7 @@
   width: 100%;
   min-height: 44px;
   margin: 0;
-  padding: 6px 4px;
+  padding: 4px 2px;
   border: none;
   background: transparent;
   cursor: pointer;
