@@ -17,7 +17,7 @@ Canal PWA no preview GCP: ícone instalável **light** (kit §04) e navegação 
 |------|----------------|
 | Ícones PWA | Tile light 192/512/maskable; **splash/apple-touch** = lockup stacked em silk (`pwa-startup-lockup-light.svg`) |
 | Manifest + HTML | `theme_color` / `background_color` `#FFF7FB` (silk light) |
-| Shell compacto | Bottom nav 56px touch; **trilho** opaco **44px** (faixa baixa); Neri **sem disco** (só avatar + sombra); **PAT-CTX-2** parallax no perfil |
+| Shell compacto | Bottom nav **56px** (itens inalterados); fundo lateral **36px** acima do safe-area; Neri sem disco; **PAT-CTX-2** parallax |
 | Paciente compact | PAT-2b sub-abas; macro PAT-2a; PAT-CTX-2 chrome; seleção fidel; copy onboarding home vazia |
 | Dia a dia | `patient-list-bus` + refresh da lente Ava após CRUD; card discovery **dark legível** (P0-8, `day-to-day-discovery-hub.css`) |
 | Loading | `CenteredPageLoading` / `CenteredBlockLoading` |

@@ -4,9 +4,10 @@
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
   --compact-nav-h: 56px;
-  --compact-nav-rail-h: 44px;
-  --compact-nav-overhang: 26px;
-  --compact-fab-clearance: 64px;
+  /** Altura só do fundo opaco laterais — não a área de toque dos itens */
+  --compact-nav-rail-h: 36px;
+  --compact-nav-overhang: 16px;
+  --compact-fab-clearance: 56px;
   --compact-bottom-scroll-pad: calc(
     var(--compact-nav-h) + var(--compact-nav-overhang) + var(--compact-fab-clearance) +
       env(safe-area-inset-bottom, 0px)
@@ -169,9 +170,9 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement .ap
   bottom: 0;
   z-index: 500;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: space-around;
-  height: calc(var(--compact-nav-h, 50px) + env(safe-area-inset-bottom, 0px));
+  height: calc(var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: transparent;
   border-top: none;
@@ -179,26 +180,26 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement .ap
   overflow: visible;
 }
 
-/* Faixas laterais — só a “prateleira” baixa; eixo Neri fica vazio (sem barra alta atrás) */
+/* Fundo cinza — faixas laterais baixas; centro e safe-area sem prateleira plena */
 .app-mobile-bottom-nav::before,
 .app-mobile-bottom-nav::after {
   content: '';
   position: absolute;
-  left: 0;
   top: auto;
-  bottom: 0;
-  height: calc(var(--compact-nav-rail-h, 44px) + env(safe-area-inset-bottom, 0px));
-  width: calc(50% - 52px);
-  background: var(--card-bg);
-  border-top: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
-  box-shadow: 0 -1px 6px rgba(15, 23, 42, 0.03);
+  bottom: env(safe-area-inset-bottom, 0px);
+  height: var(--compact-nav-rail-h, 36px);
+  width: calc(50% - 54px);
+  background: color-mix(in srgb, var(--card-bg) 94%, var(--background) 6%);
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  box-shadow: none;
   pointer-events: none;
   z-index: 0;
 }
 
 html[data-theme='dark'] .app-mobile-bottom-nav::before,
 html[data-theme='dark'] .app-mobile-bottom-nav::after {
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.22);
+  background: color-mix(in srgb, var(--card-bg) 92%, transparent);
+  box-shadow: none;
 }
 
 .app-mobile-bottom-nav::before {
@@ -223,13 +224,12 @@ html[data-theme='dark'] .app-mobile-bottom-nav::after {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-height: var(--compact-nav-rail-h, 44px);
   border: none;
   background: transparent;
   color: var(--text-secondary, rgba(0, 0, 0, 0.65));
   font-size: 11px;
   line-height: 1.2;
-  padding: 2px 4px 4px;
+  padding: 6px 4px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   font-weight: 500;
@@ -414,7 +414,7 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
 .app-mobile-fab-stack {
   position: fixed;
   right: 16px;
-  bottom: calc(var(--compact-nav-rail-h, 44px) + 12px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--compact-nav-h, 56px) + 8px + env(safe-area-inset-bottom, 0px));
   z-index: 520;
   display: flex;
   flex-direction: column;
