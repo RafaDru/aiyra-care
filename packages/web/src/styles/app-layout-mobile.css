@@ -3,9 +3,10 @@
 .app-layout--compact {
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
-  --compact-nav-h: 50px;
-  --compact-nav-overhang: 22px;
-  --compact-fab-clearance: 58px;
+  --compact-nav-h: 56px;
+  --compact-nav-rail-h: 44px;
+  --compact-nav-overhang: 26px;
+  --compact-fab-clearance: 64px;
   --compact-bottom-scroll-pad: calc(
     var(--compact-nav-h) + var(--compact-nav-overhang) + var(--compact-fab-clearance) +
       env(safe-area-inset-bottom, 0px)
@@ -168,7 +169,7 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement .ap
   bottom: 0;
   z-index: 500;
   display: flex;
-  align-items: stretch;
+  align-items: flex-end;
   justify-content: space-around;
   height: calc(var(--compact-nav-h, 50px) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -178,17 +179,19 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement .ap
   overflow: visible;
 }
 
-/* Faixas laterais opacas; vão transparentes no eixo Neri (sem cortar o círculo) */
+/* Faixas laterais — só a “prateleira” baixa; eixo Neri fica vazio (sem barra alta atrás) */
 .app-mobile-bottom-nav::before,
 .app-mobile-bottom-nav::after {
   content: '';
   position: absolute;
-  top: 0;
+  left: 0;
+  top: auto;
   bottom: 0;
-  width: calc(50% - 58px);
+  height: calc(var(--compact-nav-rail-h, 44px) + env(safe-area-inset-bottom, 0px));
+  width: calc(50% - 52px);
   background: var(--card-bg);
-  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.04);
+  border-top: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  box-shadow: 0 -1px 6px rgba(15, 23, 42, 0.03);
   pointer-events: none;
   z-index: 0;
 }
@@ -200,10 +203,12 @@ html[data-theme='dark'] .app-mobile-bottom-nav::after {
 
 .app-mobile-bottom-nav::before {
   left: 0;
+  right: auto;
 }
 
 .app-mobile-bottom-nav::after {
   right: 0;
+  left: auto;
 }
 
 .app-mobile-bottom-nav > * {
@@ -218,12 +223,13 @@ html[data-theme='dark'] .app-mobile-bottom-nav::after {
   align-items: center;
   justify-content: center;
   gap: 2px;
+  min-height: var(--compact-nav-rail-h, 44px);
   border: none;
   background: transparent;
   color: var(--text-secondary, rgba(0, 0, 0, 0.65));
   font-size: 11px;
   line-height: 1.2;
-  padding: 4px 4px;
+  padding: 2px 4px 4px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   font-weight: 500;
@@ -355,18 +361,17 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 2px solid color-mix(in srgb, var(--card-bg) 88%, var(--primary) 12%);
-  box-shadow:
-    0 4px 18px rgba(126, 34, 206, 0.28),
-    0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent);
+  background: none;
+  border: none;
+  box-shadow: none;
   z-index: 520;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .app-mobile-bottom-nav__neri-avatar {
   transform: scale(1.12);
   transform-origin: center bottom;
+  filter: drop-shadow(0 3px 10px rgba(126, 34, 206, 0.22));
 }
 
 .app-mobile-bottom-nav__neri-caption {
@@ -409,7 +414,7 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
 .app-mobile-fab-stack {
   position: fixed;
   right: 16px;
-  bottom: calc(var(--compact-nav-h, 50px) + 8px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--compact-nav-rail-h, 44px) + 12px + env(safe-area-inset-bottom, 0px));
   z-index: 520;
   display: flex;
   flex-direction: column;
