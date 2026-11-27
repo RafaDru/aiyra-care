@@ -510,12 +510,19 @@
   line-height: 1.25;
 }
 
-/* Exploratório — macro recolhido com ícone pequeno à esquerda (Canvas / design preview). */
+/* Macro S3 — ícone pequeno à esquerda + label (oficial 27/11). */
 .patient-section-nav--macro-left-icon .patient-macro-tile {
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
+  min-height: 34px;
+  padding: 5px 10px;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__label {
+  font-size: 11px;
+  line-height: 1.25;
 }
 
 .patient-section-nav--macro-left-icon .patient-macro-tile__icon {

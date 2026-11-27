@@ -56,7 +56,7 @@ import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
-import { chromeMacroLabelsOnly } from '../../lib/patient-chrome-phases.js'
+import { chromeMacroCompactLeftIcon } from '../../lib/patient-chrome-phases.js'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 
 const { Title, Text } = Typography
@@ -108,8 +108,8 @@ export function PatientDetail() {
   const [profileSheetOpen, setProfileSheetOpen] = useState(false)
   const compactShell = useCompactAppShell()
   const { progress: chromeProgress } = useCompactPatientChrome()
-  const macroLabelsOnly =
-    compactShell && chromeMacroLabelsOnly(chromeProgress)
+  const macroCompactLeftIcon =
+    compactShell && chromeMacroCompactLeftIcon(chromeProgress)
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
@@ -526,7 +526,7 @@ export function PatientDetail() {
       activeSection={activeSection}
       items={macroCompactItems}
       onChange={setActiveSection}
-      labelsOnly={macroLabelsOnly}
+      compactLeftIcon={macroCompactLeftIcon}
     />
   ) : (
     <div className="patient-section-nav">

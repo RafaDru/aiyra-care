@@ -15,6 +15,12 @@ export function chromeHeaderPhase(progress: number): number {
   return Math.max(0, Math.min(1, (progress - CHROME_HEADER_COLLAPSE_START) / span))
 }
 
-export function chromeMacroLabelsOnly(progress: number): boolean {
+/** Macro recolhido S3 — ícone à esquerda + label (oficial 27/11). */
+export function chromeMacroCompactLeftIcon(progress: number): boolean {
   return chromeMacroPhase(progress) >= 0.82
+}
+
+/** @deprecated usar chromeMacroCompactLeftIcon */
+export function chromeMacroLabelsOnly(progress: number): boolean {
+  return chromeMacroCompactLeftIcon(progress)
 }

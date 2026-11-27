@@ -4,7 +4,7 @@
  */
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Card, Segmented, Switch, Tag, Typography } from 'antd'
+import { Card, Segmented, Tag, Typography } from 'antd'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 import { useTranslation } from 'react-i18next'
 import type { PatientSection, PatientTabKey } from '../../lib/patient-navigation.js'
@@ -16,7 +16,7 @@ import { PatientCompactProfileHero } from '../../components/patient/PatientCompa
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
 import {
   chromeHeaderPhase,
-  chromeMacroLabelsOnly,
+  chromeMacroCompactLeftIcon,
   chromeMacroPhase,
 } from '../../lib/patient-chrome-phases.js'
 import {
@@ -70,7 +70,6 @@ export function DesignPatientChromePreview() {
   const { progress, setChrome } = useCompactPatientChrome()
   const heroSentinelRef = useRef<HTMLDivElement>(null)
   const [profileSheetOpen, setProfileSheetOpen] = useState(false)
-  const [macroLeftIcon, setMacroLeftIcon] = useState(false)
   const [searchParams] = useSearchParams()
   const chromeFromUrl = searchParams.get('chrome')
   const initialPreset = (): ChromePreset => {
@@ -89,7 +88,7 @@ export function DesignPatientChromePreview() {
   const [activeSection, setActiveSection] = useState<PatientSection>('clinical')
   const [activeTab, setActiveTab] = useState<PatientTabKey>('growth')
   const sectionTabKeys = SECTION_TABS[activeSection]
-  const macroLabelsOnly = chromeMacroLabelsOnly(progress)
+  const macroCompactLeftIcon = chromeMacroCompactLeftIcon(progress)
 
   useEffect(() => {
     setChrome({ patientFocus: true })
@@ -160,14 +159,6 @@ export function DesignPatientChromePreview() {
         <Text type="secondary" className="design-chrome-preset-bar__hint">
           p={progress.toFixed(2)}
         </Text>
-        {macroLabelsOnly ? (
-          <label className="design-chrome-preset-bar__toggle" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Switch size="small" checked={macroLeftIcon} onChange={setMacroLeftIcon} />
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              macro left-icon (exploratório)
-            </Text>
-          </label>
-        ) : null}
       </div>
 
       <div ref={heroSentinelRef}>
@@ -197,8 +188,7 @@ export function DesignPatientChromePreview() {
             activeSection={activeSection}
             items={macroCompactItems}
             onChange={setActiveSection}
-            labelsOnly={macroLabelsOnly}
-            leftIconDense={macroLeftIcon}
+            compactLeftIcon={macroCompactLeftIcon}
           />
           <PatientCompactSubTabs
             activeKey={activeTab}
