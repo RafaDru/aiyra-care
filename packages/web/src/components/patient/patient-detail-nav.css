@@ -2,7 +2,7 @@
 .patient-detail-sticky-nav {
   position: sticky;
   top: 0;
-  z-index: 22;
+  z-index: 32;
   background: transparent;
   border-bottom: 1px solid var(--border, #e2e8f0);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
@@ -366,12 +366,20 @@
   will-change: transform;
 }
 
-/* Macro/menu cola abaixo do header orb+chip (S3) — não sobrepõe faixa chrome */
+/*
+ * PAT chrome — macro + submenu (B+) sticky abaixo do header; z-index 32 < header 110.
+ * `top` = footprint do header (orb); sem parallax que empurra o rail para trás do orb.
+ */
 .app-layout--compact.app-layout--patient-chrome .patient-detail-sticky-nav {
-  top: calc(
-    var(--compact-chrome-header-sticky-h, 84px) * var(--patient-chrome-p-header, var(--patient-chrome-p, 0))
-  );
-  z-index: 22;
+  top: var(--compact-chrome-header-sticky-h, 90px);
+  z-index: 32;
+  transform: none;
+  transition: top 0.18s ease-out;
+}
+
+.app-layout--compact.app-layout--patient-chrome .patient-compact-sub-tabs {
+  position: relative;
+  z-index: 28;
 }
 
 .app-layout--compact .patient-section-nav--compact-grid:not(.patient-section-nav--labels-only) .patient-macro-tile {

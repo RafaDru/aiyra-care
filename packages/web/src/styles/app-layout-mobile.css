@@ -1,7 +1,7 @@
 /* ── Compact PWA shell (≤768px / standalone) ───────────────────────────── */
 
 /**
- * Rolagem: viewport inteiro (`html` / `window`) — conteúdo passa sob header sticky e bottom nav fixa.
+ * Rolagem: viewport (`window`) — stack sticky: header (z110) → macro+B+ (top=header-h, z32) → Resumo.
  * `.app-main-content` só reserva `margin-bottom` + `scroll-padding-bottom`; sem `overflow-y` interno.
  */
 html:has(.app-layout--compact.app-layout--neri-fab-refinement),
@@ -19,8 +19,10 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
 .app-layout--compact {
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
-  /** Altura útil do header sticky no patient-chrome (min-h + padding vertical 10+10). */
-  --compact-chrome-header-sticky-h: calc(var(--compact-header-h, 64px) + 20px);
+  /** Footprint sticky do header PAT (orb 10px + 70px + respiro inferior). Macro cola logo abaixo. */
+  --compact-chrome-header-sticky-h: calc(
+    10px + var(--compact-heart-orb-size, 70px) + 10px
+  );
   /** Wash rosa/lilás da faixa do header (não WM silk global) */
   --compact-header-wash-opacity: 0.5;
   /** Faixas/cards de ação (macro, B+, blocos clicáveis) — só o fundo; filhos 100% */
