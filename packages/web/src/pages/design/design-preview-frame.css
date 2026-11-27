@@ -48,10 +48,6 @@
   flex-shrink: 0;
 }
 
-.design-patient-chrome-preview__history-scroll {
-  min-height: 0;
-}
-
 .design-patient-chrome-preview__hero-sentinel {
   height: 1px;
   margin: 0;

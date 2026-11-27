@@ -197,7 +197,7 @@ export function DesignPatientChromePreview() {
             sectionLabel={t(`sections.${activeSection}`)}
           />
         </div>
-        <div className="patient-tab-body--compact design-patient-chrome-preview__history-scroll" style={{ padding: 16 }}>
+        <div className="patient-tab-body--compact" style={{ padding: 16 }}>
           <Title level={5} style={{ margin: 0, fontSize: 15 }}>
             Resumo do histórico
           </Title>
@@ -208,6 +208,7 @@ export function DesignPatientChromePreview() {
               <VaccineFixtureRow name={row.name} meta={row.meta} pill={row.pill} ok={row.ok} />
             </div>
           ))}
+          <div className="design-preview-bottom-nav-scroll-pad" aria-hidden />
           {preset === 'auto' ? (
             <>
               <BadgeSpacer />
@@ -216,9 +217,7 @@ export function DesignPatientChromePreview() {
               </Text>
               <div className="design-preview-scroll-spacer" aria-hidden />
             </>
-          ) : (
-            <div className="design-preview-bottom-nav-scroll-pad" aria-hidden />
-          )}
+          ) : null}
         </div>
       </Card>
     </div>
