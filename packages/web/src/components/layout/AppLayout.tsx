@@ -143,14 +143,15 @@ function AppLayoutFrame() {
 
   const chromeLevel =
     compactShell && patientFocus && chromeProgress > 0.12 ? 'app-layout--patient-chrome' : ''
-  const navDense =
-    !designPreview && chromeProgress > 0.58 ? 'app-layout--bottom-nav-dense' : ''
+  const chromeExpanded =
+    compactShell && patientFocus && chromeProgress <= 0.18 ? 'app-layout--patient-chrome-expanded' : ''
+  const navDense = compactShell && chromeProgress > 0.58 ? 'app-layout--bottom-nav-dense' : ''
 
   const layout = (
     <Layout
       className={
         compactShell
-          ? `app-layout app-layout--compact app-layout--neri-fab-refinement ${chromeLevel} ${navDense}${designPreview ? ' design-preview-viewport' : ''}`.trim()
+          ? `app-layout app-layout--compact app-layout--neri-fab-refinement ${chromeLevel} ${chromeExpanded} ${navDense}${designPreview ? ' design-preview-viewport' : ''}`.trim()
           : 'app-layout'
       }
       style={

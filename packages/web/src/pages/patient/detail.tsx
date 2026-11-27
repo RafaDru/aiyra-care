@@ -51,6 +51,7 @@ import '../../components/ava/ava-dock.css'
 import { PatientCompactSubTabs } from '../../components/patient/PatientCompactSubTabs.js'
 import { PatientCompactMacroSections } from '../../components/patient/PatientCompactMacroSections.js'
 import { PatientCompactPersonContextBar } from '../../components/patient/PatientCompactPersonContextBar.js'
+import { PatientCompactProfileHero } from '../../components/patient/PatientCompactProfileHero.js'
 import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
@@ -548,48 +549,103 @@ export function PatientDetail() {
 
   return (
     <div>
-      <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} style={{ marginBottom: 16 }}>
-        {t('common.back')}
-      </Button>
+      {!compactShell ? (
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} style={{ marginBottom: 16 }}>
+          {t('common.back')}
+        </Button>
+      ) : null}
 
-      <div ref={heroSentinelRef} style={{ marginBottom: 20 }}>
-      <Card style={{ borderRadius: 16, overflow: 'clip' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-          <Avatar size={96} src={patient.photoUrl} style={{ backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5', fontSize: 40 }}>
-            {patient.name.charAt(0).toUpperCase()}
-          </Avatar>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <Title level={4} style={{ margin: 0 }}>{patient.name}</Title>
-              <Button
-                size="small"
-                danger
-                type="primary"
-                icon={<PhoneOutlined />}
-                onClick={() => navigate(`/emergency?patientId=${patient.id}`)}
+      <div ref={heroSentinelRef}>
+        {compactShell ? (
+          <PatientCompactProfileHero
+            patient={patient}
+            age={age}
+            onBack={() => navigate('/')}
+            onEdit={handleEditOpen}
+            onEmergency={() => navigate(`/emergency?patientId=${patient.id}`)}
+          />
+        ) : (
+          <Card style={{ borderRadius: 16, overflow: 'clip', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+              <Avatar
+                size={96}
+                src={patient.photoUrl}
+                style={{
+                  backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5',
+                  fontSize: 40,
+                }}
               >
-                {t('nav.emergency')}
-              </Button>
-              <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
-              <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
-              {patient.isOwner !== false && (
-              <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); notifyPatientsListChanged(); message.success(t('common.ok')); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : t('toast.deletePatientError')) } }}>
-                <Button size="small" danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-              )}
+                {patient.name.charAt(0).toUpperCase()}
+              </Avatar>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Title level={4} style={{ margin: 0 }}>
+                    {patient.name}
+                  </Title>
+                  <Button
+                    size="small"
+                    danger
+                    type="primary"
+                    icon={<PhoneOutlined />}
+                    onClick={() => navigate(`/emergency?patientId=${patient.id}`)}
+                  >
+                    {t('nav.emergency')}
+                  </Button>
+                  <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
+                  <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
+                  {patient.isOwner !== false && (
+                    <Popconfirm
+                      title={t('patient.deleteConfirm')}
+                      onConfirm={async () => {
+                        try {
+                          await api.patients.delete(patient.id)
+                          notifyPatientsListChanged()
+                          message.success(t('common.ok'))
+                          navigate('/')
+                        } catch (e) {
+                          message.error(e instanceof Error ? e.message : t('toast.deletePatientError'))
+                        }
+                      }}
+                    >
+                      <Button size="small" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                  )}
+                </div>
+                <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <Tag>{age}</Tag>
+                  <Tag color="geekblue">
+                    {t(`patient.category.${patient.ageCategory}`, { defaultValue: patient.ageCategory })}
+                  </Tag>
+                  {patient.gender === 'male' && (
+                    <Tag icon={<ManOutlined />} color="blue">
+                      {t('patient.male')}
+                    </Tag>
+                  )}
+                  {patient.gender === 'female' && (
+                    <Tag icon={<WomanOutlined />} color="pink">
+                      {t('patient.female')}
+                    </Tag>
+                  )}
+                  {patient.weightKg && (
+                    <Tag color="green">
+                      {patient.weightKg} {t('patient.weight')}
+                    </Tag>
+                  )}
+                  {patient.heightCm && (
+                    <Tag color="cyan">
+                      {patient.heightCm} {t('patient.height')}
+                    </Tag>
+                  )}
+                  {patient.bloodType && (
+                    <Tag color="purple">
+                      {t('patient.bloodType')} {patient.bloodType}
+                    </Tag>
+                  )}
+                </div>
+              </div>
             </div>
-            <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <Tag>{age}</Tag>
-              <Tag color="geekblue">{t(`patient.category.${patient.ageCategory}`, { defaultValue: patient.ageCategory })}</Tag>
-              {patient.gender === 'male' && <Tag icon={<ManOutlined />} color="blue">{t('patient.male')}</Tag>}
-              {patient.gender === 'female' && <Tag icon={<WomanOutlined />} color="pink">{t('patient.female')}</Tag>}
-              {patient.weightKg && <Tag color="green">{patient.weightKg} {t('patient.weight')}</Tag>}
-              {patient.heightCm && <Tag color="cyan">{patient.heightCm} {t('patient.height')}</Tag>}
-              {patient.bloodType && <Tag color="purple">{t('patient.bloodType')} {patient.bloodType}</Tag>}
-            </div>
-          </div>
-        </div>
-      </Card>
+          </Card>
+        )}
       </div>
 
       {compactShell ? (

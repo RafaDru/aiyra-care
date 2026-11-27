@@ -302,6 +302,67 @@
   font-weight: 600;
 }
 
+/* ── PAT expand/collapse — hero S0 + parallax (--patient-chrome-p) ─────── */
+
+.app-layout--compact .patient-compact-profile-hero {
+  margin-bottom: 12px;
+  opacity: clamp(0, calc(1 - var(--patient-chrome-p, 0) * 1.12), 1);
+  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -32px), 0);
+  transition:
+    opacity 0.16s ease-out,
+    transform 0.16s ease-out;
+  will-change: transform, opacity;
+  pointer-events: auto;
+}
+
+.app-layout--compact.app-layout--patient-chrome-expanded .patient-compact-profile-hero {
+  opacity: 1;
+  transform: none;
+}
+
+.app-layout--compact .patient-compact-profile-hero__back {
+  margin: 0 0 8px;
+  padding-inline: 4px;
+  align-self: flex-start;
+}
+
+.patient-compact-profile-hero__row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.patient-compact-profile-hero__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.patient-compact-profile-hero__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-compact-profile-hero__tags {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.app-layout--compact .patient-detail-sticky-nav {
+  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -14px), 0);
+  transition: transform 0.16s ease-out;
+  will-change: transform;
+}
+
+.app-layout--compact .patient-section-nav--compact-grid:not(.patient-section-nav--labels-only) .patient-macro-tile {
+  min-height: calc(40px + (1 - var(--patient-chrome-p, 0)) * 32px);
+  transition: min-height 0.16s ease-out;
+}
+
 /* Macro-seções compact — PAT-1 grid 2×2 (substitui Segmented 4-col) */
 .patient-section-nav--compact-grid {
   position: relative;

@@ -15,6 +15,33 @@
   margin: 12px !important;
 }
 
+.design-chrome-preset-bar {
+  position: sticky;
+  top: 0;
+  z-index: 560;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -4px 0 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: color-mix(in srgb, var(--card-bg, #fff) 92%, transparent);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.design-chrome-preset-bar__hint {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.design-preview-scroll-spacer {
+  height: 55vh;
+  margin-top: 16px;
+}
+
 .design-patient-chrome-preview__hero-sentinel {
   height: 1px;
   margin: 0;

@@ -240,9 +240,17 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   min-width: 0;
   flex: 1 1 auto;
   opacity: calc(1 - var(--patient-chrome-p, 0));
-  transform: translateY(calc(var(--patient-chrome-p, 0) * -6px));
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -8px), 0);
+  transition:
+    opacity 0.18s ease-out,
+    transform 0.18s ease-out;
   pointer-events: calc((1 - var(--patient-chrome-p, 0)) * 1); /* no-op in old browsers */
+  will-change: transform, opacity;
+}
+
+.app-layout--compact.app-layout--patient-chrome-expanded .app-header__lockup-wrap {
+  opacity: 1;
+  transform: none;
 }
 
 @supports (pointer-events: none) {
