@@ -416,7 +416,29 @@
 }
 
 .patient-tab-body--compact {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding: 16px !important;
+  background: transparent !important;
+}
+
+/* Shell 50% preenche o corpo da aba até o fim do card (evita faixa WM mais roxa abaixo do conteúdo) */
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-action-surface-bg, var(--card-bg));
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > * {
+  position: relative;
+  z-index: 1;
 }
 
 /*
