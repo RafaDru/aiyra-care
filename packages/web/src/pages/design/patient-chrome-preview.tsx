@@ -19,6 +19,7 @@ import {
   chromeMacroPhase,
 } from '../../lib/patient-chrome-phases.js'
 import {
+  DESIGN_CLINICAL_HISTORY_ROWS,
   DESIGN_PATIENT_BRUNO,
   DESIGN_PATIENT_FAMILY,
 } from '../../fixtures/design-patient-chrome.js'
@@ -188,9 +189,13 @@ export function DesignPatientChromePreview() {
             Resumo do histórico
           </Title>
           <BadgeSpacer />
-          <VaccineFixtureRow name="Hepatite B" meta="3ª dose · ago/2024" pill="Em dia" ok />
-          <BadgeSpacer small />
-          <VaccineFixtureRow name="Tríplice viral (SCR)" meta="Última dose há 9 anos" pill="Verificar" ok={false} />
+          {DESIGN_CLINICAL_HISTORY_ROWS.map((row, index) => (
+            <div key={row.name}>
+              {index > 0 ? <BadgeSpacer small /> : null}
+              <VaccineFixtureRow name={row.name} meta={row.meta} pill={row.pill} ok={row.ok} />
+            </div>
+          ))}
+          <div className="design-preview-bottom-nav-scroll-pad" aria-hidden />
           {preset === 'auto' ? (
             <>
               <BadgeSpacer />
