@@ -7,6 +7,10 @@
   overflow: visible;
 }
 
+.design-preview-viewport:has(.design-patient-chrome-compare) {
+  max-width: 860px;
+}
+
 .design-preview-viewport > .app-mobile-bottom-nav {
   overflow: visible;
 }
@@ -16,9 +20,8 @@
 }
 
 .design-chrome-preset-bar {
-  position: sticky;
-  top: 0;
-  z-index: 560;
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -73,4 +76,39 @@
 .design-preview-vaccine-row .ant-typography,
 .design-preview-vaccine-row .ant-tag {
   opacity: 1 !important;
+}
+
+.design-patient-chrome-compare {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+}
+
+.design-patient-chrome-compare__intro {
+  margin-bottom: 12px;
+}
+
+.design-patient-chrome-compare__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.design-patient-chrome-compare__col {
+  width: 390px;
+  flex-shrink: 0;
+}
+
+.design-patient-chrome-compare__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.app-layout--patient-chrome .design-patient-chrome-preview .patient-detail-sticky-nav,
+.app-layout--patient-chrome .design-patient-chrome-card .patient-detail-sticky-nav {
+  top: var(--compact-chrome-header-sticky-h, 90px);
 }

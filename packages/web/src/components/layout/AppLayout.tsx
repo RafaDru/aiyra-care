@@ -43,7 +43,10 @@ import {
   useCompactPatientChrome,
 } from '../../contexts/CompactPatientChromeContext.js'
 import { useDesignPreviewMode } from '../../contexts/DesignPreviewModeContext.js'
-import { DESIGN_PATIENT_CHROME_PATH } from '../../lib/design-preview-env.js'
+import {
+  DESIGN_PATIENT_CHROME_COMPARE_PATH,
+  DESIGN_PATIENT_CHROME_PATH,
+} from '../../lib/design-preview-env.js'
 import { chromeHeaderPhase, chromeMacroPhase } from '../../lib/patient-chrome-phases.js'
 
 const { Sider, Content, Header } = Layout
@@ -119,7 +122,9 @@ function AppLayoutFrame() {
 
   const patientFocusRoute =
     PATIENT_FOCUS_PATH.test(location.pathname) ||
-    (designPreview && location.pathname.startsWith(DESIGN_PATIENT_CHROME_PATH))
+    (designPreview &&
+      (location.pathname.startsWith(DESIGN_PATIENT_CHROME_PATH) ||
+        location.pathname.startsWith(DESIGN_PATIENT_CHROME_COMPARE_PATH)))
 
   useEffect(() => {
     if (!compactShell || !patientFocusRoute) {
