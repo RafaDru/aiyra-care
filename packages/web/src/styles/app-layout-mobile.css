@@ -3,6 +3,7 @@
 .app-layout--compact {
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
+  --compact-heart-orb-size: 70px;
   --compact-nav-h: 56px;
   /** Altura só do fundo opaco laterais — não a área de toque dos itens */
   --compact-nav-rail-h: 36px;
@@ -15,12 +16,44 @@
   background: var(--background, #f8fafc);
 }
 
+/* HDR-2 — marca d’água em toda a shell (atrás de header, conteúdo e bottom nav) */
+.app-layout--compact.app-layout--neri-fab-refinement {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: url('/brand/kit-oficial-ananeri/02-simbolo-e-wordmark/ananeri-silk-watermark.svg')
+    center top / cover no-repeat;
+}
+
+html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::before {
+  opacity: 0.92;
+  filter: saturate(0.95) brightness(0.88);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement > .ant-layout,
+.app-layout--compact.app-layout--neri-fab-refinement > .app-mobile-bottom-nav,
+.app-layout--compact.app-layout--neri-fab-refinement > .app-mobile-capture-fab-stack {
+  position: relative;
+  z-index: 1;
+}
+
 .app-layout--compact .app-sider {
   display: none !important;
 }
 
 .app-layout--compact .ant-layout {
   background: var(--background, #f8fafc);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .ant-layout {
+  background: transparent;
 }
 
 .app-layout--compact .app-header--compact-brand {
@@ -62,11 +95,11 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   transition: padding-left 0.2s ease;
 }
 
-/* PAT-CTX-2 — chip de pessoa à direita do orb 56px, mesma faixa do header (não embaixo) */
+/* PAT-CTX-2 — chip de pessoa à direita do orb 70px, mesma faixa do header (não embaixo) */
 .app-layout--compact.app-layout--patient-chrome .app-header__brand--compact {
   padding-left: max(
     calc(4px + var(--patient-chrome-p, 0) * 52px),
-    calc(10px + 56px + 8px)
+    calc(10px + var(--compact-heart-orb-size, 70px) + 8px)
   );
 }
 
@@ -100,8 +133,8 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   position: absolute;
   left: 10px;
   top: 10px;
-  width: 56px;
-  height: 56px;
+  width: var(--compact-heart-orb-size, 70px);
+  height: var(--compact-heart-orb-size, 70px);
   border-radius: 50%;
   background: var(--card-bg);
   box-shadow:
@@ -125,38 +158,9 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
     no-repeat;
 }
 
-/* HDR-2 — marca d’água à direita no header (não no brand com overflow clip) */
 .app-layout--compact.app-layout--neri-fab-refinement .app-header--compact-brand {
   position: relative;
-  isolation: isolate;
-  overflow: clip;
-  overflow-clip-margin: 0 0 0 0;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement.app-layout--patient-chrome .app-header--compact-brand {
-  overflow-clip-margin: 0 0 14px 0;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .app-header--compact-brand::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 600px;
-  height: 600px;
-  transform: rotate(20deg);
-  transform-origin: top right;
-  opacity: 0.18;
-  pointer-events: none;
-  z-index: 0;
-  filter: saturate(1.25);
-  background: url('/brand/kit-oficial-ananeri/02-simbolo-e-wordmark/ananeri-symbol-heart.svg')
-    right top / contain no-repeat;
-}
-
-html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement .app-header--compact-brand::after {
-  opacity: 0.14;
-  filter: saturate(1.1) brightness(1.15);
+  overflow: visible;
 }
 
 .app-layout--compact .app-header__brand--compact > * {
