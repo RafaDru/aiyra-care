@@ -51,6 +51,7 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 .app-layout--compact .app-header__brand--compact {
   position: relative;
   isolation: isolate;
+  z-index: 1;
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
@@ -127,6 +128,7 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 /* HDR-2 — marca d’água à direita no header (não no brand com overflow clip) */
 .app-layout--compact.app-layout--neri-fab-refinement .app-header--compact-brand {
   position: relative;
+  isolation: isolate;
   overflow: clip;
   overflow-clip-margin: 0 0 0 0;
 }
