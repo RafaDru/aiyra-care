@@ -18,7 +18,7 @@ const colB64 = fs.readFileSync(colPng).toString('base64')
 
 src = src.replace(
   /const CANVAS_BUILD = "[^"]+";/,
-  'const CANVAS_BUILD = "2026-11-27 • comparar lado a lado v6 + S0 hero";',
+  'const CANVAS_BUILD = "2026-11-27 • 1ª compacta rod.1 + comparar v6 + S0 hero";',
 )
 
 const injection = `
