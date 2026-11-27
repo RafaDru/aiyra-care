@@ -442,49 +442,69 @@
 }
 
 /*
- * Corpo da aba compacta — shell 50% (silk visível), linhas/cards internos 100% opacos.
- * Diferente de macro/B+: aqui o .ant-card é painel de conteúdo, não controle.
+ * Corpo da aba — shell 50% só no ::before do .patient-tab-body--compact.
+ * Cards filhos: sem segundo shell; linhas/tags 100% opacas + contraste fixo.
  */
-.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card,
-.app-layout--compact.app-layout--neri-fab-refinement
-  .patient-tab-body--compact
-  > .ant-card:not(.ant-card .ant-card) {
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact {
+  color: var(--text-primary, #0f172a);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card {
   position: relative;
   background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card::before,
-.app-layout--compact.app-layout--neri-fab-refinement
-  .patient-tab-body--compact
-  > .ant-card:not(.ant-card .ant-card)::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: 0;
-  pointer-events: none;
-  background: var(--compact-action-surface-bg, var(--card-bg));
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card > .ant-card-body {
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card > .ant-card-body {
   position: relative;
   z-index: 1;
+  padding: 0 !important;
   background: transparent !important;
+  color: var(--text-primary, #0f172a);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-typography,
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item .ant-typography {
+  color: var(--text-primary, #0f172a);
+  opacity: 1;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-typography-secondary,
+.app-layout--compact.app-layout--neri-fab-refinement
+  .patient-tab-body--compact
+  .ant-list-item
+  .ant-typography-secondary {
+  color: var(--text-secondary, #64748b) !important;
+  opacity: 1;
 }
 
 .app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item {
   position: relative;
   z-index: 1;
-  background: var(--card-bg, #ffffff) !important;
+  margin-bottom: 8px;
+  padding: 12px !important;
+  border: 1px solid var(--border, #e2e8f0);
   border-radius: 10px;
+  background: var(--card-bg, #ffffff) !important;
+  color: var(--text-primary, #0f172a);
+  opacity: 1;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item-meta-title,
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item-meta-description {
+  color: inherit;
+  opacity: 1;
 }
 
 .app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card .ant-card {
   background: var(--card-bg, #ffffff) !important;
+  border: 1px solid var(--border, #e2e8f0);
 }
 
-.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card .ant-card::before {
-  content: none;
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card .ant-card .ant-card-body {
+  background: var(--card-bg, #ffffff) !important;
+  color: var(--text-primary, #0f172a);
 }
 
 .app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-tag,
