@@ -1,4 +1,4 @@
-/** Scroll expandido → recolhido: (1) macro/menu, (2) perfil + lockup. */
+/** Scroll expandido → recolhido: (1) macro/menu; (2) só lockup→orb — seletor de perfil não compacta. */
 export const CHROME_MACRO_COMPACT_BY = 0.44
 export const CHROME_HEADER_COLLAPSE_START = 0.4
 

@@ -1,5 +1,5 @@
 /**
- * Corpo PAT compact (hero + rail macro/B+ + Resumo) — paridade patient/detail × Canvas v7.2.
+ * Corpo PAT compact (hero + rail macro/B+ + Resumo) — paridade patient/detail × Canvas v7.4.
  */
 import { useRef, useState, type CSSProperties } from 'react'
 import { Card, Tag, Typography } from 'antd'

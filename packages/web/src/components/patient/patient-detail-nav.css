@@ -135,7 +135,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: var(--compact-action-surface-bg, var(--card-bg));
+  background: var(--compact-nav-control-bg, var(--card-bg));
 }
 
 .patient-sub-tabs-bplus > * {
@@ -171,7 +171,7 @@
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
-  background: var(--compact-action-surface-bg, var(--card-bg));
+  background: var(--compact-nav-control-bg, var(--card-bg));
   transition: background 0.15s ease;
 }
 
@@ -185,7 +185,7 @@
 }
 
 .patient-sub-tabs-bplus__menu:hover::before {
-  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
+  background: var(--compact-nav-control-selected-bg, var(--nav-selected-bg, #faf5ff));
 }
 
 .patient-sub-tabs-bplus__rail-wrap {
@@ -222,7 +222,7 @@
   background: linear-gradient(
     to right,
     transparent,
-    var(--compact-action-surface-bg, var(--card-bg)) 72%
+    var(--compact-nav-control-bg, var(--card-bg)) 72%
   );
 }
 
@@ -258,7 +258,7 @@
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
-  background: var(--compact-action-surface-bg, var(--card-bg));
+  background: var(--compact-nav-control-bg, var(--card-bg));
   transition: background 0.15s ease;
 }
 
@@ -282,7 +282,7 @@
 }
 
 .patient-sub-tabs-bplus__chip--active::before {
-  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
+  background: var(--compact-nav-control-selected-bg, var(--nav-selected-bg, #faf5ff));
 }
 
 .patient-sub-tabs-bplus__sheet .ant-drawer-header {
@@ -425,7 +425,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: var(--compact-action-surface-strip-bg, color-mix(in srgb, var(--primary) 4%, var(--card-bg)));
+  background: var(--compact-macro-strip-bg, color-mix(in srgb, var(--primary) 4%, var(--card-bg)));
 }
 
 .patient-section-nav--compact-grid > * {
@@ -468,7 +468,7 @@
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
-  background: var(--compact-action-surface-bg, var(--card-bg));
+  background: var(--compact-nav-control-bg, var(--card-bg));
   transition: background 0.15s ease;
 }
 
@@ -506,7 +506,7 @@
 }
 
 .patient-macro-tile--active::before {
-  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
+  background: var(--compact-nav-control-selected-bg, var(--nav-selected-bg, #faf5ff));
 }
 
 .patient-macro-tile--active .patient-macro-tile__icon {
