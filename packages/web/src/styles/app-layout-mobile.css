@@ -49,13 +49,8 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
   --compact-neri-nav-r: 27px;
   --compact-neri-visual-lift: 2.88px;
   --compact-neri-rail-r: 35.1px;
-  /** Disco + arco acima da faixa 56px (paridade Canvas NERI_FLOAT_ABOVE_MENU + NERI_RAIL_R + 4). */
-  --compact-neri-float-above-menu: calc(
-    var(--compact-neri-nav-r, 27px) + var(--compact-neri-visual-lift, 2.88px)
-  );
-  --compact-nav-arch-rise: calc(
-    var(--compact-neri-float-above-menu) + var(--compact-neri-rail-r, 35.1px) + 4px
-  );
+  /** Cúpula do arco sobre o topo reto do rail (sem faixa extra acima do SVG). */
+  --compact-nav-arch-rise: calc(var(--compact-neri-rail-r, 35.1px) + var(--compact-neri-visual-lift, 2.88px) + 2px);
   /** Respiro interno dos labels — somado a `env(safe-area-inset-bottom)` na shell fixa. */
   --compact-bottom-nav-padding-bottom: 8px;
   --compact-nav-rail-fill: var(--card-bg, #fafbfc);
@@ -378,7 +373,9 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px) + 40px);
+  height: calc(
+    var(--compact-nav-arch-rise, 40px) + var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px)
+  );
   pointer-events: none;
   z-index: 0;
   background: linear-gradient(

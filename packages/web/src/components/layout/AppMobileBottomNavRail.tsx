@@ -1,13 +1,10 @@
 /** Faixa inferior contínua — topo reto + arco convexo sobre Neri (estrutural; paridade Canvas). */
 
-const NAV_H = 56
-const NERI_NAV_SIZE = 48
-const NERI_NAV_SCALE = 1.12
-const NERI_HULL_PAD = 6
-const NERI_HULL_SIZE = NERI_NAV_SIZE + NERI_HULL_PAD
-const NERI_NAV_R = NERI_HULL_SIZE / 2
-const NERI_VISUAL_LIFT = (NERI_NAV_SIZE * (NERI_NAV_SCALE - 1)) / 2
-const NERI_RAIL_R = NERI_NAV_R * 1.3
+import {
+  COMPACT_NAV_H as NAV_H,
+  NERI_RAIL_R,
+  NERI_VISUAL_LIFT,
+} from '../../lib/compact-bottom-nav-rail-metrics.js'
 
 export function AppMobileBottomNavRail({ width = 390 }: { width?: number }) {
   const cx = width / 2
