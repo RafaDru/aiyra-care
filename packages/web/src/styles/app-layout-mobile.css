@@ -43,6 +43,10 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
     var(--nav-selected-bg, #faf5ff) calc(var(--compact-action-surface-opacity, 0.5) * 100%),
     transparent
   );
+  /** Macro tiles + B+ chips/menu — fundo 100% opaco (sem vazar WM no scroll) */
+  --compact-nav-control-bg: var(--card-bg, #ffffff);
+  --compact-nav-control-selected-bg: var(--nav-selected-bg, #faf5ff);
+  --compact-macro-strip-bg: color-mix(in srgb, var(--primary) 4%, var(--card-bg, #ffffff));
   --compact-heart-orb-size: 70px;
   /** Aura Neri bottom nav — roxo/rosa (média do PNG); atrás do disco */
   --compact-neri-aura-pink: rgba(236, 72, 153, 0.28);
@@ -271,21 +275,16 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   min-width: 0;
   min-height: 44px;
   padding-right: 8px;
-  opacity: clamp(0, calc((var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) - 0.04) / 0.88), 1);
-  transform: translate3d(
-    0,
-    calc((1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0))) * 6px),
-    0
-  );
-  transition:
-    opacity 0.18s ease-out,
-    transform 0.18s ease-out;
-  will-change: transform, opacity;
-}
-
-.app-layout--compact.app-layout--patient-chrome-expanded .app-header__patient-ctx-slot {
   opacity: 0;
   pointer-events: none;
+  transform: none;
+}
+
+/* Perfil no header: tamanho/layout fixos ao aparecer — sem rampa de chrome-p-header */
+.app-layout--compact.app-layout--patient-chrome:not(.app-layout--patient-chrome-expanded)
+  .app-header__patient-ctx-slot {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Coração no header — 10px esq/topo; sobrepõe o silk como Neri na bottom nav */

@@ -6,7 +6,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { Patient } from '../../lib/api.types.js'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
-import { chromeHeaderPhase } from '../../lib/patient-chrome-phases.js'
+
+/** Paridade `app-layout--patient-chrome-expanded` (AppLayout progress ≤ 0.18). */
+const PROFILE_CHIP_INTERACTIVE_MIN_P = 0.18
 
 const HEADER_SLOT_ID = 'app-header-patient-ctx-slot'
 
@@ -57,14 +59,14 @@ export function PatientCompactPersonContextBar({ patient, patients, heroSentinel
   }, [heroSentinelRef, patient.id, onPinnedChange])
 
   const others = patients.filter((p) => p.id !== patient.id)
-  const headerP = chromeHeaderPhase(progress)
+  const profileChipInteractive = progress > PROFILE_CHIP_INTERACTIVE_MIN_P
 
   const chip = (
     <button
       type="button"
       className="patient-compact-person-ctx__trigger"
       style={{
-        pointerEvents: headerP > 0.42 ? 'auto' : 'none',
+        pointerEvents: profileChipInteractive ? 'auto' : 'none',
       }}
       aria-label={t('patient.compactContextAria', { name: patient.name })}
       onClick={() => setSheetOpen(true)}
