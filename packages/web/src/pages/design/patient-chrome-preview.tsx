@@ -3,6 +3,7 @@
  * Viewport alvo: 390×844 (iPhone).
  */
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Card, Segmented, Tag, Typography } from 'antd'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 import { useTranslation } from 'react-i18next'
@@ -62,12 +63,21 @@ export function DesignPatientChromePreview() {
   const { t } = useTranslation()
   const { progress, setChrome } = useCompactPatientChrome()
   const heroSentinelRef = useRef<HTMLDivElement>(null)
+  const [searchParams] = useSearchParams()
+  const chromeFromUrl = searchParams.get('chrome')
   const initialPreset = (): ChromePreset => {
-    const q = new URLSearchParams(window.location.search).get('chrome')
-    if (q === 'expanded' || q === 'collapsed' || q === 'auto') return q
+    if (chromeFromUrl === 'expanded' || chromeFromUrl === 'collapsed' || chromeFromUrl === 'auto') {
+      return chromeFromUrl
+    }
     return 'collapsed'
   }
   const [preset, setPreset] = useState<ChromePreset>(initialPreset)
+
+  useEffect(() => {
+    if (chromeFromUrl === 'expanded' || chromeFromUrl === 'collapsed' || chromeFromUrl === 'auto') {
+      setPreset(chromeFromUrl)
+    }
+  }, [chromeFromUrl])
   const [activeSection, setActiveSection] = useState<PatientSection>('clinical')
   const [activeTab, setActiveTab] = useState<PatientTabKey>('growth')
   const sectionTabKeys = SECTION_TABS[activeSection]
