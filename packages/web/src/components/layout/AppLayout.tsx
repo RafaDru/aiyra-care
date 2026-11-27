@@ -48,7 +48,6 @@ import {
   DESIGN_PATIENT_CHROME_COMPARE_PATH,
   DESIGN_PATIENT_CHROME_PATH,
 } from '../../lib/design-preview-env.js'
-import { chromeHeaderPhase, chromeMacroPhase } from '../../lib/patient-chrome-phases.js'
 
 const { Sider, Content, Header } = Layout
 
