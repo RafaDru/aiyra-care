@@ -44,6 +44,7 @@ import {
 } from '../../contexts/CompactPatientChromeContext.js'
 import { useDesignPreviewMode } from '../../contexts/DesignPreviewModeContext.js'
 import { DESIGN_PATIENT_CHROME_PATH } from '../../lib/design-preview-env.js'
+import { chromeHeaderPhase, chromeMacroPhase } from '../../lib/patient-chrome-phases.js'
 
 const { Sider, Content, Header } = Layout
 
@@ -156,7 +157,12 @@ function AppLayoutFrame() {
       }
       style={
         compactShell
-          ? ({ '--patient-chrome-p': chromeProgress, minHeight: '100vh' } as CSSProperties)
+          ? ({
+              '--patient-chrome-p': chromeProgress,
+              '--patient-chrome-p-macro': chromeMacroPhase(chromeProgress),
+              '--patient-chrome-p-header': chromeHeaderPhase(chromeProgress),
+              minHeight: '100vh',
+            } as CSSProperties)
           : { minHeight: '100vh', height: '100vh', overflow: 'hidden' }
       }
     >
