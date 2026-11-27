@@ -45,6 +45,7 @@ import {
 } from '../../contexts/CompactPatientChromeContext.js'
 import { useDesignPreviewMode } from '../../contexts/DesignPreviewModeContext.js'
 import { DESIGN_PATIENT_CHROME_PATH } from '../../lib/design-preview-env.js'
+import { chromeHeaderPhase, chromeMacroPhase } from '../../lib/patient-chrome-phases.js'
 
 const { Sider, Content, Header } = Layout
 
