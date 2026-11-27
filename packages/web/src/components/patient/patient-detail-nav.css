@@ -2,7 +2,7 @@
 .patient-detail-sticky-nav {
   position: sticky;
   top: 0;
-  z-index: 22;
+  z-index: 32;
   background: transparent;
   border-bottom: 1px solid var(--border, #e2e8f0);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
@@ -379,12 +379,26 @@
   will-change: transform;
 }
 
+/*
+ * PAT chrome — macro + submenu (B+) sticky abaixo do header; z-index 32 < header 110.
+ */
+.app-layout--compact.app-layout--patient-chrome .patient-detail-sticky-nav {
+  top: var(--compact-chrome-header-sticky-h, 90px);
+  z-index: 32;
+  transform: none;
+  transition: top 0.18s ease-out;
+}
+
+.app-layout--compact.app-layout--patient-chrome .patient-compact-sub-tabs {
+  position: relative;
+  z-index: 28;
+}
+
 .app-layout--compact .patient-section-nav--compact-grid .patient-macro-tile {
   min-height: calc(
     34px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 38px
   );
   transition: min-height 0.16s ease-out;
-}
 
 .app-layout--compact .patient-macro-tile__icon {
   opacity: calc(1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * 1.15);
