@@ -20,11 +20,12 @@ export function AppMobileBottomNavRail({ width = 390 }: { width?: number }) {
   const vbH = NAV_H - vbMinY
   const shell = `M 0,0 H ${leftX.toFixed(2)} A ${r},${r} 0 0 0 ${rightX.toFixed(2)},0 H ${width} V ${NAV_H} H 0 Z`
   const groove = `M ${leftX.toFixed(2)},0 A ${r},${r} 0 0 0 ${rightX.toFixed(2)},0`
-  const fill = 'var(--card-bg, #fafbfc)'
+  const fill = 'var(--compact-nav-rail-fill, var(--card-bg, #fafbfc))'
 
   return (
     <div className="app-mobile-bottom-nav__rail" aria-hidden>
       <svg
+        className="app-mobile-bottom-nav__rail-svg"
         width="100%"
         height={vbH}
         viewBox={`0 ${vbMinY.toFixed(2)} ${width} ${vbH.toFixed(2)}`}

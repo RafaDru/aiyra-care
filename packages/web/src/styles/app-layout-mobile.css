@@ -33,8 +33,16 @@
   --compact-neri-nav-r: 27px;
   --compact-neri-visual-lift: 2.88px;
   --compact-neri-rail-r: 35.1px;
-  /** Espaço acima da faixa plana para o disco Neri + arco convexo (paridade Canvas). */
-  --compact-nav-arch-rise: 69px;
+  /** Disco + arco acima da faixa 56px (paridade Canvas NERI_FLOAT_ABOVE_MENU + NERI_RAIL_R + 4). */
+  --compact-neri-float-above-menu: calc(
+    var(--compact-neri-nav-r, 27px) + var(--compact-neri-visual-lift, 2.88px)
+  );
+  --compact-nav-arch-rise: calc(
+    var(--compact-neri-float-above-menu) + var(--compact-neri-rail-r, 35.1px) + 4px
+  );
+  /** Respiro interno dos labels — somado a `env(safe-area-inset-bottom)` na shell fixa. */
+  --compact-bottom-nav-padding-bottom: 8px;
+  --compact-nav-rail-fill: var(--card-bg, #fafbfc);
   --compact-fab-clearance: 56px;
   --compact-bottom-scroll-pad: calc(
     var(--compact-nav-h) + var(--compact-nav-arch-rise) + var(--compact-fab-clearance) +
@@ -367,6 +375,25 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   background: transparent;
   border: none;
   overflow: visible;
+  isolation: isolate;
+}
+
+/** Wash suave lilás → faixa rail (sem corte brusco com o silk do fundo). */
+.app-mobile-bottom-nav::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px) + 40px);
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--nav-selected-bg, #faf5ff) 38%, transparent) 42%,
+    color-mix(in srgb, var(--compact-nav-rail-fill) 94%, #ede9fe) 100%
+  );
 }
 
 .app-mobile-bottom-nav__rail {
@@ -376,17 +403,28 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   bottom: env(safe-area-inset-bottom, 0px);
   height: var(--compact-nav-h, 56px);
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
+  overflow: visible;
+}
+
+.app-mobile-bottom-nav__rail-svg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
   overflow: visible;
 }
 
 .app-mobile-bottom-nav__col {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-width: 0;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  overflow: visible;
 }
 
 .app-mobile-bottom-nav__item {
@@ -404,7 +442,7 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   font-family: inherit;
   font-size: 11px;
   line-height: 1.2;
-  padding: 6px 2px 4px;
+  padding: 6px 2px var(--compact-bottom-nav-padding-bottom, 8px);
   margin: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -512,6 +550,8 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
 
 .app-mobile-bottom-nav__neri-slot {
   pointer-events: none;
+  overflow: visible;
+  z-index: 3;
 }
 
 .app-mobile-bottom-nav__neri {
@@ -525,7 +565,7 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
   width: 100%;
   max-width: 88px;
   min-height: var(--compact-nav-h, 56px);
-  padding: 6px 2px 4px;
+  padding: 6px 2px var(--compact-bottom-nav-padding-bottom, 8px);
   border: none;
   background: transparent;
   cursor: pointer;
@@ -548,7 +588,7 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
   background: transparent;
   border: none;
   box-shadow: none;
-  z-index: 2;
+  z-index: 4;
   overflow: visible;
   pointer-events: none;
 }
@@ -638,7 +678,7 @@ html[data-theme='dark'] .app-mobile-bottom-nav__neri-inner::before {
 .app-layout--bottom-nav-dense .app-mobile-bottom-nav__item {
   gap: 0;
   padding-top: 6px;
-  padding-bottom: 2px;
+  padding-bottom: var(--compact-bottom-nav-padding-bottom, 8px);
 }
 
 .app-layout--bottom-nav-dense .app-mobile-bottom-nav__neri-caption {

@@ -4,6 +4,11 @@
   max-width: 390px;
   margin: 0 auto;
   min-height: 100%;
+  overflow: visible;
+}
+
+.design-preview-viewport > .app-mobile-bottom-nav {
+  overflow: visible;
 }
 
 .design-preview-viewport .app-main-content {
