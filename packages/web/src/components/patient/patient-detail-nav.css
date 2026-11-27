@@ -121,7 +121,7 @@
 .patient-sub-tabs-bplus {
   position: relative;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 8px;
   min-height: 44px;
   padding: 8px 0 8px 8px;
@@ -513,13 +513,21 @@
 }
 
 /* PAT-CTX-1 — chip de pessoa no header (portal); card opaco sobre o wash contínuo (não parte do fundo do header) */
-.app-layout--compact.app-layout--patient-chrome .patient-compact-person-ctx__trigger {
+.app-layout--compact .app-header__patient-ctx-slot .patient-compact-person-ctx__trigger {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 6px 10px;
   border: 1px solid var(--border, #e2e8f0);
   border-radius: 10px;
   background: var(--card-bg, #ffffff);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.app-layout--compact.app-layout--patient-chrome .patient-compact-person-ctx__trigger {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .patient-compact-person-ctx__trigger {

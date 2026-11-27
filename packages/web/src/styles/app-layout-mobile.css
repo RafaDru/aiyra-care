@@ -29,12 +29,15 @@
   --compact-neri-aura-purple: rgba(147, 51, 234, 0.22);
   --compact-neri-aura-deep: rgba(126, 34, 206, 0.09);
   --compact-nav-h: 56px;
-  /** Altura só do fundo opaco laterais — não a área de toque dos itens */
-  --compact-nav-rail-h: 36px;
-  --compact-nav-overhang: 16px;
+  --compact-neri-hull-size: 54px;
+  --compact-neri-nav-r: 27px;
+  --compact-neri-visual-lift: 2.88px;
+  --compact-neri-rail-r: 35.1px;
+  /** Espaço acima da faixa plana para o disco Neri + arco convexo (paridade Canvas). */
+  --compact-nav-arch-rise: 69px;
   --compact-fab-clearance: 56px;
   --compact-bottom-scroll-pad: calc(
-    var(--compact-nav-h) + var(--compact-nav-overhang) + var(--compact-fab-clearance) +
+    var(--compact-nav-h) + var(--compact-nav-arch-rise) + var(--compact-fab-clearance) +
       env(safe-area-inset-bottom, 0px)
   );
   background: var(--background, #f8fafc);
@@ -200,6 +203,12 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   .app-layout--compact.app-layout--patient-chrome .app-header__lockup-wrap {
     pointer-events: none;
     visibility: hidden;
+    flex: 0 0 0;
+    width: 0;
+    max-width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
   }
 }
 
@@ -209,6 +218,7 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   flex: 1 1 auto;
   min-width: 0;
   min-height: 44px;
+  padding-right: 8px;
 }
 
 /* Coração no header — 10px esq/topo; sobrepõe o silk como Neri na bottom nav */
@@ -344,14 +354,18 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   right: 0;
   bottom: 0;
   z-index: 500;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-around;
-  height: calc(var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: 1fr;
+  align-items: end;
+  box-sizing: border-box;
+  height: calc(
+    var(--compact-nav-arch-rise, 69px) + var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px)
+  );
+  padding-top: var(--compact-nav-arch-rise, 69px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: transparent;
-  border-top: none;
-  box-shadow: none;
+  border: none;
   overflow: visible;
 }
 
@@ -366,42 +380,65 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   overflow: visible;
 }
 
-.app-mobile-bottom-nav > * {
+.app-mobile-bottom-nav__col {
   position: relative;
   z-index: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .app-mobile-bottom-nav__item {
-  flex: 1;
+  width: 100%;
+  max-width: 88px;
+  min-height: var(--compact-nav-h, 56px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 2px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, rgba(0, 0, 0, 0.65));
+  color: var(--text-secondary, #64748b);
+  font-family: inherit;
   font-size: 11px;
   line-height: 1.2;
-  padding: 6px 4px;
+  padding: 6px 2px 4px;
+  margin: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   font-weight: 500;
-  transition: gap 0.2s ease, padding 0.2s ease;
+  box-sizing: border-box;
 }
 
 .app-mobile-bottom-nav__icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 40px;
   height: 28px;
   border-radius: 14px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease;
 }
 
-.app-mobile-bottom-nav__item .anticon {
-  font-size: 20px;
+.app-mobile-bottom-nav__icon-wrap svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.app-mobile-bottom-nav__label {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: inherit;
 }
 
 .app-mobile-bottom-nav__item--active {
@@ -433,10 +470,6 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
   margin: 2px auto 0;
   border-radius: 2px;
   background: var(--primary, #7e22ce);
-}
-
-.app-mobile-bottom-nav__item--emergency {
-  color: var(--emergency-nav, #cf1322);
 }
 
 .app-mobile-bottom-nav__item--emergency.app-mobile-bottom-nav__item--active {
@@ -478,11 +511,6 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
 /* ── Center Neri — chat (transparente nas laterais da faixa) ─────────── */
 
 .app-mobile-bottom-nav__neri-slot {
-  flex: 1;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  background: transparent;
   pointer-events: none;
 }
 
@@ -496,12 +524,14 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
   gap: 2px;
   width: 100%;
   max-width: 88px;
-  padding: 6px 4px;
+  min-height: var(--compact-nav-h, 56px);
+  padding: 6px 2px 4px;
   border: none;
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   overflow: visible;
+  box-sizing: border-box;
 }
 
 .app-mobile-bottom-nav__neri-inner {
@@ -509,17 +539,18 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
   left: 50%;
   top: 0;
   transform: translate(-50%, -50%);
-  width: 56px;
-  height: 56px;
+  width: var(--compact-neri-hull-size, 54px);
+  height: var(--compact-neri-hull-size, 54px);
   border-radius: 50%;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  background: none;
+  background: transparent;
   border: none;
   box-shadow: none;
-  z-index: 520;
+  z-index: 2;
   overflow: visible;
+  pointer-events: none;
 }
 
 /* Glow suave atrás do círculo Neri (paridade canvas NERI_AURA) */
@@ -548,8 +579,10 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
 .app-mobile-bottom-nav__neri-inner .ava-avatar-shell {
   position: relative;
   z-index: 1;
-  width: 54px;
-  height: 54px;
+  width: var(--compact-neri-hull-size, 54px) !important;
+  height: var(--compact-neri-hull-size, 54px) !important;
+  min-width: var(--compact-neri-hull-size, 54px);
+  min-height: var(--compact-neri-hull-size, 54px);
   border-radius: 50%;
   display: flex;
   align-items: flex-end;
@@ -570,12 +603,17 @@ html[data-theme='dark'] .app-mobile-bottom-nav__neri-inner::before {
   filter: drop-shadow(0 2px 8px rgba(126, 34, 206, 0.16));
 }
 
+.app-mobile-bottom-nav__neri-inner .ava-avatar__photo {
+  object-fit: cover;
+  object-position: 50% 33%;
+}
+
 .app-mobile-bottom-nav__neri-caption {
   font-size: 11px;
   line-height: 1.2;
   font-weight: 600;
   color: var(--primary, #7e22ce);
-  margin-top: auto;
+  white-space: nowrap;
 }
 
 /* ── Ava dock — orb oculto; drawer via requestAvaOpen (chat Neri no centro) ─ */
@@ -593,7 +631,7 @@ html[data-theme='dark'] .app-mobile-bottom-nav__neri-inner::before {
   overflow: hidden;
   margin: 0;
   padding: 0;
-  transform: scale(0.85);
+  transform: translate(-50%, -50%) scale(0.85);
   transition: opacity 0.2s ease, max-height 0.2s ease, transform 0.2s ease;
 }
 
@@ -610,7 +648,9 @@ html[data-theme='dark'] .app-mobile-bottom-nav__neri-inner::before {
 .app-mobile-fab-stack {
   position: fixed;
   right: 16px;
-  bottom: calc(var(--compact-nav-h, 56px) + 8px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(
+    var(--compact-nav-arch-rise, 69px) + var(--compact-nav-h, 56px) + 8px + env(safe-area-inset-bottom, 0px)
+  );
   z-index: 520;
   display: flex;
   flex-direction: column;

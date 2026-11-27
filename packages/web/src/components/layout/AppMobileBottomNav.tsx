@@ -59,18 +59,19 @@ export function AppMobileBottomNav({
         <MobileNavIconEmergency active={active} muted={MUTED} emergency={EMERGENCY} />
       )
     return (
-      <button
-        key={key}
-        type="button"
-        className={`app-mobile-bottom-nav__item${active ? ' app-mobile-bottom-nav__item--active' : ''}${
-          emergency ? ' app-mobile-bottom-nav__item--emergency' : ''
-        }`}
-        aria-current={active ? 'page' : undefined}
-        onClick={() => onNavigate(key)}
-      >
-        <span className="app-mobile-bottom-nav__icon-wrap">{icon}</span>
-        <span className="app-mobile-bottom-nav__label">{labels[key]}</span>
-      </button>
+      <div key={key} className="app-mobile-bottom-nav__col">
+        <button
+          type="button"
+          className={`app-mobile-bottom-nav__item${active ? ' app-mobile-bottom-nav__item--active' : ''}${
+            emergency ? ' app-mobile-bottom-nav__item--emergency' : ''
+          }`}
+          aria-current={active ? 'page' : undefined}
+          onClick={() => onNavigate(key)}
+        >
+          <span className="app-mobile-bottom-nav__icon-wrap">{icon}</span>
+          <span className="app-mobile-bottom-nav__label">{labels[key]}</span>
+        </button>
+      </div>
     )
   }
 
@@ -79,7 +80,7 @@ export function AppMobileBottomNav({
       <AppMobileBottomNavRail />
       {renderRouteItem(ROUTE_KEYS[0])}
       {renderRouteItem(ROUTE_KEYS[1])}
-      <div className="app-mobile-bottom-nav__neri-slot" aria-hidden={false}>
+      <div className="app-mobile-bottom-nav__col app-mobile-bottom-nav__neri-slot">
         <button
           type="button"
           className="app-mobile-bottom-nav__neri"
@@ -99,20 +100,22 @@ export function AppMobileBottomNav({
         </button>
       </div>
       {renderRouteItem(ROUTE_KEYS[2])}
-      <button
-        type="button"
-        className={`app-mobile-bottom-nav__item${
-          servicesActive ? ' app-mobile-bottom-nav__item--active' : ''
-        }`}
-        aria-expanded={servicesActive}
-        aria-haspopup="dialog"
-        onClick={onOpenServices}
-      >
-        <span className="app-mobile-bottom-nav__icon-wrap">
-          <MobileNavIconServices active={servicesActive} muted={MUTED} primary={PRIMARY} />
-        </span>
-        <span className="app-mobile-bottom-nav__label">{labels.services}</span>
-      </button>
+      <div className="app-mobile-bottom-nav__col">
+        <button
+          type="button"
+          className={`app-mobile-bottom-nav__item${
+            servicesActive ? ' app-mobile-bottom-nav__item--active' : ''
+          }`}
+          aria-expanded={servicesActive}
+          aria-haspopup="dialog"
+          onClick={onOpenServices}
+        >
+          <span className="app-mobile-bottom-nav__icon-wrap">
+            <MobileNavIconServices active={servicesActive} muted={MUTED} primary={PRIMARY} />
+          </span>
+          <span className="app-mobile-bottom-nav__label">{labels.services}</span>
+        </button>
+      </div>
     </nav>
   )
 }

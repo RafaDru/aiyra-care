@@ -25,11 +25,10 @@ function SvgIcon({ d, color }: { d: string; color: string }) {
   )
 }
 
-function FamilyHeart({ tx, ty, fill, filled }: { tx: number; ty: number; fill: string; filled: boolean }) {
-  const scale = 1.035
+function FamilyHeart({ tx, ty, fill, scale }: { tx: number; ty: number; fill: string; scale: number }) {
   return (
     <g transform={`translate(${tx} ${ty}) scale(${scale}) translate(-512 -512)`}>
-      <path fill={fill} d={filled ? HEART_FILLED : HEART_OUTLINED} />
+      <path fill={fill} d={HEART_FILLED} />
     </g>
   )
 }
@@ -38,6 +37,12 @@ export function MobileNavIconHome({ active, muted, primary }: { active: boolean;
   const c = active ? primary : muted
   return <SvgIcon d={active ? HEART_FILLED : HEART_OUTLINED} color={c} />
 }
+
+const FAMILY_PX_TO_VB = 896 / 20
+/** Espelho Canvas — ~5px entre corações laterais no tile 20px. */
+const FAMILY_SPREAD_VB = 3.2 * FAMILY_PX_TO_VB
+const FAMILY_VB_W = 896 + 10 * FAMILY_PX_TO_VB
+const FAMILY_VB_MIN_X = 512 - FAMILY_VB_W / 2
 
 export function MobileNavIconFamily({
   active,
@@ -54,11 +59,28 @@ export function MobileNavIconFamily({
     if (!active) return muted
     return role === 'top' ? primary : familyPink
   }
+  const topScale = active ? 0.36 : 0.33
+  const sideScale = active ? 0.32 : 0.29
   return (
-    <svg width={20} height={20} viewBox="350 180 330 560" aria-hidden>
-      <FamilyHeart tx={512} ty={318} fill={ink('top')} filled={active} />
-      <FamilyHeart tx={350} ty={478} fill={ink('bottom')} filled={active} />
-      <FamilyHeart tx={674} ty={478} fill={ink('bottom')} filled={active} />
+    <svg
+      width={20}
+      height={20}
+      viewBox={`${FAMILY_VB_MIN_X} 64 ${FAMILY_VB_W} 896`}
+      aria-hidden
+    >
+      <FamilyHeart tx={512} ty={318} fill={ink('top')} scale={topScale} />
+      <FamilyHeart
+        tx={408 - FAMILY_SPREAD_VB}
+        ty={478 + FAMILY_SPREAD_VB}
+        fill={ink('bottom')}
+        scale={sideScale}
+      />
+      <FamilyHeart
+        tx={616 + FAMILY_SPREAD_VB}
+        ty={478 + FAMILY_SPREAD_VB}
+        fill={ink('bottom')}
+        scale={sideScale}
+      />
     </svg>
   )
 }

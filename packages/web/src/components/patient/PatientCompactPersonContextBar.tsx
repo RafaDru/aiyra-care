@@ -62,7 +62,10 @@ export function PatientCompactPersonContextBar({ patient, patients, heroSentinel
     <button
       type="button"
       className="patient-compact-person-ctx__trigger"
-      style={{ opacity: progress, pointerEvents: progress > 0.35 ? 'auto' : 'none' }}
+      style={{
+        opacity: Math.min(1, Math.max(0.35, progress)),
+        pointerEvents: progress > 0.35 ? 'auto' : 'none',
+      }}
       aria-label={t('patient.compactContextAria', { name: patient.name })}
       onClick={() => setSheetOpen(true)}
     >
