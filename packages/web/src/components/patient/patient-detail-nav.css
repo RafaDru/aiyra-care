@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 22;
-  background: var(--card-bg);
+  background: var(--compact-action-surface-bg, var(--card-bg));
   border-bottom: 1px solid var(--border, #e2e8f0);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
 }
@@ -109,7 +109,7 @@
   gap: 8px;
   min-height: 44px;
   padding: 8px 0 8px 8px;
-  background: var(--card-bg);
+  background: var(--compact-action-surface-bg, var(--card-bg));
   border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 
@@ -124,7 +124,12 @@
   justify-content: center;
   border-radius: 10px;
   border: 1px solid var(--border, #e2e8f0);
-  background: color-mix(in srgb, var(--border) 18%, var(--card-bg));
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--border) 18%, var(--card-bg))
+      calc(var(--compact-action-surface-opacity, 1) * 100%),
+    transparent
+  );
   color: var(--nav-selected-text, #6b21a8);
   font-size: 18px;
   line-height: 1;
@@ -135,7 +140,7 @@
 
 .patient-sub-tabs-bplus__menu:hover {
   border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-  background: var(--nav-selected-bg, #faf5ff);
+  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
 }
 
 .patient-sub-tabs-bplus__rail-wrap {
@@ -169,7 +174,11 @@
   width: 28px;
   height: 44px;
   pointer-events: none;
-  background: linear-gradient(to right, transparent, var(--card-bg) 72%);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--compact-action-surface-bg, var(--card-bg)) 72%
+  );
 }
 
 .patient-sub-tabs-bplus__chip {
@@ -183,7 +192,7 @@
   padding: 0 14px;
   border-radius: 10px;
   border: 1px solid var(--border, #e2e8f0);
-  background: var(--card-bg);
+  background: var(--compact-action-surface-bg, var(--card-bg));
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
@@ -207,7 +216,7 @@
 }
 
 .patient-sub-tabs-bplus__chip--active {
-  background: var(--nav-selected-bg, #faf5ff);
+  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
   border-color: var(--nav-selected-border, #e9d5ff);
   color: var(--nav-selected-text, #6b21a8);
   font-weight: 600;
@@ -237,7 +246,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding: 12px 16px 8px;
-  background: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
+  background: var(--compact-action-surface-strip-bg, color-mix(in srgb, var(--primary) 4%, var(--card-bg)));
 }
 
 .patient-macro-tile {
@@ -252,7 +261,7 @@
   padding: 10px 8px;
   border-radius: 8px;
   border: 1px solid var(--border, #e2e8f0);
-  background: var(--card-bg);
+  background: var(--compact-action-surface-bg, var(--card-bg));
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
@@ -290,7 +299,7 @@
 }
 
 .patient-macro-tile--active {
-  background: var(--nav-selected-bg, #faf5ff);
+  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
   border-color: var(--nav-selected-border, #e9d5ff);
   color: var(--nav-selected-text, #6b21a8);
   font-weight: 600;
@@ -312,6 +321,16 @@
 
 .patient-tab-body--compact {
   padding: 16px !important;
+}
+
+/* Blocos clicáveis no corpo compacto — fundo 50%, texto/badges opacos */
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card {
+  background: var(--compact-action-surface-bg, var(--card-bg)) !important;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item {
+  background: var(--compact-action-surface-bg, var(--card-bg));
+  border-radius: 10px;
 }
 
 /* PAT-CTX-1 — chip de pessoa no header (portal) */
@@ -371,7 +390,7 @@
 }
 
 .patient-compact-person-ctx__list-item--active {
-  background: var(--nav-selected-bg, #faf5ff);
+  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
   color: var(--nav-selected-text, #6b21a8);
   font-weight: 600;
 }
