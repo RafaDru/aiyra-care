@@ -1,5 +1,21 @@
 /* ── Compact PWA shell (≤768px / standalone) ───────────────────────────── */
 
+/**
+ * Rolagem: viewport inteiro (`html` / `window`) — conteúdo passa sob header sticky e bottom nav fixa.
+ * `.app-main-content` só reserva `margin-bottom` + `scroll-padding-bottom`; sem `overflow-y` interno.
+ */
+html:has(.app-layout--compact.app-layout--neri-fab-refinement),
+html:has(.app-layout--compact.app-layout--neri-fab-refinement) body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .app-layout--compact {
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
@@ -92,13 +108,35 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
 }
 
 .app-layout--compact .app-header--compact-brand {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   padding: 0 14px !important;
   gap: 8px !important;
   border-bottom: 1px solid var(--border);
   background: transparent !important;
   box-shadow: 0 1px 0 rgba(126, 34, 206, 0.06);
   overflow: visible;
+}
+
+/* PAT-CTX — topo do orb = topo do chip (mesma linha de 10px no header patient-chrome) */
+.app-layout--compact.app-layout--patient-chrome .app-header.app-header--compact-brand {
+  align-items: flex-start !important;
+  height: auto !important;
+  min-height: var(--compact-header-h, 64px);
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  box-sizing: border-box;
+}
+
+.app-layout--compact.app-layout--patient-chrome .app-header__brand--compact {
+  align-items: flex-start;
+  align-self: stretch;
+  min-height: 44px;
+}
+
+.app-layout--compact.app-layout--patient-chrome .app-header__patient-ctx-slot {
+  align-items: flex-start;
 }
 
 /* Wash 50% contínuo — silk uniforme + gradiente (sem costura orb/chip; não herdado nos filhos) */
@@ -266,10 +304,10 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 /* NAV-CONTENT — reserva de scroll para barra + overhang Neri + FAB */
 .app-layout--compact .app-main-content {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
+  display: block;
+  flex: none;
+  min-height: auto;
+  overflow: visible;
   margin: 12px !important;
   margin-bottom: calc(12px + var(--compact-bottom-scroll-pad)) !important;
   padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
@@ -289,64 +327,11 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 .app-layout--compact.app-layout--neri-fab-refinement .app-main-content > * {
   position: relative;
   z-index: 1;
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .app-main-content .ant-card:has(.patient-detail-sticky-nav) {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(
-    100dvh - var(--compact-header-h, 64px) - 24px - var(--compact-bottom-scroll-pad, 128px)
-  );
 }
 
 .app-layout--compact.app-layout--neri-fab-refinement .app-main-content .ant-card:has(.patient-detail-sticky-nav) .ant-card-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
   padding: 0;
   background: transparent !important;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .app-main-content .patient-sub-tabs.ant-tabs {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .app-main-content .patient-sub-tabs .ant-tabs-content-holder {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .app-main-content .patient-sub-tabs .ant-tabs-content {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .app-main-content .patient-sub-tabs .ant-tabs-tabpane.ant-tabs-tabpane-active {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 100%;
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement
-  .app-main-content
-  .ant-card:has(.patient-detail-sticky-nav)
-  .ant-card-body
-  > .patient-tab-body--compact {
-  flex: 1 1 auto;
 }
 
 /* Cards stand out from page wash on compact */

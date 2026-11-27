@@ -127,20 +127,19 @@ function AppLayoutFrame() {
   }, [compactShell, patientFocusRoute, location.pathname, resetChrome])
 
   useEffect(() => {
-    const el = contentRef.current
-    if (!el || !compactShell || !patientFocusRoute || designPreview) return
+    if (!compactShell || !patientFocusRoute || designPreview) return
 
     const onScroll = () => {
-      const raw = Math.min(1, Math.max(0, el.scrollTop / 152))
+      const scrollTop = window.scrollY
+      const raw = Math.min(1, Math.max(0, scrollTop / 152))
       const eased = raw * raw * (3 - 2 * raw)
       setChrome({ progress: eased, patientFocus: true })
-      el.style.setProperty('--patient-chrome-p', String(eased))
     }
 
     onScroll()
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [compactShell, patientFocusRoute, location.pathname, setChrome])
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [compactShell, patientFocusRoute, location.pathname, setChrome, designPreview])
 
   const chromeLevel =
     compactShell && patientFocus && chromeProgress > 0.12 ? 'app-layout--patient-chrome' : ''
@@ -156,7 +155,7 @@ function AppLayoutFrame() {
       }
       style={
         compactShell
-          ? ({ '--patient-chrome-p': chromeProgress, minHeight: '100vh', height: '100vh', overflow: 'hidden' } as CSSProperties)
+          ? ({ '--patient-chrome-p': chromeProgress, minHeight: '100vh' } as CSSProperties)
           : { minHeight: '100vh', height: '100vh', overflow: 'hidden' }
       }
     >
@@ -229,7 +228,13 @@ function AppLayoutFrame() {
         </div>
       </Sider>
       )}
-      <Layout style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <Layout
+        style={
+          compactShell
+            ? { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'visible' }
+            : { flex: 1, minHeight: 0, overflow: 'hidden' }
+        }
+      >
         <Header
           className={compactShell ? 'app-header app-header--compact-brand' : 'app-header'}
           style={{
@@ -309,7 +314,11 @@ function AppLayoutFrame() {
         <Content
           ref={contentRef}
           className="app-main-content"
-          style={{ margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }}
+          style={
+            compactShell
+              ? { flex: 'none', minHeight: 'auto', overflow: 'visible' }
+              : { margin: 24, flex: 1, minHeight: 0, overflow: 'auto', overflowX: 'hidden' }
+          }
         >
           {configured && user && <RuntimeDegradedBanner />}
           {configured && user && <HygieneLoginPrompt />}
