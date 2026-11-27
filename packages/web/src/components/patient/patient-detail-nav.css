@@ -419,17 +419,67 @@
   padding: 16px !important;
 }
 
-/* Blocos clicáveis no corpo compacto — fundo 50%, texto/badges opacos */
-.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card {
-  background: var(--compact-action-surface-bg, var(--card-bg)) !important;
+/*
+ * Corpo da aba compacta — shell 50% (silk visível), linhas/cards internos 100% opacos.
+ * Diferente de macro/B+: aqui o .ant-card é painel de conteúdo, não controle.
+ */
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card,
+.app-layout--compact.app-layout--neri-fab-refinement
+  .patient-tab-body--compact
+  > .ant-card:not(.ant-card .ant-card) {
+  position: relative;
+  background: transparent !important;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card::before,
+.app-layout--compact.app-layout--neri-fab-refinement
+  .patient-tab-body--compact
+  > .ant-card:not(.ant-card .ant-card)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-action-surface-bg, var(--card-bg));
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card > .ant-card-body {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
 }
 
 .app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item {
-  background: var(--compact-action-surface-bg, var(--card-bg));
+  position: relative;
+  z-index: 1;
+  background: var(--card-bg, #ffffff) !important;
   border-radius: 10px;
 }
 
-/* PAT-CTX-1 — chip de pessoa no header (portal) */
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card .ant-card {
+  background: var(--card-bg, #ffffff) !important;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card .ant-card::before {
+  content: none;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-tag,
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-badge {
+  opacity: 1;
+}
+
+/* PAT-CTX-1 — chip de pessoa no header (portal); card opaco sobre o wash contínuo (não parte do fundo do header) */
+.app-layout--compact.app-layout--patient-chrome .patient-compact-person-ctx__trigger {
+  position: relative;
+  padding: 6px 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--card-bg, #ffffff);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
 .patient-compact-person-ctx__trigger {
   display: flex;
   align-items: center;
