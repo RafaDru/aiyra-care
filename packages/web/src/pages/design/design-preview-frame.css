@@ -1,0 +1,30 @@
+/* Galeria dev — frame 390px (paridade Canvas / captura screenshot). */
+.design-preview-viewport {
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  min-height: 100%;
+}
+
+.design-preview-viewport .app-main-content {
+  margin: 12px !important;
+}
+
+.design-patient-chrome-preview__hero-sentinel {
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.design-preview-vaccine-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--card-bg, #fff);
+}

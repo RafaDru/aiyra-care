@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useDesignPreviewMode } from '../contexts/DesignPreviewModeContext.js'
 
 const NARROW_VIEWPORT_MQ = '(max-width: 768px)'
 const STANDALONE_DISPLAY_MQ = '(display-mode: standalone)'
@@ -14,9 +15,14 @@ function matchesCompactShell(): boolean {
 
 /** PWA compact: `standalone` ou viewport estreito **com** pointer coarse (não quebra web estreita no desktop). */
 export function useCompactAppShell(): boolean {
-  const [compact, setCompact] = useState(matchesCompactShell)
+  const designPreview = useDesignPreviewMode()
+  const [compact, setCompact] = useState(() => designPreview || matchesCompactShell())
 
   useEffect(() => {
+    if (designPreview) {
+      setCompact(true)
+      return
+    }
     const narrow = window.matchMedia(NARROW_VIEWPORT_MQ)
     const standalone = window.matchMedia(STANDALONE_DISPLAY_MQ)
     const coarse = window.matchMedia(COARSE_POINTER_MQ)
@@ -31,7 +37,7 @@ export function useCompactAppShell(): boolean {
       standalone.removeEventListener('change', update)
       coarse.removeEventListener('change', update)
     }
-  }, [])
+  }, [designPreview])
 
-  return compact
+  return designPreview || compact
 }

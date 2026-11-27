@@ -42,6 +42,8 @@ import {
   CompactPatientChromeProvider,
   useCompactPatientChrome,
 } from '../../contexts/CompactPatientChromeContext.js'
+import { useDesignPreviewMode } from '../../contexts/DesignPreviewModeContext.js'
+import { DESIGN_PATIENT_CHROME_PATH } from '../../lib/design-preview-env.js'
 
 const { Sider, Content, Header } = Layout
 
@@ -62,6 +64,7 @@ function AppLayoutFrame() {
   const [servicesSheetOpen, setServicesSheetOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
+  const designPreview = useDesignPreviewMode()
   const compactShell = useCompactAppShell()
   const { progress: chromeProgress, patientFocus, setChrome, resetChrome } = useCompactPatientChrome()
   const { patientId: avaPatientId } = useAvaPatientLens()
@@ -69,6 +72,7 @@ function AppLayoutFrame() {
   const location = useLocation()
   const { t } = useTranslation()
   const { configured, user, signOut } = useAuth()
+  const shellActive = (configured && Boolean(user)) || designPreview
   const { darkMode } = useTheme()
   const familyPendingCount = useFamilyPendingCount(configured && Boolean(user))
   useScreenTelemetry()
@@ -112,7 +116,9 @@ function AppLayoutFrame() {
 
   const servicesNavActive = servicesSheetOpen || location.pathname.startsWith('/settings')
 
-  const patientFocusRoute = PATIENT_FOCUS_PATH.test(location.pathname)
+  const patientFocusRoute =
+    PATIENT_FOCUS_PATH.test(location.pathname) ||
+    (designPreview && location.pathname.startsWith(DESIGN_PATIENT_CHROME_PATH))
 
   useEffect(() => {
     if (!compactShell || !patientFocusRoute) {
@@ -122,7 +128,7 @@ function AppLayoutFrame() {
 
   useEffect(() => {
     const el = contentRef.current
-    if (!el || !compactShell || !patientFocusRoute) return
+    if (!el || !compactShell || !patientFocusRoute || designPreview) return
 
     const onScroll = () => {
       const raw = Math.min(1, Math.max(0, el.scrollTop / 152))
@@ -144,7 +150,7 @@ function AppLayoutFrame() {
     <Layout
       className={
         compactShell
-          ? `app-layout app-layout--compact app-layout--neri-fab-refinement ${chromeLevel} ${navDense}`.trim()
+          ? `app-layout app-layout--compact app-layout--neri-fab-refinement ${chromeLevel} ${navDense}${designPreview ? ' design-preview-viewport' : ''}`.trim()
           : 'app-layout'
       }
       style={
@@ -309,7 +315,7 @@ function AppLayoutFrame() {
           <Outlet />
         </Content>
       </Layout>
-      {compactShell && configured && user && (
+      {compactShell && shellActive && (
         <AppMobileBottomNav
           selectedKey={mobileBottomSelectedKey}
           servicesActive={servicesNavActive}
@@ -320,9 +326,9 @@ function AppLayoutFrame() {
           }}
         />
       )}
-      {compactShell && configured && user && <AppMobileCaptureFabStack />}
+      {compactShell && shellActive && !designPreview && <AppMobileCaptureFabStack />}
       {configured && user && <QuickCaptureGlobal showTrigger={!compactShell} />}
-      {compactShell && configured && user && (
+      {compactShell && shellActive && !designPreview && (
         <AppMobileServicesSheet
           open={servicesSheetOpen}
           onClose={() => setServicesSheetOpen(false)}
