@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { Patient } from '../../lib/api.types.js'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
+import { chromeHeaderPhase } from '../../lib/patient-chrome-phases.js'
 
 const HEADER_SLOT_ID = 'app-header-patient-ctx-slot'
 
@@ -56,15 +57,14 @@ export function PatientCompactPersonContextBar({ patient, patients, heroSentinel
   }, [heroSentinelRef, patient.id, onPinnedChange])
 
   const others = patients.filter((p) => p.id !== patient.id)
-  const showChip = progress > 0.18
+  const headerP = chromeHeaderPhase(progress)
 
   const chip = (
     <button
       type="button"
       className="patient-compact-person-ctx__trigger"
       style={{
-        opacity: Math.min(1, Math.max(0.35, progress)),
-        pointerEvents: progress > 0.35 ? 'auto' : 'none',
+        pointerEvents: headerP > 0.42 ? 'auto' : 'none',
       }}
       aria-label={t('patient.compactContextAria', { name: patient.name })}
       onClick={() => setSheetOpen(true)}
@@ -87,7 +87,7 @@ export function PatientCompactPersonContextBar({ patient, patients, heroSentinel
 
   return (
   <>
-      {showChip && slotEl ? createPortal(chip, slotEl) : null}
+      {slotEl ? createPortal(chip, slotEl) : null}
 
       <Drawer
         title={t('patient.compactContextSheetTitle')}

@@ -19,6 +19,8 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
 .app-layout--compact {
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
+  /** Altura útil do header sticky no patient-chrome (min-h + padding vertical 10+10). */
+  --compact-chrome-header-sticky-h: calc(var(--compact-header-h, 64px) + 20px);
   /** Wash rosa/lilás da faixa do header (não WM silk global) */
   --compact-header-wash-opacity: 0.5;
   /** Faixas/cards de ação (macro, B+, blocos clicáveis) — só o fundo; filhos 100% */
@@ -56,8 +58,7 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
   --compact-nav-rail-fill: var(--card-bg, #fafbfc);
   --compact-fab-clearance: 56px;
   --compact-bottom-scroll-pad: calc(
-    var(--compact-nav-h) + var(--compact-nav-arch-rise) + var(--compact-fab-clearance) +
-      env(safe-area-inset-bottom, 0px)
+    var(--compact-nav-h) + var(--compact-nav-arch-rise) + 12px + env(safe-area-inset-bottom, 0px)
   );
   background: var(--background, #f8fafc);
 }
@@ -105,7 +106,7 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
 .app-layout--compact .app-header--compact-brand {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 110;
   padding: 0 14px !important;
   gap: 8px !important;
   border-bottom: 1px solid var(--border);
@@ -122,6 +123,20 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
   padding-top: 10px !important;
   padding-bottom: 10px !important;
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 110;
+}
+
+/* S3 — após p-header, fundo opaco no chrome para conteúdo não vazar atrás do wash */
+.app-layout--compact.app-layout--patient-chrome .app-header.app-header--compact-brand::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: clamp(0, calc((var(--patient-chrome-p-header, 0) - 0.35) / 0.65), 1);
+  background: color-mix(in srgb, var(--card-bg, #ffffff) 88%, transparent);
 }
 
 .app-layout--compact.app-layout--patient-chrome .app-header__brand--compact {
@@ -218,47 +233,33 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   gap: 8px;
   min-width: 0;
   flex: 1 1 auto;
-  padding-left: calc(4px + var(--patient-chrome-p, 0) * 52px);
-  transition: padding-left 0.2s ease;
-}
-
-/* PAT-CTX-2 — chip de pessoa à direita do orb 70px, mesma faixa do header (não embaixo) */
-.app-layout--compact.app-layout--patient-chrome .app-header__brand--compact {
-  padding-left: max(
-    calc(4px + var(--patient-chrome-p, 0) * 52px),
-    calc(10px + var(--compact-heart-orb-size, 70px) + 8px)
+  padding-left: calc(
+    4px + var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) *
+      (6px + var(--compact-heart-orb-size, 70px) + 8px)
   );
+  transition: padding-left 0.18s ease-out;
 }
 
 .app-layout--compact .app-header__lockup-wrap {
-  display: block;
+  display: flex;
+  align-items: center;
   min-width: 0;
   flex: 1 1 auto;
-  opacity: calc(1 - var(--patient-chrome-p, 0));
-  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -8px), 0);
+  opacity: clamp(0, calc(1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 1.12), 1);
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * -8px),
+    0
+  );
   transition:
     opacity 0.18s ease-out,
     transform 0.18s ease-out;
-  pointer-events: calc((1 - var(--patient-chrome-p, 0)) * 1); /* no-op in old browsers */
   will-change: transform, opacity;
 }
 
 .app-layout--compact.app-layout--patient-chrome-expanded .app-header__lockup-wrap {
   opacity: 1;
   transform: none;
-}
-
-@supports (pointer-events: none) {
-  .app-layout--compact.app-layout--patient-chrome .app-header__lockup-wrap {
-    pointer-events: none;
-    visibility: hidden;
-    flex: 0 0 0;
-    width: 0;
-    max-width: 0;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-  }
 }
 
 .app-layout--compact .app-header__patient-ctx-slot {
@@ -268,6 +269,21 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   min-width: 0;
   min-height: 44px;
   padding-right: 8px;
+  opacity: clamp(0, calc((var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) - 0.04) / 0.88), 1);
+  transform: translate3d(
+    0,
+    calc((1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0))) * 6px),
+    0
+  );
+  transition:
+    opacity 0.18s ease-out,
+    transform 0.18s ease-out;
+  will-change: transform, opacity;
+}
+
+.app-layout--compact.app-layout--patient-chrome-expanded .app-header__patient-ctx-slot {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Coração no header — 10px esq/topo; sobrepõe o silk como Neri na bottom nav */
@@ -282,8 +298,10 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   box-shadow:
     0 3px 12px rgba(126, 34, 206, 0.18),
     0 0 0 1px color-mix(in srgb, var(--border) 55%, transparent);
-  opacity: var(--patient-chrome-p, 0);
-  transform: scale(calc(0.75 + var(--patient-chrome-p, 0) * 0.25));
+  opacity: var(--patient-chrome-p-header, var(--patient-chrome-p, 0));
+  transform: scale(
+    calc(0.75 + var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 0.25)
+  );
   transform-origin: top left;
   z-index: 520;
   pointer-events: none;
@@ -366,7 +384,7 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   isolation: isolate;
 }
 
-/** Wash suave lilás → faixa rail (sem corte brusco com o silk do fundo). */
+/** Wash lilás acima da Neri — decorativo; não clipa conteúdo (conteúdo some só no trilho branco). */
 .app-mobile-bottom-nav::before {
   content: '';
   position: absolute;
@@ -381,8 +399,9 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    color-mix(in srgb, var(--nav-selected-bg, #faf5ff) 38%, transparent) 42%,
-    color-mix(in srgb, var(--compact-nav-rail-fill) 94%, #ede9fe) 100%
+    transparent 42%,
+    color-mix(in srgb, var(--nav-selected-bg, #faf5ff) 18%, transparent) 62%,
+    color-mix(in srgb, var(--compact-nav-rail-fill) 92%, #ede9fe) 100%
   );
 }
 

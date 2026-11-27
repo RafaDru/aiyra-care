@@ -15,7 +15,8 @@ export function AppMobileBottomNavRail({ width = 390 }: { width?: number }) {
   const r = NERI_RAIL_R.toFixed(2)
   const vbMinY = cy - NERI_RAIL_R
   const vbH = NAV_H - vbMinY
-  const shell = `M 0,0 H ${leftX.toFixed(2)} A ${r},${r} 0 0 0 ${rightX.toFixed(2)},0 H ${width} V ${NAV_H} H 0 Z`
+  /** Corpo branco só abaixo da corda do arco — cúpula = contorno, conteúdo passa atrás do wash. */
+  const flatFill = `M 0,0 H ${width} V ${NAV_H} H 0 Z`
   const groove = `M ${leftX.toFixed(2)},0 A ${r},${r} 0 0 0 ${rightX.toFixed(2)},0`
   const fill = 'var(--compact-nav-rail-fill, var(--card-bg, #fafbfc))'
 
@@ -28,8 +29,8 @@ export function AppMobileBottomNavRail({ width = 390 }: { width?: number }) {
         viewBox={`0 ${vbMinY.toFixed(2)} ${width} ${vbH.toFixed(2)}`}
         preserveAspectRatio="none"
       >
-        <path d={shell} fill={fill} />
-        <path d={shell} fill="none" stroke="rgba(226,232,240,0.85)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+        <path d={flatFill} fill={fill} />
+        <path d={flatFill} fill="none" stroke="rgba(226,232,240,0.85)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
         <path
           d={groove}
           fill="none"

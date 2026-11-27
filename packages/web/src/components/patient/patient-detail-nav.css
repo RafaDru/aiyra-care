@@ -306,8 +306,16 @@
 
 .app-layout--compact .patient-compact-profile-hero {
   margin-bottom: 12px;
-  opacity: clamp(0, calc(1 - var(--patient-chrome-p, 0) * 1.12), 1);
-  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -32px), 0);
+  opacity: clamp(
+    0,
+    calc(1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 1.12),
+    1
+  );
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * -32px),
+    0
+  );
   transition:
     opacity 0.16s ease-out,
     transform 0.16s ease-out;
@@ -358,9 +366,31 @@
   will-change: transform;
 }
 
+/* Macro/menu cola abaixo do header orb+chip (S3) — não sobrepõe faixa chrome */
+.app-layout--compact.app-layout--patient-chrome .patient-detail-sticky-nav {
+  top: calc(
+    var(--compact-chrome-header-sticky-h, 84px) * var(--patient-chrome-p-header, var(--patient-chrome-p, 0))
+  );
+  z-index: 22;
+}
+
 .app-layout--compact .patient-section-nav--compact-grid:not(.patient-section-nav--labels-only) .patient-macro-tile {
-  min-height: calc(40px + (1 - var(--patient-chrome-p, 0)) * 32px);
-  transition: min-height 0.16s ease-out;
+  min-height: calc(34px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 38px);
+  padding: calc(5px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 5px) 10px;
+  gap: calc(6px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 2px);
+  transition:
+    min-height 0.16s ease-out,
+    padding 0.16s ease-out,
+    gap 0.16s ease-out;
+}
+
+.app-layout--compact .patient-section-nav--compact-grid .patient-macro-tile__icon {
+  transform: scale(calc(1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * 0.08));
+  transition: transform 0.16s ease-out, opacity 0.16s ease-out;
+}
+
+.app-layout--compact .patient-section-nav--compact-grid .patient-macro-tile__label {
+  transition: font-size 0.16s ease-out;
 }
 
 /* Macro-seções compact — PAT-1 grid 2×2 (substitui Segmented 4-col) */
@@ -622,8 +652,7 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-.app-layout--compact.app-layout--patient-chrome .patient-compact-person-ctx__trigger {
-  opacity: 1;
+.app-layout--compact.app-layout--patient-chrome .app-header__patient-ctx-slot .patient-compact-person-ctx__trigger {
   pointer-events: auto;
 }
 

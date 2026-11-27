@@ -44,7 +44,7 @@
 
 /** Espaço final para rolar conteúdo sob a bottom nav (só fixtures design). */
 .design-preview-bottom-nav-scroll-pad {
-  height: calc(var(--compact-nav-arch-rise, 69px) + var(--compact-nav-h, 56px) + 96px);
+  height: calc(var(--compact-nav-arch-rise, 69px) + var(--compact-nav-h, 56px) + 24px);
   flex-shrink: 0;
 }
 .design-patient-chrome-preview__hero-sentinel {

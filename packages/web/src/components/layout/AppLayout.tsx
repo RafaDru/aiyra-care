@@ -256,7 +256,7 @@ function AppLayoutFrame() {
             flexShrink: 0,
             position: 'sticky',
             top: 0,
-            zIndex: 100,
+            zIndex: 110,
           }}
         >
           <div
