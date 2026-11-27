@@ -3,6 +3,8 @@
 .app-layout--compact {
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
+  /** Wash rosa/lilás da faixa do header (não WM silk global) */
+  --compact-header-wash-opacity: 0.5;
   --compact-heart-orb-size: 70px;
   --compact-nav-h: 56px;
   /** Altura só do fundo opaco laterais — não a área de toque dos itens */
@@ -62,10 +64,10 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
   border-bottom: 1px solid var(--border);
   background: linear-gradient(
     90deg,
-    var(--card-bg, #ffffff) 0%,
-    #fff7fb 42%,
-    rgba(251, 207, 232, 0.85) 78%,
-    rgba(244, 114, 182, 0.35) 100%
+    color-mix(in srgb, var(--card-bg, #ffffff) calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 0%,
+    color-mix(in srgb, #fff7fb calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 42%,
+    color-mix(in srgb, #fbcfe8 calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 78%,
+    color-mix(in srgb, #f472b6 calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 100%
   ) !important;
   box-shadow: 0 1px 0 rgba(126, 34, 206, 0.06);
 }
@@ -73,10 +75,33 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
 html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   background: linear-gradient(
     90deg,
-    var(--card-bg) 0%,
-    color-mix(in srgb, var(--card-bg) 92%, var(--primary)) 48%,
-    color-mix(in srgb, var(--primary) 12%, var(--card-bg)) 88%,
-    color-mix(in srgb, var(--primary) 8%, var(--background)) 100%
+    color-mix(
+        in srgb,
+        var(--card-bg) calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+        transparent
+      )
+      0%,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--card-bg) 92%, var(--primary))
+          calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+        transparent
+      )
+      48%,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--primary) 12%, var(--card-bg))
+          calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+        transparent
+      )
+      88%,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--primary) 8%, var(--background))
+          calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+        transparent
+      )
+      100%
   ) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 90%, transparent);
 }
