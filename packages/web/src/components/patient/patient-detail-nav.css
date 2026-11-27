@@ -399,6 +399,7 @@
     34px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 38px
   );
   transition: min-height 0.16s ease-out;
+}
 
 .app-layout--compact .patient-macro-tile__icon {
   opacity: calc(1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * 1.15);
