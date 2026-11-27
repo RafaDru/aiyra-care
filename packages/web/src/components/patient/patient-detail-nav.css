@@ -306,8 +306,12 @@
 
 .app-layout--compact .patient-compact-profile-hero {
   margin-bottom: 12px;
-  opacity: clamp(0, calc(1 - var(--patient-chrome-p, 0) * 1.12), 1);
-  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -32px), 0);
+  opacity: clamp(0, calc(1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 1.12), 1);
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * -32px),
+    0
+  );
   transition:
     opacity 0.16s ease-out,
     transform 0.16s ease-out;
@@ -353,14 +357,29 @@
 }
 
 .app-layout--compact .patient-detail-sticky-nav {
-  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -14px), 0);
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * -10px),
+    0
+  );
   transition: transform 0.16s ease-out;
   will-change: transform;
 }
 
-.app-layout--compact .patient-section-nav--compact-grid:not(.patient-section-nav--labels-only) .patient-macro-tile {
-  min-height: calc(40px + (1 - var(--patient-chrome-p, 0)) * 32px);
+.app-layout--compact .patient-section-nav--compact-grid .patient-macro-tile {
+  min-height: calc(
+    34px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 38px
+  );
   transition: min-height 0.16s ease-out;
+}
+
+.app-layout--compact .patient-macro-tile__icon {
+  opacity: calc(1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * 1.15);
+  max-height: calc((1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 22px);
+  overflow: hidden;
+  transition:
+    opacity 0.14s ease-out,
+    max-height 0.14s ease-out;
 }
 
 /* Macro-seções compact — PAT-1 grid 2×2 (substitui Segmented 4-col) */
@@ -468,12 +487,14 @@
 }
 
 .patient-section-nav--labels-only .patient-macro-tile {
-  min-height: 40px;
-  padding: 8px 6px;
+  min-height: 34px;
+  padding: 5px 10px;
+  gap: 0;
 }
 
 .patient-section-nav--labels-only .patient-macro-tile__label {
   font-size: 11px;
+  line-height: 1.25;
 }
 
 .patient-tab-body--compact {

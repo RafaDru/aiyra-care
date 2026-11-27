@@ -22,6 +22,7 @@ import { RuntimeDegradedBanner } from '../ops/RuntimeDegradedBanner.js'
 import { SupportReportModal } from '../support/SupportReportModal.js'
 import { QuickCaptureGlobal } from '../quick-capture/QuickCaptureGlobal.js'
 import { requestQuickCaptureOpen } from '../../lib/quick-capture-bus.js'
+import { chromeHeaderPhase, chromeMacroPhase } from '../../lib/patient-chrome-phases.js'
 import { HeaderOrderRequestsMenu } from './HeaderOrderRequestsMenu.js'
 import { PatientConsultVisitHost } from '../patient/PatientConsultVisitHost.js'
 import { SUPPORT_CENTER_PATH } from '../../lib/support-center-path.js'
@@ -156,7 +157,12 @@ function AppLayoutFrame() {
       }
       style={
         compactShell
-          ? ({ '--patient-chrome-p': chromeProgress, minHeight: '100vh' } as CSSProperties)
+          ? ({
+              '--patient-chrome-p': chromeProgress,
+              '--patient-chrome-p-macro': chromeMacroPhase(chromeProgress),
+              '--patient-chrome-p-header': chromeHeaderPhase(chromeProgress),
+              minHeight: '100vh',
+            } as CSSProperties)
           : { minHeight: '100vh', height: '100vh', overflow: 'hidden' }
       }
     >

@@ -2,7 +2,7 @@
  * Galeria dev — paridade PAT compact × Canvas (S0 expandido ↔ S3 recolhido).
  * Viewport alvo: 390×844 (iPhone).
  */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Card, Segmented, Tag, Typography } from 'antd'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
@@ -14,6 +14,11 @@ import { PatientCompactSubTabs } from '../../components/patient/PatientCompactSu
 import { PatientCompactPersonContextBar } from '../../components/patient/PatientCompactPersonContextBar.js'
 import { PatientCompactProfileHero } from '../../components/patient/PatientCompactProfileHero.js'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
+import {
+  chromeHeaderPhase,
+  chromeMacroLabelsOnly,
+  chromeMacroPhase,
+} from '../../lib/patient-chrome-phases.js'
 import {
   DESIGN_PATIENT_BRUNO,
   DESIGN_PATIENT_FAMILY,
@@ -81,7 +86,7 @@ export function DesignPatientChromePreview() {
   const [activeSection, setActiveSection] = useState<PatientSection>('clinical')
   const [activeTab, setActiveTab] = useState<PatientTabKey>('growth')
   const sectionTabKeys = SECTION_TABS[activeSection]
-  const macroLabelsOnly = progress > 0.62
+  const macroLabelsOnly = chromeMacroLabelsOnly(progress)
 
   useEffect(() => {
     setChrome({ patientFocus: true })
@@ -127,8 +132,17 @@ export function DesignPatientChromePreview() {
     return labels[key] ?? t(`patient.tabs.${key}`, { defaultValue: key })
   }
 
+  const phaseStyle = {
+    '--patient-chrome-p-macro': chromeMacroPhase(progress),
+    '--patient-chrome-p-header': chromeHeaderPhase(progress),
+  } as React.CSSProperties
+
   return (
-    <div className="design-patient-chrome-preview" data-testid="design-patient-chrome-preview">
+    <div
+      className="design-patient-chrome-preview"
+      data-testid="design-patient-chrome-preview"
+      style={phaseStyle}
+    >
       <div className="design-chrome-preset-bar" role="toolbar" aria-label="Chrome PAT">
         <Segmented
           size="small"
