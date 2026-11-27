@@ -324,10 +324,23 @@
   transform: none;
 }
 
+.patient-compact-profile-hero__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .app-layout--compact .patient-compact-profile-hero__back {
-  margin: 0 0 8px;
+  margin: 0;
   padding-inline: 4px;
-  align-self: flex-start;
+}
+
+.app-layout--compact .patient-compact-profile-hero__swap {
+  margin: 0;
+  padding-inline: 8px;
+  color: var(--text-secondary, #64748b);
 }
 
 .patient-compact-profile-hero__row {
@@ -495,6 +508,37 @@
 .patient-section-nav--labels-only .patient-macro-tile__label {
   font-size: 11px;
   line-height: 1.25;
+}
+
+/* Exploratório — macro recolhido com ícone pequeno à esquerda (Canvas / design preview). */
+.patient-section-nav--macro-left-icon .patient-macro-tile {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__icon {
+  opacity: 1;
+  max-height: 18px;
+  width: 18px;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__icon .anticon {
+  font-size: 14px;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__label {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
 }
 
 .patient-tab-body--compact {

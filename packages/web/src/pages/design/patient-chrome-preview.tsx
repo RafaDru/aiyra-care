@@ -4,7 +4,7 @@
  */
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Card, Segmented, Tag, Typography } from 'antd'
+import { Card, Segmented, Switch, Tag, Typography } from 'antd'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 import { useTranslation } from 'react-i18next'
 import type { PatientSection, PatientTabKey } from '../../lib/patient-navigation.js'
@@ -20,6 +20,7 @@ import {
   chromeMacroPhase,
 } from '../../lib/patient-chrome-phases.js'
 import {
+  DESIGN_CLINICAL_HISTORY_ROWS,
   DESIGN_PATIENT_BRUNO,
   DESIGN_PATIENT_FAMILY,
 } from '../../fixtures/design-patient-chrome.js'
@@ -68,6 +69,8 @@ export function DesignPatientChromePreview() {
   const { t } = useTranslation()
   const { progress, setChrome } = useCompactPatientChrome()
   const heroSentinelRef = useRef<HTMLDivElement>(null)
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false)
+  const [macroLeftIcon, setMacroLeftIcon] = useState(false)
   const [searchParams] = useSearchParams()
   const chromeFromUrl = searchParams.get('chrome')
   const initialPreset = (): ChromePreset => {
@@ -135,7 +138,7 @@ export function DesignPatientChromePreview() {
   const phaseStyle = {
     '--patient-chrome-p-macro': chromeMacroPhase(progress),
     '--patient-chrome-p-header': chromeHeaderPhase(progress),
-  } as React.CSSProperties
+  } as CSSProperties
 
   return (
     <div
@@ -157,6 +160,14 @@ export function DesignPatientChromePreview() {
         <Text type="secondary" className="design-chrome-preset-bar__hint">
           p={progress.toFixed(2)}
         </Text>
+        {macroLabelsOnly ? (
+          <label className="design-chrome-preset-bar__toggle" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Switch size="small" checked={macroLeftIcon} onChange={setMacroLeftIcon} />
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              macro left-icon (exploratório)
+            </Text>
+          </label>
+        ) : null}
       </div>
 
       <div ref={heroSentinelRef}>
@@ -165,6 +176,7 @@ export function DesignPatientChromePreview() {
           age="8 anos"
           onBack={() => undefined}
           showActions={false}
+          onSwapProfile={() => setProfileSheetOpen(true)}
         />
       </div>
 
@@ -172,6 +184,8 @@ export function DesignPatientChromePreview() {
         patient={DESIGN_PATIENT_BRUNO}
         patients={DESIGN_PATIENT_FAMILY}
         heroSentinelRef={heroSentinelRef}
+        sheetOpen={profileSheetOpen}
+        onSheetOpenChange={setProfileSheetOpen}
       />
 
       <Card
@@ -184,6 +198,7 @@ export function DesignPatientChromePreview() {
             items={macroCompactItems}
             onChange={setActiveSection}
             labelsOnly={macroLabelsOnly}
+            leftIconDense={macroLeftIcon}
           />
           <PatientCompactSubTabs
             activeKey={activeTab}
@@ -192,14 +207,17 @@ export function DesignPatientChromePreview() {
             sectionLabel={t(`sections.${activeSection}`)}
           />
         </div>
-        <div className="patient-tab-body--compact" style={{ padding: 16 }}>
+        <div className="patient-tab-body--compact design-patient-chrome-preview__history-scroll" style={{ padding: 16 }}>
           <Title level={5} style={{ margin: 0, fontSize: 15 }}>
             Resumo do histórico
           </Title>
           <BadgeSpacer />
-          <VaccineFixtureRow name="Hepatite B" meta="3ª dose · ago/2024" pill="Em dia" ok />
-          <BadgeSpacer small />
-          <VaccineFixtureRow name="Tríplice viral (SCR)" meta="Última dose há 9 anos" pill="Verificar" ok={false} />
+          {DESIGN_CLINICAL_HISTORY_ROWS.map((row, index) => (
+            <div key={row.name}>
+              {index > 0 ? <BadgeSpacer small /> : null}
+              <VaccineFixtureRow name={row.name} meta={row.meta} pill={row.pill} ok={row.ok} />
+            </div>
+          ))}
           {preset === 'auto' ? (
             <>
               <BadgeSpacer />
@@ -208,7 +226,9 @@ export function DesignPatientChromePreview() {
               </Text>
               <div className="design-preview-scroll-spacer" aria-hidden />
             </>
-          ) : null}
+          ) : (
+            <div className="design-preview-bottom-nav-scroll-pad" aria-hidden />
+          )}
         </div>
       </Card>
     </div>

@@ -1,7 +1,15 @@
 import { Avatar, Button, Card, Tag, Typography } from 'antd'
-import { ArrowLeftOutlined, EditOutlined, ManOutlined, PhoneOutlined, WomanOutlined } from '@ant-design/icons'
+import {
+  ArrowLeftOutlined,
+  EditOutlined,
+  ManOutlined,
+  PhoneOutlined,
+  SwapOutlined,
+  WomanOutlined,
+} from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { Patient } from '../../lib/api.types.js'
+import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
 
 const { Title } = Typography
 
@@ -11,6 +19,7 @@ type Props = {
   onBack: () => void
   onEdit?: () => void
   onEmergency?: () => void
+  onSwapProfile?: () => void
   showActions?: boolean
 }
 
@@ -21,20 +30,35 @@ export function PatientCompactProfileHero({
   onBack,
   onEdit,
   onEmergency,
+  onSwapProfile,
   showActions = true,
 }: Props) {
   const { t } = useTranslation()
+  const { progress } = useCompactPatientChrome()
+  const showSwap = Boolean(onSwapProfile) && progress <= 0.22
 
   return (
     <div className="patient-compact-profile-hero" data-testid="patient-compact-profile-hero">
-      <Button
-        type="text"
-        icon={<ArrowLeftOutlined />}
-        className="patient-compact-profile-hero__back"
-        onClick={onBack}
-      >
-        {t('common.back')}
-      </Button>
+      <div className="patient-compact-profile-hero__toolbar">
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          className="patient-compact-profile-hero__back"
+          onClick={onBack}
+        >
+          {t('common.back')}
+        </Button>
+        {showSwap ? (
+          <Button
+            type="text"
+            size="small"
+            icon={<SwapOutlined />}
+            className="patient-compact-profile-hero__swap"
+            aria-label={t('patient.compactContextSheetTitle')}
+            onClick={onSwapProfile}
+          />
+        ) : null}
+      </div>
       <Card style={{ borderRadius: 16, overflow: 'clip' }} styles={{ body: { padding: 16 } }}>
         <div className="patient-compact-profile-hero__row">
           <Avatar

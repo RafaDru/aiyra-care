@@ -105,6 +105,7 @@ export function PatientDetail() {
   } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
   const heroSentinelRef = useRef<HTMLDivElement>(null)
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false)
   const compactShell = useCompactAppShell()
   const { progress: chromeProgress } = useCompactPatientChrome()
   const macroLabelsOnly =
@@ -565,6 +566,7 @@ export function PatientDetail() {
             onBack={() => navigate('/')}
             onEdit={handleEditOpen}
             onEmergency={() => navigate(`/emergency?patientId=${patient.id}`)}
+            onSwapProfile={() => setProfileSheetOpen(true)}
           />
         ) : (
           <Card style={{ borderRadius: 16, overflow: 'clip', marginBottom: 20 }}>
@@ -655,6 +657,8 @@ export function PatientDetail() {
           patient={patient}
           patients={allPatients}
           heroSentinelRef={heroSentinelRef}
+          sheetOpen={profileSheetOpen}
+          onSheetOpenChange={setProfileSheetOpen}
         />
       ) : null}
 

@@ -465,6 +465,11 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 .app-mobile-bottom-nav__icon-wrap svg {
   display: block;
   flex-shrink: 0;
+  overflow: visible;
+}
+
+.app-mobile-bottom-nav__icon-wrap--family {
+  overflow: visible;
 }
 
 .app-mobile-bottom-nav__label {
@@ -665,14 +670,13 @@ html[data-theme='dark'] .app-mobile-bottom-nav__neri-inner::before {
 
 /* ── FAB stack (Registro / Pedido) ─────────────────────────────────────── */
 
-.app-layout--bottom-nav-dense .app-mobile-bottom-nav__icon-wrap,
-.app-layout--bottom-nav-dense .app-mobile-bottom-nav__neri-inner {
+.app-layout--bottom-nav-dense .app-mobile-bottom-nav__icon-wrap {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   margin: 0;
   padding: 0;
-  transform: translate(-50%, -50%) scale(0.85);
+  transform: scale(0.85);
   transition: opacity 0.2s ease, max-height 0.2s ease, transform 0.2s ease;
 }
 
