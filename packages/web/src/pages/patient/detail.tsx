@@ -56,6 +56,7 @@ import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
+import { chromeMacroCompactLeftIcon } from '../../lib/patient-chrome-phases.js'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 
 const { Title, Text } = Typography
@@ -104,9 +105,11 @@ export function PatientDetail() {
   } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
   const heroSentinelRef = useRef<HTMLDivElement>(null)
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false)
   const compactShell = useCompactAppShell()
   const { progress: chromeProgress } = useCompactPatientChrome()
-  const macroLabelsOnly = compactShell && chromeProgress > 0.62
+  const macroCompactLeftIcon =
+    compactShell && chromeMacroCompactLeftIcon(chromeProgress)
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
@@ -523,7 +526,7 @@ export function PatientDetail() {
       activeSection={activeSection}
       items={macroCompactItems}
       onChange={setActiveSection}
-      labelsOnly={macroLabelsOnly}
+      compactLeftIcon={macroCompactLeftIcon}
     />
   ) : (
     <div className="patient-section-nav">
@@ -563,6 +566,7 @@ export function PatientDetail() {
             onBack={() => navigate('/')}
             onEdit={handleEditOpen}
             onEmergency={() => navigate(`/emergency?patientId=${patient.id}`)}
+            onSwapProfile={() => setProfileSheetOpen(true)}
           />
         ) : (
           <Card style={{ borderRadius: 16, overflow: 'clip', marginBottom: 20 }}>
@@ -653,6 +657,8 @@ export function PatientDetail() {
           patient={patient}
           patients={allPatients}
           heroSentinelRef={heroSentinelRef}
+          sheetOpen={profileSheetOpen}
+          onSheetOpenChange={setProfileSheetOpen}
         />
       ) : null}
 

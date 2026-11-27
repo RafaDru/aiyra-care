@@ -306,8 +306,12 @@
 
 .app-layout--compact .patient-compact-profile-hero {
   margin-bottom: 12px;
-  opacity: clamp(0, calc(1 - var(--patient-chrome-p, 0) * 1.12), 1);
-  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -32px), 0);
+  opacity: clamp(0, calc(1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 1.12), 1);
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * -32px),
+    0
+  );
   transition:
     opacity 0.16s ease-out,
     transform 0.16s ease-out;
@@ -320,10 +324,23 @@
   transform: none;
 }
 
+.patient-compact-profile-hero__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .app-layout--compact .patient-compact-profile-hero__back {
-  margin: 0 0 8px;
+  margin: 0;
   padding-inline: 4px;
-  align-self: flex-start;
+}
+
+.app-layout--compact .patient-compact-profile-hero__swap {
+  margin: 0;
+  padding-inline: 8px;
+  color: var(--text-secondary, #64748b);
 }
 
 .patient-compact-profile-hero__row {
@@ -353,14 +370,29 @@
 }
 
 .app-layout--compact .patient-detail-sticky-nav {
-  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -14px), 0);
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * -10px),
+    0
+  );
   transition: transform 0.16s ease-out;
   will-change: transform;
 }
 
-.app-layout--compact .patient-section-nav--compact-grid:not(.patient-section-nav--labels-only) .patient-macro-tile {
-  min-height: calc(40px + (1 - var(--patient-chrome-p, 0)) * 32px);
+.app-layout--compact .patient-section-nav--compact-grid .patient-macro-tile {
+  min-height: calc(
+    34px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 38px
+  );
   transition: min-height 0.16s ease-out;
+}
+
+.app-layout--compact .patient-macro-tile__icon {
+  opacity: calc(1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * 1.15);
+  max-height: calc((1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 22px);
+  overflow: hidden;
+  transition:
+    opacity 0.14s ease-out,
+    max-height 0.14s ease-out;
 }
 
 /* Macro-seções compact — PAT-1 grid 2×2 (substitui Segmented 4-col) */
@@ -468,12 +500,52 @@
 }
 
 .patient-section-nav--labels-only .patient-macro-tile {
-  min-height: 40px;
-  padding: 8px 6px;
+  min-height: 34px;
+  padding: 5px 10px;
+  gap: 0;
 }
 
 .patient-section-nav--labels-only .patient-macro-tile__label {
   font-size: 11px;
+  line-height: 1.25;
+}
+
+/* Macro S3 — ícone pequeno à esquerda + label (oficial 27/11). */
+.patient-section-nav--macro-left-icon .patient-macro-tile {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 34px;
+  padding: 5px 10px;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__label {
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__icon {
+  opacity: 1;
+  max-height: 18px;
+  width: 18px;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__icon .anticon {
+  font-size: 14px;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__label {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
 }
 
 .patient-tab-body--compact {

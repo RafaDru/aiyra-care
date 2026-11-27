@@ -49,13 +49,8 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
   --compact-neri-nav-r: 27px;
   --compact-neri-visual-lift: 2.88px;
   --compact-neri-rail-r: 35.1px;
-  /** Disco + arco acima da faixa 56px (paridade Canvas NERI_FLOAT_ABOVE_MENU + NERI_RAIL_R + 4). */
-  --compact-neri-float-above-menu: calc(
-    var(--compact-neri-nav-r, 27px) + var(--compact-neri-visual-lift, 2.88px)
-  );
-  --compact-nav-arch-rise: calc(
-    var(--compact-neri-float-above-menu) + var(--compact-neri-rail-r, 35.1px) + 4px
-  );
+  /** Cúpula do arco sobre o topo reto do rail (sem faixa extra acima do SVG). */
+  --compact-nav-arch-rise: calc(var(--compact-neri-rail-r, 35.1px) + var(--compact-neri-visual-lift, 2.88px) + 2px);
   /** Respiro interno dos labels — somado a `env(safe-area-inset-bottom)` na shell fixa. */
   --compact-bottom-nav-padding-bottom: 8px;
   --compact-nav-rail-fill: var(--card-bg, #fafbfc);
@@ -223,14 +218,16 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   gap: 8px;
   min-width: 0;
   flex: 1 1 auto;
-  padding-left: calc(4px + var(--patient-chrome-p, 0) * 52px);
+  padding-left: calc(
+    4px + var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 52px
+  );
   transition: padding-left 0.2s ease;
 }
 
 /* PAT-CTX-2 — chip de pessoa à direita do orb 70px, mesma faixa do header (não embaixo) */
 .app-layout--compact.app-layout--patient-chrome .app-header__brand--compact {
   padding-left: max(
-    calc(4px + var(--patient-chrome-p, 0) * 52px),
+    calc(4px + var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 52px),
     calc(10px + var(--compact-heart-orb-size, 70px) + 8px)
   );
 }
@@ -239,8 +236,12 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   display: block;
   min-width: 0;
   flex: 1 1 auto;
-  opacity: calc(1 - var(--patient-chrome-p, 0));
-  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -8px), 0);
+  opacity: calc(1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0)));
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * -8px),
+    0
+  );
   transition:
     opacity 0.18s ease-out,
     transform 0.18s ease-out;
@@ -287,8 +288,10 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   box-shadow:
     0 3px 12px rgba(126, 34, 206, 0.18),
     0 0 0 1px color-mix(in srgb, var(--border) 55%, transparent);
-  opacity: var(--patient-chrome-p, 0);
-  transform: scale(calc(0.75 + var(--patient-chrome-p, 0) * 0.25));
+  opacity: var(--patient-chrome-p-header, var(--patient-chrome-p, 0));
+  transform: scale(
+    calc(0.75 + var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 0.25)
+  );
   transform-origin: top left;
   z-index: 520;
   pointer-events: none;
@@ -378,7 +381,9 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px) + 40px);
+  height: calc(
+    var(--compact-nav-arch-rise, 40px) + var(--compact-nav-h, 56px) + env(safe-area-inset-bottom, 0px)
+  );
   pointer-events: none;
   z-index: 0;
   background: linear-gradient(
@@ -457,6 +462,11 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 .app-mobile-bottom-nav__icon-wrap svg {
   display: block;
   flex-shrink: 0;
+  overflow: visible;
+}
+
+.app-mobile-bottom-nav__icon-wrap--family {
+  overflow: visible;
 }
 
 .app-mobile-bottom-nav__label {
@@ -657,14 +667,13 @@ html[data-theme='dark'] .app-mobile-bottom-nav__neri-inner::before {
 
 /* ── FAB stack (Registro / Pedido) ─────────────────────────────────────── */
 
-.app-layout--bottom-nav-dense .app-mobile-bottom-nav__icon-wrap,
-.app-layout--bottom-nav-dense .app-mobile-bottom-nav__neri-inner {
+.app-layout--bottom-nav-dense .app-mobile-bottom-nav__icon-wrap {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   margin: 0;
   padding: 0;
-  transform: translate(-50%, -50%) scale(0.85);
+  transform: scale(0.85);
   transition: opacity 0.2s ease, max-height 0.2s ease, transform 0.2s ease;
 }
 

@@ -2,7 +2,8 @@
  * Galeria dev — paridade PAT compact × Canvas (S0 expandido ↔ S3 recolhido).
  * Viewport alvo: 390×844 (iPhone).
  */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Card, Segmented, Tag, Typography } from 'antd'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +15,12 @@ import { PatientCompactPersonContextBar } from '../../components/patient/Patient
 import { PatientCompactProfileHero } from '../../components/patient/PatientCompactProfileHero.js'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
 import {
+  chromeHeaderPhase,
+  chromeMacroCompactLeftIcon,
+  chromeMacroPhase,
+} from '../../lib/patient-chrome-phases.js'
+import {
+  DESIGN_CLINICAL_HISTORY_ROWS,
   DESIGN_PATIENT_BRUNO,
   DESIGN_PATIENT_FAMILY,
 } from '../../fixtures/design-patient-chrome.js'
@@ -62,16 +69,26 @@ export function DesignPatientChromePreview() {
   const { t } = useTranslation()
   const { progress, setChrome } = useCompactPatientChrome()
   const heroSentinelRef = useRef<HTMLDivElement>(null)
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false)
+  const [searchParams] = useSearchParams()
+  const chromeFromUrl = searchParams.get('chrome')
   const initialPreset = (): ChromePreset => {
-    const q = new URLSearchParams(window.location.search).get('chrome')
-    if (q === 'expanded' || q === 'collapsed' || q === 'auto') return q
+    if (chromeFromUrl === 'expanded' || chromeFromUrl === 'collapsed' || chromeFromUrl === 'auto') {
+      return chromeFromUrl
+    }
     return 'collapsed'
   }
   const [preset, setPreset] = useState<ChromePreset>(initialPreset)
+
+  useEffect(() => {
+    if (chromeFromUrl === 'expanded' || chromeFromUrl === 'collapsed' || chromeFromUrl === 'auto') {
+      setPreset(chromeFromUrl)
+    }
+  }, [chromeFromUrl])
   const [activeSection, setActiveSection] = useState<PatientSection>('clinical')
   const [activeTab, setActiveTab] = useState<PatientTabKey>('growth')
   const sectionTabKeys = SECTION_TABS[activeSection]
-  const macroLabelsOnly = progress > 0.62
+  const macroCompactLeftIcon = chromeMacroCompactLeftIcon(progress)
 
   useEffect(() => {
     setChrome({ patientFocus: true })
@@ -117,8 +134,17 @@ export function DesignPatientChromePreview() {
     return labels[key] ?? t(`patient.tabs.${key}`, { defaultValue: key })
   }
 
+  const phaseStyle = {
+    '--patient-chrome-p-macro': chromeMacroPhase(progress),
+    '--patient-chrome-p-header': chromeHeaderPhase(progress),
+  } as CSSProperties
+
   return (
-    <div className="design-patient-chrome-preview" data-testid="design-patient-chrome-preview">
+    <div
+      className="design-patient-chrome-preview"
+      data-testid="design-patient-chrome-preview"
+      style={phaseStyle}
+    >
       <div className="design-chrome-preset-bar" role="toolbar" aria-label="Chrome PAT">
         <Segmented
           size="small"
@@ -141,6 +167,7 @@ export function DesignPatientChromePreview() {
           age="8 anos"
           onBack={() => undefined}
           showActions={false}
+          onSwapProfile={() => setProfileSheetOpen(true)}
         />
       </div>
 
@@ -148,6 +175,8 @@ export function DesignPatientChromePreview() {
         patient={DESIGN_PATIENT_BRUNO}
         patients={DESIGN_PATIENT_FAMILY}
         heroSentinelRef={heroSentinelRef}
+        sheetOpen={profileSheetOpen}
+        onSheetOpenChange={setProfileSheetOpen}
       />
 
       <Card
@@ -159,7 +188,7 @@ export function DesignPatientChromePreview() {
             activeSection={activeSection}
             items={macroCompactItems}
             onChange={setActiveSection}
-            labelsOnly={macroLabelsOnly}
+            compactLeftIcon={macroCompactLeftIcon}
           />
           <PatientCompactSubTabs
             activeKey={activeTab}
@@ -168,14 +197,17 @@ export function DesignPatientChromePreview() {
             sectionLabel={t(`sections.${activeSection}`)}
           />
         </div>
-        <div className="patient-tab-body--compact" style={{ padding: 16 }}>
+        <div className="patient-tab-body--compact design-patient-chrome-preview__history-scroll" style={{ padding: 16 }}>
           <Title level={5} style={{ margin: 0, fontSize: 15 }}>
             Resumo do histórico
           </Title>
           <BadgeSpacer />
-          <VaccineFixtureRow name="Hepatite B" meta="3ª dose · ago/2024" pill="Em dia" ok />
-          <BadgeSpacer small />
-          <VaccineFixtureRow name="Tríplice viral (SCR)" meta="Última dose há 9 anos" pill="Verificar" ok={false} />
+          {DESIGN_CLINICAL_HISTORY_ROWS.map((row, index) => (
+            <div key={row.name}>
+              {index > 0 ? <BadgeSpacer small /> : null}
+              <VaccineFixtureRow name={row.name} meta={row.meta} pill={row.pill} ok={row.ok} />
+            </div>
+          ))}
           {preset === 'auto' ? (
             <>
               <BadgeSpacer />
@@ -184,7 +216,9 @@ export function DesignPatientChromePreview() {
               </Text>
               <div className="design-preview-scroll-spacer" aria-hidden />
             </>
-          ) : null}
+          ) : (
+            <div className="design-preview-bottom-nav-scroll-pad" aria-hidden />
+          )}
         </div>
       </Card>
     </div>

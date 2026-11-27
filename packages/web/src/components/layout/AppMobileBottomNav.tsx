@@ -58,6 +58,7 @@ export function AppMobileBottomNav({
       ) : (
         <MobileNavIconEmergency active={active} muted={MUTED} emergency={EMERGENCY} />
       )
+    const family = key === '/family'
     return (
       <div key={key} className="app-mobile-bottom-nav__col">
         <button
@@ -68,7 +69,11 @@ export function AppMobileBottomNav({
           aria-current={active ? 'page' : undefined}
           onClick={() => onNavigate(key)}
         >
-          <span className="app-mobile-bottom-nav__icon-wrap">{icon}</span>
+          <span
+            className={`app-mobile-bottom-nav__icon-wrap${family ? ' app-mobile-bottom-nav__icon-wrap--family' : ''}`}
+          >
+            {icon}
+          </span>
           <span className="app-mobile-bottom-nav__label">{labels[key]}</span>
         </button>
       </div>

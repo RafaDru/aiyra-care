@@ -14,16 +14,28 @@ interface Props {
   patients: Patient[]
   heroSentinelRef: React.RefObject<HTMLElement | null>
   onPinnedChange?: (pinned: boolean) => void
+  /** Controlado opcional — mesmo sheet que o acelerador no hero S0. */
+  sheetOpen?: boolean
+  onSheetOpenChange?: (open: boolean) => void
 }
 
 /**
  * PAT-CTX-1 — chip de pessoa no header compacto (coração + nome) ao rolar o hero.
  */
-export function PatientCompactPersonContextBar({ patient, patients, heroSentinelRef, onPinnedChange }: Props) {
+export function PatientCompactPersonContextBar({
+  patient,
+  patients,
+  heroSentinelRef,
+  onPinnedChange,
+  sheetOpen: sheetOpenProp,
+  onSheetOpenChange,
+}: Props) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { progress, setChrome } = useCompactPatientChrome()
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetOpenInternal, setSheetOpenInternal] = useState(false)
+  const sheetOpen = sheetOpenProp ?? sheetOpenInternal
+  const setSheetOpen = onSheetOpenChange ?? setSheetOpenInternal
   const [slotEl, setSlotEl] = useState<HTMLElement | null>(null)
   const pinnedRef = useRef(false)
 
