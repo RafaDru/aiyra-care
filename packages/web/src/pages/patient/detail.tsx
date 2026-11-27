@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, Card, Avatar, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload, Badge } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
 import { patientBirthDateFormRules } from '../../lib/patient-birth-date-form-rules.js'
-import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -55,15 +55,11 @@ import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
+import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 
 const { Title, Text } = Typography
 
-const SECTION_ICONS: Record<PatientSection, ReactNode> = {
-  overview: <UserOutlined />,
-  clinical: <MedicineBoxOutlined />,
-  plan: <IdcardOutlined />,
-  files: <FolderOutlined />,
-}
+const SECTION_ICONS = PATIENT_COMPACT_MACRO_ICONS
 
 const TAB_DATA_DOMAIN: Partial<Record<PatientTabKey, string>> = {
   agenda: 'timeline',

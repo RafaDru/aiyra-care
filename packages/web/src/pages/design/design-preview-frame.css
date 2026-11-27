@@ -19,6 +19,8 @@
 }
 
 .design-preview-vaccine-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -27,4 +29,11 @@
   border-radius: 10px;
   border: 1px solid var(--border, #e2e8f0);
   background: var(--card-bg, #fff);
+  color: var(--text-primary, #0f172a);
+  opacity: 1;
+}
+
+.design-preview-vaccine-row .ant-typography,
+.design-preview-vaccine-row .ant-tag {
+  opacity: 1 !important;
 }

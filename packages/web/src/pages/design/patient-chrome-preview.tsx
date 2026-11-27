@@ -2,9 +2,9 @@
  * Galeria dev — paridade PAT compact × Canvas S3.
  * Viewport alvo: 390×844 (iPhone). Abra DevTools → device toolbar 390px ou a rota já limita largura.
  */
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, Tag, Typography } from 'antd'
-import { MedicineBoxOutlined, UserOutlined, IdcardOutlined, FolderOutlined } from '@ant-design/icons'
+import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 import { useTranslation } from 'react-i18next'
 import type { PatientSection, PatientTabKey } from '../../lib/patient-navigation.js'
 import { SECTION_TABS } from '../../lib/patient-navigation.js'
@@ -22,13 +22,6 @@ const { Title, Text } = Typography
 
 /** S3 no espelho Canvas ≈ 0,85 de progresso de chrome. */
 const CHROME_S3_PROGRESS = 0.85
-
-const SECTION_ICONS: Record<PatientSection, ReactNode> = {
-  overview: <UserOutlined />,
-  clinical: <MedicineBoxOutlined />,
-  plan: <IdcardOutlined />,
-  files: <FolderOutlined />,
-}
 
 function VaccineFixtureRow({
   name,
@@ -72,7 +65,7 @@ export function DesignPatientChromePreview() {
   const macroCompactItems = (['overview', 'clinical', 'plan', 'files'] as PatientSection[]).map((section) => ({
     section,
     label: t(`sections.${section}`),
-    icon: SECTION_ICONS[section],
+    icon: PATIENT_COMPACT_MACRO_ICONS[section],
   }))
 
   const tabTextLabel = (key: PatientTabKey) => {

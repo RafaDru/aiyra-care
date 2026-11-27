@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Button, Space, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api.js'
@@ -15,14 +15,20 @@ const { Text } = Typography
 export function CookieConsentBanner() {
   const { t } = useTranslation()
   const { session } = useAuth()
+  const location = useLocation()
   const [visible, setVisible] = useState(false)
   const [saving, setSaving] = useState(false)
+  const designGallery = location.pathname.startsWith('/design')
 
   useEffect(() => {
+    if (designGallery) {
+      setVisible(false)
+      return
+    }
     setVisible(!hasCookieConsent())
-  }, [])
+  }, [designGallery])
 
-  if (!visible) return null
+  if (designGallery || !visible) return null
 
   const accept = async () => {
     setSaving(true)

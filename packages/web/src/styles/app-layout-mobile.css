@@ -117,6 +117,10 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
   z-index: 1;
 }
 
+.app-layout--compact .app-header__heart-orb {
+  z-index: 520;
+}
+
 html[data-theme='dark'] .app-layout--compact .app-header--compact-brand::before {
   background:
     linear-gradient(
@@ -241,24 +245,6 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   overflow: visible;
 }
 
-/* Corações da WM global — não cortar costura na faixa do header */
-.app-layout--compact.app-layout--neri-fab-refinement::before {
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(var(--compact-header-h, 64px) - 1px),
-    rgba(0, 0, 0, 0.15) var(--compact-header-h, 64px),
-    black calc(var(--compact-header-h, 64px) + 24px)
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(var(--compact-header-h, 64px) - 1px),
-    rgba(0, 0, 0, 0.15) var(--compact-header-h, 64px),
-    black calc(var(--compact-header-h, 64px) + 24px)
-  );
-}
-
 /* NAV-CONTENT — reserva de scroll para barra + overhang Neri + FAB */
 .app-layout--compact .app-main-content {
   position: relative;
@@ -369,36 +355,15 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
   overflow: visible;
 }
 
-/* Fundo cinza — faixas laterais baixas; centro e safe-area sem prateleira plena */
-.app-mobile-bottom-nav::before,
-.app-mobile-bottom-nav::after {
-  content: '';
+.app-mobile-bottom-nav__rail {
   position: absolute;
-  top: auto;
+  left: 0;
+  right: 0;
   bottom: env(safe-area-inset-bottom, 0px);
-  height: var(--compact-nav-rail-h, 36px);
-  width: calc(50% - 54px);
-  background: color-mix(in srgb, var(--card-bg) 94%, var(--background) 6%);
-  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
-  box-shadow: none;
+  height: var(--compact-nav-h, 56px);
   pointer-events: none;
   z-index: 0;
-}
-
-html[data-theme='dark'] .app-mobile-bottom-nav::before,
-html[data-theme='dark'] .app-mobile-bottom-nav::after {
-  background: color-mix(in srgb, var(--card-bg) 92%, transparent);
-  box-shadow: none;
-}
-
-.app-mobile-bottom-nav::before {
-  left: 0;
-  right: auto;
-}
-
-.app-mobile-bottom-nav::after {
-  right: 0;
-  left: auto;
+  overflow: visible;
 }
 
 .app-mobile-bottom-nav > * {
@@ -583,6 +548,15 @@ html[data-theme='dark'] .app-mobile-bottom-nav__item--active {
 .app-mobile-bottom-nav__neri-inner .ava-avatar-shell {
   position: relative;
   z-index: 1;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card-bg) 94%, var(--background) 6%);
+  box-shadow: 0 2px 6px rgba(147, 51, 234, 0.14);
 }
 
 html[data-theme='dark'] .app-mobile-bottom-nav__neri-inner::before {

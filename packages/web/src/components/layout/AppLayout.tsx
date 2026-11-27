@@ -144,7 +144,8 @@ function AppLayoutFrame() {
 
   const chromeLevel =
     compactShell && patientFocus && chromeProgress > 0.12 ? 'app-layout--patient-chrome' : ''
-  const navDense = chromeProgress > 0.58 ? 'app-layout--bottom-nav-dense' : ''
+  const navDense =
+    !designPreview && chromeProgress > 0.58 ? 'app-layout--bottom-nav-dense' : ''
 
   const layout = (
     <Layout

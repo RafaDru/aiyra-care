@@ -11,6 +11,7 @@
   "nav": {
     "dashboard": "Home",
     "yourFamily": "Your family",
+    "familyCompact": "Family",
     "emergency": "Emergency",
     "integrations": "Integrations",
     "roadmap": "Roadmap",
