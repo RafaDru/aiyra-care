@@ -81,56 +81,88 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
 }
 
 .app-layout--compact .app-header--compact-brand {
+  position: relative;
   padding: 0 14px !important;
   gap: 8px !important;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--card-bg, #ffffff) calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 0%,
-    color-mix(in srgb, #fff7fb calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 42%,
-    color-mix(in srgb, #fbcfe8 calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 78%,
-    color-mix(in srgb, #f472b6 calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 100%
-  ) !important;
+  background: transparent !important;
   box-shadow: 0 1px 0 rgba(126, 34, 206, 0.06);
+  overflow: visible;
+}
+
+/* Wash 50% contínuo — silk uniforme + gradiente (sem costura orb/chip; não herdado nos filhos) */
+.app-layout--compact .app-header--compact-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--card-bg, #ffffff) calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 0%,
+      color-mix(in srgb, #fff7fb calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 42%,
+      color-mix(in srgb, #fbcfe8 calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 78%,
+      color-mix(in srgb, #f472b6 calc(var(--compact-header-wash-opacity, 0.5) * 100%), transparent) 100%
+    ),
+    color-mix(
+      in srgb,
+      #fff7fb calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+      transparent
+    );
+}
+
+.app-layout--compact .app-header--compact-brand > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme='dark'] .app-layout--compact .app-header--compact-brand::before {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(
+          in srgb,
+          var(--card-bg) calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+          transparent
+        )
+        0%,
+      color-mix(
+          in srgb,
+          color-mix(in srgb, var(--card-bg) 92%, var(--primary))
+            calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+          transparent
+        )
+        48%,
+      color-mix(
+          in srgb,
+          color-mix(in srgb, var(--primary) 12%, var(--card-bg))
+            calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+          transparent
+        )
+        88%,
+      color-mix(
+          in srgb,
+          color-mix(in srgb, var(--primary) 8%, var(--background))
+            calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+          transparent
+        )
+        100%
+    ),
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--card-bg) 88%, var(--primary))
+        calc(var(--compact-header-wash-opacity, 0.5) * 100%),
+      transparent
+    );
 }
 
 html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
-  background: linear-gradient(
-    90deg,
-    color-mix(
-        in srgb,
-        var(--card-bg) calc(var(--compact-header-wash-opacity, 0.5) * 100%),
-        transparent
-      )
-      0%,
-    color-mix(
-        in srgb,
-        color-mix(in srgb, var(--card-bg) 92%, var(--primary))
-          calc(var(--compact-header-wash-opacity, 0.5) * 100%),
-        transparent
-      )
-      48%,
-    color-mix(
-        in srgb,
-        color-mix(in srgb, var(--primary) 12%, var(--card-bg))
-          calc(var(--compact-header-wash-opacity, 0.5) * 100%),
-        transparent
-      )
-      88%,
-    color-mix(
-        in srgb,
-        color-mix(in srgb, var(--primary) 8%, var(--background))
-          calc(var(--compact-header-wash-opacity, 0.5) * 100%),
-        transparent
-      )
-      100%
-  ) !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 90%, transparent);
 }
 
 .app-layout--compact .app-header__brand--compact {
   position: relative;
-  isolation: isolate;
   z-index: 1;
   display: flex;
   align-items: center;
@@ -206,13 +238,25 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 }
 
 .app-layout--compact.app-layout--neri-fab-refinement .app-header--compact-brand {
-  position: relative;
   overflow: visible;
 }
 
-.app-layout--compact .app-header__brand--compact > * {
-  position: relative;
-  z-index: 1;
+/* Corações da WM global — não cortar costura na faixa do header */
+.app-layout--compact.app-layout--neri-fab-refinement::before {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--compact-header-h, 64px) - 1px),
+    rgba(0, 0, 0, 0.15) var(--compact-header-h, 64px),
+    black calc(var(--compact-header-h, 64px) + 24px)
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--compact-header-h, 64px) - 1px),
+    rgba(0, 0, 0, 0.15) var(--compact-header-h, 64px),
+    black calc(var(--compact-header-h, 64px) + 24px)
+  );
 }
 
 /* NAV-CONTENT — reserva de scroll para barra + overhang Neri + FAB */
