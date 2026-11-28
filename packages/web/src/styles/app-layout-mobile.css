@@ -19,13 +19,14 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
 .app-layout--compact {
   --patient-chrome-p: 0;
   --compact-header-h: 64px;
-  /** Footprint sticky do header PAT (orb 10px + 70px + respiro inferior). Macro cola logo abaixo. */
-  --compact-chrome-header-sticky-h: calc(
-    10px + var(--compact-heart-orb-size, 70px) + 10px
-  );
+  /** Sticky macro — abaixo da faixa do header (perfil); orb sobrepõe macro, não empurra top. */
+  --compact-chrome-header-sticky-h: var(--compact-header-h, 64px);
   /** Wash rosa/lilás da faixa do header (não WM silk global) */
   --compact-header-wash-opacity: 0.5;
-  /** Faixas/cards de ação (macro, B+, blocos clicáveis) — só o fundo; filhos 100% */
+  /**
+   * Chrome estrutural (faixa macro, trilho B+, shell sticky): fundo 50% sobre silk.
+   * Botões/tiles (--compact-nav-control-*) e cards de conteúdo: 100% opacos.
+   */
   --compact-action-surface-opacity: 0.5;
   --compact-action-surface-bg: color-mix(
     in srgb,
@@ -43,10 +44,11 @@ html:has(.app-layout--compact.app-layout--neri-fab-refinement)::-webkit-scrollba
     var(--nav-selected-bg, #faf5ff) calc(var(--compact-action-surface-opacity, 0.5) * 100%),
     transparent
   );
-  /** Macro tiles + B+ chips/menu — fundo 100% opaco (sem vazar WM no scroll) */
+  /** Tiles macro, chip B+, botão ☰ — superfície de controle 100% opaca */
   --compact-nav-control-bg: var(--card-bg, #ffffff);
   --compact-nav-control-selected-bg: var(--nav-selected-bg, #faf5ff);
-  --compact-macro-strip-bg: color-mix(in srgb, var(--primary) 4%, var(--card-bg, #ffffff));
+  /** Container da grade macro (50%) — não confundir com tile */
+  --compact-macro-strip-bg: var(--compact-action-surface-strip-bg);
   --compact-heart-orb-size: 70px;
   /** Aura Neri bottom nav — roxo/rosa (média do PNG); atrás do disco */
   --compact-neri-aura-pink: rgba(236, 72, 153, 0.28);
@@ -151,8 +153,36 @@ html[data-theme='dark'] .app-layout--compact.app-layout--neri-fab-refinement::be
   min-height: 44px;
 }
 
+.app-layout--compact.app-layout--patient-chrome .app-header__brand--compact {
+  width: 100%;
+  max-width: 100%;
+}
+
 .app-layout--compact.app-layout--patient-chrome .app-header__patient-ctx-slot {
-  align-items: flex-start;
+  align-items: stretch;
+  align-self: stretch;
+  justify-content: stretch;
+}
+
+/* Perfil: faixa cheia entre orb (esq) e margem direita — lockup não compete no flex */
+.app-layout--compact.app-layout--patient-chrome:not(.app-layout--patient-chrome-expanded) .app-header__lockup-wrap {
+  flex: 0 0 0;
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-layout--compact.app-layout--patient-chrome:not(.app-layout--patient-chrome-expanded) .app-header__patient-ctx-slot {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  padding-right: 0;
 }
 
 /* Wash 50% contínuo — silk uniforme + gradiente (sem costura orb/chip; não herdado nos filhos) */
@@ -290,7 +320,7 @@ html[data-theme='dark'] .app-layout--compact .app-header--compact-brand {
 /* Coração no header — 10px esq/topo; sobrepõe o silk como Neri na bottom nav */
 .app-layout--compact .app-header__heart-orb {
   position: absolute;
-  left: 10px;
+  left: 4px;
   top: 10px;
   width: var(--compact-heart-orb-size, 70px);
   height: var(--compact-heart-orb-size, 70px);

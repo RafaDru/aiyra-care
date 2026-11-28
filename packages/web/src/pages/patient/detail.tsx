@@ -52,6 +52,7 @@ import { PatientCompactSubTabs } from '../../components/patient/PatientCompactSu
 import { PatientCompactMacroSections } from '../../components/patient/PatientCompactMacroSections.js'
 import { PatientCompactPersonContextBar } from '../../components/patient/PatientCompactPersonContextBar.js'
 import { PatientCompactProfileHero } from '../../components/patient/PatientCompactProfileHero.js'
+import { PatientChromeMacroSentinel } from '../../components/patient/PatientChromeMacroSentinel.js'
 import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
@@ -106,9 +107,9 @@ export function PatientDetail() {
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
   const heroSentinelRef = useRef<HTMLDivElement>(null)
   const compactShell = useCompactAppShell()
-  const { progress: chromeProgress } = useCompactPatientChrome()
+  const { macroProgress: chromeMacroProgress } = useCompactPatientChrome()
   const macroCompactLeftIcon =
-    compactShell && chromeMacroCompactLeftIcon(chromeProgress)
+    compactShell && chromeMacroCompactLeftIcon(chromeMacroProgress)
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
@@ -694,6 +695,7 @@ export function PatientDetail() {
       <FamilySupportPanel patientId={patient.id} />
 
       <Card style={{ borderRadius: 16, overflow: 'visible' }} styles={{ body: { padding: 0, overflow: 'visible' } }}>
+        {compactShell ? <PatientChromeMacroSentinel /> : null}
         {sectionTabKeys.length > 1 ? (
           <Tabs
             className="patient-sub-tabs"

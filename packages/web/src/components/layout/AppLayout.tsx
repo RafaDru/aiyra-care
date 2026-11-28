@@ -47,7 +47,8 @@ import {
   DESIGN_PATIENT_CHROME_COMPARE_PATH,
   DESIGN_PATIENT_CHROME_PATH,
 } from '../../lib/design-preview-env.js'
-import { chromeHeaderPhase, chromeMacroPhase } from '../../lib/patient-chrome-phases.js'
+import { chromeHeaderPhase } from '../../lib/patient-chrome-phases.js'
+import { usePatientChromeScrollSync } from '../../hooks/usePatientChromeScrollSync.js'
 
 const { Sider, Content, Header } = Layout
 
@@ -70,7 +71,8 @@ function AppLayoutFrame() {
   const contentRef = useRef<HTMLDivElement>(null)
   const designPreview = useDesignPreviewMode()
   const compactShell = useCompactAppShell()
-  const { progress: chromeProgress, patientFocus, setChrome, resetChrome } = useCompactPatientChrome()
+  const { progress: chromeProgress, macroProgress: chromeMacroProgress, patientFocus, setChrome, resetChrome } =
+    useCompactPatientChrome()
   const { patientId: avaPatientId } = useAvaPatientLens()
   const navigate = useNavigate()
   const location = useLocation()
@@ -132,26 +134,14 @@ function AppLayoutFrame() {
     }
   }, [compactShell, patientFocusRoute, location.pathname, resetChrome])
 
-  useEffect(() => {
-    if (!compactShell || !patientFocusRoute || designPreview) return
-
-    const onScroll = () => {
-      const scrollTop = window.scrollY
-      const raw = Math.min(1, Math.max(0, scrollTop / 152))
-      const eased = raw * raw * (3 - 2 * raw)
-      setChrome({ progress: eased, patientFocus: true })
-    }
-
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [compactShell, patientFocusRoute, location.pathname, setChrome, designPreview])
+  usePatientChromeScrollSync(compactShell && patientFocusRoute && !designPreview)
 
   const chromeLevel =
     compactShell && patientFocus && chromeProgress > 0.12 ? 'app-layout--patient-chrome' : ''
   const chromeExpanded =
     compactShell && patientFocus && chromeProgress <= 0.18 ? 'app-layout--patient-chrome-expanded' : ''
   const navDense = compactShell && chromeProgress > 0.58 ? 'app-layout--bottom-nav-dense' : ''
+  const showMobileBottomNav = compactShell && (shellActive || designPreview)
 
   const layout = (
     <Layout
@@ -164,7 +154,7 @@ function AppLayoutFrame() {
         compactShell
           ? ({
               '--patient-chrome-p': chromeProgress,
-              '--patient-chrome-p-macro': chromeMacroPhase(chromeProgress),
+              '--patient-chrome-p-macro': chromeMacroProgress,
               '--patient-chrome-p-header': chromeHeaderPhase(chromeProgress),
               minHeight: '100vh',
             } as CSSProperties)
@@ -337,7 +327,7 @@ function AppLayoutFrame() {
           <Outlet />
         </Content>
       </Layout>
-      {compactShell && shellActive && (
+      {showMobileBottomNav && (
         <AppMobileBottomNav
           selectedKey={mobileBottomSelectedKey}
           servicesActive={servicesNavActive}

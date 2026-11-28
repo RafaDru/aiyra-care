@@ -2,6 +2,7 @@
  * Corpo PAT compact (hero + rail macro/B+ + Resumo) — paridade patient/detail × Canvas v7.4.
  */
 import { useRef, useState, type CSSProperties } from 'react'
+import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
 import { Card, Tag, Typography } from 'antd'
 import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 import { useTranslation } from 'react-i18next'
@@ -16,6 +17,7 @@ import {
   chromeMacroCompactLeftIcon,
   chromeMacroPhase,
 } from '../../lib/patient-chrome-phases.js'
+import { PatientChromeMacroSentinel } from '../../components/patient/PatientChromeMacroSentinel.js'
 import {
   DESIGN_CLINICAL_HISTORY_ROWS,
   DESIGN_PATIENT_BRUNO,
@@ -69,11 +71,18 @@ export function DesignPatientChromePreviewContent({
   'data-testid': testId = 'design-patient-chrome-preview',
 }: DesignPatientChromePreviewContentProps) {
   const { t } = useTranslation()
+  const { macroProgress: liveMacroProgress } = useCompactPatientChrome()
   const heroSentinelRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<PatientSection>('clinical')
   const [activeTab, setActiveTab] = useState<PatientTabKey>('growth')
   const sectionTabKeys = SECTION_TABS[activeSection]
-  const macroCompactLeftIcon = chromeMacroCompactLeftIcon(chromeP)
+  const fixtureChrome = chromeP !== undefined
+  const macroProgress = fixtureChrome
+    ? chromeP >= 0.5
+      ? 1
+      : chromeMacroPhase(chromeP)
+    : liveMacroProgress
+  const macroCompactLeftIcon = chromeMacroCompactLeftIcon(macroProgress)
 
   const macroCompactItems = (['overview', 'clinical', 'plan', 'files'] as PatientSection[]).map((section) => ({
     section,
@@ -95,11 +104,13 @@ export function DesignPatientChromePreviewContent({
     return labels[key] ?? t(`patient.tabs.${key}`, { defaultValue: key })
   }
 
-  const phaseStyle = {
-    '--patient-chrome-p': chromeP,
-    '--patient-chrome-p-macro': chromeMacroPhase(chromeP),
-    '--patient-chrome-p-header': chromeHeaderPhase(chromeP),
-  } as CSSProperties
+  const phaseStyle = fixtureChrome
+    ? ({
+        '--patient-chrome-p': chromeP,
+        '--patient-chrome-p-macro': macroProgress,
+        '--patient-chrome-p-header': chromeHeaderPhase(chromeP),
+      } as CSSProperties)
+    : undefined
 
   return (
     <div
@@ -127,6 +138,7 @@ export function DesignPatientChromePreviewContent({
         style={{ borderRadius: 16, overflow: 'visible', marginTop: 8 }}
         styles={{ body: { padding: 0, overflow: 'visible' } }}
       >
+        <PatientChromeMacroSentinel />
         <div className="patient-detail-sticky-nav" data-testid="design-patient-chrome-rail">
           <PatientCompactMacroSections
             activeSection={activeSection}

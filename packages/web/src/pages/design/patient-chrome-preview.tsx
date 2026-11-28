@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import { Segmented, Typography } from 'antd'
 import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
+import { usePatientChromeScrollSync } from '../../hooks/usePatientChromeScrollSync.js'
 import { DESIGN_PATIENT_CHROME_PATH } from '../../lib/design-preview-env.js'
 import { DesignPatientChromePreviewContent } from './patient-chrome-preview-content.js'
 import '../../components/patient/patient-detail-nav.css'
@@ -14,14 +15,8 @@ const { Text } = Typography
 
 const CHROME_COLLAPSED = 0.85
 const CHROME_EXPANDED = 0
-const SCROLL_CHROME_RANGE = 152
 
 type ChromePreset = 'expanded' | 'collapsed' | 'auto'
-
-function easeChrome(raw: number): number {
-  const c = Math.max(0, Math.min(1, raw))
-  return c * c * (3 - 2 * c)
-}
 
 export function DesignPatientChromePreview() {
   const { progress, setChrome } = useCompactPatientChrome()
@@ -36,23 +31,21 @@ export function DesignPatientChromePreview() {
     setChrome({ patientFocus: true })
   }, [setChrome])
 
+  usePatientChromeScrollSync(preset === 'auto')
+
   useEffect(() => {
     if (preset === 'expanded') {
-      setChrome({ progress: CHROME_EXPANDED, patientFocus: true })
+      setChrome({ progress: CHROME_EXPANDED, macroProgress: 0, patientFocus: true })
       window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
       return
     }
     if (preset === 'collapsed') {
-      setChrome({ progress: CHROME_COLLAPSED, patientFocus: true })
-      return
+      setChrome({
+        progress: CHROME_COLLAPSED,
+        macroProgress: 1,
+        patientFocus: true,
+      })
     }
-    const onScroll = () => {
-      const raw = Math.min(1, Math.max(0, window.scrollY / SCROLL_CHROME_RANGE))
-      setChrome({ progress: easeChrome(raw), patientFocus: true })
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
   }, [preset, setChrome])
 
   return (

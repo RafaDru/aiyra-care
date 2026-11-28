@@ -1,9 +1,9 @@
-/** Dev-only galeria visual — paridade Canvas vs componentes reais (sem API). */
+/** Galeria visual — dev por padrão; preview/E2E com `VITE_DESIGN_ROUTES=1`. */
 export function isDesignPreviewRoutesEnabled(): boolean {
-  if (!import.meta.env.DEV) return false
   const flag = import.meta.env.VITE_DESIGN_ROUTES
   if (flag === '0' || flag === 'false') return false
-  return true
+  if (flag === '1' || flag === 'true') return true
+  return import.meta.env.DEV
 }
 
 export const DESIGN_PATIENT_CHROME_PATH = '/design/patient-chrome'
