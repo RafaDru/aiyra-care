@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Tabs, Card, Avatar, Typography, Button, Tag, Popconfirm, App, Modal, Form, Input, Select, Descriptions, Divider, Space, Segmented, Upload, Badge } from 'antd'
 import { MaskedDatePicker } from '../../components/ui/MaskedDatePicker.js'
 import { patientBirthDateFormRules } from '../../lib/patient-birth-date-form-rules.js'
-import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, MedicineBoxOutlined, FolderOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, ManOutlined, WomanOutlined, UserOutlined, LinkOutlined, IdcardOutlined, FileProtectOutlined, HistoryOutlined, SyncOutlined, ApiOutlined, SafetyCertificateOutlined, CalendarOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons'
 import { SyncProgressModal } from '../../components/scraper/SyncProgressModal.js'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
@@ -51,18 +51,18 @@ import '../../components/ava/ava-dock.css'
 import { PatientCompactSubTabs } from '../../components/patient/PatientCompactSubTabs.js'
 import { PatientCompactMacroSections } from '../../components/patient/PatientCompactMacroSections.js'
 import { PatientCompactPersonContextBar } from '../../components/patient/PatientCompactPersonContextBar.js'
+import { PatientCompactProfileHero } from '../../components/patient/PatientCompactProfileHero.js'
+import { PatientChromeMacroSentinel } from '../../components/patient/PatientChromeMacroSentinel.js'
 import { useCompactAppShell } from '../../hooks/useCompactAppShell.js'
 import { CenteredPageLoading } from '../../components/ui/CenteredLoading.js'
 import { notifyPatientsListChanged } from '../../lib/patient-list-bus.js'
+import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
+import { chromeMacroCompactLeftIcon } from '../../lib/patient-chrome-phases.js'
+import { PATIENT_COMPACT_MACRO_ICONS } from '../../components/patient/patient-compact-macro-icons.js'
 
 const { Title, Text } = Typography
 
-const SECTION_ICONS: Record<PatientSection, ReactNode> = {
-  overview: <UserOutlined />,
-  clinical: <MedicineBoxOutlined />,
-  plan: <IdcardOutlined />,
-  files: <FolderOutlined />,
-}
+const SECTION_ICONS = PATIENT_COMPACT_MACRO_ICONS
 
 const TAB_DATA_DOMAIN: Partial<Record<PatientTabKey, string>> = {
   agenda: 'timeline',
@@ -106,8 +106,10 @@ export function PatientDetail() {
   } | null>(null)
   const integrationsTabRef = useRef<IntegrationsTabHandle>(null)
   const heroSentinelRef = useRef<HTMLDivElement>(null)
-  const [personCtxPinned, setPersonCtxPinned] = useState(false)
   const compactShell = useCompactAppShell()
+  const { macroProgress: chromeMacroProgress } = useCompactPatientChrome()
+  const macroCompactLeftIcon =
+    compactShell && chromeMacroCompactLeftIcon(chromeMacroProgress)
 
   useCareReminderNotifications(patient?.id ?? '', Boolean(patient?.id))
 
@@ -524,6 +526,7 @@ export function PatientDetail() {
       activeSection={activeSection}
       items={macroCompactItems}
       onChange={setActiveSection}
+      compactLeftIcon={macroCompactLeftIcon}
     />
   ) : (
     <div className="patient-section-nav">
@@ -548,49 +551,104 @@ export function PatientDetail() {
   }))
 
   return (
-    <div className={compactShell && personCtxPinned ? 'patient-detail-root--ctx-pinned' : undefined}>
-      <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} style={{ marginBottom: 16 }}>
-        {t('common.back')}
-      </Button>
+    <div>
+      {!compactShell ? (
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} style={{ marginBottom: 16 }}>
+          {t('common.back')}
+        </Button>
+      ) : null}
 
-      <div ref={heroSentinelRef} style={{ marginBottom: 20 }}>
-      <Card style={{ borderRadius: 16, overflow: 'clip' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-          <Avatar size={96} src={patient.photoUrl} style={{ backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5', fontSize: 40 }}>
-            {patient.name.charAt(0).toUpperCase()}
-          </Avatar>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <Title level={4} style={{ margin: 0 }}>{patient.name}</Title>
-              <Button
-                size="small"
-                danger
-                type="primary"
-                icon={<PhoneOutlined />}
-                onClick={() => navigate(`/emergency?patientId=${patient.id}`)}
+      <div ref={heroSentinelRef}>
+        {compactShell ? (
+          <PatientCompactProfileHero
+            patient={patient}
+            age={age}
+            onBack={() => navigate('/')}
+            onEdit={handleEditOpen}
+            onEmergency={() => navigate(`/emergency?patientId=${patient.id}`)}
+          />
+        ) : (
+          <Card style={{ borderRadius: 16, overflow: 'clip', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+              <Avatar
+                size={96}
+                src={patient.photoUrl}
+                style={{
+                  backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5',
+                  fontSize: 40,
+                }}
               >
-                {t('nav.emergency')}
-              </Button>
-              <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
-              <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
-              {patient.isOwner !== false && (
-              <Popconfirm title={t('patient.deleteConfirm')} onConfirm={async () => { try { await api.patients.delete(patient.id); notifyPatientsListChanged(); message.success(t('common.ok')); navigate('/') } catch (e) { message.error(e instanceof Error ? e.message : t('toast.deletePatientError')) } }}>
-                <Button size="small" danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-              )}
+                {patient.name.charAt(0).toUpperCase()}
+              </Avatar>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Title level={4} style={{ margin: 0 }}>
+                    {patient.name}
+                  </Title>
+                  <Button
+                    size="small"
+                    danger
+                    type="primary"
+                    icon={<PhoneOutlined />}
+                    onClick={() => navigate(`/emergency?patientId=${patient.id}`)}
+                  >
+                    {t('nav.emergency')}
+                  </Button>
+                  <Button size="small" icon={<EditOutlined />} onClick={handleEditOpen} />
+                  <PatientAccessGrantsDrawer patientId={patient.id} patientName={patient.name} />
+                  {patient.isOwner !== false && (
+                    <Popconfirm
+                      title={t('patient.deleteConfirm')}
+                      onConfirm={async () => {
+                        try {
+                          await api.patients.delete(patient.id)
+                          notifyPatientsListChanged()
+                          message.success(t('common.ok'))
+                          navigate('/')
+                        } catch (e) {
+                          message.error(e instanceof Error ? e.message : t('toast.deletePatientError'))
+                        }
+                      }}
+                    >
+                      <Button size="small" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                  )}
+                </div>
+                <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <Tag>{age}</Tag>
+                  <Tag color="geekblue">
+                    {t(`patient.category.${patient.ageCategory}`, { defaultValue: patient.ageCategory })}
+                  </Tag>
+                  {patient.gender === 'male' && (
+                    <Tag icon={<ManOutlined />} color="blue">
+                      {t('patient.male')}
+                    </Tag>
+                  )}
+                  {patient.gender === 'female' && (
+                    <Tag icon={<WomanOutlined />} color="pink">
+                      {t('patient.female')}
+                    </Tag>
+                  )}
+                  {patient.weightKg && (
+                    <Tag color="green">
+                      {patient.weightKg} {t('patient.weight')}
+                    </Tag>
+                  )}
+                  {patient.heightCm && (
+                    <Tag color="cyan">
+                      {patient.heightCm} {t('patient.height')}
+                    </Tag>
+                  )}
+                  {patient.bloodType && (
+                    <Tag color="purple">
+                      {t('patient.bloodType')} {patient.bloodType}
+                    </Tag>
+                  )}
+                </div>
+              </div>
             </div>
-            <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <Tag>{age}</Tag>
-              <Tag color="geekblue">{t(`patient.category.${patient.ageCategory}`, { defaultValue: patient.ageCategory })}</Tag>
-              {patient.gender === 'male' && <Tag icon={<ManOutlined />} color="blue">{t('patient.male')}</Tag>}
-              {patient.gender === 'female' && <Tag icon={<WomanOutlined />} color="pink">{t('patient.female')}</Tag>}
-              {patient.weightKg && <Tag color="green">{patient.weightKg} {t('patient.weight')}</Tag>}
-              {patient.heightCm && <Tag color="cyan">{patient.heightCm} {t('patient.height')}</Tag>}
-              {patient.bloodType && <Tag color="purple">{t('patient.bloodType')} {patient.bloodType}</Tag>}
-            </div>
-          </div>
-        </div>
-      </Card>
+          </Card>
+        )}
       </div>
 
       {compactShell ? (
@@ -598,7 +656,6 @@ export function PatientDetail() {
           patient={patient}
           patients={allPatients}
           heroSentinelRef={heroSentinelRef}
-          onPinnedChange={setPersonCtxPinned}
         />
       ) : null}
 
@@ -638,6 +695,7 @@ export function PatientDetail() {
       <FamilySupportPanel patientId={patient.id} />
 
       <Card style={{ borderRadius: 16, overflow: 'visible' }} styles={{ body: { padding: 0, overflow: 'visible' } }}>
+        {compactShell ? <PatientChromeMacroSentinel /> : null}
         {sectionTabKeys.length > 1 ? (
           <Tabs
             className="patient-sub-tabs"

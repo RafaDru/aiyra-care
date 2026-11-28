@@ -1,10 +1,33 @@
+.patient-chrome-macro-sentinel {
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Fundo 50% só em ::before — ícones/labels 100% opacos (sem vazar WM pelo container) */
 .patient-detail-sticky-nav {
   position: sticky;
   top: 0;
-  z-index: 22;
-  background: var(--card-bg);
+  z-index: 32;
+  background: transparent;
   border-bottom: 1px solid var(--border, #e2e8f0);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.patient-detail-sticky-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-action-surface-bg, var(--card-bg));
+}
+
+.patient-detail-sticky-nav > * {
+  position: relative;
+  z-index: 1;
 }
 
 .patient-section-nav {
@@ -104,16 +127,32 @@
 
 /* Sub-abas compactas — PAT-2b: menu ☰ + carrossel com peek */
 .patient-sub-tabs-bplus {
+  position: relative;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 8px 0 8px 8px;
-  background: var(--card-bg);
+  padding: 8px 16px;
+  background: transparent;
   border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 
+.patient-sub-tabs-bplus::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-action-surface-bg, var(--card-bg));
+}
+
+.patient-sub-tabs-bplus > * {
+  position: relative;
+  z-index: 1;
+}
+
 .patient-sub-tabs-bplus__menu {
+  position: relative;
   flex: 0 0 44px;
   width: 44px;
   height: 44px;
@@ -124,18 +163,37 @@
   justify-content: center;
   border-radius: 10px;
   border: 1px solid var(--border, #e2e8f0);
-  background: color-mix(in srgb, var(--border) 18%, var(--card-bg));
+  background: transparent;
   color: var(--nav-selected-text, #6b21a8);
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: border-color 0.15s ease;
+}
+
+.patient-sub-tabs-bplus__menu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-nav-control-bg, var(--card-bg));
+  transition: background 0.15s ease;
+}
+
+.patient-sub-tabs-bplus__menu .anticon {
+  position: relative;
+  z-index: 1;
 }
 
 .patient-sub-tabs-bplus__menu:hover {
   border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-  background: var(--nav-selected-bg, #faf5ff);
+}
+
+.patient-sub-tabs-bplus__menu:hover::before {
+  background: var(--compact-nav-control-selected-bg, var(--nav-selected-bg, #faf5ff));
 }
 
 .patient-sub-tabs-bplus__rail-wrap {
@@ -169,10 +227,15 @@
   width: 28px;
   height: 44px;
   pointer-events: none;
-  background: linear-gradient(to right, transparent, var(--card-bg) 72%);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--compact-nav-control-bg, var(--card-bg)) 72%
+  );
 }
 
 .patient-sub-tabs-bplus__chip {
+  position: relative;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -183,7 +246,7 @@
   padding: 0 14px;
   border-radius: 10px;
   border: 1px solid var(--border, #e2e8f0);
-  background: var(--card-bg);
+  background: transparent;
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
@@ -192,11 +255,24 @@
   white-space: nowrap;
   scroll-snap-align: start;
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
+.patient-sub-tabs-bplus__chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-nav-control-bg, var(--card-bg));
+  transition: background 0.15s ease;
+}
+
 .patient-sub-tabs-bplus__chip-label {
+  position: relative;
+  z-index: 1;
   display: block;
   white-space: nowrap;
 }
@@ -207,11 +283,14 @@
 }
 
 .patient-sub-tabs-bplus__chip--active {
-  background: var(--nav-selected-bg, #faf5ff);
   border-color: var(--nav-selected-border, #e9d5ff);
   color: var(--nav-selected-text, #6b21a8);
   font-weight: 600;
   box-shadow: inset 0 -2px 0 var(--primary, #7e22ce);
+}
+
+.patient-sub-tabs-bplus__chip--active::before {
+  background: var(--compact-nav-control-selected-bg, var(--nav-selected-bg, #faf5ff));
 }
 
 .patient-sub-tabs-bplus__sheet .ant-drawer-header {
@@ -231,16 +310,131 @@
   font-weight: 600;
 }
 
+/* ── PAT expand/collapse — hero S0 + parallax (--patient-chrome-p) ─────── */
+
+.app-layout--compact .patient-compact-profile-hero {
+  margin-bottom: 12px;
+  opacity: clamp(
+    0,
+    calc(1 - var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * 1.12),
+    1
+  );
+  transform: translate3d(
+    0,
+    calc(var(--patient-chrome-p-header, var(--patient-chrome-p, 0)) * -32px),
+    0
+  );
+  transition:
+    opacity 0.16s ease-out,
+    transform 0.16s ease-out;
+  will-change: transform, opacity;
+  pointer-events: auto;
+}
+
+.app-layout--compact.app-layout--patient-chrome-expanded .patient-compact-profile-hero {
+  opacity: 1;
+  transform: none;
+}
+
+.app-layout--compact .patient-compact-profile-hero__back {
+  margin: 0 0 8px;
+  padding-inline: 4px;
+  align-self: flex-start;
+}
+
+.patient-compact-profile-hero__row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.patient-compact-profile-hero__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.patient-compact-profile-hero__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-compact-profile-hero__tags {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.app-layout--compact .patient-detail-sticky-nav {
+  transform: translate3d(0, calc(var(--patient-chrome-p, 0) * -14px), 0);
+  transition: transform 0.16s ease-out;
+  will-change: transform;
+}
+
+/*
+ * PAT chrome — macro + submenu (B+) sticky abaixo do header; z-index 32 < header 110.
+ * `top` = footprint do header (orb); sem parallax que empurra o rail para trás do orb.
+ */
+.app-layout--compact.app-layout--patient-chrome .patient-detail-sticky-nav {
+  top: var(--compact-chrome-header-sticky-h, 64px);
+  z-index: 32;
+  transform: none;
+  transition: top 0.18s ease-out;
+}
+
+.app-layout--compact.app-layout--patient-chrome .patient-compact-sub-tabs {
+  position: relative;
+  z-index: 28;
+}
+
+.app-layout--compact .patient-section-nav--compact-grid:not(.patient-section-nav--labels-only) .patient-macro-tile {
+  min-height: calc(34px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 38px);
+  padding: calc(5px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 5px) 10px;
+  gap: calc(6px + (1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0))) * 2px);
+  transition:
+    min-height 0.16s ease-out,
+    padding 0.16s ease-out,
+    gap 0.16s ease-out;
+}
+
+.app-layout--compact .patient-section-nav--compact-grid .patient-macro-tile__icon {
+  transform: scale(calc(1 - var(--patient-chrome-p-macro, var(--patient-chrome-p, 0)) * 0.08));
+  transition: transform 0.16s ease-out, opacity 0.16s ease-out;
+}
+
+.app-layout--compact .patient-section-nav--compact-grid .patient-macro-tile__label {
+  transition: font-size 0.16s ease-out;
+}
+
 /* Macro-seções compact — PAT-1 grid 2×2 (substitui Segmented 4-col) */
 .patient-section-nav--compact-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding: 12px 16px 8px;
-  background: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
+  background: transparent;
+}
+
+.patient-section-nav--compact-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-macro-strip-bg, color-mix(in srgb, var(--primary) 4%, var(--card-bg)));
+}
+
+.patient-section-nav--compact-grid > * {
+  position: relative;
+  z-index: 1;
 }
 
 .patient-macro-tile {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -252,7 +446,7 @@
   padding: 10px 8px;
   border-radius: 8px;
   border: 1px solid var(--border, #e2e8f0);
-  background: var(--card-bg);
+  background: transparent;
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
@@ -267,7 +461,20 @@
     box-shadow 0.15s ease;
 }
 
+.patient-macro-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--compact-nav-control-bg, var(--card-bg));
+  transition: background 0.15s ease;
+}
+
 .patient-macro-tile__icon {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   flex-shrink: 0;
   font-size: 18px;
@@ -276,6 +483,8 @@
 }
 
 .patient-macro-tile__label {
+  position: relative;
+  z-index: 1;
   flex: 0 1 auto;
   width: 100%;
   min-width: 0;
@@ -290,41 +499,170 @@
 }
 
 .patient-macro-tile--active {
-  background: var(--nav-selected-bg, #faf5ff);
   border-color: var(--nav-selected-border, #e9d5ff);
   color: var(--nav-selected-text, #6b21a8);
   font-weight: 600;
   box-shadow: inset 0 -2px 0 var(--primary);
 }
 
+.patient-macro-tile--active::before {
+  background: var(--compact-nav-control-selected-bg, var(--nav-selected-bg, #faf5ff));
+}
+
 .patient-macro-tile--active .patient-macro-tile__icon {
   color: var(--nav-selected-text, #6b21a8);
 }
 
-.patient-tab-body--compact {
-  padding: 16px !important;
+.patient-section-nav--labels-only .patient-macro-tile {
+  min-height: 40px;
+  padding: 8px 6px;
 }
 
-/* PAT-CTX-1 — contexto de pessoa ao rolar (compact) */
-.patient-compact-person-ctx {
-  position: sticky;
-  top: 0;
-  z-index: 24;
-  display: none;
+.patient-section-nav--labels-only .patient-macro-tile__label {
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+/* Macro S3 — ícone pequeno à esquerda + label (oficial 27/11). */
+.patient-section-nav--macro-left-icon .patient-macro-tile {
+  flex-direction: row;
   align-items: center;
-  min-height: 44px;
-  padding: 0 12px;
-  background: var(--card-bg);
-  border-bottom: 1px solid var(--border, #e2e8f0);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 34px;
+  padding: 5px 10px;
 }
 
-.patient-compact-person-ctx--visible {
+.patient-section-nav--macro-left-icon .patient-macro-tile__label {
+  font-size: 11px;
+  line-height: 1.25;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__icon {
+  opacity: 1;
+  max-height: 18px;
+  width: 18px;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.patient-section-nav--macro-left-icon .patient-macro-tile__icon .anticon {
+  font-size: 14px;
+}
+
+.patient-tab-body--compact {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
   display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 16px !important;
+  background: transparent !important;
 }
 
-.patient-detail-root--ctx-pinned .patient-detail-sticky-nav {
-  top: 44px;
+/*
+ * Corpo da aba — sem wash 50% (só silk global). Linhas/cards de dado 100% opacos.
+ */
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact {
+  color: var(--text-primary, #0f172a);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card {
+  position: relative;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > .ant-card > .ant-card-body {
+  position: relative;
+  z-index: 1;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--text-primary, #0f172a);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-typography,
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item .ant-typography {
+  color: var(--text-primary, #0f172a);
+  opacity: 1;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-typography-secondary,
+.app-layout--compact.app-layout--neri-fab-refinement
+  .patient-tab-body--compact
+  .ant-list-item
+  .ant-typography-secondary {
+  color: var(--text-secondary, #64748b) !important;
+  opacity: 1;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 8px;
+  padding: 12px !important;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--card-bg, #ffffff) !important;
+  color: var(--text-primary, #0f172a);
+  opacity: 1;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item-meta-title,
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-list-item-meta-description {
+  color: inherit;
+  opacity: 1;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card .ant-card {
+  background: var(--card-bg, #ffffff) !important;
+  border: 1px solid var(--border, #e2e8f0);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-card .ant-card .ant-card-body {
+  background: var(--card-bg, #ffffff) !important;
+  color: var(--text-primary, #0f172a);
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-tag,
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .ant-badge {
+  opacity: 1;
+}
+
+/* PAT-CTX-1 — chip de pessoa no header (portal); card opaco sobre o wash contínuo (não parte do fundo do header) */
+.app-layout--compact .app-header__patient-ctx-slot .patient-compact-person-ctx__trigger {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--card-bg, #ffffff);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.app-layout--compact.app-layout--patient-chrome .app-header__patient-ctx-slot .patient-compact-person-ctx__trigger {
+  pointer-events: auto;
+}
+
+.app-layout--compact.app-layout--patient-chrome:not(.app-layout--patient-chrome-expanded)
+  .app-header__patient-ctx-slot
+  .patient-compact-person-ctx__trigger {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
 }
 
 .patient-compact-person-ctx__trigger {
@@ -334,7 +672,7 @@
   width: 100%;
   min-height: 44px;
   margin: 0;
-  padding: 6px 4px;
+  padding: 4px 2px;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -383,7 +721,7 @@
 }
 
 .patient-compact-person-ctx__list-item--active {
-  background: var(--nav-selected-bg, #faf5ff);
+  background: var(--compact-action-surface-selected-bg, var(--nav-selected-bg, #faf5ff));
   color: var(--nav-selected-text, #6b21a8);
   font-weight: 600;
 }

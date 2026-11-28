@@ -1,0 +1,134 @@
+/* Galeria dev — frame 390px (paridade Canvas / captura screenshot). */
+.design-preview-viewport {
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  min-height: 100%;
+  overflow: visible;
+}
+
+/* HDR-2 silk — mesma shell paciente real (fundo transparente no miolo) */
+.design-preview-viewport.app-layout--neri-fab-refinement > .ant-layout {
+  background: transparent !important;
+}
+
+.design-preview-viewport .app-main-content {
+  background: transparent !important;
+}
+
+.design-preview-viewport:has(.design-patient-chrome-compare) {
+  max-width: 860px;
+}
+
+.design-preview-viewport > .app-mobile-bottom-nav {
+  display: flex;
+  overflow: visible;
+  z-index: 500;
+}
+
+.design-preview-viewport .app-main-content {
+  margin: 12px !important;
+}
+
+.design-chrome-preset-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -4px 0 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: color-mix(in srgb, var(--card-bg, #fff) 92%, transparent);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.design-chrome-preset-bar__hint {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.design-preview-scroll-spacer {
+  height: 55vh;
+  margin-top: 16px;
+}
+
+/** Espaço final para rolar conteúdo sob a bottom nav (só fixtures design). */
+.design-preview-bottom-nav-scroll-pad {
+  height: calc(var(--compact-nav-arch-rise, 69px) + var(--compact-nav-h, 56px) + 24px);
+  flex-shrink: 0;
+}
+.design-patient-chrome-preview__hero-sentinel {
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.design-preview-vaccine-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--card-bg, #fff);
+  color: var(--text-primary, #0f172a);
+  opacity: 1;
+}
+
+.design-preview-vaccine-row .ant-typography,
+.design-preview-vaccine-row .ant-tag {
+  opacity: 1 !important;
+}
+
+.design-patient-chrome-compare {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+}
+
+.design-patient-chrome-compare__intro {
+  margin-bottom: 12px;
+}
+
+.design-patient-chrome-compare__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.design-patient-chrome-compare__col {
+  width: 390px;
+  flex-shrink: 0;
+}
+
+.design-patient-chrome-compare__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.app-layout--patient-chrome .design-patient-chrome-preview .patient-detail-sticky-nav,
+.app-layout--patient-chrome .design-patient-chrome-card .patient-detail-sticky-nav {
+  top: var(--compact-chrome-header-sticky-h, 64px);
+}
+
+/* Conteúdo fixture — card e linhas opacas; chrome nav continua 50% nos ::before do rail */
+.app-layout--patient-chrome .design-patient-chrome-card.ant-card {
+  background: var(--card-bg, #fff) !important;
+}
+
+.app-layout--patient-chrome .design-patient-chrome-card .patient-tab-body--compact::before {
+  content: none;
+}

@@ -71,13 +71,14 @@ test.describe('pwa-mobile-patient-ux', () => {
     expect(labelBox).not.toBeNull()
     expect(iconBox!.y).toBeLessThan(labelBox!.y)
 
-    const ctxBar = page.getByTestId('patient-compact-person-ctx')
-    await expect(ctxBar).toBeHidden()
+    const ctxSlot = page.getByTestId('app-header-patient-ctx-slot')
+    await expect(ctxSlot.getByRole('button')).toHaveCount(0)
     await page.locator('.app-main-content').evaluate((el) => {
       el.scrollTop = 420
     })
-    await expect(ctxBar).toHaveClass(/patient-compact-person-ctx--visible/, { timeout: 10_000 })
-    await ctxBar.getByRole('button').first().click()
+    await expect(ctxSlot.getByRole('button')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.app-layout--patient-chrome')).toBeVisible()
+    await ctxSlot.getByRole('button').click()
     await expect(page.getByRole('dialog')).toBeVisible()
     await expect(page.getByText(unique, { exact: true })).toBeVisible()
     await page.keyboard.press('Escape')

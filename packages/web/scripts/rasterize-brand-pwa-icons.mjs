@@ -50,4 +50,6 @@ rasterize(APP_ICON_LIGHT, 'pwa-icon-192.png', 192)
 rasterize(APP_ICON_LIGHT, 'pwa-icon-512.png', 512)
 rasterize(APP_ICON_LIGHT, 'pwa-icon-512-maskable.png', 512)
 rasterize('favicon.svg', 'favicon-32.png', 32)
-rasterize(APP_ICON_LIGHT, 'apple-touch-icon.png', 180)
+/** Splash / apple-touch: lockup stacked em silk — sem “tile” do app icon */
+rasterize('pwa-startup-lockup-light.svg', 'apple-touch-icon.png', 180)
+rasterize('pwa-startup-lockup-light.svg', 'pwa-splash-512.png', 512)

@@ -1,5 +1,22 @@
 # Histórico do Projeto Ananeri
 
+## [2026-11-26] - Validação visual PWA — Canvas (sem Figma operacional)
+
+### Produto (Rafael)
+- Não edita Figma na plataforma; precisa de local para validar componentes/telas antes do código.
+
+### Realizado (política + doc)
+- Canal oficial: Canvas **Ananeri PWA — design system playground** + `docs/design/PWA_VISUAL_VALIDATION.md`.
+- Figma Paciente permanece arquivo histórico; desconexão de conta/MCP é opcional.
+
+## [2026-11-26] - PWA — splash lockup, nav 50px, PAT-CTX-2 parallax
+
+### Produto (Rafael)
+- Abertura sem tile duplicado do app icon; barra inferior menor; rolagem no perfil com header coração + pessoa e densificação de macro/nav.
+
+### Realizado (eng)
+- PR **#250** (`cursor/pwa-scroll-compact-chrome-53db`): `pwa-startup-lockup-light`, `CompactPatientChromeContext`, portal chip no header, nav 50px.
+
 ## [2026-11-25] - PWA shell lote Rafael (HDR-2, NAV, PAT-CTX-1) em `main`
 
 ### Realizado (eng)

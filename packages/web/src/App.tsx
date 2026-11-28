@@ -26,8 +26,13 @@ import { MobileOAuthReturnPage } from './pages/auth/mobile-oauth-return.js'
 import { CentralAtendimentoPage } from './pages/central-atendimento.js'
 import { CookieConsentBanner } from './components/legal/CookieConsentBanner.js'
 import { SUPPORT_CENTER_PATH } from './lib/support-center-path.js'
+import { isDesignPreviewRoutesEnabled } from './lib/design-preview-env.js'
+import { DesignPreviewModeProvider } from './contexts/DesignPreviewModeContext.js'
+import { DesignPatientChromePreview } from './pages/design/patient-chrome-preview.js'
+import { DesignPatientChromeCompare } from './pages/design/patient-chrome-compare.js'
 
 const internalRoadmap = isInternalRoadmapEnabled()
+const designPreviewRoutes = isDesignPreviewRoutesEnabled()
 
 export function App() {
   return (
@@ -42,6 +47,19 @@ export function App() {
         <Route path="/consentimento-menor" element={<LegalDocumentPage kind="minor_guardian_consent" />} />
         <Route path={SUPPORT_CENTER_PATH} element={<CentralAtendimentoPage />} />
         <Route path="/clinical-export/:token" element={<ClinicalExportSharePage />} />
+        {designPreviewRoutes ? (
+          <Route
+            path="/design"
+            element={
+              <DesignPreviewModeProvider>
+                <AppLayout />
+              </DesignPreviewModeProvider>
+            }
+          >
+            <Route path="patient-chrome" element={<DesignPatientChromePreview />} />
+            <Route path="patient-chrome-compare" element={<DesignPatientChromeCompare />} />
+          </Route>
+        ) : null}
         <Route element={<RequireAuth />}>
           <Route path="/compliance/accept" element={<ComplianceAcceptPage />} />
           <Route element={<RequireCompliance />}>

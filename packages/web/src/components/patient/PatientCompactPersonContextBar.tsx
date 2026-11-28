@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Avatar, Drawer } from 'antd'
 import { DownOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { Patient } from '../../lib/api.types.js'
+import { useCompactPatientChrome } from '../../contexts/CompactPatientChromeContext.js'
+
+/** Paridade `app-layout--patient-chrome-expanded` (AppLayout progress ≤ 0.18). */
+const PROFILE_CHIP_INTERACTIVE_MIN_P = 0.18
+
+const HEADER_SLOT_ID = 'app-header-patient-ctx-slot'
 
 interface Props {
   patient: Patient
@@ -13,61 +20,76 @@ interface Props {
 }
 
 /**
- * PAT-CTX-1 — barra compacta abaixo do header quando o hero do perfil sai da viewport.
+ * PAT-CTX-1 — chip de pessoa no header compacto (coração + nome) ao rolar o hero.
  */
 export function PatientCompactPersonContextBar({ patient, patients, heroSentinelRef, onPinnedChange }: Props) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [pinned, setPinned] = useState(false)
+  const { progress, setChrome } = useCompactPatientChrome()
   const [sheetOpen, setSheetOpen] = useState(false)
-  const barRef = useRef<HTMLDivElement>(null)
+  const [slotEl, setSlotEl] = useState<HTMLElement | null>(null)
+  const pinnedRef = useRef(false)
+
+  useEffect(() => {
+    setChrome({ patientFocus: true })
+  }, [patient.id, setChrome])
+
+  useEffect(() => {
+    const updateSlot = () => setSlotEl(document.getElementById(HEADER_SLOT_ID))
+    updateSlot()
+    const id = window.requestAnimationFrame(updateSlot)
+    return () => window.cancelAnimationFrame(id)
+  }, [progress])
 
   useEffect(() => {
     const sentinel = heroSentinelRef.current
     if (!sentinel) return
     const obs = new IntersectionObserver(
       ([entry]) => {
-        const next = !entry.isIntersecting
-        setPinned(next)
-        onPinnedChange?.(next)
+        const pinned = !entry.isIntersecting
+        if (pinnedRef.current !== pinned) {
+          pinnedRef.current = pinned
+          onPinnedChange?.(pinned)
+        }
       },
-      { root: null, rootMargin: '0px', threshold: 0 },
+      { root: null, rootMargin: '-8px 0px 0px 0px', threshold: 0 },
     )
     obs.observe(sentinel)
     return () => obs.disconnect()
   }, [heroSentinelRef, patient.id, onPinnedChange])
 
   const others = patients.filter((p) => p.id !== patient.id)
+  const profileChipInteractive = progress > PROFILE_CHIP_INTERACTIVE_MIN_P
+
+  const chip = (
+    <button
+      type="button"
+      className="patient-compact-person-ctx__trigger"
+      style={{
+        pointerEvents: profileChipInteractive ? 'auto' : 'none',
+      }}
+      aria-label={t('patient.compactContextAria', { name: patient.name })}
+      onClick={() => setSheetOpen(true)}
+    >
+      <Avatar
+        size={28}
+        src={patient.photoUrl}
+        className="patient-compact-person-ctx__avatar"
+        style={{
+          backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5',
+          flexShrink: 0,
+        }}
+      >
+        {patient.name.charAt(0).toUpperCase()}
+      </Avatar>
+      <span className="patient-compact-person-ctx__name">{patient.name}</span>
+      <DownOutlined className="patient-compact-person-ctx__chev" aria-hidden />
+    </button>
+  )
 
   return (
-    <>
-      <div
-        ref={barRef}
-        className={`patient-compact-person-ctx${pinned ? ' patient-compact-person-ctx--visible' : ''}`}
-        aria-hidden={!pinned}
-        data-testid="patient-compact-person-ctx"
-      >
-        <button
-          type="button"
-          className="patient-compact-person-ctx__trigger"
-          aria-label={t('patient.compactContextAria', { name: patient.name })}
-          onClick={() => setSheetOpen(true)}
-        >
-          <Avatar
-            size={24}
-            src={patient.photoUrl}
-            className="patient-compact-person-ctx__avatar"
-            style={{
-              backgroundColor: patient.gender === 'female' ? '#EC4899' : '#4F46E5',
-              flexShrink: 0,
-            }}
-          >
-            {patient.name.charAt(0).toUpperCase()}
-          </Avatar>
-          <span className="patient-compact-person-ctx__name">{patient.name}</span>
-          <DownOutlined className="patient-compact-person-ctx__chev" aria-hidden />
-        </button>
-      </div>
+  <>
+      {slotEl ? createPortal(chip, slotEl) : null}
 
       <Drawer
         title={t('patient.compactContextSheetTitle')}

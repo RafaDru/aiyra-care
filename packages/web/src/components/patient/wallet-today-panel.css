@@ -3,6 +3,16 @@
   background: var(--card-bg, #fff);
 }
 
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .wallet-today-panel {
+  border: none;
+  background: transparent !important;
+}
+
+.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact .wallet-today-panel .ant-card-body {
+  padding: 0;
+  color: var(--text-primary, #0f172a);
+}
+
 .wallet-today-panel__header {
   display: flex;
   flex-wrap: wrap;
