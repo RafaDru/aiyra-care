@@ -81,7 +81,7 @@ export function AppMobileBottomNav({
   }
 
   return (
-    <nav className="app-mobile-bottom-nav" aria-label={t('nav.main')}>
+    <nav className="app-mobile-bottom-nav" data-testid="app-mobile-bottom-nav" aria-label={t('nav.main')}>
       <AppMobileBottomNavRail />
       {renderRouteItem(ROUTE_KEYS[0])}
       {renderRouteItem(ROUTE_KEYS[1])}

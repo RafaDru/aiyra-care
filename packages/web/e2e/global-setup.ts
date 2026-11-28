@@ -1,5 +1,6 @@
 async function globalSetup() {
   if (process.env.E2E_SMOKE_ONLY === '1') return
+  if (process.env.E2E_DESIGN_ONLY === '1') return
 
   const api = process.env.VITE_API_URL ?? 'http://127.0.0.1:3010'
   try {

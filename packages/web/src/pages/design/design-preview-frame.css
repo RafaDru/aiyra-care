@@ -7,12 +7,23 @@
   overflow: visible;
 }
 
+/* HDR-2 silk — mesma shell paciente real (fundo transparente no miolo) */
+.design-preview-viewport.app-layout--neri-fab-refinement > .ant-layout {
+  background: transparent !important;
+}
+
+.design-preview-viewport .app-main-content {
+  background: transparent !important;
+}
+
 .design-preview-viewport:has(.design-patient-chrome-compare) {
   max-width: 860px;
 }
 
 .design-preview-viewport > .app-mobile-bottom-nav {
+  display: flex;
   overflow: visible;
+  z-index: 500;
 }
 
 .design-preview-viewport .app-main-content {
@@ -111,5 +122,14 @@
 
 .app-layout--patient-chrome .design-patient-chrome-preview .patient-detail-sticky-nav,
 .app-layout--patient-chrome .design-patient-chrome-card .patient-detail-sticky-nav {
-  top: var(--compact-chrome-header-sticky-h, 90px);
+  top: var(--compact-chrome-header-sticky-h, 64px);
+}
+
+/* Conteúdo fixture — card e linhas opacas; chrome nav continua 50% nos ::before do rail */
+.app-layout--patient-chrome .design-patient-chrome-card.ant-card {
+  background: var(--card-bg, #fff) !important;
+}
+
+.app-layout--patient-chrome .design-patient-chrome-card .patient-tab-body--compact::before {
+  content: none;
 }

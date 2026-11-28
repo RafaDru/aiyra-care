@@ -10,6 +10,8 @@ import {
 export type CompactPatientChromeState = {
   /** 0 = header cheio; 1 = chrome compacto (coração + pessoa). */
   progress: number
+  /** 0→1 compactação macro — só após sticky rail colidir com header. */
+  macroProgress: number
   patientFocus: boolean
 }
 
@@ -20,6 +22,7 @@ type CompactPatientChromeContextValue = CompactPatientChromeState & {
 
 const defaultState: CompactPatientChromeState = {
   progress: 0,
+  macroProgress: 0,
   patientFocus: false,
 }
 

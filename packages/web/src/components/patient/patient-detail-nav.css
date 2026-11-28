@@ -1,3 +1,11 @@
+.patient-chrome-macro-sentinel {
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
 /* Fundo 50% só em ::before — ícones/labels 100% opacos (sem vazar WM pelo container) */
 .patient-detail-sticky-nav {
   position: sticky;
@@ -124,7 +132,7 @@
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 8px 0 8px 8px;
+  padding: 8px 16px;
   background: transparent;
   border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
@@ -135,7 +143,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: var(--compact-nav-control-bg, var(--card-bg));
+  background: var(--compact-action-surface-bg, var(--card-bg));
 }
 
 .patient-sub-tabs-bplus > * {
@@ -383,7 +391,7 @@
  * PAT chrome — macro + submenu (B+) sticky abaixo do header; z-index 32 < header 110.
  */
 .app-layout--compact.app-layout--patient-chrome .patient-detail-sticky-nav {
-  top: var(--compact-chrome-header-sticky-h, 90px);
+  top: var(--compact-chrome-header-sticky-h, 64px);
   z-index: 32;
   transform: none;
   transition: top 0.18s ease-out;
@@ -574,24 +582,8 @@
   background: transparent !important;
 }
 
-/* Shell 50% preenche o corpo da aba até o fim do card (evita faixa WM mais roxa abaixo do conteúdo) */
-.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: var(--compact-action-surface-bg, var(--card-bg));
-}
-
-.app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact > * {
-  position: relative;
-  z-index: 1;
-}
-
 /*
- * Corpo da aba — shell 50% só no ::before do .patient-tab-body--compact.
- * Cards filhos: sem segundo shell; linhas/tags 100% opacas + contraste fixo.
+ * Corpo da aba — sem wash 50% (só silk global). Linhas/cards de dado 100% opacos.
  */
 .app-layout--compact.app-layout--neri-fab-refinement .patient-tab-body--compact {
   color: var(--text-primary, #0f172a);
@@ -676,6 +668,15 @@
 .app-layout--compact.app-layout--patient-chrome .patient-compact-person-ctx__trigger {
   opacity: 1;
   pointer-events: auto;
+}
+
+.app-layout--compact.app-layout--patient-chrome:not(.app-layout--patient-chrome-expanded)
+  .app-header__patient-ctx-slot
+  .patient-compact-person-ctx__trigger {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
 }
 
 .patient-compact-person-ctx__trigger {
